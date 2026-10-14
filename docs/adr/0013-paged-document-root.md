@@ -1,0 +1,42 @@
+# ADR-0013：分页文档根与统一权威修订
+
+2026-10-15；DEV-024候选设计，开始实施前的边界。遵循蓝图04/05/10；不将预览facade的多份独立SceneCoordinator组合成生产文档，不把页号用作身份。
+
+## 模块和规范对象
+
+建立shared-core/document，依赖canvas-core规范SceneSnapshot/StrokeObject/StrokeSamples，canvas-core不反向依赖App文档域。DocumentRoot由一个规范scene及不可变Page目录组成；根id/revision直接取scene.id/revision，没有第二套AppStroke或独立DocRevision。PageId与LayerId稳定且在文档内唯一；顺序是目录映射，移动页不改身份或对象归属。目录里记录页面尺寸、纸张和最近内容修订，页面内容通过绑定LayerId读取规范对象；初期一页一个内容层，后续扩展Layer目录。
+
+文档root由一个DocumentAuthority持有；画布纯prepare/apply和页目录变更在该authority一次提交中发布。元数据变更也推进同一根revision；页的contentRevision采用该次根commitSequence，而非另一个提交计数。页序变化不改变页面contentRevision。原生view只持选中的PageId和规范只读快照，不能各自维护页scene并在保存时拼合。
+
+## 命令与原子边界
+
+operation身份在文档范围统一；同ID完整payload重试回原receipt，换payload拒绝。Insert、Move、Copy、Delete及规范Canvas命令共享baseRevision/commitSequence。输入在DOWN捕获page/layer/tool/变换，切页只取消未完成输入；完成命令保留其captured target，不能在worker回调查当前页。
+
+Copy同时生成新PageId、LayerId及全部对象ID，规范不可变样本允许结构共享，不深clone每点；校验mapping完整且一一对应，任何复用live/retired身份在publish前拒绝。Delete同一次根提交移除页目录及其规范对象，不能留下孤立笔迹；最后一页保留稳定PageId，清空内容并改为空白纸张。页删除前宿主停止该页新输入，接管/排空已完成命令；迟到旧patch按root revision拒绝，责任由submission队列恢复handoff，不能重新创建已删页。
+
+页面删除/重排/复制的撤销须保存规范变化及页目录变化，按操作数和字节限制；不保存每次全Document深副本。对象恢复需要推进对象generation/revision，避免缓存及迟到命令ABA；撤销不改回旧根revision。第一交付先验证根/页目录与画布原子桥接，完整历史和UI在后续交付接续，PAGE-02/03保持未验收。
+
+## 容量、存储与视图
+
+C0内存参考设置页数、live对象/payload、已用身份及operation journal的显式计数/字节上限；所有拒绝在publish前，原命令仍由调用方持有。journal满时拒绝，不能悄悄清掉可能仍用于未知结果查询的receipt。当前私有同步preview epoch策略不能直接复制给正式authority。生产shared-data把目录/对象/operation写同一事务，durable receipt与MEMORY_ONLY分开。
+
+视口/页选择/阅读位置属于session展示状态，不通过切页提高内容revision。页缓存按PageId/contentRevision/viewport与surface token隔离；根元数据推进revision但未变页可复用规范几何。页重排保持当前PageId，删掉选中页才显式选邻页；书签目标不存在时失效，不跳到同序号页。
+
+后续分页预览codec新增版本与目录，不修改既存v1文件；v1以一个稳定首PageId迁入，导入为副本重建文档/页/对象身份。模板、PDF源引用、逐页增量存储、删除撤销和大目录索引各有独立验收，不能用简单翻页按钮代替完整P0。
+
+## 实施顺序与检查
+
+1. 纯Scene apply边界供外部文档authority组合，旧MemorySceneCoordinator复用同一验证，不增加第二份scene authority。
+2. shared-core不可变root/目录与有界MemoryDocumentAuthority，验证稳定页序、单root revision、copy/delete原子性、captured layer及late/stale拒绝、幂等/容量/孤立页。
+3. 统一Swift宿主framework出口与Android依赖，源码边界及实际双端编译；新增模块必须进入验证/打包输入hash，旧证据过期不能沿用。
+4. 然后推进历史、NCPREVIEW v2兼容及双端分页UI/实际保存重开。当前App仍单页，生产API/C1不冻结。
+
+## 已实现的C0交付A
+
+shared-core已建立DocumentRoot、PageDescriptor及MemoryDocumentAuthority。Insert/Move/Copy/Delete/SetPaper/Rename和Canvas命令一次发布目录+规范scene；last-page删除清空内容且保留PageId/LayerId。live/retired身份不复用，默认128页/5000对象、live 8MiB、journal 128项/8MiB、身份2MiB，所有为逻辑参考额度。超120 UTF-16单位的原始标题拒绝，不能截断后仍把无界原字符串留在journal。copy映射防御复制、限制条目并按768字节/映射声明；基础命令预留4KiB，样本按28字节/点计费。
+
+PreparedCanvas桥接canvas-session原ScenePatch，不建立另一个可变SceneCoordinator。完整payload等价（包括操作ID与PageId）支持重建的transport包及丢ACK后原patch重放；旧base、跨页和已删页拒绝，仍由调用方/提交队列保留工作。纯Scene apply复用于旧MemorySceneCoordinator；元数据barrier共享私有不可变map，对象修改仅复制一次map，apply不重扫已验证的真实样本bounds。
+
+源码边界校验覆盖两个commonMain、只允许shared-core→canvas-core。JVM验证分模块记数，新增真实Doc owner线程检查另列jvm_document_owner_thread_verified。Android依赖shared-core，由其api传递规范canvas对象；Apple宿主仅链接shared-core统一导出的NoteCanvasPrototype.framework，旧canvas-core framework不同时链接。打包与验证指纹纳入新模块及构建脚本，旧报告不能沿用。
+
+交付A仅为内存根/命令及实际平台编译，当前App仍使用既有单页预览facade；分页UI、完整撤销/redo、v2交换/恢复和正式增量事务尚未交付。后续交付B优先完整规范delta历史及对象恢复revision，交付C做有界v2兼容codec，再以同一authority接入双端分页UI。PUB API、格式与C1不冻结。

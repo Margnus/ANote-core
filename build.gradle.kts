@@ -16,16 +16,18 @@ val verifyFixtureCatalog by tasks.registering(Exec::class) {
 tasks.register("verifyPrototype") {
     group = "verification"
     description = "Verify the C1 common-code contract prototype on JVM."
-    dependsOn(":canvas-core:jvmTest")
+    dependsOn(":canvas-core:jvmTest", ":shared-core:jvmTest")
     dependsOn(verifyFixtureCatalog)
     doLast {
         val inputs = fileTree("canvas-core/src") { include("**/*.kt") }.files +
+            fileTree("shared-core/src") { include("**/*.kt") }.files +
             fileTree("fixtures") { include("**/*.json") }.files +
             fileTree("tools") { include("*.py") }.files + listOf(
             file("settings.gradle.kts"), file("build.gradle.kts"),
-            file("canvas-core/build.gradle.kts"), file("gradle.properties"), file("ci/verify.sh"),
+            file("canvas-core/build.gradle.kts"), file("shared-core/build.gradle.kts"), file("gradle.properties"), file("ci/verify.sh"),
         ) + fileTree(".generated-fixtures/scale") { include("*.bin", "verified-manifest.json") }.files
-        val testXml = fileTree("canvas-core/build/test-results/jvmTest") { include("TEST-*.xml") }.files
+        val testXml = fileTree("canvas-core/build/test-results/jvmTest") { include("TEST-*.xml") }.files +
+            fileTree("shared-core/build/test-results/jvmTest") { include("TEST-*.xml") }.files
         check(testXml.isNotEmpty()) { "Expected real JVM test XML before stamping verification" }
         val records = (inputs + testXml).sortedBy { it.relativeTo(rootDir).invariantSeparatorsPath }.map { input ->
             val sha = MessageDigest.getInstance("SHA-256").digest(input.readBytes())

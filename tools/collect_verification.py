@@ -14,12 +14,12 @@ def main():
                                   check=True, capture_output=True, text=True)
     catalog = subprocess.run([sys.executable, str(ROOT/'tools/validate_fixture_catalog.py')],
                              check=True, capture_output=True, text=True)
-    suites = list((ROOT/'canvas-core/build/test-results/jvmTest').glob('TEST-*.xml'))
+    suites = [p for module in ('canvas-core', 'shared-core') for p in (ROOT/module/'build/test-results/jvmTest').glob('TEST-*.xml')]
     if not suites:
         raise SystemExit('No JVM test XML. Run verifyPrototype first; a source file count is not a test result.')
-    inputs = sorted((ROOT/'canvas-core/src').rglob('*.kt')) + sorted((ROOT/'fixtures').rglob('*.json')) + sorted((ROOT/'tools').glob('*.py')) + [
+    inputs = sorted((ROOT/'canvas-core/src').rglob('*.kt')) + sorted((ROOT/'shared-core/src').rglob('*.kt')) + sorted((ROOT/'fixtures').rglob('*.json')) + sorted((ROOT/'tools').glob('*.py')) + [
         ROOT/'settings.gradle.kts', ROOT/'build.gradle.kts',
-        ROOT/'canvas-core/build.gradle.kts', ROOT/'gradle.properties', ROOT/'ci/verify.sh',
+        ROOT/'canvas-core/build.gradle.kts', ROOT/'shared-core/build.gradle.kts', ROOT/'gradle.properties', ROOT/'ci/verify.sh',
     ] + sorted((ROOT/'.generated-fixtures/scale').glob('*.bin')) + sorted((ROOT/'.generated-fixtures/scale').glob('verified-manifest.json'))
     stamp_path = ROOT/'reports/gradle-verification.sha256'
     if not stamp_path.exists():
@@ -38,11 +38,12 @@ def main():
         for key in totals: totals[key] += int(suite.attrib.get(key, 0))
         results.append({'suite': suite.attrib['name'], 'tests': int(suite.attrib['tests']),
                         'time_seconds': float(suite.attrib.get('time', 0))})
-    sources = sorted((ROOT/'canvas-core/src/commonMain').rglob('*.kt'))
+    sources = [p for module in ('canvas-core', 'shared-core') for p in sorted((ROOT/module/'src/commonMain').rglob('*.kt'))]
     report = {
         'phase': 'C0/C1 reference prototype',
         'status': 'passed' if totals['failures'] + totals['errors'] + totals['skipped'] == 0 else 'failed',
         'jvm_contract_tests': totals, 'suites': results,
+        'module_jvm_tests': {module: sum(int(ET.parse(p).getroot().attrib['tests']) for p in suites if module in p.parts) for module in ('canvas-core', 'shared-core')},
         'architecture': json.loads(architecture.stdout),
         'fixture_catalog': json.loads(catalog.stdout),
         'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
@@ -50,6 +51,7 @@ def main():
         'android_build_verified': False, 'apple_build_verified': False,
         'disk_durability_verified': False, 'gpu_lifecycle_verified': False,
         'device_performance_verified': False, 'c1_architecture_gate_complete': False,
+        'jvm_document_owner_thread_verified': any(s['suite'].endswith('.DocumentOwnerThreadTest') and s['tests'] >= 1 for s in results) and totals['failures'] + totals['errors'] + totals['skipped'] == 0,
         'jvm_owner_worker_threads_verified': any(s['suite'].endswith('.BoundedOwnerExecutorTest') and s['tests'] >= 15 for s in results) and totals['failures'] + totals['errors'] + totals['skipped'] == 0,
     }
     (ROOT/'reports').mkdir(exist_ok=True)

@@ -8,7 +8,7 @@ export KONAN_DATA_DIR="${KONAN_DATA_DIR:-$task_root/.konan}"
 task_python="${PYTHON_BIN:-python3}"
 task_native_args=()
 if [[ -n "${KOTLIN_NATIVE_HOME:-}" ]]; then task_native_args+=("-Pkotlin.native.home=$KOTLIN_NATIVE_HOME"); fi
-./gradlew --no-daemon --console=plain -PenableAppleTargets=true "${task_native_args[@]}" :canvas-core:linkDebugFrameworkIosSimulatorArm64
+./gradlew --no-daemon --console=plain -PenableAppleTargets=true "${task_native_args[@]}" :shared-core:linkDebugFrameworkIosSimulatorArm64
 mkdir -p ios-app/build
 if ! xcodebuild -quiet -project ios-app/NoteCorePreview.xcodeproj -scheme NoteCorePreview \
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \

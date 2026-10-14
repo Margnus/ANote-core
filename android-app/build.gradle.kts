@@ -19,16 +19,17 @@ android {
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
 }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
-dependencies { implementation(project(":canvas-core")) }
+dependencies { implementation(project(":shared-core")) }
 
 tasks.register("verifyPreviewAndroid") {
     dependsOn("assembleDebug", "lintDebug")
     doLast {
-        val inputs = rootProject.fileTree("canvas-core/src/commonMain") { include("**/*.kt") }.files +
+        val inputs = rootProject.fileTree("shared-core/src/commonMain") { include("**/*.kt") }.files +
+            rootProject.fileTree("canvas-core/src/commonMain") { include("**/*.kt") }.files +
             rootProject.fileTree("canvas-core/src/jvmAndAndroidMain") { include("**/*.kt") }.files +
             fileTree("src/main").files + listOf(buildFile, rootProject.buildFile,
                 rootProject.file("settings.gradle.kts"), rootProject.file("gradle.properties"),
-                rootProject.file("canvas-core/build.gradle.kts"),
+                rootProject.file("canvas-core/build.gradle.kts"), rootProject.file("shared-core/build.gradle.kts"),
                 file("build/outputs/apk/debug/android-app-debug.apk"), file("build/reports/lint-results-debug.xml"))
         val stamp = rootProject.file("reports/android-build-inputs.sha256")
         stamp.parentFile.mkdirs()

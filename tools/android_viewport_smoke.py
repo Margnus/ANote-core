@@ -26,7 +26,7 @@ def main():
     for key in required:
         if f'{key}=passed' not in output: raise AssertionError(output)
     inputs = sorted([*ROOT.glob('android-app/src/androidTest/**/*.kt'), *ROOT.glob('android-app/src/main/**/*.kt'),
-                     *ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidMain/**/*.kt'), ROOT/'android-app/build.gradle.kts', test])
+                     *ROOT.glob('shared-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidMain/**/*.kt'), ROOT/'android-app/build.gradle.kts', ROOT/'shared-core/build.gradle.kts', test])
     report = {'status': 'passed', 'apk_sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
               'serial': args.serial, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
               'checks': required[:-1], 'event_source': 'synthetic MotionEvent injected through UiAutomation into window',

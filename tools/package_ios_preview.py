@@ -15,11 +15,11 @@ def main():
     info = plistlib.loads((APP/'Info.plist').read_bytes())
     assert info['CFBundleIdentifier'] == 'dev.notecore.preview'
     assert info['CFBundleSupportedPlatforms'] == ['iPhoneSimulator']
-    inputs = list((ROOT/'canvas-core/src/commonMain').rglob('*.kt')) + list((ROOT/'ios-app/NoteCorePreview').glob('*.swift')) + [
-        ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'canvas-core/build.gradle.kts', ROOT/'gradle.properties',
+    inputs = list((ROOT/'shared-core/src/commonMain').rglob('*.kt')) + list((ROOT/'canvas-core/src/commonMain').rglob('*.kt')) + list((ROOT/'ios-app/NoteCorePreview').glob('*.swift')) + [
+        ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'canvas-core/build.gradle.kts', ROOT/'shared-core/build.gradle.kts', ROOT/'gradle.properties',
         ROOT/'ios-app/NoteCorePreview.xcodeproj/project.pbxproj',
         ROOT/'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',
-        ROOT/'canvas-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype',
+        ROOT/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype',
     ] + [p for p in APP.rglob('*') if p.is_file()]
     actual = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
     stamp = ROOT/'reports/ios-build-inputs.sha256'

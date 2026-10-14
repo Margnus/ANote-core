@@ -1,13 +1,32 @@
 package dev.notecore.canvas.prototype
 
 /** A small immutable reference snapshot. Map copying is not the planned production store. */
-class SceneSnapshot internal constructor(val id: SceneId, val revision: Long, objects: Map<ObjectId, StrokeObject>) {
-    private val entries = objects.toMap()
+class SceneSnapshot private constructor(val id: SceneId, val revision: Long, private val entries: Map<ObjectId, StrokeObject>, trusted: Unit) {
+    internal constructor(id: SceneId, revision: Long, objects: Map<ObjectId, StrokeObject>) : this(id, revision, objects.toMap(), Unit)
     val objectCount: Int get() = entries.size
     fun find(id: ObjectId): StrokeObject? = entries[id]
     fun objects(): List<StrokeObject> = entries.values.toList()
     internal fun copyEntries(): MutableMap<ObjectId, StrokeObject> = entries.toMutableMap()
-    companion object { fun empty(id: SceneId): SceneSnapshot = SceneSnapshot(id, 0, emptyMap()) }
+    companion object {
+        fun empty(id: SceneId): SceneSnapshot = SceneSnapshot(id, 0, emptyMap(), Unit)
+        /** Validated codec/fixture entry, not a mutable authority or a claim of persisted durability. */
+        fun restored(id: SceneId, revision: Long, objects: List<StrokeObject>): SceneSnapshot {
+            require(revision >= 0 && objects.size <= 100_000)
+            require(objects.map { it.id }.toSet().size == objects.size)
+            for (obj in objects) { require(obj.transform.inverseOrNull() != null); obj.bounds() }
+            return SceneSnapshot(id, revision, objects.associateBy { it.id }, Unit)
+        }
+        internal fun applying(scene: SceneSnapshot, changes: List<ObjectChange>): SceneSnapshot {
+            // Metadata barriers share the privately owned immutable map; object edits copy it once.
+            if (changes.isEmpty()) return SceneSnapshot(scene.id, scene.revision + 1, scene.entries, Unit)
+            val next = scene.entries.toMutableMap()
+            for (change in changes) {
+                val id = change.after?.id ?: change.before!!.id
+                if (change.after == null) next.remove(id) else next[id] = change.after
+            }
+            return SceneSnapshot(scene.id, scene.revision + 1, next, Unit) // next has no external mutable alias.
+        }
+    }
 }
 
 sealed interface CanvasCommand {
@@ -39,7 +58,7 @@ class ScenePatch internal constructor(
 ) {
     private val items = changes.toList()
     fun changes(): List<ObjectChange> = items.toList()
-    internal fun sameContent(other: ScenePatch): Boolean = sceneId == other.sceneId &&
+    fun sameContent(other: ScenePatch): Boolean = sceneId == other.sceneId &&
         baseRevision == other.baseRevision && dirtyBounds == other.dirtyBounds && items == other.items
 }
 
@@ -52,7 +71,50 @@ sealed interface PrepareResult {
     data class Rejected(val reason: Rejection) : PrepareResult
 }
 
+sealed interface SceneApplication {
+    data class Applied(val snapshot: SceneSnapshot) : SceneApplication
+    data class Rejected(val reason: Rejection) : SceneApplication
+}
+
 object SceneReducer {
+    /** Pure composition for an outer document authority; never owns mutable scene state or a receipt journal. */
+    fun prepareChanges(scene: SceneSnapshot, commandId: CommandId, changes: List<ObjectChange>,
+                       metadataDirtyBounds: BoundsD? = null): PrepareResult {
+        if (scene.revision == Long.MAX_VALUE) return PrepareResult.Rejected(Rejection.REVISION_EXHAUSTED)
+        var dirty = metadataDirtyBounds
+        val seen = mutableSetOf<ObjectId>()
+        try {
+            for (change in changes) {
+                val id = change.after?.id ?: change.before?.id ?: return PrepareResult.Rejected(Rejection.INVALID_GEOMETRY)
+                if (!seen.add(id) || (change.before != null && change.after != null && change.before.id != change.after.id))
+                    return PrepareResult.Rejected(Rejection.INVALID_GEOMETRY)
+                if (scene.find(id) != change.before) return PrepareResult.Rejected(Rejection.STALE_OBJECT)
+                if (change.before != null && change.after != null && change.after.objectRevision <= change.before.objectRevision)
+                    return PrepareResult.Rejected(Rejection.STALE_OBJECT)
+                change.before?.bounds()?.let { dirty = dirty?.union(it) ?: it }
+                change.after?.bounds()?.let { dirty = dirty?.union(it) ?: it }
+            }
+            return PrepareResult.Prepared(ScenePatch(commandId, scene.id, scene.revision, changes, dirty ?: BoundsD(0.0, 0.0, 0.0, 0.0)))
+        } catch (_: IllegalArgumentException) { return PrepareResult.Rejected(Rejection.INVALID_GEOMETRY) }
+    }
+    fun apply(scene: SceneSnapshot, patch: ScenePatch): SceneApplication {
+        if (patch.sceneId != scene.id) return SceneApplication.Rejected(Rejection.WRONG_SCENE)
+        if (patch.baseRevision != scene.revision) return SceneApplication.Rejected(Rejection.STALE_SCENE)
+        if (scene.revision == Long.MAX_VALUE) return SceneApplication.Rejected(Rejection.REVISION_EXHAUSTED)
+        val changes = patch.changes(); val seen = mutableSetOf<ObjectId>()
+        for (change in changes) {
+            val id = change.after?.id ?: change.before?.id ?: return SceneApplication.Rejected(Rejection.INVALID_GEOMETRY)
+            if (!seen.add(id) || (change.before != null && change.after != null && change.before.id != change.after.id))
+                return SceneApplication.Rejected(Rejection.INVALID_GEOMETRY)
+            if (scene.find(id) != change.before) return SceneApplication.Rejected(Rejection.STALE_OBJECT)
+            if (change.before != null && change.after != null && change.after.objectRevision <= change.before.objectRevision)
+                return SceneApplication.Rejected(Rejection.STALE_OBJECT)
+        }
+        // ScenePatch's internal constructor is reached through validating preparation, with immutable payloads.
+        // Recheck CAS / object headers, but do not rescan real samples to recompute already validated bounds.
+        return SceneApplication.Applied(SceneSnapshot.applying(scene, changes))
+    }
+
     fun prepare(scene: SceneSnapshot, command: CanvasCommand): PrepareResult {
         if (command.sceneId != scene.id) return PrepareResult.Rejected(Rejection.WRONG_SCENE)
         if (command.baseRevision != scene.revision) return PrepareResult.Rejected(Rejection.STALE_SCENE)
@@ -108,13 +170,9 @@ class MemorySceneCoordinator(initial: SceneSnapshot, private val journalCapacity
         if (patch.baseRevision != current.revision) return CommitResult.Rejected(Rejection.STALE_SCENE)
         if (journal.size >= journalCapacity) return CommitResult.Rejected(Rejection.JOURNAL_FULL)
         if (current.revision == Long.MAX_VALUE) return CommitResult.Rejected(Rejection.REVISION_EXHAUSTED)
-        val next = current.copyEntries()
-        for (change in patch.changes()) {
-            val id = change.after?.id ?: change.before!!.id
-            if (next[id] != change.before) return CommitResult.Rejected(Rejection.STALE_OBJECT)
-            if (change.after == null) next.remove(id) else next[id] = change.after
-        }
-        val snapshot = SceneSnapshot(current.id, current.revision + 1, next)
+        val application = SceneReducer.apply(current, patch)
+        if (application is SceneApplication.Rejected) return CommitResult.Rejected(application.reason)
+        val snapshot = (application as SceneApplication.Applied).snapshot
         val receipt = CommitReceipt(patch.commandId, snapshot.revision, Durability.MEMORY_ONLY)
         journal[patch.commandId] = patch to receipt
         current = snapshot

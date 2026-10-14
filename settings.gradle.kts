@@ -10,5 +10,5 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = "NoteCore"
-include(":canvas-core")
+include(":canvas-core", ":shared-core")
 if (providers.gradleProperty("enableAndroidTargets").orNull == "true") include(":android-app")
