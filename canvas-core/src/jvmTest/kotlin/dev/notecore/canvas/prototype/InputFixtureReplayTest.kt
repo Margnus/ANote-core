@@ -41,15 +41,14 @@ class InputFixtureReplayTest {
                 BrushSpec(BrushKind.MONOLINE, brush.long("algorithm_version").toInt(), brush.getValue("width").jsonPrimitive.double, -1))
             val input = InputReplaySession()
             val authority = MemorySceneCoordinator(SceneSnapshot.empty(current.sceneId))
-            val completed = mutableListOf<CompletedInput>()
+            val submissions = StrokeSubmissionQueue(current.sceneId)
+            var nextSubmission = 0L
             fun submitPending() {
-                while (completed.isNotEmpty()) {
-                    val stroke = completed.first()
-                    val command = stroke.command(CommandId("op-${authority.snapshot().revision}"),
-                        ObjectId("stroke-${authority.snapshot().revision}"), authority.snapshot().revision)
-                    val patch = assertIs<PrepareResult.Prepared>(SceneReducer.prepare(authority.snapshot(), command)).patch
-                    assertEquals(Durability.MEMORY_ONLY, assertIs<CommitResult.Accepted>(authority.commit(patch)).receipt.durability)
-                    completed.removeAt(0)
+                while (submissions.unconfirmedEntries > 0) {
+                    val attempt = assertIs<DispatchResult.Ready>(submissions.dispatch(authority.snapshot())).attempt
+                    assertEquals(CompletionUpdate.UPDATED, submissions.complete(attempt, authority.commit(attempt.patch)))
+                    val collected = assertNotNull(submissions.collectConfirmed(attempt.id))
+                    assertEquals(Durability.MEMORY_ONLY, collected.second.durability)
                 }
             }
             var lastEventTime = -1L
@@ -63,7 +62,11 @@ class InputFixtureReplayTest {
                             when (event.text("tool")) { "stylus" -> PointerTool.STYLUS; "finger" -> PointerTool.FINGER; else -> error("Unknown tool") },
                             PointerPhase.valueOf(event.text("phase").uppercase()), event.points("real_samples"), event.points("predicted_samples")), current)
                         assertFalse(result is InputResult.Rejected, "${case.text("id")}: $result")
-                        if (result is InputResult.Completed) completed.add(result.stroke)
+                        if (result is InputResult.Completed) {
+                            val sequence = nextSubmission++
+                            assertIs<AdmissionResult.Admitted>(submissions.enqueue(StrokeSubmission(
+                                CommandId("op-$sequence"), ObjectId("stroke-$sequence"), result.stroke)))
+                        }
                     }
                     "select_layer" -> current = current.copy(layerId = LayerId(event.text("layer_id")))
                     "complete_pending_commit" -> submitPending()
@@ -71,6 +74,7 @@ class InputFixtureReplayTest {
                 }
             }
             submitPending(); input.close()
+            assertEquals(0L, submissions.chargedBytes); assertEquals(0, submissions.retainedEntries)
             val expected = case.getValue("expected").jsonObject
             val objects = authority.snapshot().objects()
             assertEquals(expected.long("completed_strokes").toInt(), objects.size, case.text("id"))

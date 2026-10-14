@@ -6,7 +6,7 @@ input/synthetic-traces.json为生成的合成样本，版本0.1-draft。origin�
 
 当前5类轨迹：普通笔、预测只预览、抬笔后切层、未提交前取消、手指导航非笔迹。取消case无已确认checkpoint，因此期望未完成笔不提交；生产长笔checkpoint的保留行为由后续宿主契约验证，不据此丢弃已确认数据。
 
-工具生成器检查格式数值/时间/序列与独立reference投影，并记录文件hash。JVM测试已读取JSON并核验manifest SHA，通过公共InputReplaySession、SceneReducer和MemorySceneCoordinator逐点对照真实坐标/压力/时间、捕获layer及提交数。JSON依赖仅在jvmTest；原生适配器尚未实现，expected不是实际设备结果。公共测试另有历史批次、10,000点长笔与指针冲突；下一步将它们扩展为JSON轨迹，补规模样本、背压和lease调度反例。
+工具生成器检查格式数值/时间/序列与独立reference投影，并记录文件hash。JVM测试已读取JSON并核验manifest SHA，通过公共InputReplaySession、StrokeSubmissionQueue、SceneReducer和MemorySceneCoordinator逐点对照真实坐标/压力/时间、捕获layer及提交数。JSON依赖仅在jvmTest；原生适配器尚未实现，expected不是实际设备结果。公共测试另有历史批次、10,000点长笔与指针冲突；下一步将它们扩展为JSON轨迹，补规模样本、背压和lease调度反例。
 
 ```bash
 python3 tools/generate_input_fixtures.py

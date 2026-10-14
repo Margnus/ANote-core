@@ -10,6 +10,7 @@
 - 纯场景命令和patch，内存单写者的修订/幂等/容量检查；Receipt明确MEMORY_ONLY。
 - 迟到frame的revision/generation检查、scene/object/算法版本的几何缓存键。
 - 按字节计费的LRU参考策略及重键/淘汰/超额/溢出反例。
+- [提交队列模型](docs/adr/0003-submission-ownership-and-retry.md)：计数/逻辑字节准入、失败保留、丢ACK幂等重试、旧回调拒绝；Confirmed仍为MEMORY_ONLY。
 - commonTest、独立JVM演示、源码依赖边界和真实测试报告。
 - 有界输入状态机、历史批次与预测分离、捕获目标、显式取消/关闭/拒绝；见[输入ADR](docs/adr/0002-input-replay-boundary.md)。
 - [规模笔迹子集](fixtures/scale/README.md)：S1/S2/S9共120万点，按需生成并核验SHA；不代表完整场景压测。
@@ -53,4 +54,4 @@ tools/                      # 边界校验、测试结果收集
 reports/                    # 真实验证记录
 ```
 
-Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，已有规模笔迹与旧字段候选映射，下一步做D3生命周期/背压/lease、D4原生PoC、D5架构冻结。
+Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，已有规模笔迹与旧字段候选映射，D3已有提交所有权/重试参考模型，下一步实现lease假后端与可控调度器，再做D4原生PoC、D5架构冻结。
