@@ -4,6 +4,26 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class DocumentOwnerThreadTest {
+    @Test fun historyTraversalRemainsOnActualOwnerThreadAndForeignAttemptKeepsStacks() {
+        val executor = BoundedOwnerExecutor()
+        val id = SceneId("history-owner")
+        val authority = MemoryDocumentAuthority(DocumentRoot.empty(id, "title",
+            PageDescriptor(PageId("a"), LayerId("ink-a"), 595.0, 842.0)), ownerCheck = executor::checkOwnerThread)
+        val edit = DocumentCommand.Rename(CommandId("edit"), id, 0, "new")
+        assertIs<DocumentCommit.Accepted>(authority.commit(edit))
+        val undo = DocumentCommand.Undo(CommandId("undo"), id, 1, edit.id)
+        val before = authority.status()
+        try {
+            executor.submit(undo, 1024, { input -> authority.commit(input) }) { _, result ->
+                assertIs<WorkResult.OutcomeUnknown>(result); assertEquals(before, authority.status())
+                ResultDisposition.ACKNOWLEDGED
+            }
+            executor.stopAccepting(); assertTrue(executor.awaitWorkerStop(3000))
+            assertEquals(1, executor.drainResults().acknowledged)
+            assertIs<DocumentCommit.Accepted>(authority.commit(undo))
+            assertEquals("title", authority.snapshot().title); assertEquals(1, authority.status().redoCount)
+        } finally { executor.stopAccepting(); assertTrue(executor.awaitWorkerStop(3000)) }
+    }
     @Test fun realWorkerCannotCommitOrInspectDocumentAndOwnerCanContinueAfterFailedForeignCall() {
         val executor = BoundedOwnerExecutor()
         val id = SceneId("thread-document")

@@ -9,6 +9,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import dev.notecore.canvas.preview.PreviewNotebook
 import dev.notecore.canvas.prototype.*
+import dev.notecore.document.*
 import kotlin.math.abs
 
 /** Dedicated emulator checks: inject real Android multi-pointer events through the window. */
@@ -66,6 +67,8 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("finger_pan_without_ink", "passed")
             verifyExecutor()
             result.putString("executor_owner_worker", "passed")
+            verifyDocumentHistory()
+            result.putString("document_delta_history_owner", "passed")
             verifyStorage()
             result.putString("storage_failure_recovery", "passed")
             result.putString("storage_bounded_read_and_active_owner", "passed")
@@ -78,6 +81,35 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("viewport_status", "failed"); result.putString("failure", failure.stackTraceToString())
             finish(Activity.RESULT_CANCELED, result)
         }
+    }
+    private fun verifyDocumentHistory() {
+        val executor = BoundedOwnerExecutor(2, 4096, "NoteCore-ART-history")
+        val doc = SceneId("ART-history")
+        val page = PageDescriptor(PageId("page"), LayerId("ink"), 595.0, 842.0, PaperKind.RULED)
+        val owner = MemoryDocumentAuthority(DocumentRoot.empty(doc, "test", page), ownerCheck = executor::checkOwnerThread)
+        val samples = StrokeSamples.copyOf(doubleArrayOf(1.0, 2.0), doubleArrayOf(3.0, 4.0), floatArrayOf(0.5f, 0.7f), longArrayOf(1, 2))
+        val objectId = ObjectId("stroke")
+        val add = DocumentCommand.Canvas(page.id, CanvasCommand.AddStroke(CommandId("add"), 0,
+            StrokeTarget(doc, page.layerId, BrushSpec(BrushKind.MONOLINE, 1, 2.0, 0xff000000.toInt())), objectId, samples))
+        check(owner.commit(add) is DocumentCommit.Accepted)
+        val clear = DocumentCommand.DeletePage(CommandId("clear"), doc, 1, page.id)
+        check(owner.commit(clear) is DocumentCommit.Accepted)
+        val undo = DocumentCommand.Undo(CommandId("undo"), doc, 2, clear.id)
+        val before = owner.status()
+        try {
+            executor.submit(undo, 1024, { owner.commit(it) }) { _, outcome ->
+                check(outcome is WorkResult.OutcomeUnknown); check(owner.status() == before)
+                ResultDisposition.ACKNOWLEDGED
+            }
+            executor.stopAccepting(); check(executor.awaitWorkerStop(3000)); check(executor.drainResults().acknowledged == 1)
+            val restored = owner.commit(undo) as DocumentCommit.Accepted
+            check(owner.snapshot().page(0).paper == PaperKind.RULED)
+            check(owner.snapshot().scene.find(objectId)!!.objectRevision == 3L)
+            check(owner.snapshot().scene.find(objectId)!!.samples === samples)
+            check(owner.commit(undo) == restored)
+            check(owner.commit(DocumentCommand.Redo(CommandId("redo"), doc, 3, clear.id)) is DocumentCommit.Accepted)
+            check(owner.snapshot().scene.objectCount == 0 && owner.snapshot().revision == 4L)
+        } finally { executor.stopAccepting(); check(executor.awaitWorkerStop(3000)) }
     }
     private fun verifyCatalogReuse() {
         lateinit var adapter: NoteListAdapter

@@ -1,0 +1,25 @@
+# ADR-0014：有界规范delta历史与对象恢复revision
+
+2026-10-15；DEV-024B内存参考实现，接续ADR-0013。历史属于同一个DocumentAuthority，不能为undo另建scene或把root revision改回历史值。
+
+每个成功edit记录规范ObjectChange、PageChange、标题及前后PageId顺序；只保留本次变化与有界目录数组，不深clone全Document。Undo/Redo操作携带expected top operationId与当前baseRevision，防止异步按钮/多会话撤销错误目标。单次根提交更新目录、对象、epoch、历史栈和receipt；任何失败不移动栈、不清掉redo。成功的新edit才清掉旧redo分支。
+
+根revision每次成功undo/redo都递增；恢复PageId/LayerId/对象ID用于同一逻辑实体，但对象revision必须高于其最后生命周期epoch，删除也消费epoch。不得把恢复对象的revision设回旧值；旧prepared patch与几何cache key不能因delete→restore发生ABA。history校验当前语义payload与目标delta的预期一侧一致，比较时允许历史操作推进过的content/object revision，不能跳过layer/brush/samples/transform/尺寸/纸张验证。
+
+历史按条目与声明字节限制。metadata包括有界前后页序与变化页，payload只引用规范不可变样本；额度涵盖undo和redo。超大单次可撤销变化在publish前拒绝，原命令留在调用方；正常容量淘汰只移除最老可撤销记录并显式暴露horizon，不能丢当前内容或未确认工作。operation去重journal与history各有责任，历史淘汰不擅自清掉可能用于未知结果查询的receipt。
+
+只按data delta进行反向应用，不重跑原业务命令（例如Copy的ID allocator）。Redo重用原复制得到的实体ID并推进epoch，而新Copy分配新身份。Undo最后页清空恢复原纸张/笔迹，Undo其他页删除恢复同一pageId及页序；视图选择依旧是session状态，由宿主依据稳定ID处理，不按旧页号误跳。
+
+本交付仍MEMORY_ONLY；正式history spill、SQLite事务、进程恢复及跨账号隔离由shared-data后续实现。完成后再实施有界v2 codec和双端分页UI。
+
+## 实现边界与计费
+
+DocumentCommand增加Undo/Redo，expectedOperationId指向原edit而非前次undo的ID。DocumentAuthorityStatus返回undo/redo条目、顶部operationId、合计historyByteCharge及evictedHistoryCount。默认两栈合计128条/8MiB，构造额度要求至少一条；零historyBytes用于明确拒绝可撤销edit。超过单条额度拒绝，正常新edit只淘汰最老undo，并清掉既有redo分支；失败不改变任一栈。history遍历不增新记录、不重跑原copy，向另一栈移动同一个私有delta，字节charge保持不变。
+
+每条delta只有变化对象、变化PageDescriptor、有界前后PageId顺序及标题，不保留SceneSnapshot/DocumentRoot；初始化目录map仅为临时查找，不留进历史。变化对象引用规范不可变样本，不clone采样数组。计费保守地对before/after分别按28字节/点及对象/目录header收费，即使样本共享也不减免；这是防止低估的逻辑额度，不是精确堆内存测量。语义匹配优先样本引用相等，避免对共享样本进行无意义全点扫描。纯metadata提交复用私有不可变epoch及身份集合。
+
+对象epoch与live/retired身份一起保留；身份额度按对象80字节+ID字符声明包含epoch映射责任。正常变更也检查epoch，删除消费下一epoch，恢复按最后epoch+1创建新header。epoch到Long.MAX_VALUE时拒绝所有后续对象生命周期变化，根/元数据/历史保持原样。history丢失/进程重开不隐式恢复可撤销责任，后续codec须明确历史不跨预览重开持久化，正式持久化另设事务门禁。
+
+## 验证与后续
+
+新增12项common历史反例：多类edit连续全undo/redo、copy身份/样本共享与版本、删页顺序、最后页清空、transform/删除版本单调、成功/失败分支、top/base/doc及原回执、条目horizon、两栈字节/超大拒绝、journal满、epoch耗尽及旧prepared patch。另新增实际JVM worker尝试undo，被owner检查拒绝且栈保持；核心合计170项（canvas-core138、shared-core32）。Android ART历史与双端编译在独立产物报告记证据，不把shared-core实现称为App分页界面。App仍为单页，DEV-024C有界v2兼容codec及DEV-024D双端分页UI/实际保存重开接续；PAGE-02/03、生产API与C1仍未验收。

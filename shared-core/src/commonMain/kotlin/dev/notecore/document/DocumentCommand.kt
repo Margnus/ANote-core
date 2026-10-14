@@ -7,6 +7,10 @@ sealed interface DocumentCommand {
     val id: CommandId
     val documentId: SceneId
     val baseRevision: Long
+    data class Undo(override val id: CommandId, override val documentId: SceneId, override val baseRevision: Long,
+                    val expectedOperationId: CommandId) : DocumentCommand
+    data class Redo(override val id: CommandId, override val documentId: SceneId, override val baseRevision: Long,
+                    val expectedOperationId: CommandId) : DocumentCommand
     data class Rename(override val id: CommandId, override val documentId: SceneId, override val baseRevision: Long,
                       val title: String) : DocumentCommand
     data class InsertPage(override val id: CommandId, override val documentId: SceneId, override val baseRevision: Long,
@@ -46,12 +50,15 @@ sealed interface DocumentCommand {
 
 data class DocumentBudget(val maxPages: Int = 128, val maxObjects: Int = 5000, val liveBytes: Long = 8L * 1024 * 1024,
                           val journalEntries: Int = 128, val journalBytes: Long = 8L * 1024 * 1024,
-                          val identityBytes: Long = 2L * 1024 * 1024) {
-    init { require(maxPages in 1..4096 && maxObjects in 1..100_000 && liveBytes >= 0 && journalEntries in 1..16_384 && journalBytes >= 0 && identityBytes >= 0) }
+                          val identityBytes: Long = 2L * 1024 * 1024,
+                          val historyEntries: Int = 128, val historyBytes: Long = 8L * 1024 * 1024) {
+    init { require(maxPages in 1..4096 && maxObjects in 1..100_000 && liveBytes >= 0 && journalEntries in 1..16_384 && journalBytes >= 0 && identityBytes >= 0)
+        require(historyEntries in 1..16_384 && historyBytes >= 0) }
 }
 enum class DocumentRejection { WRONG_DOCUMENT, STALE_ROOT, REVISION_EXHAUSTED, MISSING_PAGE, WRONG_LAYER, STALE_PAGE,
     REUSED_OPERATION_ID, REUSED_IDENTITY, COPY_MAPPING, INVALID_PAGE, INVALID_TITLE, SCENE_REJECTED, NO_CHANGE,
-    PAGE_CAPACITY, OBJECT_CAPACITY, LIVE_BYTE_CAPACITY, JOURNAL_CAPACITY, IDENTITY_CAPACITY }
+    PAGE_CAPACITY, OBJECT_CAPACITY, LIVE_BYTE_CAPACITY, JOURNAL_CAPACITY, IDENTITY_CAPACITY,
+    HISTORY_EMPTY, HISTORY_TARGET, HISTORY_CONFLICT, HISTORY_CAPACITY }
 class DocumentReceipt internal constructor(val operationId: CommandId, val rootRevision: Long, affectedPages: Set<PageId>) {
     private val pages = affectedPages.toSet()
     val durability: Durability get() = Durability.MEMORY_ONLY
@@ -62,4 +69,7 @@ sealed interface DocumentCommit {
     data class Rejected(val reason: DocumentRejection, val sceneReason: Rejection? = null) : DocumentCommit
 }
 data class DocumentAuthorityStatus(val liveByteCharge: Long, val journalByteCharge: Long, val identityByteCharge: Long,
-                                   val operationCount: Int, val pageCount: Int, val objectCount: Int)
+                                   val operationCount: Int, val pageCount: Int, val objectCount: Int,
+                                   val undoCount: Int, val redoCount: Int, val historyByteCharge: Long,
+                                   val nextUndoOperationId: CommandId?, val nextRedoOperationId: CommandId?,
+                                   val evictedHistoryCount: Long)

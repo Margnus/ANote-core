@@ -9,9 +9,11 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
                               private val ownerCheck: () -> Unit = {}) {
     private data class JournalEntry(val command: DocumentCommand, val receipt: DocumentReceipt, val charge: Long)
     private data class State(val root: DocumentRoot, val journal: Map<CommandId, JournalEntry>,
-                             val pages: Set<PageId>, val layers: Set<LayerId>, val objects: Set<ObjectId>)
+                             val pages: Set<PageId>, val layers: Set<LayerId>, val objects: Set<ObjectId>,
+                             val epochs: Map<ObjectId, Long>, val undo: List<DocumentDelta> = emptyList(),
+                             val redo: List<DocumentDelta> = emptyList(), val evictedHistoryCount: Long = 0)
     private var state = State(initial, emptyMap(), initial.pages().map { it.id }.toSet(), initial.pages().map { it.layerId }.toSet(),
-        initial.scene.objects().map { it.id }.toSet())
+        initial.scene.objects().map { it.id }.toSet(), initial.scene.objects().associate { it.id to it.objectRevision })
     init {
         ownerCheck()
         require(initial.pageCount <= budget.maxPages && initial.scene.objectCount <= budget.maxObjects)
@@ -21,13 +23,15 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
     fun status(): DocumentAuthorityStatus {
         ownerCheck(); val current = state
         return DocumentAuthorityStatus(liveCharge(current.root), current.journal.values.sumOf { it.charge }, identityCharge(current),
-            current.journal.size, current.root.pageCount, current.root.scene.objectCount)
+            current.journal.size, current.root.pageCount, current.root.scene.objectCount,
+            current.undo.size, current.redo.size, (current.undo + current.redo).sumOf { it.charge },
+            current.undo.lastOrNull()?.operationId, current.redo.lastOrNull()?.operationId, current.evictedHistoryCount)
     }
     private fun objectCharge(value: StrokeObject): Long = 256L + value.id.value.length * 2 + value.layerId.value.length * 2 + value.samples.size.toLong() * 28
     private fun liveCharge(root: DocumentRoot): Long = 512L + root.title.length * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
         root.scene.objects().sumOf(::objectCharge)
     private fun identityCharge(value: State): Long = value.pages.sumOf { 48L + it.value.length * 2 } +
-        value.layers.sumOf { 48L + it.value.length * 2 } + value.objects.sumOf { 48L + it.value.length * 2 }
+        value.layers.sumOf { 48L + it.value.length * 2 } + value.objects.sumOf { 80L + it.value.length * 2 }
     private fun commandCharge(command: DocumentCommand): Long = 4096L + when (command) {
         is DocumentCommand.Canvas -> when (val action = command.command) {
             is CanvasCommand.AddStroke -> action.samples.size.toLong() * 28
@@ -56,6 +60,8 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
         val pages = root.pages().toMutableList()
         var title = root.title
         val changes = mutableListOf<ObjectChange>()
+        var historyDelta: DocumentDelta? = null
+        val undoing = command is DocumentCommand.Undo
         var canvasPatch: ScenePatch? = null
         val affected = linkedSetOf<PageId>()
         val newPages = mutableSetOf<PageId>(); val newLayers = mutableSetOf<LayerId>(); val newObjects = mutableSetOf<ObjectId>()
@@ -68,6 +74,42 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
             return null
         }
         when (command) {
+            is DocumentCommand.Undo, is DocumentCommand.Redo -> {
+                val expected = when (command) {
+                    is DocumentCommand.Undo -> command.expectedOperationId
+                    is DocumentCommand.Redo -> command.expectedOperationId
+                    else -> error("history command")
+                }
+                val delta = (if (undoing) old.undo else old.redo).lastOrNull() ?: return reject(DocumentRejection.HISTORY_EMPTY)
+                if (delta.operationId != expected) return reject(DocumentRejection.HISTORY_TARGET)
+                historyDelta = delta
+                val expectedOrder = if (undoing) delta.afterOrder else delta.beforeOrder
+                val targetOrder = if (undoing) delta.beforeOrder else delta.afterOrder
+                val expectedTitle = if (undoing) delta.afterTitle else delta.beforeTitle
+                if (root.pages().map { it.id } != expectedOrder || root.title != expectedTitle) return reject(DocumentRejection.HISTORY_CONFLICT)
+                title = if (undoing) delta.beforeTitle else delta.afterTitle
+                val restoredPages = pages.associateBy { it.id }.toMutableMap()
+                for (change in delta.pages) {
+                    val expectedPage = if (undoing) change.after else change.before
+                    val targetPage = if (undoing) change.before else change.after
+                    if (!samePageContent(root.findPage(change.id), expectedPage)) return reject(DocumentRejection.HISTORY_CONFLICT)
+                    if (targetPage == null) restoredPages.remove(change.id)
+                    else restoredPages[change.id] = targetPage.copy(contentRevision = nextRevision)
+                }
+                pages.clear()
+                for (id in targetOrder) pages.add(restoredPages[id] ?: return reject(DocumentRejection.HISTORY_CONFLICT))
+                for (change in delta.objects) {
+                    val expectedObject = if (undoing) change.after else change.before
+                    val targetObject = if (undoing) change.before else change.after
+                    val id = (change.before ?: change.after!!).id
+                    val current = root.scene.find(id)
+                    if (!sameObjectContent(current, expectedObject)) return reject(DocumentRejection.HISTORY_CONFLICT)
+                    val epoch = old.epochs[id] ?: return reject(DocumentRejection.HISTORY_CONFLICT)
+                    if (epoch == Long.MAX_VALUE) return reject(DocumentRejection.REVISION_EXHAUSTED)
+                    changes.add(ObjectChange(current, targetObject?.copy(objectRevision = epoch + 1)))
+                }
+                affected.addAll(delta.affected)
+            }
             is DocumentCommand.Rename -> {
                 title = command.title.trim().take(120).ifBlank { "未命名笔记" }
                 if (title == root.title) return reject(DocumentRejection.NO_CHANGE)
@@ -160,7 +202,19 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
         val prospectiveLive = liveCharge(root) + (title.length - root.title.length) * 2 + changes.sumOf { (it.after?.let(::objectCharge) ?: 0L) - (it.before?.let(::objectCharge) ?: 0L) } +
             pages.sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } - root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 }
         if (prospectiveLive > budget.liveBytes) return reject(DocumentRejection.LIVE_BYTE_CAPACITY)
-        val nextIds = State(root, old.journal, old.pages + newPages, old.layers + newLayers, old.objects + newObjects)
+        if (pages.size > budget.maxPages) return reject(DocumentRejection.PAGE_CAPACITY)
+        val epochs = if (changes.isEmpty()) null else old.epochs.toMutableMap()
+        for (change in changes) {
+            val id = (change.before ?: change.after!!).id
+            val previous = old.epochs[id] ?: 0L
+            if (previous == Long.MAX_VALUE) return reject(DocumentRejection.REVISION_EXHAUSTED)
+            val next = change.after?.objectRevision ?: (previous + 1)
+            if (next <= previous) return reject(DocumentRejection.SCENE_REJECTED, Rejection.STALE_OBJECT)
+            epochs!![id] = next
+        }
+        val nextIds = old.copy(pages = if (newPages.isEmpty()) old.pages else old.pages + newPages,
+            layers = if (newLayers.isEmpty()) old.layers else old.layers + newLayers,
+            objects = if (newObjects.isEmpty()) old.objects else old.objects + newObjects, epochs = epochs?.toMap() ?: old.epochs)
         if (identityCharge(nextIds) > budget.identityBytes) return reject(DocumentRejection.IDENTITY_CAPACITY)
         val patch = canvasPatch ?: when (val prepared = SceneReducer.prepareChanges(root.scene, command.id, changes)) {
             is PrepareResult.Rejected -> return reject(DocumentRejection.SCENE_REJECTED, prepared.reason)
@@ -169,9 +223,29 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
         val application = SceneReducer.apply(root.scene, patch)
         if (application is SceneApplication.Rejected) return reject(DocumentRejection.SCENE_REJECTED, application.reason)
         val nextRoot = DocumentRoot.compose(title, (application as SceneApplication.Applied).snapshot, pages)
+        val nextUndo: List<DocumentDelta>
+        val nextRedo: List<DocumentDelta>
+        var evicted = old.evictedHistoryCount
+        val traversal = historyDelta
+        if (traversal != null) {
+            nextUndo = if (undoing) old.undo.dropLast(1) else old.undo + traversal
+            nextRedo = if (undoing) old.redo + traversal else old.redo.dropLast(1)
+        } else {
+            val delta = DocumentDelta(command.id, root, nextRoot, changes, affected)
+            if (delta.charge > budget.historyBytes) return reject(DocumentRejection.HISTORY_CAPACITY)
+            val retained = old.undo.toMutableList()
+            var retainedBytes = retained.sumOf { it.charge }
+            while (retained.size >= budget.historyEntries || delta.charge > budget.historyBytes - retainedBytes) {
+                retainedBytes -= retained.removeAt(0).charge
+                evicted++
+            }
+            nextUndo = retained + delta
+            nextRedo = emptyList() // A failed edit never reaches this publication; its redo branch survives.
+        }
         val receipt = DocumentReceipt(command.id, nextRevision, affected)
         val nextJournal = old.journal + (command.id to JournalEntry(command, receipt, commandBytes))
-        state = nextIds.copy(root = nextRoot, journal = nextJournal) // Only publication point; never partially mutates metadata/scene.
+        state = nextIds.copy(root = nextRoot, journal = nextJournal, undo = nextUndo, redo = nextRedo,
+            evictedHistoryCount = evicted) // Only publication point; never partially mutates metadata/scene/history.
         return DocumentCommit.Accepted(receipt)
     }
 }

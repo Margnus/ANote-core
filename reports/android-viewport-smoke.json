@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "apk_sha256": "31f3c214b55fa3e913b53fe72c3e5d520d561fffca78463fc33ca0a58f461fdf",
+  "apk_sha256": "48371c394b777dc09283a7f7e5dc64099656d63afd0b23b2dde9816edae5b3bb",
   "serial": "emulator-5580",
   "api": "36",
   "checks": [
@@ -8,6 +8,7 @@
     "stylus_transform_lock",
     "finger_pan_without_ink",
     "executor_owner_worker",
+    "document_delta_history_owner",
     "storage_failure_recovery",
     "storage_bounded_read_and_active_owner",
     "storage_atomic_rename_failure",
@@ -15,14 +16,15 @@
   ],
   "event_source": "synthetic MotionEvent injected through UiAutomation into window",
   "executor_thread_source": "real Android ART owner/worker threads, bounded result delivery and explicit retry",
+  "document_history_source": "real ART document authority and owner/worker guard, last-page undo/redo, monotonic object epoch and immutable sample sharing; not paged App UI verification",
   "storage_test_source": "real AtomicFile directory and silent-rename failure / retained reopen / repaired retry / strict UTF-8 and 32MiB preflight, isolated synthetic cache",
   "catalog_test_source": "1000 synthetic rows in a real ListView window, bounded widget creation and recycled-row ID rebinding; not a latency benchmark",
   "real_stylus_verified": false,
   "device_performance_verified": false,
   "source_and_test_apk_sha256": {
-    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "71606224212cc7f242413109e3feb2463bf96ae6b9816e32f510a677f90509fc",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "267cc62382816323ca751955d31a0663de4c1611f499f4885b09cba2f1e6ed16",
     "android-app/build.gradle.kts": "5a0838bc5d30cac71f16124d58f67757702fa37945327e6badf336cbf42852ee",
-    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "02eef567b80c4236ff3f37524a6286acdb336f19890eab477df8e1d142f7726e",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "e6212535a69528974ab6a66cbf568284208b1386aded6a165b4567ae8fa0b2bf",
     "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "81f36ebde3128f9f4b37aac6b58e42c8201f952f7dacac6b8ce1415c73851085",
     "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "58f979e0136a51e192b7450b200c9ccadc8a9867b1553906b1172be262ba1e88",
     "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
@@ -43,8 +45,9 @@
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "48b7f6e203d6781b38b2121da8e0b2d601854779fe08dc96e8b6fc3e346ead06",
     "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "311d1ea9195ae1933f13227a9d7197441c99ef61c97fd249032643365ea79be2",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "1873129f406eeac06095c00258b1d481c3d5f17696fd636efe5212335d1a86cc",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "eac7b57ab3ec1ad6f3b1a785caa9cf7700eb74c12f6803194e70a6e942e67435",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "9da5f4c5d2ae54142cfabcdec5ef5f2ba1277ef6bd66bf48067133a863ef1872"
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "6c2d7b7d10a29178fcc8916640c7349beadfa4dd6c135727bb7ad747879e9d78"
   }
 }
