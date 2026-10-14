@@ -20,6 +20,7 @@ data class OwnedWorkSummary(val ticket: OwnerWorkTicket, val stage: OwnedWorkSta
 data class OwnerExecutorStatus(
     val accepting: Boolean, val workerStopped: Boolean, val workerFailure: String?,
     val chargedBytes: Long, val entries: List<OwnedWorkSummary>, val ownerThreadId: Long, val workerThreadId: Long,
+    val ownerWakeFailure: String? = null,
 ) {
     val isDrained: Boolean get() = !accepting && workerStopped && entries.isEmpty()
 }

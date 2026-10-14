@@ -240,4 +240,26 @@ class BoundedOwnerExecutorTest {
         executor.stopAccepting(); assertTrue(executor.awaitWorkerStop(3000)); executor.drainResults()
         assertEquals(1, destroyed.get()); assertEquals(DocumentClosePhase.CLOSED, document.status().phase); assertTrue(executor.status().isDrained)
     }
+    @Test fun wakeRunsAfterPublicationOffMonitorAndFailureKeepsResultsAndAcceptedNextJob() {
+        val wakes = AtomicInteger()
+        val published = CountDownLatch(1)
+        val executor = BoundedOwnerExecutor(requestOwnerWake = {
+            wakes.incrementAndGet(); published.countDown(); throw IllegalStateException("Owner loop unavailable")
+        })
+        try {
+            repeat(2) { value ->
+                assertIs<WorkAdmission.Accepted>(executor.submit(value, 4, { it }) { input, result ->
+                    assertEquals(input, assertIs<WorkResult.Succeeded<Int>>(result).value)
+                    ResultDisposition.ACKNOWLEDGED
+                })
+            }
+            assertTrue(published.await(3, TimeUnit.SECONDS))
+            executor.stopAccepting(); assertTrue(executor.awaitWorkerStop(3000))
+            assertNull(executor.status().workerFailure)
+            assertEquals("IllegalStateException", executor.status().ownerWakeFailure)
+            assertEquals(8L, executor.status().chargedBytes); assertTrue(wakes.get() >= 2)
+            assertEquals(2, executor.drainResults().acknowledged); assertTrue(executor.status().isDrained)
+        } finally { executor.stopAccepting(); assertTrue(executor.awaitWorkerStop(3000)) }
+    }
+
 }

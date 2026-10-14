@@ -1,124 +1,154 @@
 package dev.notecore.app
 
 import android.content.Context
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.util.AtomicFile
-import android.net.Uri
-import dev.notecore.canvas.preview.PreviewNotebook
-import dev.notecore.canvas.preview.PreviewNotebookSnapshot
-import org.json.JSONObject
+import android.util.Log
+import dev.notecore.canvas.preview.*
+import dev.notecore.canvas.prototype.*
 import java.io.File
-import java.util.concurrent.Executors
-import java.util.UUID
-import java.nio.ByteBuffer
-import java.nio.charset.CodingErrorAction
+import java.util.concurrent.atomic.AtomicBoolean
 
 data class NoteSummary(val id: String, val title: String, val modified: Long)
 
-/** App-owned serial IO survives Activity recreation. Only immutable snapshots cross the boundary. */
-class NoteStore private constructor(context: Context) {
-    private val resolver = context.applicationContext.contentResolver
-    private val directory = File(context.filesDir, "preview-notes").apply { mkdirs() }
-    private val io = Executors.newSingleThreadExecutor()
+/** App lifetime storage owner is the main thread. Only immutable captures / exclusive read results cross IO. */
+class NoteStore private constructor(context: Context, private val directory: File = File(context.filesDir, "preview-notes")) {
+    private val io = PreviewFileIO(directory, context.applicationContext.contentResolver)
     private val main = Handler(Looper.getMainLooper())
-    private data class Pending(val snapshot: PreviewNotebookSnapshot, val callback: (Long, String?) -> Unit)
-    private val pending = linkedMapOf<String, Pending>()
-    private val failed = mutableMapOf<String, PreviewNotebookSnapshot>() // preserve failed full content until a successful retry
-    private var scheduled = false
-    // Owner-thread capture survives Activity recreation while the system file picker is visible.
+    private val wakePending = AtomicBoolean()
+    private val executor = BoundedOwnerExecutor(16, 256L * 1024 * 1024, "NoteCore-preview-storage", ::requestPump)
+    private val ledger = PreviewSaveLedger()
+    private data class SaveCallback(val version: Long, val receive: (Long, String?) -> Unit)
+    private val saveCallbacks = mutableMapOf<String, SaveCallback>()
+    private var viewEpoch = 0L
+    private var activeNotebook: PreviewNotebook? = null
+    internal val activeDocumentId: String? get() { executor.checkOwnerThread(); return activeNotebook?.documentId }
+    internal fun attachActive(note: PreviewNotebook) {
+        executor.checkOwnerThread()
+        check(activeNotebook == null || activeNotebook === note) { "Release the previous owner only after snapshot admission" }
+        activeNotebook = note
+    }
+    internal fun releaseActive(note: PreviewNotebook) {
+        executor.checkOwnerThread(); check(activeNotebook === note); activeNotebook = null
+    }
     var exportSnapshot: PreviewNotebookSnapshot? = null
-    private fun file(id: String): File {
-        require(id.matches(Regex("[a-zA-Z0-9-]{1,128}")))
-        return File(directory, "$id.ncp")
+        get() { executor.checkOwnerThread(); return field }
+        set(value) { executor.checkOwnerThread(); field = value }
+    init { executor.checkOwnerThread() }
+    private fun requestPump() {
+        if (!wakePending.compareAndSet(false, true)) return
+        if (!main.post {
+            wakePending.set(false)
+            executor.drainResults(16)
+            pumpWrites()
+            if (executor.status().entries.firstOrNull()?.stage == OwnedWorkStage.READY) requestPump()
+        }) { wakePending.set(false); error("Storage owner event loop unavailable") }
     }
-    private fun writeSnapshot(snapshot: PreviewNotebookSnapshot) {
-        val atomic = AtomicFile(file(snapshot.documentId))
-        val bytes = snapshot.encode().toByteArray(Charsets.UTF_8)
-        val stream = atomic.startWrite()
-        try { stream.write(bytes); atomic.finishWrite(stream) }
-        catch (error: Throwable) { atomic.failWrite(stream); throw error }
-        val metadata = JSONObject().put("title", snapshot.title).toString()
-        runCatching { File(directory, "${snapshot.documentId}.meta").writeText(metadata) }
+    private fun notifyUi(action: () -> Unit) {
+        // Ownership was transferred to ledger / durable file before this advisory UI notification.
+        runCatching(action).onFailure { Log.e("NoteCoreStorage", "UI notification failed after storage handoff", it) }
     }
-    fun export(uri: Uri, snapshot: PreviewNotebookSnapshot, callback: (String?) -> Unit) = io.execute {
-        val failure = runCatching {
-            val bytes = snapshot.encode().toByteArray(Charsets.UTF_8)
-            checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(bytes); it.flush() }
-        }.exceptionOrNull()
-        main.post { callback(failure?.let { "导出失败，目标文件可能不完整，请重新导出" }) }
+    fun save(snapshot: PreviewNotebookSnapshot, callback: (Long, String?) -> Unit): Boolean {
+        executor.checkOwnerThread()
+        val previous = ledger.latest(snapshot.documentId)
+        val admission = ledger.offer(snapshot)
+        if (admission != PreviewSaveAdmission.ACCEPTED) {
+            notifyUi { callback(snapshot.version, "保存队列已满或内容版本过期，请保留当前笔记并重试") }
+            return false
+        }
+        if (previous?.version != snapshot.version) viewEpoch++
+        saveCallbacks[snapshot.documentId] = SaveCallback(snapshot.version, callback)
+        pumpWrites()
+        return true
     }
-    fun importCopy(uri: Uri, callback: (PreviewNotebook?, String?) -> Unit) = io.execute {
-        val result = runCatching {
-            val bytes = checkNotNull(resolver.openInputStream(uri)).use { input ->
-                val output = java.io.ByteArrayOutputStream()
-                val buffer = ByteArray(8192)
-                while (true) {
-                    val count = input.read(buffer)
-                    if (count < 0) break
-                    require(output.size().toLong() + count <= 32L * 1024 * 1024)
-                    output.write(buffer, 0, count)
+    private fun pumpWrites() {
+        executor.checkOwnerThread()
+        while (true) {
+            val attempt = ledger.nextWrite() ?: return
+            val admission = executor.submit(attempt to io, attempt.snapshot.encodingWorkByteCharge, {
+                it.second.write(it.first.snapshot); Unit
+            }) { input, result ->
+                val original = input.first
+                val success = result is WorkResult.Succeeded
+                check(ledger.complete(original, success))
+                val id = original.snapshot.documentId
+                saveCallbacks[id]?.takeIf { it.version == original.snapshot.version }?.let { receiver ->
+                    saveCallbacks.remove(id)
+                    notifyUi { receiver.receive(original.snapshot.version, if (success) null else "保存失败，更改仍在本机会话中，请重试保存") }
                 }
-                output.toByteArray()
+                ResultDisposition.ACKNOWLEDGED // Failure content is retained in ledger before ACK.
             }
-            val encoded = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
-            val id = UUID.randomUUID().toString()
-            check(!file(id).exists())
-            PreviewNotebook.importAsCopy(encoded, id).also { writeSnapshot(it.capture()) }
-        }
-        main.post { callback(result.getOrNull(), result.exceptionOrNull()?.let { "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖" }) }
-    }
-    fun save(snapshot: PreviewNotebookSnapshot, callback: (Long, String?) -> Unit) {
-        synchronized(pending) {
-            pending[snapshot.documentId] = Pending(snapshot, callback) // full snapshot supersedes an earlier unsaved version
-            if (scheduled) return
-            scheduled = true
-        }
-        io.execute {
-            while (true) {
-                val job = synchronized(pending) {
-                    val key = pending.keys.firstOrNull()
-                    if (key == null) { scheduled = false; null } else pending.remove(key)
-                } ?: break
-                val failure = runCatching {
-                    writeSnapshot(job.snapshot)
-                }.exceptionOrNull()
-                synchronized(pending) {
-                    if (failure == null) failed.remove(job.snapshot.documentId) else failed[job.snapshot.documentId] = job.snapshot
+            if (admission is WorkAdmission.Rejected) {
+                check(ledger.returnUnstarted(attempt))
+                // Already admitted snapshot stays pending; a completing job wakes and pumps it later.
+                // An individually oversized encoding cannot fit: surface it and retain for recovery.
+                if (attempt.snapshot.encodingWorkByteCharge > 256L * 1024 * 1024 ||
+                    admission.reason == WorkAdmissionFailure.WORKER_TERMINATED || admission.reason == WorkAdmissionFailure.STOPPED) {
+                    notifyUi { saveCallbacks[attempt.snapshot.documentId]?.receive?.invoke(attempt.snapshot.version,
+                        "保存后端暂不可用，更改仍保留，请重试") }
                 }
-                main.post { job.callback(job.snapshot.version, failure?.let { "保存失败，请保留当前笔记并重试" }) }
+                return
             }
         }
     }
-    fun list(callback: (List<NoteSummary>) -> Unit) = io.execute {
-        val ids = directory.listFiles().orEmpty().filter { it.extension == "ncp" || it.name.endsWith(".ncp.bak") }
-            .map { it.name.removeSuffix(".bak").removeSuffix(".ncp") } + synchronized(pending) { failed.keys.toList() }
-        val notes = ids.distinct().map { id ->
-                val title = synchronized(pending) { failed[id]?.title } ?: runCatching { JSONObject(File(directory, "$id.meta").readText()).getString("title") }
-                    .getOrElse { runCatching { read(id).title }.getOrDefault("待恢复的笔记") }
-                NoteSummary(id, title, file(id).lastModified())
-            }.sortedByDescending { it.modified }
-        main.post { callback(notes) }
-    }
-    private fun read(id: String): PreviewNotebook {
-        val atomic = AtomicFile(file(id))
-        val text = atomic.openRead().use { stream ->
-            require(stream.channel.size() <= 32L * 1024 * 1024) { "Document too large" }
-            stream.bufferedReader(Charsets.UTF_8).readText()
+    private fun <I : Any, R : Any> request(input: I, bytes: Long, compute: (I) -> R,
+                                          rejected: () -> Unit, receive: (WorkResult<R>) -> Unit) {
+        executor.checkOwnerThread()
+        val admission = executor.submit(input, bytes, compute) { _, result ->
+            notifyUi { receive(result) }; ResultDisposition.ACKNOWLEDGED
         }
-        return PreviewNotebook.restore(text).also { require(it.documentId == id) }
+        if (admission is WorkAdmission.Rejected) notifyUi(rejected)
     }
-    fun open(id: String, callback: (PreviewNotebook?, String?) -> Unit) = io.execute {
-        val retained = synchronized(pending) { failed[id] }
-        val result = runCatching { if (retained == null) read(id) else PreviewNotebook.restore(retained.encode()) }
-        main.post { callback(result.getOrNull(), result.exceptionOrNull()?.let { "笔记读取失败，原文件已保留" }
-            ?: retained?.let { "有更改尚未保存，请点击保存重试" }) }
+    fun export(uri: Uri, snapshot: PreviewNotebookSnapshot, callback: (String?) -> Unit) {
+        request(Triple(uri, snapshot, io), snapshot.encodingWorkByteCharge, { input ->
+            input.third.export(input.first, input.second); Unit
+        }, { callback("后台队列繁忙，请重新导出") }) { result ->
+            callback(if (result is WorkResult.Succeeded) null else "导出失败，目标文件可能不完整，请重新导出")
+        }
     }
+    fun importCopy(uri: Uri, callback: (PreviewNotebook?, String?) -> Unit) {
+        request(uri to io, READ_WORK_BYTES, { input -> input.second.importCopy(input.first) },
+            { callback(null, "后台队列繁忙，请重新导入") }) { result ->
+            callback((result as? WorkResult.Succeeded)?.value,
+                if (result is WorkResult.Succeeded) null else "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖")
+        }
+    }
+    fun list(callback: (List<NoteSummary>, String?) -> Unit) {
+        request(io, 2L * 1024 * 1024, { it.catalog() }, { callback(retainedSummaries(), "后台队列繁忙，请重新打开列表") }) { result ->
+            val disk = (result as? WorkResult.Succeeded)?.value.orEmpty()
+            // Overlay current owner captures at delivery, never read ledger from the worker.
+            val retained = retainedSummaries(); val ids = retained.map { it.id }.toSet()
+            callback((disk.filter { it.id !in ids } + retained).sortedByDescending { it.modified },
+                if (result is WorkResult.Succeeded) null else "列表读取失败，原文件与未保存内容仍保留")
+        }
+    }
+    private fun retainedSummaries(): List<NoteSummary> = ledger.states().map {
+        NoteSummary(it.snapshot.documentId, it.snapshot.title + "（未保存）", System.currentTimeMillis())
+    }
+    fun open(id: String, callback: (PreviewNotebook?, String?) -> Unit) {
+        executor.checkOwnerThread()
+        activeNotebook?.takeIf { it.documentId == id }?.let { callback(it, null); return }
+        val retained = ledger.latest(id); val epoch = viewEpoch
+        request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
+            if (input.second == null) input.third.read(input.first) else PreviewNotebook.restore(input.second!!.encode())
+        }, { callback(null, "后台队列繁忙，请重新打开笔记") }) { result ->
+            if (viewEpoch != epoch) {
+                // No mutable/read payload is posted; retry a pure read after this result is ACKed.
+                main.post { open(id, callback) }
+            } else callback((result as? WorkResult.Succeeded)?.value,
+                if (result !is WorkResult.Succeeded) "笔记读取失败，原文件已保留"
+                else retained?.let { "有更改尚未保存，请点击保存重试" })
+        }
+    }
+    internal fun saveStates(): List<PreviewSaveState> { executor.checkOwnerThread(); return ledger.states() }
+    internal fun stopTestBackend() { executor.stopAccepting() }
     companion object {
+        private const val READ_WORK_BYTES = 160L * 1024 * 1024 // Declared parsing/UTF/buffer reservation, not measured heap.
         @Volatile private var instance: NoteStore? = null
         fun get(context: Context): NoteStore = instance ?: synchronized(this) {
             instance ?: NoteStore(context.applicationContext).also { instance = it }
         }
+        internal fun isolated(context: Context, directory: File): NoteStore = NoteStore(context, directory)
     }
 }

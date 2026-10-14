@@ -17,152 +17,178 @@ struct LocalNote: Identifiable { let id: String; let title: String; let date: Da
 
 final class PreviewModel: ObservableObject {
     @Published var notes: [LocalNote] = []
+    @Published var catalogError = false
     @Published var current: PreviewNotebook?
     @Published var status = ""
     @Published var revision: Int64 = 0
     @Published var exportDocument: PreviewBackup?
     @Published var transferBusy = false
-    private let io = DispatchQueue(label: "dev.notecore.preview.storage")
     private let directory: URL
-    private var pending: PreviewNotebookSnapshot?
-    private var saveScheduled = false
-    private var failed: [String: PreviewNotebookSnapshot] = [:]
+    private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024)
+    private var storageEpoch: Int64 = 0
+    private var navigationEpoch: Int64 = 0
+    private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: 256 * 1024 * 1024,
+        onOwnerProgress: { [weak self] in self?.pumpWrites() })
     init() {
+        precondition(Thread.isMainThread)
         directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PreviewNotes", isDirectory: true)
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         refresh()
     }
-    private func file(_ id: String) -> URL { directory.appendingPathComponent(id).appendingPathExtension("ncp") }
+    private static func file(_ id: String, directory: URL) -> URL {
+        precondition(id.range(of: "^[a-zA-Z0-9-]{1,128}$", options: .regularExpression) != nil)
+        return directory.appendingPathComponent(id).appendingPathExtension("ncp")
+    }
+    private func request<Input, Output>(input: Input, bytes: Int64, compute: @escaping (Input) throws -> Output,
+                                       rejected: () -> Void, receive: @escaping (AppleWorkResult<Output>) -> Void) {
+        let admission = try! executor.submit(input: input, chargedBytes: bytes, compute: compute, receive: { _, result in
+            receive(result); return .acknowledged
+        })
+        if case .rejected = admission { rejected() }
+    }
     func create() {
+        navigationEpoch += 1
         current = PreviewNotebook(documentId: UUID().uuidString, title: "未命名笔记")
         revision = 0; save()
     }
+    private func overlay(_ disk: [LocalNote]) -> [LocalNote] {
+        let retained = ledger.states().map { LocalNote(id: $0.snapshot.documentId, title: $0.snapshot.title + "（未保存）", date: Date()) }
+        let ids = Set(retained.map { $0.id })
+        return (disk.filter { !ids.contains($0.id) } + retained).sorted { $0.date > $1.date }
+    }
     func refresh() {
-        io.async {
-            let files = (try? FileManager.default.contentsOfDirectory(at: self.directory, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
-            var notes = files.filter { $0.pathExtension == "ncp" }.map { url -> LocalNote in
+        request(input: directory, bytes: 2 * 1024 * 1024, compute: { root in
+            try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+            return try PreviewFileIO.catalog(root).map { url -> LocalNote in
                 let date = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
-                guard let data = try? String(contentsOf: url, encoding: .utf8),
-                      let note = try? PreviewNotebook.companion.restore(encoded: data) else {
-                    return LocalNote(id: url.deletingPathExtension().lastPathComponent, title: "待恢复的笔记", date: date)
-                }
-                return LocalNote(id: note.documentId, title: note.title, date: date)
+                let id = url.deletingPathExtension().lastPathComponent
+                let title: String
+                if let encoded = try? PreviewFileIO.readHeaderUTF8(url),
+                   let header = try? PreviewNotebook.companion.header(encodedHeader: encoded), header.documentId == id {
+                    title = header.title
+                } else { title = "待恢复的笔记" }
+                return LocalNote(id: id, title: title, date: date)
             }
-            for (id, retained) in self.failed {
-                notes.removeAll { $0.id == id }
-                notes.append(LocalNote(id: id, title: retained.title + "（未保存）", date: Date()))
+        }, rejected: { notes = overlay(notes); catalogError = true; status = "后台队列繁忙，请重新打开列表" }) { result in
+            switch result {
+            case .succeeded(let disk): self.notes = self.overlay(disk); self.catalogError = false
+            case .outcomeUnknown: self.notes = self.overlay(self.notes); self.catalogError = true; self.status = "列表读取失败，原文件与未保存内容仍保留"
             }
-            notes.sort { $0.date > $1.date }
-            let result = notes
-            DispatchQueue.main.async { self.notes = result }
         }
     }
     func open(_ id: String) {
+        guard current == nil else { return }
+        navigationEpoch += 1
+        let navigation = navigationEpoch, epoch = storageEpoch
+        let retained = ledger.latest(documentId: id)
         status = "正在打开…"
-        io.async {
-            do {
-                let retained = self.failed[id]
-                let data: String
-                if let retained = retained { data = retained.encode() }
-                else { data = try String(contentsOf: self.file(id), encoding: .utf8) }
-                guard data.utf8.count <= 32 * 1024 * 1024 else { throw CocoaError(.fileReadTooLarge) }
-                let note = try PreviewNotebook.companion.restore(encoded: data)
-                guard note.documentId == id else { throw CocoaError(.fileReadCorruptFile) }
-                DispatchQueue.main.async {
-                    self.current = note; self.revision = note.changeVersion
-                    self.status = retained == nil ? "已打开 · \(note.strokeCount) 笔" : "有更改尚未保存，请重试保存"
-                }
-            } catch { DispatchQueue.main.async { self.status = "读取失败，原文件已保留" } }
+        request(input: (Self.file(id, directory: directory), id, retained), bytes: 160 * 1024 * 1024, compute: { input in
+            let encoded: String
+            if let captured = input.2 { encoded = captured.encode() }
+            else { encoded = try PreviewFileIO.readUTF8(input.0) }
+            let note = try PreviewNotebook.companion.restore(encoded: encoded)
+            guard note.documentId == input.1 else { throw CocoaError(.fileReadCorruptFile) }
+            return note // Exclusive transfer of newly restored mutable notebook to main owner.
+        }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
+            guard self.navigationEpoch == navigation && self.current == nil else { return }
+            if self.storageEpoch != epoch {
+                // Retry the pure read after ACK; no old notebook payload is placed on a callback queue.
+                DispatchQueue.main.async { self.open(id) }; return
+            }
+            switch result {
+            case .succeeded(let note):
+                self.current = note; self.revision = note.changeVersion
+                self.status = retained == nil ? "已打开 · \(note.strokeCount) 笔" : "有更改尚未保存，请重试保存"
+            case .outcomeUnknown: self.status = "读取失败，原文件已保留"
+            }
         }
     }
     func changed() { revision = current?.changeVersion ?? 0; save() }
     func prepareExport() {
-        guard !transferBusy, let note = current else { return }
+        guard !transferBusy, exportDocument == nil, let note = current else { return }
         note.cancelStroke()
         guard note.retryPendingStroke() else { status = note.lastError; return }
-        let snapshot = note.capture()
         transferBusy = true; status = "正在准备备份…"
-        io.async {
-            let document = PreviewBackup(data: Data(snapshot.encode().utf8))
-            DispatchQueue.main.async { self.exportDocument = document; self.transferBusy = false }
+        let snapshot = note.capture()
+        request(input: snapshot, bytes: snapshot.encodingWorkByteCharge, compute: { captured in
+            let encoded = captured.encode()
+            guard encoded.utf16.count <= 16_000_000 else { throw CocoaError(.fileWriteOutOfSpace) }
+            return PreviewBackup(data: Data(encoded.utf8))
+        }, rejected: { transferBusy = false; status = "后台队列繁忙，请重新导出" }) { result in
+            self.transferBusy = false
+            switch result {
+            case .succeeded(let document): self.exportDocument = document
+            case .outcomeUnknown: self.status = "备份生成失败，笔记仍保留，请重试"
+            }
         }
     }
     func importCopy(_ url: URL) {
         guard !transferBusy else { return }
         transferBusy = true; status = "正在校验并导入…"
-        // Start access while the picker grant is alive; release on every worker completion path.
         let scoped = url.startAccessingSecurityScopedResource()
-        io.async {
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            do {
-                let handle = try FileHandle(forReadingFrom: url)
-                defer { try? handle.close() }
-                var data = Data()
-                while let chunk = try handle.read(upToCount: 8192), !chunk.isEmpty {
-                    guard data.count + chunk.count <= 32 * 1024 * 1024 else { throw CocoaError(.fileReadTooLarge) }
-                    data.append(chunk)
-                }
-                guard let encoded = String(data: data, encoding: .utf8) else { throw CocoaError(.fileReadCorruptFile) }
-                let id = UUID().uuidString
-                let note = try PreviewNotebook.companion.importAsCopy(encoded: encoded, newDocumentId: id)
-                guard !FileManager.default.fileExists(atPath: self.file(id).path) else { throw CocoaError(.fileWriteFileExists) }
-                try note.capture().encode().write(to: self.file(id), atomically: true, encoding: .utf8)
-                DispatchQueue.main.async {
-                    self.transferBusy = false
-                    if self.current == nil {
-                        self.current = note; self.revision = note.changeVersion
-                        self.status = "已导入为新笔记 · \(note.strokeCount) 笔"
-                    } else { self.status = "备份已导入为新笔记，可返回列表查看" }
-                }
+        let id = UUID().uuidString
+        request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: 160 * 1024 * 1024, compute: { input in
+            defer { if input.1 { input.0.stopAccessingSecurityScopedResource() } }
+            let encoded = try PreviewFileIO.readUTF8(input.0)
+            let note = try PreviewNotebook.companion.importAsCopy(encoded: encoded, newDocumentId: input.3)
+            guard !FileManager.default.fileExists(atPath: input.2.path) else { throw CocoaError(.fileWriteFileExists) }
+            try PreviewFileIO.writeUTF8(note.capture().encode(), to: input.2)
+            return note
+        }, rejected: {
+            if scoped { url.stopAccessingSecurityScopedResource() }
+            transferBusy = false; status = "后台队列繁忙，请重新导入"
+        }) { result in
+            self.transferBusy = false
+            switch result {
+            case .succeeded(let note):
+                if self.current == nil {
+                    self.navigationEpoch += 1; self.current = note; self.revision = note.changeVersion
+                    self.status = "已导入为新笔记 · \(note.strokeCount) 笔"
+                } else { self.status = "备份已导入为新笔记，可返回列表查看" }
                 self.refresh()
-            } catch {
-                DispatchQueue.main.async { self.transferBusy = false; self.status = "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖" }
+            case .outcomeUnknown: self.status = "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖"
             }
         }
     }
-    func save() {
-        guard let note = current else { return }
-        guard note.retryPendingStroke() else { status = note.lastError; return }
-        let snapshot = note.capture()
-        pending = snapshot
-        status = "正在保存… · \(note.strokeCount) 笔"
-        if saveScheduled { return }
-        saveScheduled = true
-        // Debounce on the owner; one immutable latest snapshot is sent to serial IO.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            self.saveScheduled = false
-            guard let latest = self.pending else { return }; self.pending = nil
-            self.write(latest)
+    @discardableResult func save() -> Bool {
+        guard let note = current else { return true }
+        guard note.retryPendingStroke() else { status = note.lastError; return false }
+        let snapshot = note.capture(), previous = ledger.latest(documentId: note.documentId)
+        guard ledger.offer(snapshot: snapshot) == .accepted else {
+            status = "保存队列已满或内容版本过期，请保留当前笔记并重试"; return false
         }
+        if previous?.version != snapshot.version { storageEpoch += 1 }
+        status = "正在保存… · \(note.strokeCount) 笔"
+        pumpWrites(); return true
     }
-    private func write(_ snapshot: PreviewNotebookSnapshot) {
-        io.async {
-            do {
-                try snapshot.encode().write(to: self.file(snapshot.documentId), atomically: true, encoding: .utf8)
-                self.failed.removeValue(forKey: snapshot.documentId)
-                DispatchQueue.main.async {
+    private func pumpWrites() {
+        while let attempt = ledger.nextWrite() {
+            let admission = try! executor.submit(input: (attempt, Self.file(attempt.snapshot.documentId, directory: directory)),
+                chargedBytes: attempt.snapshot.encodingWorkByteCharge, compute: { input in
+                    try PreviewFileIO.writeUTF8(input.0.snapshot.encode(), to: input.1)
+                    return true
+                }, receive: { input, result in
+                    let success: Bool
+                    if case .succeeded = result { success = true } else { success = false }
+                    precondition(self.ledger.complete(attempt: input.0, success: success))
+                    let snapshot = input.0.snapshot
                     if self.current?.documentId == snapshot.documentId && self.current?.changeVersion == snapshot.version {
-                        self.status = "已保存到本机 · \(self.current?.strokeCount ?? 0) 笔"
-                    } else if self.current == nil { self.status = "笔记已保存到本机" }
-                }
-            } catch {
-                self.failed[snapshot.documentId] = snapshot
-                DispatchQueue.main.async { self.status = "保存失败，更改仍保留在当前会话，请重试" }
+                        self.status = success ? "已保存到本机 · \(self.current?.strokeCount ?? 0) 笔" : "保存失败，更改仍保留在本机会话，请重试"
+                    } else if self.current == nil && !success { self.status = "保存失败，更改仍保留，可从列表重新打开并重试" }
+                    return .acknowledged // Failure is in the owner ledger before releasing worker responsibility.
+                })
+            if case .rejected = admission {
+                precondition(ledger.returnUnstarted(attempt: attempt))
+                if attempt.snapshot.encodingWorkByteCharge > 256 * 1024 * 1024 { status = "保存后端暂不可用，更改仍保留，请重试" }
+                return
             }
         }
     }
     func close() {
         current?.cancelStroke()
-        if let note = current, !note.retryPendingStroke() { status = note.lastError; return }
-        if let note = current { write(note.capture()) }
-        pending = nil; current = nil; refresh()
+        guard save() else { return }
+        navigationEpoch += 1; current = nil; refresh()
     }
-    func flushForBackground() {
-        current?.cancelStroke()
-        if let note = current, !note.retryPendingStroke() { status = note.lastError; return }
-        if let note = current { write(note.capture()) }
-        pending = nil
-    }
+    func flushForBackground() { current?.cancelStroke(); save() }
 }
 
 @main
@@ -239,7 +265,7 @@ struct PreviewRoot: View {
                                     VStack(alignment: .leading) { Text(note.title).font(.headline); Text(note.date, style: .date).font(.caption).foregroundStyle(.secondary) }
                                 }
                             }
-                            if model.notes.isEmpty { Text("还没有笔记，写下第一个想法。").foregroundStyle(.secondary) }
+                            if model.notes.isEmpty { Text(model.catalogError ? "暂时无法读取笔记，请稍后重试。" : "还没有笔记，写下第一个想法。").foregroundStyle(.secondary) }
                         }
                         if !model.status.isEmpty { Text(model.status).font(.caption) }
                     }.navigationTitle("NoteCore").refreshable { model.refresh() }

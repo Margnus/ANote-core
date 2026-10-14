@@ -9,6 +9,7 @@ import java.util.ArrayDeque
 class BoundedOwnerExecutor(
     private val maxEntries: Int = 64, private val byteBudget: Long = 8L * 1024 * 1024,
     threadName: String = "NoteCore-worker",
+    private val requestOwnerWake: (() -> Unit)? = null,
 ) {
     private val identity = Any()
     private val ownerThread = Thread.currentThread()
@@ -49,6 +50,7 @@ class BoundedOwnerExecutor(
     private var chargedBytes = 0L
     private var workerStopped = false
     private var workerFailure: String? = null
+    private var ownerWakeFailure: String? = null
     private var draining = false // owner-only: callbacks cannot recursively drain another result
     private val worker: Thread
     init {
@@ -95,6 +97,7 @@ class BoundedOwnerExecutor(
                 } ?: break
                 job.execute()
                 synchronized(monitor) { ready.addLast(job); job.stage = OwnedWorkStage.READY; monitor.notifyAll() }
+                wakeOwner()
             }
         } catch (failure: Throwable) {
             // Complete reserved result slots in FIFO order. Never-started work is distinct from unknown execution.
@@ -106,7 +109,16 @@ class BoundedOwnerExecutor(
                 pending.clear() // every pending entry now has a retained NotExecuted result; nothing is discarded
                 monitor.notifyAll()
             }
-        } finally { synchronized(monitor) { workerStopped = true; monitor.notifyAll() } }
+        } finally {
+            synchronized(monitor) { workerStopped = true; monitor.notifyAll() }
+            wakeOwner()
+        }
+    }
+    /** Wake is a no-payload scheduling hint; failures never discard results or kill accepted work. */
+    private fun wakeOwner() {
+        try { requestOwnerWake?.invoke() } catch (failure: Throwable) {
+            synchronized(monitor) { ownerWakeFailure = failure.javaClass.simpleName.take(80) }
+        }
     }
     /** Owner event-loop pumps a finite number of results. Receiver exceptions block FIFO and keep the exact result. */
     fun drainResults(limit: Int = 16): ResultDrain {
@@ -156,7 +168,7 @@ class BoundedOwnerExecutor(
         checkOwnerThread()
         return synchronized(monitor) {
             OwnerExecutorStatus(accepting, workerStopped, workerFailure, chargedBytes,
-                entries.values.map { OwnedWorkSummary(it.ticket, it.stage, it.bytes, it.deliveryFailure) }, ownerThread.id, worker.id)
+                entries.values.map { OwnedWorkSummary(it.ticket, it.stage, it.bytes, it.deliveryFailure) }, ownerThread.id, worker.id, ownerWakeFailure)
         }
     }
     /** Diagnostic/test wait only; production UI must pump without blocking. A timeout does not cancel anything. */

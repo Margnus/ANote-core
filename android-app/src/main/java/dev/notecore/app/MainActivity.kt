@@ -48,7 +48,7 @@ class MainActivity : Activity() {
                 if (notebook != null) leaveEditor() else finish()
             }
         }
-        val id = savedInstanceState?.getString("document")
+        val id = savedInstanceState?.getString("document") ?: store.activeDocumentId
         if (id == null) library() else open(id)
     }
     private fun text(value: String, size: Float = 16f) = TextView(this).apply {
@@ -87,10 +87,11 @@ class MainActivity : Activity() {
         val scroll = ScrollView(this); val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(20), 0, dp(20), dp(20)) }
         scroll.addView(list); root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         list.addView(text("正在读取笔记…"))
-        store.list { notes ->
+        store.list { notes, failure ->
             if (generation != viewGeneration || isFinishing) return@list
             list.removeAllViews()
-            if (notes.isEmpty()) list.addView(text("还没有笔记，写下第一个想法。", 16f).apply { setPadding(dp(4), dp(30), 0, 0) })
+            failure?.let(::showError)
+            if (notes.isEmpty()) list.addView(text(if (failure == null) "还没有笔记，写下第一个想法。" else "暂时无法读取笔记，请稍后重试。", 16f).apply { setPadding(dp(4), dp(30), 0, 0) })
             notes.forEach { note ->
                 list.addView(button("${note.title}\n${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(note.modified))}") { open(note.id) },
                     LinearLayout.LayoutParams(-1, dp(88)).apply { bottomMargin = dp(10) })
@@ -106,6 +107,7 @@ class MainActivity : Activity() {
         }
     }
     private fun editor(note: PreviewNotebook) {
+        store.attachActive(note)
         viewGeneration++; notebook = note; root.removeAllViews()
         val header = row()
         header.addView(button("返回") { leaveEditor() })
@@ -150,14 +152,17 @@ class MainActivity : Activity() {
         if (!note.retryPendingStroke()) { showError(note.lastError); return false }
         val snapshot = note.capture(); val generation = viewGeneration
         status?.text = getString(R.string.saving, note.strokeCount)
-        store.save(snapshot) { version, failure ->
+        return store.save(snapshot) { version, failure ->
             if (failure != null && !isFinishing) showError(failure)
             if (generation != viewGeneration || notebook !== note || isFinishing) return@save
             if (failure == null && version == note.changeVersion) status?.text = getString(R.string.saved, note.strokeCount)
         }
-        return true
     }
-    private fun leaveEditor() { canvas?.cancelInk(); if (save()) library() }
+    private fun leaveEditor() {
+        canvas?.cancelInk()
+        val note = notebook ?: return
+        if (save()) { store.releaseActive(note); library() }
+    }
     private fun exportBackup() {
         val note = notebook ?: return
         canvas?.cancelInk()

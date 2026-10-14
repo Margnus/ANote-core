@@ -66,11 +66,80 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("finger_pan_without_ink", "passed")
             verifyExecutor()
             result.putString("executor_owner_worker", "passed")
+            verifyStorage()
+            result.putString("storage_failure_recovery", "passed")
+            result.putString("storage_bounded_read_and_active_owner", "passed")
+            result.putString("storage_atomic_rename_failure", "passed")
             result.putString("viewport_status", "passed")
             finish(Activity.RESULT_OK, result)
         } catch (failure: Throwable) {
             result.putString("viewport_status", "failed"); result.putString("failure", failure.stackTraceToString())
             finish(Activity.RESULT_CANCELED, result)
+        }
+    }
+    private fun <T : Any> storageResult(request: ((T) -> Unit) -> Unit): T {
+        val ready = java.util.concurrent.CountDownLatch(1)
+        val value = java.util.concurrent.atomic.AtomicReference<T>()
+        runOnMainSync { request { value.set(it); ready.countDown() } }
+        check(ready.await(5, java.util.concurrent.TimeUnit.SECONDS)) { "Storage owner callback timed out" }
+        return checkNotNull(value.get())
+    }
+    private fun verifyStorage() {
+        // Isolated synthetic cache directory; never alter the preview's real note directory.
+        val directory = java.io.File(targetContext.cacheDir, "storage-contract-${java.util.UUID.randomUUID()}")
+        directory.writeText("A file blocks the required directory")
+        lateinit var store: NoteStore
+        lateinit var snapshot: dev.notecore.canvas.preview.PreviewNotebookSnapshot
+        lateinit var notebook: PreviewNotebook
+        runOnMainSync {
+            store = NoteStore.isolated(targetContext, directory)
+            notebook = PreviewNotebook("storage-contract", "Retained after failure")
+            check(notebook.beginStroke(12.0, 15.0, 0.5f, 1))
+            check(notebook.endStroke(20.0, 30.0, 0.6f, 2))
+            snapshot = notebook.capture()
+        }
+        try {
+            val failed = storageResult<Pair<Long, String?>> { done -> store.save(snapshot) { version, error -> done(version to error) } }
+            check(failed.second != null && failed.first == snapshot.version)
+            runOnMainSync {
+                val retained = store.saveStates().single()
+                check(retained.retryRequired && retained.snapshot === snapshot)
+            }
+            val reopened = storageResult<Pair<PreviewNotebook?, String?>> { done -> store.open(snapshot.documentId) { note, error -> done(note to error) } }
+            check(reopened.first?.capture()?.encode() == snapshot.encode() && reopened.second != null)
+            val listing = storageResult<Pair<List<NoteSummary>, String?>> { done -> store.list { notes, error -> done(notes to error) } }
+            check(listing.first.single().title.contains("Retained after failure"))
+            check(directory.delete()); check(directory.mkdirs())
+            val saved = storageResult<Pair<Long, String?>> { done -> store.save(snapshot) { version, error -> done(version to error) } }
+            check(saved.second == null)
+            check(java.io.File(directory, "storage-contract.ncp").readText() == snapshot.encode())
+            runOnMainSync { check(store.saveStates().isEmpty()) }
+            val failedTarget = java.io.File(directory, "rename-failure.ncp").apply { check(mkdir()) }
+            val sentinel = java.io.File(failedTarget, "keep").apply { writeText("Preserve unrelated contents") }
+            lateinit var renameSnapshot: dev.notecore.canvas.preview.PreviewNotebookSnapshot
+            runOnMainSync { renameSnapshot = PreviewNotebook("rename-failure", "Must not claim saved").capture() }
+            val renameFailure = storageResult<Pair<Long, String?>> { done -> store.save(renameSnapshot) { version, error -> done(version to error) } }
+            check(renameFailure.second != null && sentinel.readText() == "Preserve unrelated contents")
+            runOnMainSync { check(store.saveStates().single().snapshot === renameSnapshot) }
+            check(sentinel.delete()); check(failedTarget.delete())
+            val renameRetry = storageResult<Pair<Long, String?>> { done -> store.save(renameSnapshot) { version, error -> done(version to error) } }
+            check(renameRetry.second == null && failedTarget.readText() == renameSnapshot.encode())
+            val corrupt = java.io.File(directory, "invalid-utf.ncp").apply { writeBytes(byteArrayOf(0xff.toByte())) }
+            val invalid = storageResult<Pair<PreviewNotebook?, String?>> { done -> store.open("invalid-utf") { note, error -> done(note to error) } }
+            check(invalid.first == null && invalid.second != null && corrupt.readBytes().contentEquals(byteArrayOf(0xff.toByte())))
+            val oversized = java.io.File(directory, "oversized.ncp")
+            java.io.RandomAccessFile(oversized, "rw").use { it.setLength(33L * 1024 * 1024) }
+            val large = storageResult<Pair<PreviewNotebook?, String?>> { done -> store.open("oversized") { note, error -> done(note to error) } }
+            check(large.first == null && large.second != null && oversized.length() == 33L * 1024 * 1024)
+            runOnMainSync {
+                store.attachActive(notebook)
+                // Activity recreation reuses the app-owned canonical notebook even when save admission could fail.
+                store.open(notebook.documentId) { active, error -> check(active === notebook && error == null) }
+                store.releaseActive(notebook)
+            }
+        } finally {
+            runOnMainSync { store.stopTestBackend() }
+            directory.deleteRecursively()
         }
     }
     private fun setup() {

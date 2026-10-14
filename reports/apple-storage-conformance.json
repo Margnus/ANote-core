@@ -1,0 +1,23 @@
+{
+  "device_performance_verified": false,
+  "ios_runtime_verified": false,
+  "passed": [
+    "atomic_full_text_replacement",
+    "strict_utf8_preserves_invalid_original",
+    "oversize_preflight_preserves_file",
+    "bounded_header_does_not_decode_body",
+    "actual_write_failure_owner_retention_repair_retry",
+    "bounded_catalog_capacity_and_missing_directory"
+  ],
+  "platform": "macOS Foundation filesystem",
+  "production_crash_recovery_verified": false,
+  "status": "passed",
+  "test_count": 6,
+  "input_sha256": {
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "4f911b9fde8da229c3877825ed1e7fd29e480c6da8f51ae48cad0e2b4292270c",
+    "ios-app/NoteCorePreview/PreviewFileIO.swift": "608a6c20717864d15bf043d808522a18c9562498ad3879a1615d7197eed70c03",
+    "apple-runtime-tests/StorageConformance.swift": "2d7d958c68a340c24e7e184b354ee7c6e73ef523868743f04be800e4a9f7866c",
+    "tools/verify_apple_storage.py": "9ab3a0386d7e40f041d8aee8ea6e07f59fe9cd6f810782c810323aa973990704"
+  },
+  "scope": "macOS execution of same Foundation IO helper compiled into iOS; no UIKit, KMP model runtime or physical-device durability validation"
+}

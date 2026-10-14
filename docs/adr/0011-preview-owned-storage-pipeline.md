@@ -1,0 +1,35 @@
+# ADR-0011：预览保存账本与双端有界后端
+
+2026-10-14；DEV-022，D4预览接入与D3责任边界增量。单页NCPREVIEW v1继续用于预览；不冻结生产格式，不把本机文件写回当SQLite事务、durable command ledger或断电恢复门禁。
+
+## 状态与责任
+
+PreviewSaveLedger只在文档owner执行，不是第二份可变scene authority。它持有canonical notebook生成的不可变全量snapshot，默认最多8个待保存文档/32MiB逻辑snapshot额度。每个文档最多一个in-flight，另保留latest完整版本；在途与latest不相同时同时计费。没有进入后端的旧完整snapshot可被更高version完整版本替代，正在写的旧版本不能被替换或提前归还。相同version重试原留存内容，不接纳并发fork；稳定版本顺序依赖每份文档只有一个canonical owner。
+
+匹配attempt身份的写回只结束该次在途责任；旧成功/失败都不能清除后来接纳的latest。失败或未知结果在没有更新版本时转retryRequired，保留原内容、预算与列表/重开入口，显式保存才重试。已有更高完整版本时可继续写该替代版本；这是预览全文件幂等替换，不能迁移为任意命令/析构的自动重执行。foreign、重复与迟到attempt拒绝，backend未执行就拒绝时returnUnstarted归还给pending，不能伪造磁盘失败或释放内容。
+
+ledger拒绝新snapshot时仍由当前notebook持有，保存返回false，主动关闭不清掉当前编辑器。Android把唯一活动notebook保留在App生命周期owner里，Activity重建重用同一实例；即使保存准入失败也不靠旧磁盘副本替换内存内容。成功接纳关闭snapshot后才释放活动owner。iOS当前模型由App持有，关闭准入失败保留current。进程被杀/卸载/断电后的未写入内存责任不是此方案能恢复的。
+
+## 平台边界与预算
+
+Android采用BoundedOwnerExecutor，Apple采用独立Foundation执行器；各为一个串行IO worker、16条/256MiB声明工作峰值，ready/blocked结果至ACK仍占额度。AndroidHandler最多一个无payload wake待执行，每批16结果，完成释放后再泵pending；Apple沿用ADR-0010的有界wake。JVM原型新增requestOwnerWake：在发布后、锁外请求，唤醒失败保留所有结果/任务并记录ownerWakeFailure，不作为成功交付。host必须诊断/恢复owner事件循环，不能丢结果。
+
+snapshot逻辑计费为固定元数据、stroke对象和每点28字节；编码工作采用保守字符上界（每点144字符+笔/头部），为文本builder/UTF转换声明8倍工作预留，再加snapshot。读取/解析任务声明160MiB、列表2MiB；ledger、活动notebook和系统备份文档仍有各自owner责任。这些不是实际heap统计，也不是全应用硬内存上限；完整文本编解码、多次对象分配和当前页的旧journal/redo仍需真机测量。完整200k点页的保守编码预留可进入后端，压力下读取/导入会明确拒绝并提示重试，不能建立隐形无界队列。正式版本须分块二进制、分页目录、准确分配计费和全局预算。
+
+平台IO helper持有只读目录/resolver或静态Foundation函数，不读取UI、ledger或失败集合。显式输入携带snapshot/URL/独占security-scope capability；后台restore创建的mutable notebook在结果交付后独占转给owner。Apple picker grant在准入拒绝或worker所有完成路径释放一次。UI通知是已完成数据handoff后的提示；AndroidUI通知抛错会记录日志，不能反复执行已完成文件替换。
+
+## 文件操作和读取一致性
+
+写入完成后才通知本机保存；失败先交回ledger再ACK工作结果。Android[AtomicFile](https://developer.android.com/reference/android/util/AtomicFile)要求调用者提供串行互斥，本实现所有读写由同一worker执行。[AOSP实现](https://github.com/aosp-mirror/platform_frameworks_base/blob/master/core/java/android/util/AtomicFile.java)中部分同步/rename失败只记录日志，因此新增可抛错的fd.sync，并在finishWrite后用8KiB buffer逐字节读回核对原编码bytes，发现未替换/截断则保留snapshot，不误报保存。读回不额外创建整文件副本，也不代表已验证目录fsync、断电或跨进程事务。AppleData.atomic抛错由执行器交回，实际Foundation替换/失败在macOS验证，iOS文件系统行为待运行。
+
+打开优先使用owner最新未保存snapshot，epoch变化时丢弃旧只读恢复结果并重新读取；不把旧磁盘内容替换进正在编辑的owner。Android活动实例重建直接重用。列表在交付时叠加owner未保存版本，后台不访问owner集合。双端列表仅读取最多4KiB的前两行、由共享header解析标题/id/版本，不解码整页笔迹；header有效不等于正文有效，打开仍全量严格校验。平台目录上限2000个预览文档，超出报告失败不伪装空目录；生产分页目录尚待实施。
+
+完整文件在分配前检查32MiB，并在每个8KiB chunk再检查增长边界；严格UTF-8，损坏/超大原文件不修改。编码结果再检查16m UTF-16字符，避免存入共享decoder无法恢复的超长文本。导入仍新UUID完整验证后原子写入，不覆盖原件。
+
+## 实际验证与未完成
+
+新增12项公共保存/header测试+1项JVM唤醒故障测试，核心135项（15 suites，JVM真实执行器16项）。Apple执行器仍12项macOS真实线程/9项JVM对照；文件IO另6项macOS检查：完整替换、实际写失败接管/修复重试、严格UTF、32MiB预检、header不解正文、2000目录边界与缺失目录。它们不运行UIKit/KMP Swift业务模型，不等于iOS启动。
+
+Android独立Instrumentation报告新增3项存储检查，使用独立合成cache目录：目录阻挡导致真实写入失败、留存重开/列表/修复重试、AtomicFile只日志rename失败不能误报成功、严格UTF/超大文件与活动canonical实例重用；另有原3项合成多指和1项ART线程。完整21项App流程独立回归，报告必须匹配当前APK SHA。
+
+后续DEV-023优先Android列表视图复用/目录体验，随后DEV-024建立分页文档域、稳定PageId与逐页版本/保存边界，先设计再接UI。D6正式增量存储/崩溃恢复仍独立推进；iOS运行时、真机触笔/性能、原生GPU与C1冻结都未完成。

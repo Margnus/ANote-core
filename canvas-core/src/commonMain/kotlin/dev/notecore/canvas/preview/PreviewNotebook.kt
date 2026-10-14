@@ -132,6 +132,20 @@ class PreviewNotebook private constructor(
         const val MAX_STROKES = 500
         const val MAX_POINTS = 200_000
         const val MAX_STROKE_POINTS = 20_000
+        /** Catalog-only metadata. Validates the bounded header, never claims the stroke payload is valid. */
+        @Throws(IllegalArgumentException::class)
+        fun header(encodedHeader: String): PreviewNotebookHeader {
+            require(encodedHeader.length <= 4096)
+            val lines = encodedHeader.lineSequence().iterator()
+            require(lines.hasNext() && lines.next() == "NCPREVIEW\t1")
+            require(lines.hasNext())
+            val row = lines.next().split('\t')
+            require(row.size == 6 && row[0] == "D")
+            val id = unescape(row[1]); val title = unescape(row[2])
+            val next = row[3].toLong(); val count = row[4].toInt(); val version = row[5].toLong()
+            require(id.isNotBlank() && id.length <= 128 && title.length <= 120 && next > 0 && count in 0..MAX_STROKES && version >= 0)
+            return PreviewNotebookHeader(id, title, count, version)
+        }
         /** Validate the whole backup before assigning a fresh local identity; never replace a document. */
         @Throws(IllegalArgumentException::class)
         fun importAsCopy(encoded: String, newDocumentId: String): PreviewNotebook {
@@ -172,11 +186,19 @@ class PreviewNotebook private constructor(
     }
 }
 
+data class PreviewNotebookHeader(val documentId: String, val title: String, val strokeCount: Int, val version: Long)
+
 /** Versioned preview interchange, not the production NoteCore format or a durable receipt. */
 class PreviewNotebookSnapshot internal constructor(
     val documentId: String, val title: String, val version: Long,
     private val scene: SceneSnapshot, private val nextObject: Long,
 ) {
+    /** Logical retained snapshot charge, not a measurement of Kotlin/Swift heap. */
+    val retainedByteCharge: Long = 512L + documentId.length * 2 + title.length * 2 +
+        scene.objects().sumOf { 256L + it.id.value.length * 2 + it.samples.size.toLong() * 28 }
+    /** Conservative text/builder/UTF conversion work reservation; charge before worker encoding. */
+    val encodingWorkByteCharge: Long = retainedByteCharge +
+        (1024L + scene.objectCount * 256L + scene.objects().sumOf { it.samples.size.toLong() } * 144L) * 8
     fun encode(): String = buildString {
         append("NCPREVIEW\t1\nD\t"); append(escape(documentId)); append('\t'); append(escape(title))
         append('\t'); append(nextObject); append('\t'); append(scene.objectCount); append('\t'); append(version); append('\n')
