@@ -7,6 +7,9 @@ internal class DocumentDelta(operationId: CommandId, before: DocumentRoot, after
                              changes: List<ObjectChange>, affected: Set<PageId>) {
     val operationId = operationId
     val objects = changes.toList()
+    private val membershipIds = changes.filter { it.before == null || it.after == null }.map { (it.before ?: it.after!!).id }.toSet()
+    val beforePositions = before.scene.objects().withIndex().filter { it.value.id in membershipIds }.associate { it.value.id to it.index }
+    val afterPositions = after.scene.objects().withIndex().filter { it.value.id in membershipIds }.associate { it.value.id to it.index }
     val affected = affected.toSet()
     val beforeOrder = before.pages().map { it.id }
     val afterOrder = after.pages().map { it.id }
@@ -26,7 +29,7 @@ internal class DocumentDelta(operationId: CommandId, before: DocumentRoot, after
         (beforeOrder + afterOrder).sumOf { 48L + it.value.length * 2L } +
         this.affected.sumOf { 48L + it.value.length * 2L } +
         pages.sumOf { page -> 64L + listOfNotNull(page.before, page.after).sumOf { 192L + (it.id.value.length + it.layerId.value.length) * 2L } } +
-        objects.sumOf { change -> 64L + listOfNotNull(change.before, change.after).sumOf { 256L + (it.id.value.length + it.layerId.value.length) * 2L + it.samples.size.toLong() * 28L } }
+        objects.sumOf { change -> 192L + listOfNotNull(change.before, change.after).sumOf { 256L + (it.id.value.length + it.layerId.value.length) * 2L + it.samples.size.toLong() * 28L } }
 }
 
 internal data class PageChange(val id: PageId, val before: PageDescriptor?, val after: PageDescriptor?)

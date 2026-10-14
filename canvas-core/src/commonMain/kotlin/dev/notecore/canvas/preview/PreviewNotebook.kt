@@ -28,7 +28,10 @@ class PreviewNotebook private constructor(
     init { require(documentId.isNotBlank() && documentId.length <= 128 && initialTitle.length <= 120) }
 
     fun rename(value: String) {
-        val normalized = value.trim().take(120).ifBlank { "未命名笔记" }
+        val trimmed = value.trim()
+        var end = minOf(120, trimmed.length)
+        if (end < trimmed.length && end > 0 && trimmed[end - 1].isHighSurrogate() && trimmed[end].isLowSurrogate()) end--
+        val normalized = trimmed.substring(0, end).ifBlank { "未命名笔记" }
         if (normalized != title) { title = normalized; changeVersion++ }
     }
     fun selectPen(argb: Int, width: Double) {
@@ -193,6 +196,8 @@ class PreviewNotebookSnapshot internal constructor(
     val documentId: String, val title: String, val version: Long,
     private val scene: SceneSnapshot, private val nextObject: Long,
 ) {
+    /** Read-only canonical values for versioned preview migration; never exposes the mutable owner. */
+    fun canonicalScene(): SceneSnapshot = scene
     /** Logical retained snapshot charge, not a measurement of Kotlin/Swift heap. */
     val retainedByteCharge: Long = 512L + documentId.length * 2 + title.length * 2 +
         scene.objects().sumOf { 256L + it.id.value.length * 2 + it.samples.size.toLong() * 28 }

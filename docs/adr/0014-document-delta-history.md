@@ -4,6 +4,8 @@
 
 每个成功edit记录规范ObjectChange、PageChange、标题及前后PageId顺序；只保留本次变化与有界目录数组，不深clone全Document。Undo/Redo操作携带expected top operationId与当前baseRevision，防止异步按钮/多会话撤销错误目标。单次根提交更新目录、对象、epoch、历史栈和receipt；任何失败不移动栈、不清掉redo。成功的新edit才清掉旧redo分支。
 
+DEV-024C补充绘制顺序保护：成员新增/删除的delta记录对象的前后稀疏位置；undo删除恢复原位置，redo复制重用原位置，不把恢复笔迹追加到末尾改变覆盖关系。只存变化成员的位置映射，额外header已纳入逻辑charge；不在每个edit存完整对象顺序数组。详见[codec与顺序增量](0015-paged-preview-codec.md)。
+
 根revision每次成功undo/redo都递增；恢复PageId/LayerId/对象ID用于同一逻辑实体，但对象revision必须高于其最后生命周期epoch，删除也消费epoch。不得把恢复对象的revision设回旧值；旧prepared patch与几何cache key不能因delete→restore发生ABA。history校验当前语义payload与目标delta的预期一侧一致，比较时允许历史操作推进过的content/object revision，不能跳过layer/brush/samples/transform/尺寸/纸张验证。
 
 历史按条目与声明字节限制。metadata包括有界前后页序与变化页，payload只引用规范不可变样本；额度涵盖undo和redo。超大单次可撤销变化在publish前拒绝，原命令留在调用方；正常容量淘汰只移除最老可撤销记录并显式暴露horizon，不能丢当前内容或未确认工作。operation去重journal与history各有责任，历史淘汰不擅自清掉可能用于未知结果查询的receipt。

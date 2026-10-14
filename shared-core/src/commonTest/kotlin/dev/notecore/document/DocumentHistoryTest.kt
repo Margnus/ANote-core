@@ -4,6 +4,25 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class DocumentHistoryTest {
+    @Test fun undoDeletingEarlierInkRestoresOriginalDrawOrderAcrossRepeatedTraversal() {
+        val owner = authority(); val first = add(owner); accept(owner, first)
+        val second = DocumentCommand.Canvas(a.id, (first.command as CanvasCommand.AddStroke).copy(id = CommandId("second"), baseRevision = 1, objectId = ObjectId("second")))
+        accept(owner, second)
+        accept(owner, DocumentCommand.Canvas(a.id, CanvasCommand.DeleteStroke(CommandId("delete-first"), doc, 2, ink, 1)))
+        repeat(3) {
+            accept(owner, undo(owner)); assertEquals(listOf(ink, ObjectId("second")), owner.snapshot().scene.objects().map { it.id })
+            accept(owner, redo(owner)); assertEquals(listOf(ObjectId("second")), owner.snapshot().scene.objects().map { it.id })
+        }
+    }
+
+    @Test fun restoringDeletedPagePlacesItsInkBeforeOtherPagesInk() {
+        val owner = authority(); val first = add(owner); accept(owner, first)
+        accept(owner, DocumentCommand.InsertPage(CommandId("insert"), doc, 1, b))
+        val action = first.command as CanvasCommand.AddStroke
+        accept(owner, DocumentCommand.Canvas(b.id, action.copy(id = CommandId("b-ink"), baseRevision = 2, objectId = ObjectId("b-ink"), target = action.target.copy(layerId = b.layerId))))
+        accept(owner, DocumentCommand.DeletePage(CommandId("delete-page"), doc, 3, a.id))
+        accept(owner, undo(owner)); assertEquals(listOf(ink, ObjectId("b-ink")), owner.snapshot().scene.objects().map { it.id })
+    }
     private val doc = SceneId("history-doc")
     private val a = PageDescriptor(PageId("a"), LayerId("ink-a"), 595.0, 842.0, PaperKind.RULED)
     private val b = PageDescriptor(PageId("b"), LayerId("ink-b"), 595.0, 842.0)

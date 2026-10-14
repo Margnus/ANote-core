@@ -4,6 +4,15 @@ import dev.notecore.canvas.preview.PreviewNotebook
 import kotlin.test.*
 
 class PreviewNotebookContractTest {
+    @Test fun titleBoundaryCannotSplitAnEmojiIntoUtf8ReplacementData() {
+        val note = PreviewNotebook("title-boundary", "test")
+        note.rename("x".repeat(119) + "😀")
+        assertEquals("x".repeat(119), note.title)
+        val bytes = note.capture().encode().encodeToByteArray()
+        assertEquals(note.title, PreviewNotebook.restore(bytes.decodeToString()).title)
+        note.rename("x".repeat(118) + "😀"); assertEquals(120, note.title.length)
+        assertTrue(note.title.endsWith("😀"))
+    }
     @Test fun importedBackupGetsIndependentIdentityAndPreservesEverySampleAndBrush() {
         val source = PreviewNotebook("original", "备份\\中文")
         source.selectPen(-12345, 9.0); stroke(source); stroke(source, 20.0); source.undo()

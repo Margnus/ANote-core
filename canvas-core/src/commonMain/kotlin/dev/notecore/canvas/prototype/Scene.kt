@@ -16,6 +16,11 @@ class SceneSnapshot private constructor(val id: SceneId, val revision: Long, pri
             for (obj in objects) { require(obj.transform.inverseOrNull() != null); obj.bounds() }
             return SceneSnapshot(id, revision, objects.associateBy { it.id }, Unit)
         }
+        /** Read-only composition preserving explicit draw order, without rescanning immutable sample geometry. */
+        fun reordered(scene: SceneSnapshot, objectOrder: List<ObjectId>): SceneSnapshot {
+            require(objectOrder.size == scene.objectCount && objectOrder.toSet() == scene.entries.keys)
+            return SceneSnapshot(scene.id, scene.revision, objectOrder.associateWith { scene.entries.getValue(it) }, Unit)
+        }
         internal fun applying(scene: SceneSnapshot, changes: List<ObjectChange>): SceneSnapshot {
             // Metadata barriers share the privately owned immutable map; object edits copy it once.
             if (changes.isEmpty()) return SceneSnapshot(scene.id, scene.revision + 1, scene.entries, Unit)

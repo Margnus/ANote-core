@@ -3,6 +3,15 @@ package dev.notecore.canvas.prototype
 import kotlin.test.*
 
 class SceneCompositionTest {
+    @Test fun drawOrderCompositionOwnsOrderAndRejectsMissingOrDuplicateMembers() {
+        val a = objectAt("a"); val b = objectAt("b")
+        val source = SceneSnapshot.restored(id, 4, listOf(a, b)); val order = mutableListOf(b.id, a.id)
+        val next = SceneSnapshot.reordered(source, order); order.clear()
+        assertEquals(listOf(b, a), next.objects()); assertEquals(listOf(a, b), source.objects())
+        assertSame(a, next.find(a.id)); assertEquals(4L, next.revision)
+        assertFailsWith<IllegalArgumentException> { SceneSnapshot.reordered(source, listOf(a.id)) }
+        assertFailsWith<IllegalArgumentException> { SceneSnapshot.reordered(source, listOf(a.id, a.id)) }
+    }
     private val id = SceneId("document")
     private fun objectAt(key: String = "stroke", revision: Long = 1): StrokeObject = StrokeObject(ObjectId(key), revision, LayerId("layer"),
         BrushSpec(BrushKind.MONOLINE, 1, 2.0, 0xff000000.toInt()),

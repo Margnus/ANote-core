@@ -222,7 +222,18 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
         }
         val application = SceneReducer.apply(root.scene, patch)
         if (application is SceneApplication.Rejected) return reject(DocumentRejection.SCENE_REJECTED, application.reason)
-        val nextRoot = DocumentRoot.compose(title, (application as SceneApplication.Applied).snapshot, pages)
+        var scene = (application as SceneApplication.Applied).snapshot
+        historyDelta?.let { delta ->
+            val positions = if (undoing) delta.beforePositions else delta.afterPositions
+            // Only newly restored members need placement; transforms keep their existing draw order.
+            val restored = changes.filter { it.before == null }.map { it.after!!.id }.toSet()
+            if (restored.isNotEmpty()) {
+                val order = scene.objects().map { it.id }.filter { it !in restored }.toMutableList()
+                for ((id, position) in positions.filterKeys { it in restored }.entries.sortedBy { it.value }) order.add(position, id)
+                scene = SceneSnapshot.reordered(scene, order)
+            }
+        }
+        val nextRoot = DocumentRoot.compose(title, scene, pages)
         val nextUndo: List<DocumentDelta>
         val nextRedo: List<DocumentDelta>
         var evicted = old.evictedHistoryCount
