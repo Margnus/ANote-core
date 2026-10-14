@@ -12,13 +12,15 @@
 - 按字节计费的LRU参考策略及重键/淘汰/超额/溢出反例。
 - commonTest、独立JVM演示、源码依赖边界和真实测试报告。
 - 有界输入状态机、历史批次与预测分离、捕获目标、显式取消/关闭/拒绝；见[输入ADR](docs/adr/0002-input-replay-boundary.md)。
+- [规模笔迹子集](fixtures/scale/README.md)：S1/S2/S9共120万点，按需生成并核验SHA；不代表完整场景压测。
+- [旧字段映射](docs/旧格式字段映射.md)及[原生采集契约](docs/原生输入采集契约.md)：有源码证据和候选规则，转换器/采集器尚未实现。
 - [合成输入轨迹](fixtures/README.md)：5类D2候选及hash，已由Kotlin回放并逐点验证；不是设备性能结果。
 
 这些是验证架构的reference实现，API可调整；Map复制、内存journal和临时数值范围不代表生产性能或正式文件协议。Native资源lease、worker调度、真实输入、SQLite和完整几何/索引尚未实现。
 
 ## 构建与验证
 
-需要JDK17。Gradle8.14和Kotlin2.2.21精确固定；首次执行会下载公开依赖。设置JAVA_HOME为自己的JDK17目录，Gradle User Home建议放本工程目录，不改旧工程缓存/设置。
+验证需要JDK17和Python3（可用PYTHON_BIN指定）。规模fixture按需生成约34MB，保存在忽略目录，不修改旧工程。Gradle8.14和Kotlin2.2.21精确固定；首次执行会下载公开依赖。设置JAVA_HOME为自己的JDK17目录，Gradle User Home建议放本工程目录，不改旧工程缓存/设置。
 
 ```bash
 export GRADLE_USER_HOME="$PWD/.gradle-user-home"
@@ -51,4 +53,4 @@ tools/                      # 边界校验、测试结果收集
 reports/                    # 真实验证记录
 ```
 
-Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，下一步补规模样本/旧字段映射，再做D3生命周期/背压/lease、D4原生PoC、D5架构冻结。
+Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，已有规模笔迹与旧字段候选映射，下一步做D3生命周期/背压/lease、D4原生PoC、D5架构冻结。

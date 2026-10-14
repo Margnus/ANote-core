@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
+import org.gradle.api.tasks.testing.Test
 
 plugins { kotlin("multiplatform") }
 
@@ -16,6 +17,23 @@ kotlin {
         }
     }
     jvmToolchain(17)
+}
+
+val generateScaleFixtures by tasks.registering(Exec::class) {
+    val script = rootProject.file("tools/generate_scale_fixtures.py")
+    val manifest = rootProject.file("fixtures/scale/manifest.json")
+    val output = rootProject.file(".generated-fixtures/scale")
+    inputs.files(script, manifest)
+    outputs.dir(output)
+    commandLine(providers.environmentVariable("PYTHON_BIN").orElse("python3").get(), script.absolutePath)
+}
+
+tasks.named<Test>("jvmTest") {
+    dependsOn(generateScaleFixtures)
+    inputs.files(rootProject.file("fixtures/scale/manifest.json"))
+    inputs.dir(rootProject.file(".generated-fixtures/scale"))
+    systemProperty("notecore.scale.fixture.dir", rootProject.file(".generated-fixtures/scale").absolutePath)
+    systemProperty("notecore.scale.manifest", rootProject.file("fixtures/scale/manifest.json").absolutePath)
 }
 
 tasks.register<JavaExec>("runPrototype") {

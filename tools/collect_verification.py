@@ -12,13 +12,15 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     architecture = subprocess.run([sys.executable, str(ROOT/'tools/check_architecture.py')],
                                   check=True, capture_output=True, text=True)
+    catalog = subprocess.run([sys.executable, str(ROOT/'tools/validate_fixture_catalog.py')],
+                             check=True, capture_output=True, text=True)
     suites = list((ROOT/'canvas-core/build/test-results/jvmTest').glob('TEST-*.xml'))
     if not suites:
         raise SystemExit('No JVM test XML. Run verifyPrototype first; a source file count is not a test result.')
-    inputs = sorted((ROOT/'canvas-core/src').rglob('*.kt')) + sorted((ROOT/'fixtures/input').glob('*.json')) + [
+    inputs = sorted((ROOT/'canvas-core/src').rglob('*.kt')) + sorted((ROOT/'fixtures').rglob('*.json')) + sorted((ROOT/'tools').glob('*.py')) + [
         ROOT/'settings.gradle.kts', ROOT/'build.gradle.kts',
-        ROOT/'canvas-core/build.gradle.kts', ROOT/'gradle.properties',
-    ]
+        ROOT/'canvas-core/build.gradle.kts', ROOT/'gradle.properties', ROOT/'ci/verify.sh',
+    ] + sorted((ROOT/'.generated-fixtures/scale').glob('*.bin')) + sorted((ROOT/'.generated-fixtures/scale').glob('verified-manifest.json'))
     stamp_path = ROOT/'reports/gradle-verification.sha256'
     if not stamp_path.exists():
         raise SystemExit('No Gradle verification stamp. Run the root verifyPrototype task first.')
@@ -42,6 +44,7 @@ def main():
         'status': 'passed' if totals['failures'] + totals['errors'] + totals['skipped'] == 0 else 'failed',
         'jvm_contract_tests': totals, 'suites': results,
         'architecture': json.loads(architecture.stdout),
+        'fixture_catalog': json.loads(catalog.stdout),
         'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
         'verification_input_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs},
         'android_build_verified': False, 'apple_build_verified': False,

@@ -1,0 +1,73 @@
+{
+  "schema_version": "scale-ink-1-draft",
+  "generator_version": 1,
+  "origin": "synthetic",
+  "clock_origin": "stroke-relative microseconds; each stroke replayed in an isolated session",
+  "units": {
+    "coordinates": "scene-point",
+    "time": "microsecond",
+    "pressure": "normalized-0-to-1"
+  },
+  "encoding": {
+    "header": "little-endian 8-byte NCSCALE1 + uint32 strokes + uint32 points_per_stroke",
+    "point": "little-endian float64 x, float64 y, float32 pressure, int64 time_us",
+    "point_record_bytes": 28
+  },
+  "scope": "ink subset only; not full S1/S2 documents or all S9 adversarial scenarios",
+  "missing_baseline_assets": [
+    "S1 other 49 pages, 2 text boxes, 2 images",
+    "S2 100 mixed objects and lasso transform",
+    "S9 queue/surface/lease scheduling"
+  ],
+  "device_performance_measured": false,
+  "profiles": [
+    {
+      "id": "S1-ink-current-page",
+      "file": "S1-ink-current-page.bin",
+      "strokes": 1000,
+      "points_per_stroke": 100,
+      "total_points": 100000,
+      "distribution": "grid-100-columns",
+      "bounds_scene_points": [
+        0.0,
+        0.0,
+        3192.75,
+        295.75
+      ],
+      "bytes": 2800016,
+      "sha256": "c1028effd9f94a1d11df339e45884afdfb940ba3073a57da59102b54cebf2f40"
+    },
+    {
+      "id": "S2-ink-dense-page",
+      "file": "S2-ink-dense-page.bin",
+      "strokes": 10000,
+      "points_per_stroke": 100,
+      "total_points": 1000000,
+      "distribution": "overlap-10-columns",
+      "bounds_scene_points": [
+        0.0,
+        0.0,
+        42.75,
+        2005.75
+      ],
+      "bytes": 28000016,
+      "sha256": "22eea352e0ded47f34cabc0c8b543de0126a658377a6ea286cf60130a17c6725"
+    },
+    {
+      "id": "S9-ink-long-stroke",
+      "file": "S9-ink-long-stroke.bin",
+      "strokes": 1,
+      "points_per_stroke": 100000,
+      "total_points": 100000,
+      "distribution": "long-zigzag",
+      "bounds_scene_points": [
+        0.0,
+        0.0,
+        24999.75,
+        7.75
+      ],
+      "bytes": 2800016,
+      "sha256": "49e5298371b35f407815f66e14839522dca2201df654094ed4de675e732c65a2"
+    }
+  ]
+}

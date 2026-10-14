@@ -1,0 +1,1063 @@
+{
+  "schema_version": "legacy-inventory-1-draft",
+  "scope": "selected local source declarations; no AST, decoder or AAR equivalence",
+  "source_files": [
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/PressurePoint.kt",
+      "sha256": "6a158841148b8d877afef7099fa12f8737966516d3ce69aecb8b4a1e3365c464",
+      "lines": 226
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/DrawRecord.kt",
+      "sha256": "7ab01622fec7e6d5cc6463ae76783f4d7174a7b88ac8e7b8e3dfc47e384e43dc",
+      "lines": 493
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/Pen.kt",
+      "sha256": "06df17f695de9729aa7e919d2256da8664401150d22a1521591ff78066fa7efa",
+      "lines": 948
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/StorePressurePoint.kt",
+      "sha256": "1fe7713afd9bcfb32ae7bb4c91709041c0db8cf32429d2cdd7e04e8a2c241d39",
+      "lines": 21
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/StoreDrawRecord.kt",
+      "sha256": "2fb4ac62d66ef725b167b25728b6a63c90113f1f1fd496bb5adc176e9dd42e66",
+      "lines": 71
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/PointBitV1.kt",
+      "sha256": "159fb554de9da2a940a80ddd564e618aa1711ff894f3daa8720021480602123f",
+      "lines": 69
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/DrawRecordBitV1.kt",
+      "sha256": "22cedad71fc9bc11a4e57fc14d11cfdbbe43e2a43a981a23e053c93e35ffa408",
+      "lines": 78
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/ParsePointV1.kt",
+      "sha256": "4b6d59ee433972a0f8c0c83e5267fd81bbeb49c9b8278f23d76b3e58b8167719",
+      "lines": 26
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/ParseStrokeV1.kt",
+      "sha256": "2db36546a27be48345f777174e234f1571600d5f59eabaea7f9c162094a7343f",
+      "lines": 61
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/StrokeConvertManager.kt",
+      "sha256": "601867444ae8aa3c379829f770770b3095a0d0f040b0b0ed6c1bc2150402e73d",
+      "lines": 57
+    },
+    {
+      "path": "drawpanellibv2/src/main/java/com/jideos/nb_boundary/view/DefaultCoordinateStrategy.kt",
+      "sha256": "eccd92840051ee28b187a43e068958a9622307655732cb26ee9330dfe6f21273",
+      "lines": 56
+    },
+    {
+      "path": "jnotesv2cn/biz_base_db/src/main/proto/DrawRecordProtobuf.proto",
+      "sha256": "efe874d6f3785d0e2e3f0b7d6e912ecafd4558029bb9f1e6d098ebd52d88d475",
+      "lines": 45
+    },
+    {
+      "path": "jnotesv2cn/biz_base_db/src/main/proto/StrokesProtobuf.proto",
+      "sha256": "7931883133a696854b57baf1be0c361e8dfa532f809d3b29eaf52660333cfc09",
+      "lines": 20
+    },
+    {
+      "path": "jnotesv2cn/biz_base_db/src/main/java/com/jideos/biz_base_db/Converter.kt",
+      "sha256": "3748a50cbe5ff16f575803cb1684f743752416354c7bc0910dd3cd4b7c658f6c",
+      "lines": 363
+    },
+    {
+      "path": "jnotesv2cn/biz_base_db/src/main/java/com/jideos/biz_base_db/bean/Stroke.kt",
+      "sha256": "2c04ba1baf1ba7f940f1efa83588de887b58ce12f3c83f444b1c589bffcd7546",
+      "lines": 189
+    }
+  ],
+  "anchors": [
+    {
+      "id": "audio-is-not-input-clock",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/PressurePoint.kt",
+      "line": 45,
+      "anchor": "var mSoundPosition = 0"
+    },
+    {
+      "id": "angle-not-in-point-proto",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/PressurePoint.kt",
+      "line": 73,
+      "anchor": "var angle = 0f"
+    },
+    {
+      "id": "alpha-constructor-default",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/PressurePoint.kt",
+      "line": 77,
+      "anchor": "var alpha = 1f"
+    },
+    {
+      "id": "alpha-proto-absent-default",
+      "path": "jnotesv2cn/biz_base_db/src/main/java/com/jideos/biz_base_db/Converter.kt",
+      "line": 305,
+      "anchor": "point.alpha = if (proto.hasAlpha()) proto.alpha else 0f"
+    },
+    {
+      "id": "layer-outside-record-proto",
+      "path": "jnotesv2cn/biz_base_db/src/main/java/com/jideos/biz_base_db/bean/Stroke.kt",
+      "line": 110,
+      "anchor": "var layerId: Int = 0"
+    },
+    {
+      "id": "source-record-layer",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/DrawRecord.kt",
+      "line": 165,
+      "anchor": "var layerId:Int = 0"
+    },
+    {
+      "id": "packed-pressure-truncation",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/PointBitV1.kt",
+      "line": 24,
+      "anchor": "return s.shl(7) or (p * 100).toInt()"
+    },
+    {
+      "id": "packed-record-width",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/DrawRecordBitV1.kt",
+      "line": 54,
+      "anchor": "(width * 10).toInt().shl(12)"
+    },
+    {
+      "id": "packed-graph-sentinel",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/DrawRecordBitV1.kt",
+      "line": 22,
+      "anchor": "val i6 = t.shr(11) and 1"
+    },
+    {
+      "id": "compact-point-loses-pencil",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/ParsePointV1.kt",
+      "line": 10,
+      "anchor": "tp.m = PointBitV1.createM(action, lastType, nextType, mPointFlag)"
+    },
+    {
+      "id": "explicit-storage-version",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/StrokeConvertManager.kt",
+      "line": 22,
+      "anchor": "const val CURRENT_STROKE_VERSION = 1"
+    },
+    {
+      "id": "legacy-unversioned-prefix",
+      "path": "drawpanellibv2/src/main/java/com/jideos/drawpanel/draw/convert/StrokeConvertManager.kt",
+      "line": 45,
+      "anchor": "Triple(0, 0, data)"
+    }
+  ],
+  "models": {
+    "PressurePoint": [
+      {
+        "name": "x",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "",
+        "json_key": "x",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "y",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "",
+        "json_key": "y",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "p",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "",
+        "json_key": "p",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "action",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "",
+        "json_key": "a",
+        "alias_annotation": "@SerializedName(\"a\",alternate = [\"action\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "velocity",
+        "mutable": false,
+        "declared_type": "Float",
+        "initializer_expression": "0f",
+        "json_key": "b",
+        "alias_annotation": "@SerializedName(\"b\",alternate = [\"velocity\"])",
+        "serialize_false": true,
+        "transient": true
+      },
+      {
+        "name": "lastType",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "VISIBILITY",
+        "json_key": "c",
+        "alias_annotation": "@SerializedName(\"c\",alternate = [\"lastType\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "nextType",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "VISIBILITY",
+        "json_key": "d",
+        "alias_annotation": "@SerializedName(\"d\",alternate = [\"nextType\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mSoundPosition",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0",
+        "json_key": "e",
+        "alias_annotation": "@SerializedName(\"e\",alternate = [\"mSoundPosition\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mPointFlag",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "DEFAULT_mPointFlag  // 点标识",
+        "json_key": "f",
+        "alias_annotation": "@SerializedName(\"f\",alternate = [\"mFillFlag\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "bmType",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "-1 //图片类型（用于铅笔绘制）",
+        "json_key": "g",
+        "alias_annotation": "@SerializedName(\"g\",alternate = [\"bmType\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "pencilW",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "-1f //铅笔绘制图片宽度",
+        "json_key": "h",
+        "alias_annotation": "@SerializedName(\"h\",alternate = [\"pencilW\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "pencilH",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "-1f //铅笔绘制图片高度",
+        "json_key": "i",
+        "alias_annotation": "@SerializedName(\"i\",alternate = [\"pencilH\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "rotation",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0f //铅笔图片绘制角度",
+        "json_key": "j",
+        "alias_annotation": "@SerializedName(\"j\",alternate = [\"rotation\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "tilt",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0f //铅笔图片倾斜角度",
+        "json_key": "k",
+        "alias_annotation": "@SerializedName(\"k\",alternate = [\"tilt\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "angle",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0f //铅笔图片倾斜角度",
+        "json_key": "l",
+        "alias_annotation": "@SerializedName(\"l\",alternate = [\"angle\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "alpha",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "1f //铅笔绘制透明度",
+        "json_key": "m",
+        "alias_annotation": "@SerializedName(\"m\",alternate = [\"alpha\"])",
+        "serialize_false": false,
+        "transient": false
+      }
+    ],
+    "DrawRecord": [
+      {
+        "name": "type",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "",
+        "json_key": "a",
+        "alias_annotation": "@SerializedName(\"a\", alternate = [\"type\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "graphType",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "DEFAULT_graphType",
+        "json_key": "b",
+        "alias_annotation": "@SerializedName(\"b\", alternate = [\"graphType\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "color",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "",
+        "json_key": "c",
+        "alias_annotation": "@SerializedName(\"c\", alternate = [\"color\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "width",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "",
+        "json_key": "d",
+        "alias_annotation": "@SerializedName(\"d\", alternate = [\"width\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "id",
+        "mutable": true,
+        "declared_type": "String",
+        "initializer_expression": "\"\"",
+        "json_key": "e",
+        "alias_annotation": "@SerializedName(\"e\", alternate = [\"id\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "editEnable",
+        "mutable": true,
+        "declared_type": "Boolean",
+        "initializer_expression": "DEFAULT_editEnable",
+        "json_key": "f",
+        "alias_annotation": "@SerializedName(\"f\", alternate = [\"editEnable\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mTransX",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0f",
+        "json_key": "g",
+        "alias_annotation": "@SerializedName(\"g\", alternate = [\"mTransX\"])",
+        "serialize_false": true,
+        "transient": true
+      },
+      {
+        "name": "mTransY",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0f",
+        "json_key": "h",
+        "alias_annotation": "@SerializedName(\"h\", alternate = [\"mTransY\"])",
+        "serialize_false": true,
+        "transient": true
+      },
+      {
+        "name": "mScale",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "1f",
+        "json_key": "i",
+        "alias_annotation": "@SerializedName(\"i\", alternate = [\"mScale\"])",
+        "serialize_false": true,
+        "transient": true
+      },
+      {
+        "name": "mRotation",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0f",
+        "json_key": "j",
+        "alias_annotation": "@SerializedName(\"j\", alternate = [\"mRotation\"])",
+        "serialize_false": true,
+        "transient": true
+      },
+      {
+        "name": "points",
+        "mutable": true,
+        "declared_type": "ArrayList<PressurePoint>",
+        "initializer_expression": "ArrayList()",
+        "json_key": "k",
+        "alias_annotation": "@SerializedName(\"k\", alternate = [\"points\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "controlPoints",
+        "mutable": true,
+        "declared_type": "ArrayList<PressurePoint>?",
+        "initializer_expression": "ArrayList()",
+        "json_key": "l",
+        "alias_annotation": "@SerializedName(\"l\", alternate = [\"controlPoints\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "strokeId",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "m",
+        "alias_annotation": "@SerializedName(\"m\", alternate = [\"strokeId\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mSoundId",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "\"\"",
+        "json_key": "n",
+        "alias_annotation": "@SerializedName(\"n\", alternate = [\"mSoundId\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mDownSoundPosition",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "DEFAULT_mDownSoundPosition",
+        "json_key": "o",
+        "alias_annotation": "@SerializedName(\"o\", alternate = [\"mDownSoundPosition\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mUpSoundPosition",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "DEFAULT_mUpSoundPosition",
+        "json_key": "p",
+        "alias_annotation": "@SerializedName(\"p\", alternate = [\"mUpSoundPosition\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mCenterPointX",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "0f",
+        "json_key": "r",
+        "alias_annotation": "@SerializedName(\"r\", alternate = [\"mCenterPointX\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mCenterPointY",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "0f",
+        "json_key": "s",
+        "alias_annotation": "@SerializedName(\"s\", alternate = [\"mCenterPointY\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mOvalAngle",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "0f",
+        "json_key": "t",
+        "alias_annotation": "@SerializedName(\"t\", alternate = [\"mOvalAngle\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "showFill",
+        "mutable": true,
+        "declared_type": "Boolean",
+        "initializer_expression": "false",
+        "json_key": "u",
+        "alias_annotation": "@SerializedName(\"u\", alternate = [\"showFill\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "markLayer",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "v",
+        "alias_annotation": "@SerializedName(\"v\", alternate = [\"markLayer\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mScaleY",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "1f",
+        "json_key": "w",
+        "alias_annotation": "@SerializedName(\"w\", alternate = [\"mScaleY\"])",
+        "serialize_false": true,
+        "transient": false
+      },
+      {
+        "name": "mViewRotation",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "0f",
+        "json_key": "x",
+        "alias_annotation": "@SerializedName(\"x\", alternate = [\"mViewRotation\"])",
+        "serialize_false": true,
+        "transient": false
+      },
+      {
+        "name": "rect",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "RectD()",
+        "json_key": "rect",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "adhesiveTapeBg",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "y",
+        "alias_annotation": "@SerializedName(\"y\", alternate = [\"adhesiveTapeBg\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "adhesiveTapeType",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "z",
+        "alias_annotation": "@SerializedName(\"z\", alternate = [\"adhesiveTapeType\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "layerId",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "a1",
+        "alias_annotation": "@SerializedName(\"a1\", alternate = [\"layerId\"])",
+        "serialize_false": false,
+        "transient": false
+      }
+    ],
+    "StorePressurePoint": [
+      {
+        "name": "x",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "",
+        "json_key": "x",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "y",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "",
+        "json_key": "y",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "sp",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "a",
+        "alias_annotation": "@SerializedName(\"a\", alternate = [\"sp\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "m",
+        "mutable": true,
+        "declared_type": "Short",
+        "initializer_expression": "0",
+        "json_key": "m",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      }
+    ],
+    "StoreDrawRecord": [
+      {
+        "name": "color",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "a",
+        "alias_annotation": "@SerializedName(\"a\", alternate = [\"color\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "id",
+        "mutable": true,
+        "declared_type": "String",
+        "initializer_expression": "\"\"",
+        "json_key": "b",
+        "alias_annotation": "@SerializedName(\"b\", alternate = [\"id\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "strokeId",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "c",
+        "alias_annotation": "@SerializedName(\"c\", alternate = [\"strokeId\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "tPoints",
+        "mutable": true,
+        "declared_type": "ArrayList<StorePressurePoint>?",
+        "initializer_expression": "null",
+        "json_key": "d",
+        "alias_annotation": "@SerializedName(\"d\", alternate = [\"tPoints\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "tControlPoints",
+        "mutable": true,
+        "declared_type": "ArrayList<StorePressurePoint>?",
+        "initializer_expression": "null",
+        "json_key": "e",
+        "alias_annotation": "@SerializedName(\"e\", alternate = [\"controlPoints\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mSoundId",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "\"\"",
+        "json_key": "f",
+        "alias_annotation": "@SerializedName(\"f\", alternate = [\"mSoundId\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mDownSoundPosition",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "-1",
+        "json_key": "g",
+        "alias_annotation": "@SerializedName(\"g\", alternate = [\"mDownSoundPosition\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mUpSoundPosition",
+        "mutable": true,
+        "declared_type": "",
+        "initializer_expression": "-1",
+        "json_key": "h",
+        "alias_annotation": "@SerializedName(\"h\", alternate = [\"mUpSoundPosition\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mCenterPointX",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "0f",
+        "json_key": "i",
+        "alias_annotation": "@SerializedName(\"i\", alternate = [\"mCenterPointX\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mCenterPointY",
+        "mutable": true,
+        "declared_type": "Float",
+        "initializer_expression": "0f",
+        "json_key": "j",
+        "alias_annotation": "@SerializedName(\"j\", alternate = [\"mCenterPointY\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "mOvalAngle",
+        "mutable": true,
+        "declared_type": "Short",
+        "initializer_expression": "0",
+        "json_key": "k",
+        "alias_annotation": "@SerializedName(\"k\", alternate = [\"mOvalAngle\"])",
+        "serialize_false": false,
+        "transient": false
+      },
+      {
+        "name": "t",
+        "mutable": true,
+        "declared_type": "Int",
+        "initializer_expression": "0",
+        "json_key": "t",
+        "alias_annotation": null,
+        "serialize_false": false,
+        "transient": false
+      }
+    ]
+  },
+  "proto_messages": {
+    "DrawRecordWrapper": [
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "type",
+        "tag": 1
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "graphType",
+        "tag": 2
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "color",
+        "tag": 3
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "width",
+        "tag": 4
+      },
+      {
+        "presence": "optional",
+        "type": "string",
+        "name": "id",
+        "tag": 5
+      },
+      {
+        "presence": "optional",
+        "type": "bool",
+        "name": "editEnable",
+        "tag": 6
+      },
+      {
+        "presence": "repeated",
+        "type": "PressurePointWrapper",
+        "name": "points",
+        "tag": 7
+      },
+      {
+        "presence": "repeated",
+        "type": "PressurePointWrapper",
+        "name": "controlPoints",
+        "tag": 8
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "strokeId",
+        "tag": 9
+      },
+      {
+        "presence": "optional",
+        "type": "string",
+        "name": "mSoundId",
+        "tag": 10
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "mDownSoundPosition",
+        "tag": 11
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "mUpSoundPosition",
+        "tag": 12
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "mCenterPointX",
+        "tag": 13
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "mCenterPointY",
+        "tag": 14
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "mOvalAngle",
+        "tag": 15
+      },
+      {
+        "presence": "optional",
+        "type": "bool",
+        "name": "showFill",
+        "tag": 16
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "markLayer",
+        "tag": 17
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "adhesiveTapeBg",
+        "tag": 18
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "adhesiveTapeType",
+        "tag": 19
+      }
+    ],
+    "PressurePointWrapper": [
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "x",
+        "tag": 1
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "y",
+        "tag": 2
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "p",
+        "tag": 3
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "action",
+        "tag": 4
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "lastType",
+        "tag": 5
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "nextType",
+        "tag": 6
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "mSoundPosition",
+        "tag": 7
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "mPointFlag",
+        "tag": 8
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "bmType",
+        "tag": 9
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "pencilW",
+        "tag": 10
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "pencilH",
+        "tag": 11
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "rotation",
+        "tag": 12
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "tilt",
+        "tag": 13
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "alpha",
+        "tag": 14
+      }
+    ],
+    "StrokesWrapper": [
+      {
+        "presence": "repeated",
+        "type": "StrokeWrapper",
+        "name": "strokes",
+        "tag": 1
+      }
+    ],
+    "StrokeWrapper": [
+      {
+        "presence": "repeated",
+        "type": "PointWrapper",
+        "name": "points",
+        "tag": 1
+      }
+    ],
+    "PointWrapper": [
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "x",
+        "tag": 1
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "y",
+        "tag": 2
+      },
+      {
+        "presence": "optional",
+        "type": "float",
+        "name": "p",
+        "tag": 3
+      },
+      {
+        "presence": "optional",
+        "type": "int32",
+        "name": "action",
+        "tag": 4
+      }
+    ]
+  },
+  "pen_constants": {
+    "ERASER_OLD": 0,
+    "BALLPOINT_PEN": 1,
+    "INK_PEN": 2,
+    "MARKPEN": 3,
+    "LASSOV2": 4,
+    "PENCIL": 5,
+    "PATTERN_RECOGNITION_PEN": 6,
+    "GRAPH_PEN": 7,
+    "LASER_POINTER_PEN": 8,
+    "HAND_WRITE_PEN": 9,
+    "ADHESIVE_TAPE_PEN": 10,
+    "BEAUTY_PEN": 11,
+    "ERASER": 20,
+    "IMAGE": 21,
+    "PDF": 22,
+    "GEOMETRY_LINE_PEN": 21,
+    "GEOMETRY_DOTTED_PEN": 22,
+    "GEOMETRY_RECT_PEN": 23,
+    "GEOMETRY_OVAL_PEN": 24,
+    "GEOMETRY_RIGHT_TRIANGLE_PEN": 25,
+    "GEOMETRY_ISOSCELES_TRIANGLE_PEN": 26,
+    "LINE": 0,
+    "DOTTED": 1,
+    "RECT": 3,
+    "OVAL": 4,
+    "ISOSCELES_ANGLE": 5,
+    "RIGHT_ANGLE": 6,
+    "ANGLE": 7,
+    "QUADRILATERAL": 8,
+    "PENTAGON": 9,
+    "CIRECLE": 10,
+    "CHANGE_COLOR": 30,
+    "AUTO_GRAPH": 31,
+    "WAVE": 11,
+    "ARC": 12,
+    "SINGLE_ARROW": 13,
+    "DOUBLE_ARROW": 14,
+    "HEXAGON": 15,
+    "STAR": 16,
+    "CYLINDER": 17,
+    "TRIANGULAR_PRISM": 18,
+    "CUBE": 19,
+    "CONE": 20,
+    "TRIANGULAR_PYRAMID": 21,
+    "PYRAMID": 22,
+    "SPHERE": 23,
+    "SEMICIRCLE": 24,
+    "RING": 25,
+    "HEART": 26,
+    "PARENTHESES": 27,
+    "THREE_SYSTEM": 28,
+    "MARK_PEN_NORMAL": 0,
+    "MARK_PEN_LINE": 1,
+    "MARK_LAYER_TOP": 0,
+    "MARK_LAYER_BOTTOM": 1,
+    "LASER_POINTER_PEN_LINE": 0,
+    "LASER_POINTER_PEN_POINT": 1,
+    "pressureSensitivityMin": 0
+  },
+  "aar_equivalence_verified": false,
+  "personal_notes_read": false
+}
