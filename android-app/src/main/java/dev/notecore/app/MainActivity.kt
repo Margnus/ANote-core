@@ -13,8 +13,6 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.*
 import dev.notecore.canvas.preview.PreviewNotebook
-import java.text.DateFormat
-import java.util.Date
 import java.util.UUID
 
 class MainActivity : Activity() {
@@ -84,20 +82,28 @@ class MainActivity : Activity() {
         }, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         status = text("", 13f).apply { setPadding(dp(20), 0, dp(20), dp(8)) }
         root.addView(status)
-        val scroll = ScrollView(this); val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(20), 0, dp(20), dp(20)) }
-        scroll.addView(list); root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        list.addView(text("正在读取笔记…"))
+        val frame = FrameLayout(this)
+        val list = ListView(this).apply {
+            setPadding(dp(20), 0, dp(20), dp(20)); clipToPadding = false
+            divider = android.graphics.drawable.ColorDrawable(Color.TRANSPARENT); dividerHeight = dp(10)
+        }
+        val empty = text("正在读取笔记…", 16f).apply {
+            gravity = Gravity.CENTER; setPadding(dp(24), dp(24), dp(24), dp(24))
+        }
+        frame.addView(list, FrameLayout.LayoutParams(-1, -1))
+        frame.addView(empty, FrameLayout.LayoutParams(-1, -1))
+        list.emptyView = empty
+        val adapter = NoteListAdapter(dp(88), { button("", {}) }, ::open)
+        list.adapter = adapter
+        root.addView(frame, LinearLayout.LayoutParams(-1, 0, 1f))
         store.list { notes, failure ->
             if (generation != viewGeneration || isFinishing) return@list
-            list.removeAllViews()
+            empty.text = if (failure == null) "还没有笔记，写下第一个想法。" else "暂时无法读取笔记，请稍后重试。"
+            adapter.replace(notes)
             failure?.let(::showError)
-            if (notes.isEmpty()) list.addView(text(if (failure == null) "还没有笔记，写下第一个想法。" else "暂时无法读取笔记，请稍后重试。", 16f).apply { setPadding(dp(4), dp(30), 0, 0) })
-            notes.forEach { note ->
-                list.addView(button("${note.title}\n${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(note.modified))}") { open(note.id) },
-                    LinearLayout.LayoutParams(-1, dp(88)).apply { bottomMargin = dp(10) })
-            }
         }
     }
+
     private fun open(id: String) {
         viewGeneration++; val generation = viewGeneration
         root.removeAllViews(); root.addView(text("正在打开…").apply { setPadding(dp(24), dp(24), 0, 0) })

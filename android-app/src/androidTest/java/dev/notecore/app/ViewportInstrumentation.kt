@@ -70,11 +70,43 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("storage_failure_recovery", "passed")
             result.putString("storage_bounded_read_and_active_owner", "passed")
             result.putString("storage_atomic_rename_failure", "passed")
+            verifyCatalogReuse()
+            result.putString("catalog_visible_row_recycling", "passed")
             result.putString("viewport_status", "passed")
             finish(Activity.RESULT_OK, result)
         } catch (failure: Throwable) {
             result.putString("viewport_status", "failed"); result.putString("failure", failure.stackTraceToString())
             finish(Activity.RESULT_CANCELED, result)
+        }
+    }
+    private fun verifyCatalogReuse() {
+        lateinit var adapter: NoteListAdapter
+        lateinit var list: android.widget.ListView
+        var opened: String? = null
+        val rows = (0 until 1000).map { NoteSummary("synthetic-$it", "Synthetic note $it", 0) }
+        runOnMainSync {
+            list = android.widget.ListView(host)
+            adapter = NoteListAdapter((88 * host.resources.displayMetrics.density).toInt(), { android.widget.Button(host) }, { opened = it })
+            list.adapter = adapter; host.setContentView(list); adapter.replace(rows)
+        }
+        waitForIdleSync()
+        runOnMainSync {
+            check(adapter.count == 1000 && list.childCount in 1..99)
+            check(adapter.createdRowCount < 100) { "Catalog created widgets for invisible rows" }
+            list.setSelection(999)
+        }
+        waitForIdleSync()
+        runOnMainSync {
+            val last = list.getChildAt(list.childCount - 1) as android.widget.Button
+            check(last.text.startsWith("Synthetic note 999\n")); last.performClick()
+            check(opened == "synthetic-999") { "Recycled row opened a stale document ID" }
+            list.setSelection(0)
+        }
+        waitForIdleSync()
+        runOnMainSync {
+            val first = list.getChildAt(0) as android.widget.Button
+            check(first.text.startsWith("Synthetic note 0\n")); first.performClick()
+            check(opened == "synthetic-0"); check(adapter.createdRowCount < 100)
         }
     }
     private fun <T : Any> storageResult(request: ((T) -> Unit) -> Unit): T {

@@ -64,3 +64,5 @@ Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授�
 Apple有界执行器与macOS真实线程对照见[ADR-0010](docs/adr/0010-apple-executor-conformance.md)。运行核心验证后使用 `python3 tools/verify_apple_executor.py`：12项Apple线程检查、9项JVM协议对照。iOS仅编译，App保存接入见[DEV-022](docs/adr/0011-preview-owned-storage-pipeline.md)。
 
 当前核心135项测试/15 suites；Apple线程12项+Foundation IO6项为macOS证据。双端保存使用最新/在途/失败snapshot账本、有界IO和标题头读取，旧写回不能清除新内容。Android独立窗口/ART/存储报告7项，完整App流程21项，按实际产物SHA记录；不代替真机或生产恢复验收。下一步DEV-023列表复用，DEV-024分页文档域。
+
+DEV-023新增[目录行复用](docs/adr/0012-preview-catalog-row-recycling.md)：Android原生ListView回收可见行，1000条合成目录滚动/点击绑定已验证，独立报告增至8项。下一节点为shared-core分页文档根/稳定PageId，生产一万条分页索引尚未实现。

@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "apk_sha256": "5ec2461744c5fdb2b4b3ecaace04905a79457664b594dfef55f5219faa5b8c74",
+  "apk_sha256": "85c582f609db6aefd55fbde4938ca5334979413786575b6778b61ed8cec4923f",
   "serial": "emulator-5580",
   "api": "36",
   "checks": [
@@ -10,19 +10,22 @@
     "executor_owner_worker",
     "storage_failure_recovery",
     "storage_bounded_read_and_active_owner",
-    "storage_atomic_rename_failure"
+    "storage_atomic_rename_failure",
+    "catalog_visible_row_recycling"
   ],
   "event_source": "synthetic MotionEvent injected through UiAutomation into window",
   "executor_thread_source": "real Android ART owner/worker threads, bounded result delivery and explicit retry",
   "storage_test_source": "real AtomicFile directory and silent-rename failure / retained reopen / repaired retry / strict UTF-8 and 32MiB preflight, isolated synthetic cache",
+  "catalog_test_source": "1000 synthetic rows in a real ListView window, bounded widget creation and recycled-row ID rebinding; not a latency benchmark",
   "real_stylus_verified": false,
   "device_performance_verified": false,
   "source_and_test_apk_sha256": {
-    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "d42ca4dc1d8c17cdfa4ed404d985f6062c4d5f585ce95122b7b92a674d5bec82",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "71606224212cc7f242413109e3feb2463bf96ae6b9816e32f510a677f90509fc",
     "android-app/build.gradle.kts": "8982eee264e6567445cf3027f092b535444d96ab6f6f56b98d2df2be75ddcde7",
-    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "630e5498f6fe8430a468e7617f2212e9afb7fc5e07b9aece47595cd0f9d3e995",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "02eef567b80c4236ff3f37524a6286acdb336f19890eab477df8e1d142f7726e",
     "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "81f36ebde3128f9f4b37aac6b58e42c8201f952f7dacac6b8ce1415c73851085",
-    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "2afe6d76020f8f0f82c0dc2282678b28c5221c29478989a547511f16eab199fc",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "58f979e0136a51e192b7450b200c9ccadc8a9867b1553906b1172be262ba1e88",
+    "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
     "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "1d5a5ebe553a6dabefc6b6951156eb8e904272b9601bc816830434e5b8d656b3",
     "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "1a3034c11e19efe5d0844e222760fb94658803004d3aca7f20d041ab0c0da043",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewNotebook.kt": "cb3d3a114de1ce38b9bbf43e71b3551e39c421840e9d2e8e91e4f5c963cda37d",
