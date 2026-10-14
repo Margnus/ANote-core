@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 import time
+import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -90,12 +91,52 @@ def main():
     count(2)
     output = ROOT/'reports/android-preview.png'
     output.write_bytes(adb('exec-out', 'screencap', '-p', binary=True))
+    # Real system document picker, not a direct invocation of storage implementation.
+    click(text('导出'))
+    field = wait(lambda tree: find(tree, **{'class': 'android.widget.EditText', 'resource-id': 'android:id/title'}), 'Export picker absent')
+    export_name = field.attrib['text']
+    assert re.fullmatch(r'NoteCore-[a-zA-Z0-9-]+\.ncp', export_name)
+    click(wait(lambda tree: find(tree, **{'resource-id': 'android:id/button1'}), 'Picker SAVE absent'))
+    text('导出')
+    exported = adb('exec-out', 'cat', '/sdcard/Download/' + export_name)
+    assert exported == before
+    click(text('返回'))
+    click(text('导入备份')); wait(lambda tree: find(tree, **{'package': 'com.google.android.documentsui'}), 'Import picker absent')
+    adb('shell', 'input', 'keyevent', '4'); text('导入备份')
+    original_files = set(adb('shell', 'run-as', PACKAGE, 'ls', 'files/preview-notes').splitlines())
+    imported_ids = []
+    for _ in range(2):
+        click(text('导入备份'))
+        click(text(export_name))
+        count(2); text('已导入为新笔记 · 2 笔')
+        files_now = set(adb('shell', 'run-as', PACKAGE, 'ls', 'files/preview-notes').splitlines())
+        new_files = [f for f in files_now - original_files if f.endswith('.ncp')]
+        assert len(new_files) == 1
+        imported = adb('exec-out', 'run-as', PACKAGE, 'cat', 'files/preview-notes/' + new_files[0])
+        assert imported.splitlines()[2:] == before.splitlines()[2:]
+        meta = imported.splitlines()[1].split('\t')
+        assert meta[1] != filename[:-4] and meta[2] == title
+        imported_ids.append(meta[1]); original_files = files_now
+        click(text('返回'))
+    assert len(set(imported_ids)) == 2
+    corrupt_name = 'NoteCoreCorrupt-' + time.strftime('%Y%m%d%H%M%S') + '.ncp'
+    with tempfile.TemporaryDirectory(prefix='notecore-backup-smoke-') as tmp:
+        corrupt = Path(tmp)/corrupt_name; corrupt.write_text('NCPREVIEW\t9\ninvalid\n')
+        adb('push', str(corrupt), '/sdcard/Download/' + corrupt_name)
+    click(text('导入备份')); click(text(corrupt_name))
+    wait(lambda tree: next((n for n in tree.iter('node') if n.attrib.get('text', '').startswith('导入失败：')), None), 'Corrupt backup was not rejected')
+    assert set(adb('shell', 'run-as', PACKAGE, 'ls', 'files/preview-notes').splitlines()) == original_files
+    assert adb('exec-out', 'run-as', PACKAGE, 'cat', f'files/preview-notes/{filename}') == before
+    print('system export exact bytes, picker cancellation, repeated copy import and corrupt rejection passed', flush=True)
     report = {'status': 'passed', 'apk_sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
               'device': {'serial': args.serial, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
                          'abi': adb('shell', 'getprop', 'ro.product.cpu.abi').strip(), 'kind': 'emulator'},
               'checks': ['install', 'cold_launch', 'create', 'rename', 'draw_real_touch_events', 'color_capture',
                          'undo', 'redo', 'finger_toggle', 'save_acknowledgement', 'saved_point_count',
-                         'force_stop_and_reopen', 'exact_saved_content_after_reopen', 'back_to_library_and_reopen'],
+                         'force_stop_and_reopen', 'exact_saved_content_after_reopen', 'back_to_library_and_reopen',
+                         'system_picker_export_exact_bytes', 'import_picker_cancel', 'import_as_new_document',
+                         'repeated_import_unique_identity', 'corrupt_backup_rejected', 'original_preserved_after_import'],
+              'imported_document_ids': imported_ids,
               'saved_strokes': 2, 'saved_real_points': sum(int(r[4]) for r in stroke_rows),
               'document_sha256': hashlib.sha256(before.encode()).hexdigest(), 'screenshot': str(output.relative_to(ROOT)),
               'real_stylus_verified': False, 'device_performance_verified': False,

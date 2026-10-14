@@ -4,6 +4,25 @@ import dev.notecore.canvas.preview.PreviewNotebook
 import kotlin.test.*
 
 class PreviewNotebookContractTest {
+    @Test fun importedBackupGetsIndependentIdentityAndPreservesEverySampleAndBrush() {
+        val source = PreviewNotebook("original", "备份\\中文")
+        source.selectPen(-12345, 9.0); stroke(source); stroke(source, 20.0); source.undo()
+        val backup = source.capture().encode()
+        val copy = PreviewNotebook.importAsCopy(backup, "copy")
+        assertEquals("copy", copy.documentId); assertEquals(source.title, copy.title)
+        assertEquals(1, copy.strokeCount); assertFalse(copy.canRedo)
+        assertEquals(backup.lines().drop(2), copy.capture().encode().lines().drop(2))
+        assertEquals(0, copy.changeVersion)
+        stroke(copy, 50.0); assertNotEquals(copy.strokeId(0), copy.strokeId(1))
+        assertEquals(backup, source.capture().encode())
+    }
+    @Test fun importRejectsReuseInvalidIdentityAndCorruptionBeforeCreatingCopy() {
+        val source = PreviewNotebook("original", "test"); stroke(source)
+        val backup = source.capture().encode()
+        assertFailsWith<IllegalArgumentException> { PreviewNotebook.importAsCopy(backup, "original") }
+        assertFailsWith<IllegalArgumentException> { PreviewNotebook.importAsCopy(backup, "") }
+        assertFailsWith<IllegalArgumentException> { PreviewNotebook.importAsCopy(backup.substringBefore("END"), "copy") }
+    }
     private fun stroke(note: PreviewNotebook, offset: Double = 0.0) {
         assertTrue(note.beginStroke(10.0 + offset, 20.0, 0.4f, 0))
         assertTrue(note.appendStroke(20.0 + offset, 30.0, 0.7f, 1000))

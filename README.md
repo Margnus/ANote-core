@@ -1,6 +1,6 @@
 # NoteCore
 
-独立笔记App与通用画布工程，2026-10-14开始实际开发。当前增加D4离线手写预览竖切：Android原生列表/画布与本机保存已在模拟器验证，iOS宿主与framework已编译成ARM64模拟器.app但尚未启动验证；C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
+独立笔记App与通用画布工程，2026-10-14开始实际开发。当前增加D4离线手写预览竖切：Android原生列表/画布、本机保存及单页备份导入导出已在模拟器验证，iOS宿主与framework已编译成ARM64模拟器.app但尚未启动验证；C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
 
 先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](https://github.com/Margnus/AI-Note/blob/main/README.md)。
 
@@ -18,7 +18,7 @@
 - [旧字段映射](docs/旧格式字段映射.md)及[原生采集契约](docs/原生输入采集契约.md)：有源码证据和候选规则，转换器/采集器尚未实现。
 - [合成输入轨迹](fixtures/README.md)：5类D2候选及hash，已由Kotlin回放并逐点验证；不是设备性能结果。
 
-这些是验证架构的reference实现，API可调整；Map复制、内存journal和临时数值范围不代表生产性能或正式文件协议。Native资源lease、worker调度、真实输入、SQLite和完整几何/索引尚未实现。
+这些是验证架构的reference实现，API可调整；Map复制、内存journal和临时数值范围不代表生产性能或正式文件协议。生产Native资源lease、真实worker调度、完整设备采集校准、SQLite和完整几何/索引尚未实现。
 
 ## 构建与验证
 

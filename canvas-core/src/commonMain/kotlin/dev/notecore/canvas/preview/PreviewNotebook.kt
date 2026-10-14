@@ -132,6 +132,14 @@ class PreviewNotebook private constructor(
         const val MAX_STROKES = 500
         const val MAX_POINTS = 200_000
         const val MAX_STROKE_POINTS = 20_000
+        /** Validate the whole backup before assigning a fresh local identity; never replace a document. */
+        @Throws(IllegalArgumentException::class)
+        fun importAsCopy(encoded: String, newDocumentId: String): PreviewNotebook {
+            val source = restore(encoded)
+            require(newDocumentId != source.documentId) { "Import requires a fresh document identity" }
+            val scene = SceneSnapshot(SceneId(newDocumentId), 0, source.memory.snapshot().copyEntries())
+            return PreviewNotebook(newDocumentId, source.title, scene, source.nextObject)
+        }
         @Throws(IllegalArgumentException::class)
         fun restore(encoded: String): PreviewNotebook {
             require(encoded.length <= 16_000_000) { "Preview document too large" }

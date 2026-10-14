@@ -2,6 +2,7 @@ package dev.notecore.app
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.content.res.ColorStateList
@@ -74,6 +75,15 @@ class MainActivity : Activity() {
             val note = PreviewNotebook(UUID.randomUUID().toString(), "未命名笔记")
             editor(note); save()
         }, LinearLayout.LayoutParams(-1, dp(56)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
+        root.addView(button("导入备份") {
+            try {
+                startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE); type = "*/*"
+                }, 102)
+            } catch (_: android.content.ActivityNotFoundException) { showError("系统文件选择器不可用") }
+        }, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
+        status = text("", 13f).apply { setPadding(dp(20), 0, dp(20), dp(8)) }
+        root.addView(status)
         val scroll = ScrollView(this); val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(20), 0, dp(20), dp(20)) }
         scroll.addView(list); root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         list.addView(text("正在读取笔记…"))
@@ -101,7 +111,8 @@ class MainActivity : Activity() {
         header.addView(button("返回") { leaveEditor() })
         titleView = text(note.title, 18f).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END; setPadding(dp(8), 0, dp(8), 0); setOnClickListener { rename() } }
         header.addView(titleView, LinearLayout.LayoutParams(0, dp(48), 1f))
-        header.addView(button("保存") { save() }); root.addView(header)
+        header.addView(button("保存") { save() })
+        header.addView(button("导出") { exportBackup() }); root.addView(header)
         val tools = row()
         undoButton = button("撤销") { canvas?.cancelInk(); if (note.undo()) { canvas?.invalidate(); save(); updateControls() } else showError(note.lastError) }
         redoButton = button("重做") { canvas?.cancelInk(); if (note.redo()) { canvas?.invalidate(); save(); updateControls() } else showError(note.lastError) }
@@ -128,9 +139,9 @@ class MainActivity : Activity() {
             note.rename(field.text.toString()); titleView?.text = note.title; save()
         }.show()
     }
-    private fun save() {
-        val note = notebook ?: return
-        if (!note.retryPendingStroke()) { showError(note.lastError); return }
+    private fun save(): Boolean {
+        val note = notebook ?: return true
+        if (!note.retryPendingStroke()) { showError(note.lastError); return false }
         val snapshot = note.capture(); val generation = viewGeneration
         status?.text = getString(R.string.saving, note.strokeCount)
         store.save(snapshot) { version, failure ->
@@ -138,8 +149,44 @@ class MainActivity : Activity() {
             if (generation != viewGeneration || notebook !== note || isFinishing) return@save
             if (failure == null && version == note.changeVersion) status?.text = getString(R.string.saved, note.strokeCount)
         }
+        return true
     }
-    private fun leaveEditor() { canvas?.cancelInk(); save(); library() }
+    private fun leaveEditor() { canvas?.cancelInk(); if (save()) library() }
+    private fun exportBackup() {
+        val note = notebook ?: return
+        canvas?.cancelInk()
+        if (!note.retryPendingStroke()) { showError(note.lastError); return }
+        store.exportSnapshot = note.capture()
+        try {
+            startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE); type = "application/octet-stream"
+                putExtra(Intent.EXTRA_TITLE, "NoteCore-${note.documentId}.ncp")
+            }, 101)
+        } catch (_: android.content.ActivityNotFoundException) {
+            store.exportSnapshot = null; showError("系统文件选择器不可用")
+        }
+    }
+    @Deprecated("Framework result callback keeps the preview dependency-free")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 101) {
+            val snapshot = store.exportSnapshot; store.exportSnapshot = null
+            if (resultCode != RESULT_OK) return
+            val uri = data?.data ?: return showError("未获取导出位置，请重试")
+            if (snapshot == null) { showError("会话已重建，请重新导出"); return }
+            store.export(uri, snapshot) { failure -> if (!isFinishing && !isDestroyed) {
+                if (failure != null) showError(failure) else Toast.makeText(this, "备份已导出", Toast.LENGTH_LONG).show()
+            } }
+        } else if (requestCode == 102 && resultCode == RESULT_OK) {
+            val uri = data?.data ?: return showError("未获取导入文件")
+            val generation = viewGeneration
+            store.importCopy(uri) { note, failure ->
+                if (isFinishing || isDestroyed || generation != viewGeneration) return@importCopy
+                if (note != null) { editor(note); status?.text = getString(R.string.imported, note.strokeCount) }
+                else showError(failure ?: "导入失败")
+            }
+        }
+    }
     private fun showError(message: String) {
         if (message.isBlank()) return
         status?.text = message; Toast.makeText(this, message, Toast.LENGTH_LONG).show()

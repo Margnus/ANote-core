@@ -1,5 +1,17 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import NoteCanvasPrototype
+
+struct PreviewBackup: FileDocument {
+    static var readableContentTypes: [UTType] { [.data] }
+    var data: Data
+    init(data: Data) { self.data = data }
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else { throw CocoaError(.fileReadCorruptFile) }
+        self.data = data
+    }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
+}
 
 struct LocalNote: Identifiable { let id: String; let title: String; let date: Date }
 
@@ -8,6 +20,8 @@ final class PreviewModel: ObservableObject {
     @Published var current: PreviewNotebook?
     @Published var status = ""
     @Published var revision: Int64 = 0
+    @Published var exportDocument: PreviewBackup?
+    @Published var transferBusy = false
     private let io = DispatchQueue(label: "dev.notecore.preview.storage")
     private let directory: URL
     private var pending: PreviewNotebookSnapshot?
@@ -62,6 +76,50 @@ final class PreviewModel: ObservableObject {
         }
     }
     func changed() { revision = current?.changeVersion ?? 0; save() }
+    func prepareExport() {
+        guard !transferBusy, let note = current else { return }
+        note.cancelStroke()
+        guard note.retryPendingStroke() else { status = note.lastError; return }
+        let snapshot = note.capture()
+        transferBusy = true; status = "正在准备备份…"
+        io.async {
+            let document = PreviewBackup(data: Data(snapshot.encode().utf8))
+            DispatchQueue.main.async { self.exportDocument = document; self.transferBusy = false }
+        }
+    }
+    func importCopy(_ url: URL) {
+        guard !transferBusy else { return }
+        transferBusy = true; status = "正在校验并导入…"
+        // Start access while the picker grant is alive; release on every worker completion path.
+        let scoped = url.startAccessingSecurityScopedResource()
+        io.async {
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let handle = try FileHandle(forReadingFrom: url)
+                defer { try? handle.close() }
+                var data = Data()
+                while let chunk = try handle.read(upToCount: 8192), !chunk.isEmpty {
+                    guard data.count + chunk.count <= 32 * 1024 * 1024 else { throw CocoaError(.fileReadTooLarge) }
+                    data.append(chunk)
+                }
+                guard let encoded = String(data: data, encoding: .utf8) else { throw CocoaError(.fileReadCorruptFile) }
+                let id = UUID().uuidString
+                let note = try PreviewNotebook.companion.importAsCopy(encoded: encoded, newDocumentId: id)
+                guard !FileManager.default.fileExists(atPath: self.file(id).path) else { throw CocoaError(.fileWriteFileExists) }
+                try note.capture().encode().write(to: self.file(id), atomically: true, encoding: .utf8)
+                DispatchQueue.main.async {
+                    self.transferBusy = false
+                    if self.current == nil {
+                        self.current = note; self.revision = note.changeVersion
+                        self.status = "已导入为新笔记 · \(note.strokeCount) 笔"
+                    } else { self.status = "备份已导入为新笔记，可返回列表查看" }
+                }
+                self.refresh()
+            } catch {
+                DispatchQueue.main.async { self.transferBusy = false; self.status = "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖" }
+            }
+        }
+    }
     func save() {
         guard let note = current else { return }
         guard note.retryPendingStroke() else { status = note.lastError; return }
@@ -95,11 +153,13 @@ final class PreviewModel: ObservableObject {
     }
     func close() {
         current?.cancelStroke()
+        if let note = current, !note.retryPendingStroke() { status = note.lastError; return }
         if let note = current { write(note.capture()) }
         pending = nil; current = nil; refresh()
     }
     func flushForBackground() {
         current?.cancelStroke()
+        if let note = current, !note.retryPendingStroke() { status = note.lastError; return }
         if let note = current { write(note.capture()) }
         pending = nil
     }
@@ -122,6 +182,8 @@ struct PreviewRoot: View {
     @State private var finger = true
     @State private var renaming = false
     @State private var title = ""
+    @State private var importing = false
+    @State private var exporting = false
     var body: some View {
         Group {
             if let note = model.current {
@@ -131,6 +193,7 @@ struct PreviewRoot: View {
                         Spacer()
                         Button(note.title) { note.cancelStroke(); title = note.title; renaming = true }.font(.headline).lineLimit(1)
                         Spacer(); Button("保存") { model.save() }
+                        Button("导出") { model.prepareExport() }.disabled(model.transferBusy)
                     }.padding(.horizontal)
                     HStack {
                         Button("撤销") { note.cancelStroke(); if note.undo() { model.changed() } }.disabled(!note.canUndo)
@@ -158,7 +221,10 @@ struct PreviewRoot: View {
             } else {
                 NavigationStack {
                     List {
-                        Section { Button("新建笔记") { model.create() } }
+                        Section {
+                            Button("新建笔记") { model.create() }
+                            Button("导入备份") { importing = true }.disabled(model.transferBusy)
+                        }
                         Section("本机笔记") {
                             ForEach(model.notes) { note in
                                 Button { model.open(note.id) } label: {
@@ -176,6 +242,22 @@ struct PreviewRoot: View {
             TextField("名称", text: $title)
             Button("取消", role: .cancel) { }
             Button("完成") { model.current?.rename(value: title); model.changed() }
+        }
+        .onChange(of: model.exportDocument != nil) { _, ready in if ready { exporting = true } }
+        .fileExporter(isPresented: $exporting, document: model.exportDocument, contentType: .data,
+            defaultFilename: "NoteCore-backup.ncp") { result in
+                model.exportDocument = nil
+                switch result {
+                case .success: model.status = "备份已导出"
+                case .failure: model.status = "导出未完成，请重试"
+                }
+            }
+        .onChange(of: exporting) { _, showing in if !showing { model.exportDocument = nil } }
+        .fileImporter(isPresented: $importing, allowedContentTypes: [.data]) { result in
+            switch result {
+            case .success(let url): model.importCopy(url)
+            case .failure: model.status = "导入未完成，已有笔记未更改"
+            }
         }
     }
 }
