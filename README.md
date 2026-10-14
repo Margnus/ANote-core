@@ -1,6 +1,6 @@
 # NoteCore
 
-独立笔记App与通用画布工程，2026-10-14开始实际开发。当前为C0/C1架构验证阶段：已建立KMP工程与可执行公共契约参考原型，尚未实现Android/iOS原生App、画布渲染或磁盘保存。
+独立笔记App与通用画布工程，2026-10-14开始实际开发。当前增加D4离线手写预览竖切：Android原生列表/画布与本机保存已在模拟器验证，iOS宿主与framework已编译成ARM64模拟器.app但尚未启动验证；C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
 
 先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](https://github.com/Margnus/AI-Note/blob/main/README.md)。
 
@@ -32,7 +32,9 @@ python3 tools/check_architecture.py
 python3 tools/collect_verification.py
 ```
 
-同一入口可用于本地或CI：`bash ci/verify.sh`（需JAVA_HOME，Python可通过PYTHON_BIN指定）。未配置GitHub远程工作流或自动发布。
+Android包：`bash ci/package-android-preview.sh`（另需ANDROID_HOME）；iOS模拟器包：`bash ci/package-ios-preview.sh`。
+
+同一核心验证入口可用于本地或CI：`bash ci/verify.sh`（需JAVA_HOME，Python可通过PYTHON_BIN指定）。未配置GitHub远程工作流或自动发布。
 
 测试HTML在canvas-core/build/reports/tests/jvmTest/index.html，机器报告在[reports/verification.json](reports/verification.json)。后者由实际Gradle XML生成；代码变化后应重新运行测试再生成报告。
 
@@ -42,7 +44,7 @@ Apple编译入口单独开启：
 ./gradlew -PenableAppleTargets=true :canvas-core:linkDebugFrameworkIosSimulatorArm64
 ```
 
-此入口需兼容的Xcode、Kotlin/Native下载与平台环境；目前未验证，不是可运行的SwiftUI App。本机Apple SDK版本和官方KMP兼容表需重新确认。Android原生模块在D4交付创建，当前不能产出APK。
+此入口需要Xcode、Kotlin/Native与平台环境；本轮已实际编译framework及SwiftUI/UIKit模拟器宿主，见[打包说明](docs/初步运行版本.md)。本机无iOS runtime，不能宣称启动或真机验证。Android模块已建立，可用`bash ci/package-android-preview.sh`产出独立调试APK。
 
 ## 目录
 
@@ -55,4 +57,4 @@ tools/                      # 边界校验、测试结果收集
 reports/                    # 真实验证记录
 ```
 
-Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，已有规模笔迹与旧字段候选映射，D3已有提交所有权/重试参考模型，现有lease假后端与可控调度模型，下一步实现统一关闭协调器/恢复handoff，再做D4原生PoC、D5架构冻结。
+Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，已有规模笔迹与旧字段候选映射，D3已有提交所有权/重试参考模型，现有lease假后端与可控调度模型，用户当前目标为先交付可打包运行版本，正在完成D4离线手写预览；关闭协调器/恢复handoff与D5架构冻结继续作为后续门禁。

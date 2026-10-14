@@ -1,7 +1,7 @@
 # NoteCore development
 
 - Read README.md, docs/开发执行计划.md and docs/进度.md before continuing.
-- The current phase is C0/C1 architectural validation. Common-code prototypes are not frozen public APIs or production implementations.
+- The user now requests an initial packaged runnable preview. Build a narrow D4 offline handwriting vertical slice alongside C0/C1 validation. Keep prototypes and preview APIs explicitly unfrozen; packaging is not production architecture approval.
 - Preserve jnotesv2cn, jnotesv2 and drawpanellibv2; this is an independent new project.
 - Do not introduce Android/UIKit, database, network, vendor SDK or app business dependencies into canvas-core/commonMain.
 - Use one canonical scene model and one authority per document. Render/session tokens are not content revisions.
