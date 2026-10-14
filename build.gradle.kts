@@ -10,7 +10,8 @@ tasks.register("verifyPrototype") {
     description = "Verify the C1 common-code contract prototype on JVM."
     dependsOn(":canvas-core:jvmTest")
     doLast {
-        val inputs = fileTree("canvas-core/src") { include("**/*.kt") }.files + listOf(
+        val inputs = fileTree("canvas-core/src") { include("**/*.kt") }.files +
+            fileTree("fixtures/input") { include("*.json") }.files + listOf(
             file("settings.gradle.kts"), file("build.gradle.kts"),
             file("canvas-core/build.gradle.kts"), file("gradle.properties"),
         )

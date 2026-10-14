@@ -8,4 +8,4 @@
 - Make failure and ownership contracts concrete before implementing platform features. Do not silently discard real samples or accepted commands.
 - Run meaningful common tests and the dependency check. Passing JVM tests does not validate Android, Apple compilation or device performance.
 - Update progress with actual verification and remaining gates; never mark an entire requirement complete from a single prototype test.
-- Do not stage, commit, push or publish unless the user asks.
+- The user authorized verified milestone commits and pushes: NoteCore to Margnus/ANote-core and blueprint to Margnus/AI-Note. Check diffs and verification before each milestone; never force-push or publish apps without authorization.

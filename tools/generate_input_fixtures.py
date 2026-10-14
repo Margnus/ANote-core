@@ -106,7 +106,7 @@ def main():
     manifest={'schema_version':'0.1-draft','origin':'synthetic','seed':SEED,'cases':count,
               'points_per_stroke':args.points,'file':'synthetic-traces.json',
               'sha256':hashlib.sha256(payload).hexdigest(),'bytes':len(payload),
-              'validated_by':'Python schema/order/reference projection checks; Kotlin/native adapter consumption not implemented',
+              'validated_by':'Python schema/order/reference projection checks; JVM consumption is verified separately by InputFixtureReplayTest',
               'hardware_performance_baseline':False}
     (args.output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(manifest,ensure_ascii=False,indent=2))

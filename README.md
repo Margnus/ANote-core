@@ -2,7 +2,7 @@
 
 独立笔记App与通用画布工程，2026-10-14开始实际开发。当前为C0/C1架构验证阶段：已建立KMP工程与可执行公共契约参考原型，尚未实现Android/iOS原生App、画布渲染或磁盘保存。
 
-先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](../note-app-blueprint-20261014/README.md)。
+先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](https://github.com/Margnus/AI-Note/blob/main/README.md)。
 
 ## 当前可运行内容
 
@@ -11,7 +11,8 @@
 - 迟到frame的revision/generation检查、scene/object/算法版本的几何缓存键。
 - 按字节计费的LRU参考策略及重键/淘汰/超额/溢出反例。
 - commonTest、独立JVM演示、源码依赖边界和真实测试报告。
-- [合成输入轨迹](fixtures/README.md)：5类D2候选及hash，未接入Kotlin/原生消费，不是设备性能结果。
+- 有界输入状态机、历史批次与预测分离、捕获目标、显式取消/关闭/拒绝；见[输入ADR](docs/adr/0002-input-replay-boundary.md)。
+- [合成输入轨迹](fixtures/README.md)：5类D2候选及hash，已由Kotlin回放并逐点验证；不是设备性能结果。
 
 这些是验证架构的reference实现，API可调整；Map复制、内存journal和临时数值范围不代表生产性能或正式文件协议。Native资源lease、worker调度、真实输入、SQLite和完整几何/索引尚未实现。
 
@@ -50,4 +51,4 @@ tools/                      # 边界校验、测试结果收集
 reports/                    # 真实验证记录
 ```
 
-本次未改旧App/DrawPanel，未提交、推送或发布。D2已开始合成轨迹，下一步补消费/回放与规模样本，再做D3生命周期/背压/lease、D4原生PoC、D5架构冻结。
+Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，下一步补规模样本/旧字段映射，再做D3生命周期/背压/lease、D4原生PoC、D5架构冻结。

@@ -15,7 +15,7 @@ def main():
     suites = list((ROOT/'canvas-core/build/test-results/jvmTest').glob('TEST-*.xml'))
     if not suites:
         raise SystemExit('No JVM test XML. Run verifyPrototype first; a source file count is not a test result.')
-    inputs = sorted((ROOT/'canvas-core/src').rglob('*.kt')) + [
+    inputs = sorted((ROOT/'canvas-core/src').rglob('*.kt')) + sorted((ROOT/'fixtures/input').glob('*.json')) + [
         ROOT/'settings.gradle.kts', ROOT/'build.gradle.kts',
         ROOT/'canvas-core/build.gradle.kts', ROOT/'gradle.properties',
     ]
