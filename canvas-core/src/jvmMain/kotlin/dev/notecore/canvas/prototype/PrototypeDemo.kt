@@ -38,4 +38,18 @@ fun main() {
     check(release.value.size == 4) // simulated backend acknowledgement; no native destructor here
     resources.completeRelease(release, ResourceReleaseOutcome.RELEASED)
     println("resource_model_drained=${resources.isDrained} charged=${resources.chargedBytes}; native_gpu_verified=false")
+    val document = DocumentCloseCoordinator<String, ByteArray>(sceneId)
+    val session = (document.openSession(oldFrame, 10) as SessionOpenResult.Opened).session
+    document.consume(session, InputBatch(0, 0, 1, PointerTool.STYLUS, PointerPhase.DOWN, listOf(InputSample(1.0, 1.0, 0.5f, 0))), target)
+    document.consume(session, InputBatch(1, 1, 1, PointerTool.STYLUS, PointerPhase.UP, listOf(InputSample(2.0, 2.0, 0.5f, 1))), target)
+    check(document.submitPending(session, CommandId("close-add"), ObjectId("close-stroke")) == AdmissionResult.Admitted)
+    val closeAttempt = (document.dispatch(memory.snapshot()) as DispatchResult.Ready).attempt
+    document.beginClose()
+    println("document_close_before_ack=${document.status().phase} late_frame_publish=${document.canPublish(session, oldFrame)}")
+    document.complete(closeAttempt, memory.commit(closeAttempt.patch))
+    val offer = document.offerSubmission(closeAttempt.id)!!
+    val ownedByReceiver = offer.payload as RecoveryPayload.Confirmed
+    println("document_close_before_handoff=${document.status().phase} receipt=${ownedByReceiver.receipt.durability}")
+    check(document.acknowledge(offer))
+    println("document_close_after_handoff=${document.status().phase} retained_submissions=${document.status().submissions.size}; durable_recovery_verified=false")
 }

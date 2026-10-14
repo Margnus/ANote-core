@@ -34,6 +34,7 @@ sealed interface DispatchResult {
     data object AttemptNumbersExhausted : DispatchResult
 }
 enum class CompletionUpdate { UPDATED, STALE_ATTEMPT, INVALID_RECEIPT }
+data class SubmissionSummary(val id: CommandId, val state: SubmissionState, val chargedBytes: Long)
 
 /** Bounded, single-owner FIFO model. No coroutines, thread safety, disk, automatic retry or rebase.
  * Confirmed payloads remain charged until collected. Recovery removes blocked work only by explicit handoff.
@@ -54,6 +55,7 @@ class StrokeSubmissionQueue(val sceneId: SceneId, val maxEntries: Int = 64, val 
 
     fun state(id: CommandId): SubmissionState? = entries[id]?.state
     fun submission(id: CommandId): StrokeSubmission? = entries[id]?.submission
+    fun snapshotStates(): List<SubmissionSummary> = entries.values.map { SubmissionSummary(it.submission.id, it.state, it.submission.chargedBytes) }
 
     fun enqueue(submission: StrokeSubmission): AdmissionResult {
         entries[submission.id]?.let { old ->

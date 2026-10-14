@@ -47,6 +47,7 @@ class InputReplaySession(private val maxRealSamples: Int = 100_000) {
     private var sequence = -1L
     private var eventTime = -1L
     private var closed = false
+    val activeRealSamples: Int get() = active?.samples?.size ?: 0
     init { require(maxRealSamples in 1..1_000_000) }
 
     fun consume(batch: InputBatch, targetAtDown: StrokeTarget): InputResult {

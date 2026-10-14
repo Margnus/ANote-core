@@ -34,6 +34,10 @@ sealed interface ResourceBorrow<out V : Any> {
 enum class LeaseReturn { RETURNED, ALREADY_RETURNED, FOREIGN }
 enum class ResourceReleaseOutcome { RELEASED, NOT_RELEASED, UNKNOWN }
 enum class ResourceCompletion { UPDATED, STALE }
+data class ResourceDrainStatus(
+    val reservations: Int, val readers: Int, val releasing: Int,
+    val unknown: List<ResourceHandle>, val ready: Int, val chargedBytes: Long, val isDrained: Boolean,
+)
 sealed interface ResourceReleaseDispatch<out V : Any> {
     data class Ready<V : Any>(val ticket: ResourceReleaseTicket<V>) : ResourceReleaseDispatch<V>
     data object Idle : ResourceReleaseDispatch<Nothing>
@@ -71,6 +75,9 @@ class ResourceLeasePool<K : Any, V : Any>(
     val outstandingLeases: Int get() = leases.size
     val isDrained: Boolean get() = closed && resources.isEmpty() && reservations.isEmpty() && leases.isEmpty()
     init { require(residentBudget > 0 && totalBudget >= residentBudget && maxResources > 0 && maxLeases > 0) }
+    fun drainStatus() = ResourceDrainStatus(reservations.size, leases.size,
+        resources.values.count { it.release != null }, resources.values.filter { it.unknownRelease }.map { it.handle },
+        resources.values.count { !it.resident && it.borrowers == 0 && it.release == null && !it.unknownRelease }, chargedBytes, isDrained)
 
     /** Reserve BEFORE allocating. Rejecting a replacement does not evict the old resident value. */
     fun reserve(bytes: Long): ReservationResult {
