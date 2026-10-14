@@ -1,6 +1,6 @@
 # NoteCore
 
-独立笔记App与通用画布工程，2026-10-14开始实际开发。当前增加D4离线手写预览竖切：Android原生列表/画布、本机保存及单页备份导入导出已在模拟器验证，iOS宿主与framework已编译成ARM64模拟器.app但尚未启动验证；C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
+独立笔记App与通用画布工程，2026-10-14开始实际开发。当前增加D4离线手写预览竖切：Android原生列表/画布、本机保存、单页备份导入导出和缩放平移已在模拟器验证，iOS宿主与framework已编译成ARM64模拟器.app但尚未启动验证；C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
 
 先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](https://github.com/Margnus/AI-Note/blob/main/README.md)。
 

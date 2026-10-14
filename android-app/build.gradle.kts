@@ -14,7 +14,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0-preview"
-        testInstrumentationRunner = "android.test.InstrumentationTestRunner"
+        testInstrumentationRunner = "dev.notecore.app.ViewportInstrumentation"
     }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
 }

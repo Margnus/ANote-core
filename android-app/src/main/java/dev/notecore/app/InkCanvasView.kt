@@ -5,6 +5,8 @@ import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
 import dev.notecore.canvas.preview.PreviewNotebook
+import dev.notecore.canvas.preview.PreviewViewport
+import kotlin.math.hypot
 
 /** Thin native input/render adapter. Paths are cached per committed revision, not rebuilt per MOVE. */
 @android.annotation.SuppressLint("ViewConstructor") // deliberately programmatic: a canonical notebook is mandatory
@@ -22,15 +24,37 @@ class InkCanvasView(context: Context, val notebook: PreviewNotebook, private val
     private var activePointer = -1
     private var startX = 0f; private var startY = 0f
     private var moved = false
-    private var lastX = 0f; private var lastY = 0f; private var lastPressure = 0.5f; private var lastTime = 0L
-    private val scale: Float get() = minOf(width / 1000f, height / 1400f)
-    private val offsetX: Float get() = (width - 1000f * scale) / 2
+    val viewport = PreviewViewport()
+    private val scale: Float get() = viewport.scale.toFloat()
+    private val offsetX: Float get() = viewport.offsetX.toFloat()
+    private val offsetY: Float get() = viewport.offsetY.toFloat()
+    private var navigating = false
+    private var navIds = emptyList<Int>()
+    private var navX = 0.0; private var navY = 0.0; private var navSpan = 0.0
+    private var activeStylus = false
+    private var suppressSequence = false
+    fun resetViewport() { cancelInk(); viewport.reset(); invalidate() }
+    fun zoomViewport(ratio: Double) {
+        cancelInk(); viewport.gesture(width / 2.0, height / 2.0, width / 2.0, height / 2.0, ratio); invalidate()
+    }
+    private fun navigate(event: MotionEvent, skip: Int = -1) {
+        val fingers = (0 until event.pointerCount).filter { it != skip && event.getToolType(it) == MotionEvent.TOOL_TYPE_FINGER }.take(2)
+        if (fingers.isEmpty()) { navIds = emptyList(); return }
+        val ids = fingers.map { event.getPointerId(it) }
+        val x = fingers.sumOf { event.getX(it).toDouble() } / fingers.size
+        val y = fingers.sumOf { event.getY(it).toDouble() } / fingers.size
+        val span = if (fingers.size == 2) hypot((event.getX(fingers[1]) - event.getX(fingers[0])).toDouble(), (event.getY(fingers[1]) - event.getY(fingers[0])).toDouble()) else 0.0
+        if (ids == navIds && event.actionMasked == MotionEvent.ACTION_MOVE) {
+            viewport.gesture(navX, navY, x, y, if (span > 1 && navSpan > 1) span / navSpan else 1.0)
+        }
+        navIds = ids; navX = x; navY = y; navSpan = span
+    }
     init { setBackgroundColor(0xffedf2f6.toInt()); isFocusable = true; contentDescription = "手写画布，0笔" }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (scale <= 0f) return
-        canvas.save(); canvas.translate(offsetX, 0f); canvas.scale(scale, scale)
+        canvas.save(); canvas.translate(offsetX, offsetY); canvas.scale(scale, scale)
         canvas.drawRect(0f, 0f, 1000f, 1400f, paper)
         var y = 80f
         while (y < 1400) { canvas.drawLine(35f, y, 965f, y, guide); y += 48f }
@@ -61,10 +85,9 @@ class InkCanvasView(context: Context, val notebook: PreviewNotebook, private val
     }
     private fun point(event: MotionEvent, index: Int, history: Int = -1): Boolean {
         val x = ((if (history < 0) event.getX(index) else event.getHistoricalX(index, history)) - offsetX) / scale
-        val y = (if (history < 0) event.getY(index) else event.getHistoricalY(index, history)) / scale
+        val y = ((if (history < 0) event.getY(index) else event.getHistoricalY(index, history)) - offsetY) / scale
         val pressure = (if (history < 0) event.getPressure(index) else event.getHistoricalPressure(index, history)).coerceIn(0f, 1f)
         val time = (if (history < 0) event.eventTime else event.getHistoricalEventTime(history)) * 1000
-        lastX = x; lastY = y; lastPressure = pressure; lastTime = time
         if (!notebook.appendStroke(x.toDouble(), y.toDouble(), pressure, time)) { cancelInk(); error(notebook.lastError); return false }
         active?.lineTo(x, y)
         moved = moved || kotlin.math.abs(x - startX) + kotlin.math.abs(y - startY) > 0.1f
@@ -72,18 +95,30 @@ class InkCanvasView(context: Context, val notebook: PreviewNotebook, private val
     }
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (scale <= 0f) return false
-        when (event.actionMasked) {
+        val action = event.actionMasked
+        if (action == MotionEvent.ACTION_DOWN) { navigating = false; suppressSequence = false; navIds = emptyList() }
+        if (suppressSequence) { if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) suppressSequence = false; return true }
+        val fingers = (0 until event.pointerCount).count { event.getToolType(it) == MotionEvent.TOOL_TYPE_FINGER }
+        // A pencil keeps a stable transform; secondary fingers never move paper under its nib.
+        if (!activeStylus && (navigating || fingers >= 2 || (!fingerDrawing && fingers > 0))) {
+            if (!navigating) { cancelInk(); navigating = true; parent.requestDisallowInterceptTouchEvent(true) }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                navigating = false; navIds = emptyList(); parent.requestDisallowInterceptTouchEvent(false)
+            } else navigate(event, if (action == MotionEvent.ACTION_POINTER_UP) event.actionIndex else -1)
+            invalidate(); return true
+        }
+        when (action) {
             MotionEvent.ACTION_DOWN -> {
                 if (event.getToolType(0) == MotionEvent.TOOL_TYPE_ERASER) { error("预览版暂不支持橡皮尾端，请使用撤销"); return true }
                 val stylus = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                 if (!stylus && !fingerDrawing) return true
-                val x = (event.x - offsetX) / scale; val y = event.y / scale
+                val x = (event.x - offsetX) / scale; val y = (event.y - offsetY) / scale
                 if (x !in 0f..1000f || y !in 0f..1400f) return true
                 notebook.selectPen(penColor, penWidth)
                 if (!notebook.beginStroke(x.toDouble(), y.toDouble(), event.pressure.coerceIn(0f, 1f), event.eventTime * 1000)) {
                     error(notebook.lastError); return true
                 }
-                activePointer = event.getPointerId(0); startX = x; startY = y; moved = false
+                activeStylus = stylus; activePointer = event.getPointerId(0); startX = x; startY = y; moved = false
                 active = Path().apply { moveTo(x, y) }; parent.requestDisallowInterceptTouchEvent(true)
             }
             MotionEvent.ACTION_MOVE -> {
@@ -97,9 +132,10 @@ class InkCanvasView(context: Context, val notebook: PreviewNotebook, private val
                 val index = event.actionIndex
                 if (event.getPointerId(index) == activePointer && active != null) {
                     for (h in 0 until event.historySize) if (!point(event, index, h)) return true
-                    val x = (event.getX(index) - offsetX) / scale; val y = event.getY(index) / scale
+                    val x = (event.getX(index) - offsetX) / scale; val y = (event.getY(index) - offsetY) / scale
                     val ok = notebook.endStroke(x.toDouble(), y.toDouble(), event.getPressure(index).coerceIn(0f, 1f), event.eventTime * 1000)
-                    active = null; activePointer = -1
+                    active = null; activePointer = -1; activeStylus = false
+                    suppressSequence = event.pointerCount > 1
                     if (ok) changed() else error(notebook.lastError)
                     parent.requestDisallowInterceptTouchEvent(false); performClick()
                 }
@@ -109,7 +145,7 @@ class InkCanvasView(context: Context, val notebook: PreviewNotebook, private val
         invalidate(); return true
     }
     override fun performClick(): Boolean { super.performClick(); return true }
-    fun cancelInk() { notebook.cancelStroke(); active = null; activePointer = -1; parent?.requestDisallowInterceptTouchEvent(false); invalidate() }
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) { if (oldw != 0) cancelInk() }
+    fun cancelInk() { notebook.cancelStroke(); active = null; activePointer = -1; activeStylus = false; navigating = false; navIds = emptyList(); parent?.requestDisallowInterceptTouchEvent(false); invalidate() }
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) { cancelInk(); viewport.resize(w.toDouble(), h.toDouble()) }
     override fun onDetachedFromWindow() { cancelInk(); super.onDetachedFromWindow() }
 }

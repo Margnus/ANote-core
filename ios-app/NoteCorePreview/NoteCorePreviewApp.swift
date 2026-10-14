@@ -184,6 +184,8 @@ struct PreviewRoot: View {
     @State private var title = ""
     @State private var importing = false
     @State private var exporting = false
+    @State private var viewportRequest = 0
+    @State private var viewportRatio = 0.0
     var body: some View {
         Group {
             if let note = model.current {
@@ -213,8 +215,14 @@ struct PreviewRoot: View {
                             }
                         }.padding(.horizontal)
                     }.frame(height: 36)
+                    HStack(spacing: 20) {
+                        Button("缩小") { viewportRatio = 1.0 / 1.5; viewportRequest += 1 }
+                        Button("放大") { viewportRatio = 1.5; viewportRequest += 1 }
+                        Button("适合页面") { viewportRatio = 0; viewportRequest += 1 }
+                        Text("双指缩放").font(.caption).foregroundStyle(.secondary)
+                    }.padding(.horizontal)
                     Text(model.status).font(.caption).foregroundStyle(.secondary)
-                    NativeInkCanvas(note: note, color: color, width: width, finger: finger, revision: model.revision,
+                    NativeInkCanvas(note: note, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
                         changed: { model.changed() }, failed: { model.status = $0 })
                         .padding(.horizontal, 12).padding(.bottom, 8)
                 }.padding(.top, 8)

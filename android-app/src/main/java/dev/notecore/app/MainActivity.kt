@@ -124,6 +124,12 @@ class MainActivity : Activity() {
         colors.forEach { (name, color) -> palette.addView(button(name) { canvas?.cancelInk(); canvas?.penColor = color }.apply { setTextColor(color) }) }
         listOf("细" to 2.5, "中" to 5.0, "粗" to 9.0).forEach { (name, width) -> palette.addView(button(name) { canvas?.cancelInk(); canvas?.penWidth = width }) }
         root.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(palette) })
+        val viewportTools = row()
+        viewportTools.addView(button("缩小") { canvas?.zoomViewport(1.0 / 1.5) })
+        viewportTools.addView(button("放大") { canvas?.zoomViewport(1.5) })
+        viewportTools.addView(button("适合页面") { canvas?.resetViewport() })
+        viewportTools.addView(text("双指缩放", 12f))
+        root.addView(viewportTools)
         status = text(getString(R.string.opened, note.strokeCount), 13f).apply { setPadding(dp(20), dp(4), dp(20), dp(8)) }
         root.addView(status)
         canvas = InkCanvasView(this, note, { save(); updateControls() }, ::showError)

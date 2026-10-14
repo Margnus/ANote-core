@@ -90,6 +90,9 @@ def main():
     click(wait(lambda tree: next((n for n in tree.iter('node') if n.attrib.get('text', '').startswith(title+'\n')), None), 'Back did not return to library'))
     count(2)
     output = ROOT/'reports/android-preview.png'
+    click(text('放大')); count(2)
+    click(text('缩小')); count(2)
+    click(text('适合页面')); count(2)
     output.write_bytes(adb('exec-out', 'screencap', '-p', binary=True))
     # Real system document picker, not a direct invocation of storage implementation.
     click(text('导出'))
@@ -135,7 +138,7 @@ def main():
                          'undo', 'redo', 'finger_toggle', 'save_acknowledgement', 'saved_point_count',
                          'force_stop_and_reopen', 'exact_saved_content_after_reopen', 'back_to_library_and_reopen',
                          'system_picker_export_exact_bytes', 'import_picker_cancel', 'import_as_new_document',
-                         'repeated_import_unique_identity', 'corrupt_backup_rejected', 'original_preserved_after_import'],
+                         'repeated_import_unique_identity', 'corrupt_backup_rejected', 'original_preserved_after_import', 'viewport_toolbar'],
               'imported_document_ids': imported_ids,
               'saved_strokes': 2, 'saved_real_points': sum(int(r[4]) for r in stroke_rows),
               'document_sha256': hashlib.sha256(before.encode()).hexdigest(), 'screenshot': str(output.relative_to(ROOT)),
