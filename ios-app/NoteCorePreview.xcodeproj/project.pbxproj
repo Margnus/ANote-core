@@ -81,6 +81,7 @@
 			<array>
 				<string>000000000000000000000010</string>
 				<string>000000000000000000000011</string>
+				<string>000000000000000000000016</string>
 			</array>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
@@ -164,6 +165,7 @@
 			<array>
 				<string>000000000000000000000012</string>
 				<string>000000000000000000000013</string>
+				<string>000000000000000000000017</string>
 			</array>
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<integer>0</integer>
@@ -390,6 +392,24 @@
 				<key>ONLY_ACTIVE_ARCH</key>
 				<string>YES</string>
 			</dict>
+		</dict>
+		<key>000000000000000000000016</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.swift</string>
+			<key>path</key>
+			<string>BoundedOwnerExecutor.swift</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>000000000000000000000017</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>000000000000000000000016</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>

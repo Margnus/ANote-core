@@ -1,0 +1,76 @@
+{
+  "ios_runtime_verified": false,
+  "passed": [
+    "fifo_finite_drain",
+    "all_states_capacity_stop",
+    "byte_bounds",
+    "blocked_identity_retry_no_recompute",
+    "throwing_receiver_idempotent_redelivery",
+    "compute_side_effect_unknown_next_job",
+    "owner_queue_guard_worker_separation",
+    "recursive_drain_guard",
+    "foreign_ticket_rejected",
+    "payload_release_only_after_ack",
+    "automatic_owner_wake_stop_drain",
+    "automatic_blocked_wake_requires_explicit_retry"
+  ],
+  "platform": "macOS",
+  "real_apple_threads_verified": true,
+  "test_count": 12,
+  "status": "passed",
+  "shared_contract_cases": [
+    {
+      "scenario": "fifo_finite_drain",
+      "jvm_case": "realWorkerExecutesFifoAndOwnerReceivesFiniteBatches"
+    },
+    {
+      "scenario": "all_states_capacity_stop",
+      "jvm_case": "runningQueuedAndReadyJobsAllConsumeCapacityAndRejectedWorkNeverRuns"
+    },
+    {
+      "scenario": "byte_bounds",
+      "jvm_case": "byteAdmissionUsesRemainingBudgetWithoutOverflowAndRejectsInvalidCharge"
+    },
+    {
+      "scenario": "blocked_identity_retry_no_recompute",
+      "jvm_case": "blockedReceiverKeepsExactResultAndFifoUntilExplicitRetryWithoutRerunningWork"
+    },
+    {
+      "scenario": "throwing_receiver_idempotent_redelivery",
+      "jvm_case": "receiverExceptionAfterPartialApplyRequiresIdempotentReceiverAndRetainsCharge"
+    },
+    {
+      "scenario": "compute_side_effect_unknown_next_job",
+      "jvm_case": "computeFailureIsUnknownOutcomeAndNextAcceptedJobStillExecutes"
+    },
+    {
+      "scenario": "owner_queue_guard_worker_separation",
+      "jvm_case": "foreignThreadCannotAdmitDrainStopInspectRetryOrMutateDocument"
+    },
+    {
+      "scenario": "recursive_drain_guard",
+      "jvm_case": "reentrantDrainCannotDeliverAnotherResultWhileCurrentReceiverOwnsIt"
+    },
+    {
+      "scenario": "foreign_ticket_rejected",
+      "jvm_case": "foreignDeliveryTicketAndDuplicateAcknowledgmentCannotFreeAnotherExecutorBudget"
+    }
+  ],
+  "shared_case_count": 9,
+  "ios_build_verified": false,
+  "device_performance_verified": false,
+  "production_c1_gate_complete": false,
+  "limitations": [
+    "Apple Foundation worker / serial Dispatch owner verified on macOS, not iOS runtime",
+    "Swift fatal traps / process death are not recoverable worker errors",
+    "Native GPU resources and durable storage are not exercised by this executor suite"
+  ],
+  "input_sha256": {
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "4f911b9fde8da229c3877825ed1e7fd29e480c6da8f51ae48cad0e2b4292270c",
+    "apple-runtime-tests/ExecutorConformance.swift": "a36732cabf221e37cb719c53ef366ee78f8ddef6509bcf00c91223beb887ea69",
+    "tools/verify_apple_executor.py": "1dfd591a1c0b25a0a502e931ad30fbf012291c579bc2c0789b6d6baf37bed092",
+    "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BoundedOwnerExecutorTest.xml": "af346aafd7b4aba38654e88f331ce046ccbb506f4be1e436d6a52aa19408b91c",
+    "reports/verification.json": "1935ef64e91fe5ef2fcf1ccc81510bc0e1ae332b4d0a5812b315fe00720c6052"
+  },
+  "compiler": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx26.0"
+}
