@@ -26,4 +26,16 @@ fun main() {
     val cache = WeightedLruCache<String, Long>(8) { it }
     cache.put("a", 4); cache.put("a", 4); cache.put("b", 4); cache.put("c", 4)
     println("cache_entries=${cache.size} resident_bytes=${cache.residentBytes} budget=${cache.maxBytes}")
+    val resources = ResourceLeasePool<String, ByteArray>(4, 8)
+    val reserved = (resources.reserve(4) as ReservationResult.Reserved).reservation
+    check(resources.publish(reserved, "tile", ByteArray(4)) is ResourcePublication.Resident)
+    val reader = (resources.borrow("tile") as ResourceBorrow.Borrowed<ByteArray>).lease
+    resources.close()
+    check(resources.nextRelease(ResourceLane.GPU) is ResourceReleaseDispatch.Idle)
+    println("resource_model_closed_charged=${resources.chargedBytes} borrowed=${resources.borrowedBytes}")
+    resources.returnLease(reader)
+    val release = (resources.nextRelease(ResourceLane.GPU) as ResourceReleaseDispatch.Ready<ByteArray>).ticket
+    check(release.value.size == 4) // simulated backend acknowledgement; no native destructor here
+    resources.completeRelease(release, ResourceReleaseOutcome.RELEASED)
+    println("resource_model_drained=${resources.isDrained} charged=${resources.chargedBytes}; native_gpu_verified=false")
 }
