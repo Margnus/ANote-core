@@ -13,13 +13,14 @@
 - [提交队列模型](docs/adr/0003-submission-ownership-and-retry.md)：计数/逻辑字节准入、失败保留、丢ACK幂等重试、旧回调拒绝；Confirmed仍为MEMORY_ONLY。
 - [资源lease模型](docs/adr/0004-resource-lease-and-destruction.md)：预留/驻留/退休资源计费，最后读者后释放，未知析构结果隔离；附单线程可控调度假后端。
 - [文档关闭模型](docs/adr/0008-document-close-and-recovery-handoff.md)：统一session停止、完成笔保留、队列/resource drain与两步接管，未知结果继续持有owner。
+- [有界真实执行器](docs/adr/0009-bounded-owner-worker-executor.md)：JVM/Android串行worker、creator-owner线程检查、预留结果槽和显式交付重试，停止不清空已接管工作。
 - commonTest、独立JVM演示、源码依赖边界和真实测试报告。
 - 有界输入状态机、历史批次与预测分离、捕获目标、显式取消/关闭/拒绝；见[输入ADR](docs/adr/0002-input-replay-boundary.md)。
 - [规模笔迹子集](fixtures/scale/README.md)：S1/S2/S9共120万点，按需生成并核验SHA；不代表完整场景压测。
 - [旧字段映射](docs/旧格式字段映射.md)及[原生采集契约](docs/原生输入采集契约.md)：有源码证据和候选规则，转换器/采集器尚未实现。
 - [合成输入轨迹](fixtures/README.md)：5类D2候选及hash，已由Kotlin回放并逐点验证；不是设备性能结果。
 
-这些是验证架构的reference实现，API可调整；Map复制、内存journal和临时数值范围不代表生产性能或正式文件协议。生产Native资源lease、真实worker调度、完整设备采集校准、SQLite和完整几何/索引尚未实现。
+这些是验证架构的reference实现，API可调整；Map复制、内存journal和临时数值范围不代表生产性能或正式文件协议。已有JVM/Android有界真实worker与owner结果泵；生产Native资源lease、Apple执行器、完整设备采集校准、SQLite和完整几何/索引尚未实现。
 
 ## 构建与验证
 

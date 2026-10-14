@@ -40,6 +40,7 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
     residentBudget: Long = 4L * 1024 * 1024, resourceBudget: Long = 8L * 1024 * 1024,
     private val maxSessions: Int = 8, private val inputBudget: Long = 8L * 1024 * 1024,
     maxResources: Int = 256, maxLeases: Int = 1024, releaseLane: ResourceLane = ResourceLane.GPU,
+    private val ownerCheck: () -> Unit = {},
 ) {
     private val identity = Any()
     private class Session(val input: InputReplaySession, val gate: FramePublicationGate, val reservation: Long) {
@@ -57,9 +58,10 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
     private var nextSession = 0L
     private var inputReserved = 0L
     private var observedRevision = 0L
-    init { require(maxSessions > 0 && inputBudget >= 0) }
+    init { ownerCheck(); require(maxSessions > 0 && inputBudget >= 0) }
 
     fun openSession(initialFrame: FrameToken, maxRealSamples: Int = 100_000): SessionOpenResult {
+        ownerCheck()
         require(maxRealSamples in 1..1_000_000)
         val charge = 256L + maxRealSamples.toLong() * 28
         val failure = when {
@@ -78,6 +80,7 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
         return SessionOpenResult.Opened(token)
     }
     fun consume(session: DocumentSession, batch: InputBatch, targetAtDown: StrokeTarget): SessionInputResult {
+        ownerCheck()
         if (closing) return SessionInputResult.Rejected(SessionInputFailure.CLOSING)
         val state = sessions[session]?.takeIf { !it.closed } ?: return SessionInputResult.Rejected(SessionInputFailure.CLOSED_OR_FOREIGN)
         if (state.pending != null) return SessionInputResult.Rejected(SessionInputFailure.COMPLETED_PENDING)
@@ -86,9 +89,10 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
         if (result is InputResult.Completed) state.pending = result.stroke
         return SessionInputResult.Consumed(result)
     }
-    fun pending(session: DocumentSession): CompletedInput? = sessions[session]?.pending
+    fun pending(session: DocumentSession): CompletedInput? { ownerCheck(); return sessions[session]?.pending }
     /** First assignment is stable across capacity rejection; a later call may not replace IDs. */
     fun submitPending(session: DocumentSession, id: CommandId, objectId: ObjectId): AdmissionResult {
+        ownerCheck()
         val state = sessions[session] ?: return AdmissionResult.Rejected(AdmissionRejection.STOPPED)
         val completed = state.pending ?: return AdmissionResult.Rejected(AdmissionRejection.STOPPED)
         if (state.offer != null || closing) return AdmissionResult.Rejected(AdmissionRejection.STOPPED)
@@ -101,13 +105,16 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
         } else state.admissionFailure = (result as AdmissionResult.Rejected).reason
         return result
     }
-    fun expectFrame(session: DocumentSession, frame: FrameToken): Boolean =
-        !closing && frame.sceneId == sceneId && frame.sceneRevision >= observedRevision && sessions[session]?.takeIf { !it.closed }?.gate?.expect(frame) == true
-    fun canPublish(session: DocumentSession, frame: FrameToken): Boolean =
-        !closing && frame.sceneRevision >= observedRevision && sessions[session]?.takeIf { !it.closed }?.gate?.canPublish(frame) == true
+    fun expectFrame(session: DocumentSession, frame: FrameToken): Boolean {
+        ownerCheck(); return !closing && frame.sceneId == sceneId && frame.sceneRevision >= observedRevision && sessions[session]?.takeIf { !it.closed }?.gate?.expect(frame) == true
+    }
+    fun canPublish(session: DocumentSession, frame: FrameToken): Boolean {
+        ownerCheck(); return !closing && frame.sceneRevision >= observedRevision && sessions[session]?.takeIf { !it.closed }?.gate?.canPublish(frame) == true
+    }
 
     /** Only unfinished real input is cancelled, with its sample count reported to the host. */
     fun closeSession(session: DocumentSession): SessionStop? {
+        ownerCheck()
         val state = sessions[session]?.takeIf { !it.closed } ?: return null
         val count = state.input.activeRealSamples
         state.input.close(); state.gate.close(); state.closed = true
@@ -117,6 +124,7 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
     }
     private fun removeSession(session: DocumentSession) { sessions.remove(session)?.let { inputReserved -= it.reservation } }
     fun beginClose(): List<SessionStop> {
+        ownerCheck()
         if (closing) return emptyList()
         closing = true
         val stopped = sessions.keys.toList().mapNotNull(::closeSession)
@@ -124,6 +132,7 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
         return stopped
     }
     fun status(): DocumentCloseStatus {
+        ownerCheck()
         val state = resources.drainStatus()
         val phase = if (!closing) DocumentClosePhase.OPEN else if (sessions.isEmpty() && queue.retainedEntries == 0 && state.isDrained)
             DocumentClosePhase.CLOSED else DocumentClosePhase.CLOSING
@@ -131,24 +140,28 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
     }
     /** Host also calls this after external authority changes; snapshots never replace the authority. */
     fun observeScene(scene: SceneSnapshot): Boolean {
+        ownerCheck()
         if (scene.id != sceneId || scene.revision < observedRevision) return false
         observedRevision = scene.revision
         return true
     }
     fun dispatch(scene: SceneSnapshot): DispatchResult {
+        ownerCheck()
         observeScene(scene)
         return queue.dispatch(scene)
     }
     fun complete(attempt: SubmissionAttempt, result: CommitResult): CompletionUpdate {
+        ownerCheck()
         val update = queue.complete(attempt, result)
         if (update == CompletionUpdate.UPDATED && result is CommitResult.Accepted)
             observedRevision = maxOf(observedRevision, result.receipt.sceneRevision)
         return update
     }
-    fun transportFailed(attempt: SubmissionAttempt, detail: String) = queue.transportFailed(attempt, detail)
-    fun retry(id: CommandId) = queue.retry(id)
+    fun transportFailed(attempt: SubmissionAttempt, detail: String): CompletionUpdate { ownerCheck(); return queue.transportFailed(attempt, detail) }
+    fun retry(id: CommandId): Boolean { ownerCheck(); return queue.retry(id) }
 
     fun offerPending(session: DocumentSession): RecoveryOffer? {
+        ownerCheck()
         val state = sessions[session]?.takeIf { it.closed } ?: return null
         val completed = state.pending ?: return null
         return state.offer ?: RecoveryOffer(identity, RecoveryPayload.Pending(session, completed, state.proposal, state.admissionFailure))
@@ -156,6 +169,7 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
     }
     /** In-flight/unknown outcomes are deliberately not transferable as definitive failures. */
     fun offerSubmission(id: CommandId): RecoveryOffer? {
+        ownerCheck()
         submissionOffers[id]?.let { return it }
         val submission = queue.submission(id) ?: return null
         val payload = when (val state = queue.state(id)) {
@@ -167,6 +181,7 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
     }
     /** Explicit receiver acknowledgment transfers responsibility; an offer alone never frees charge. */
     fun acknowledge(offer: RecoveryOffer): Boolean {
+        ownerCheck()
         if (offer.owner !== identity) return false
         val session = sessions.entries.firstOrNull { it.value.offer === offer }?.key
         if (session != null) {
@@ -181,12 +196,12 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
         if (!collected) return false
         submissionOffers.remove(id); offer.invalidate(); return true
     }
-    fun reserveResource(bytes: Long) = resources.reserve(bytes)
-    fun publishResource(reservation: ResourceReservation, key: K, value: V) = resources.publish(reservation, key, value)
-    fun cancelUnallocated(reservation: ResourceReservation) = resources.cancelUnallocated(reservation)
-    fun borrowResource(key: K) = resources.borrow(key)
-    fun returnLease(lease: ResourceLease<V>) = resources.returnLease(lease)
-    fun nextRelease(lane: ResourceLane) = resources.nextRelease(lane)
-    fun completeRelease(ticket: ResourceReleaseTicket<V>, outcome: ResourceReleaseOutcome) = resources.completeRelease(ticket, outcome)
-    fun resolveUnknown(handle: ResourceHandle, outcome: ResourceReleaseOutcome) = resources.resolveUnknown(handle, outcome)
+    fun reserveResource(bytes: Long): ReservationResult { ownerCheck(); return resources.reserve(bytes) }
+    fun publishResource(reservation: ResourceReservation, key: K, value: V): ResourcePublication { ownerCheck(); return resources.publish(reservation, key, value) }
+    fun cancelUnallocated(reservation: ResourceReservation): Boolean { ownerCheck(); return resources.cancelUnallocated(reservation) }
+    fun borrowResource(key: K): ResourceBorrow<V> { ownerCheck(); return resources.borrow(key) }
+    fun returnLease(lease: ResourceLease<V>): LeaseReturn { ownerCheck(); return resources.returnLease(lease) }
+    fun nextRelease(lane: ResourceLane): ResourceReleaseDispatch<V> { ownerCheck(); return resources.nextRelease(lane) }
+    fun completeRelease(ticket: ResourceReleaseTicket<V>, outcome: ResourceReleaseOutcome): ResourceCompletion { ownerCheck(); return resources.completeRelease(ticket, outcome) }
+    fun resolveUnknown(handle: ResourceHandle, outcome: ResourceReleaseOutcome): ResourceCompletion { ownerCheck(); return resources.resolveUnknown(handle, outcome) }
 }

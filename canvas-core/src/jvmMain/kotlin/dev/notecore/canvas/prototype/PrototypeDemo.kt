@@ -52,4 +52,19 @@ fun main() {
     println("document_close_before_handoff=${document.status().phase} receipt=${ownedByReceiver.receipt.durability}")
     check(document.acknowledge(offer))
     println("document_close_after_handoff=${document.status().phase} retained_submissions=${document.status().submissions.size}; durable_recovery_verified=false")
+    val executor = BoundedOwnerExecutor(2, 16, "NoteCore-demo-worker")
+    try {
+        var received = 0
+        repeat(2) {
+            check(executor.submit(4, { executor.checkWorkerThread(); Thread.currentThread().id }) { result ->
+                executor.checkOwnerThread()
+                check((result as WorkResult.Succeeded<Long>).value != Thread.currentThread().id)
+                received++; ResultDisposition.ACKNOWLEDGED
+            } is WorkAdmission.Accepted)
+        }
+        executor.stopAccepting(); check(executor.awaitWorkerStop(3000))
+        println("real_worker_stopped=${executor.status().workerStopped} before_ack_charged=${executor.status().chargedBytes} drained=${executor.status().isDrained}")
+        executor.drainResults()
+        println("real_owner_received=$received after_ack_charged=${executor.status().chargedBytes} drained=${executor.status().isDrained}; apple_executor_verified=false")
+    } finally { executor.stopAccepting(); check(executor.awaitWorkerStop(3000)) }
 }

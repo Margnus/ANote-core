@@ -22,14 +22,15 @@ def main():
     test = ROOT/'android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk'
     adb('install', '-r', str(apk)); adb('install', '-r', str(test))
     output = adb('shell', 'am', 'instrument', '-w', '-r', 'dev.notecore.preview.test/dev.notecore.app.ViewportInstrumentation')
-    required = ['pinch_and_inverse_mapping', 'stylus_transform_lock', 'finger_pan_without_ink', 'viewport_status']
+    required = ['pinch_and_inverse_mapping', 'stylus_transform_lock', 'finger_pan_without_ink', 'executor_owner_worker', 'viewport_status']
     for key in required:
         if f'{key}=passed' not in output: raise AssertionError(output)
     inputs = sorted([*ROOT.glob('android-app/src/androidTest/**/*.kt'), *ROOT.glob('android-app/src/main/**/*.kt'),
-                     *ROOT.glob('canvas-core/src/commonMain/**/*.kt'), ROOT/'android-app/build.gradle.kts', test])
+                     *ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidMain/**/*.kt'), ROOT/'android-app/build.gradle.kts', test])
     report = {'status': 'passed', 'apk_sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
               'serial': args.serial, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
               'checks': required[:-1], 'event_source': 'synthetic MotionEvent injected through UiAutomation into window',
+              'executor_thread_source': 'real Android ART owner/worker threads, bounded result delivery and explicit retry',
               'real_stylus_verified': False, 'device_performance_verified': False,
               'source_and_test_apk_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}}
     (ROOT/'reports/android-viewport-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')

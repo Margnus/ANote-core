@@ -21,6 +21,9 @@ kotlin {
         iosSimulatorArm64 { binaries.framework { baseName = "NoteCanvasPrototype"; isStatic = true } }
     }
     sourceSets {
+        val jvmAndAndroidMain by creating { dependsOn(getByName("commonMain")) }
+        getByName("jvmMain").dependsOn(jvmAndAndroidMain)
+        if (providers.gradleProperty("enableAndroidTargets").orNull == "true") getByName("androidMain").dependsOn(jvmAndAndroidMain)
         commonTest.dependencies { implementation(kotlin("test")) }
         jvmTest {
             resources.srcDir("../fixtures/input")

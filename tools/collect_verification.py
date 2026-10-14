@@ -50,6 +50,7 @@ def main():
         'android_build_verified': False, 'apple_build_verified': False,
         'disk_durability_verified': False, 'gpu_lifecycle_verified': False,
         'device_performance_verified': False, 'c1_architecture_gate_complete': False,
+        'jvm_owner_worker_threads_verified': any(s['suite'].endswith('.BoundedOwnerExecutorTest') and s['tests'] >= 15 for s in results) and totals['failures'] + totals['errors'] + totals['skipped'] == 0,
     }
     (ROOT/'reports').mkdir(exist_ok=True)
     (ROOT/'reports/verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')

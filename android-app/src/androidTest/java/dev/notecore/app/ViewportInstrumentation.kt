@@ -8,6 +8,7 @@ import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
 import dev.notecore.canvas.preview.PreviewNotebook
+import dev.notecore.canvas.prototype.*
 import kotlin.math.abs
 
 /** Dedicated emulator checks: inject real Android multi-pointer events through the window. */
@@ -63,6 +64,8 @@ class ViewportInstrumentation : Instrumentation() {
                 check(note.capture().encode() == bytes && !note.hasActiveStroke)
             }
             result.putString("finger_pan_without_ink", "passed")
+            verifyExecutor()
+            result.putString("executor_owner_worker", "passed")
             result.putString("viewport_status", "passed")
             finish(Activity.RESULT_OK, result)
         } catch (failure: Throwable) {
@@ -77,6 +80,36 @@ class ViewportInstrumentation : Instrumentation() {
             host.setContentView(canvas)
         }
         waitForIdleSync()
+    }
+    private fun verifyExecutor() {
+        // This owner is the instrumentation thread, not the UI thread; join never blocks the app UI.
+        val executor = BoundedOwnerExecutor(2, 8, "NoteCore-ART-test")
+        try {
+            val owner = Thread.currentThread().id
+            var allow = false; var callbacks = 0; var runs = 0
+            val input = SceneId("ART-owned-input")
+            val first = executor.submit(input, 4, { executor.checkWorkerThread(); runs++; Thread.currentThread().id }) { retained, outcome ->
+                check(retained === input)
+                executor.checkOwnerThread(); check(Thread.currentThread().id == owner)
+                check((outcome as WorkResult.Succeeded<Long>).value != owner)
+                if (!allow) ResultDisposition.RETRY_REQUIRED else { callbacks++; ResultDisposition.ACKNOWLEDGED }
+            } as WorkAdmission.Accepted
+            executor.submit(4, { executor.checkWorkerThread(); runs++; Thread.currentThread().id }) {
+                check(Thread.currentThread().id == owner); check((it as WorkResult.Succeeded<Long>).value != owner)
+                callbacks++; ResultDisposition.ACKNOWLEDGED
+            }
+            check(executor.submit(1, { error("Rejected work executed") }) { ResultDisposition.ACKNOWLEDGED } is WorkAdmission.Rejected)
+            executor.stopAccepting(); check(executor.awaitWorkerStop(3000))
+            check(executor.status().chargedBytes == 8L && !executor.status().isDrained)
+            check(executor.drainResults().blocked === first.ticket && callbacks == 0 && runs == 2)
+            allow = true; check(executor.retryDelivery(first.ticket)); check(executor.drainResults().acknowledged == 2)
+            check(callbacks == 2 && runs == 2 && executor.status().isDrained)
+            val document = DocumentCloseCoordinator<String, Any>(SceneId("ART-thread-check"), ownerCheck = executor::checkOwnerThread)
+            var refused = false
+            val foreign = Thread { try { document.beginClose() } catch (_: IllegalStateException) { refused = true } }
+            foreign.start(); foreign.join(3000); check(!foreign.isAlive && refused)
+            check(document.status().phase == DocumentClosePhase.OPEN); document.beginClose()
+        } finally { executor.stopAccepting(); check(executor.awaitWorkerStop(3000)) }
     }
     private data class P(val id: Int, val x: Float, val y: Float, val tool: Int = MotionEvent.TOOL_TYPE_FINGER)
     private fun event(action: Int, points: List<P>) {

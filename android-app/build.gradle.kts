@@ -25,6 +25,7 @@ tasks.register("verifyPreviewAndroid") {
     dependsOn("assembleDebug", "lintDebug")
     doLast {
         val inputs = rootProject.fileTree("canvas-core/src/commonMain") { include("**/*.kt") }.files +
+            rootProject.fileTree("canvas-core/src/jvmAndAndroidMain") { include("**/*.kt") }.files +
             fileTree("src/main").files + listOf(buildFile, rootProject.buildFile,
                 rootProject.file("settings.gradle.kts"), rootProject.file("gradle.properties"),
                 rootProject.file("canvas-core/build.gradle.kts"),
