@@ -69,3 +69,21 @@ tasks.register<JavaExec>("runSpatialIndexPoc") {
     mainClass.set("dev.notecore.canvas.prototype.SpatialIndexBenchmark")
     args(rootProject.projectDir.absolutePath)
 }
+
+tasks.register<JavaExec>("generateBrushPathFixtures") {
+    group = "verification"
+    dependsOn("jvmTestClasses")
+    val tests = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(tests.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.BrushPathFixtures")
+    args(rootProject.projectDir.absolutePath)
+}
+
+tasks.register<JavaExec>("runBrushPathCosts") {
+    group = "verification"
+    dependsOn("jvmTestClasses", generateScaleFixtures)
+    val tests = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(tests.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.BrushPathCosts")
+    args(rootProject.projectDir.absolutePath)
+}

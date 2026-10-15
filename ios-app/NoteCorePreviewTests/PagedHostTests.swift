@@ -5,6 +5,51 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    func testSharedBrushContoursMatchAnalyticCoverageOffscreen() throws {
+        struct Fixture: Decodable {
+            struct Case: Decodable { let name: String; let alpha: Double; let contours: [[[Double]]]; let oracle_mask: [String] }
+            let width: Int; let height: Int; let fill_rule: String; let cases: [Case]
+        }
+        let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "brush-paths", withExtension: "json"))
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(contentsOf: url))
+        XCTAssertEqual(fixture.fill_rule, "nonzero-once"); XCTAssertEqual(fixture.cases.count, 6)
+        var testedPixels = 0
+        for c in fixture.cases {
+            let path = CGMutablePath()
+            for contour in c.contours {
+                for (index, point) in contour.enumerated() {
+                    let p = CGPoint(x: point[0], y: point[1])
+                    if index == 0 { path.move(to: p) } else { path.addLine(to: p) }
+                }
+                path.closeSubpath()
+            }
+            for antialias in [false, true] {
+                var pixels = [UInt8](repeating: 0, count: fixture.width * fixture.height * 4)
+                try pixels.withUnsafeMutableBytes { bytes in
+                    let context = try XCTUnwrap(CGContext(data: bytes.baseAddress, width: fixture.width, height: fixture.height,
+                        bitsPerComponent: 8, bytesPerRow: fixture.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+                    context.setAllowsAntialiasing(antialias); context.setShouldAntialias(antialias)
+                    // Fixture uses top-down scene pixels; raw CGBitmapContext rows
+                    // are vertically reversed relative to its default user space.
+                    context.translateBy(x: 0, y: CGFloat(fixture.height))
+                    context.scaleBy(x: 1, y: -1)
+                    context.setFillColor(red: 1, green: 1, blue: 1, alpha: c.alpha)
+                    context.addPath(path); context.fillPath(using: .winding) // ONE compound fill.
+                }
+                for y in 0..<fixture.height {
+                    let row = Array(c.oracle_mask[y])
+                    for x in 0..<fixture.width where row[x] != "?" {
+                        let actual = Int(pixels[(y * fixture.width + x) * 4 + 3])
+                        let expected = row[x] == "#" ? Int((c.alpha * 255).rounded()) : 0
+                        XCTAssertLessThanOrEqual(abs(actual - expected), 1, "\(c.name) AA=\(antialias) x=\(x) y=\(y) expected=\(expected) actual=\(actual)")
+                        testedPixels += 1
+                    }
+                }
+            }
+        }
+        XCTAssertGreaterThan(testedPixels, 20000)
+    }
     private func directory() -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("NoteCoreHostTests-" + UUID().uuidString, isDirectory: true)
     }

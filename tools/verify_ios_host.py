@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testSharedBrushContoursMatchAnalyticCoverageOffscreen()',
     'testActualAndroidFileImportsFreshIdsAndExportsAllPages()',
     'testFailedSaveRetainsRootAcrossCloseAndRepair()',
     'testLateImportCannotReplaceNewActiveOwner()',
@@ -33,7 +34,8 @@ def inputs():
              ROOT/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype',
              ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'gradle.properties',
              ROOT/'canvas-core/build.gradle.kts', ROOT/'shared-core/build.gradle.kts',
-             ROOT/'fixtures/transfer/android-paged-v2.ncp', ROOT/'fixtures/transfer/android-paged-v2.json', Path(__file__)]
+             ROOT/'fixtures/transfer/android-paged-v2.ncp', ROOT/'fixtures/transfer/android-paged-v2.json',
+             ROOT/'fixtures/geometry/brush-paths.json', Path(__file__)]
     return {path.relative_to(ROOT).as_posix(): digest(path) for path in sorted(files)}
 
 
@@ -88,6 +90,7 @@ def main():
     host = BUILD/'Build/Products/Debug-iphonesimulator/NoteCorePreview.app'
     executable = host/'NoteCorePreview'
     plugin = host/'PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests'
+    assert digest(host/'PlugIns/NoteCorePreviewTests.xctest/brush-paths.json') == digest(ROOT/'fixtures/geometry/brush-paths.json')
     report = {
         'status': 'passed', 'platform': 'iOS Simulator ARM64 app-host XCTest',
         'device': {k: device[k] for k in ('name', 'udid', 'state')}, 'test_count': len(actual),
@@ -98,6 +101,8 @@ def main():
         'android_fixture_sha256': digest(fixture), 'android_fixture_provenance': provenance,
         'native_model_file_reopen_verified': True, 'cross_platform_fixture_import_verified': True,
         'native_offscreen_render_pixels_verified': True,
+        'shared_brush_contour_offscreen_verified': True,
+        'brush_fixture_execution_scope': 'JVM-generated common contour output consumed by real iOS CoreGraphics; not Kotlin/Native runtime generation, AA edge equivalence or app integration',
         'desktop_ui_interaction_verified': False, 'real_touch_input_verified': False,
         'system_file_picker_verified': False, 'process_restart_verified': False,
         'device_performance_verified': False, 'production_c1_gate_complete': False,

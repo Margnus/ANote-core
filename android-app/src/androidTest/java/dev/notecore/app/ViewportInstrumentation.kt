@@ -19,10 +19,20 @@ class ViewportInstrumentation : Instrumentation() {
     private lateinit var canvas: InkCanvasView
     private lateinit var note: PagedPreviewNotebook
     private var downTime = 0L
-    override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
+    private var brushPathOnly = false
+    override fun onCreate(arguments: Bundle?) {
+        brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
+        super.onCreate(arguments); start()
+    }
     override fun onStart() {
         val result = Bundle()
         try {
+            if (brushPathOnly) {
+                result.putInt("brush_path_pixels", BrushPathOffscreen.verify(context.assets))
+                result.putString("brush_path_status", "passed")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             setup()
             val cx = canvas.width / 2f; val cy = canvas.height / 2f

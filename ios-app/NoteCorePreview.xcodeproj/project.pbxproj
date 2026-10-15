@@ -464,6 +464,7 @@
 			<array>
 				<string>000000000000000000000030</string>
 				<string>000000000000000000000040</string>
+				<string>000000000000000000000043</string>
 			</array>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
@@ -675,9 +676,28 @@
 			<key>files</key>
 			<array>
 				<string>000000000000000000000041</string>
+				<string>000000000000000000000044</string>
 			</array>
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<integer>0</integer>
+		</dict>
+		<key>000000000000000000000043</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.json</string>
+			<key>path</key>
+			<string>../fixtures/geometry/brush-paths.json</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+		</dict>
+		<key>000000000000000000000044</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>000000000000000000000043</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>
