@@ -100,6 +100,7 @@ final class AppleBrushImageExperiment {
     private var image: CGImage?
     private var unknown = false
     private(set) var released = false
+    private(set) var rowStorageUpperBytes = 0
     private let releaseBoundary: (Bool) throws -> Void
     private init(_ adapter: AppleBrushRenderExperiment, _ reader: AppleBrushReaderExperiment,
                  _ releaseBoundary: @escaping (Bool) throws -> Void) {
@@ -125,6 +126,7 @@ final class AppleBrushImageExperiment {
                 guard let image = holder.image, image.bytesPerRow * image.height <= Int(item.job.nativeAllowance) - bytes else {
                     throw AppleBrushImageFailureExperiment.layout
                 }
+                holder.rowStorageUpperBytes = context.bytesPerRow * h + image.bytesPerRow * image.height
                 try afterCopy()
             }
             return .ready(holder)

@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testFixedScrollZoomQueueAndHeldReaderTrace()',
     'testForeignThreadCannotReleaseHolderAndThrowingReceiveRedelivers()',
     'testSwiftWorkerRendersActualPixelsAndCloseKeepsNativeBudget()',
     'testExactResultRedeliveryAndFrameChangeBeforeAck()',
@@ -97,7 +98,16 @@ def main():
     executable = host/'NoteCorePreview'
     plugin = host/'PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests'
     assert digest(host/'PlugIns/NoteCorePreviewTests.xctest/brush-paths.json') == digest(ROOT/'fixtures/geometry/brush-paths.json')
+    attachments = BUILD/('attachments-' + result.stem)
+    command('xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(result), '--output-path', str(attachments))
+    traces = []
+    for path in attachments.rglob('*.json'):
+        data = json.loads(path.read_text(encoding='utf-8'))
+        if isinstance(data, dict) and data.get('trace_id') == 'dev034-fixed-viewport-v1':
+            traces.append(data)
+    assert len(traces) == 1 and traces[0]['closed_drained']
     report = {
+        'render_viewport_trace': traces[0], 'viewport_trace_test_count': 1,
         'status': 'passed', 'platform': 'iOS Simulator ARM64 app-host XCTest',
         'device': {k: device[k] for k in ('name', 'udid', 'state')}, 'test_count': len(actual),
         'checks': sorted(EXPECTED), 'test_summary': summary,

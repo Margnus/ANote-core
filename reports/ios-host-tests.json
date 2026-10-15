@@ -1,4 +1,139 @@
 {
+  "render_viewport_trace": {
+    "closed_drained": true,
+    "copies": [
+      {
+        "elapsed_ns": 1039625,
+        "row_storage_upper_bytes": 16384
+      },
+      {
+        "elapsed_ns": 1009417,
+        "row_storage_upper_bytes": 16384
+      }
+    ],
+    "events": [
+      {
+        "charged": 24576,
+        "elapsed_ns": 60785917,
+        "event": "first-held",
+        "executor": 0,
+        "retired": 0
+      },
+      {
+        "charged": 24576,
+        "elapsed_ns": 60803125,
+        "event": "scroll-old-retired",
+        "executor": 0,
+        "retired": 24576
+      },
+      {
+        "charged": 205216,
+        "elapsed_ns": 62377167,
+        "event": "two-jobs-rejected-third",
+        "executor": 180640,
+        "retired": 24576
+      },
+      {
+        "charged": 205216,
+        "elapsed_ns": 62382875,
+        "event": "queued-cancelled",
+        "executor": 180640,
+        "retired": 24576
+      },
+      {
+        "charged": 205216,
+        "elapsed_ns": 111213167,
+        "event": "ready-before-ack",
+        "executor": 180640,
+        "retired": 24576
+      },
+      {
+        "charged": 24576,
+        "elapsed_ns": 111271750,
+        "event": "late-and-cancelled-ack",
+        "executor": 0,
+        "retired": 24576
+      },
+      {
+        "charged": 49152,
+        "elapsed_ns": 159243167,
+        "event": "zoom-image-held",
+        "executor": 0,
+        "retired": 24576
+      },
+      {
+        "charged": 49152,
+        "elapsed_ns": 171341667,
+        "event": "closed-two-readers",
+        "executor": 0,
+        "retired": 49152
+      },
+      {
+        "charged": 24576,
+        "elapsed_ns": 171378209,
+        "event": "new-reader-released",
+        "executor": 0,
+        "retired": 24576
+      },
+      {
+        "charged": 0,
+        "elapsed_ns": 171385292,
+        "event": "old-reader-released",
+        "executor": 0,
+        "retired": 0
+      }
+    ],
+    "input_points": 4,
+    "max_jobs": 2,
+    "queue_wait_ns": [
+      {
+        "queue_handoff_wait_lower_ns": 26792,
+        "queue_handoff_wait_upper_ns": 68750,
+        "request_to_worker_ns": 68750,
+        "submit_elapsed_ns": 41958
+      },
+      {
+        "queue_handoff_wait_lower_ns": 22834,
+        "queue_handoff_wait_upper_ns": 66667,
+        "request_to_worker_ns": 66667,
+        "submit_elapsed_ns": 43833
+      },
+      {
+        "queue_handoff_wait_lower_ns": 48516291,
+        "queue_handoff_wait_upper_ns": 48562000,
+        "request_to_worker_ns": 48562000,
+        "submit_elapsed_ns": 45709
+      },
+      {
+        "queue_handoff_wait_lower_ns": 16667,
+        "queue_handoff_wait_upper_ns": 55875,
+        "request_to_worker_ns": 55875,
+        "submit_elapsed_ns": 39208
+      }
+    ],
+    "resident_budget": 32768,
+    "timing_scope": "One iOS Simulator run; Admission-to-beforeCompute wait bounded by submit call timestamps; includes controlled worker gate and handoff overhead; copy is create API elapsed, not heap/GPU",
+    "total_budget": 210000,
+    "trace_id": "dev034-fixed-viewport-v1",
+    "viewports": [
+      [
+        0.25,
+        8,
+        0.5
+      ],
+      [
+        4.25,
+        8,
+        0.5
+      ],
+      [
+        4.25,
+        8,
+        0.25
+      ]
+    ]
+  },
+  "viewport_trace_test_count": 1,
   "status": "passed",
   "platform": "iOS Simulator ARM64 app-host XCTest",
   "device": {
@@ -6,13 +141,14 @@
     "udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
     "state": "Booted"
   },
-  "test_count": 15,
+  "test_count": 16,
   "checks": [
     "testActualAndroidFileImportsFreshIdsAndExportsAllPages()",
     "testCancelledQueuedJobAndUnknownComputeRequireAckAndReconciliation()",
     "testCopyFailureCleanupUnknownReturnsHolderAndNoDestructiveRetry()",
     "testExactResultRedeliveryAndFrameChangeBeforeAck()",
     "testFailedSaveRetainsRootAcrossCloseAndRepair()",
+    "testFixedScrollZoomQueueAndHeldReaderTrace()",
     "testForeignThreadCannotReleaseHolderAndThrowingReceiveRedelivers()",
     "testLateImportCannotReplaceNewActiveOwner()",
     "testLateOpenCannotReplaceNewActiveOwner()",
@@ -38,7 +174,7 @@
         },
         "expectedFailures": 0,
         "failedTests": 0,
-        "passedTests": 15,
+        "passedTests": 16,
         "skippedTests": 0,
         "testPlanConfiguration": {
           "configurationId": "1",
@@ -49,19 +185,19 @@
     "environmentDescription": "NoteCorePreview · Built with macOS 26.6.2",
     "expectedFailures": 0,
     "failedTests": 0,
-    "finishTime": 1792069177.346,
-    "passedTests": 15,
+    "finishTime": 1792069617.325,
+    "passedTests": 16,
     "result": "Passed",
     "runtimeWarnings": [],
     "skippedTests": 0,
-    "startTime": 1792069169.133,
+    "startTime": 1792069609.461,
     "statistics": [],
     "testFailures": [],
     "title": "Test - NoteCorePreview",
     "topInsights": [],
-    "totalTestCount": 15
+    "totalTestCount": 16
   },
-  "xcresult": "ios-app/build/host-tests/run-45f3f35b064a4b269b0e47c856e48c16.xcresult",
+  "xcresult": "ios-app/build/host-tests/run-595e54d0c0a1483b94b5cc87318d4bdb.xcresult",
   "source_and_framework_sha256": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
@@ -84,22 +220,22 @@
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "127897258aaff666d03829023c0ec8275446fd01301c1843a7fca0ebd9a51a7f",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
-    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "c1b9a8d2f0a0ff98fd909d9d35a259137fc81cbcdb0b02bcfc36a29bb9b4e8f5",
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "639cdee7b1c6f7be4e0d7c5673c3f67ac251e2857396ba27c3fff93a18048a71",
     "fixtures/geometry/brush-paths.json": "396ab01fd7e56f964e623a8300c7f83ed6970df9c3c2e0e8e214b3cbebe0d8fa",
     "fixtures/transfer/android-paged-v2.json": "be2ca34cf4628328b2aa1bf6fe08a1c9b04754956664a9890e3eef5817391016",
     "fixtures/transfer/android-paged-v2.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
     "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
-    "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "691ac53fc46240343cdb36fa9cbe1826cb5ebe2171fad2691524250bc59148cd",
+    "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "fde00fc5897647ab8006d3e279b6aea14e2a895a2d2ee65587925d9008d8f996",
     "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "4f911b9fde8da229c3877825ed1e7fd29e480c6da8f51ae48cad0e2b4292270c",
     "ios-app/NoteCorePreview/NativeInkCanvas.swift": "f3465e0d59b459f281b60430103f6a090b02254d012cc091431930fd115be402",
     "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "04980aeb9fa337f70a0882cd992d23b632b779a343ba7ce7506c24140280aa1a",
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "608a6c20717864d15bf043d808522a18c9562498ad3879a1615d7197eed70c03",
     "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "9dfb61e12e0533b223352abcd56b06c3e315409751df817db6159bbcdafb2040",
     "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
-    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "3a4ba38092772ecdb0da56d0d7a73498787c3017b08f4f9e03d48b42a0604b31",
+    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "a97b575ecc0c3e96ecda747d6dafbd62943eb44bf32ed1907f4a7027116610e4",
     "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "d015fe67e2517c9c37a13b499c0cbce351b32da4cd59c5d78df587cae237f028",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "32425649ce861ebd7974f46835d3586f013dba65dca0b3b3d4ee6b52e1c49fae",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "4ed7555e676b3458d68a83ffe29b70797d0fd708f7fa99c7b60a324f1f9ee284",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
     "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
@@ -110,7 +246,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "d5e9d113dd7b77f7466abdd5100037140540a8c81989543e08e6657b9446954b",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "1c5291fe1c2809ec458983ae6e15627697466e2b4899d5d67d82b1088154b5c6",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
-    "tools/verify_ios_host.py": "53e6600cc66caee5bf62253114437097c3efd99247725ebe4d7c5d18d1c3f918"
+    "tools/verify_ios_host.py": "02673811f24d071251a6acc6e1129fa2133c1c5dcce1be70bb7ca0f7ceff467f"
   },
   "framework_verified_build_inputs": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
@@ -134,10 +270,10 @@
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "127897258aaff666d03829023c0ec8275446fd01301c1843a7fca0ebd9a51a7f",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
-    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "c1b9a8d2f0a0ff98fd909d9d35a259137fc81cbcdb0b02bcfc36a29bb9b4e8f5",
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "639cdee7b1c6f7be4e0d7c5673c3f67ac251e2857396ba27c3fff93a18048a71",
     "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "32425649ce861ebd7974f46835d3586f013dba65dca0b3b3d4ee6b52e1c49fae",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "4ed7555e676b3458d68a83ffe29b70797d0fd708f7fa99c7b60a324f1f9ee284",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
     "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
@@ -151,8 +287,8 @@
   },
   "test_build_sha256": {
     "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "e8d3fa04bbcfd58b2713a572d0ea33c8ccd21d95f8b64fb2b4710fcd09285c96",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "6cad71bb8495e36256dbeb9558ce2a66f56264373a4ca0da44ebbdfa1966d5a4",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "2c2a3c50c77acd857babde82224b87c27c87c4fcfa4d342785498ce99bc7ac16"
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "385f3856f27f71642a9d97e228ae43fb3bda6542faaa7ae0c5965c2a80cad784",
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "5623f27445bbda97fcc976fd2a1eaf6dfa8c66f1c97a141b4e499a83bda27448"
   },
   "android_fixture_sha256": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
   "android_fixture_provenance": {

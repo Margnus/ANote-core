@@ -27,3 +27,5 @@
 证据：[宿主源码/framework/二进制报告](../reports/ios-host-tests.json)、[普通包构建](../reports/ios-preview-build.json)、[XCTest 后普通包恢复/payload 核对](../reports/ios-preview-restored.json)。后者只证明安装内容，无 UI 或新包交互回归。旧 UI-001 保留其包 SHA，不转移到此包。74 项 Apple 共同/CoreGraphics/测试 NSThread 回归另列 [原生报告](../reports/apple-brush-common-tests.json)，不是 Swift 接入证据；272 项共享 JVM 也另列。
 
 结论：**采用为 DEV-034C 的未冻结实验基础，生产采用证据不足**。已排除“另建生产 worker”方案；App 接入路径是通过同一 owner 在现有视口生命周期准入/取消、驱动 drain 后 ACK、UI 持有同一平台 holder 到明确释放。普通 App 当前未调用此 backend，继续只支持 MONOLINE。先用固定视口 trace 补队列等待/拒绝、复制和长持有成本，再依据 M-1 与 C1 决定生产后端。owner 完全丢失/跨线程接管、物理触笔/heap、硬件 GPU fence、任意变换、SQLite 恢复均未验收。
+
+后续DEV-034C已完成双端固定视口责任trace，见[记录](固定视口资源trace.md)。本文B节点在Core eb5935d时为15项宿主；当前宿主报告为16项，额外1项属于C，不改变B的6项独立范围。

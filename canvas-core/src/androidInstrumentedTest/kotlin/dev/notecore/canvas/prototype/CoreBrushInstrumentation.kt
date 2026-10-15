@@ -16,10 +16,11 @@ class CoreBrushInstrumentation : Instrumentation() {
                 BrushReductionPocTest::class.java, ChunkedBrushPocTest::class.java,
                 BrushTileCachePocTest::class.java, ResourceLeaseContractTest::class.java,
                 WeightedLruContractTest::class.java, BrushTilePixelsPocTest::class.java, BrushTileBitmapTest::class.java,
-                BrushRenderOwnerPocTest::class.java, BrushRenderExecutorPocTest::class.java, AndroidBrushImagePocTest::class.java)
-            check(result.wasSuccessful() && result.runCount == 84 && result.ignoreCount == 0) {
+                BrushRenderOwnerPocTest::class.java, BrushRenderExecutorPocTest::class.java, AndroidBrushImagePocTest::class.java, RenderViewportTraceTest::class.java)
+            check(result.wasSuccessful() && result.runCount == 85 && result.ignoreCount == 0) {
                 "run=${result.runCount} ignored=${result.ignoreCount} failures=${result.failures.joinToString { it.trace }}"
             }
+            output.putString("render_viewport_trace", checkNotNull(RenderViewportTraceTest.observation))
             output.putInt("common_brush_tests", result.runCount)
             output.putInt("common_brush_ignored", result.ignoreCount)
             output.putString("common_brush_status", "passed")

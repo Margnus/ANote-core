@@ -22,6 +22,7 @@ internal class BrushRenderExecutorPoc(
     private val dispatched = mutableMapOf<BrushRenderIdPoc, Dispatch>()
     private val acknowledged = mutableListOf<BrushRenderJobPoc>()
     val chargedBytes: Long get() = owner.chargedBytes
+    val retiredBytes: Long get() = owner.retiredBytes
     val pendingJobs: Int get() = owner.pendingJobs
     val isDrained: Boolean get() = owner.isDrained && executor.status().isDrained
     fun executorStatus() = executor.status()

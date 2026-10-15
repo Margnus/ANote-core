@@ -28,6 +28,7 @@ class AppleBrushOwnerExperiment(
     private val owner = BrushRenderOwnerPoc(frame, layer, residentBudget, totalBudget, maxJobs, checkOwner = checkOwner)
     private val check = checkOwner
     val chargedBytes: Long get() = owner.chargedBytes
+    val retiredBytes: Long get() = owner.retiredBytes
     val isDrained: Boolean get() = owner.isDrained
     // Bounded catalog preparation on owner; only job.execute crosses to the existing worker.
     fun admit(stroke: StrokeObject, frame: FrameToken, originX: Double, originY: Double,

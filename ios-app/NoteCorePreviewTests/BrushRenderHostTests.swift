@@ -143,4 +143,80 @@ final class BrushRenderHostTests: XCTestCase {
         try await stop(a); XCTAssertTrue(try holder.close()); XCTAssertTrue(a.isDrained)
     }
 
+    @MainActor func testFixedScrollZoomQueueAndHeldReaderTrace() async throws {
+        let (frame, stroke) = try fixture()
+        let a = try AppleBrushRenderExperiment(frame: frame, layer: stroke.layerId, totalBytes: 210000, maxJobs: 2)
+        let traceBegin = DispatchTime.now().uptimeNanoseconds
+        let gate = DispatchSemaphore(value: 0), lock = NSLock()
+        var starts: [UInt64] = [], admissions: [(UInt64, UInt64)] = [], events: [[String: Any]] = [], copies: [[String: Any]] = []
+        var images: [AppleBrushImageExperiment] = []
+        defer { gate.signal(); try? a.close(); for image in images { _ = try? image.close() } }
+        func event(_ name: String) throws {
+            events.append(["event": name, "elapsed_ns": DispatchTime.now().uptimeNanoseconds - traceBegin, "charged": a.chargedBytes, "retired": a.owner.retiredBytes,
+                "executor": try a.executor.status().chargedBytes])
+        }
+        func submit(_ frame: FrameToken, x: Double, scale: Double, blocked: Bool = false) throws -> AppleBrushDispatchExperiment {
+            let begin = DispatchTime.now().uptimeNanoseconds
+            let item = try XCTUnwrap(a.submit(stroke: stroke, frame: frame, originX: x, pixelSize: scale, beforeCompute: {
+                let start = DispatchTime.now().uptimeNanoseconds
+                lock.lock(); starts.append(start); lock.unlock()
+                if blocked { precondition(gate.wait(timeout: .now() + 5) == .success) }
+            }))
+            admissions.append((begin, DispatchTime.now().uptimeNanoseconds)); return item
+        }
+        func copy(_ item: AppleBrushDispatchExperiment) throws {
+            let begin = DispatchTime.now().uptimeNanoseconds
+            guard case .ready(let image) = try AppleBrushImageExperiment.create(a, item) else { return XCTFail("trace image") }
+            copies.append(["elapsed_ns": DispatchTime.now().uptimeNanoseconds - begin,
+                "row_storage_upper_bytes": image.rowStorageUpperBytes]); images.append(image)
+        }
+        let first = try submit(frame, x: 0.25, scale: 0.5)
+        try await ready(a); XCTAssertEqual(try a.drain(), ["PUBLISHED"]); try copy(first); try event("first-held")
+        let scroll = FrameToken(sceneId: frame.sceneId, sceneRevision: frame.sceneRevision, viewportVersion: 2,
+            sessionGeneration: 1, surfaceGeneration: 1, requestSequence: 2)
+        try a.expect(scroll, layer: stroke.layerId); try event("scroll-old-retired")
+        XCTAssertFalse(try images[0].draw(try bitmap(), in: .zero))
+        _ = try submit(scroll, x: 4.25, scale: 0.5, blocked: true)
+        let untilRunning = Date().addingTimeInterval(8)
+        while try a.executor.status().entries.first?.stage != .running && Date() < untilRunning {
+            try await Task.sleep(nanoseconds: 1_000_000)
+        }
+        XCTAssertEqual(try a.executor.status().entries.first?.stage, .running)
+        let cancelled = try submit(scroll, x: 4.25, scale: 0.5)
+        XCTAssertEqual(try a.executor.status().entries.last?.stage, .queued)
+        XCTAssertNil(try a.submit(stroke: stroke, frame: scroll, originX: 4.25))
+        try event("two-jobs-rejected-third"); try a.cancel(cancelled); try event("queued-cancelled")
+        gate.signal()
+        let untilReady = Date().addingTimeInterval(8)
+        while try a.executor.status().entries.contains(where: { $0.stage != .ready }) && Date() < untilReady {
+            try await Task.sleep(nanoseconds: 1_000_000)
+        }
+        XCTAssertTrue(try a.executor.status().entries.allSatisfy { $0.stage == .ready }); try event("ready-before-ack")
+        let zoom = FrameToken(sceneId: frame.sceneId, sceneRevision: frame.sceneRevision, viewportVersion: 3,
+            sessionGeneration: 1, surfaceGeneration: 1, requestSequence: 3)
+        try a.expect(zoom, layer: stroke.layerId); XCTAssertEqual(try a.drain(), ["DISCARDED", "FAILED"])
+        try event("late-and-cancelled-ack")
+        let last = try submit(zoom, x: 4.25, scale: 0.25)
+        try await ready(a); XCTAssertEqual(try a.drain(), ["PUBLISHED"]); try copy(last); try event("zoom-image-held")
+        try await stop(a); try event("closed-two-readers"); XCTAssertFalse(a.isDrained)
+        XCTAssertTrue(try images[1].close()); try event("new-reader-released")
+        XCTAssertTrue(try images[0].close()); try event("old-reader-released"); XCTAssertTrue(a.isDrained)
+        // All worker closures finished; read the diagnostic under the same lock.
+        let workerStarts: [UInt64] = { lock.lock(); defer { lock.unlock() }; return starts }()
+        XCTAssertEqual(workerStarts.count, 4)
+        let queueWaits = zip(workerStarts, admissions).map { start, call -> [String: UInt64] in
+            ["submit_elapsed_ns": call.1 - call.0, "request_to_worker_ns": start - call.0,
+             "queue_handoff_wait_lower_ns": start > call.1 ? start - call.1 : 0,
+             "queue_handoff_wait_upper_ns": start - call.0]
+        }
+        let trace: [String: Any] = ["trace_id": "dev034-fixed-viewport-v1", "events": events,
+            "queue_wait_ns": queueWaits, "copies": copies, "total_budget": 210000, "resident_budget": 32768,
+            "max_jobs": 2, "input_points": 4, "viewports": [[0.25, 8, 0.5], [4.25, 8, 0.5], [4.25, 8, 0.25]],
+            "timing_scope": "One iOS Simulator run; Admission-to-beforeCompute wait bounded by submit call timestamps; includes controlled worker gate and handoff overhead; copy is create API elapsed, not heap/GPU",
+            "closed_drained": a.isDrained]
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: trace, options: [.sortedKeys]),
+            uniformTypeIdentifier: "public.json")
+        attachment.name = "notecore-apple-render-trace.json"; attachment.lifetime = .keepAlways; add(attachment)
+    }
+
 }
