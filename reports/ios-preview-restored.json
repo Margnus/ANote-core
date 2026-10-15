@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "bundle": "dev.notecore.preview",
+  "ordinary_package_restored_after_host_tests": true,
+  "artifact_sha256": "c45cf11e6206942ead50a14aeddd8166af8835fb13eb9b5aa2fa516686b16421",
+  "installed_payload_sha256": {
+    "NoteCorePreview": "e8d3fa04bbcfd58b2713a572d0ea33c8ccd21d95f8b64fb2b4710fcd09285c96",
+    "__preview.dylib": "8050889c2ab4b356b83e0c5c41d971b95226638cd860dd59c0491d4b4c1d9dfe",
+    "NoteCorePreview.debug.dylib": "946e8d7b26d885d1b66ca2dfdd99a299035cecb6203dcb22a1c352203db19ede",
+    "Info.plist": "f9b3513fe3aed66f5a655231aee76e5ea6e0596028132855f61e13bd6b2a584a",
+    "PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  "test_payload_moved_to_build_quarantine": [
+    "PlugIns/NoteCorePreviewTests.xctest.dSYM/Contents/Info.plist",
+    "PlugIns/NoteCorePreviewTests.xctest.dSYM/Contents/Resources/DWARF/NoteCorePreviewTests",
+    "PlugIns/NoteCorePreviewTests.xctest.dSYM/Contents/Resources/Relocations/aarch64/NoteCorePreviewTests.yml",
+    "PlugIns/NoteCorePreviewTests.xctest/Info.plist",
+    "PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests",
+    "PlugIns/NoteCorePreviewTests.xctest/android-paged-v2.ncp",
+    "PlugIns/NoteCorePreviewTests.xctest/brush-paths.json"
+  ],
+  "no_xctest_plugin": true,
+  "data_deleted": false,
+  "ui_interaction_verified": false,
+  "launch_verified": false,
+  "input_sha256": {
+    "tools/restore_ios_preview.py": "e1454fc86dd9a461ab22583d69deb926268be2d7ea7d7dfc98b62106646dc9bc",
+    "reports/ios-preview-build.json": "70a5ea07740ba0889a2f787a9082ab2e8113d8d357ecb76f90f21850245f2b1e",
+    "reports/ios-host-tests.json": "d8bf5320987697bc8209b43ff2c52713a32fc15ad61110ba251eff6037e94d62"
+  },
+  "scope": "Install ordinary simulator app over test host and verify exact payload file set and every hash; no uninstall, data reset, UI, launch or physical-device claim"
+}

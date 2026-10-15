@@ -16,7 +16,7 @@ def main():
     assert info['CFBundleIdentifier'] == 'dev.notecore.preview'
     assert info['CFBundleSupportedPlatforms'] == ['iPhoneSimulator']
     assert not list(APP.rglob('*.xctest')), 'Test plugins must stay in the separate host-test build, not the distributable app'
-    inputs = list((ROOT/'shared-core/src/commonMain').rglob('*.kt')) + list((ROOT/'canvas-core/src/commonMain').rglob('*.kt')) + list((ROOT/'ios-app/NoteCorePreview').glob('*.swift')) + [
+    inputs = list((ROOT/'canvas-core/src/iosMain').rglob('*.kt')) + list((ROOT/'shared-core/src/commonMain').rglob('*.kt')) + list((ROOT/'canvas-core/src/commonMain').rglob('*.kt')) + list((ROOT/'ios-app/NoteCorePreview').glob('*.swift')) + [
         ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'canvas-core/build.gradle.kts', ROOT/'shared-core/build.gradle.kts', ROOT/'gradle.properties',
         ROOT/'ios-app/NoteCorePreview.xcodeproj/project.pbxproj',
         ROOT/'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',

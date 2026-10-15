@@ -23,7 +23,7 @@ def main():
         capture_output=True, text=True, check=True).stdout)['devices']
     device = next(d for group in devices.values() for d in group if d['udid'] == args.device)
     assert device['name'] == 'NoteCorePreview' and device['state'] == 'Booted' and device['isAvailable']
-    sources = sorted([*ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonTest/**/*.kt'), *ROOT.glob('canvas-core/src/iosSimulatorArm64Test/**/*.kt'),
+    sources = sorted([*ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/iosMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonTest/**/*.kt'), *ROOT.glob('canvas-core/src/iosSimulatorArm64Test/**/*.kt'),
         ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'canvas-core/build.gradle.kts',
         ROOT/'gradle.properties', Path(__file__)])
     before = {p.relative_to(ROOT).as_posix(): digest(p) for p in sources}

@@ -14,10 +14,10 @@
       "payload_bytes": 8192,
       "image_row_bytes": 256,
       "output_row_bytes": 256,
-      "conversion_elapsed_ns": 362834,
-      "copy_create_elapsed_ns": 483667,
-      "draw_elapsed_ns": 1083833,
-      "release_call_elapsed_ns": 4250
+      "conversion_elapsed_ns": 359250,
+      "copy_create_elapsed_ns": 499166,
+      "draw_elapsed_ns": 406708,
+      "release_call_elapsed_ns": 5917
     },
     {
       "filter_cases": 6,
@@ -113,7 +113,7 @@
   ],
   "source_and_build_sha256": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
-    "canvas-core/build.gradle.kts": "48c83da9e8168e8616ba6082a8756d5a88a9bf7da785add0103cbfb51223c0a7",
+    "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "4e3e22ae481fa2a3f5aab66266a8f93d8e7d5cf822a282f752d6c39b8243ff8e",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "339eff8c0b2e4b3d73b8f24a77c1d440ed08d3038d67d8ac649dd57c89a28f17",
@@ -153,14 +153,15 @@
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/SpatialIndexPocTest.kt": "9bdb9ad382e48daf43d13b881edb6c8823f9dcae21cb95cbbc045af3ee484bf1",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/SubmissionQueueContractTest.kt": "d0656da56400839949c7cbd4022d164ced80c3f2414866cebac775281785088e",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/WeightedLruContractTest.kt": "d266f9fcd5abdea40b72258640f046f417790eb75af7c57e791141c56a64ec3c",
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "c1b9a8d2f0a0ff98fd909d9d35a259137fc81cbcdb0b02bcfc36a29bb9b4e8f5",
     "canvas-core/src/iosSimulatorArm64Test/kotlin/dev/notecore/canvas/prototype/BrushRenderThreadTest.kt": "6a2b758a3329f3ecc6b651f430758a6878618d6464e4b447aba28e8642a5b2a2",
     "canvas-core/src/iosSimulatorArm64Test/kotlin/dev/notecore/canvas/prototype/BrushTileCGImageTest.kt": "9279e0657410720c5b26d4aaccaf54ecd7891b613cdc39a27acddc26fe12f367",
     "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
-    "tools/verify_apple_brush_common.py": "3b507901ec4935aa9371f2b10edc73f98d8a44ad09487ef632c749fc0d7d167a"
+    "tools/verify_apple_brush_common.py": "783e04f99e893190c42735204a71e525e146187852988bc31d7507cdcd7b971e"
   },
-  "test_binary_sha256": "d44f8fe6c16237793f21b5faf10c4f47f395da5f02d4f2ee178cca70033afe26",
-  "test_output_sha256": "f4b8effaf24f3744af67c27eaf6911ec7ac9b81667333ed40fff263384b17d67",
+  "test_binary_sha256": "5d5af5dd7b19ef595cb117e2d39b6415e5aac7a5c6ca84e16719abf24469a786",
+  "test_output_sha256": "5d09350dadab9ab82d76f2e392af36fb7368e7525a2ef47592fb36e667e801f1",
   "desktop_unlock_required": false,
   "native_image_lease_handoff_verified": true,
   "native_render_thread_handoff_verified": true,

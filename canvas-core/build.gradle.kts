@@ -28,6 +28,11 @@ kotlin {
         val jvmAndAndroidMain by creating { dependsOn(getByName("commonMain")) }
         getByName("jvmMain").dependsOn(jvmAndAndroidMain)
         if (providers.gradleProperty("enableAndroidTargets").orNull == "true") getByName("androidMain").dependsOn(jvmAndAndroidMain)
+        if (providers.gradleProperty("enableAppleTargets").orNull == "true") {
+            val iosMain by creating { dependsOn(getByName("commonMain")) }
+            getByName("iosArm64Main").dependsOn(iosMain)
+            getByName("iosSimulatorArm64Main").dependsOn(iosMain)
+        }
         commonTest.dependencies { implementation(kotlin("test")) }
         val jvmAndAndroidTest by creating { dependsOn(getByName("commonTest")) }
         getByName("jvmTest").dependsOn(jvmAndAndroidTest)

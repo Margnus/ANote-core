@@ -10,6 +10,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testForeignThreadCannotReleaseHolderAndThrowingReceiveRedelivers()',
+    'testSwiftWorkerRendersActualPixelsAndCloseKeepsNativeBudget()',
+    'testExactResultRedeliveryAndFrameChangeBeforeAck()',
+    'testCancelledQueuedJobAndUnknownComputeRequireAckAndReconciliation()',
+    'testCopyFailureCleanupUnknownReturnsHolderAndNoDestructiveRetry()',
+    'testOldImageRejectsDrawAndInsufficientCopyBudgetKeepsPermitFree()',
     'testSharedBrushContoursMatchAnalyticCoverageOffscreen()',
     'testActualAndroidFileImportsFreshIdsAndExportsAllPages()',
     'testFailedSaveRetainsRootAcrossCloseAndRepair()',
@@ -27,7 +33,7 @@ def digest(path):
 
 
 def inputs():
-    files = [*ROOT.glob('ios-app/NoteCorePreview/*.swift'), *ROOT.glob('ios-app/NoteCorePreviewTests/*.swift'),
+    files = [*ROOT.glob('canvas-core/src/iosMain/**/*.kt'), *ROOT.glob('ios-app/NoteCorePreview/*.swift'), *ROOT.glob('ios-app/NoteCorePreviewTests/*.swift'),
              *ROOT.glob('shared-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonMain/**/*.kt'),
              ROOT/'ios-app/NoteCorePreview.xcodeproj/project.pbxproj',
              ROOT/'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',
@@ -58,7 +64,7 @@ def main():
     # to the complete current common source set; hashing stale framework + new source is insufficient.
     built = json.loads((ROOT/'reports/ios-preview-build.json').read_text(encoding='utf-8'))['source_and_build_input_sha256']
     def framework_input(path):
-        return '/src/commonMain/' in path or path.endswith('.kts') or path == 'gradle.properties' or path.endswith('.framework/NoteCanvasPrototype')
+        return '/src/iosMain/' in path or '/src/commonMain/' in path or path.endswith('.kts') or path == 'gradle.properties' or path.endswith('.framework/NoteCanvasPrototype')
     expected_framework = {path: sha for path, sha in before.items() if framework_input(path)}
     recorded_framework = {path: sha for path, sha in built.items() if framework_input(path)}
     assert expected_framework == recorded_framework, 'Kotlin framework/source binding is stale; run package-ios-preview.sh first'
@@ -102,6 +108,10 @@ def main():
         'native_model_file_reopen_verified': True, 'cross_platform_fixture_import_verified': True,
         'native_offscreen_render_pixels_verified': True,
         'shared_brush_contour_offscreen_verified': True,
+        'app_host_swift_executor_kotlin_native_render_verified': True,
+        'brush_render_host_test_count': 6,
+        'brush_native_unique_reader_and_ack_budget_verified': True,
+        'brush_scope': 'Unfrozen Apple iosMain shim + existing Swift worker executes common segmented renderer/mask/RGBA; CGImage held through close/UNKNOWN. Ordinary app does not consume this backend. ARC ownership release, not physical heap/GPU reclamation.',
         'brush_fixture_execution_scope': 'JVM-generated common contour output consumed by real iOS CoreGraphics; not Kotlin/Native runtime generation, AA edge equivalence or app integration',
         'desktop_ui_interaction_verified': False, 'real_touch_input_verified': False,
         'system_file_picker_verified': False, 'process_restart_verified': False,
