@@ -6,6 +6,8 @@
 
 最新顺序按蓝图e066cfb与[ADR-0020](docs/adr/0020-read-only-legacy-and-measurement-first.md)调整：旧单页编辑/写出SDK已收口，v1只读迁入不创建另一owner；接下来优先C0真机基线、共同笔刷几何和密集页索引PoC，再做生产架构冻结及SQLite层。Mac锁屏相关桌面交互验证已由用户明确延后，不阻挡独立开发。
 
+最新DEV-029已推进[精确直线段派生简化](docs/派生笔迹直线段简化PoC.md)：S2路径逻辑字节减少87.2%–92.1%，规范点全部保留；238项独立离线JUnit及两模块iOS-target KLIB编译通过。当前结果见[独立报告](reports/offline-jvm-verification.json)；既有Gradle/原生运行报告及体验包仍属于DEV-028，新简化器的原生运行和App集成未完成。远端推送待自动审批恢复，本地开发继续。
+
 ## 当前可运行内容
 
 - [三笔刷有界路径与离屏验证](docs/共同笔刷路径与离屏验证.md)：共享231项测试、Kotlin/Native运行11项、Android/iOS实际离屏覆盖与alpha；S2成本排除了整页无限制路径缓存，下一步简化/分段与驻留预算。未接入App三笔刷。
