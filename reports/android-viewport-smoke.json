@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "apk_sha256": "730bd3a5ac37b071528e477ebc28a05099ebb3b66eabd9583bd2dfdc917ea681",
+  "apk_sha256": "5fc470d371dadc58ebccd1394a4ea0628924abc7f068e185d317a8e66c83c657",
   "serial": "emulator-5580",
   "api": "36",
   "checks": [
@@ -10,6 +10,7 @@
     "executor_owner_worker",
     "document_delta_history_owner",
     "paged_preview_codec",
+    "paged_preview_session",
     "storage_failure_recovery",
     "storage_bounded_read_and_active_owner",
     "storage_atomic_rename_failure",
@@ -19,14 +20,15 @@
   "executor_thread_source": "real Android ART owner/worker threads, bounded result delivery and explicit retry",
   "document_history_source": "real ART document authority and owner/worker guard, last-page undo/redo, monotonic object epoch and immutable sample sharing; not paged App UI verification",
   "paged_codec_source": "real ART v2 canonical round-trip and bounded header plus v1 migration preserving sample time; not paged App storage/UI verification",
+  "paged_session_source": "real ART shared session selection, unfinished cancellation, copy/delete/undo and full-root capture/reopen; no native paged App UI yet",
   "storage_test_source": "real AtomicFile directory and silent-rename failure / retained reopen / repaired retry / strict UTF-8 and 32MiB preflight, isolated synthetic cache",
   "catalog_test_source": "1000 synthetic rows in a real ListView window, bounded widget creation and recycled-row ID rebinding; not a latency benchmark",
   "real_stylus_verified": false,
   "device_performance_verified": false,
   "source_and_test_apk_sha256": {
-    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "4e6f5b165b7efe5798adc375d31037cbbe1b06e2663647b2273405120cc29cad",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "01b8fa66c2dc5f909de68cabf7fdab61b1be0164794928c9052efd341834ea80",
     "android-app/build.gradle.kts": "5a0838bc5d30cac71f16124d58f67757702fa37945327e6badf336cbf42852ee",
-    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "16432ba5293b473d682382488507d814a18d3a8a8f0da5732fa2f9aca8a63ac7",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "5b74d763c5cf66be242dbf1efc96934efcda2966e0d55eb513fd072e6a2592d1",
     "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "81f36ebde3128f9f4b37aac6b58e42c8201f952f7dacac6b8ce1415c73851085",
     "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "58f979e0136a51e192b7450b200c9ccadc8a9867b1553906b1172be262ba1e88",
     "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
@@ -50,7 +52,8 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "847035c95bdc396611d88b427a4259df6264e7d0411b38f6b95d96160bdf6825",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "8d97559461f922f4d6b6bdc52b752476dc2d937131a1f0f442317785a04c079d"
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "dc996123a270f32010ed21591cf9357cd1fbb91024dc1e695691351a85e1e7da",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "fb98ac38f32a8d1dc26ba0c8c1055169d89d2ced70f3fbcab9b942a77f2e55fe",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "3fa2cbe7cbfa9190483271420fed04b1755f57a1f7f0ced64ff7e60f05469d7b"
   }
 }

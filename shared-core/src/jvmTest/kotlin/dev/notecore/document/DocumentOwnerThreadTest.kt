@@ -4,6 +4,21 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class DocumentOwnerThreadTest {
+    @Test fun pagedSessionRejectsActualWorkerMutationAndSnapshotCalls() {
+        val executor = BoundedOwnerExecutor()
+        val root = DocumentRoot.empty(SceneId("session-owner"), "title", PageDescriptor(PageId("a"), LayerId("ink-a"), 595.0, 842.0))
+        val note = PagedPreviewNotebook(root, "owner-session", ownerCheck = executor::checkOwnerThread)
+        try {
+            executor.submit(1024, { note.insertPage() }) { outcome ->
+                assertIs<WorkResult.OutcomeUnknown>(outcome); assertSame(root, note.snapshot()); ResultDisposition.ACKNOWLEDGED
+            }
+            executor.submit(1024, { note.capture() }) { outcome ->
+                assertIs<WorkResult.OutcomeUnknown>(outcome); assertEquals(1, note.pageCount); ResultDisposition.ACKNOWLEDGED
+            }
+            executor.stopAccepting(); assertTrue(executor.awaitWorkerStop(3000)); assertEquals(2, executor.drainResults().acknowledged)
+            assertTrue(note.insertPage()); assertEquals(2, note.pageCount)
+        } finally { executor.stopAccepting(); assertTrue(executor.awaitWorkerStop(3000)) }
+    }
     @Test fun historyTraversalRemainsOnActualOwnerThreadAndForeignAttemptKeepsStacks() {
         val executor = BoundedOwnerExecutor()
         val id = SceneId("history-owner")

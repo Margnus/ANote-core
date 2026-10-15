@@ -22,7 +22,7 @@ def main():
     test = ROOT/'android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk'
     adb('install', '-r', str(apk)); adb('install', '-r', str(test))
     output = adb('shell', 'am', 'instrument', '-w', '-r', 'dev.notecore.preview.test/dev.notecore.app.ViewportInstrumentation')
-    required = ['pinch_and_inverse_mapping', 'stylus_transform_lock', 'finger_pan_without_ink', 'executor_owner_worker', 'document_delta_history_owner', 'paged_preview_codec', 'storage_failure_recovery', 'storage_bounded_read_and_active_owner', 'storage_atomic_rename_failure', 'catalog_visible_row_recycling', 'viewport_status']
+    required = ['pinch_and_inverse_mapping', 'stylus_transform_lock', 'finger_pan_without_ink', 'executor_owner_worker', 'document_delta_history_owner', 'paged_preview_codec', 'paged_preview_session', 'storage_failure_recovery', 'storage_bounded_read_and_active_owner', 'storage_atomic_rename_failure', 'catalog_visible_row_recycling', 'viewport_status']
     for key in required:
         if f'{key}=passed' not in output: raise AssertionError(output)
     inputs = sorted([*ROOT.glob('android-app/src/androidTest/**/*.kt'), *ROOT.glob('android-app/src/main/**/*.kt'),
@@ -33,6 +33,7 @@ def main():
               'executor_thread_source': 'real Android ART owner/worker threads, bounded result delivery and explicit retry',
               'document_history_source': 'real ART document authority and owner/worker guard, last-page undo/redo, monotonic object epoch and immutable sample sharing; not paged App UI verification',
               'paged_codec_source': 'real ART v2 canonical round-trip and bounded header plus v1 migration preserving sample time; not paged App storage/UI verification',
+              'paged_session_source': 'real ART shared session selection, unfinished cancellation, copy/delete/undo and full-root capture/reopen; no native paged App UI yet',
               'storage_test_source': 'real AtomicFile directory and silent-rename failure / retained reopen / repaired retry / strict UTF-8 and 32MiB preflight, isolated synthetic cache',
               'catalog_test_source': '1000 synthetic rows in a real ListView window, bounded widget creation and recycled-row ID rebinding; not a latency benchmark',
               'real_stylus_verified': False, 'device_performance_verified': False,

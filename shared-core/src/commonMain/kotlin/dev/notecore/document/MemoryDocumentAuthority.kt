@@ -28,7 +28,7 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
             current.undo.lastOrNull()?.operationId, current.redo.lastOrNull()?.operationId, current.evictedHistoryCount)
     }
     private fun objectCharge(value: StrokeObject): Long = 256L + value.id.value.length * 2 + value.layerId.value.length * 2 + value.samples.size.toLong() * 28
-    private fun liveCharge(root: DocumentRoot): Long = 512L + root.title.length * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
+    private fun liveCharge(root: DocumentRoot): Long = 512L + (root.id.value.length + root.title.length) * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
         root.scene.objects().sumOf(::objectCharge)
     private fun identityCharge(value: State): Long = value.pages.sumOf { 48L + it.value.length * 2 } +
         value.layers.sumOf { 48L + it.value.length * 2 } + value.objects.sumOf { 80L + it.value.length * 2 }

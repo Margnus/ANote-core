@@ -31,3 +31,15 @@ shared-core增加薄分页预览会话：只持一个MemoryDocumentAuthority、�
 - D4：iOS使用同一共享会话/codec/账本接口，SwiftUI/UIKit增加分页与不同尺寸视口；先framework/宿主编译，再在具备runtime/设备后实测对应场景。无runtime不能填写运行通过，Android结果不能代替iOS。
 
 每个节点提交真实证据；没有跨页真实保存/重开就不将DEV-024D/PAGE-02/03标完成。高点数原生渲染、稳定性/低内存、正式receipt持久化与C1冻结继续保持独立门禁。
+
+## 已实现的D1共享会话参考
+
+PagedPreviewNotebook持有唯一MemoryDocumentAuthority、稳定selected PageId、输入与pending完成命令。渲染访问使用按root revision/PageId失效的只读projection，不在每次pointX/Y调用重新遍历场景。投影提供完整规范StrokeObject，原生接入时必须用其矩阵处理笔宽/覆盖关系，不能只变换中心线后沿用原宽度假称完整仿射渲染。
+
+Down前预留命令/对象身份；完成笔即使因journal/history/live容量拒绝也保留原command及样本，cancel只取消未完成输入，页面编辑在pending期间拒绝。切换不同PageId取消未完成笔，迟到UP无活动会话不能落到新页；再次选择同页不取消正在写的笔。copy选择源页后副本；delete选择合法邻页，undo/redo优先保持仍存在的selected ID。页选择不推进根revision，页面尺寸/纸张取规范PageDescriptor。
+
+PagedPreviewSnapshot捕获完整不可变root，旧capture编码不受后续页编辑影响；它只包含已提交内容，不转移pending责任。live预算与codec retained charge统一包含文档ID，避免在恰好边界时出现文档提交成功但snapshot超额。逻辑charge按对象头/点数计算，公开canonical snapshot已在restore/prepare验证几何，因此准入capture不反复扫描不可变点bounds。尚未接入原生保存账本或分页UI，不能把snapshot的内存往返说成文件重开。
+
+10项common会话用例覆盖选择/单revision、copy身份/样本、删页邻页/最后页、输入切页/迟到UP、工具捕获、失败完成命令保留、全根capture/reopen、规范变换/尺寸、坏输入/标题及owner边界；另有真实JVM worker禁止会话读写，合计200项（Core140、shared-core60）。Android ART会话与双端编译分别记产物报告；D2账本泛化、D3 Android实际分页IO/UI及D4 iOS接入/运行仍未完成。
+
+D2模块方向：保存账本和相应测试迁入shared-core，旧Core单页snapshot由shared-core的只读adapter接入，分页snapshot实现同一封闭保存输入协议。Core不为新App引入文档依赖；不复制两个账本。same-version重复capture可走规范引用快路径，失败重开后重建的等价内容也须允许显式重试；不同内容同版本要拒绝，不能回报成功却仍保存旧内容。版本替换、未启动退回、在途/失败保留和旧attempt拒绝沿用同一状态机，用实际双端编译和旧保存故障反例保护过渡。

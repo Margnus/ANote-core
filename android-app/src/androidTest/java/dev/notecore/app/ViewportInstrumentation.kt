@@ -70,6 +70,8 @@ class ViewportInstrumentation : Instrumentation() {
             verifyDocumentHistory()
             result.putString("document_delta_history_owner", "passed")
             result.putString("paged_preview_codec", "passed")
+            verifyPagedSession()
+            result.putString("paged_preview_session", "passed")
             verifyStorage()
             result.putString("storage_failure_recovery", "passed")
             result.putString("storage_bounded_read_and_active_owner", "passed")
@@ -82,6 +84,20 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("viewport_status", "failed"); result.putString("failure", failure.stackTraceToString())
             finish(Activity.RESULT_CANCELED, result)
         }
+    }
+    private fun verifyPagedSession() {
+        val note = PagedPreviewNotebook.create("ART-session", "分页", "ART-fresh")
+        val first = note.currentPageId
+        check(note.beginStroke(1.0, 2.0, 0.5f, 1)); check(note.endStroke(3.0, 4.0, 0.7f, 2))
+        check(note.insertPage()); val second = note.currentPageId
+        check(note.beginStroke(10.0, 20.0, 0.5f, 3)); check(note.selectPage(first))
+        check(!note.endStroke(30.0, 40.0, 0.7f, 4)); check(note.totalStrokeCount == 1)
+        check(note.copyCurrentPage()); val copied = note.currentPageId
+        check(note.totalStrokeCount == 2 && note.pageCount == 3)
+        check(note.deleteCurrentPage()); check(note.currentPageId == second)
+        check(note.undo()); check(note.currentPageId == second); check(note.selectPage(copied))
+        val reopened = PagedPreviewNotebook(PagedPreviewCodec.decode(note.capture().encode()), "ART-reopened")
+        check(reopened.pageCount == 3 && reopened.totalStrokeCount == 2 && !reopened.canUndo)
     }
     private fun verifyDocumentHistory() {
         val executor = BoundedOwnerExecutor(2, 4096, "NoteCore-ART-history")

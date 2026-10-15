@@ -96,7 +96,9 @@ object PagedPreviewCodec {
             validText(obj.id.value); validText(obj.layerId.value)
             require(obj.brush.algorithmVersion == 1 && obj.transform.inverseOrNull() != null)
             require(obj.samples.size in 1..MAX_STROKE_POINTS && obj.samples.size <= MAX_POINTS - total)
-            total += obj.samples.size; obj.bounds()
+            // Public canonical snapshots already validate geometry at restore/prepare boundaries.
+            // Charging a UI capture must not rescan every immutable real sample.
+            total += obj.samples.size
             charge += 256L + (obj.id.value.length + obj.layerId.value.length) * 2L + obj.samples.size.toLong() * 28
         }
         require(charge <= MAX_RETAINED_BYTES)
