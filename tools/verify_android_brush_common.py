@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
     assert args.serial.startswith('emulator-'), 'Use a dedicated emulator'
     sources = sorted([*ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonTest/**/*.kt'),
-        *ROOT.glob('canvas-core/src/jvmAndAndroidMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidTest/**/*.kt'), *ROOT.glob('canvas-core/src/androidInstrumentedTest/**/*.kt'),
+        *ROOT.glob('canvas-core/src/jvmAndAndroidMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidTest/**/*.kt'), *ROOT.glob('canvas-core/src/androidMain/**/*.kt'), *ROOT.glob('canvas-core/src/androidInstrumentedTest/**/*.kt'),
         ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'canvas-core/build.gradle.kts', ROOT/'gradle.properties', Path(__file__)])
     before = {p.relative_to(ROOT).as_posix(): digest(p) for p in sources}
     build = ROOT/'canvas-core/build/android-brush-tests'
@@ -42,16 +42,16 @@ def main():
     output = adb('shell', 'am', 'instrument', '-w', '-r',
         'dev.notecore.canvas.poc.test/dev.notecore.canvas.prototype.CoreBrushInstrumentation')
     (build/'run.log').write_text(output, encoding='utf-8')
-    assert 'common_brush_status=passed' in output and 'common_brush_tests=78' in output and 'common_brush_ignored=0' in output, output
+    assert 'common_brush_status=passed' in output and 'common_brush_tests=84' in output and 'common_brush_ignored=0' in output, output
     assert before == {p.relative_to(ROOT).as_posix(): digest(p) for p in sources} and digest(apk) == apk_sha
     observations = json.loads(re.search(r'native_image_observations=(\[.*\])', output).group(1))
     assert len(observations) == 3
     report = {'native_image_observations': observations, 'status': 'passed', 'platform': 'Android emulator ART standalone canvas-core test APK',
         'serial': args.serial, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
-        'test_count': 78, 'common_test_count': 68, 'real_render_executor_test_count': 5, 'android_bitmap_test_count': 5, 'test_groups': ['BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileBitmapTest', 'BrushRenderOwnerPocTest', 'BrushRenderExecutorPocTest'],
+        'test_count': 84, 'android_image_holder_test_count': 6, 'common_test_count': 68, 'real_render_executor_test_count': 5, 'android_bitmap_test_count': 5, 'test_groups': ['BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileBitmapTest', 'BrushRenderOwnerPocTest', 'BrushRenderExecutorPocTest', 'AndroidBrushImagePocTest'],
         'source_and_build_sha256': before, 'test_apk': apk.relative_to(ROOT).as_posix(), 'test_apk_sha256': apk_sha,
         'test_output_sha256': digest(build/'run.log'), 'desktop_unlock_required': False,
-        'native_image_lease_handoff_verified': True, 'real_bounded_executor_render_handoff_verified': True, 'shared_geometry_and_chunk_mask_on_art_verified': True, 'native_canvas_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,
+        'native_image_lease_handoff_verified': True, 'android_image_holder_verified': True, 'real_bounded_executor_render_handoff_verified': True, 'shared_geometry_and_chunk_mask_on_art_verified': True, 'native_canvas_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,
         'physical_device_measured': False, 'app_brush_integration_verified': False,
         'native_cost_scope': 'Bitmap allocationByteCount and one exploratory API timing. Includes temporary RGBA ByteBuffer copy; no process peak heap, GPU, GC or delayed reclamation measurement. Release time is recycle API return.',
         'scope': 'Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest and filtered tile seam checks with true neighbor gutter and disjoint device-pixel core clips. Includes Bitmap allocationByteCount observations; no whole-process heap, GPU, arbitrary transform, app UI, touch or device performance claim.'}
