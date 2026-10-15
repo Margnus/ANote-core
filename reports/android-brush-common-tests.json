@@ -1,11 +1,29 @@
 {
+  "native_image_observations": [
+    {
+      "filter_cases": 6,
+      "max_channel_delta": 0,
+      "unpadded_channel_differences": 183
+    },
+    {
+      "color_pixels": 2048,
+      "payload_bytes": 8192,
+      "bitmap_allocation_bytes": 8192,
+      "bitmap_row_bytes": 256,
+      "output_allocation_bytes": 8192,
+      "conversion_elapsed_ns": 121541,
+      "copy_create_elapsed_ns": 162875,
+      "draw_elapsed_ns": 11791,
+      "release_call_elapsed_ns": 1583
+    }
+  ],
   "status": "passed",
   "platform": "Android emulator ART standalone canvas-core test APK",
   "serial": "emulator-5580",
   "api": "36",
-  "test_count": 57,
-  "common_test_count": 55,
-  "android_bitmap_test_count": 2,
+  "test_count": 63,
+  "common_test_count": 59,
+  "android_bitmap_test_count": 4,
   "test_groups": [
     "BrushEnvelopePocTest",
     "BrushPathPocTest",
@@ -14,18 +32,20 @@
     "BrushTileCachePocTest",
     "ResourceLeaseContractTest",
     "WeightedLruContractTest",
+    "BrushTilePixelsPocTest",
     "BrushTileBitmapTest"
   ],
   "source_and_build_sha256": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "canvas-core/build.gradle.kts": "ffc48ccb1b3726a03fb404cdb4525b45834546009437ab6ac8cceb2fe63e32df",
-    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/BrushTileBitmapTest.kt": "ae1ac66b7705cdc427c2385908d20b6c3faa24e537edd835cbd8c418deff2f41",
-    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "f7591f96481dfcfe7a39f8e47f1d9dcc9fa9796b1c29b11f33bf9c9c9a9da764",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/BrushTileBitmapTest.kt": "81266e0fb602c74e9b308a6f337768b4d82e2024e4bbd05ceb4c388ced6cf610",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "8b2367d29a9a918bee297e97a4298f9900df17d151d1559f8f3b781d2afb54bc",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "4e3e22ae481fa2a3f5aab66266a8f93d8e7d5cf822a282f752d6c39b8243ff8e",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "339eff8c0b2e4b3d73b8f24a77c1d440ed08d3038d67d8ac649dd57c89a28f17",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushReductionPoc.kt": "b6d2bfa6bf4e5bf7946e1d711affd9fa52b899a2cf1da33e6c5cced7d7882844",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTileCachePoc.kt": "a9985d79490f0cce2198a591c90ed2e9d7576a8525f83107b0bd696f0b5c5def",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "463e7ece786ff360b9eddf99089320a4d97cccf7cad2dfd8a015af9142b73cb9",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "cd8d921a9fe5f8114ce078a521be823e2e16867c9bcdc1bb89506b6f944313a9",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "65f6b68f001eb090a098816857e81e6da69da8ab603b8b274d70221b2cca5549",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "30f990e632feb680a7b9d39836e278f861c880b2fa50a0c252f83c11dc20b0b1",
@@ -42,6 +62,7 @@
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushPathPocTest.kt": "11bd522704e60bc701175ef63fdc64b2decab4e7f269a7bcd5b8e267956332c0",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushReductionPocTest.kt": "7700ad8fef37abb90162e13b5b0f97b3e8e6b736a4fe889e5547092ff29d5fdd",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushTileCachePocTest.kt": "423393291161f4bc7abb1876399e090aa2a92e4fb1cb6f3501b21610f32aed34",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPocTest.kt": "1ce1a529cf49be6e3f589a54d477c8d9641da89198dee28b29bf16dde493e81b",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPocTest.kt": "57831c9c16cb237f2dcf6d796a27b958261a9191842065de59262b5a20a10636",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/ControlledResourceBackend.kt": "a8edb740d7d1d06da46dec475887ceed9fa2ca7c447d8cd9d948182c8705a81a",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/DocumentCloseContractTest.kt": "2b818d969cdc14b82835ffb2298edecd02a809af13e4e317cf3d7281969f31dd",
@@ -59,16 +80,17 @@
     "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "311d1ea9195ae1933f13227a9d7197441c99ef61c97fd249032643365ea79be2",
     "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
-    "tools/verify_android_brush_common.py": "806dfbdf7dbb7a365e1c264f35ac3cdb9a0f8c82d8f76446086e95daeff1bd3e"
+    "tools/verify_android_brush_common.py": "03c39418abceeb203362d202a9de50190cb362ee40e528ed812898ee686da2d6"
   },
   "test_apk": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
-  "test_apk_sha256": "1b26f210bcdf9b358c1e402ba23db3a2d4b595eda3550c4df9361a5ff257f615",
-  "test_output_sha256": "68293b9d907305131334ccc5a8b50018f17ebc657d11fc39fabb61a711fd48f7",
+  "test_apk_sha256": "defef3d87d44ad2c5068378b18e0a308c20f22cd570dcfa3dde89b054cec63f8",
+  "test_output_sha256": "5994863a757a529fc6cb1582c28087a3fa808a09bbd41e9afd9195e40d4b8e4e",
   "desktop_unlock_required": false,
   "shared_geometry_and_chunk_mask_on_art_verified": true,
   "native_canvas_mask_image_consumption_verified": true,
   "native_brush_path_rasterizer_verified": false,
   "physical_device_measured": false,
   "app_brush_integration_verified": false,
-  "scope": "Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest-scaled tile seam checks. No filtered gutter, app UI, touch or device performance claim."
+  "native_cost_scope": "Bitmap allocationByteCount and one exploratory API timing. Includes temporary RGBA ByteBuffer copy; no process peak heap, GPU, GC or delayed reclamation measurement. Release time is recycle API return.",
+  "scope": "Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest and filtered tile seam checks with true neighbor gutter and disjoint device-pixel core clips. Includes Bitmap allocationByteCount observations; no whole-process heap, GPU, arbitrary transform, app UI, touch or device performance claim."
 }

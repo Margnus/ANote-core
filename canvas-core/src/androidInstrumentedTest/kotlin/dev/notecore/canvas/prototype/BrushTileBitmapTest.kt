@@ -5,11 +5,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.RectF
+import java.nio.ByteBuffer
 import org.junit.Test
 import kotlin.test.*
 
 /** Actual ART generation -> Android premultiplied Bitmap -> Canvas, without app UI. */
 class BrushTileBitmapTest {
+    companion object { val observations = mutableListOf<String>() }
     private val frame = FrameToken(SceneId("bitmap-page"), 1, 1, 1, 1, 1)
     private val layer = LayerId("ink")
     private val grid = BrushTileGridPoc(PointD(0.25, 8.0), 64, 32, pixelSize = 0.5, samplesPerAxis = 4)
@@ -69,5 +72,94 @@ class BrushTileBitmapTest {
             readers.forEach { cache.returnReader(it) }; cache.close()
         }
         assertTrue(cache.isDrained)
+    }
+
+    private fun rgbaBitmap(reader: BrushTileReaderPoc): Bitmap = rgbaBitmap(
+        (BrushTilePixelsPoc.build(reader, BrushTileImageFixture.rgb) as BrushTilePixelBuild.Ready).pixels)
+
+    private fun rgbaBitmap(pixels: BrushTilePixelsPoc): Bitmap {
+        val bitmap = Bitmap.createBitmap(pixels.grid.width, pixels.grid.height, Bitmap.Config.ARGB_8888)
+        try {
+            val copy = ByteBuffer.allocate(pixels.logicalBytes.toInt())
+            for (i in 0 until pixels.logicalBytes.toInt()) copy.put(pixels.byteAt(i).toByte())
+            copy.rewind(); bitmap.copyPixelsFromBuffer(copy)
+            return bitmap
+        } catch (failure: Throwable) { bitmap.recycle(); throw failure }
+    }
+
+    @Test fun sharedPremultipliedPayloadCompositesWithoutSecondAlphaOrChannelSwap() {
+        val f = BrushTileImageFixture; val cache = BrushTileCachePoc(32768, 65536)
+        val reader = f.reader(cache, f.catalog())
+        val conversionStart = System.nanoTime()
+        val payload = (BrushTilePixelsPoc.build(reader, f.rgb) as BrushTilePixelBuild.Ready).pixels
+        val conversionNs = System.nanoTime() - conversionStart
+        val copyStart = System.nanoTime(); val image = rgbaBitmap(payload)
+        val copyNs = System.nanoTime() - copyStart
+        val output = Bitmap.createBitmap(64, 32, Bitmap.Config.ARGB_8888)
+        var observation: String? = null
+        try {
+            val drawStart = System.nanoTime()
+            val canvas = Canvas(output); canvas.drawColor(Color.WHITE); canvas.drawBitmap(image, 0f, 0f, Paint())
+            val drawNs = System.nanoTime() - drawStart
+            for (i in 0 until 2048) {
+                val alpha = payload.byteAt(i * 4 + 3); val pixel = output.getPixel(i % 64, i / 64)
+                assertEquals(alpha, Color.alpha(image.getPixel(i % 64, i / 64)))
+                for ((channel, actual) in listOf(0 to Color.red(pixel), 1 to Color.green(pixel), 2 to Color.blue(pixel)))
+                    assertTrue(kotlin.math.abs(payload.byteAt(i * 4 + channel) + 255 - alpha - actual) <= 1)
+            }
+            observation = "{\"color_pixels\":2048,\"payload_bytes\":${payload.logicalBytes},\"bitmap_allocation_bytes\":${image.allocationByteCount},\"bitmap_row_bytes\":${image.rowBytes},\"output_allocation_bytes\":${output.allocationByteCount},\"conversion_elapsed_ns\":$conversionNs,\"copy_create_elapsed_ns\":$copyNs,\"draw_elapsed_ns\":$drawNs"
+        } finally {
+            val releaseStart = System.nanoTime(); image.recycle(); output.recycle()
+            val releaseNs = System.nanoTime() - releaseStart
+            cache.returnReader(reader); cache.close()
+            observation?.let { observations.add("$it,\"release_call_elapsed_ns\":$releaseNs}") }
+        }
+        assertTrue(cache.isDrained)
+    }
+
+    private fun scaled(catalog: ChunkedBrushPoc, split: Boolean, gutter: Int, scale: Float): ByteArray {
+        val f = BrushTileImageFixture; val cache = BrushTileCachePoc(65536, 131072)
+        val output = Bitmap.createBitmap(144, 80, Bitmap.Config.ARGB_8888)
+        try {
+            val canvas = Canvas(output); val paint = Paint().also { it.isFilterBitmap = true; it.isAntiAlias = false }
+            for (side in 0 until if (split) 2 else 1) {
+                val core = if (split) f.grid.copy(origin = PointD(0.25 + side * 16, 8.0), width = 32) else f.grid
+                val reader = f.reader(cache, catalog, checkNotNull(core.withGutter(gutter)))
+                try {
+                    val image = rgbaBitmap(reader)
+                    try {
+                        val x = 3.25f + side * core.width * scale; val y = 3.25f
+                        val save = canvas.save()
+                        canvas.clipRect(kotlin.math.ceil(x - 0.5f), kotlin.math.ceil(y - 0.5f),
+                            kotlin.math.ceil(x + core.width * scale - 0.5f), kotlin.math.ceil(y + core.height * scale - 0.5f))
+                        canvas.drawBitmap(image, null, RectF(x - gutter * scale, y - gutter * scale,
+                            x + (core.width + gutter) * scale, y + (core.height + gutter) * scale), paint)
+                        canvas.restoreToCount(save)
+                    } finally { image.recycle() }
+                } finally { cache.returnReader(reader) }
+            }
+            val raw = ByteBuffer.allocate(output.byteCount); output.copyPixelsToBuffer(raw)
+            return raw.array()
+        } finally { output.recycle(); cache.close(); check(cache.isDrained) }
+    }
+
+    @Test fun filteredTilesUseTrueNeighborBorderAndClipToNonoverlappingCore() {
+        var controlDifferences = 0; var observedMax = 0
+        for (kind in BrushKind.entries) for (scale in listOf(1.5f, 2f)) {
+            val c = BrushTileImageFixture.catalog(kind)
+            val reference = scaled(c, false, 1, scale); val tiled = scaled(c, true, 1, scale)
+            val unpadded = scaled(c, true, 0, scale)
+            var maxDelta = 0
+            for (y in 5 until (3 + 32 * scale).toInt() - 1) for (x in 5 until (3 + 64 * scale).toInt() - 1) for (channel in 0..3) {
+                val offset = (y * 144 + x) * 4 + channel
+                val expected = reference[offset].toInt() and 255
+                maxDelta = maxOf(maxDelta, kotlin.math.abs(expected - (tiled[offset].toInt() and 255)))
+                if (expected != (unpadded[offset].toInt() and 255)) controlDifferences++
+            }
+            observedMax = maxOf(observedMax, maxDelta)
+            assertTrue(maxDelta <= 1, "kind=$kind scale=$scale maxDelta=$maxDelta")
+        }
+        assertTrue(controlDifferences > 0, "Fixture must expose the missing-neighbor problem")
+        observations.add("{\"filter_cases\":6,\"max_channel_delta\":$observedMax,\"unpadded_channel_differences\":$controlDifferences}")
     }
 }

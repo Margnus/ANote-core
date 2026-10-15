@@ -11,16 +11,18 @@ class CoreBrushInstrumentation : Instrumentation() {
     override fun onStart() {
         val output = Bundle()
         try {
+            BrushTileBitmapTest.observations.clear()
             val result = JUnitCore.runClasses(BrushEnvelopePocTest::class.java, BrushPathPocTest::class.java,
                 BrushReductionPocTest::class.java, ChunkedBrushPocTest::class.java,
                 BrushTileCachePocTest::class.java, ResourceLeaseContractTest::class.java,
-                WeightedLruContractTest::class.java, BrushTileBitmapTest::class.java)
-            check(result.wasSuccessful() && result.runCount == 57 && result.ignoreCount == 0) {
+                WeightedLruContractTest::class.java, BrushTilePixelsPocTest::class.java, BrushTileBitmapTest::class.java)
+            check(result.wasSuccessful() && result.runCount == 63 && result.ignoreCount == 0) {
                 "run=${result.runCount} ignored=${result.ignoreCount} failures=${result.failures.joinToString { it.trace }}"
             }
             output.putInt("common_brush_tests", result.runCount)
             output.putInt("common_brush_ignored", result.ignoreCount)
             output.putString("common_brush_status", "passed")
+            output.putString("native_image_observations", BrushTileBitmapTest.observations.joinToString(prefix = "[", postfix = "]"))
             finish(Activity.RESULT_OK, output)
         } catch (failure: Throwable) {
             output.putString("common_brush_status", "failed")

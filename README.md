@@ -12,6 +12,8 @@ DEV-029的[精确直线段派生简化](docs/派生笔迹直线段简化PoC.md)�
 
 最新 DEV-031 已实现[掩码缓存与原生图像消费](docs/掩码缓存与原生图像消费PoC.md)：复用现有资源池，跨视口命中与当前帧发布分离，退休读者继续占用总预算；修复 Kotlin/Native 淘汰 Map.Entry 后访问的异常。标准 Gradle 254 项、Android 55 项共同测试加 2 项 Bitmap/Canvas 检查、iOS Kotlin/Native 55 项通过。40 次固定视口请求命中 22 次，20,480 个覆盖值与无缓存一致。Apple 新 mask 图像消费、滤波/gutter 与真机实际内存继续推进；普通 App 仍为 DEV-028 包，新缓存未接入。
 
+最新 DEV-032 已完成[双端掩码图像与滤波接缝验证](docs/双端掩码图像与滤波接缝PoC.md)：新 mask 在 ART/Kotlin/Native 当场生成，分别由 Bitmap/Canvas、CGImage/CoreGraphics 消费。三笔刷 × 1.5/2.0 倍滤波下，真实邻域 gutter 加设备像素唯一归属裁剪与整块结果一致，无 gutter 对照暴露接缝。标准 Gradle 258 项、Android 63 项、Apple 62 项通过，原生行存储及转换/复制/绘制/释放 API 观测已记录。尚不等于真机内存或任意变换验收；DEV-033 接续总量预算与实际有界作业集成，普通 App 包未切换后端。
+
 ## 当前可运行内容
 
 - [三笔刷有界路径与离屏验证](docs/共同笔刷路径与离屏验证.md)：共享231项测试、Kotlin/Native运行11项、Android/iOS实际离屏覆盖与alpha；S2成本排除了整页无限制路径缓存，下一步简化/分段与驻留预算。未接入App三笔刷。
