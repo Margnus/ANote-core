@@ -303,29 +303,34 @@ struct PreviewRoot: View {
                         Button("适合页面") { viewportRatio = 0; viewportRequest += 1 }
                         Text("双指缩放").font(.caption).foregroundStyle(.secondary)
                     }.padding(.horizontal)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
-                            Button("上一页") { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex - 1).id) } }
-                                .disabled(note.currentPageIndex == 0)
-                            Text("\(note.currentPageIndex + 1)/\(note.pageCount)").accessibilityLabel("当前页码")
-                            Button("下一页") { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex + 1).id) } }
-                                .disabled(note.currentPageIndex == note.pageCount - 1)
-                            Button("加页") { model.editPage { $0.insertPage() } }
-                            Button("复制页") { model.editPage { $0.doCopyCurrentPage() } }
-                            Button("删页") { note.cancelStroke(); deletingPage = true }
-                            Button("前移") { model.editPage { $0.moveCurrentPage(before: $0.page(index: $0.currentPageIndex - 1).id) } }
-                                .disabled(note.currentPageIndex == 0)
-                            Button("后移") { model.editPage {
-                                $0.moveCurrentPage(before: $0.currentPageIndex + 2 < $0.pageCount ? $0.page(index: $0.currentPageIndex + 2).id : nil)
-                            } }.disabled(note.currentPageIndex == note.pageCount - 1)
-                            Menu("纸张") {
-                                Button("空白") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .blank) } }
-                                Button("横线") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .ruled) } }
-                                Button("方格") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .grid) } }
-                                Button("点阵") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .dots) } }
-                            }
-                        }.padding(.horizontal)
-                    }.frame(minHeight: 36)
+                    HStack(spacing: 8) {
+                        Button { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex - 1).id) } } label: {
+                            Image(systemName: "chevron.left").frame(width: 44, height: 44)
+                        }.accessibilityLabel("上一页").disabled(note.currentPageIndex == 0)
+                        Text("\(note.currentPageIndex + 1)/\(note.pageCount)").monospacedDigit().fixedSize()
+                            .accessibilityLabel("当前页码").accessibilityValue("\(note.currentPageIndex + 1)/\(note.pageCount)")
+                        Button { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex + 1).id) } } label: {
+                            Image(systemName: "chevron.right").frame(width: 44, height: 44)
+                        }.accessibilityLabel("下一页").disabled(note.currentPageIndex == note.pageCount - 1)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                Button("加页") { model.editPage { $0.insertPage() } }
+                                Button("复制页") { model.editPage { $0.doCopyCurrentPage() } }
+                                Button("删页") { note.cancelStroke(); deletingPage = true }
+                                Button("前移") { model.editPage { $0.moveCurrentPage(before: $0.page(index: $0.currentPageIndex - 1).id) } }
+                                    .disabled(note.currentPageIndex == 0)
+                                Button("后移") { model.editPage {
+                                    $0.moveCurrentPage(before: $0.currentPageIndex + 2 < $0.pageCount ? $0.page(index: $0.currentPageIndex + 2).id : nil)
+                                } }.disabled(note.currentPageIndex == note.pageCount - 1)
+                                Menu("纸张") {
+                                    Button("空白") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .blank) } }
+                                    Button("横线") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .ruled) } }
+                                    Button("方格") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .grid) } }
+                                    Button("点阵") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .dots) } }
+                                }
+                            }.padding(.trailing)
+                        }
+                    }.padding(.horizontal).frame(minHeight: 44)
                     Text(model.status).font(.caption).foregroundStyle(.secondary)
                     NativeInkCanvas(note: note, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
                         changed: { model.changed() }, failed: { model.status = $0 })
