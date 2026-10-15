@@ -58,3 +58,13 @@ tasks.register<JavaExec>("runPrototype") {
     classpath(mainCompilation.output.allOutputs, configurations.named("jvmRuntimeClasspath"))
     mainClass.set("dev.notecore.canvas.prototype.PrototypeDemoKt")
 }
+
+tasks.register<JavaExec>("runSpatialIndexPoc") {
+    group = "verification"
+    description = "Opt-in M-3 desktop AABB experiment; not a physical device benchmark."
+    dependsOn("jvmTestClasses", generateScaleFixtures)
+    val testCompilation = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(testCompilation.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.SpatialIndexBenchmark")
+    args(rootProject.projectDir.absolutePath)
+}

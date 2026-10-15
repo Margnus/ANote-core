@@ -8,6 +8,8 @@
 
 ## 当前可运行内容
 
+- [密集页空间索引PoC](docs/空间索引PoC.md)：S2百万点与退化分布上的网格/STR树正确性和桌面成本测量；未接入App，生产结构尚未选定。
+
 - 平台无关double坐标和矩阵、不可变真实采样、captured scene/layer/tool。
 - 纯场景命令和patch，内存单写者的修订/幂等/容量检查；Receipt明确MEMORY_ONLY。
 - 迟到frame的revision/generation检查、scene/object/算法版本的几何缓存键。
