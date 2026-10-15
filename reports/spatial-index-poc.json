@@ -14,7 +14,7 @@
         "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt": "189d9a1162bc84b11f32f95d9cf1fbcf7abf01ee5468883476e05c004c29dff0",
         "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "30f990e632feb680a7b9d39836e278f861c880b2fa50a0c252f83c11dc20b0b1",
         "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/SpatialIndexBenchmark.kt": "dfca5a55fb2812c5b1dd706e5a4b1084f03f8125e337d11aff0f0dcbfa38c7d6",
-        "canvas-core/build.gradle.kts": "e98a05733615e0936c9d5278d2cf16aa77789b6c7b4f280a9b55a3f285e3b920",
+        "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
         "fixtures/scale/manifest.json": "6f8f33488894ea52701603f294b2b5a8b2035cf5a5260c87f3eb82926e2330e6"
     },
     "cases": [
@@ -241,19 +241,19 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 10802458,
-                    "median_ns": 10990917,
-                    "max_ns": 11574791
+                    "min_ns": 2078125,
+                    "median_ns": 2869917,
+                    "max_ns": 2919042
                 },
                 "query_batch": {
-                    "min_ns": 4378333,
-                    "median_ns": 5236958,
-                    "max_ns": 5626625
+                    "min_ns": 2856208,
+                    "median_ns": 6620625,
+                    "max_ns": 7223125
                 },
                 "move_100": {
-                    "min_ns": 35208,
-                    "median_ns": 267250,
-                    "max_ns": 275750
+                    "min_ns": 48792,
+                    "median_ns": 85416,
+                    "max_ns": 302000
                 }
             },
             "str_packed_rtree": {
@@ -469,25 +469,25 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 1639917,
-                    "median_ns": 2084417,
-                    "max_ns": 2194209
+                    "min_ns": 1475250,
+                    "median_ns": 2270583,
+                    "max_ns": 2650083
                 },
                 "query_batch": {
-                    "min_ns": 1117375,
-                    "median_ns": 1308917,
-                    "max_ns": 1368333
+                    "min_ns": 1028833,
+                    "median_ns": 1415083,
+                    "max_ns": 1511458
                 },
                 "move_100_full_rebuild": {
-                    "min_ns": 1646833,
-                    "median_ns": 1881958,
-                    "max_ns": 2169667
+                    "min_ns": 1386708,
+                    "median_ns": 1580875,
+                    "max_ns": 2685875
                 }
             },
             "brute_query_batch": {
-                "min_ns": 11154917,
-                "median_ns": 12772667,
-                "max_ns": 12853250
+                "min_ns": 4294042,
+                "median_ns": 12623791,
+                "max_ns": 82406750
             }
         },
         {
@@ -713,19 +713,19 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 1239000,
-                    "median_ns": 1554875,
-                    "max_ns": 2447000
+                    "min_ns": 1074375,
+                    "median_ns": 1445708,
+                    "max_ns": 1690000
                 },
                 "query_batch": {
-                    "min_ns": 1064542,
-                    "median_ns": 1273250,
-                    "max_ns": 1756750
+                    "min_ns": 601250,
+                    "median_ns": 680791,
+                    "max_ns": 2846917
                 },
                 "move_100": {
-                    "min_ns": 35000,
-                    "median_ns": 44541,
-                    "max_ns": 54833
+                    "min_ns": 27500,
+                    "median_ns": 32584,
+                    "max_ns": 41042
                 }
             },
             "str_packed_rtree": {
@@ -941,25 +941,25 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 1853167,
-                    "median_ns": 2074542,
-                    "max_ns": 2117417
+                    "min_ns": 771792,
+                    "median_ns": 1124750,
+                    "max_ns": 1229083
                 },
                 "query_batch": {
-                    "min_ns": 206458,
-                    "median_ns": 454042,
-                    "max_ns": 486417
+                    "min_ns": 191167,
+                    "median_ns": 214208,
+                    "max_ns": 229000
                 },
                 "move_100_full_rebuild": {
-                    "min_ns": 1863167,
-                    "median_ns": 2054917,
-                    "max_ns": 2131459
+                    "min_ns": 783875,
+                    "median_ns": 913292,
+                    "max_ns": 1187792
                 }
             },
             "brute_query_batch": {
-                "min_ns": 4546333,
-                "median_ns": 7955958,
-                "max_ns": 12862000
+                "min_ns": 12400041,
+                "median_ns": 12604250,
+                "max_ns": 12922917
             }
         },
         {
@@ -1185,19 +1185,19 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 430292,
-                    "median_ns": 432667,
-                    "max_ns": 452709
+                    "min_ns": 435250,
+                    "median_ns": 454375,
+                    "max_ns": 821292
                 },
                 "query_batch": {
-                    "min_ns": 36168375,
-                    "median_ns": 51465750,
-                    "max_ns": 59349250
+                    "min_ns": 35441375,
+                    "median_ns": 49301625,
+                    "max_ns": 55035917
                 },
                 "move_100": {
-                    "min_ns": 4875,
-                    "median_ns": 6792,
-                    "max_ns": 8250
+                    "min_ns": 6416,
+                    "median_ns": 7250,
+                    "max_ns": 25000
                 }
             },
             "str_packed_rtree": {
@@ -1413,25 +1413,25 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 326417,
-                    "median_ns": 333000,
-                    "max_ns": 393042
+                    "min_ns": 278417,
+                    "median_ns": 290167,
+                    "max_ns": 869709
                 },
                 "query_batch": {
-                    "min_ns": 2080333,
-                    "median_ns": 2191166,
-                    "max_ns": 2650375
+                    "min_ns": 2052000,
+                    "median_ns": 2171084,
+                    "max_ns": 2216209
                 },
                 "move_100_full_rebuild": {
-                    "min_ns": 349000,
-                    "median_ns": 368958,
-                    "max_ns": 408208
+                    "min_ns": 289625,
+                    "median_ns": 315792,
+                    "max_ns": 327750
                 }
             },
             "brute_query_batch": {
-                "min_ns": 4017958,
-                "median_ns": 4120375,
-                "max_ns": 4245500
+                "min_ns": 4077042,
+                "median_ns": 4137708,
+                "max_ns": 20078500
             }
         },
         {
@@ -1657,19 +1657,19 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 886709,
-                    "median_ns": 947208,
-                    "max_ns": 988833
+                    "min_ns": 824542,
+                    "median_ns": 843959,
+                    "max_ns": 847791
                 },
                 "query_batch": {
-                    "min_ns": 1143834,
-                    "median_ns": 1290542,
-                    "max_ns": 1451208
+                    "min_ns": 1053791,
+                    "median_ns": 1089041,
+                    "max_ns": 1145708
                 },
                 "move_100": {
-                    "min_ns": 36250,
-                    "median_ns": 37709,
-                    "max_ns": 40709
+                    "min_ns": 26500,
+                    "median_ns": 29667,
+                    "max_ns": 36417
                 }
             },
             "str_packed_rtree": {
@@ -1885,25 +1885,25 @@
                     ]
                 },
                 "build": {
-                    "min_ns": 579625,
-                    "median_ns": 585542,
-                    "max_ns": 631958
+                    "min_ns": 541500,
+                    "median_ns": 544209,
+                    "max_ns": 583834
                 },
                 "query_batch": {
-                    "min_ns": 433542,
-                    "median_ns": 455292,
-                    "max_ns": 509916
+                    "min_ns": 415917,
+                    "median_ns": 425666,
+                    "max_ns": 437667
                 },
                 "move_100_full_rebuild": {
-                    "min_ns": 593459,
-                    "median_ns": 596875,
-                    "max_ns": 615917
+                    "min_ns": 549708,
+                    "median_ns": 564208,
+                    "max_ns": 599208
                 }
             },
             "brute_query_batch": {
-                "min_ns": 11412333,
-                "median_ns": 11663416,
-                "max_ns": 11708375
+                "min_ns": 11006708,
+                "median_ns": 11032166,
+                "max_ns": 11063958
             }
         }
     ]

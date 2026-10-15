@@ -1,0 +1,92 @@
+{
+  "schema": "c1-evidence-audit-1",
+  "status": "passed",
+  "reports": {
+    "spatial-index-poc": {
+      "report_sha256": "ce3aa90cdc94a4b142698cce0559d6e611d0f6bd6d7373f8f92b2198eb3810e0",
+      "role": "historical_experiment",
+      "binding_state": "matched",
+      "matched_bindings": 6,
+      "mismatches": [],
+      "scope": "Desktop JVM AABB broad phase only; synthetic ink subset; no exact hit test, render, device latency or heap measurement"
+    },
+    "brush-path-costs": {
+      "report_sha256": "4cea2e0c3d4eca28a454bfe4fcc9ee2df94732bd8a74d94d82d2e966decfd825",
+      "role": "historical_experiment",
+      "binding_state": "matched",
+      "matched_bindings": 8,
+      "mismatches": [],
+      "scope": "Desktop JVM one pass per brush, 100 initial warmup strokes. Build timings exclude fixture IO/sample copying, include output allocation and possible GC. Outputs released per stroke. No wall-clock threshold."
+    },
+    "brush-reduction-costs": {
+      "report_sha256": "f5870c744e51633c44b07c8895c13de48e37124d94844a3a7a7b1c288448cd95",
+      "role": "historical_experiment",
+      "binding_state": "matched",
+      "matched_bindings": 9,
+      "mismatches": [],
+      "scope": "Same-process desktop JVM comparison, alternating baseline/reduced order; 100 warmups then one pass. Reduced build includes plan and projection copies, both exclude fixture IO/canonical sample creation. Logical payloads, not actual heap. No time threshold."
+    },
+    "chunked-brush-costs": {
+      "report_sha256": "17e97631fac83febe79cb799d45b38db37342f13c481ff7e6f70f909db0bfceb",
+      "role": "historical_experiment",
+      "binding_state": "matched",
+      "matched_bindings": 11,
+      "mismatches": [],
+      "scope": "Desktop JVM exploratory cold costs, bounded CPU subpixel reference rasterization, S9 per-stroke window work and S2 global bounds-only index experiment. No native raster/heap, page UI, frame budget or latency acceptance."
+    },
+    "brush-tile-cache-costs": {
+      "report_sha256": "1292be76501ead4039db493f2a5cfba4b5afc429b0dec096c42df4b0f16d1783",
+      "role": "historical_experiment",
+      "binding_state": "matched",
+      "matched_bindings": 41,
+      "mismatches": [],
+      "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
+    },
+    "verification": {
+      "report_sha256": "19411c356f2065800ac3c285117573b2d93f6e317231850cdbb11ce057b7e6cd",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 147,
+      "mismatches": [],
+      "scope": "C0/C1 reference prototype"
+    },
+    "android-brush-common-tests": {
+      "report_sha256": "77b262c330d294f590d17c0534502003fdc6bc1a4fbd16bf5855c5245de4baa4",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 54,
+      "mismatches": [],
+      "scope": "Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest and filtered tile seam checks with true neighbor gutter and disjoint device-pixel core clips. Includes Bitmap allocationByteCount observations; no whole-process heap, GPU, arbitrary transform, app UI, touch or device performance claim."
+    },
+    "apple-brush-common-tests": {
+      "report_sha256": "d732635d9ae3fde028c56f6853a08d2adad31abeb12fbb27ae2c95d2b01083f7",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 49,
+      "mismatches": [],
+      "scope": "Actual common envelope/path generation, bounded admission, cancellation and coverage tests compiled/run by Kotlin/Native. Includes CoreGraphics RGBA image/alpha/color and nearest/filtered tile consumption. No UIKit touch, physical performance, general filter/transform or heap claim."
+    },
+    "ios-host-tests": {
+      "report_sha256": "5a830a9268821f0ad1de6410e7b366c22367d55555e529055f9b990d1ca72d39",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 51,
+      "mismatches": [],
+      "scope": "Actual iOS app-host APIs, isolated temporary files and CoreGraphics offscreen pixels. Separate test build; not distributable binary UI, real touch, system picker, force-stop or power-loss recovery evidence."
+    },
+    "render-viewport-trace": {
+      "report_sha256": "f6028562a215156777a1c19d464cf1551aeb8d15b19e823abca607d00c3bc67c",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 3,
+      "mismatches": [],
+      "scope": "Same fixed synthetic scroll/zoom responsibility trace on actual ART Bitmap and iOS app-host Swift worker/CGImage; no ordinary app integration. Timings are single exploratory runs with deliberate worker gate/owner polling. Wait bounds bracket admission within submit and end at beforeCompute; include handoff overhead, not isolated scheduler latency. Row storage/charge is not peak heap or GPU residency."
+    }
+  },
+  "errors": [],
+  "scope": "Read-only rehash of recorded inputs and retained artifacts; no rerun or completeness proof. Historical drift is explicit, never promoted to current benchmark evidence. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.",
+  "ordinary_app_backend_integrated": false,
+  "c1_gate_complete": false,
+  "physical_device_or_heap_measured": false,
+  "audit_tool_sha256": "90bc2e3e5e6fed48c45d7cb321a40b32f2c838b3fc4e4b5b8228b262062735d6"
+}
