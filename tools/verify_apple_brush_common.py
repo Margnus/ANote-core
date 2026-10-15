@@ -38,16 +38,17 @@ def main():
     binary = ROOT/'canvas-core/build/bin/iosSimulatorArm64/debugTest/test.kexe'
     binary_sha = digest(binary)
     run = subprocess.run(['xcrun', 'simctl', 'spawn', args.device, str(binary),
-        '--ktest_filter=dev.notecore.canvas.prototype.BrushEnvelopePocTest.*:dev.notecore.canvas.prototype.BrushPathPocTest.*:dev.notecore.canvas.prototype.BrushReductionPocTest.*:dev.notecore.canvas.prototype.ChunkedBrushPocTest.*',
-        '--ktest_logger=GTEST'], cwd=ROOT, check=True, capture_output=True, text=True, timeout=120)
+        '--ktest_filter=dev.notecore.canvas.prototype.BrushEnvelopePocTest.*:dev.notecore.canvas.prototype.BrushPathPocTest.*:dev.notecore.canvas.prototype.BrushReductionPocTest.*:dev.notecore.canvas.prototype.ChunkedBrushPocTest.*:dev.notecore.canvas.prototype.BrushTileCachePocTest.*:dev.notecore.canvas.prototype.ResourceLeaseContractTest.*:dev.notecore.canvas.prototype.WeightedLruContractTest.*',
+        '--ktest_logger=GTEST'], cwd=ROOT, check=False, capture_output=True, text=True, timeout=120)
     (build/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
+    run.check_returncode()
     passed = re.findall(r'^\[\s+OK\s+\]\s+(\S+)', run.stdout, re.MULTILINE)
     expected = set()
-    for name in ('BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest'):
+    for name in ('BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest'):
         source = ROOT/('canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/'+name+'.kt')
         expected.update('dev.notecore.canvas.prototype.'+name+'.'+method for method in
             re.findall(r'@Test\s+fun\s+(\w+)\(', source.read_text(encoding='utf-8')))
-    assert len(expected) == 26 and set(passed) == expected and len(passed) == 26, run.stdout
+    assert len(expected) == 55 and set(passed) == expected and len(passed) == 55, run.stdout
     assert before == {p.relative_to(ROOT).as_posix(): digest(p) for p in sources}
     assert digest(binary) == binary_sha
     report = {'status': 'passed', 'platform': 'Kotlin/Native ARM64 tests executed via iOS Simulator spawn',

@@ -115,8 +115,11 @@ class ResourceLeasePool<K : Any, V : Any>(
         }
         resident.remove(key)?.let(::retire)
         while (residentBytes > residentBudget - reservation.bytes) {
+            // Kotlin/Native invalidates EntryRef after map mutation. Capture the value first.
             val oldest = resident.entries.first()
-            resident.remove(oldest.key); retire(oldest.value)
+            val oldestKey = oldest.key
+            val oldestValue = oldest.value
+            resident.remove(oldestKey); retire(oldestValue)
         }
         resident[key] = entry; residentBytes += reservation.bytes
         return ResourcePublication.Resident(entry.handle)

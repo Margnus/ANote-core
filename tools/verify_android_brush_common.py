@@ -41,16 +41,16 @@ def main():
     output = adb('shell', 'am', 'instrument', '-w', '-r',
         'dev.notecore.canvas.poc.test/dev.notecore.canvas.prototype.CoreBrushInstrumentation')
     (build/'run.log').write_text(output, encoding='utf-8')
-    assert 'common_brush_status=passed' in output and 'common_brush_tests=26' in output and 'common_brush_ignored=0' in output, output
+    assert 'common_brush_status=passed' in output and 'common_brush_tests=57' in output and 'common_brush_ignored=0' in output, output
     assert before == {p.relative_to(ROOT).as_posix(): digest(p) for p in sources} and digest(apk) == apk_sha
     report = {'status': 'passed', 'platform': 'Android emulator ART standalone canvas-core test APK',
         'serial': args.serial, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
-        'test_count': 26, 'test_groups': ['BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest'],
+        'test_count': 57, 'common_test_count': 55, 'android_bitmap_test_count': 2, 'test_groups': ['BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTileBitmapTest'],
         'source_and_build_sha256': before, 'test_apk': apk.relative_to(ROOT).as_posix(), 'test_apk_sha256': apk_sha,
         'test_output_sha256': digest(build/'run.log'), 'desktop_unlock_required': False,
-        'shared_geometry_and_chunk_mask_on_art_verified': True, 'native_canvas_rasterizer_verified': False,
+        'shared_geometry_and_chunk_mask_on_art_verified': True, 'native_canvas_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,
         'physical_device_measured': False, 'app_brush_integration_verified': False,
-        'scope': 'Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. No app UI, Android Canvas rasterization, touch or device performance claim.'}
+        'scope': 'Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest-scaled tile seam checks. No filtered gutter, app UI, touch or device performance claim.'}
     (ROOT/'reports/android-brush-common-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({k: v for k, v in report.items() if k != 'source_and_build_sha256'}))
 

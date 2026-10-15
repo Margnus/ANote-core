@@ -37,9 +37,11 @@ class WeightedLruCache<K : Any, V : Any>(val maxBytes: Long, private val weigh: 
         // Subtract before comparing to avoid overflowing Long when budgets are large.
         while (residentBytes > maxBytes - bytes) {
             val oldest = entries.entries.first()
-            entries.remove(oldest.key)
-            residentBytes -= oldest.value.bytes
-            displaced.add(DisplacedEntry(oldest.key, oldest.value.value))
+            val oldestKey = oldest.key
+            val oldestValue = oldest.value
+            entries.remove(oldestKey)
+            residentBytes -= oldestValue.bytes
+            displaced.add(DisplacedEntry(oldestKey, oldestValue.value))
         }
         entries[key] = Entry(value, bytes)
         residentBytes += bytes

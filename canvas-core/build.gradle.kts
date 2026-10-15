@@ -97,3 +97,13 @@ tasks.register<JavaExec>("runBrushPathCosts") {
     mainClass.set("dev.notecore.canvas.prototype.BrushPathCosts")
     args(rootProject.projectDir.absolutePath)
 }
+
+tasks.register<JavaExec>("runBrushTileCacheCosts") {
+    group = "verification"
+    description = "Synthetic viewport cache/reader accounting trace; not a heap or device benchmark."
+    dependsOn("jvmTestClasses")
+    val tests = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(tests.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.BrushTileCacheCosts")
+    args(rootProject.projectDir.absolutePath)
+}

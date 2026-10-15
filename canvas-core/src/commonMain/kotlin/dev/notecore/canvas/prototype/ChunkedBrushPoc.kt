@@ -46,6 +46,10 @@ internal class ChunkedBrushPoc private constructor(
     private val captured: FrameToken, private val stroke: StrokeObject, val segmentsPerChunk: Int,
     private val boxes: DoubleArray, private val index: PackedRTreePoc,
 ) {
+    // Opaque derived-cache identity: keys must not retain the catalog/canonical sample arrays.
+    internal val cacheIdentity = Any()
+    internal val contentFrame: FrameToken get() = captured
+    val ownerLayer: LayerId get() = stroke.layerId
     val chunkCount: Int get() = boxes.size / 4
     val boundsPayloadBytes: Long get() = boxes.size * 8L
     val indexNodeCount: Int get() = index.nodeCount
