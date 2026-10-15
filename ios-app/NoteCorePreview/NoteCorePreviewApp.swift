@@ -83,7 +83,7 @@ final class PreviewModel: ObservableObject {
         status = "正在打开…"
         request(input: (Self.file(id, directory: directory), id, retained), bytes: 160 * 1024 * 1024, compute: { input in
             let encoded: String
-            if let captured = input.2 { encoded = captured.encode() }
+            if let captured = input.2 { encoded = try captured.encode() }
             else { encoded = try PreviewFileIO.readUTF8(input.0) }
             let note = try PreviewNotebook.companion.restore(encoded: encoded)
             guard note.documentId == input.1 else { throw CocoaError(.fileReadCorruptFile) }
@@ -153,8 +153,9 @@ final class PreviewModel: ObservableObject {
         guard let note = current else { return true }
         guard note.retryPendingStroke() else { status = note.lastError; return false }
         let snapshot = note.capture(), previous = ledger.latest(documentId: note.documentId)
-        guard ledger.offer(snapshot: snapshot) == .accepted else {
-            status = "保存队列已满或内容版本过期，请保留当前笔记并重试"; return false
+        let admission = ledger.offer(snapshot: LegacyPreviewSaveSnapshot(source: snapshot))
+        guard admission == .accepted else {
+            status = admission == .versionConflict ? "保存内容发生冲突，请保留当前笔记并导出备份" : "保存队列已满或内容版本过期，请保留当前笔记并重试"; return false
         }
         if previous?.version != snapshot.version { storageEpoch += 1 }
         status = "正在保存… · \(note.strokeCount) 笔"
@@ -172,7 +173,10 @@ final class PreviewModel: ObservableObject {
                     precondition(self.ledger.complete(attempt: input.0, success: success))
                     let snapshot = input.0.snapshot
                     if self.current?.documentId == snapshot.documentId && self.current?.changeVersion == snapshot.version {
-                        self.status = success ? "已保存到本机 · \(self.current?.strokeCount ?? 0) 笔" : "保存失败，更改仍保留在本机会话，请重试"
+                        if let current = self.current, current.hasPendingStroke { self.status = current.lastError }
+                        else if let current = self.current, !snapshot.sameContent(other: LegacyPreviewSaveSnapshot(source: current.capture())) {
+                            self.status = "保存内容发生冲突，请保留当前笔记并导出备份"
+                        } else { self.status = success ? "已保存到本机 · \(self.current?.strokeCount ?? 0) 笔" : "保存失败，更改仍保留在本机会话，请重试" }
                     } else if self.current == nil && !success { self.status = "保存失败，更改仍保留，可从列表重新打开并重试" }
                     return .acknowledged // Failure is in the owner ledger before releasing worker responsibility.
                 })

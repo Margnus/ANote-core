@@ -161,7 +161,7 @@ class MainActivity : Activity() {
         return store.save(snapshot) { version, failure ->
             if (failure != null && !isFinishing) showError(failure)
             if (generation != viewGeneration || notebook !== note || isFinishing) return@save
-            if (failure == null && version == note.changeVersion) status?.text = getString(R.string.saved, note.strokeCount)
+            if (failure == null && version == note.changeVersion && !note.hasPendingStroke) status?.text = getString(R.string.saved, note.strokeCount)
         }
     }
     private fun leaveEditor() {

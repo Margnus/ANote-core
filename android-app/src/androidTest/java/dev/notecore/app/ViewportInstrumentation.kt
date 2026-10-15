@@ -8,6 +8,8 @@ import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
 import dev.notecore.canvas.preview.PreviewNotebook
+import dev.notecore.canvas.preview.PreviewSaveLedger
+import dev.notecore.canvas.preview.PreviewSaveAdmission
 import dev.notecore.canvas.prototype.*
 import dev.notecore.document.*
 import kotlin.math.abs
@@ -72,6 +74,8 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("paged_preview_codec", "passed")
             verifyPagedSession()
             result.putString("paged_preview_session", "passed")
+            verifyPagedStorage()
+            result.putString("paged_snapshot_storage", "passed")
             verifyStorage()
             result.putString("storage_failure_recovery", "passed")
             result.putString("storage_bounded_read_and_active_owner", "passed")
@@ -84,6 +88,35 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("viewport_status", "failed"); result.putString("failure", failure.stackTraceToString())
             finish(Activity.RESULT_CANCELED, result)
         }
+    }
+    private fun verifyPagedStorage() {
+        val directory = java.io.File(targetContext.cacheDir, "paged-storage-${System.nanoTime()}")
+        check(directory.mkdirs())
+        try {
+            val io = PreviewFileIO(directory, targetContext.contentResolver)
+            val note = PagedPreviewNotebook.create("ART-paged-save", "分页保存", "ART-save-session")
+            check(note.beginStroke(1.0, 2.0, 0.5f, 1)); check(note.endStroke(3.0, 4.0, 0.7f, 2))
+            val old = note.capture(); val ledger = PreviewSaveLedger()
+            check(ledger.offer(old) == PreviewSaveAdmission.ACCEPTED); val first = ledger.nextWrite()!!
+            check(note.insertPage()); check(note.beginStroke(10.0, 20.0, 0.5f, 3)); check(note.endStroke(30.0, 40.0, 0.7f, 4))
+            val latest = note.capture(); check(ledger.offer(latest) == PreviewSaveAdmission.ACCEPTED)
+            io.write(first.snapshot); check(ledger.complete(first, true)); check(ledger.latest(note.documentId) === latest)
+            val next = ledger.nextWrite()!!; io.write(next.snapshot); check(ledger.complete(next, true))
+            val decoded = PagedPreviewCodec.decode(java.io.File(directory, "${note.documentId}.ncp").readText())
+            check(decoded.pageCount == 2 && decoded.scene.objectCount == 2 && decoded.pages() == latest.root.pages())
+            check(decoded.scene.objects() == latest.root.scene.objects())
+            check(!ledger.complete(first, true))
+            val blocked = java.io.File(directory, "blocked"); blocked.writeText("synthetic IO failure")
+            val recoveryIO = PreviewFileIO(blocked, targetContext.contentResolver)
+            check(ledger.offer(latest) == PreviewSaveAdmission.ACCEPTED); val failed = ledger.nextWrite()!!
+            check(runCatching { recoveryIO.write(failed.snapshot) }.isFailure); check(ledger.complete(failed, false))
+            check(ledger.latest(note.documentId) === latest && ledger.nextWrite() == null)
+            check(blocked.delete()); check(blocked.mkdirs())
+            val reopened = PagedPreviewNotebook(decoded, "ART-recovered-session").capture()
+            check(ledger.offer(reopened) == PreviewSaveAdmission.ACCEPTED)
+            val retry = ledger.nextWrite()!!; recoveryIO.write(retry.snapshot); check(ledger.complete(retry, true))
+            check(java.io.File(blocked, "${note.documentId}.ncp").readText() == latest.encode())
+        } finally { directory.deleteRecursively() }
     }
     private fun verifyPagedSession() {
         val note = PagedPreviewNotebook.create("ART-session", "分页", "ART-fresh")
@@ -180,6 +213,7 @@ class ViewportInstrumentation : Instrumentation() {
         directory.writeText("A file blocks the required directory")
         lateinit var store: NoteStore
         lateinit var snapshot: dev.notecore.canvas.preview.PreviewNotebookSnapshot
+        lateinit var retainedInput: PreviewSaveSnapshot
         lateinit var notebook: PreviewNotebook
         runOnMainSync {
             store = NoteStore.isolated(targetContext, directory)
@@ -193,14 +227,28 @@ class ViewportInstrumentation : Instrumentation() {
             check(failed.second != null && failed.first == snapshot.version)
             runOnMainSync {
                 val retained = store.saveStates().single()
-                check(retained.retryRequired && retained.snapshot === snapshot)
+                retainedInput = retained.snapshot
+                check(retained.retryRequired && retainedInput.sameContent(LegacyPreviewSaveSnapshot(snapshot)))
             }
             val reopened = storageResult<Pair<PreviewNotebook?, String?>> { done -> store.open(snapshot.documentId) { note, error -> done(note to error) } }
             check(reopened.first?.capture()?.encode() == snapshot.encode() && reopened.second != null)
+            lateinit var reconstructed: dev.notecore.canvas.preview.PreviewNotebookSnapshot
+            lateinit var fork: dev.notecore.canvas.preview.PreviewNotebookSnapshot
+            runOnMainSync {
+                reconstructed = reopened.first!!.capture()
+                val other = PreviewNotebook(snapshot.documentId, snapshot.title)
+                check(other.beginStroke(100.0, 200.0, 0.5f, 1)); check(other.endStroke(300.0, 400.0, 0.6f, 2))
+                fork = other.capture()
+            }
+            val conflict = storageResult<Pair<Long, String?>> { done -> store.save(fork) { version, error -> done(version to error) } }
+            check(conflict.second?.contains("冲突") == true)
+            val failedRetry = storageResult<Pair<Long, String?>> { done -> store.save(reconstructed) { version, error -> done(version to error) } }
+            check(failedRetry.second != null)
+            runOnMainSync { check(store.saveStates().single().snapshot === retainedInput) }
             val listing = storageResult<Pair<List<NoteSummary>, String?>> { done -> store.list { notes, error -> done(notes to error) } }
             check(listing.first.single().title.contains("Retained after failure"))
             check(directory.delete()); check(directory.mkdirs())
-            val saved = storageResult<Pair<Long, String?>> { done -> store.save(snapshot) { version, error -> done(version to error) } }
+            val saved = storageResult<Pair<Long, String?>> { done -> store.save(reconstructed) { version, error -> done(version to error) } }
             check(saved.second == null)
             check(java.io.File(directory, "storage-contract.ncp").readText() == snapshot.encode())
             runOnMainSync { check(store.saveStates().isEmpty()) }
@@ -210,7 +258,7 @@ class ViewportInstrumentation : Instrumentation() {
             runOnMainSync { renameSnapshot = PreviewNotebook("rename-failure", "Must not claim saved").capture() }
             val renameFailure = storageResult<Pair<Long, String?>> { done -> store.save(renameSnapshot) { version, error -> done(version to error) } }
             check(renameFailure.second != null && sentinel.readText() == "Preserve unrelated contents")
-            runOnMainSync { check(store.saveStates().single().snapshot === renameSnapshot) }
+            runOnMainSync { check(store.saveStates().single().snapshot.sameContent(LegacyPreviewSaveSnapshot(renameSnapshot))) }
             check(sentinel.delete()); check(failedTarget.delete())
             val renameRetry = storageResult<Pair<Long, String?>> { done -> store.save(renameSnapshot) { version, error -> done(version to error) } }
             check(renameRetry.second == null && failedTarget.readText() == renameSnapshot.encode())

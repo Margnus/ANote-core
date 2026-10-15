@@ -206,11 +206,14 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
 }
 
 /** Pure immutable full-document capture for the existing bounded storage pipeline's next adapter. */
-class PagedPreviewSnapshot internal constructor(val root: DocumentRoot) {
-    val documentId: String get() = root.id.value
-    val title: String get() = root.title
-    val version: Long get() = root.revision
-    val retainedByteCharge: Long = PagedPreviewCodec.retainedByteCharge(root)
-    val encodingWorkByteCharge: Long = PagedPreviewCodec.encodingWorkByteCharge(root)
-    fun encode(): String = PagedPreviewCodec.encode(root)
+class PagedPreviewSnapshot internal constructor(val root: DocumentRoot) : PreviewSaveSnapshot {
+    override val documentId: String get() = root.id.value
+    override val title: String get() = root.title
+    override val version: Long get() = root.revision
+    override val retainedByteCharge: Long = PagedPreviewCodec.retainedByteCharge(root)
+    override val encodingWorkByteCharge: Long = PagedPreviewCodec.encodingWorkByteCharge(root)
+    override fun encode(): String = PagedPreviewCodec.encode(root)
+    override fun sameContent(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot &&
+        (root === other.root || documentId == other.documentId && version == other.version && title == other.title &&
+            root.pages() == other.root.pages() && root.scene.objects() == other.root.scene.objects())
 }

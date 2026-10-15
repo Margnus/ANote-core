@@ -198,6 +198,8 @@ class PreviewNotebookSnapshot internal constructor(
 ) {
     /** Read-only canonical values for versioned preview migration; never exposes the mutable owner. */
     fun canonicalScene(): SceneSnapshot = scene
+    /** v1 metadata is part of exact save content, even when current visible ink is equal. */
+    val nextObjectSequence: Long get() = nextObject
     /** Logical retained snapshot charge, not a measurement of Kotlin/Swift heap. */
     val retainedByteCharge: Long = 512L + documentId.length * 2 + title.length * 2 +
         scene.objects().sumOf { 256L + it.id.value.length * 2 + it.samples.size.toLong() * 28 }

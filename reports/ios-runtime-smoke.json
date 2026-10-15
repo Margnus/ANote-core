@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-15T00:24:53.262696+00:00",
+  "checks": [
+    "dedicated_device_and_runtime",
+    "install",
+    "installed_executable_matches_build",
+    "launch",
+    "process_alive_after_screenshot",
+    "screenshot_capture"
+  ],
+  "bundle": "dev.notecore.preview",
+  "artifact_sha256": "5a5d090e0faa0bd121bdd30a321ff2b9b8ba77c09983f3e93bdfb78a3337d0e7",
+  "executable_sha256": "e8d3fa04bbcfd58b2713a572d0ea33c8ccd21d95f8b64fb2b4710fcd09285c96",
+  "device": {
+    "name": "NoteCorePreview",
+    "udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+    "state": "Booted"
+  },
+  "runtime": {
+    "identifier": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+    "version": "27.0",
+    "buildversion": "24A434",
+    "supportedArchitectures": [
+      "arm64"
+    ]
+  },
+  "pid": 21017,
+  "launch_output": "dev.notecore.preview: 21017",
+  "process": "21017\t0\tUIKitApplication:dev.notecore.preview[4f3f][rb-legacy]",
+  "screenshot": "reports/ios-preview.png",
+  "screenshot_sha256": "f0fd415a3190bf537e325b31a8aae86a89b616afa488d49fb2807776fa96d96c",
+  "input_sha256": {
+    "reports/ios-preview-build.json": "a304ab05c52f5932c3ad558ed6ab8c5ac870e7c5254506c34cb545245b7686c5",
+    "tools/ios_runtime_smoke.py": "babbd58801d66aa88d8b302d89c3722c799c982d048262efed8c4410f2bc1167"
+  },
+  "ui_interaction_verified": false,
+  "drawing_verified": false,
+  "save_reopen_verified": false,
+  "device_performance_verified": false,
+  "production_c1_gate_complete": false,
+  "scope": "Dedicated iOS Simulator install/launch, process liveness and screenshot only; inspect the image separately; no UI actions or storage recovery verification"
+}

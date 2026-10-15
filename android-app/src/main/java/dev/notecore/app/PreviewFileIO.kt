@@ -6,6 +6,8 @@ import android.util.AtomicFile
 import dev.notecore.canvas.preview.PreviewNotebook
 import dev.notecore.canvas.preview.PreviewNotebookHeader
 import dev.notecore.canvas.preview.PreviewNotebookSnapshot
+import dev.notecore.document.PreviewSaveSnapshot
+import dev.notecore.document.LegacyPreviewSaveSnapshot
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
@@ -19,7 +21,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         require(id.matches(Regex("[a-zA-Z0-9-]{1,128}")))
         return File(directory, "$id.ncp")
     }
-    fun write(snapshot: PreviewNotebookSnapshot) {
+    fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
         val encoded = snapshot.encode(); require(encoded.length <= 16_000_000)
         val bytes = encoded.toByteArray(Charsets.UTF_8)
@@ -46,7 +48,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     fun importCopy(uri: Uri): PreviewNotebook {
         val bytes = checkNotNull(resolver.openInputStream(uri)).use(::readBounded)
         val id = UUID.randomUUID().toString(); check(!file(id).exists())
-        return PreviewNotebook.importAsCopy(decode(bytes), id).also { write(it.capture()) }
+        return PreviewNotebook.importAsCopy(decode(bytes), id).also { write(LegacyPreviewSaveSnapshot(it.capture())) }
     }
     fun catalog(): List<NoteSummary> {
         ensureDirectory()

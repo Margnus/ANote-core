@@ -32,7 +32,7 @@ def main():
     output.parent.mkdir(exist_ok=True)
     subprocess.run(['/usr/bin/ditto', '-c', '-k', '--keepParent', str(APP), str(output)], check=True)
     report = {'status': 'passed', 'platform': 'iOS Simulator ARM64', 'bundle': info['CFBundleIdentifier'],
-              'build_verified': True, 'launch_verified': False, 'launch_limitation': 'No iOS Simulator runtime installed on this host',
+              'build_verified': True, 'launch_verified': False, 'launch_limitation': 'Packaging compiles the host but does not exercise runtime launch; verified separately',
               'artifact': str(output.relative_to(ROOT)), 'bytes': output.stat().st_size,
               'sha256': hashlib.sha256(output.read_bytes()).hexdigest(), 'device_ipa': False, 'code_signing': 'disabled for Simulator build',
               'xcode': subprocess.run(['/usr/bin/xcodebuild', '-version'], check=True, capture_output=True, text=True).stdout.strip(),

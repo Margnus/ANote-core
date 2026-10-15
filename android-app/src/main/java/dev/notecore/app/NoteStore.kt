@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import dev.notecore.canvas.preview.*
 import dev.notecore.canvas.prototype.*
+import dev.notecore.document.LegacyPreviewSaveSnapshot
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -52,9 +53,10 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     fun save(snapshot: PreviewNotebookSnapshot, callback: (Long, String?) -> Unit): Boolean {
         executor.checkOwnerThread()
         val previous = ledger.latest(snapshot.documentId)
-        val admission = ledger.offer(snapshot)
+        val admission = ledger.offer(LegacyPreviewSaveSnapshot(snapshot))
         if (admission != PreviewSaveAdmission.ACCEPTED) {
-            notifyUi { callback(snapshot.version, "保存队列已满或内容版本过期，请保留当前笔记并重试") }
+            notifyUi { callback(snapshot.version, if (admission == PreviewSaveAdmission.VERSION_CONFLICT)
+                "保存内容发生冲突，请保留当前笔记并导出备份" else "保存队列已满或内容版本过期，请保留当前笔记并重试") }
             return false
         }
         if (previous?.version != snapshot.version) viewEpoch++

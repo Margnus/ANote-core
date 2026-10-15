@@ -1,15 +1,17 @@
 package dev.notecore.canvas.preview
 
+import dev.notecore.document.PreviewSaveSnapshot
+
 /** Preview full-snapshot replacement only; not a command ledger or production durable authority.
  * Single owner; an admitted latest snapshot and every in-flight older snapshot retain their budgets.
  * Version order assumes one live canonical notebook owner per document, never concurrent forks.
  */
-enum class PreviewSaveAdmission { ACCEPTED, STALE_VERSION, DOCUMENT_CAPACITY, BYTE_CAPACITY }
-class PreviewSaveAttempt internal constructor(internal val identity: Any, val number: Long, val snapshot: PreviewNotebookSnapshot)
-data class PreviewSaveState(val snapshot: PreviewNotebookSnapshot, val inFlight: Boolean, val retryRequired: Boolean)
+enum class PreviewSaveAdmission { ACCEPTED, STALE_VERSION, VERSION_CONFLICT, DOCUMENT_CAPACITY, BYTE_CAPACITY }
+class PreviewSaveAttempt internal constructor(internal val identity: Any, val number: Long, val snapshot: PreviewSaveSnapshot)
+data class PreviewSaveState(val snapshot: PreviewSaveSnapshot, val inFlight: Boolean, val retryRequired: Boolean)
 
 class PreviewSaveLedger(private val maxDocuments: Int = 8, private val byteBudget: Long = 32L * 1024 * 1024) {
-    private class Entry(var latest: PreviewNotebookSnapshot, var flight: PreviewSaveAttempt? = null, var retryRequired: Boolean = false)
+    private class Entry(var latest: PreviewSaveSnapshot, var flight: PreviewSaveAttempt? = null, var retryRequired: Boolean = false)
     private val identity = Any()
     private val entries = linkedMapOf<String, Entry>()
     private var sequence = 0L
@@ -17,18 +19,19 @@ class PreviewSaveLedger(private val maxDocuments: Int = 8, private val byteBudge
     val chargedBytes: Long get() = entries.values.sumOf { charge(it.latest, it.flight) }
     val documentCount: Int get() = entries.size
     val isDrained: Boolean get() = entries.isEmpty()
-    private fun charge(latest: PreviewNotebookSnapshot, flight: PreviewSaveAttempt?): Long =
+    private fun charge(latest: PreviewSaveSnapshot, flight: PreviewSaveAttempt?): Long =
         latest.retainedByteCharge + if (flight != null && flight.snapshot !== latest) flight.snapshot.retainedByteCharge else 0
 
     /** Rejected snapshots remain with caller. A newer complete snapshot can supersede unsent/failed older content.
      * An in-flight older write is never replaced or freed before its matching completion.
      * Same-version admission retries the retained immutable content; it does not replace it with a fork.
      */
-    fun offer(snapshot: PreviewNotebookSnapshot): PreviewSaveAdmission {
+    fun offer(snapshot: PreviewSaveSnapshot): PreviewSaveAdmission {
         val entry = entries[snapshot.documentId]
         if (entry != null && snapshot.version < entry.latest.version) return PreviewSaveAdmission.STALE_VERSION
         if (entry == null && entries.size >= maxDocuments) return PreviewSaveAdmission.DOCUMENT_CAPACITY
         if (entry != null && snapshot.version == entry.latest.version) {
+            if (snapshot !== entry.latest && !entry.latest.sameContent(snapshot)) return PreviewSaveAdmission.VERSION_CONFLICT
             entry.retryRequired = false
             return PreviewSaveAdmission.ACCEPTED
         }
@@ -39,7 +42,7 @@ class PreviewSaveLedger(private val maxDocuments: Int = 8, private val byteBudge
         else { entry.latest = snapshot; entry.retryRequired = false }
         return PreviewSaveAdmission.ACCEPTED
     }
-    fun latest(documentId: String): PreviewNotebookSnapshot? = entries[documentId]?.latest
+    fun latest(documentId: String): PreviewSaveSnapshot? = entries[documentId]?.latest
     fun states(): List<PreviewSaveState> = entries.values.map { PreviewSaveState(it.latest, it.flight != null, it.retryRequired) }
     fun nextWrite(): PreviewSaveAttempt? {
         val entry = entries.values.firstOrNull { it.flight == null && !it.retryRequired } ?: return null
