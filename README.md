@@ -1,6 +1,6 @@
 # NoteCore
 
-独立笔记App与通用画布工程，2026-10-14开始实际开发。当前增加D4离线手写预览竖切：Android原生列表/画布、本机保存、单页备份导入导出和缩放平移已在模拟器验证；iOS宿主与framework已编译成ARM64模拟器.app，并在专用iOS27模拟器完成安装、启动和首屏核对，书写/保存交互仍待验证。C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
+独立笔记App与通用画布工程，2026-10-14开始实际开发。当前D4离线手写预览：Android多页编辑、整本保存/备份与缩放已在模拟器完成实际UI验证；iOS已接入同一分页会话，编译ARM64模拟器.app、安装启动及8项真实宿主API/文件/绘制测试通过，真实触摸/系统选择器仍待验证。C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
 
 先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](https://github.com/Margnus/AI-Note/blob/main/README.md)。
 
@@ -34,7 +34,7 @@ python3 tools/check_architecture.py
 python3 tools/collect_verification.py
 ```
 
-Android包：`bash ci/package-android-preview.sh`（另需ANDROID_HOME）；iOS模拟器包：`bash ci/package-ios-preview.sh`。Android已接入整本分页预览，新增[接入ADR](docs/adr/0018-android-paged-preview.md)与[分页界面验证](reports/android-paged-smoke.json)；iOS分页宿主接续开发。
+Android包：`bash ci/package-android-preview.sh`（另需ANDROID_HOME）；iOS模拟器包：`bash ci/package-ios-preview.sh`。Android见[接入ADR](docs/adr/0018-android-paged-preview.md)与[分页界面验证](reports/android-paged-smoke.json)；iOS见[接入ADR](docs/adr/0019-ios-paged-preview.md)与[真实宿主API测试](reports/ios-host-tests.json)，不将API测试当作触摸UI验收。
 
 同一核心验证入口可用于本地或CI：`bash ci/verify.sh`（需JAVA_HOME，Python可通过PYTHON_BIN指定）。未配置GitHub远程工作流或自动发布。
 

@@ -38,6 +38,9 @@ def main():
     installed = Path(sim('get_app_container', args.device, BUNDLE, 'app').strip())
     executable = info['CFBundleExecutable']
     assert digest(installed/executable) == digest(APP/executable)
+    # Recent Xcode debug builds place app logic in .debug.dylib; the launcher stub alone is insufficient.
+    payload = {str(path.relative_to(APP)): digest(path) for path in APP.rglob('*') if path.is_file()}
+    assert all((installed/path).is_file() and digest(installed/path) == sha for path, sha in payload.items()), 'Installed app payload differs from packaged build'
     launched = sim('launch', args.device, BUNDLE).strip()
     assert launched.startswith(BUNDLE + ': ')
     pid = int(launched.rsplit(': ', 1)[1])
@@ -50,8 +53,9 @@ def main():
     assert screenshot.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
     report = {
         'status': 'passed', 'observed_at': datetime.now(timezone.utc).isoformat(),
-        'checks': ['dedicated_device_and_runtime', 'install', 'installed_executable_matches_build', 'launch', 'process_alive_after_screenshot', 'screenshot_capture'],
+        'checks': ['dedicated_device_and_runtime', 'install', 'installed_executable_matches_build', 'installed_payload_matches_build', 'launch', 'process_alive_after_screenshot', 'screenshot_capture'],
         'bundle': BUNDLE, 'artifact_sha256': build['sha256'], 'executable_sha256': digest(APP/executable),
+        'installed_payload_sha256': payload,
         'device': {k: device[k] for k in ('name', 'udid', 'state')},
         'runtime': {k: runtime[k] for k in ('identifier', 'version', 'buildversion', 'supportedArchitectures')},
         'pid': pid, 'launch_output': launched, 'process': process,

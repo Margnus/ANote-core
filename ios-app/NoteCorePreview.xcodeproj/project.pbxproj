@@ -43,6 +43,7 @@
 			<key>targets</key>
 			<array>
 				<string>000000000000000000000008</string>
+				<string>00000000000000000000003B</string>
 			</array>
 		</dict>
 		<key>000000000000000000000002</key>
@@ -51,6 +52,7 @@
 			<string>PBXGroup</string>
 			<key>children</key>
 			<array>
+				<string>000000000000000000000032</string>
 				<string>000000000000000000000004</string>
 				<string>000000000000000000000014</string>
 				<string>000000000000000000000003</string>
@@ -67,6 +69,7 @@
 			<key>children</key>
 			<array>
 				<string>000000000000000000000009</string>
+				<string>000000000000000000000033</string>
 			</array>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
@@ -344,6 +347,8 @@
 				</array>
 				<key>ONLY_ACTIVE_ARCH</key>
 				<string>YES</string>
+				<key>ENABLE_TESTABILITY</key>
+				<string>YES</string>
 			</dict>
 		</dict>
 		<key>00000000000000000000000F</key>
@@ -430,6 +435,249 @@
 			<string>PBXBuildFile</string>
 			<key>fileRef</key>
 			<string>000000000000000000000018</string>
+		</dict>
+		<key>000000000000000000000030</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.swift</string>
+			<key>path</key>
+			<string>PagedHostTests.swift</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>000000000000000000000031</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>000000000000000000000030</string>
+		</dict>
+		<key>000000000000000000000032</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXGroup</string>
+			<key>path</key>
+			<string>NoteCorePreviewTests</string>
+			<key>children</key>
+			<array>
+				<string>000000000000000000000030</string>
+				<string>000000000000000000000040</string>
+			</array>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>000000000000000000000033</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>explicitFileType</key>
+			<string>wrapper.cfbundle</string>
+			<key>includeInIndex</key>
+			<integer>0</integer>
+			<key>path</key>
+			<string>NoteCorePreviewTests.xctest</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>000000000000000000000034</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXSourcesBuildPhase</string>
+			<key>buildActionMask</key>
+			<integer>2147483647</integer>
+			<key>files</key>
+			<array>
+				<string>000000000000000000000031</string>
+			</array>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<integer>0</integer>
+		</dict>
+		<key>000000000000000000000035</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFrameworksBuildPhase</string>
+			<key>buildActionMask</key>
+			<integer>2147483647</integer>
+			<key>files</key>
+			<array>
+				<string>000000000000000000000015</string>
+			</array>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<integer>0</integer>
+		</dict>
+		<key>000000000000000000000036</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXContainerItemProxy</string>
+			<key>containerPortal</key>
+			<string>000000000000000000000001</string>
+			<key>proxyType</key>
+			<integer>1</integer>
+			<key>remoteGlobalIDString</key>
+			<string>000000000000000000000008</string>
+			<key>remoteInfo</key>
+			<string>NoteCorePreview</string>
+		</dict>
+		<key>000000000000000000000037</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXTargetDependency</string>
+			<key>target</key>
+			<string>000000000000000000000008</string>
+			<key>targetProxy</key>
+			<string>000000000000000000000036</string>
+		</dict>
+		<key>000000000000000000000038</key>
+		<dict>
+			<key>isa</key>
+			<string>XCBuildConfiguration</string>
+			<key>name</key>
+			<string>Debug</string>
+			<key>buildSettings</key>
+			<dict>
+				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
+				<string>dev.notecore.preview.host-tests</string>
+				<key>PRODUCT_NAME</key>
+				<string>$(TARGET_NAME)</string>
+				<key>GENERATE_INFOPLIST_FILE</key>
+				<string>YES</string>
+				<key>ARCHS</key>
+				<array>
+					<string>arm64</string>
+				</array>
+				<key>ONLY_ACTIVE_ARCH</key>
+				<string>YES</string>
+				<key>TEST_HOST</key>
+				<string>$(BUILT_PRODUCTS_DIR)/NoteCorePreview.app/NoteCorePreview</string>
+				<key>BUNDLE_LOADER</key>
+				<string>$(TEST_HOST)</string>
+				<key>FRAMEWORK_SEARCH_PATHS</key>
+				<array>
+					<string>$(inherited)</string>
+					<string>$(SRCROOT)/../shared-core/build/bin/iosSimulatorArm64/debugFramework</string>
+				</array>
+				<key>LD_RUNPATH_SEARCH_PATHS</key>
+				<array>
+					<string>$(inherited)</string>
+					<string>@executable_path/Frameworks</string>
+					<string>@loader_path/Frameworks</string>
+				</array>
+				<key>TARGETED_DEVICE_FAMILY</key>
+				<string>1,2</string>
+			</dict>
+		</dict>
+		<key>000000000000000000000039</key>
+		<dict>
+			<key>isa</key>
+			<string>XCBuildConfiguration</string>
+			<key>name</key>
+			<string>Release</string>
+			<key>buildSettings</key>
+			<dict>
+				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
+				<string>dev.notecore.preview.host-tests</string>
+				<key>PRODUCT_NAME</key>
+				<string>$(TARGET_NAME)</string>
+				<key>GENERATE_INFOPLIST_FILE</key>
+				<string>YES</string>
+				<key>ARCHS</key>
+				<array>
+					<string>arm64</string>
+				</array>
+				<key>ONLY_ACTIVE_ARCH</key>
+				<string>YES</string>
+				<key>TEST_HOST</key>
+				<string>$(BUILT_PRODUCTS_DIR)/NoteCorePreview.app/NoteCorePreview</string>
+				<key>BUNDLE_LOADER</key>
+				<string>$(TEST_HOST)</string>
+				<key>FRAMEWORK_SEARCH_PATHS</key>
+				<array>
+					<string>$(inherited)</string>
+					<string>$(SRCROOT)/../shared-core/build/bin/iosSimulatorArm64/debugFramework</string>
+				</array>
+				<key>LD_RUNPATH_SEARCH_PATHS</key>
+				<array>
+					<string>$(inherited)</string>
+					<string>@executable_path/Frameworks</string>
+					<string>@loader_path/Frameworks</string>
+				</array>
+				<key>TARGETED_DEVICE_FAMILY</key>
+				<string>1,2</string>
+			</dict>
+		</dict>
+		<key>00000000000000000000003A</key>
+		<dict>
+			<key>isa</key>
+			<string>XCConfigurationList</string>
+			<key>buildConfigurations</key>
+			<array>
+				<string>000000000000000000000038</string>
+				<string>000000000000000000000039</string>
+			</array>
+			<key>defaultConfigurationIsVisible</key>
+			<integer>0</integer>
+			<key>defaultConfigurationName</key>
+			<string>Debug</string>
+		</dict>
+		<key>00000000000000000000003B</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXNativeTarget</string>
+			<key>buildConfigurationList</key>
+			<string>00000000000000000000003A</string>
+			<key>buildPhases</key>
+			<array>
+				<string>000000000000000000000034</string>
+				<string>000000000000000000000035</string>
+				<string>000000000000000000000042</string>
+			</array>
+			<key>buildRules</key>
+			<array/>
+			<key>dependencies</key>
+			<array>
+				<string>000000000000000000000037</string>
+			</array>
+			<key>name</key>
+			<string>NoteCorePreviewTests</string>
+			<key>productName</key>
+			<string>NoteCorePreviewTests</string>
+			<key>productReference</key>
+			<string>000000000000000000000033</string>
+			<key>productType</key>
+			<string>com.apple.product-type.bundle.unit-test</string>
+		</dict>
+		<key>000000000000000000000040</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>file</string>
+			<key>path</key>
+			<string>../fixtures/transfer/android-paged-v2.ncp</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+		</dict>
+		<key>000000000000000000000041</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>000000000000000000000040</string>
+		</dict>
+		<key>000000000000000000000042</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXResourcesBuildPhase</string>
+			<key>buildActionMask</key>
+			<integer>2147483647</integer>
+			<key>files</key>
+			<array>
+				<string>000000000000000000000041</string>
+			</array>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<integer>0</integer>
 		</dict>
 	</dict>
 	<key>rootObject</key>

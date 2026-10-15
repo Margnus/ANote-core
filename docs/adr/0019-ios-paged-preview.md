@@ -1,0 +1,29 @@
+# ADR-0019：Swift分页宿主与真实iOS API验证
+
+2026-10-15；DEV-024D4首个接入节点，接续ADR-0016/0018。公共组件API与生产架构仍未冻结。
+
+## 所有权与完整文档
+
+PreviewModel在主线程创建并持有唯一PagedPreviewNotebook，注入主线程owner检查，额度与Android一致。worker只解码/复制不可变DocumentRoot；打开结果先检查navigation/storage epoch，再在主线程adopt。失败重开直接使用同一账本留存的完整root，不在worker创建另一可变authority，也不重新编码/解析全部样本。
+
+异步导入捕获navigation epoch；用户已新建另一笔记时只保留成功落盘的新副本，不替换当前owner。SwiftUI画布以documentId绑定视图身份，避免宿主复用持有旧notebook的UIView。关闭先将完整capture准入原账本，再retire；完成未提交笔阻止关闭，迟到编辑不能修改已释放的旧owner。文件写入失败仍由原账本保留，退回列表显示未保存内容并允许重开重试。
+
+savedRoot仅保留一份已确认根引用。当前根未改变且没有待写时，不启动IO，因此旧v1打开、保存、后台、关闭均保持原字节；首次内容编辑才写v2。导出捕获全部页面，与selected PageId无关。导入在worker完整校验后分配fresh文档/页面/layer/对象身份，写入新副本才交付。已知codec支持与宿主渲染能力分开：当前原生画笔仅MONOLINE算法1，不支持的笔刷和绘制范围明确拒绝，保留源文件。
+
+## 页面与绘制
+
+SwiftUI提供切页、加页、复制、删除确认、移动页序、纸张及全局撤销重做。页选择发布呈现更新但不修改内容revision或保存。UIKit视口按实际页面尺寸适页，切换PageId/尺寸取消未完成输入并复位；历史操作后仍使用共享会话的合法当前PageId。
+
+路径缓存键包含root revision和PageId。原始采样路径与笔宽经过完整CoreGraphics仿射矩阵；单点按椭圆实际填充，不用微小线段冒充变换后的圆点。纸张辅助线生成上限按80格控制，避免最大尺寸导入页生成无界辅助几何。真实笔迹仍使用全页Path预览；批量桥接、增量几何、tile/分块缓存与真机指标仍待后续实现。
+
+## 验证与产物隔离
+
+新增iOS app-host XCTest target，使用专用NoteCorePreview模拟器和独立ios-app/build/host-tests派生目录。PreviewModel可注入隔离临时目录，测试调用实际宿主API、真实Foundation文件IO和CoreGraphics；不向用户笔记目录写入测试内容。
+
+8项测试覆盖：三页保存关闭后新owner从磁盘逐字段恢复；v1不编辑保持字节和首次编辑保留1000×1400右下笔迹；真实失败目录修复/留存重开；仿射单点横向40、纵向20像素及同revision切页缓存；Android实际生成的三页v2文件导入并fresh全部身份/完整根导出；不支持笔刷和坏UTF拒绝且原件不变；迟到导入/打开不能替换新owner。跨端fixture来自Android已验证的合成测试笔记，并保留SHA及产物来源，不含真实用户内容。
+
+入口tools/verify_ios_host.py实际执行xcodebuild test，检查8个用例名称与通过状态、真实设备UUID、来源/共享framework/测试可执行及debug dylib指纹，生成reports/ios-host-tests.json。Xcode不自动重建Kotlin，工具必须先核对成功打包记录绑定的完整common源码集合、构建配置及framework；过期时拒绝执行，不能只把新源码与旧framework一起hash后误报。此独立测试构建不冒称最终分发包的UI操作。工具不提供跳过执行后手填通过的入口。测试结束后需重新运行最终包安装/启动检查，恢复模拟器上的正常预览包。
+
+打包入口拒绝.app内残留.xctest，正常预览包与测试插件隔离。安装/启动入口另核对全部安装payload：新Xcode调试构建的逻辑位于.debug.dylib，仅比较入口stub不足以证明运行的是当前逻辑。reports/ios-runtime-smoke.json单独记录7项安装/启动/截图检查。
+
+Mac锁屏使桌面交互工具不可用，本轮未进行真实点击、触摸书写、系统文件选择器或强停重开。新owner同进程文件重开与offscreen像素验证不能替代这些场景。真机Pencil、低内存/断电、正式history/receipt持久化、完整PAGE需求和C1门禁保持未验收。

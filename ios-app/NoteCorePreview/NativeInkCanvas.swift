@@ -3,7 +3,7 @@ import UIKit
 import NoteCanvasPrototype
 
 struct NativeInkCanvas: UIViewRepresentable {
-    let note: PreviewNotebook
+    let note: PagedPreviewNotebook
     let color: Int32
     let width: Double
     let finger: Bool
@@ -15,6 +15,7 @@ struct NativeInkCanvas: UIViewRepresentable {
     func makeUIView(context: Context) -> InkUIView { let view = InkUIView(note: note); view.lastViewportRequest = viewportRequest; return view }
     func updateUIView(_ view: InkUIView, context: Context) {
         if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width { view.cancelInk() }
+        view.refreshPage()
         view.penColor = color; view.penWidth = width; view.fingerDrawing = finger
         if view.lastViewportRequest != viewportRequest {
             view.cancelInk(); view.lastViewportRequest = viewportRequest
@@ -27,7 +28,7 @@ struct NativeInkCanvas: UIViewRepresentable {
 }
 
 final class InkUIView: UIView {
-    let note: PreviewNotebook
+    let note: PagedPreviewNotebook
     var changed: () -> Void = { }
     var failed: (String) -> Void = { _ in }
     var penColor: Int32 = Int32(bitPattern: 0xff253247)
@@ -36,7 +37,16 @@ final class InkUIView: UIView {
     private var active: UITouch?
     var hasInk: Bool { active != nil }
     private var path: UIBezierPath?
-    private var cached: [(UIBezierPath, UIColor, CGFloat)] = []
+    private struct CachedStroke {
+        let path: UIBezierPath
+        let color: UIColor
+        let width: CGFloat
+        let transform: CGAffineTransform
+        let dot: CGPoint?
+    }
+    private var cached: [CachedStroke] = []
+    private var cachedPage = ""
+    private var configuredPage = ""
     private var cachedVersion: Int64 = -1
     private var oldBounds: CGRect = .zero
     let viewport = PreviewViewport()
@@ -63,42 +73,78 @@ final class InkUIView: UIView {
         }
         navTouches = ids; navCenter = center; navSpan = span; setNeedsDisplay()
     }
-    init(note: PreviewNotebook) {
+    init(note: PagedPreviewNotebook) {
         self.note = note; super.init(frame: .zero)
         isMultipleTouchEnabled = true; backgroundColor = UIColor(red: 0.93, green: 0.95, blue: 0.97, alpha: 1)
-        accessibilityLabel = "手写画布"
+        isAccessibilityElement = true; accessibilityLabel = "手写画布"; accessibilityIdentifier = "note-canvas"
+    }
+    func refreshPage() {
+        let page = note.currentPage
+        if configuredPage != page.id.value || viewport.pageWidth != page.width || viewport.pageHeight != page.height {
+            cancelInk(); viewport.configurePage(width: page.width, height: page.height); viewport.reset()
+            configuredPage = page.id.value
+        }
+        accessibilityValue = "\(note.strokeCount)笔"
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     override func layoutSubviews() {
         super.layoutSubviews()
         if oldBounds != .zero && oldBounds != bounds { cancelInk() }
-        oldBounds = bounds; viewport.resize(width: bounds.width, height: bounds.height)
+        oldBounds = bounds; refreshPage(); viewport.resize(width: bounds.width, height: bounds.height)
     }
     override func draw(_ rect: CGRect) {
         guard let c = UIGraphicsGetCurrentContext(), scale > 0 else { return }
         c.saveGState(); c.translateBy(x: offsetX, y: offsetY); c.scaleBy(x: scale, y: scale)
-        UIColor.white.setFill(); c.fill(CGRect(x: 0, y: 0, width: 1000, height: 1400))
-        c.clip(to: CGRect(x: 0, y: 0, width: 1000, height: 1400))
+        let page = note.currentPage
+        let paper = CGRect(x: 0, y: 0, width: page.width, height: page.height)
+        UIColor.white.setFill(); c.fill(paper); c.clip(to: paper)
         c.setStrokeColor(UIColor(white: 0.92, alpha: 1).cgColor); c.setLineWidth(1)
-        for y in stride(from: 80, to: 1400, by: 48) { c.move(to: CGPoint(x: 35, y: y)); c.addLine(to: CGPoint(x: 965, y: y)) }; c.strokePath()
-        if cachedVersion != note.changeVersion {
-            cached = (0..<note.strokeCount).map { stroke in
+        // Bound guide geometry even for a maximum-size imported page.
+        let spacing = max(24.0, max(page.width, page.height) / 80.0)
+        if page.paper == .ruled || page.paper == .grid {
+            for y in stride(from: spacing, to: page.height, by: spacing) {
+                c.move(to: CGPoint(x: 0, y: y)); c.addLine(to: CGPoint(x: page.width, y: y))
+            }
+        }
+        if page.paper == .grid {
+            for x in stride(from: spacing, to: page.width, by: spacing) {
+                c.move(to: CGPoint(x: x, y: 0)); c.addLine(to: CGPoint(x: x, y: page.height))
+            }
+        }
+        c.strokePath()
+        if page.paper == .dots {
+            c.setFillColor(UIColor(white: 0.92, alpha: 1).cgColor)
+            for x in stride(from: spacing, to: page.width, by: spacing) {
+                for y in stride(from: spacing, to: page.height, by: spacing) {
+                    c.fillEllipse(in: CGRect(x: x - 0.8, y: y - 0.8, width: 1.6, height: 1.6))
+                }
+            }
+        }
+        if cachedVersion != note.changeVersion || cachedPage != page.id.value {
+            cached = (0..<note.strokeCount).map { index in
+                let stroke = note.stroke(index: index), samples = stroke.samples, m = stroke.transform
                 let p = UIBezierPath(); p.lineCapStyle = .round; p.lineJoinStyle = .round
-                let n = note.pointCount(stroke: stroke)
-                let start = CGPoint(x: note.pointX(stroke: stroke, point: 0), y: note.pointY(stroke: stroke, point: 0))
+                let start = CGPoint(x: samples.x(index: 0), y: samples.y(index: 0))
                 p.move(to: start)
                 var moved = false
-                for point in 1..<n {
-                    let next = CGPoint(x: note.pointX(stroke: stroke, point: point), y: note.pointY(stroke: stroke, point: point))
+                for point in 1..<samples.size {
+                    let next = CGPoint(x: samples.x(index: point), y: samples.y(index: point))
                     p.addLine(to: next); moved = moved || next != start
                 }
-                if !moved { p.addLine(to: CGPoint(x: start.x + 0.01, y: start.y)) }
-                return (p, inkColor(note.strokeColor(index: stroke)), CGFloat(note.strokeWidth(index: stroke)))
+                return CachedStroke(path: p, color: inkColor(stroke.brush.argb), width: stroke.brush.width,
+                    transform: CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty), dot: moved ? nil : start)
             }
-            cachedVersion = note.changeVersion
+            cachedVersion = note.changeVersion; cachedPage = page.id.value
             accessibilityValue = "\(note.strokeCount)笔"
         }
-        for (p, color, width) in cached { color.setStroke(); p.lineWidth = width; p.stroke() }
+        for stroke in cached {
+            c.saveGState(); c.concatenate(stroke.transform)
+            if let dot = stroke.dot {
+                stroke.color.setFill()
+                c.fillEllipse(in: CGRect(x: dot.x - stroke.width / 2, y: dot.y - stroke.width / 2, width: stroke.width, height: stroke.width))
+            } else { stroke.color.setStroke(); stroke.path.lineWidth = stroke.width; stroke.path.stroke() }
+            c.restoreGState()
+        }
         if let path = path { inkColor(penColor).setStroke(); path.lineWidth = penWidth; path.stroke() }
         c.restoreGState()
     }
@@ -118,7 +164,7 @@ final class InkUIView: UIView {
         }
         guard active == nil, let touch = touches.first(where: { $0.type == .pencil || ($0.type == .direct && fingerDrawing) }) else { return }
         let (p, pressure, time) = sample(touch)
-        guard (0...1000).contains(p.x), (0...1400).contains(p.y) else { return }
+        guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
         note.selectPen(argb: penColor, width: penWidth)
         guard note.beginStroke(x: p.x, y: p.y, pressure: pressure, timeMicros: time) else { failed(note.lastError); return }
         active = touch; path = UIBezierPath(); path?.lineCapStyle = .round; path?.lineJoinStyle = .round

@@ -1,17 +1,25 @@
 {
   "status": "passed",
-  "observed_at": "2026-10-15T02:44:16.537588+00:00",
+  "observed_at": "2026-10-15T03:11:05.227240+00:00",
   "checks": [
     "dedicated_device_and_runtime",
     "install",
     "installed_executable_matches_build",
+    "installed_payload_matches_build",
     "launch",
     "process_alive_after_screenshot",
     "screenshot_capture"
   ],
   "bundle": "dev.notecore.preview",
-  "artifact_sha256": "775c94012d3435331901f675ca0261fa61f3b26b107a9c0dd4e5399c529d7e33",
+  "artifact_sha256": "9ae23a687b810b4dbe60dac4e3afbb950396f5ddca53c6b2df46c1c962e781ab",
   "executable_sha256": "e8d3fa04bbcfd58b2713a572d0ea33c8ccd21d95f8b64fb2b4710fcd09285c96",
+  "installed_payload_sha256": {
+    "NoteCorePreview": "e8d3fa04bbcfd58b2713a572d0ea33c8ccd21d95f8b64fb2b4710fcd09285c96",
+    "__preview.dylib": "8050889c2ab4b356b83e0c5c41d971b95226638cd860dd59c0491d4b4c1d9dfe",
+    "NoteCorePreview.debug.dylib": "fd3bab5c66e252882069917aa033e9cf6e7fc07ab9ff664e6ab8914140118300",
+    "Info.plist": "f9b3513fe3aed66f5a655231aee76e5ea6e0596028132855f61e13bd6b2a584a",
+    "PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
   "device": {
     "name": "NoteCorePreview",
     "udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
@@ -25,14 +33,14 @@
       "arm64"
     ]
   },
-  "pid": 25158,
-  "launch_output": "dev.notecore.preview: 25158",
-  "process": "25158\t0\tUIKitApplication:dev.notecore.preview[9801][rb-legacy]",
+  "pid": 27565,
+  "launch_output": "dev.notecore.preview: 27565",
+  "process": "27565\t0\tUIKitApplication:dev.notecore.preview[8223][rb-legacy]",
   "screenshot": "reports/ios-preview.png",
-  "screenshot_sha256": "0f311256de934bcc31fde9bf28b1950481ebf87afc012569bea2670d09b23bc7",
+  "screenshot_sha256": "383b2f647ddf906282dc948497a746c6056d0916b1f29c76389a26d0352e4430",
   "input_sha256": {
-    "reports/ios-preview-build.json": "f9c3987f0db713bd4bd083a110c387f10e88f0b86dc5e51218b757359a56cfc7",
-    "tools/ios_runtime_smoke.py": "babbd58801d66aa88d8b302d89c3722c799c982d048262efed8c4410f2bc1167"
+    "reports/ios-preview-build.json": "26cdd4ad4b21d8b2028ffdd58646a98d3c2b70c33b9f05223e576433591a8a29",
+    "tools/ios_runtime_smoke.py": "852a4929f84e72820bf85571c4293a1dcec0e5e740303c065c5edec58a5ec5cd"
   },
   "ui_interaction_verified": false,
   "drawing_verified": false,
