@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--measure-reduction', action='store_true')
+    parser.add_argument('--measure-chunks', action='store_true')
     parser.add_argument('--native-library', action='store_true', help='Also compile two iOS-target KLIBs; no framework or simulator execution')
     args = parser.parse_args()
     java = Path(os.environ['JAVA_HOME'])/'bin'/('java.exe' if os.name == 'nt' else 'java')
@@ -81,6 +82,8 @@ def main():
     assert count, output
     if args.measure_reduction:
         run([str(java), '-cp', classpath(cp), 'dev.notecore.canvas.prototype.BrushReductionCosts', str(ROOT)], 'reduction-costs')
+    if args.measure_chunks:
+        run([str(java), '-cp', classpath(cp), 'dev.notecore.canvas.prototype.ChunkedBrushCosts', str(ROOT)], 'chunk-costs')
     native_outputs = []
     native_version = None
     if args.native_library:
@@ -107,6 +110,7 @@ def main():
         'source_and_fixture_sha256': before, 'output_jar_sha256': {p.relative_to(ROOT).as_posix(): raw(p) for p in outputs.values()},
         'compiler_and_runtime_sha256': {p.relative_to(cache).as_posix(): raw(p) for p in set([*compiler, *testing])},
         'test_log_sha256': raw(build/'tests.log'), 'reduction_measurement_run': args.measure_reduction,
+        'chunk_measurement_run': args.measure_chunks,
         'ios_target_klib_compilation_verified': args.native_library, 'native_compiler_version': native_version,
         'native_library_sha256': {p.relative_to(ROOT).as_posix(): raw(p) for p in native_outputs},
         'gradle_verification_refreshed': False, 'android_build_verified': False, 'apple_build_verified': False,

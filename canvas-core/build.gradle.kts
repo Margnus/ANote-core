@@ -8,7 +8,11 @@ if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
     extensions.configure<com.android.build.gradle.LibraryExtension> {
         namespace = "dev.notecore.canvas"
         compileSdk = 36
-        defaultConfig { minSdk = 26 }
+        defaultConfig {
+            minSdk = 26
+            testApplicationId = "dev.notecore.canvas.poc.test"
+            testInstrumentationRunner = "dev.notecore.canvas.prototype.CoreBrushInstrumentation"
+        }
         compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     }
 }
@@ -25,6 +29,12 @@ kotlin {
         getByName("jvmMain").dependsOn(jvmAndAndroidMain)
         if (providers.gradleProperty("enableAndroidTargets").orNull == "true") getByName("androidMain").dependsOn(jvmAndAndroidMain)
         commonTest.dependencies { implementation(kotlin("test")) }
+        if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
+            getByName("androidInstrumentedTest") {
+                dependsOn(getByName("commonTest"))
+                dependencies { implementation(kotlin("test-junit")); implementation("junit:junit:4.13.2") }
+            }
+        }
         jvmTest {
             resources.srcDir("../fixtures/input")
             resources.srcDir("../fixtures/geometry")

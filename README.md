@@ -6,7 +6,9 @@
 
 最新顺序按蓝图e066cfb与[ADR-0020](docs/adr/0020-read-only-legacy-and-measurement-first.md)调整：旧单页编辑/写出SDK已收口，v1只读迁入不创建另一owner；接下来优先C0真机基线、共同笔刷几何和密集页索引PoC，再做生产架构冻结及SQLite层。Mac锁屏相关桌面交互验证已由用户明确延后，不阻挡独立开发。
 
-最新DEV-029已推进[精确直线段派生简化](docs/派生笔迹直线段简化PoC.md)：S2路径逻辑字节减少87.2%–92.1%，规范点全部保留；238项独立离线JUnit及两模块iOS-target KLIB编译通过。当前结果见[独立报告](reports/offline-jvm-verification.json)；既有Gradle/原生运行报告及体验包仍属于DEV-028，新简化器的原生运行和App集成未完成。远端推送待自动审批恢复，本地开发继续。
+最新DEV-030已推进[按需分段与覆盖掩码](docs/分段索引与覆盖掩码PoC.md)：S9局部窗口仅生成4/782段，荧光笔回折/分段不重复加深；S2局部候选输入点减少41.4%，同时记录整页退化与索引增长。标准Gradle246项，Android ART和iOS Kotlin/Native各26项实际通过，补齐前轮原生执行。当前普通App包仍属DEV-028，新mask未接入App；审批已恢复，继续正常同步。
+
+DEV-029的[精确直线段派生简化](docs/派生笔迹直线段简化PoC.md)在S2减少87.2%–92.1%路径逻辑字节并完整保留规范点；独立桌面/KLIB测量见[报告](reports/offline-jvm-verification.json)，原生/标准构建以最新节点为准。
 
 ## 当前可运行内容
 
