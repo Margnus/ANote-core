@@ -5,6 +5,17 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedPreviewCodecTest {
+    @Test fun legacyBottomRightInkKeepsOriginalPaperExtentAndDecodedCopySharesSamples() {
+        val old = PreviewNotebook("corner", "corner")
+        assertTrue(old.beginStroke(900.0, 1300.0, 0.5f, 1)); assertTrue(old.endStroke(999.0, 1399.0, 0.5f, 2))
+        val root = PagedPreviewCodec.decode(old.capture().encode())
+        assertEquals(1000.0, root.page(0).width); assertEquals(1400.0, root.page(0).height)
+        assertEquals(1399.0, root.scene.objects().single().samples.y(1))
+        val copy = PagedPreviewCodec.copyAsNew(root, SceneId("new"), mapOf(root.page(0).id to PageId("fresh-page")),
+            mapOf(root.page(0).layerId to LayerId("fresh-layer")), mapOf(root.scene.objects().single().id to ObjectId("fresh-object")))
+        assertSame(root.scene.objects().single().samples, copy.scene.objects().single().samples)
+        assertEquals(root.page(0).width, copy.page(0).width)
+    }
     @Test fun cumulativePointsCannotBypassAdmissionWithManyIndividuallyValidStrokes() {
         val text = buildString {
             append("NCPREVIEW\t2\nD\tcumulative\tcapacity\t1\t11\t0\nG\tp\tl\t595.0\t842.0\tBLANK\t0\n")

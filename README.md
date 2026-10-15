@@ -34,7 +34,7 @@ python3 tools/check_architecture.py
 python3 tools/collect_verification.py
 ```
 
-Android包：`bash ci/package-android-preview.sh`（另需ANDROID_HOME）；iOS模拟器包：`bash ci/package-ios-preview.sh`。
+Android包：`bash ci/package-android-preview.sh`（另需ANDROID_HOME）；iOS模拟器包：`bash ci/package-ios-preview.sh`。Android已接入整本分页预览，新增[接入ADR](docs/adr/0018-android-paged-preview.md)与[分页界面验证](reports/android-paged-smoke.json)；iOS分页宿主接续开发。
 
 同一核心验证入口可用于本地或CI：`bash ci/verify.sh`（需JAVA_HOME，Python可通过PYTHON_BIN指定）。未配置GitHub远程工作流或自动发布。
 

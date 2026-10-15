@@ -6,7 +6,7 @@ codec位于shared-core，输入/输出为规范DocumentRoot，不建立第二份
 
 默认预览限制128页、5000对象、总200000真实点、每笔20000点和16000000 UTF-16单位文本；平台在读文件前仍须32MiB预检与严格UTF-8读取。逐行解析采用有限行长度和字段数检查，在分配数组前检查本笔与累计点数，不先split全文件。重复页/layer/对象、孤立对象、页revision超过根、非有限/奇异矩阵、坏转义、缺footer/多余body全部拒绝。encoder检查同一容量与样式契约，按有界chunk追加文本；encode失败不改变根、不进行半文件发布。文本builder/UTF转换及捕获快照预留charge供后续保存账本准入，不将它说成精确heap上限。
 
-v1只读迁入复用现有严格decoder，经只读snapshot接口取规范Scene对象，首PageId固定为文档范围内page-1、layer沿用ink、尺寸595×842、空白纸。v1 changeVersion成为根revision，页contentRevision取同值；不改写原v1文件，只有后续显式保存才输出v2。保留每点时间/压力和既有对象ID，不通过public point getter重建一份丢字段的笔迹。v1和v2重复导入都由宿主提供完整新document/page/layer/object身份映射，校验fresh/完整/一一对应，样本可共享，导入根和对象版本重置为新文档初始值。
+v1只读迁入复用现有严格decoder，经只读snapshot接口取规范Scene对象，首PageId固定为文档范围内page-1、layer沿用ink、尺寸1000×1400、空白纸。DEV-024D3按旧原生画布实际坐标修正了先前595×842候选，防止右下方笔迹被裁切。v1 changeVersion成为根revision，页contentRevision取同值；未编辑不改写原v1文件，后续内容编辑保存才输出v2。保留每点时间/压力和既有对象ID，不通过public point getter重建一份丢字段的笔迹。v1和v2重复导入都由宿主提供完整新document/page/layer/object身份映射，校验fresh/完整/一一对应，样本可共享，导入根和对象版本重置为新文档初始值。
 
 v2不持久化undo/redo、receipt journal、retired身份/epoch或session展示状态；重开不可声称恢复未确认operation或全局身份责任。宿主后续必须隔离旧session回调并分配新UUID，正式进程恢复依赖shared-data操作账本/事务。格式支持分页不等于App已能翻页；交付C先验证round-trip、v1兼容、篡改/容量和副本身份，随后D才接双端同一authority分页UI和真实保存重开。
 

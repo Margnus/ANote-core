@@ -3,11 +3,8 @@ package dev.notecore.app
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.AtomicFile
-import dev.notecore.canvas.preview.PreviewNotebook
-import dev.notecore.canvas.preview.PreviewNotebookHeader
-import dev.notecore.canvas.preview.PreviewNotebookSnapshot
-import dev.notecore.document.PreviewSaveSnapshot
-import dev.notecore.document.LegacyPreviewSaveSnapshot
+import dev.notecore.canvas.prototype.*
+import dev.notecore.document.*
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
@@ -41,14 +38,19 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             require(input.read() == -1)
         }
     }
-    fun export(uri: Uri, snapshot: PreviewNotebookSnapshot) {
+    fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {
         val encoded = snapshot.encode(); require(encoded.length <= 16_000_000)
         checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(encoded.toByteArray(Charsets.UTF_8)); it.flush() }
     }
-    fun importCopy(uri: Uri): PreviewNotebook {
+    fun importCopy(uri: Uri): DocumentRoot {
         val bytes = checkNotNull(resolver.openInputStream(uri)).use(::readBounded)
         val id = UUID.randomUUID().toString(); check(!file(id).exists())
-        return PreviewNotebook.importAsCopy(decode(bytes), id).also { write(LegacyPreviewSaveSnapshot(it.capture())) }
+        val source = PagedPreviewCodec.decode(decode(bytes)); validateRenderable(source)
+        return PagedPreviewCodec.copyAsNew(source, SceneId(id),
+            source.pages().associate { it.id to PageId(UUID.randomUUID().toString()) },
+            source.pages().associate { it.layerId to LayerId(UUID.randomUUID().toString()) },
+            source.scene.objects().associate { it.id to ObjectId(UUID.randomUUID().toString()) }
+        ).also { write(PagedPreviewSnapshot.fromRoot(it)) }
     }
     fun catalog(): List<NoteSummary> {
         ensureDirectory()
@@ -65,13 +67,13 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         }
         return ids.map { id -> NoteSummary(id, runCatching { readHeader(id).title }.getOrDefault("待恢复的笔记"), file(id).lastModified()) }
     }
-    private fun readHeader(id: String): PreviewNotebookHeader = AtomicFile(file(id)).openRead().use { stream ->
+    private fun readHeader(id: String): PagedPreviewHeader = AtomicFile(file(id)).openRead().use { stream ->
         val input = stream.buffered(256); val bytes = java.io.ByteArrayOutputStream(1024); var newlines = 0
         while (newlines < 2) {
             val value = input.read(); require(value >= 0 && bytes.size() < 4096) { "Invalid catalog header" }
             bytes.write(value); if (value == 10) newlines++
         }
-        PreviewNotebook.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
+        PagedPreviewCodec.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
     }
     private fun readBounded(input: java.io.InputStream): ByteArray {
         val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
@@ -84,8 +86,17 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     private fun decode(bytes: ByteArray): String = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
         .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
-    fun read(id: String): PreviewNotebook = AtomicFile(file(id)).openRead().use { stream ->
+    fun read(id: String): DocumentRoot = AtomicFile(file(id)).openRead().use { stream ->
         require(stream.channel.size() <= 32L * 1024 * 1024)
-        PreviewNotebook.restore(decode(readBounded(stream))).also { require(it.documentId == id) }
+        PagedPreviewCodec.decode(decode(readBounded(stream))).also { require(it.id.value == id); validateRenderable(it) }
+    }
+    /** Preview renderer capability gate: unsupported content stays on disk without lossy conversion. */
+    private fun validateRenderable(root: DocumentRoot) {
+        for (stroke in root.scene.objects()) {
+            require(stroke.brush.kind == BrushKind.MONOLINE && stroke.brush.algorithmVersion == 1)
+            val m = stroke.transform
+            require(listOf(m.a, m.b, m.c, m.d, m.tx, m.ty).all { it.isFinite() && kotlin.math.abs(it) <= 1e12 })
+            for (i in 0 until stroke.samples.size) require(kotlin.math.abs(stroke.samples.x(i)) <= 1e12 && kotlin.math.abs(stroke.samples.y(i)) <= 1e12)
+        }
     }
 }

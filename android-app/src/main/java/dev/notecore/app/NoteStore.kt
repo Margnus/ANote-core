@@ -7,9 +7,12 @@ import android.os.Looper
 import android.util.Log
 import dev.notecore.canvas.preview.*
 import dev.notecore.canvas.prototype.*
-import dev.notecore.document.LegacyPreviewSaveSnapshot
+import dev.notecore.document.*
+import java.util.UUID
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+
+data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean)
 
 data class NoteSummary(val id: String, val title: String, val modified: Long)
 
@@ -23,17 +26,34 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private data class SaveCallback(val version: Long, val receive: (Long, String?) -> Unit)
     private val saveCallbacks = mutableMapOf<String, SaveCallback>()
     private var viewEpoch = 0L
-    private var activeNotebook: PreviewNotebook? = null
+    private var activeNotebook: PagedPreviewNotebook? = null
     internal val activeDocumentId: String? get() { executor.checkOwnerThread(); return activeNotebook?.documentId }
-    internal fun attachActive(note: PreviewNotebook) {
+    private var activeSavedRoot: DocumentRoot? = null
+    internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
+        executor.checkOwnerThread()
+        activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
+        val note = PagedPreviewNotebook(opened.root, UUID.randomUUID().toString(),
+            DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
+            executor::checkOwnerThread)
+        activeNotebook = note
+        activeSavedRoot = opened.root.takeIf { opened.persisted && ledger.latest(note.documentId) == null }
+        return note
+    }
+    internal fun create(): PagedPreviewNotebook {
+        executor.checkOwnerThread()
+        val nonce = UUID.randomUUID().toString()
+        return adopt(OpenedDocument(DocumentRoot.empty(SceneId(UUID.randomUUID().toString()), "未命名笔记",
+            PageDescriptor(PageId("$nonce-page"), LayerId("$nonce-layer"), 595.0, 842.0)), false))
+    }
+    internal fun attachActive(note: PagedPreviewNotebook) {
         executor.checkOwnerThread()
         check(activeNotebook == null || activeNotebook === note) { "Release the previous owner only after snapshot admission" }
         activeNotebook = note
     }
-    internal fun releaseActive(note: PreviewNotebook) {
-        executor.checkOwnerThread(); check(activeNotebook === note); activeNotebook = null
+    internal fun releaseActive(note: PagedPreviewNotebook) {
+        executor.checkOwnerThread(); check(activeNotebook === note); check(note.retire()); activeNotebook = null; activeSavedRoot = null
     }
-    var exportSnapshot: PreviewNotebookSnapshot? = null
+    var exportSnapshot: PagedPreviewSnapshot? = null
         get() { executor.checkOwnerThread(); return field }
         set(value) { executor.checkOwnerThread(); field = value }
     init { executor.checkOwnerThread() }
@@ -50,10 +70,13 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         // Ownership was transferred to ledger / durable file before this advisory UI notification.
         runCatching(action).onFailure { Log.e("NoteCoreStorage", "UI notification failed after storage handoff", it) }
     }
-    fun save(snapshot: PreviewNotebookSnapshot, callback: (Long, String?) -> Unit): Boolean {
+    fun save(snapshot: PagedPreviewSnapshot, callback: (Long, String?) -> Unit): Boolean {
         executor.checkOwnerThread()
+        if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot === snapshot.root && ledger.latest(snapshot.documentId) == null) {
+            notifyUi { callback(snapshot.version, null) }; return true
+        }
         val previous = ledger.latest(snapshot.documentId)
-        val admission = ledger.offer(LegacyPreviewSaveSnapshot(snapshot))
+        val admission = ledger.offer(snapshot)
         if (admission != PreviewSaveAdmission.ACCEPTED) {
             notifyUi { callback(snapshot.version, if (admission == PreviewSaveAdmission.VERSION_CONFLICT)
                 "保存内容发生冲突，请保留当前笔记并导出备份" else "保存队列已满或内容版本过期，请保留当前笔记并重试") }
@@ -75,6 +98,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 val success = result is WorkResult.Succeeded
                 check(ledger.complete(original, success))
                 val id = original.snapshot.documentId
+                if (success && activeNotebook?.documentId == id) activeSavedRoot = (original.snapshot as PagedPreviewSnapshot).root
                 saveCallbacks[id]?.takeIf { it.version == original.snapshot.version }?.let { receiver ->
                     saveCallbacks.remove(id)
                     notifyUi { receiver.receive(original.snapshot.version, if (success) null else "保存失败，更改仍在本机会话中，请重试保存") }
@@ -102,17 +126,17 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }
         if (admission is WorkAdmission.Rejected) notifyUi(rejected)
     }
-    fun export(uri: Uri, snapshot: PreviewNotebookSnapshot, callback: (String?) -> Unit) {
+    fun export(uri: Uri, snapshot: PagedPreviewSnapshot, callback: (String?) -> Unit) {
         request(Triple(uri, snapshot, io), snapshot.encodingWorkByteCharge, { input ->
             input.third.export(input.first, input.second); Unit
         }, { callback("后台队列繁忙，请重新导出") }) { result ->
             callback(if (result is WorkResult.Succeeded) null else "导出失败，目标文件可能不完整，请重新导出")
         }
     }
-    fun importCopy(uri: Uri, callback: (PreviewNotebook?, String?) -> Unit) {
+    fun importCopy(uri: Uri, callback: (OpenedDocument?, String?) -> Unit) {
         request(uri to io, READ_WORK_BYTES, { input -> input.second.importCopy(input.first) },
             { callback(null, "后台队列繁忙，请重新导入") }) { result ->
-            callback((result as? WorkResult.Succeeded)?.value,
+            callback((result as? WorkResult.Succeeded)?.value?.let { OpenedDocument(it, true) },
                 if (result is WorkResult.Succeeded) null else "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖")
         }
     }
@@ -128,18 +152,18 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun retainedSummaries(): List<NoteSummary> = ledger.states().map {
         NoteSummary(it.snapshot.documentId, it.snapshot.title + "（未保存）", System.currentTimeMillis())
     }
-    fun open(id: String, callback: (PreviewNotebook?, String?) -> Unit) {
+    fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) {
         executor.checkOwnerThread()
-        activeNotebook?.takeIf { it.documentId == id }?.let { callback(it, null); return }
+        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot === it.snapshot()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
-            if (input.second == null) input.third.read(input.first) else PreviewNotebook.restore(input.second!!.encode())
+            if (input.second == null) input.third.read(input.first) else (input.second as PagedPreviewSnapshot).root
         }, { callback(null, "后台队列繁忙，请重新打开笔记") }) { result ->
             if (viewEpoch != epoch) {
                 // No mutable/read payload is posted; retry a pure read after this result is ACKed.
                 main.post { open(id, callback) }
-            } else callback((result as? WorkResult.Succeeded)?.value,
-                if (result !is WorkResult.Succeeded) "笔记读取失败，原文件已保留"
+            } else callback((result as? WorkResult.Succeeded)?.value?.let { OpenedDocument(it, retained == null) },
+                if (result !is WorkResult.Succeeded) "笔记读取失败或含暂不支持的笔刷，原文件已保留"
                 else retained?.let { "有更改尚未保存，请点击保存重试" })
         }
     }

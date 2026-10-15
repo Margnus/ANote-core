@@ -75,10 +75,10 @@ def main():
             if len(rows) > 1 and rows[1].split('\t')[2] == title: contents.append((filename, value))
     assert len(contents) == 1
     filename, before = contents[0]
-    assert before.startswith('NCPREVIEW\t1\n') and before.endswith('END\n')
+    assert before.startswith('NCPREVIEW\t2\n') and before.endswith('END\n')
     stroke_rows = [r.split('\t') for r in before.splitlines() if r.startswith('S\t')]
-    assert len(stroke_rows) == 2 and stroke_rows[0][2] != stroke_rows[1][2]
-    assert sum(int(r[4]) for r in stroke_rows) == len([r for r in before.splitlines() if r.startswith('P\t')])
+    assert len(stroke_rows) == 2 and stroke_rows[0][6] != stroke_rows[1][6]
+    assert sum(int(r[8]) for r in stroke_rows) == len([r for r in before.splitlines() if r.startswith('P\t')])
     print('draw, colors, undo/redo, finger policy and saved point counts passed', flush=True)
     adb('shell', 'am', 'force-stop', PACKAGE)
     assert 'Status: ok' in adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/dev.notecore.app.MainActivity')
@@ -116,7 +116,17 @@ def main():
         new_files = [f for f in files_now - original_files if f.endswith('.ncp')]
         assert len(new_files) == 1
         imported = adb('exec-out', 'run-as', PACKAGE, 'cat', 'files/preview-notes/' + new_files[0])
-        assert imported.splitlines()[2:] == before.splitlines()[2:]
+        def content(value):
+            rows = [line.split('\t') for line in value.splitlines()]
+            pages = [r for r in rows if r[0] == 'G']
+            layers = {r[2]: index for index, r in enumerate(pages)}
+            return ([r[3:6] for r in pages],
+                    [[layers[r[2]], *r[4:]] if r[0] == 'S' else r for r in rows if r[0] in ('S', 'P')])
+        assert content(imported) == content(before)
+        for kind, index in [('G', 1), ('G', 2), ('S', 1)]:
+            old_ids = {r.split('\t')[index] for r in before.splitlines() if r.startswith(kind+'\t')}
+            new_ids = {r.split('\t')[index] for r in imported.splitlines() if r.startswith(kind+'\t')}
+            assert old_ids.isdisjoint(new_ids)
         meta = imported.splitlines()[1].split('\t')
         assert meta[1] != filename[:-4] and meta[2] == title
         imported_ids.append(meta[1]); original_files = files_now
@@ -140,7 +150,7 @@ def main():
                          'system_picker_export_exact_bytes', 'import_picker_cancel', 'import_as_new_document',
                          'repeated_import_unique_identity', 'corrupt_backup_rejected', 'original_preserved_after_import', 'viewport_toolbar'],
               'imported_document_ids': imported_ids,
-              'saved_strokes': 2, 'saved_real_points': sum(int(r[4]) for r in stroke_rows),
+              'saved_strokes': 2, 'saved_real_points': sum(int(r[8]) for r in stroke_rows),
               'document_sha256': hashlib.sha256(before.encode()).hexdigest(), 'screenshot': str(output.relative_to(ROOT)),
               'real_stylus_verified': False, 'device_performance_verified': False,
               'power_loss_recovery_verified': False}

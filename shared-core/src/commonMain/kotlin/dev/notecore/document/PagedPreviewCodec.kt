@@ -41,7 +41,7 @@ object PagedPreviewCodec {
                 val legacy = PreviewNotebook.restore(text).capture()
                 val root = DocumentRoot.compose(legacy.title,
                     SceneSnapshot.restored(SceneId(legacy.documentId), legacy.version, legacy.canonicalScene().objects()),
-                    listOf(PageDescriptor(PageId("page-1"), LayerId("ink"), 595.0, 842.0, contentRevision = legacy.version)))
+                    listOf(PageDescriptor(PageId("page-1"), LayerId("ink"), 1000.0, 1400.0, contentRevision = legacy.version)))
                 retainedByteCharge(root)
                 return root
             }
@@ -139,10 +139,15 @@ object PagedPreviewCodec {
     /** Caller supplies all new identities; no allocator or mutable authority is hidden in a codec. */
     @Throws(IllegalArgumentException::class)
     fun importAsCopy(text: String, documentId: SceneId, pageIds: Map<PageId, PageId>, layerIds: Map<LayerId, LayerId>,
-                     objectIds: Map<ObjectId, ObjectId>): DocumentRoot {
+                     objectIds: Map<ObjectId, ObjectId>): DocumentRoot = copyAsNew(decode(text), documentId, pageIds, layerIds, objectIds)
+
+    /** Already decoded immutable input avoids a second full parse/point-array allocation during native import. */
+    @Throws(IllegalArgumentException::class)
+    fun copyAsNew(source: DocumentRoot, documentId: SceneId, pageIds: Map<PageId, PageId>, layerIds: Map<LayerId, LayerId>,
+                  objectIds: Map<ObjectId, ObjectId>): DocumentRoot {
+        retainedByteCharge(source)
         require(pageIds.size <= MAX_PAGES && layerIds.size <= MAX_PAGES && objectIds.size <= MAX_OBJECTS)
         val pages = pageIds.toMap(); val layers = layerIds.toMap(); val objects = objectIds.toMap()
-        val source = decode(text)
         require(documentId != source.id)
         fun <T> fresh(mapping: Map<T, T>, expected: Set<T>) {
             require(mapping.keys == expected && mapping.values.toSet().size == mapping.size && mapping.values.none { it in expected })

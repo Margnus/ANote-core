@@ -18,7 +18,7 @@ import kotlin.math.abs
 class ViewportInstrumentation : Instrumentation() {
     private lateinit var host: Activity
     private lateinit var canvas: InkCanvasView
-    private lateinit var note: PreviewNotebook
+    private lateinit var note: PagedPreviewNotebook
     private var downTime = 0L
     override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
     override fun onStart() {
@@ -212,12 +212,12 @@ class ViewportInstrumentation : Instrumentation() {
         val directory = java.io.File(targetContext.cacheDir, "storage-contract-${java.util.UUID.randomUUID()}")
         directory.writeText("A file blocks the required directory")
         lateinit var store: NoteStore
-        lateinit var snapshot: dev.notecore.canvas.preview.PreviewNotebookSnapshot
+        lateinit var snapshot: PagedPreviewSnapshot
         lateinit var retainedInput: PreviewSaveSnapshot
-        lateinit var notebook: PreviewNotebook
+        lateinit var notebook: PagedPreviewNotebook
         runOnMainSync {
             store = NoteStore.isolated(targetContext, directory)
-            notebook = PreviewNotebook("storage-contract", "Retained after failure")
+            notebook = PagedPreviewNotebook.create("storage-contract", "Retained after failure", "storage-session")
             check(notebook.beginStroke(12.0, 15.0, 0.5f, 1))
             check(notebook.endStroke(20.0, 30.0, 0.6f, 2))
             snapshot = notebook.capture()
@@ -228,15 +228,15 @@ class ViewportInstrumentation : Instrumentation() {
             runOnMainSync {
                 val retained = store.saveStates().single()
                 retainedInput = retained.snapshot
-                check(retained.retryRequired && retainedInput.sameContent(LegacyPreviewSaveSnapshot(snapshot)))
+                check(retained.retryRequired && retainedInput.sameContent(snapshot))
             }
-            val reopened = storageResult<Pair<PreviewNotebook?, String?>> { done -> store.open(snapshot.documentId) { note, error -> done(note to error) } }
-            check(reopened.first?.capture()?.encode() == snapshot.encode() && reopened.second != null)
-            lateinit var reconstructed: dev.notecore.canvas.preview.PreviewNotebookSnapshot
-            lateinit var fork: dev.notecore.canvas.preview.PreviewNotebookSnapshot
+            val reopened = storageResult<Pair<OpenedDocument?, String?>> { done -> store.open(snapshot.documentId) { note, error -> done(note to error) } }
+            check(reopened.first?.root?.let(PagedPreviewCodec::encode) == snapshot.encode() && reopened.second != null)
+            lateinit var reconstructed: PagedPreviewSnapshot
+            lateinit var fork: PagedPreviewSnapshot
             runOnMainSync {
-                reconstructed = reopened.first!!.capture()
-                val other = PreviewNotebook(snapshot.documentId, snapshot.title)
+                reconstructed = PagedPreviewSnapshot.fromRoot(reopened.first!!.root)
+                val other = PagedPreviewNotebook.create(snapshot.documentId, snapshot.title, "different-session")
                 check(other.beginStroke(100.0, 200.0, 0.5f, 1)); check(other.endStroke(300.0, 400.0, 0.6f, 2))
                 fork = other.capture()
             }
@@ -254,27 +254,46 @@ class ViewportInstrumentation : Instrumentation() {
             runOnMainSync { check(store.saveStates().isEmpty()) }
             val failedTarget = java.io.File(directory, "rename-failure.ncp").apply { check(mkdir()) }
             val sentinel = java.io.File(failedTarget, "keep").apply { writeText("Preserve unrelated contents") }
-            lateinit var renameSnapshot: dev.notecore.canvas.preview.PreviewNotebookSnapshot
-            runOnMainSync { renameSnapshot = PreviewNotebook("rename-failure", "Must not claim saved").capture() }
+            lateinit var renameSnapshot: PagedPreviewSnapshot
+            runOnMainSync { renameSnapshot = PagedPreviewNotebook.create("rename-failure", "Must not claim saved", "rename-session").capture() }
             val renameFailure = storageResult<Pair<Long, String?>> { done -> store.save(renameSnapshot) { version, error -> done(version to error) } }
             check(renameFailure.second != null && sentinel.readText() == "Preserve unrelated contents")
-            runOnMainSync { check(store.saveStates().single().snapshot.sameContent(LegacyPreviewSaveSnapshot(renameSnapshot))) }
+            runOnMainSync { check(store.saveStates().single().snapshot.sameContent(renameSnapshot)) }
             check(sentinel.delete()); check(failedTarget.delete())
             val renameRetry = storageResult<Pair<Long, String?>> { done -> store.save(renameSnapshot) { version, error -> done(version to error) } }
             check(renameRetry.second == null && failedTarget.readText() == renameSnapshot.encode())
             val corrupt = java.io.File(directory, "invalid-utf.ncp").apply { writeBytes(byteArrayOf(0xff.toByte())) }
-            val invalid = storageResult<Pair<PreviewNotebook?, String?>> { done -> store.open("invalid-utf") { note, error -> done(note to error) } }
+            val invalid = storageResult<Pair<OpenedDocument?, String?>> { done -> store.open("invalid-utf") { note, error -> done(note to error) } }
             check(invalid.first == null && invalid.second != null && corrupt.readBytes().contentEquals(byteArrayOf(0xff.toByte())))
             val oversized = java.io.File(directory, "oversized.ncp")
             java.io.RandomAccessFile(oversized, "rw").use { it.setLength(33L * 1024 * 1024) }
-            val large = storageResult<Pair<PreviewNotebook?, String?>> { done -> store.open("oversized") { note, error -> done(note to error) } }
+            val large = storageResult<Pair<OpenedDocument?, String?>> { done -> store.open("oversized") { note, error -> done(note to error) } }
             check(large.first == null && large.second != null && oversized.length() == 33L * 1024 * 1024)
             runOnMainSync {
-                store.attachActive(notebook)
+                notebook = store.adopt(OpenedDocument(snapshot.root, true))
                 // Activity recreation reuses the app-owned canonical notebook even when save admission could fail.
-                store.open(notebook.documentId) { active, error -> check(active === notebook && error == null) }
+                store.open(notebook.documentId) { active, error -> check(store.adopt(active!!) === notebook && error == null) }
                 store.releaseActive(notebook)
+                check(!notebook.beginStroke(1.0, 2.0, 0.5f, 3))
             }
+            val legacy = PreviewNotebook("legacy-noop", "Legacy unchanged")
+            check(legacy.beginStroke(900.0, 1300.0, 0.5f, 1)); check(legacy.endStroke(999.0, 1399.0, 0.5f, 2))
+            val original = legacy.capture().encode()
+            val legacyFile = java.io.File(directory, "legacy-noop.ncp").apply { writeText(original) }
+            val read = storageResult<Pair<OpenedDocument?, String?>> { done -> store.open("legacy-noop") { opened, error -> done(opened to error) } }
+            lateinit var migrated: PagedPreviewNotebook
+            runOnMainSync {
+                migrated = store.adopt(read.first!!)
+                check(migrated.currentPage.width == 1000.0 && migrated.pointY(0, 1) == 1399.0)
+            }
+            val noOp = storageResult<Pair<Long, String?>> { done -> store.save(migrated.capture()) { version, error -> done(version to error) } }
+            check(noOp.second == null && legacyFile.readText() == original)
+            runOnMainSync { check(migrated.insertPage()) }
+            val edited = storageResult<Pair<Long, String?>> { done -> store.save(migrated.capture()) { version, error -> done(version to error) } }
+            check(edited.second == null)
+            val migratedRoot = PagedPreviewCodec.decode(legacyFile.readText())
+            check(migratedRoot.pageCount == 2 && migratedRoot.scene.objects().single().samples.y(1) == 1399.0)
+            runOnMainSync { store.releaseActive(migrated) }
         } finally {
             runOnMainSync { store.stopTestBackend() }
             directory.deleteRecursively()
@@ -282,7 +301,8 @@ class ViewportInstrumentation : Instrumentation() {
     }
     private fun setup() {
         runOnMainSync {
-            note = PreviewNotebook("viewport-test", "Synthetic viewport test")
+            note = PagedPreviewNotebook(DocumentRoot.empty(SceneId("viewport-test"), "Synthetic viewport test",
+                PageDescriptor(PageId("viewport-page"), LayerId("viewport-layer"), 1000.0, 1400.0)), "viewport-session")
             canvas = InkCanvasView(host, note, {}, { error(it) })
             host.setContentView(canvas)
         }

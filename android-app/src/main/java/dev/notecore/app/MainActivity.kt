@@ -12,18 +12,20 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowInsets
 import android.widget.*
-import dev.notecore.canvas.preview.PreviewNotebook
-import java.util.UUID
+import dev.notecore.document.*
 
 class MainActivity : Activity() {
     private lateinit var root: LinearLayout
     private lateinit var store: NoteStore
-    private var notebook: PreviewNotebook? = null
+    private var notebook: PagedPreviewNotebook? = null
     private var canvas: InkCanvasView? = null
     private var status: TextView? = null
     private var titleView: TextView? = null
     private var undoButton: Button? = null
     private var redoButton: Button? = null
+    private var pageLabel: TextView? = null
+    private var previousPage: Button? = null
+    private var nextPage: Button? = null
     private var viewGeneration = 0L
     private val navy = 0xff253247.toInt()
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
@@ -70,7 +72,7 @@ class MainActivity : Activity() {
         root.addView(text("NoteCore", 30f).apply { setPadding(dp(24), dp(20), dp(24), dp(4)) })
         root.addView(text("离线手写 · 预览版", 14f).apply { setPadding(dp(24), 0, dp(24), dp(16)) })
         root.addView(button("新建笔记") {
-            val note = PreviewNotebook(UUID.randomUUID().toString(), "未命名笔记")
+            val note = store.create()
             editor(note); save()
         }, LinearLayout.LayoutParams(-1, dp(56)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         root.addView(button("导入备份") {
@@ -97,7 +99,7 @@ class MainActivity : Activity() {
         list.adapter = adapter
         root.addView(frame, LinearLayout.LayoutParams(-1, 0, 1f))
         store.list { notes, failure ->
-            if (generation != viewGeneration || isFinishing) return@list
+            if (generation != viewGeneration || isFinishing || isDestroyed) return@list
             empty.text = if (failure == null) "还没有笔记，写下第一个想法。" else "暂时无法读取笔记，请稍后重试。"
             adapter.replace(notes)
             failure?.let(::showError)
@@ -108,11 +110,11 @@ class MainActivity : Activity() {
         viewGeneration++; val generation = viewGeneration
         root.removeAllViews(); root.addView(text("正在打开…").apply { setPadding(dp(24), dp(24), 0, 0) })
         store.open(id) { note, failure ->
-            if (generation != viewGeneration || isFinishing) return@open
-            if (note != null) { editor(note); failure?.let(::showError) } else { library(); showError(failure ?: "无法打开笔记") }
+            if (generation != viewGeneration || isFinishing || isDestroyed) return@open
+            if (note != null) { editor(store.adopt(note)); failure?.let(::showError) } else { library(); showError(failure ?: "无法打开笔记") }
         }
     }
-    private fun editor(note: PreviewNotebook) {
+    private fun editor(note: PagedPreviewNotebook) {
         store.attachActive(note)
         viewGeneration++; notebook = note; root.removeAllViews()
         val header = row()
@@ -122,8 +124,8 @@ class MainActivity : Activity() {
         header.addView(button("保存") { save() })
         header.addView(button("导出") { exportBackup() }); root.addView(header)
         val tools = row()
-        undoButton = button("撤销") { canvas?.cancelInk(); if (note.undo()) { canvas?.invalidate(); save(); updateControls() } else showError(note.lastError) }
-        redoButton = button("重做") { canvas?.cancelInk(); if (note.redo()) { canvas?.invalidate(); save(); updateControls() } else showError(note.lastError) }
+        undoButton = button("撤销") { canvas?.cancelInk(); if (note.undo()) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
+        redoButton = button("重做") { canvas?.cancelInk(); if (note.redo()) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
         tools.addView(undoButton); tools.addView(redoButton)
         tools.addView(Switch(this).apply { text = "手指书写"; isChecked = true; setOnCheckedChangeListener { _, enabled -> canvas?.cancelInk(); canvas?.fingerDrawing = enabled } })
         root.addView(tools)
@@ -138,30 +140,69 @@ class MainActivity : Activity() {
         viewportTools.addView(button("适合页面") { canvas?.resetViewport() })
         viewportTools.addView(text("双指缩放", 12f))
         root.addView(viewportTools)
-        status = text(getString(R.string.opened, note.strokeCount), 13f).apply { setPadding(dp(20), dp(4), dp(20), dp(8)) }
+        addPageTools(note)
+        status = text(getString(R.string.opened, note.totalStrokeCount), 13f).apply { setPadding(dp(20), dp(4), dp(20), dp(8)) }
         root.addView(status)
         canvas = InkCanvasView(this, note, { save(); updateControls() }, ::showError)
         root.addView(canvas, LinearLayout.LayoutParams(-1, 0, 1f).apply { setMargins(dp(12), 0, dp(12), dp(12)) })
         updateControls()
     }
-    private fun updateControls() { undoButton?.isEnabled = notebook?.canUndo == true; redoButton?.isEnabled = notebook?.canRedo == true }
+    private fun addPageTools(note: PagedPreviewNotebook) {
+        val pages = row()
+        fun action(content: Boolean = true, edit: () -> Boolean) {
+            canvas?.cancelInk()
+            if (edit()) { canvas?.refreshPage(); updateControls(); if (content) save() }
+            else showError(note.lastError)
+        }
+        previousPage = button("上一页") { action(false) { note.selectPage(note.page(note.currentPageIndex - 1).id) } }
+        nextPage = button("下一页") { action(false) { note.selectPage(note.page(note.currentPageIndex + 1).id) } }
+        pages.addView(previousPage)
+        pageLabel = text("").apply { setPadding(dp(8), 0, dp(8), 0); contentDescription = "当前页码" }
+        pages.addView(pageLabel); pages.addView(nextPage)
+        pages.addView(button("加页") { action { note.insertPage() } })
+        pages.addView(button("复制页") { action { note.copyCurrentPage() } })
+        pages.addView(button("删页") {
+            AlertDialog.Builder(this).setTitle(if (note.pageCount == 1) "清空最后一页？" else "删除当前页？")
+                .setMessage("可以通过撤销恢复。关闭笔记后不保留撤销记录。")
+                .setNegativeButton("取消", null).setPositiveButton("删除") { _, _ -> action { note.deleteCurrentPage() } }.show()
+        })
+        pages.addView(button("前移") { if (note.currentPageIndex > 0) action { note.moveCurrentPage(note.page(note.currentPageIndex - 1).id) } })
+        pages.addView(button("后移") { if (note.currentPageIndex < note.pageCount - 1) action {
+            note.moveCurrentPage(if (note.currentPageIndex + 2 < note.pageCount) note.page(note.currentPageIndex + 2).id else null)
+        } })
+        pages.addView(button("纸张") {
+            val kinds = listOf(PaperKind.BLANK, PaperKind.RULED, PaperKind.GRID, PaperKind.DOTS)
+            AlertDialog.Builder(this).setTitle("纸张样式").setItems(arrayOf("空白", "横线", "方格", "点阵")) { _, index ->
+                action { note.setPaper(note.currentPage.width, note.currentPage.height, kinds[index]) }
+            }.show()
+        })
+        root.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(pages) })
+    }
+    private fun updateControls() {
+        val note = notebook ?: return
+        undoButton?.isEnabled = note.canUndo; redoButton?.isEnabled = note.canRedo
+        titleView?.text = note.title
+        pageLabel?.text = "${note.currentPageIndex + 1}/${note.pageCount}"
+        previousPage?.isEnabled = note.currentPageIndex > 0
+        nextPage?.isEnabled = note.currentPageIndex < note.pageCount - 1
+    }
     private fun rename() {
         canvas?.cancelInk()
         val note = notebook ?: return
         val field = EditText(this).apply { setText(note.title); selectAll(); maxLines = 1 }
         AlertDialog.Builder(this).setTitle("笔记名称").setView(field).setNegativeButton("取消", null).setPositiveButton("完成") { _, _ ->
-            note.rename(field.text.toString()); titleView?.text = note.title; save()
+            if (note.rename(field.text.toString())) { updateControls(); save() } else showError(note.lastError)
         }.show()
     }
     private fun save(): Boolean {
         val note = notebook ?: return true
         if (!note.retryPendingStroke()) { showError(note.lastError); return false }
         val snapshot = note.capture(); val generation = viewGeneration
-        status?.text = getString(R.string.saving, note.strokeCount)
+        status?.text = getString(R.string.saving, note.totalStrokeCount)
         return store.save(snapshot) { version, failure ->
-            if (failure != null && !isFinishing) showError(failure)
             if (generation != viewGeneration || notebook !== note || isFinishing) return@save
-            if (failure == null && version == note.changeVersion && !note.hasPendingStroke) status?.text = getString(R.string.saved, note.strokeCount)
+            if (failure != null) showError(failure)
+            if (failure == null && version == note.changeVersion && !note.hasPendingStroke) status?.text = getString(R.string.saved, note.totalStrokeCount)
         }
     }
     private fun leaveEditor() {
@@ -199,7 +240,7 @@ class MainActivity : Activity() {
             val generation = viewGeneration
             store.importCopy(uri) { note, failure ->
                 if (isFinishing || isDestroyed || generation != viewGeneration) return@importCopy
-                if (note != null) { editor(note); status?.text = getString(R.string.imported, note.strokeCount) }
+                if (note != null) { val session = store.adopt(note); editor(session); status?.text = getString(R.string.imported, session.totalStrokeCount) }
                 else showError(failure ?: "导入失败")
             }
         }

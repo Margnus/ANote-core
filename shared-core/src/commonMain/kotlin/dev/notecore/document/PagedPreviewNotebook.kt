@@ -18,6 +18,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var color = 0xff253247.toInt()
     private var width = 2.5
     private var error = ""
+    private var retired = false
     private var projectionRevision = -1L
     private var projectionPage: PageId? = null
     private var projection: List<StrokeObject> = emptyList()
@@ -40,8 +41,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     val lastError: String get() { ownerCheck(); return error }
     val hasActiveStroke: Boolean get() { ownerCheck(); return input != null }
     val hasPendingStroke: Boolean get() { ownerCheck(); return pending != null }
-    val canUndo: Boolean get() { ownerCheck(); return input == null && pending == null && memory.status().nextUndoOperationId != null }
-    val canRedo: Boolean get() { ownerCheck(); return input == null && pending == null && memory.status().nextRedoOperationId != null }
+    val canUndo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextUndoOperationId != null }
+    val canRedo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextRedoOperationId != null }
     fun snapshot(): DocumentRoot = root()
     fun page(index: Int): PageDescriptor = root().page(index)
     fun authorityStatus(): DocumentAuthorityStatus { ownerCheck(); return memory.status() }
@@ -71,6 +72,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private fun operation(): CommandId? = identity("op")?.let(::CommandId)
     private fun prepareEdit(): Boolean {
         ownerCheck()
+        if (retired) return fail("此会话已关闭，请重新打开笔记")
         if (pending != null) return fail("上一笔尚未提交，请先重试保存")
         cancelStroke(); error = ""; return true
     }
@@ -84,6 +86,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
     fun selectPage(id: PageId): Boolean {
         ownerCheck()
+        if (retired) return fail("此会话已关闭，请重新打开笔记")
         if (root().findPage(id) == null) return fail("页面不存在")
         if (id == selected) return true
         if (!prepareEdit()) return false
@@ -158,11 +161,13 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
     fun selectPen(argb: Int, width: Double): Boolean {
         ownerCheck()
+        if (retired) return fail("此会话已关闭，请重新打开笔记")
         if (!width.isFinite() || width !in 0.5..16.0) return fail("笔宽无效")
         color = argb; this.width = width; return true
     }
     fun beginStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
         ownerCheck()
+        if (retired) return fail("此会话已关闭，请重新打开笔记")
         if (pending != null || input != null) return fail("请先完成或重试当前笔画")
         val root = root(); val remaining = PagedPreviewCodec.MAX_POINTS - root.scene.objects().sumOf { it.samples.size }
         if (remaining <= 0 || root.scene.objectCount >= PagedPreviewCodec.MAX_OBJECTS) return fail("此预览已达到笔迹容量")
@@ -195,6 +200,12 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
     /** Immutable completed command remains here after capacity failure; cancel/selection cannot discard it. */
     fun pendingStroke(): DocumentCommand.Canvas? { ownerCheck(); return pending }
+    /** Host calls only after immutable snapshot admission. Pending completed ink prevents retirement. */
+    fun retire(): Boolean {
+        ownerCheck()
+        if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试")
+        cancelStroke(); retired = true; return true
+    }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())
 
@@ -216,4 +227,8 @@ class PagedPreviewSnapshot internal constructor(val root: DocumentRoot) : Previe
     override fun sameContent(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot &&
         (root === other.root || documentId == other.documentId && version == other.version && title == other.title &&
             root.pages() == other.root.pages() && root.scene.objects() == other.root.scene.objects())
+    companion object {
+        @Throws(IllegalArgumentException::class)
+        fun fromRoot(root: DocumentRoot): PagedPreviewSnapshot = PagedPreviewSnapshot(root)
+    }
 }

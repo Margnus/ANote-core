@@ -6,6 +6,21 @@ import kotlin.random.Random
 import kotlin.test.*
 
 class PreviewViewportContractTest {
+    @Test fun pageDimensionsFitLandscapeAndResetWithoutChangingTheInverseMapping() {
+        val v = PreviewViewport(); v.resize(600.0, 900.0)
+        v.configurePage(1200.0, 600.0)
+        assertEquals(0.5, v.scale); assertEquals(300.0, v.offsetY)
+        val bottom = v.toView(1190.0, 590.0)
+        assertEquals(PointD(1190.0, 590.0), v.toScene(bottom.x, bottom.y))
+        v.gesture(300.0, 450.0, 300.0, 450.0, 3.0)
+        v.configurePage(595.0, 842.0)
+        assertEquals(1.0, v.zoom)
+        assertEquals(297.5, v.toScene(300.0, 450.0).x, 1e-9)
+        assertEquals(421.0, v.toScene(300.0, 450.0).y, 1e-9)
+        val before = v.toView(123.0, 456.0)
+        assertFailsWith<IllegalArgumentException> { v.configurePage(Double.NaN, 842.0) }
+        assertEquals(before, v.toView(123.0, 456.0))
+    }
     @Test fun fitCentersPaperAndResetRestoresExactMapping() {
         val v = PreviewViewport(); v.resize(1200.0, 1000.0)
         assertEquals(1.0, v.zoom); assertEquals(0.0, v.offsetY, 1e-9)

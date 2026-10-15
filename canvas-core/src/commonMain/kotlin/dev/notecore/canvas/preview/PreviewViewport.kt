@@ -5,22 +5,30 @@ import kotlin.math.min
 
 /** UI-owner presentation state. Never mutates document samples, revision or saved content. */
 class PreviewViewport {
+    var pageWidth: Double = 1000.0; private set
+    var pageHeight: Double = 1400.0; private set
     var width: Double = 0.0; private set
     var height: Double = 0.0; private set
     var zoom: Double = 1.0; private set
     var offsetX: Double = 0.0; private set
     var offsetY: Double = 0.0; private set
-    val scale: Double get() = if (width > 0 && height > 0) min(width / 1000.0, height / 1400.0) * zoom else 0.0
+    val scale: Double get() = if (width > 0 && height > 0) min(width / pageWidth, height / pageHeight) * zoom else 0.0
+
+    fun configurePage(width: Double, height: Double) {
+        require(width.isFinite() && height.isFinite() && width in 1.0..14400.0 && height in 1.0..14400.0)
+        if (width == pageWidth && height == pageHeight) return
+        pageWidth = width; pageHeight = height; reset()
+    }
 
     fun resize(width: Double, height: Double) {
         require(width.isFinite() && height.isFinite() && width in 0.0..1e7 && height in 0.0..1e7)
         if (width == this.width && height == this.height) return
-        val center = if (scale > 0) toScene(this.width / 2, this.height / 2) else PointD(500.0, 700.0)
+        val center = if (scale > 0) toScene(this.width / 2, this.height / 2) else PointD(pageWidth / 2, pageHeight / 2)
         this.width = width; this.height = height
         offsetX = width / 2 - center.x * scale; offsetY = height / 2 - center.y * scale
         constrain()
     }
-    fun reset() { zoom = 1.0; offsetX = (width - 1000 * scale) / 2; offsetY = (height - 1400 * scale) / 2 }
+    fun reset() { zoom = 1.0; offsetX = (width - pageWidth * scale) / 2; offsetY = (height - pageHeight * scale) / 2 }
     fun toScene(x: Double, y: Double): PointD {
         require(scale > 0 && x.isFinite() && y.isFinite())
         return PointD((x - offsetX) / scale, (y - offsetY) / scale)
@@ -38,6 +46,6 @@ class PreviewViewport {
     private fun constrain() {
         fun axis(offset: Double, view: Double, page: Double) =
             if (page <= view) (view - page) / 2 else offset.coerceIn(view - page, 0.0)
-        offsetX = axis(offsetX, width, 1000 * scale); offsetY = axis(offsetY, height, 1400 * scale)
+        offsetX = axis(offsetX, width, pageWidth * scale); offsetY = axis(offsetY, height, pageHeight * scale)
     }
 }

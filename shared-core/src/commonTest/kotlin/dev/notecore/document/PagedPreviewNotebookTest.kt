@@ -4,6 +4,14 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedPreviewNotebookTest {
+    @Test fun retiredOwnerCannotAcceptLateInputOrEditWhileImmutableCaptureRemainsReadable() {
+        val note = note(); draw(note); val before = note.snapshot()
+        assertTrue(note.beginStroke(4.0, 5.0, 0.5f, 4)); assertTrue(note.retire())
+        assertFalse(note.hasActiveStroke); assertFalse(note.canUndo); assertFalse(note.canRedo)
+        assertFalse(note.endStroke(5.0, 6.0, 0.5f, 5)); assertFalse(note.beginStroke(1.0, 2.0, 0.5f, 6))
+        assertFalse(note.rename("late")); assertFalse(note.insertPage()); assertFalse(note.selectPage(note.currentPageId))
+        assertFalse(note.selectPen(1, 2.0)); assertFalse(note.undo()); assertSame(before, note.capture().root)
+    }
     private fun note() = PagedPreviewNotebook.create("document", "title", "session-a")
     private fun draw(note: PagedPreviewNotebook, offset: Double = 0.0) {
         assertTrue(note.beginStroke(1.0 + offset, 2.0, 0.3f, 1))
@@ -68,6 +76,7 @@ class PagedPreviewNotebookTest {
         val command = pending.command as CanvasCommand.AddStroke
         assertEquals(PageId("a"), pending.pageId); assertEquals(2, command.samples.size); assertEquals(10.0, command.samples.x(0))
         note.cancelStroke(); assertTrue(note.hasPendingStroke)
+        assertFalse(note.retire()); assertSame(pending, note.pendingStroke())
         assertFalse(note.insertPage()); assertFalse(note.copyCurrentPage()); assertFalse(note.deleteCurrentPage())
         assertFalse(note.moveCurrentPage(null)); assertFalse(note.setPaper(400.0, 600.0, PaperKind.GRID)); assertFalse(note.rename("changed"))
         assertFalse(note.undo()); assertFalse(note.redo()); assertFalse(note.retryPendingStroke())
