@@ -87,7 +87,7 @@ def main():
     if args.write:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(doc, ensure_ascii=False, indent=2)+'\n')
-    elif json.loads(path.read_text()) != doc:
+    elif json.loads(path.read_text(encoding='utf-8')) != doc:
         raise SystemExit('Legacy source inventory drifted; review the mapping before regenerating evidence.')
     print(json.dumps({'status': 'passed', 'source_files': len(doc['source_files']),
                       'anchors': len(doc['anchors']), 'aar_equivalence_verified': False}))

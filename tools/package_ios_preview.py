@@ -27,7 +27,7 @@ def main():
     if args.record_success:
         stamp.write_text(''.join(f'{digest}  {path}\n' for path, digest in sorted(actual.items())))
     else:
-        expected = {line.split('  ', 1)[1]: line.split('  ', 1)[0] for line in stamp.read_text().splitlines()}
+        expected = {line.split('  ', 1)[1]: line.split('  ', 1)[0] for line in stamp.read_text(encoding='utf-8').splitlines()}
         if expected != actual: raise SystemExit('iOS source/framework/app differs from successful build stamp; rerun package-ios-preview.sh')
     output = ROOT/'dist/NoteCore-0.1.0-preview-ios-simulator-arm64.app.zip'
     output.parent.mkdir(exist_ok=True)

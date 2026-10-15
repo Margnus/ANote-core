@@ -6,14 +6,18 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+CRLF = bytes([13, 10])
+LF = bytes([10])
 
 def load(relative):
-    return json.loads((ROOT/relative).read_text())
+    return json.loads((ROOT/relative).read_text(encoding='utf-8'))
 
 def main():
     trace = load('fixtures/input/manifest.json')
-    payload = (ROOT/'fixtures/input'/trace['file']).read_bytes()
-    assert len(payload) == trace['bytes'] and hashlib.sha256(payload).hexdigest() == trace['sha256']
+    # The recorded digest is over the LF form; a Windows checkout may hold CRLF.
+    payload = (ROOT/'fixtures/input'/trace['file']).read_bytes().replace(CRLF, LF)
+    assert len(payload) == trace['bytes'], 'fixture byte length mismatch'
+    assert hashlib.sha256(payload).hexdigest() == trace['sha256'], 'fixture digest mismatch'
     scale = load('fixtures/scale/manifest.json')
     assert scale['origin'] == 'synthetic' and scale['device_performance_measured'] is False
     assert scale['encoding']['point_record_bytes'] == 28

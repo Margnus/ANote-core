@@ -49,12 +49,12 @@ def main():
     device = next(d for group in devices.values() for d in group if d['udid'] == args.device)
     assert device['name'] == 'NoteCorePreview' and device['state'] == 'Booted' and device['isAvailable']
     fixture = ROOT/'fixtures/transfer/android-paged-v2.ncp'
-    provenance = json.loads(fixture.with_suffix('.json').read_text())
+    provenance = json.loads(fixture.with_suffix('.json').read_text(encoding='utf-8'))
     assert digest(fixture) == provenance['sha256'] and provenance['source_real_user_data'] is False
     before = inputs()
     # Xcode does not rebuild Kotlin itself. Require a successful package build binding this framework
     # to the complete current common source set; hashing stale framework + new source is insufficient.
-    built = json.loads((ROOT/'reports/ios-preview-build.json').read_text())['source_and_build_input_sha256']
+    built = json.loads((ROOT/'reports/ios-preview-build.json').read_text(encoding='utf-8'))['source_and_build_input_sha256']
     def framework_input(path):
         return '/src/commonMain/' in path or path.endswith('.kts') or path == 'gradle.properties' or path.endswith('.framework/NoteCanvasPrototype')
     expected_framework = {path: sha for path, sha in before.items() if framework_input(path)}
@@ -69,7 +69,7 @@ def main():
             '-derivedDataPath', str(BUILD), 'CODE_SIGNING_ALLOWED=NO', '-resultBundlePath', str(result), 'test'],
             cwd=ROOT, stdout=output, stderr=subprocess.STDOUT, timeout=600)
     if run.returncode:
-        raise RuntimeError(log.read_text()[-16000:])
+        raise RuntimeError(log.read_text(encoding='utf-8')[-16000:])
     assert inputs() == before, 'Source changed during native tests'
     summary = json.loads(command('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(result), '--format', 'json'))
     tree = json.loads(command('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(result), '--format', 'json'))

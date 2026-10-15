@@ -70,7 +70,7 @@ def main():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n')
     else:
-        if json.loads(path.read_text()) != manifest:
+        if json.loads(path.read_text(encoding='utf-8')) != manifest:
             raise SystemExit('Generated scale bytes differ from tracked manifest; investigate before updating it.')
     (args.output/'verified-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n')
     print(json.dumps({'status': 'passed', 'profiles': len(manifest['profiles']),

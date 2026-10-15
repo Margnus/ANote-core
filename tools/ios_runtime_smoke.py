@@ -28,7 +28,7 @@ def main():
     assert device['name'] == 'NoteCorePreview' and device['isAvailable'] and device['state'] == 'Booted', 'Requires the dedicated booted NoteCorePreview device'
     runtime = next(r for r in json.loads(sim('list', 'runtimes', '-j'))['runtimes'] if r['identifier'] == runtime_id)
     assert runtime['isAvailable'] and 'arm64' in runtime['supportedArchitectures']
-    build = json.loads((ROOT/'reports/ios-preview-build.json').read_text())
+    build = json.loads((ROOT/'reports/ios-preview-build.json').read_text(encoding='utf-8'))
     assert build['build_verified'] and build['bundle'] == BUNDLE
     assert digest(ROOT/build['artifact']) == build['sha256'], 'Archive changed after successful packaging'
     for path, sha in build['source_and_build_input_sha256'].items():
