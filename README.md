@@ -16,6 +16,8 @@ DEV-029的[精确直线段派生简化](docs/派生笔迹直线段简化PoC.md)�
 
 ## 当前可运行内容
 
+- 最新 DEV-033：[有界渲染作业与资源交付](docs/有界渲染作业与资源交付PoC.md)已接通既有 JVM/Android 执行器、真实 mask/RGBA 和资源池。派发前预留全作业，ACK 后才缩减；取消/关闭不提前释放，原生副本许可独占，UNKNOWN 释放继续隔离。标准 Gradle 272 项、Android 78 项、Apple 74 项通过；两端原生图像持有至释放的预算闭环已测，Apple 使用测试 NSThread，App 的 Swift 执行器接入仍待 DEV-034。普通 App 包未更换，C1与真机门禁仍未完成。
+
 - [三笔刷有界路径与离屏验证](docs/共同笔刷路径与离屏验证.md)：共享231项测试、Kotlin/Native运行11项、Android/iOS实际离屏覆盖与alpha；S2成本排除了整页无限制路径缓存，下一步简化/分段与驻留预算。未接入App三笔刷。
 
 - [三笔刷共同覆盖PoC](docs/共同笔刷几何PoC.md)：版本化候选规则、解析oracle、仿射painted bounds和手工黄金格点；未作为原生渲染后端接入。

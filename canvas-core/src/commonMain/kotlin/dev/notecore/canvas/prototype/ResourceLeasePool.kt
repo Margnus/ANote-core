@@ -2,7 +2,7 @@ package dev.notecore.canvas.prototype
 
 /** Logical dispatch destination, not evidence of an actual platform thread. */
 enum class ResourceLane { OWNER, WORKER, GPU }
-class ResourceReservation internal constructor(internal val owner: Any, val bytes: Long)
+class ResourceReservation internal constructor(internal val owner: Any, val bytes: Long, internal val publishLimit: Long = bytes)
 class ResourceHandle internal constructor(internal val owner: Any, val bytes: Long)
 class ResourceLease<V : Any> internal constructor(internal val owner: Any, resource: V) {
     private var held: V? = resource
@@ -22,8 +22,10 @@ sealed interface ReservationResult {
 sealed interface ResourcePublication {
     data class Resident(val handle: ResourceHandle) : ResourcePublication
     data class RetiredAfterClose(val handle: ResourceHandle) : ResourcePublication
+    data class Retired(val handle: ResourceHandle) : ResourcePublication
     data object StaleReservation : ResourcePublication
     data object AlreadyOwned : ResourcePublication
+    data object UnsettledReservation : ResourcePublication
 }
 sealed interface ResourceBorrow<out V : Any> {
     data class Borrowed<V : Any>(val lease: ResourceLease<V>) : ResourceBorrow<V>
@@ -80,17 +82,22 @@ class ResourceLeasePool<K : Any, V : Any>(
         resources.values.count { !it.resident && it.borrowers == 0 && it.release == null && !it.unknownRelease }, chargedBytes, isDrained)
 
     /** Reserve BEFORE allocating. Rejecting a replacement does not evict the old resident value. */
-    fun reserve(bytes: Long): ReservationResult {
+    fun reserve(bytes: Long): ReservationResult = reservePeak(bytes, bytes)
+
+    /** Worker peak may exceed resident budget, but total admission includes that full peak.
+     * Must settle to at most retainedBytes after execution/ACK before any publication.
+     */
+    fun reservePeak(bytes: Long, retainedBytes: Long): ReservationResult {
         val failure = when {
             closed -> ReservationFailure.CLOSED
-            bytes <= 0 -> ReservationFailure.INVALID_BYTES
-            bytes > residentBudget -> ReservationFailure.RESIDENT_LIMIT
+            bytes <= 0 || retainedBytes <= 0 || retainedBytes > bytes -> ReservationFailure.INVALID_BYTES
+            retainedBytes > residentBudget -> ReservationFailure.RESIDENT_LIMIT
             retainedResources >= maxResources -> ReservationFailure.RESOURCE_COUNT
             bytes > totalBudget - chargedBytes -> ReservationFailure.TOTAL_LIMIT
             else -> null
         }
         if (failure != null) return ReservationResult.Rejected(failure)
-        val reservation = ResourceReservation(identity, bytes)
+        val reservation = ResourceReservation(identity, bytes, retainedBytes)
         reservations.add(reservation); chargedBytes += bytes
         return ReservationResult.Reserved(reservation)
     }
@@ -102,9 +109,34 @@ class ResourceLeasePool<K : Any, V : Any>(
         return true
     }
 
+    /** Owner confirms work/input handoff has ended before reducing a peak reservation to retained
+     * output. Old token becomes stale. Never use this merely because cancellation was requested.
+     */
+    fun settleReservation(reservation: ResourceReservation, retainedBytes: Long): ResourceReservation? {
+        if (reservation !in reservations || retainedBytes <= 0 || retainedBytes > reservation.publishLimit) return null
+        reservations.remove(reservation)
+        chargedBytes -= reservation.bytes - retainedBytes
+        return ResourceReservation(identity, retainedBytes).also { reservations.add(it) }
+    }
+
+    /** Allocated but obsolete output transfers directly to retirement, without replacing a newer
+     * resident entry. The ordinary release/confirmation protocol still applies.
+     */
+    fun publishRetired(reservation: ResourceReservation, value: V): ResourcePublication {
+        if (reservation !in reservations) return ResourcePublication.StaleReservation
+        if (reservation.bytes > reservation.publishLimit) return ResourcePublication.UnsettledReservation
+        if (resources.values.any { it.value === value }) return ResourcePublication.AlreadyOwned
+        reservations.remove(reservation)
+        val entry = Entry(ResourceHandle(identity, reservation.bytes), value)
+        entry.resident = false
+        resources[entry.handle] = entry
+        return ResourcePublication.Retired(entry.handle)
+    }
+
     /** Successful publication transfers ownership, even if a close requires immediate retirement. */
     fun publish(reservation: ResourceReservation, key: K, value: V): ResourcePublication {
         if (reservation !in reservations) return ResourcePublication.StaleReservation
+        if (reservation.bytes > reservation.publishLimit) return ResourcePublication.UnsettledReservation
         if (resources.values.any { it.value === value }) return ResourcePublication.AlreadyOwned
         reservations.remove(reservation)
         val entry = Entry(ResourceHandle(identity, reservation.bytes), value)
@@ -194,6 +226,10 @@ class ResourceLeasePool<K : Any, V : Any>(
     fun close() {
         if (closed) return
         closed = true
+        evictAll()
+    }
+
+    fun evictAll() {
         resident.values.forEach(::retire); resident.clear()
     }
 }

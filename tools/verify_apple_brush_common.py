@@ -38,28 +38,31 @@ def main():
     binary = ROOT/'canvas-core/build/bin/iosSimulatorArm64/debugTest/test.kexe'
     binary_sha = digest(binary)
     run = subprocess.run(['xcrun', 'simctl', 'spawn', args.device, str(binary),
-        '--ktest_filter=dev.notecore.canvas.prototype.BrushEnvelopePocTest.*:dev.notecore.canvas.prototype.BrushPathPocTest.*:dev.notecore.canvas.prototype.BrushReductionPocTest.*:dev.notecore.canvas.prototype.ChunkedBrushPocTest.*:dev.notecore.canvas.prototype.BrushTileCachePocTest.*:dev.notecore.canvas.prototype.ResourceLeaseContractTest.*:dev.notecore.canvas.prototype.WeightedLruContractTest.*:dev.notecore.canvas.prototype.BrushTilePixelsPocTest.*:dev.notecore.canvas.prototype.BrushTileCGImageTest.*',
+        '--ktest_filter=dev.notecore.canvas.prototype.BrushEnvelopePocTest.*:dev.notecore.canvas.prototype.BrushPathPocTest.*:dev.notecore.canvas.prototype.BrushReductionPocTest.*:dev.notecore.canvas.prototype.ChunkedBrushPocTest.*:dev.notecore.canvas.prototype.BrushTileCachePocTest.*:dev.notecore.canvas.prototype.ResourceLeaseContractTest.*:dev.notecore.canvas.prototype.WeightedLruContractTest.*:dev.notecore.canvas.prototype.BrushTilePixelsPocTest.*:dev.notecore.canvas.prototype.BrushTileCGImageTest.*:dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.*:dev.notecore.canvas.prototype.BrushRenderThreadTest.*',
         '--ktest_logger=GTEST'], cwd=ROOT, check=False, capture_output=True, text=True, timeout=120)
     (build/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
     run.check_returncode()
     passed = re.findall(r'^\[\s+OK\s+\]\s+(\S+)', run.stdout, re.MULTILINE)
     expected = set()
-    for name in ('BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileCGImageTest'):
-        source_set = 'iosSimulatorArm64Test' if name == 'BrushTileCGImageTest' else 'commonTest'
+    for name in ('BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileCGImageTest', 'BrushRenderOwnerPocTest', 'BrushRenderThreadTest'):
+        source_set = 'iosSimulatorArm64Test' if name in ('BrushTileCGImageTest', 'BrushRenderThreadTest') else 'commonTest'
         source = ROOT/('canvas-core/src/'+source_set+'/kotlin/dev/notecore/canvas/prototype/'+name+'.kt')
         expected.update('dev.notecore.canvas.prototype.'+name+'.'+method for method in
             re.findall(r'@Test\s+fun\s+(\w+)\(', source.read_text(encoding='utf-8')))
-    assert len(expected) == 62 and set(passed) == expected and len(passed) == 62, run.stdout
+    assert len(expected) == 74 and set(passed) == expected and len(passed) == 74, run.stdout
     assert before == {p.relative_to(ROOT).as_posix(): digest(p) for p in sources}
     assert digest(binary) == binary_sha
     observations = [json.loads(line.removeprefix('NOTECORE_NATIVE_IMAGE ')) for line in run.stdout.splitlines()
         if line.startswith('NOTECORE_NATIVE_IMAGE ')]
     assert len(observations) == 2
-    report = {'native_image_observations': observations, 'status': 'passed', 'platform': 'Kotlin/Native ARM64 tests executed via iOS Simulator spawn',
-        'device': {'name': device['name'], 'udid': args.device}, 'test_count': len(passed), 'common_test_count': 59, 'core_graphics_test_count': 3, 'checks': sorted(passed),
+    render_observations = [json.loads(line.removeprefix('NOTECORE_NATIVE_RENDER ')) for line in run.stdout.splitlines()
+        if line.startswith('NOTECORE_NATIVE_RENDER ')]
+    assert len(render_observations) == 1
+    report = {'native_render_observations': render_observations, 'native_image_observations': observations, 'status': 'passed', 'platform': 'Kotlin/Native ARM64 tests executed via iOS Simulator spawn',
+        'device': {'name': device['name'], 'udid': args.device}, 'test_count': len(passed), 'common_test_count': 68, 'native_render_thread_test_count': 3, 'core_graphics_test_count': 3, 'checks': sorted(passed),
         'source_and_build_sha256': before, 'test_binary_sha256': binary_sha,
         'test_output_sha256': digest(build/'run.log'), 'desktop_unlock_required': False,
-        'shared_geometry_generation_on_kotlin_native_verified': True, 'native_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,
+        'native_image_lease_handoff_verified': True, 'native_render_thread_handoff_verified': True, 'app_swift_executor_render_integration_verified': False, 'shared_geometry_generation_on_kotlin_native_verified': True, 'native_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,
         'physical_device_measured': False, 'app_brush_integration_verified': False,
         'native_cost_scope': 'Reported image/context row storage and one exploratory API timing. CGImage snapshots may share/copy storage; rows must not be summed as unique heap. Release timing is API return, not GC/GPU reclamation.',
         'scope': 'Actual common envelope/path generation, bounded admission, cancellation and coverage tests compiled/run by Kotlin/Native. Includes CoreGraphics RGBA image/alpha/color and nearest/filtered tile consumption. No UIKit touch, physical performance, general filter/transform or heap claim.'}

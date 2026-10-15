@@ -41,7 +41,7 @@ def main():
     groups = {
         'canvas-main': sorted([*ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmMain/**/*.kt')]),
         'shared-main': sorted(ROOT.glob('shared-core/src/commonMain/**/*.kt')),
-        'canvas-tests': sorted([*ROOT.glob('canvas-core/src/commonTest/**/*.kt'), *ROOT.glob('canvas-core/src/jvmTest/**/*.kt')]),
+        'canvas-tests': sorted([*ROOT.glob('canvas-core/src/commonTest/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidTest/**/*.kt'), *ROOT.glob('canvas-core/src/jvmTest/**/*.kt')]),
         'shared-tests': sorted([*ROOT.glob('shared-core/src/commonTest/**/*.kt'), *ROOT.glob('shared-core/src/jvmTest/**/*.kt')]),
     }
     inputs = sorted({p for files in groups.values() for p in files} | set(ROOT.glob('fixtures/**/*.json')) |

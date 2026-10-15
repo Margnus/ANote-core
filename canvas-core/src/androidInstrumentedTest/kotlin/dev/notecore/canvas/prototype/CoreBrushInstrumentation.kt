@@ -15,8 +15,9 @@ class CoreBrushInstrumentation : Instrumentation() {
             val result = JUnitCore.runClasses(BrushEnvelopePocTest::class.java, BrushPathPocTest::class.java,
                 BrushReductionPocTest::class.java, ChunkedBrushPocTest::class.java,
                 BrushTileCachePocTest::class.java, ResourceLeaseContractTest::class.java,
-                WeightedLruContractTest::class.java, BrushTilePixelsPocTest::class.java, BrushTileBitmapTest::class.java)
-            check(result.wasSuccessful() && result.runCount == 63 && result.ignoreCount == 0) {
+                WeightedLruContractTest::class.java, BrushTilePixelsPocTest::class.java, BrushTileBitmapTest::class.java,
+                BrushRenderOwnerPocTest::class.java, BrushRenderExecutorPocTest::class.java)
+            check(result.wasSuccessful() && result.runCount == 78 && result.ignoreCount == 0) {
                 "run=${result.runCount} ignored=${result.ignoreCount} failures=${result.failures.joinToString { it.trace }}"
             }
             output.putInt("common_brush_tests", result.runCount)

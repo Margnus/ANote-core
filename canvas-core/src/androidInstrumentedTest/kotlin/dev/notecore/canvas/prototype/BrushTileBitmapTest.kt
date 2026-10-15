@@ -162,4 +162,31 @@ class BrushTileBitmapTest {
         assertTrue(controlDifferences > 0, "Fixture must expose the missing-neighbor problem")
         observations.add("{\"filter_cases\":6,\"max_channel_delta\":$observedMax,\"unpadded_channel_differences\":$controlDifferences}")
     }
+
+    @Test fun workerOutputBudgetStaysWithNativeBitmapUntilExplicitReaderReturn() {
+        val f = BrushTileImageFixture
+        val executor = BrushRenderExecutorPoc(f.frame, f.layer, 32768, 262144)
+        try {
+            val job = assertIs<BrushRenderAdmissionPoc.Accepted>(executor.submit(f.catalog(), f.frame, f.layer,
+                f.grid, f.rgb, 65536, nativeCopyAllowanceBytes = 16384)).job
+            val deadline = System.nanoTime() + 5_000_000_000L
+            while (executor.executorStatus().entries.single().stage != OwnedWorkStage.READY) {
+                check(System.nanoTime() < deadline); Thread.sleep(1)
+            }
+            assertEquals(BrushRenderAckPoc.PUBLISHED, executor.drain().single().second)
+            val reader = assertNotNull(executor.borrowNative(job))
+            val bitmap = Bitmap.createBitmap(64, 32, Bitmap.Config.ARGB_8888)
+            try {
+                val copy = ByteBuffer.allocate(8192)
+                for (i in 0 until 8192) copy.put(reader.byteAt(i).toByte())
+                copy.rewind(); bitmap.copyPixelsFromBuffer(copy)
+                assertTrue(copy.capacity() + bitmap.allocationByteCount <= reader.nativeCopyAllowanceBytes)
+                assertTrue((0 until 2048).any { Color.alpha(bitmap.getPixel(it % 64, it / 64)) == 51 })
+                executor.close(); assertFalse(executor.canPublish(reader)); assertEquals(24576, executor.chargedBytes)
+                assertFalse(executor.isDrained)
+                observations.add("{\"render_native_lease\":true,\"rgba_bytes\":8192,\"native_copy_allowance_bytes\":16384,\"bitmap_allocation_bytes\":${bitmap.allocationByteCount},\"staging_bytes\":${copy.capacity()},\"charged_while_closed_reader_held\":${executor.chargedBytes}}")
+            } finally { bitmap.recycle(); check(executor.completeNativeRelease(reader, ResourceReleaseOutcome.RELEASED)) }
+        } finally { executor.close(); assertTrue(executor.awaitWorkerStop(5000)); executor.drain() }
+        assertTrue(executor.isDrained); assertEquals(0, executor.chargedBytes)
+    }
 }

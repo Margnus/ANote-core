@@ -29,9 +29,11 @@ kotlin {
         getByName("jvmMain").dependsOn(jvmAndAndroidMain)
         if (providers.gradleProperty("enableAndroidTargets").orNull == "true") getByName("androidMain").dependsOn(jvmAndAndroidMain)
         commonTest.dependencies { implementation(kotlin("test")) }
+        val jvmAndAndroidTest by creating { dependsOn(getByName("commonTest")) }
+        getByName("jvmTest").dependsOn(jvmAndAndroidTest)
         if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
             getByName("androidInstrumentedTest") {
-                dependsOn(getByName("commonTest"))
+                dependsOn(jvmAndAndroidTest)
                 dependencies { implementation(kotlin("test-junit")); implementation("junit:junit:4.13.2") }
             }
         }

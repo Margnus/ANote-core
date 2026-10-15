@@ -31,19 +31,25 @@ internal class BrushTilePixelsPoc private constructor(
     companion object {
         fun build(reader: BrushTileReaderPoc, rgb: Int, maxBytes: Long = 64 * 1024,
             cancelled: () -> Boolean = { false },
+        ): BrushTilePixelBuild = convert(reader.frame, reader.ownerLayer, reader.grid, rgb, maxBytes, cancelled, reader::alphaByte)
+
+        fun build(mask: BrushTileMaskPoc, rgb: Int, maxBytes: Long = 64 * 1024,
+            cancelled: () -> Boolean = { false },
+        ): BrushTilePixelBuild = convert(mask.frame, mask.ownerLayer, mask.grid, rgb, maxBytes, cancelled, mask::alphaByte)
+
+        private fun convert(frame: FrameToken, layer: LayerId, grid: BrushTileGridPoc, rgb: Int,
+            maxBytes: Long, cancelled: () -> Boolean, alphaAt: (Int, Int) -> Int,
         ): BrushTilePixelBuild {
             require(maxBytes > 0)
             if (rgb !in 0..0xffffff) return BrushTilePixelBuild.Rejected("rgb-range")
             if (cancelled()) return BrushTilePixelBuild.Cancelled
-            val grid = reader.grid
             val bytes = grid.width * grid.height * 4
             if (bytes > maxBytes) return BrushTilePixelBuild.Rejected("pixel-budget")
-            val frame = reader.frame; val layer = reader.ownerLayer
             val rgba = ByteArray(bytes)
             for (y in 0 until grid.height) for (x in 0 until grid.width) {
                 val pixel = y * grid.width + x
                 if (pixel % 256 == 0 && cancelled()) return BrushTilePixelBuild.Cancelled
-                val alpha = reader.alphaByte(x, y)
+                val alpha = alphaAt(x, y)
                 val offset = pixel * 4
                 rgba[offset] = (((rgb ushr 16 and 255) * alpha + 127) / 255).toByte()
                 rgba[offset + 1] = (((rgb ushr 8 and 255) * alpha + 127) / 255).toByte()

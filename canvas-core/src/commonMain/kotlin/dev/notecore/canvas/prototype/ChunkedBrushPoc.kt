@@ -50,6 +50,9 @@ internal class ChunkedBrushPoc private constructor(
     internal val cacheIdentity = Any()
     internal val contentFrame: FrameToken get() = captured
     val ownerLayer: LayerId get() = stroke.layerId
+    // Conservative per-job retention charge, even when several jobs share the same source.
+    // Index object headers/references are excluded; catalog count is separately bounded by host.
+    val inputPayloadBytes: Long get() = stroke.samples.size * 28L + boundsPayloadBytes
     val chunkCount: Int get() = boxes.size / 4
     val boundsPayloadBytes: Long get() = boxes.size * 8L
     val indexNodeCount: Int get() = index.nodeCount
