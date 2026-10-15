@@ -68,11 +68,11 @@ def main():
     path = ROOT/'fixtures/scale/manifest.json'
     if args.write_manifest:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n')
+        path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     else:
-        if json.loads(path.read_text()) != manifest:
+        if json.loads(path.read_text(encoding='utf-8')) != manifest:
             raise SystemExit('Generated scale bytes differ from tracked manifest; investigate before updating it.')
-    (args.output/'verified-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n')
+    (args.output/'verified-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({'status': 'passed', 'profiles': len(manifest['profiles']),
                       'total_points': sum(p['total_points'] for p in manifest['profiles']),
                       'device_performance_measured': False}))

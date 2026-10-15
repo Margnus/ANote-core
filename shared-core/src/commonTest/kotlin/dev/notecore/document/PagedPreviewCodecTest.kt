@@ -1,14 +1,12 @@
 package dev.notecore.document
 
-import dev.notecore.canvas.preview.PreviewNotebook
 import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedPreviewCodecTest {
     @Test fun legacyBottomRightInkKeepsOriginalPaperExtentAndDecodedCopySharesSamples() {
-        val old = PreviewNotebook("corner", "corner")
-        assertTrue(old.beginStroke(900.0, 1300.0, 0.5f, 1)); assertTrue(old.endStroke(999.0, 1399.0, 0.5f, 2))
-        val root = PagedPreviewCodec.decode(old.capture().encode())
+        val input = "NCPREVIEW\t1\nD\tcorner\tcorner\t2\t1\t1\nS\tink-1\t-1\t2.5\t2\nP\t900\t1300\t0.5\t1\nP\t999\t1399\t0.5\t2\nEND\n"
+        val root = PagedPreviewCodec.decode(input)
         assertEquals(1000.0, root.page(0).width); assertEquals(1400.0, root.page(0).height)
         assertEquals(1399.0, root.scene.objects().single().samples.y(1))
         val copy = PagedPreviewCodec.copyAsNew(root, SceneId("new"), mapOf(root.page(0).id to PageId("fresh-page")),
@@ -44,12 +42,7 @@ class PagedPreviewCodecTest {
     }
     private fun encoded() = PagedPreviewCodec.encode(root())
     private fun invalid(text: String) { assertFailsWith<IllegalArgumentException> { PagedPreviewCodec.decode(text) } }
-    private fun legacy(): String {
-        val note = PreviewNotebook("legacy", "旧笔记😀")
-        assertTrue(note.beginStroke(1.0, 2.0, 0.3f, 123)); assertTrue(note.endStroke(3.0, 4.0, 0.8f, 456))
-        note.rename("旧标题")
-        return note.capture().encode()
-    }
+    private fun legacy(): String = "NCPREVIEW\t1\nD\tlegacy\t\u65e7\u6807\u9898\t2\t1\t2\nS\tink-1\t-1\t2.5\t2\nP\t1\t2\t0.3\t123\nP\t3\t4\t0.8\t456\nEND\n"
     @Test fun roundTripPreservesEveryCanonicalFieldPageAndDrawOrderAndTextBytes() {
         val before = root(); val text = encoded(); val after = PagedPreviewCodec.decode(text)
         assertEquals(before.id, after.id); assertEquals(before.title, after.title); assertEquals(before.revision, after.revision)

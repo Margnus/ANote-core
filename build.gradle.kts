@@ -30,7 +30,9 @@ tasks.register("verifyPrototype") {
             fileTree("shared-core/build/test-results/jvmTest") { include("TEST-*.xml") }.files
         check(testXml.isNotEmpty()) { "Expected real JVM test XML before stamping verification" }
         val records = (inputs + testXml).sortedBy { it.relativeTo(rootDir).invariantSeparatorsPath }.map { input ->
-            val sha = MessageDigest.getInstance("SHA-256").digest(input.readBytes())
+            val bytes = if (input.extension in setOf("kt", "kts", "py", "json", "md", "sh", "properties", "xml"))
+                input.readText(Charsets.UTF_8).replace("\r\n", "\n").toByteArray(Charsets.UTF_8) else input.readBytes()
+            val sha = MessageDigest.getInstance("SHA-256").digest(bytes)
                 .joinToString("") { "%02x".format(it) }
             "$sha  ${input.relativeTo(rootDir).invariantSeparatorsPath}"
         }

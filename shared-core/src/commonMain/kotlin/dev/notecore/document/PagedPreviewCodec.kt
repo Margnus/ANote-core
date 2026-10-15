@@ -1,6 +1,5 @@
 package dev.notecore.document
 
-import dev.notecore.canvas.preview.PreviewNotebook
 import dev.notecore.canvas.prototype.*
 
 data class PagedPreviewHeader(val documentId: String, val title: String, val pageCount: Int,
@@ -22,10 +21,7 @@ object PagedPreviewCodec {
         require(text.length <= 4096)
         val cursor = Rows(text)
         return when (cursor.row(2)) {
-            listOf("NCPREVIEW", "1") -> PreviewNotebook.header(text).let {
-                validText(it.documentId); validText(it.title)
-                PagedPreviewHeader(it.documentId, it.title, 1, it.strokeCount, it.version, 1)
-            }
+            listOf("NCPREVIEW", "1") -> LegacyPreviewReader.header(text)
             listOf("NCPREVIEW", "2") -> metadata(cursor.row(6))
             else -> throw IllegalArgumentException("Unsupported preview version")
         }
@@ -37,13 +33,7 @@ object PagedPreviewCodec {
         val rows = Rows(text)
         when (rows.row(2)) {
             listOf("NCPREVIEW", "1") -> {
-                validateLegacyLines(text)
-                val legacy = PreviewNotebook.restore(text).capture()
-                val root = DocumentRoot.compose(legacy.title,
-                    SceneSnapshot.restored(SceneId(legacy.documentId), legacy.version, legacy.canonicalScene().objects()),
-                    listOf(PageDescriptor(PageId("page-1"), LayerId("ink"), 1000.0, 1400.0, contentRevision = legacy.version)))
-                retainedByteCharge(root)
-                return root
+                return LegacyPreviewReader.decode(text)
             }
             listOf("NCPREVIEW", "2") -> Unit
             else -> throw IllegalArgumentException("Unsupported preview version")
@@ -194,16 +184,6 @@ object PagedPreviewCodec {
             value.append(line)
         }
         override fun toString(): String = value.toString()
-    }
-    private fun validateLegacyLines(text: String) {
-        var length = 0; var delimiters = 0
-        for (c in text) {
-            if (c == '\n') { length = 0; delimiters = 0 }
-            else {
-                require(++length <= MAX_LINE)
-                if (c == '\t') require(++delimiters <= 5)
-            }
-        }
     }
     private fun validText(value: String) {
         var i = 0

@@ -14,22 +14,29 @@ def main():
     errors = []
     imports = 0
     for path in sources:
-        for number, line in enumerate(path.read_text().splitlines(), 1):
+        for number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
             match = re.match(r'\s*import\s+([\w.]+)', line)
             if match:
                 imports += 1
                 if match.group(1).startswith(FORBIDDEN) or ('canvas-core' in path.parts and match.group(1).startswith('dev.notecore.document.')):
                     errors.append(f'{path.relative_to(ROOT)}:{number}: {match.group(1)}')
     # Prototype is an isolated module. App/plugin dependencies require an explicit architecture change.
-    build = (ROOT/'canvas-core/build.gradle.kts').read_text()
+    build = (ROOT/'canvas-core/build.gradle.kts').read_text(encoding='utf-8')
     if re.search(r'(implementation|api|compileOnly)\s*\(\s*project\s*\(', build):
         errors.append('canvas-core has a project dependency')
-    domain_build = (ROOT/'shared-core/build.gradle.kts').read_text()
+    domain_build = (ROOT/'shared-core/build.gradle.kts').read_text(encoding='utf-8')
     domain_dependencies = re.findall(r'(?:implementation|api|compileOnly)\s*\(\s*project\s*\(\s*"([^"]+)"', domain_build)
     if domain_dependencies != [':canvas-core']: errors.append('shared-core must depend only on canvas-core')
+    retired = re.compile(r'\b(?:PreviewNotebook|PreviewNotebookSnapshot|PreviewNotebookHeader|LegacyPreviewSaveSnapshot)\b')
+    roots = ['canvas-core/src', 'shared-core/src', 'android-app/src', 'ios-app/NoteCorePreview', 'ios-app/NoteCorePreviewTests']
+    for root in roots:
+        for path in (ROOT/root).rglob('*'):
+            if path.suffix in {'.kt', '.swift'} and retired.search(path.read_text(encoding='utf-8')):
+                errors.append(f'Retired single-page editor/save stack referenced: {path.relative_to(ROOT)}')
     report = {'status': 'failed' if errors else 'passed', 'common_source_files': len(sources),
               'imports_checked': imports, 'errors': errors,
               'modules': ['canvas-core', 'shared-core'], 'project_dependency_direction': 'shared-core -> canvas-core only',
+              'retired_single_page_stack_absent': not any('Retired single-page' in e for e in errors),
               'scope': 'commonMain imports and direct project dependencies; not a transitive bytecode audit'}
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if errors:

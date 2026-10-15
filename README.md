@@ -4,6 +4,8 @@
 
 先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](https://github.com/Margnus/AI-Note/blob/main/README.md)。
 
+最新顺序按蓝图e066cfb与[ADR-0020](docs/adr/0020-read-only-legacy-and-measurement-first.md)调整：旧单页编辑/写出SDK已收口，v1只读迁入不创建另一owner；接下来优先C0真机基线、共同笔刷几何和密集页索引PoC，再做生产架构冻结及SQLite层。Mac锁屏相关桌面交互验证已由用户明确延后，不阻挡独立开发。
+
 ## 当前可运行内容
 
 - 平台无关double坐标和矩阵、不可变真实采样、captured scene/layer/tool。

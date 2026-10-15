@@ -4,15 +4,16 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from verification_hash import verification_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 
 def load(relative):
-    return json.loads((ROOT/relative).read_text())
+    return json.loads((ROOT/relative).read_text(encoding='utf-8'))
 
 def main():
     trace = load('fixtures/input/manifest.json')
-    payload = (ROOT/'fixtures/input'/trace['file']).read_bytes()
+    payload = verification_bytes(ROOT/'fixtures/input'/trace['file'])
     assert len(payload) == trace['bytes'] and hashlib.sha256(payload).hexdigest() == trace['sha256']
     scale = load('fixtures/scale/manifest.json')
     assert scale['origin'] == 'synthetic' and scale['device_performance_measured'] is False

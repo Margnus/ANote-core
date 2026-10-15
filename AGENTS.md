@@ -9,3 +9,6 @@
 - Run meaningful common tests and the dependency check. Passing JVM tests does not validate Android, Apple compilation or device performance.
 - Update progress with actual verification and remaining gates; never mark an entire requirement complete from a single prototype test.
 - The user authorized verified milestone commits and pushes: NoteCore to Margnus/ANote-core and blueprint to Margnus/AI-Note. Check diffs and verification before each milestone; never force-push or publish apps without authorization.
+- Follow blueprint revision e066cfb / ADR-0020: close the retired single-page editor/writer stack, then prioritize C0 physical baselines, shared brush geometry and dense-page index PoCs before freezing architecture or expanding preview features.
+- The user explicitly deferred Mac-lock-dependent UI verification. Keep those gates unverified/deferred and continue independent code, API/IO tests and measurements; do not keep asking to unlock or stop work because the desktop is locked.
+- Keep historical legacy-source evidence pinned to its recorded commits; rehash results are machine-specific and do not prove source/AAR equivalence.

@@ -43,9 +43,9 @@ def main():
                   limitations=['Apple Foundation worker / serial Dispatch owner verified on macOS, not iOS runtime',
                                'Swift fatal traps / process death are not recoverable worker errors',
                                'Native GPU resources and durable storage are not exercised by this executor suite'],
-                  input_sha256={str(p.relative_to(ROOT)): digest(p) for p in [*sources, Path(__file__), xml, ROOT/'reports/verification.json']},
+                  input_sha256={p.relative_to(ROOT).as_posix(): digest(p) for p in [*sources, Path(__file__), xml, ROOT/'reports/verification.json']},
                   compiler=subprocess.run(['xcrun', 'swiftc', '--version'], capture_output=True, text=True, check=True).stdout.strip())
-    (ROOT/'reports/apple-executor-conformance.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
+    (ROOT/'reports/apple-executor-conformance.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({k: v for k, v in result.items() if k not in ('input_sha256', 'shared_contract_cases')}, ensure_ascii=False))
 
 if __name__ == '__main__': main()

@@ -28,7 +28,7 @@ def main():
     assert device['name'] == 'NoteCorePreview' and device['isAvailable'] and device['state'] == 'Booted', 'Requires the dedicated booted NoteCorePreview device'
     runtime = next(r for r in json.loads(sim('list', 'runtimes', '-j'))['runtimes'] if r['identifier'] == runtime_id)
     assert runtime['isAvailable'] and 'arm64' in runtime['supportedArchitectures']
-    build = json.loads((ROOT/'reports/ios-preview-build.json').read_text())
+    build = json.loads((ROOT/'reports/ios-preview-build.json').read_text(encoding='utf-8'))
     assert build['build_verified'] and build['bundle'] == BUNDLE
     assert digest(ROOT/build['artifact']) == build['sha256'], 'Archive changed after successful packaging'
     for path, sha in build['source_and_build_input_sha256'].items():
@@ -59,14 +59,14 @@ def main():
         'device': {k: device[k] for k in ('name', 'udid', 'state')},
         'runtime': {k: runtime[k] for k in ('identifier', 'version', 'buildversion', 'supportedArchitectures')},
         'pid': pid, 'launch_output': launched, 'process': process,
-        'screenshot': str(screenshot.relative_to(ROOT)), 'screenshot_sha256': digest(screenshot),
+        'screenshot': screenshot.relative_to(ROOT).as_posix(), 'screenshot_sha256': digest(screenshot),
         'input_sha256': {'reports/ios-preview-build.json': digest(ROOT/'reports/ios-preview-build.json'),
-                         str(Path(__file__).relative_to(ROOT)): digest(Path(__file__))},
+                         Path(__file__).relative_to(ROOT).as_posix(): digest(Path(__file__))},
         'ui_interaction_verified': False, 'drawing_verified': False, 'save_reopen_verified': False,
         'device_performance_verified': False, 'production_c1_gate_complete': False,
         'scope': 'Dedicated iOS Simulator install/launch, process liveness and screenshot only; inspect the image separately; no UI actions or storage recovery verification',
     }
-    (ROOT/'reports/ios-runtime-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    (ROOT/'reports/ios-runtime-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report, ensure_ascii=False))
 
 if __name__ == '__main__': main()

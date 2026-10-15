@@ -13,8 +13,8 @@ def main():
                     *map(str, sources), '-o', str(build/'storage-tests')], check=True)
     report = json.loads(subprocess.run([str(build/'storage-tests')], capture_output=True, text=True, check=True, timeout=60).stdout)
     assert report['status'] == 'passed' and report['test_count'] == 6 and len(set(report['passed'])) == 6
-    report['input_sha256'] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources + [Path(__file__)]}
+    report['input_sha256'] = {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources + [Path(__file__)]}
     report['scope'] = 'macOS execution of same Foundation IO helper compiled into iOS; no UIKit, KMP model runtime or physical-device durability validation'
-    (ROOT/'reports/apple-storage-conformance.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    (ROOT/'reports/apple-storage-conformance.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({k: v for k, v in report.items() if k != 'input_sha256'}, ensure_ascii=False))
 if __name__ == '__main__': main()

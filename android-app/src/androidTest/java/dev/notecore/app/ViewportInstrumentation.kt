@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
-import dev.notecore.canvas.preview.PreviewNotebook
 import dev.notecore.canvas.preview.PreviewSaveLedger
 import dev.notecore.canvas.preview.PreviewSaveAdmission
 import dev.notecore.canvas.prototype.*
@@ -161,9 +160,8 @@ class ViewportInstrumentation : Instrumentation() {
             check(decoded.pages() == owner.snapshot().pages() && decoded.scene.objects() == owner.snapshot().scene.objects())
             check(PagedPreviewCodec.encode(decoded) == encoded)
             check(PagedPreviewCodec.header(encoded.lineSequence().take(2).joinToString("\n")).formatVersion == 2)
-            val legacy = PreviewNotebook("ART-legacy", "旧笔记😀")
-            check(legacy.beginStroke(1.0, 2.0, 0.5f, 1)); check(legacy.endStroke(3.0, 4.0, 0.7f, 2))
-            val migrated = PagedPreviewCodec.decode(legacy.capture().encode())
+            val legacy = "NCPREVIEW\t1\nD\tART-legacy\tlegacy\t2\t1\t1\nS\tink-1\t-1\t2.5\t2\nP\t1\t2\t0.5\t1\nP\t3\t4\t0.7\t2\nEND\n"
+            val migrated = PagedPreviewCodec.decode(legacy)
             check(migrated.pageCount == 1 && migrated.scene.objects().single().samples.timeMicros(1) == 2L)
             check(owner.commit(undo) == restored)
             check(owner.commit(DocumentCommand.Redo(CommandId("redo"), doc, 3, clear.id)) is DocumentCommit.Accepted)
@@ -276,9 +274,7 @@ class ViewportInstrumentation : Instrumentation() {
                 store.releaseActive(notebook)
                 check(!notebook.beginStroke(1.0, 2.0, 0.5f, 3))
             }
-            val legacy = PreviewNotebook("legacy-noop", "Legacy unchanged")
-            check(legacy.beginStroke(900.0, 1300.0, 0.5f, 1)); check(legacy.endStroke(999.0, 1399.0, 0.5f, 2))
-            val original = legacy.capture().encode()
+            val original = "NCPREVIEW\t1\nD\tlegacy-noop\tLegacy unchanged\t2\t1\t1\nS\tink-1\t-1\t2.5\t2\nP\t900\t1300\t0.5\t1\nP\t999\t1399\t0.5\t2\nEND\n"
             val legacyFile = java.io.File(directory, "legacy-noop.ncp").apply { writeText(original) }
             val read = storageResult<Pair<OpenedDocument?, String?>> { done -> store.open("legacy-noop") { opened, error -> done(opened to error) } }
             lateinit var migrated: PagedPreviewNotebook

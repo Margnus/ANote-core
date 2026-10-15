@@ -5,17 +5,13 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedSaveLedgerTest {
-    @Test fun equalVisibleLegacyInkWithDifferentNextIdentityIsStillAContentConflict() {
-        fun draw(note: PreviewNotebook) {
-            assertTrue(note.beginStroke(1.0, 2.0, 0.3f, 1)); assertTrue(note.endStroke(3.0, 4.0, 0.7f, 2))
-        }
-        val a = PreviewNotebook("legacy", "title"); draw(a); draw(a); assertTrue(a.undo())
-        val b = PreviewNotebook("legacy", "title"); draw(b); b.rename("temporary"); b.rename("title")
-        val first = a.capture(); val second = b.capture()
-        assertEquals(first.version, second.version); assertEquals(first.canonicalScene().objects(), second.canonicalScene().objects())
-        assertNotEquals(first.nextObjectSequence, second.nextObjectSequence)
-        val ledger = PreviewSaveLedger(); accept(ledger, LegacyPreviewSaveSnapshot(first))
-        assertEquals(PreviewSaveAdmission.VERSION_CONFLICT, ledger.offer(LegacyPreviewSaveSnapshot(second)))
+    @Test fun migratedLegacyIdentityCounterCannotReintroduceOldObjectIdsOrAV1Writer() {
+        val input = "NCPREVIEW\t1\nD\tlegacy\ttitle\t99\t1\t1\nS\tink-1\t-1\t2.5\t1\nP\t1\t2\t0.5\t1\nEND\n"
+        val note = PagedPreviewNotebook(PagedPreviewCodec.decode(input), "new-owner")
+        val before = note.strokeId(0); draw(note)
+        assertNotEquals(before, note.strokeId(1)); assertTrue(note.strokeId(1).startsWith("new-owner-"))
+        assertTrue(note.capture().encode().startsWith("NCPREVIEW\t2\n"))
+        assertEquals(before, note.strokeId(0))
     }
     private fun note() = PagedPreviewNotebook.create("paged", "title", "fresh-session")
     private fun draw(note: PagedPreviewNotebook, offset: Double = 0.0) {
@@ -67,30 +63,30 @@ class PagedSaveLedgerTest {
         assertEquals(2, latest.root.pageCount); assertEquals(2, note.totalStrokeCount)
         assertTrue(ledger.complete(flight, true)); accept(ledger, latest); assertSame(latest, assertNotNull(ledger.nextWrite()).snapshot)
     }
-    @Test fun legacyAndPagedInputsUseTheSameSingleFlightLedgerAndKeepIndependentResponsibilities() {
-        val ledger = PreviewSaveLedger(); val legacy = LegacyPreviewSaveSnapshot(PreviewNotebook("legacy", "old").capture())
+    @Test fun migratedAndNewRootsUseTheSameSingleFlightLedgerAndKeepIndependentResponsibilities() {
+        val ledger = PreviewSaveLedger(); val legacy = PagedPreviewSnapshot.fromRoot(PagedPreviewCodec.decode("NCPREVIEW\t1\nD\tlegacy\told\t1\t0\t0\nEND\n"))
         val note = note(); draw(note); val paged = note.capture()
         accept(ledger, legacy); accept(ledger, paged)
         val a = assertNotNull(ledger.nextWrite()); val b = assertNotNull(ledger.nextWrite()); assertNull(ledger.nextWrite())
-        assertTrue(a.snapshot.encode().startsWith("NCPREVIEW\t1")); assertTrue(b.snapshot.encode().startsWith("NCPREVIEW\t2"))
+        assertTrue(a.snapshot.encode().startsWith("NCPREVIEW\t2")); assertTrue(b.snapshot.encode().startsWith("NCPREVIEW\t2"))
         assertTrue(ledger.complete(a, true)); assertTrue(ledger.returnUnstarted(b)); assertSame(paged, ledger.latest(note.documentId))
         assertFalse(ledger.complete(b, true)); assertNotNull(ledger.nextWrite())
     }
-    @Test fun legacyRecoveryComparesContentRatherThanPrivateCoordinatorRevisionOrWrapperIdentity() {
-        val original = PreviewNotebook("legacy", "old")
+    @Test fun migratedRootRecoveryComparesCanonicalContentRatherThanSessionOrWrapperIdentity() {
+        val original = PagedPreviewNotebook(PagedPreviewCodec.decode("NCPREVIEW\t1\nD\tlegacy\told\t1\t0\t0\nEND\n"), "migrated-owner")
         assertTrue(original.beginStroke(1.0, 2.0, 0.3f, 1)); assertTrue(original.endStroke(3.0, 4.0, 0.7f, 2))
         original.rename("renamed")
-        val old = LegacyPreviewSaveSnapshot(original.capture()); val ledger = PreviewSaveLedger(); accept(ledger, old)
+        val old = original.capture(); val ledger = PreviewSaveLedger(); accept(ledger, old)
         assertTrue(ledger.complete(assertNotNull(ledger.nextWrite()), false))
-        val reopened = LegacyPreviewSaveSnapshot(PreviewNotebook.restore(old.encode()).capture())
+        val reopened = PagedPreviewSnapshot.fromRoot(PagedPreviewCodec.decode(old.encode()))
         assertNotSame(old, reopened); assertTrue(old.sameContent(reopened)); accept(ledger, reopened)
         assertSame(old, assertNotNull(ledger.nextWrite()).snapshot)
     }
-    @Test fun legacySameVersionDifferentInkIsNotAcknowledgedAsTheOldSavedContent() {
-        fun snapshot(offset: Double): LegacyPreviewSaveSnapshot {
-            val note = PreviewNotebook("legacy", "title")
+    @Test fun pagedSameVersionDifferentInkIsNotAcknowledgedAsTheOldSavedContent() {
+        fun snapshot(offset: Double): PagedPreviewSnapshot {
+            val note = PagedPreviewNotebook.create("legacy", "title", "fork-session")
             assertTrue(note.beginStroke(1.0 + offset, 2.0, 0.3f, 1)); assertTrue(note.endStroke(3.0 + offset, 4.0, 0.7f, 2))
-            return LegacyPreviewSaveSnapshot(note.capture())
+            return note.capture()
         }
         val original = snapshot(0.0); val fork = snapshot(10.0); val ledger = PreviewSaveLedger(); accept(ledger, original)
         val flight = assertNotNull(ledger.nextWrite())
