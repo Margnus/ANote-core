@@ -27,6 +27,7 @@ kotlin {
         commonTest.dependencies { implementation(kotlin("test")) }
         jvmTest {
             resources.srcDir("../fixtures/input")
+            resources.srcDir("../fixtures/geometry")
             dependencies { implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0") }
         }
     }

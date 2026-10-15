@@ -8,6 +8,8 @@
 
 ## 当前可运行内容
 
+- [三笔刷共同覆盖PoC](docs/共同笔刷几何PoC.md)：版本化候选规则、解析oracle、仿射painted bounds和手工黄金格点；未作为原生渲染后端接入。
+
 - [密集页空间索引PoC](docs/空间索引PoC.md)：S2百万点与退化分布上的网格/STR树正确性和桌面成本测量；未接入App，生产结构尚未选定。
 
 - 平台无关double坐标和矩阵、不可变真实采样、captured scene/layer/tool。
