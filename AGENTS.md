@@ -1,5 +1,7 @@
 # NoteCore development
 
+- Follow docs/AI开发实施规范.md: plan globally, deliver verifiable milestones, and execute implementation/testing/fixes/review through completion within the authorized scope. Define acceptance before coding; close PoCs with an adoption/discard/integration decision. Test counts and unintegrated experiments are not product acceptance. This rule does not authorize spawning sub-agents.
+
 - Start with docs/当前开发状态.md and git status/fetch. Read only the relevant design/plan sections; README.md, docs/开发执行计划.md and docs/进度.md retain historical context. Update the current-state entry after each verified milestone, including evidence scope, remaining gates and the next concrete step.
 - The user now requests an initial packaged runnable preview. Build a narrow D4 offline handwriting vertical slice alongside C0/C1 validation. Keep prototypes and preview APIs explicitly unfrozen; packaging is not production architecture approval.
 - Preserve jnotesv2cn, jnotesv2 and drawpanellibv2; this is an independent new project.
