@@ -7,7 +7,7 @@ TEXT_SUFFIXES = {'.kt', '.kts', '.py', '.json', '.md', '.sh', '.properties', '.x
 
 def verification_bytes(path: Path) -> bytes:
     data = path.read_bytes()
-    return data.replace(b'\r\n', b'\n') if path.suffix in TEXT_SUFFIXES else data
+    return data.replace(b'\r\n', b'\n') if path.suffix.lower() in TEXT_SUFFIXES else data
 
 
 def verification_digest(path: Path) -> str:

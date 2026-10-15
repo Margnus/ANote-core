@@ -14,7 +14,8 @@ def load(relative):
 def main():
     trace = load('fixtures/input/manifest.json')
     payload = verification_bytes(ROOT/'fixtures/input'/trace['file'])
-    assert len(payload) == trace['bytes'] and hashlib.sha256(payload).hexdigest() == trace['sha256']
+    assert len(payload) == trace['bytes'], 'fixture byte length mismatch'
+    assert hashlib.sha256(payload).hexdigest() == trace['sha256'], 'fixture digest mismatch'
     scale = load('fixtures/scale/manifest.json')
     assert scale['origin'] == 'synthetic' and scale['device_performance_measured'] is False
     assert scale['encoding']['point_record_bytes'] == 28

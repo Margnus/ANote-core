@@ -17,7 +17,7 @@ def main():
         root = Path(temporary)
         lf = '中文😀\nsecond line\n'.encode('utf-8')
         crlf = lf.replace(b'\n', b'\r\n')
-        for suffix in TEXT_SUFFIXES:
+        for suffix in TEXT_SUFFIXES | {suffix.upper() for suffix in TEXT_SUFFIXES}:
             first, second = root/('lf'+suffix), root/('crlf'+suffix)
             first.write_bytes(lf); second.write_bytes(crlf)
             assert verification_digest(first) == verification_digest(second) == hashlib.sha256(lf).hexdigest()

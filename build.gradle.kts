@@ -29,10 +29,15 @@ tasks.register("verifyPrototype") {
         val testXml = fileTree("canvas-core/build/test-results/jvmTest") { include("TEST-*.xml") }.files +
             fileTree("shared-core/build/test-results/jvmTest") { include("TEST-*.xml") }.files
         check(testXml.isNotEmpty()) { "Expected real JVM test XML before stamping verification" }
+        // Text inputs are digested with CRLF normalized to LF so the stamp is
+        // reproducible on a Windows checkout; binary fixtures stay byte-exact.
+        val textExtensions = setOf("kt", "kts", "py", "json", "md", "sh", "properties", "xml")
         val records = (inputs + testXml).sortedBy { it.relativeTo(rootDir).invariantSeparatorsPath }.map { input ->
-            val bytes = if (input.extension in setOf("kt", "kts", "py", "json", "md", "sh", "properties", "xml"))
-                input.readText(Charsets.UTF_8).replace("\r\n", "\n").toByteArray(Charsets.UTF_8) else input.readBytes()
-            val sha = MessageDigest.getInstance("SHA-256").digest(bytes)
+            val bytes = input.readBytes()
+            val normalized = if (input.extension.lowercase() in textExtensions) {
+                String(bytes, Charsets.UTF_8).replace("\r\n", "\n").toByteArray(Charsets.UTF_8)
+            } else bytes
+            val sha = MessageDigest.getInstance("SHA-256").digest(normalized)
                 .joinToString("") { "%02x".format(it) }
             "$sha  ${input.relativeTo(rootDir).invariantSeparatorsPath}"
         }

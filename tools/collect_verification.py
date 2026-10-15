@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Collect real Gradle XML results; never invent native/device/durability verification."""
 import json
-import hashlib
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
