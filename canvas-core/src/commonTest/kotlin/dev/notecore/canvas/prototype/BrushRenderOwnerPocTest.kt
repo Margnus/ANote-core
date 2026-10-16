@@ -14,6 +14,39 @@ class BrushRenderOwnerPocTest {
         return owner.acknowledge(job)
     }
 
+    @Test fun multiTileFrameMatchesIndependentSmallGridsAndNeverPublishesAnIncompleteTileSet() {
+        val page = BrushFullFrameFixture
+        val o = BrushRenderOwnerPoc(f.frame, f.layer, 1048576, 2097152)
+        val j = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(page.scene(), f.frame, f.layer,
+            page.grid, 1048576, page.nativeBytes)).job
+        assertEquals(BrushRenderAckPoc.PUBLISHED, complete(o, j))
+        val reader = assertNotNull(o.borrowNative(j)); assertEquals(130, reader.grid.width); assertEquals(130, reader.grid.height)
+        page.assertSeam(reader)
+        val catalog = assertIs<ChunkedBrushBuild.Ready>(ChunkedBrushPoc.build(f.frame, page.red, segmentsPerChunk = 1)).catalog
+        // Independent 64px reference partitions deliberately differ from the worker's 128px tiles.
+        for (y in 0 until 130 step 64) for (x in 0 until 130 step 64) {
+            val grid = BrushTileGridPoc(PointD(x.toDouble(), y.toDouble()), minOf(64,130-x), minOf(64,130-y), 1.0, 4)
+            val mask = assertIs<BrushTileBuild.Ready>(catalog.render(f.frame, grid)).tile
+            for (dy in 0 until grid.height) for (dx in 0 until grid.width) {
+                val alpha = mask.alphaByte(dx,dy); val under = (alpha*(255-alpha)+127)/255
+                val offset = ((y+dy)*130+x+dx)*4
+                assertEquals(under,reader.byteAt(offset)); assertEquals(0,reader.byteAt(offset+1))
+                assertEquals(alpha,reader.byteAt(offset+2)); assertEquals(alpha+under,reader.byteAt(offset+3))
+            }
+        }
+        o.close(); assertEquals(202800,o.chargedBytes); assertFalse(o.isDrained)
+        assertTrue(o.completeNativeRelease(reader, ResourceReleaseOutcome.RELEASED)); assertTrue(o.isDrained)
+        val limited = BrushRenderOwnerPoc(f.frame,f.layer,1048576,2097152)
+        val first = assertIs<BrushTileBuild.Ready>(catalog.render(f.frame,BrushTileGridPoc(PointD(0.0,0.0),128,128,1.0,4))).edgeTests
+        val failure = assertIs<BrushRenderAdmissionPoc.Accepted>(limited.admitPage(page.scene(),f.frame,f.layer,
+            page.grid,1048576,maxEdgeTests=first+128*128*4L+1)).job
+        val result=failure.execute(); assertNull(result.pixels); assertEquals("page-work-budget",result.failure)
+        limited.receive(failure,WorkResult.Succeeded(result)); assertEquals(BrushRenderAckPoc.FAILED,limited.acknowledge(failure))
+        assertNull(limited.borrow(failure)); limited.close(); assertTrue(limited.isDrained)
+        assertFailsWith<IllegalArgumentException> { BrushTileGridPoc(PointD(0.0,0.0),129,1) }
+        assertFailsWith<IllegalArgumentException> { BrushFrameGridPoc(PointD(0.0,0.0),4096,4096) }
+    }
+
     @Test fun completePageComposesCanonicalOrderAndKeepsNativeReaderAfterClose() {
         val page = BrushPageImageFixture
         for (reverse in listOf(false, true)) {
@@ -218,5 +251,22 @@ internal object BrushPageImageFixture {
         assertEquals(0, reader.byteAt(offset + 1))
         assertEquals(if (reversed) 64 else 128, reader.byteAt(offset + 2))
         assertEquals(192, reader.byteAt(offset + 3))
+    }
+}
+
+
+internal object BrushFullFrameFixture {
+    val grid = BrushFrameGridPoc(PointD(0.0,0.0),130,130,1.0,4)
+    const val nativeBytes = 135200L
+    val red = BrushPageImageFixture.red.copy(samples=StrokeSamples.copyOf(doubleArrayOf(0.0,200.0),
+        doubleArrayOf(128.0,128.0),floatArrayOf(1f,1f),longArrayOf(0,1)))
+    private val blue = red.copy(id=ObjectId("full-blue"),brush=BrushPageImageFixture.blue.brush)
+    fun scene() = SceneSnapshot.restored(BrushPageImageFixture.frame.sceneId,BrushPageImageFixture.frame.sceneRevision,listOf(red,blue))
+    fun assertSeam(reader: BrushRenderReaderPoc) {
+        for (y in 127..129) for (x in 127..129) {
+            val offset=(y*130+x)*4
+            assertEquals(64,reader.byteAt(offset)); assertEquals(0,reader.byteAt(offset+1))
+            assertEquals(128,reader.byteAt(offset+2)); assertEquals(192,reader.byteAt(offset+3))
+        }
     }
 }

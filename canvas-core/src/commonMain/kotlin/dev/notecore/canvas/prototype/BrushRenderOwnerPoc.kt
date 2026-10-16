@@ -19,7 +19,7 @@ internal class BrushRenderComputationPoc private constructor(
  */
 internal class BrushRenderJobPoc internal constructor(
     val id: BrushRenderIdPoc, catalog: ChunkedBrushPoc?, val frame: FrameToken,
-    val layer: LayerId, val grid: BrushTileGridPoc, val rgb: Int, val workingBytes: Long,
+    val layer: LayerId, val grid: BrushPixelGridPoc, val rgb: Int, val workingBytes: Long,
     val nativeCopyAllowanceBytes: Long, val peakBytes: Long, val maxEdgeTests: Long,
     scene: SceneSnapshot? = null,
 ) {
@@ -32,7 +32,7 @@ internal class BrushRenderJobPoc internal constructor(
         }
         val catalog = checkNotNull(input) { "Job has already executed or was not dispatched" }
         try {
-            val mask = when (val built = catalog.render(frame, grid, maxWorkingBytes = workingBytes,
+            val mask = when (val built = catalog.render(frame, grid as BrushTileGridPoc, maxWorkingBytes = workingBytes,
                 maxEdgeTests = maxEdgeTests, cancelled = cancelled)) {
                 is BrushTileBuild.Ready -> built.tile
                 is BrushTileBuild.Rejected -> return BrushRenderComputationPoc.completed(id, null, built.reason)
@@ -61,22 +61,27 @@ internal class BrushRenderJobPoc internal constructor(
             // Headers/index objects/GC remain outside logical accounting; this is not a heap cap.
             val catalogBytes = chunks * 72L
             val renderBytes = workingBytes - catalogBytes
-            val compositeSteps = grid.width * grid.height * 4L
             if (renderBytes <= 0) { failed = "page-working-budget"; return@forEachObject }
-            if (remaining <= compositeSteps) { failed = "page-work-budget"; return@forEachObject }
             val catalog = when (val built = ChunkedBrushPoc.build(frame, stroke, cancelled = cancelled)) {
                 is ChunkedBrushBuild.Ready -> built.catalog
                 is ChunkedBrushBuild.Rejected -> { failed = built.reason; return@forEachObject }
                 ChunkedBrushBuild.Cancelled -> { failed = "cancelled"; return@forEachObject }
             }
-            when (val built = catalog.render(frame, grid, maxWorkingBytes = renderBytes,
-                maxEdgeTests = remaining - compositeSteps, cancelled = cancelled)) {
-                is BrushTileBuild.Ready -> {
-                    remaining -= built.edgeTests + compositeSteps
-                    if (!output.over(built.tile, stroke.brush.argb and 0xffffff, cancelled)) failed = "cancelled"
+            for (y in 0 until grid.height step 128) for (x in 0 until grid.width step 128) {
+                if (failed != null) return@forEachObject
+                val tile = BrushTileGridPoc(PointD(grid.origin.x + x * grid.pixelSize, grid.origin.y + y * grid.pixelSize),
+                    minOf(128, grid.width - x), minOf(128, grid.height - y), grid.pixelSize, grid.samplesPerAxis)
+                val compositeSteps = tile.width * tile.height * 4L
+                if (remaining <= compositeSteps) { failed = "page-work-budget"; return@forEachObject }
+                when (val built = catalog.render(frame, tile, maxWorkingBytes = renderBytes,
+                    maxEdgeTests = remaining - compositeSteps, cancelled = cancelled)) {
+                    is BrushTileBuild.Ready -> {
+                        remaining -= built.edgeTests + compositeSteps
+                        if (!output.over(built.tile, stroke.brush.argb and 0xffffff, cancelled, x, y)) failed = "cancelled"
+                    }
+                    is BrushTileBuild.Rejected -> failed = built.reason
+                    BrushTileBuild.Cancelled -> failed = "cancelled"
                 }
-                is BrushTileBuild.Rejected -> failed = built.reason
-                BrushTileBuild.Cancelled -> failed = "cancelled"
             }
         }
         if (failed != null) return failure(failed!!)
@@ -89,7 +94,7 @@ internal enum class BrushRenderAckPoc { PUBLISHED, DISCARDED, FAILED, QUARANTINE
 internal class BrushRenderReaderPoc internal constructor(private val lease: ResourceLease<BrushTilePixelsPoc>, val nativeCopyAllowanceBytes: Long) {
     val frame: FrameToken get() = lease.value.frame
     val layer: LayerId get() = lease.value.ownerLayer
-    val grid: BrushTileGridPoc get() = lease.value.grid
+    val grid: BrushPixelGridPoc get() = lease.value.grid
     fun byteAt(offset: Int) = lease.value.byteAt(offset)
     internal fun token() = lease
 }
@@ -126,7 +131,7 @@ internal class BrushRenderOwnerPoc(
      * Full scene sample retention is charged because the job holds the scene, including other layers.
      * Catalogs are built one at a time on the existing worker within the declared working budget.
      */
-    fun admitPage(scene: SceneSnapshot, frame: FrameToken, expectedLayer: LayerId, grid: BrushTileGridPoc,
+    fun admitPage(scene: SceneSnapshot, frame: FrameToken, expectedLayer: LayerId, grid: BrushPixelGridPoc,
         workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
         maxEdgeTests: Long = 20_000_000,
     ): BrushRenderAdmissionPoc {

@@ -17,10 +17,10 @@ final class AppleBrushRenderExperiment {
     let owner: AppleBrushOwnerExperiment
     private var dispatched: [ObjectIdentifier: AppleBrushDispatchExperiment] = [:]
     private var acknowledged: [AppleBrushDispatchExperiment] = [] // bounded ACK handles, no payloads
-    init(frame: FrameToken, layer: LayerId, totalBytes: Int64 = 262144, maxJobs: Int = 4) throws {
+    init(frame: FrameToken, layer: LayerId, totalBytes: Int64 = 262144, maxJobs: Int = 4, residentBytes: Int64 = 32768) throws {
         executor = try AppleBoundedOwnerExecutor(maxEntries: maxJobs, maxBytes: totalBytes, automaticPump: false)
         let executor = self.executor
-        owner = AppleBrushOwnerExperiment(frame: frame, layer: layer, residentBudget: 32768,
+        owner = AppleBrushOwnerExperiment(frame: frame, layer: layer, residentBudget: residentBytes,
             totalBudget: totalBytes, maxJobs: Int32(maxJobs), checkOwner: { try! executor.checkOwner() })
     }
     var chargedBytes: Int64 { owner.chargedBytes }
@@ -39,12 +39,13 @@ final class AppleBrushRenderExperiment {
     @discardableResult func submitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId,
         originX: Double = 0.25, originY: Double = 8, width: Int32 = 64, height: Int32 = 32,
         pixelSize: Double = 0.5, nativeAllowance: Int64 = 16384,
+        workingBytes: Int64 = 65536,
         beforeCompute: @escaping () throws -> Void = {},
         permitDelivery: @escaping () throws -> Bool = { true }
     ) throws -> AppleBrushDispatchExperiment? {
         try executor.checkOwner()
         guard let job = owner.admitPage(scene: scene, frame: frame, layer: layer, originX: originX, originY: originY,
-            width: width, height: height, pixelSize: pixelSize, workingBytes: 65536, nativeAllowance: nativeAllowance) else { return nil }
+            width: width, height: height, pixelSize: pixelSize, workingBytes: workingBytes, nativeAllowance: nativeAllowance) else { return nil }
         return try dispatch(job, beforeCompute: beforeCompute, permitDelivery: permitDelivery)
     }
     private func dispatch(_ job: AppleBrushJobExperiment, beforeCompute: @escaping () throws -> Void,

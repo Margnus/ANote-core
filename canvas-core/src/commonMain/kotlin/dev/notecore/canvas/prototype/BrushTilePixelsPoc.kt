@@ -22,7 +22,7 @@ internal sealed interface BrushTilePixelBuild {
  * Pixel conversion is separately admitted; native copies/row padding require additional budget.
  */
 internal class BrushTilePixelsPoc private constructor(
-    val frame: FrameToken, val ownerLayer: LayerId, val grid: BrushTileGridPoc,
+    val frame: FrameToken, val ownerLayer: LayerId, val grid: BrushPixelGridPoc,
     val rgb: Int, private val rgba: ByteArray,
 ) {
     val logicalBytes: Long get() = rgba.size.toLong()
@@ -31,15 +31,18 @@ internal class BrushTilePixelsPoc private constructor(
     companion object {
         /** Worker-local complete-region composition. No partial buffer can escape on failure. */
         internal class Composition(private val frame: FrameToken, private val layer: LayerId,
-            private val grid: BrushTileGridPoc,
+            private val grid: BrushPixelGridPoc,
         ) {
             private val rgba = ByteArray(grid.width * grid.height * 4)
             private var finished = false
-            fun over(mask: BrushTileMaskPoc, rgb: Int, cancelled: () -> Boolean): Boolean {
+            fun over(mask: BrushTileMaskPoc, rgb: Int, cancelled: () -> Boolean, destX: Int = 0, destY: Int = 0): Boolean {
                 check(!finished)
-                check(mask.frame == frame && mask.ownerLayer == layer && mask.grid == grid)
-                for (y in 0 until grid.height) for (x in 0 until grid.width) {
-                    val offset = (y * grid.width + x) * 4
+                check(mask.frame == frame && mask.ownerLayer == layer)
+                check(destX >= 0 && destY >= 0 && destX + mask.grid.width <= grid.width && destY + mask.grid.height <= grid.height)
+                check(mask.grid.origin == PointD(grid.origin.x + destX * grid.pixelSize, grid.origin.y + destY * grid.pixelSize) &&
+                    mask.grid.pixelSize == grid.pixelSize && mask.grid.samplesPerAxis == grid.samplesPerAxis)
+                for (y in 0 until mask.grid.height) for (x in 0 until mask.grid.width) {
+                    val offset = ((y + destY) * grid.width + x + destX) * 4
                     if (offset % 1024 == 0 && cancelled()) return false
                     val alpha = mask.alphaByte(x, y)
                     val inverse = 255 - alpha

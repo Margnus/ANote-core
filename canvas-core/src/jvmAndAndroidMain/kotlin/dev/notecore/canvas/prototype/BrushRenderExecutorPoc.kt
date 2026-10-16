@@ -34,7 +34,7 @@ internal class BrushRenderExecutorPoc(
         val admission = owner.admit(catalog, frame, layer, grid, rgb, workingBytes, nativeCopyAllowanceBytes)
         return dispatch(admission)
     }
-    fun submitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId, grid: BrushTileGridPoc,
+    fun submitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId, grid: BrushPixelGridPoc,
         workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
         maxEdgeTests: Long = 20_000_000,
     ): BrushRenderAdmissionPoc {

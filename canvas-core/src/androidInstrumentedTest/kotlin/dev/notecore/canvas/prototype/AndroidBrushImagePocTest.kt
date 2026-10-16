@@ -10,6 +10,26 @@ import kotlin.test.*
 
 /** Actual Bitmap allocations and draws; injected boundary failures are not OS failure frequency. */
 class AndroidBrushImagePocTest {
+    @Test fun multiTileCompleteFrameCopiesAllRowsIntoOneNativeImage() {
+        val f = BrushPageImageFixture; val page = BrushFullFrameFixture
+        val e = BrushRenderExecutorPoc(f.frame,f.layer,1048576,2097152)
+        val j = assertIs<BrushRenderAdmissionPoc.Accepted>(e.submitPage(page.scene(),f.frame,f.layer,page.grid,1048576,page.nativeBytes)).job
+        val until=System.nanoTime()+5_000_000_000L
+        while(e.executorStatus().entries.single().stage!=OwnedWorkStage.READY) { check(System.nanoTime()<until);Thread.sleep(1) }
+        assertEquals(BrushRenderAckPoc.PUBLISHED,e.drain().single().second)
+        val image=assertIs<AndroidBrushImageBuildPoc.Ready>(AndroidBrushImagePoc.create(e,j)).image
+        val target=Bitmap.createBitmap(130,130,Bitmap.Config.ARGB_8888)
+        try {
+            assertEquals(67600,image.allocationBytes); assertTrue(image.draw(Canvas(target),RectF(0f,0f,130f,130f),false))
+            for(y in 127..129) for(x in 127..129) {
+                val color=target.getPixel(x,y); assertEquals(192,Color.alpha(color));assertEquals(0,Color.green(color))
+                assertTrue(kotlin.math.abs((Color.red(color)*192+127)/255-64)<=1)
+                assertTrue(kotlin.math.abs((Color.blue(color)*192+127)/255-128)<=1)
+            }
+            stop(e); assertEquals(202800,e.chargedBytes);assertFalse(e.isDrained)
+            assertTrue(image.close());assertEquals(0,e.chargedBytes);assertTrue(e.isDrained)
+        } finally {image.close();target.recycle();stop(e)}
+    }
     @Test fun canonicalPageCompositeDrawsOnActualBitmapAndClosesWithHeldReader() {
         val page = BrushPageImageFixture
         val e = executor()

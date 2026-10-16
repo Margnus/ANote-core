@@ -37,6 +37,34 @@ final class BrushRenderHostTests: XCTestCase {
         try XCTUnwrap(CGContext(data: nil, width: 64, height: 32, bitsPerComponent: 8, bytesPerRow: 256,
             space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
     }
+    @MainActor func testMultiTileFrameCopiesEntireNativeImageAndClosesAfterHeldReader() async throws {
+        let text = "NCPREVIEW\t2\nD\timage-page\tFrame\t1\t2\t1\nG\tfirst\tink\t400\t400\tBLANK\t1\n" +
+            "S\tframe-red\tink\t1\tMONOLINE\t1\t-2130771968\t10\t2\t1\t0\t0\t1\t0\t0\nP\t0\t128\t1\t0\nP\t200\t128\t1\t1\n" +
+            "S\tframe-blue\tink\t1\tMONOLINE\t1\t-2147483393\t10\t2\t1\t0\t0\t1\t0\t0\nP\t0\t128\t1\t0\nP\t200\t128\t1\t1\nEND\n"
+        let root = try PagedPreviewCodec.shared.decode(text: text)
+        let layer = try XCTUnwrap(root.scene.objects().first).layerId
+        let frame = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision, viewportVersion: 1,
+            sessionGeneration: 1, surfaceGeneration: 1, requestSequence: 1)
+        let a = try AppleBrushRenderExperiment(frame: frame, layer: layer, totalBytes: 2097152, residentBytes: 1048576)
+        let item = try XCTUnwrap(a.submitPage(scene: root.scene, frame: frame, layer: layer,
+            originX: 0, originY: 0, width: 130, height: 130, pixelSize: 1,
+            nativeAllowance: 135200, workingBytes: 1048576))
+        try await ready(a); XCTAssertEqual(a.chargedBytes, item.job.peakBytes)
+        XCTAssertEqual(try a.drain(), ["PUBLISHED"])
+        guard case .ready(let image) = try AppleBrushImageExperiment.create(a, item) else { return XCTFail("Frame image missing") }
+        let target = try XCTUnwrap(CGContext(data: nil, width: 130, height: 130, bitsPerComponent: 8, bytesPerRow: 520,
+            space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+        XCTAssertEqual(image.rowStorageUpperBytes, 135200)
+        XCTAssertTrue(try image.draw(target, in: CGRect(x: 0, y: 0, width: 130, height: 130)))
+        let bytes = try XCTUnwrap(target.data).assumingMemoryBound(to: UInt8.self)
+        for y in 127...129 { for x in 127...129 {
+            let p = (y * 130 + x) * 4
+            XCTAssertEqual(Int(bytes[p]), 64); XCTAssertEqual(Int(bytes[p+1]), 0)
+            XCTAssertEqual(Int(bytes[p+2]), 128); XCTAssertEqual(Int(bytes[p+3]), 192)
+        } }
+        try await stop(a); XCTAssertFalse(a.isDrained); XCTAssertEqual(a.chargedBytes, 202800)
+        XCTAssertTrue(try image.close()); XCTAssertTrue(a.isDrained); XCTAssertEqual(a.chargedBytes, 0)
+    }
     @MainActor func testCompleteCanonicalPageCompositesBeforeAckAndDrainsHeldImage() async throws {
         let text = "NCPREVIEW\t2\nD\timage-page\tPage\t1\t2\t1\nG\tfirst\tink\t400\t400\tBLANK\t1\n" +
             "S\tpage-red\tink\t1\tMONOLINE\t1\t-2130771968\t10\t1\t1\t0\t0\t1\t0\t0\nP\t8\t12\t1\t0\n" +

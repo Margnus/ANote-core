@@ -2,13 +2,36 @@ package dev.notecore.canvas.prototype
 
 import kotlin.math.*
 
-internal data class BrushTileGridPoc(val origin: PointD, val width: Int, val height: Int, val pixelSize: Double = 1.0, val samplesPerAxis: Int = 2) {
+internal sealed interface BrushPixelGridPoc {
+    val origin: PointD
+    val width: Int
+    val height: Int
+    val pixelSize: Double
+    val samplesPerAxis: Int
+    val bounds: BoundsD get() = BoundsD(origin.x, origin.y, origin.x + width * pixelSize, origin.y + height * pixelSize)
+}
+
+/** Complete output geometry. Raster work still uses the bounded tile type below. */
+internal data class BrushFrameGridPoc(override val origin: PointD, override val width: Int, override val height: Int,
+    override val pixelSize: Double = 1.0, override val samplesPerAxis: Int = 2,
+) : BrushPixelGridPoc {
+    init {
+        require(width in 1..4096 && height in 1..4096 && width.toLong() * height <= 8388608)
+        require(pixelSize.isFinite() && pixelSize in 0.0001..1e6 && samplesPerAxis in listOf(1, 2, 4))
+        require(abs(origin.x) <= 1e9 && abs(origin.y) <= 1e9)
+        require(abs(origin.x + ((width - 1) / 128) * 128 * pixelSize) <= 1e9)
+        require(abs(origin.y + ((height - 1) / 128) * 128 * pixelSize) <= 1e9)
+    }
+}
+
+internal data class BrushTileGridPoc(override val origin: PointD, override val width: Int, override val height: Int,
+    override val pixelSize: Double = 1.0, override val samplesPerAxis: Int = 2,
+) : BrushPixelGridPoc {
     init {
         require(width in 1..128 && height in 1..128 && width * height <= 16384)
         require(pixelSize.isFinite() && pixelSize in 0.0001..1e6 && samplesPerAxis in listOf(1, 2, 4))
         require(abs(origin.x) <= 1e9 && abs(origin.y) <= 1e9)
     }
-    val bounds: BoundsD get() = BoundsD(origin.x, origin.y, origin.x + width * pixelSize, origin.y + height * pixelSize)
 }
 
 internal sealed interface ChunkedBrushBuild {
