@@ -29,6 +29,35 @@ internal class BrushTilePixelsPoc private constructor(
     fun byteAt(offset: Int): Int = rgba[offset].toInt() and 255
 
     companion object {
+        /** Worker-local complete-region composition. No partial buffer can escape on failure. */
+        internal class Composition(private val frame: FrameToken, private val layer: LayerId,
+            private val grid: BrushTileGridPoc,
+        ) {
+            private val rgba = ByteArray(grid.width * grid.height * 4)
+            private var finished = false
+            fun over(mask: BrushTileMaskPoc, rgb: Int, cancelled: () -> Boolean): Boolean {
+                check(!finished)
+                check(mask.frame == frame && mask.ownerLayer == layer && mask.grid == grid)
+                for (y in 0 until grid.height) for (x in 0 until grid.width) {
+                    val offset = (y * grid.width + x) * 4
+                    if (offset % 1024 == 0 && cancelled()) return false
+                    val alpha = mask.alphaByte(x, y)
+                    val inverse = 255 - alpha
+                    for (channel in 0..3) {
+                        val source = if (channel == 3) alpha else
+                            (((rgb ushr (16 - channel * 8)) and 255) * alpha + 127) / 255
+                        val dest = rgba[offset + channel].toInt() and 255
+                        rgba[offset + channel] = (source + (dest * inverse + 127) / 255).coerceAtMost(255).toByte()
+                    }
+                }
+                return !cancelled()
+            }
+            fun finish(): BrushTilePixelsPoc {
+                check(!finished); finished = true
+                return BrushTilePixelsPoc(frame, layer, grid, 0, rgba)
+            }
+        }
+
         fun build(reader: BrushTileReaderPoc, rgb: Int, maxBytes: Long = 64 * 1024,
             cancelled: () -> Boolean = { false },
         ): BrushTilePixelBuild = convert(reader.frame, reader.ownerLayer, reader.grid, rgb, maxBytes, cancelled, reader::alphaByte)

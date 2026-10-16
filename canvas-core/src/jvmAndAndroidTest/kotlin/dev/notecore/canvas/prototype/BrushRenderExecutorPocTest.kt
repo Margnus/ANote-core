@@ -7,6 +7,23 @@ import kotlin.test.*
 
 /** Exactly the same real executor/renderer integration tests on JVM and Android ART. */
 class BrushRenderExecutorPocTest {
+    @Test fun completePageUsesExistingWorkerAndCloseWaitsForExactAcknowledgement() {
+        val page = BrushPageImageFixture
+        val delivery = AtomicBoolean(false)
+        var computes = 0
+        val e = BrushRenderExecutorPoc(page.frame, page.layer, 32768, 262144,
+            beforeCompute = { computes++ }, permitDelivery = { delivery.get() })
+        try {
+            val j = assertIs<BrushRenderAdmissionPoc.Accepted>(e.submitPage(page.scene(), page.frame, page.layer,
+                page.grid, 65536, 16384)).job
+            ready(e, 1); assertTrue(e.drain().isEmpty()); assertEquals(j.peakBytes, e.chargedBytes)
+            assertNull(e.borrow(j)); delivery.set(true); assertTrue(e.retryDelivery(j))
+            assertEquals(BrushRenderAckPoc.PUBLISHED, e.drain().single().second); assertEquals(1, computes)
+            val reader = assertNotNull(e.borrowNative(j)); page.assertCenter(reader)
+            e.close(); assertTrue(e.awaitWorkerStop(5000)); assertFalse(e.isDrained); assertEquals(24576, e.chargedBytes)
+            assertTrue(e.completeNativeRelease(reader, ResourceReleaseOutcome.RELEASED)); assertTrue(e.isDrained)
+        } finally { finish(e) }
+    }
     private val f = BrushTileImageFixture
     private fun submit(e: BrushRenderExecutorPoc, frame: FrameToken = f.frame, c: ChunkedBrushPoc = f.catalog()) =
         assertIs<BrushRenderAdmissionPoc.Accepted>(e.submit(c, frame, f.layer, f.grid, f.rgb, 65536, 8192)).job

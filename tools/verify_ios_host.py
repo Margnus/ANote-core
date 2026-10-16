@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testCompleteCanonicalPageCompositesBeforeAckAndDrainsHeldImage()',
     'testFixedScrollZoomQueueAndHeldReaderTrace()',
     'testForeignThreadCannotReleaseHolderAndThrowingReceiveRedelivers()',
     'testSwiftWorkerRendersActualPixelsAndCloseKeepsNativeBudget()',
@@ -119,7 +120,7 @@ def main():
         'native_offscreen_render_pixels_verified': True,
         'shared_brush_contour_offscreen_verified': True,
         'app_host_swift_executor_kotlin_native_render_verified': True,
-        'brush_render_host_test_count': 6,
+        'brush_render_host_test_count': 7,
         'brush_native_unique_reader_and_ack_budget_verified': True,
         'brush_scope': 'Unfrozen Apple iosMain shim + existing Swift worker executes common segmented renderer/mask/RGBA; CGImage held through close/UNKNOWN. Ordinary app does not consume this backend. ARC ownership release, not physical heap/GPU reclamation.',
         'brush_fixture_execution_scope': 'JVM-generated common contour output consumed by real iOS CoreGraphics; not Kotlin/Native runtime generation, AA edge equivalence or app integration',

@@ -6,6 +6,8 @@ class SceneSnapshot private constructor(val id: SceneId, val revision: Long, pri
     val objectCount: Int get() = entries.size
     fun find(id: ObjectId): StrokeObject? = entries[id]
     fun objects(): List<StrokeObject> = entries.values.toList()
+    /** Allocation-free inspection for bounded derived work admission; never exposes the map. */
+    internal fun forEachObject(visit: (StrokeObject) -> Unit) { entries.values.forEach(visit) }
     internal fun copyEntries(): MutableMap<ObjectId, StrokeObject> = entries.toMutableMap()
     companion object {
         fun empty(id: SceneId): SceneSnapshot = SceneSnapshot(id, 0, emptyMap(), Unit)

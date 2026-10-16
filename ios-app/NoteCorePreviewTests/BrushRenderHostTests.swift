@@ -37,6 +37,32 @@ final class BrushRenderHostTests: XCTestCase {
         try XCTUnwrap(CGContext(data: nil, width: 64, height: 32, bitsPerComponent: 8, bytesPerRow: 256,
             space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
     }
+    @MainActor func testCompleteCanonicalPageCompositesBeforeAckAndDrainsHeldImage() async throws {
+        let text = "NCPREVIEW\t2\nD\timage-page\tPage\t1\t2\t1\nG\tfirst\tink\t400\t400\tBLANK\t1\n" +
+            "S\tpage-red\tink\t1\tMONOLINE\t1\t-2130771968\t10\t1\t1\t0\t0\t1\t0\t0\nP\t8\t12\t1\t0\n" +
+            "S\tpage-blue\tink\t1\tMONOLINE\t1\t-2147483393\t10\t1\t1\t0\t0\t1\t0\t0\nP\t8\t12\t1\t0\nEND\n"
+        let root = try PagedPreviewCodec.shared.decode(text: text)
+        let layer = try XCTUnwrap(root.scene.objects().first).layerId
+        let frame = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision, viewportVersion: 1,
+            sessionGeneration: 1, surfaceGeneration: 1, requestSequence: 1)
+        let a = try AppleBrushRenderExperiment(frame: frame, layer: layer)
+        var deliveries = 0
+        let item = try XCTUnwrap(a.submitPage(scene: root.scene, frame: frame, layer: layer,
+            permitDelivery: { deliveries += 1; return deliveries > 1 }))
+        try await ready(a); XCTAssertEqual(try a.drain(), []); XCTAssertEqual(a.chargedBytes, item.job.peakBytes)
+        XCTAssertTrue(try a.retry(item)); XCTAssertEqual(try a.drain(), ["PUBLISHED"])
+        guard case .ready(let image) = try AppleBrushImageExperiment.create(a, item) else { return XCTFail("Page image missing") }
+        let target = try bitmap()
+        XCTAssertTrue(try image.draw(target, in: CGRect(x: 0, y: 0, width: 64, height: 32)))
+        let bytes = try XCTUnwrap(target.data).assumingMemoryBound(to: UInt8.self)
+        // Image payload row order is preserved in the controlled bitmap target.
+        let center = (8 * 64 + 15) * 4
+        XCTAssertEqual(Int(bytes[center]), 64); XCTAssertEqual(Int(bytes[center + 1]), 0)
+        XCTAssertEqual(Int(bytes[center + 2]), 128); XCTAssertEqual(Int(bytes[center + 3]), 192)
+        try await stop(a); XCTAssertFalse(a.isDrained); XCTAssertEqual(a.chargedBytes, 24576)
+        XCTAssertFalse(try image.draw(target, in: .zero)); XCTAssertTrue(try image.close())
+        XCTAssertTrue(a.isDrained); XCTAssertEqual(a.chargedBytes, 0)
+    }
     @MainActor func testSwiftWorkerRendersActualPixelsAndCloseKeepsNativeBudget() async throws {
         let (frame, stroke) = try fixture()
         let a = try AppleBrushRenderExperiment(frame: frame, layer: stroke.layerId, totalBytes: 100000)

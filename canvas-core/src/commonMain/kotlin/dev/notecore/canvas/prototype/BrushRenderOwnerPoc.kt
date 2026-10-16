@@ -18,13 +18,18 @@ internal class BrushRenderComputationPoc private constructor(
  * Job input is cleared on exit; no real samples or document commands are changed.
  */
 internal class BrushRenderJobPoc internal constructor(
-    val id: BrushRenderIdPoc, catalog: ChunkedBrushPoc, val frame: FrameToken,
+    val id: BrushRenderIdPoc, catalog: ChunkedBrushPoc?, val frame: FrameToken,
     val layer: LayerId, val grid: BrushTileGridPoc, val rgb: Int, val workingBytes: Long,
     val nativeCopyAllowanceBytes: Long, val peakBytes: Long, val maxEdgeTests: Long,
+    scene: SceneSnapshot? = null,
 ) {
     private var input: ChunkedBrushPoc? = catalog
-    internal fun clearUnsubmittedInput() { input = null }
+    private var pageInput: SceneSnapshot? = scene
+    internal fun clearUnsubmittedInput() { input = null; pageInput = null }
     fun execute(cancelled: () -> Boolean = { false }): BrushRenderComputationPoc {
+        pageInput?.let { scene ->
+            try { return executePage(scene, cancelled) } finally { clearUnsubmittedInput() }
+        }
         val catalog = checkNotNull(input) { "Job has already executed or was not dispatched" }
         try {
             val mask = when (val built = catalog.render(frame, grid, maxWorkingBytes = workingBytes,
@@ -39,6 +44,44 @@ internal class BrushRenderJobPoc internal constructor(
                 BrushTilePixelBuild.Cancelled -> BrushRenderComputationPoc.completed(id, null, "cancelled")
             }
         } finally { input = null }
+    }
+
+    private fun executePage(scene: SceneSnapshot, cancelled: () -> Boolean): BrushRenderComputationPoc {
+        fun failure(reason: String) = BrushRenderComputationPoc.completed(id, null, reason)
+        if (cancelled()) return failure("cancelled")
+        val output = BrushTilePixelsPoc.Companion.Composition(frame, layer, grid)
+        var remaining = maxEdgeTests
+        var failed: String? = null
+        // Iteration preserves the immutable scene's canonical draw order, including empty pages.
+        scene.forEachObject { stroke ->
+            if (failed != null || stroke.layerId != layer) return@forEachObject
+            if (cancelled()) { failed = "cancelled"; return@forEachObject }
+            val chunks = maxOf(1, (stroke.samples.size - 1 + 127) / 128)
+            // Bound catalog primitive payload and construction entries before building them.
+            // Headers/index objects/GC remain outside logical accounting; this is not a heap cap.
+            val catalogBytes = chunks * 72L
+            val renderBytes = workingBytes - catalogBytes
+            val compositeSteps = grid.width * grid.height * 4L
+            if (renderBytes <= 0) { failed = "page-working-budget"; return@forEachObject }
+            if (remaining <= compositeSteps) { failed = "page-work-budget"; return@forEachObject }
+            val catalog = when (val built = ChunkedBrushPoc.build(frame, stroke, cancelled = cancelled)) {
+                is ChunkedBrushBuild.Ready -> built.catalog
+                is ChunkedBrushBuild.Rejected -> { failed = built.reason; return@forEachObject }
+                ChunkedBrushBuild.Cancelled -> { failed = "cancelled"; return@forEachObject }
+            }
+            when (val built = catalog.render(frame, grid, maxWorkingBytes = renderBytes,
+                maxEdgeTests = remaining - compositeSteps, cancelled = cancelled)) {
+                is BrushTileBuild.Ready -> {
+                    remaining -= built.edgeTests + compositeSteps
+                    if (!output.over(built.tile, stroke.brush.argb and 0xffffff, cancelled)) failed = "cancelled"
+                }
+                is BrushTileBuild.Rejected -> failed = built.reason
+                BrushTileBuild.Cancelled -> failed = "cancelled"
+            }
+        }
+        if (failed != null) return failure(failed!!)
+        if (cancelled()) return failure("cancelled")
+        return BrushRenderComputationPoc.completed(id, output.finish(), null)
     }
 }
 
@@ -78,6 +121,46 @@ internal class BrushRenderOwnerPoc(
     val pendingJobs: Int get() { checkOwner(); return pending.size }
     val retiredBytes: Long get() { checkOwner(); return pool.retiredBytes }
     val isDrained: Boolean get() { checkOwner(); return closed && pending.isEmpty() && pool.isDrained }
+
+    /** A complete requested region from the canonical immutable scene, not a second page model.
+     * Full scene sample retention is charged because the job holds the scene, including other layers.
+     * Catalogs are built one at a time on the existing worker within the declared working budget.
+     */
+    fun admitPage(scene: SceneSnapshot, frame: FrameToken, expectedLayer: LayerId, grid: BrushTileGridPoc,
+        workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
+        maxEdgeTests: Long = 20_000_000,
+    ): BrushRenderAdmissionPoc {
+        checkOwner(); require(workingBytes > 0 && nativeCopyAllowanceBytes >= 0 && maxEdgeTests > 0)
+        if (closed) return BrushRenderAdmissionPoc.Rejected("closed")
+        if (!gate.canPublish(frame) || expectedLayer != layer || scene.id != frame.sceneId || scene.revision != frame.sceneRevision)
+            return BrushRenderAdmissionPoc.Rejected("content-owner-mismatch")
+        if (pending.size >= maxJobs) return BrushRenderAdmissionPoc.Rejected("job-capacity")
+        if (scene.objectCount > 4096) return BrushRenderAdmissionPoc.Rejected("page-object-budget")
+        var points = 0L; var selected = 0; var invalid = false
+        scene.forEachObject { stroke ->
+            points += stroke.samples.size
+            if (stroke.layerId == layer) {
+                selected++
+                if (stroke.brush.kind != BrushKind.MONOLINE || stroke.brush.algorithmVersion != 1) invalid = true
+            }
+        }
+        if (points > 200000 || selected > 256) return BrushRenderAdmissionPoc.Rejected("page-input-budget")
+        if (invalid) return BrushRenderAdmissionPoc.Rejected("unsupported-page-brush")
+        var peak = points * 28 + scene.objectCount * 8L
+        for (bytes in listOf(workingBytes, grid.width * grid.height * 4L, nativeCopyAllowanceBytes)) {
+            if (bytes > Long.MAX_VALUE - peak) return BrushRenderAdmissionPoc.Rejected("charge-overflow")
+            peak += bytes
+        }
+        releaseUnused()
+        val reservation = when (val reserved = pool.reservePeak(peak, grid.width * grid.height * 4L + nativeCopyAllowanceBytes)) {
+            is ReservationResult.Reserved -> reserved.reservation
+            is ReservationResult.Rejected -> return BrushRenderAdmissionPoc.Rejected("pool-${reserved.reason.name.lowercase()}")
+        }
+        val job = BrushRenderJobPoc(BrushRenderIdPoc(), null, frame, layer, grid, 0, workingBytes,
+            nativeCopyAllowanceBytes, peak, maxEdgeTests, scene)
+        pending[job.id] = Pending(job, reservation)
+        return BrushRenderAdmissionPoc.Accepted(job)
+    }
 
     fun admit(catalog: ChunkedBrushPoc, frame: FrameToken, expectedLayer: LayerId, grid: BrushTileGridPoc,
         rgb: Int, workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,

@@ -34,6 +34,22 @@ final class AppleBrushRenderExperiment {
         try executor.checkOwner()
         guard let job = owner.admit(stroke: stroke, frame: frame, originX: originX, originY: originY,
             width: width, height: height, pixelSize: pixelSize, workingBytes: 65536, nativeAllowance: nativeAllowance) else { return nil }
+        return try dispatch(job, beforeCompute: beforeCompute, permitDelivery: permitDelivery)
+    }
+    @discardableResult func submitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId,
+        originX: Double = 0.25, originY: Double = 8, width: Int32 = 64, height: Int32 = 32,
+        pixelSize: Double = 0.5, nativeAllowance: Int64 = 16384,
+        beforeCompute: @escaping () throws -> Void = {},
+        permitDelivery: @escaping () throws -> Bool = { true }
+    ) throws -> AppleBrushDispatchExperiment? {
+        try executor.checkOwner()
+        guard let job = owner.admitPage(scene: scene, frame: frame, layer: layer, originX: originX, originY: originY,
+            width: width, height: height, pixelSize: pixelSize, workingBytes: 65536, nativeAllowance: nativeAllowance) else { return nil }
+        return try dispatch(job, beforeCompute: beforeCompute, permitDelivery: permitDelivery)
+    }
+    private func dispatch(_ job: AppleBrushJobExperiment, beforeCompute: @escaping () throws -> Void,
+        permitDelivery: @escaping () throws -> Bool
+    ) throws -> AppleBrushDispatchExperiment? {
         let item = AppleBrushDispatchExperiment(job)
         let admission = try executor.submit(input: item, chargedBytes: job.peakBytes, compute: { input in
             precondition(!Thread.isMainThread && Thread.current.name == "NoteCore.bounded.worker")

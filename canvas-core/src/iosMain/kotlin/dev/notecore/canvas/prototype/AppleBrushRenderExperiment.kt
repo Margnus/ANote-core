@@ -45,6 +45,17 @@ class AppleBrushOwnerExperiment(
         return (admission as? BrushRenderAdmissionPoc.Accepted)?.let { AppleBrushJobExperiment(it.job) }
     }
     fun reject(job: AppleBrushJobExperiment): Boolean = owner.rejectDispatch(job.job)
+    fun admitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId, originX: Double, originY: Double,
+        width: Int, height: Int, pixelSize: Double, workingBytes: Long, nativeAllowance: Long,
+    ): AppleBrushJobExperiment? {
+        check()
+        if (workingBytes <= 0 || nativeAllowance < 0 || width !in 1..128 || height !in 1..128 ||
+            !originX.isFinite() || !originY.isFinite() || kotlin.math.abs(originX) > 1e9 || kotlin.math.abs(originY) > 1e9 ||
+            !pixelSize.isFinite() || pixelSize !in 0.0001..1e6) return null
+        return (owner.admitPage(scene, frame, layer,
+            BrushTileGridPoc(PointD(originX, originY), width, height, pixelSize, 4),
+            workingBytes, nativeAllowance) as? BrushRenderAdmissionPoc.Accepted)?.let { AppleBrushJobExperiment(it.job) }
+    }
     fun receive(job: AppleBrushJobExperiment, result: AppleBrushResultExperiment): Boolean = owner.receive(job.job, result.result)
     fun acknowledge(job: AppleBrushJobExperiment): String = owner.acknowledge(job.job).name
     fun cancel(job: AppleBrushJobExperiment): Boolean = owner.cancel(job.job)

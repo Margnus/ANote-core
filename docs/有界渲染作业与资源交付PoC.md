@@ -48,3 +48,17 @@ Android 实际 Bitmap allocationByteCount 8,192，加 staging 8,192，落在 16,
 ## 下一节点 DEV-034
 
 将已验证 native reader/副本预算规则落实为平台图像持有适配器，补 owner 丢失、未知释放及超预留的责任交接；接入 Apple 既有 Swift 有界执行器，复用相同作业/ACK 规则，不新增另一调度权威。用固定滚动/缩放 trace 比较队列等待、拒绝、复制、驻留/退休与关闭，不先扩展 App 功能。当前仍无 M-1 真机帧/触笔/heap 验收，缩小/旋转/色彩管理、C1、SQLite 和生产闭环未完成。Mac 锁屏依赖交互继续延期，独立开发继续。
+
+## DEV-036A：同一作业内的完整墨迹区域（2026-10-16）
+
+基线Core 966a6bc。现有BrushRenderJob/Owner/Executor增加 `admitPage`/`submitPage`，Apple最小桥接和同一Swift dispatch/ACK路径跟进；没有新队列或另一规范模型。输入直接持有不可变SceneSnapshot，只合成捕获layer的MONOLINE v1，依规范Scene顺序先做每笔覆盖union再作RGBA8预乘source-over。每笔catalog在原worker逐个建立/消费，外层输出只在所有目标笔成功后返回。空目标layer输出全透明，其他layer不参与混合；失败、取消或预算不足没有半张可发布结果。完成后仍须原executor drain返回再ACK，旧帧和关闭照原规则退休。
+
+这是**完整请求网格内的透明墨迹层**，不是完整尺寸页面/多tile帧，也没有背景纸张合成。网格仍最多128×128，整Scene最多4096对象、200000点，目标layer最多256笔；超限明确拒绝且规范正文不改。派发前charge包含整个Scene保留样本的28字节/点、8字节/对象引用声明、working、RGBA与native allowance，其他layer虽不绘制也计入持有输入。目录/索引对象头、GC和平台隐藏分配未被这些逻辑值覆盖，不是heap硬上限。工作区为逐笔catalog声明载荷及render临时载荷，合成目标属于最终输出；同一maxEdgeTests在各笔光栅与像素混合间扣减，不按每笔重置。
+
+固定正确性样本是同位置红/蓝各alpha128的两点笔，源顺序得到预乘(64,0,128,192)，反序(128,0,64,192)，额外另一layer绿笔不得污染。后笔光栅工作超限以及首笔已完成后的后笔取消都使完整结果失败；空目标layer、未支持笔刷、过期帧/错误layer及总输入上限有反例。测试手动驱动的owner责任并非App导航关闭实现。
+
+验证入口仍为ci/verify.sh、verify_android_brush_common.py、verify_apple_brush_common.py与verify_ios_host.py，不建立第二套执行环境。JVM277、ART91（共同72、真实执行器6、Bitmap5、持有器7、trace1）、Native78（共同72、测试线程3、CoreGraphics3）、app-host17单列；Swift7项渲染宿主中的新增1项属于A，旧6项不改称新范围。ART/Swift均实际消费新合成像素，READY/阻塞重送保持peak，ACK后CPU8192+native16384=24576；关闭后held reader仍24576，确认释放后0。
+
+首轮共享失败是测试使用切帧前的token去验证容量拒绝，修正为当前token；首轮Swift失败是新v2夹具头写1笔但实际2笔，修正计数，不放宽像素/alpha断言。两次设备状态问题均先核实实际状态：已停的专用模拟器恢复原设备，仍活的Android进程只重连既有5581端口，未wipe/卸载/清数据。XCTest后恢复普通包及核对全部payload，包SHA 66262aa5…；不继承UI-001，不声称新包UI已验。
+
+结论：采用此路径作为DEV-036后续完整帧的原作业增量。**DEV-036整体与普通App接入仍未完成**：尚缺多tile整体完整性/全屏预算、真正View目标与引用生命周期、Model在View消失后有限批量drain/ACK及UNKNOWN责任持有。不能把“区域完整”改称“全页面完成”，不放开笔刷/格式、不用离屏像素证明GPU、物理帧/heap、完整C1或SQLite恢复。下一步仍在原owner/执行器内补完整帧和真实呈现目标，按现行C1清单验收。

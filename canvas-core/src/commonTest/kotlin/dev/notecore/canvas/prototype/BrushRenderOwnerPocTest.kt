@@ -14,6 +14,79 @@ class BrushRenderOwnerPocTest {
         return owner.acknowledge(job)
     }
 
+    @Test fun completePageComposesCanonicalOrderAndKeepsNativeReaderAfterClose() {
+        val page = BrushPageImageFixture
+        for (reverse in listOf(false, true)) {
+            val o = owner()
+            val j = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(page.scene(reverse), f.frame, f.layer,
+                f.grid, working, 16384)).job
+            val result = WorkResult.Succeeded(j.execute())
+            assertNull(o.borrow(j)); assertEquals(j.peakBytes, o.chargedBytes)
+            o.receive(j, result); assertEquals(BrushRenderAckPoc.PUBLISHED, o.acknowledge(j))
+            val reader = assertNotNull(o.borrowNative(j)); page.assertCenter(reader, reverse)
+            assertNull(o.borrowNative(j)); o.close(); assertFalse(o.isDrained); assertEquals(24576, o.chargedBytes)
+            assertFalse(o.canPublish(reader)); assertTrue(o.completeNativeRelease(reader, ResourceReleaseOutcome.RELEASED))
+            assertTrue(o.isDrained); assertEquals(0, o.chargedBytes)
+        }
+    }
+
+    @Test fun laterStrokeFailureAndCancellationNeverPublishPartialPage() {
+        val page = BrushPageImageFixture; val o = owner()
+        val catalog = assertIs<ChunkedBrushBuild.Ready>(ChunkedBrushPoc.build(f.frame, page.red)).catalog
+        val first = assertIs<BrushTileBuild.Ready>(catalog.render(f.frame, f.grid)).edgeTests
+        val j = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(page.scene(), f.frame, f.layer, f.grid,
+            working, maxEdgeTests = first + f.grid.width * f.grid.height * 8L + 1)).job
+        val output = j.execute(); assertNull(output.pixels); assertEquals("raster-work-budget", output.failure)
+        o.receive(j, WorkResult.Succeeded(output)); assertEquals(j.peakBytes, o.chargedBytes)
+        assertEquals(BrushRenderAckPoc.FAILED, o.acknowledge(j)); assertNull(o.borrow(j)); assertEquals(0, o.chargedBytes)
+        val cancelled = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(page.scene(), f.frame, f.layer, f.grid, working)).job
+        val c = cancelled.execute { true }; assertNull(c.pixels); assertEquals("cancelled", c.failure)
+        o.receive(cancelled, WorkResult.Succeeded(c)); assertEquals(BrushRenderAckPoc.FAILED, o.acknowledge(cancelled))
+        // Count the cancellation probes for a fully composed first stroke, then interrupt the
+        // second stroke at the same next probe. This exercises an already nonempty accumulator.
+        val singleScene = SceneSnapshot.restored(f.frame.sceneId, f.frame.sceneRevision, listOf(page.red))
+        val single = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(singleScene, f.frame, f.layer, f.grid, working)).job
+        var firstChecks = 0
+        val firstOutput = single.execute { firstChecks++; false }
+        assertNotNull(firstOutput.pixels); o.receive(single, WorkResult.Succeeded(firstOutput)); o.acknowledge(single)
+        val later = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(page.scene(), f.frame, f.layer, f.grid, working)).job
+        var checks = 0
+        val interrupted = later.execute { ++checks >= firstChecks }
+        assertEquals(firstChecks, checks); assertNull(interrupted.pixels); assertEquals("cancelled", interrupted.failure)
+        o.receive(later, WorkResult.Succeeded(interrupted)); assertEquals(BrushRenderAckPoc.FAILED, o.acknowledge(later))
+        assertNull(o.borrow(later))
+        o.close(); assertTrue(o.isDrained)
+    }
+
+    @Test fun emptyPageIsCompleteAndAdmissionRejectsUnsupportedOrWrongContent() {
+        val page = BrushPageImageFixture; val o = owner()
+        val empty = SceneSnapshot.restored(f.frame.sceneId, f.frame.sceneRevision, listOf(page.foreign))
+        val j = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(empty, f.frame, f.layer, f.grid, working)).job
+        assertEquals(BrushRenderAckPoc.PUBLISHED, complete(o, j))
+        val reader = assertNotNull(o.borrow(j)); repeat(8192) { assertEquals(0, reader.byteAt(it)) }; o.returnReader(reader)
+        val unsupported = SceneSnapshot.restored(f.frame.sceneId, f.frame.sceneRevision,
+            listOf(page.red.copy(brush = page.red.brush.copy(kind = BrushKind.PRESSURE))))
+        assertEquals("unsupported-page-brush", assertIs<BrushRenderAdmissionPoc.Rejected>(o.admitPage(unsupported, f.frame, f.layer, f.grid, working)).reason)
+        assertIs<BrushRenderAdmissionPoc.Rejected>(o.admitPage(page.scene(), f.frame.copy(sceneRevision = f.frame.sceneRevision + 1), f.layer, f.grid, working))
+        assertIs<BrushRenderAdmissionPoc.Rejected>(o.admitPage(page.scene(), f.frame, LayerId("other"), f.grid, working))
+        o.close(); assertTrue(o.isDrained)
+    }
+
+    @Test fun fullSceneRetentionIsChargedAndLateCompletePageIsDiscarded() {
+        val page = BrushPageImageFixture; val o = owner()
+        val j = assertIs<BrushRenderAdmissionPoc.Accepted>(o.admitPage(page.scene(), f.frame, f.layer, f.grid, working, 16384)).job
+        assertEquals(3 * 28 + 3 * 8 + working + 8192 + 16384, j.peakBytes)
+        val result = WorkResult.Succeeded(j.execute())
+        assertTrue(o.expect(f.frame.copy(viewportVersion = 2, requestSequence = 2), f.layer))
+        o.receive(j, result); assertEquals(BrushRenderAckPoc.DISCARDED, o.acknowledge(j)); assertNull(o.borrow(j))
+        assertEquals(0, o.chargedBytes); assertFailsWith<IllegalStateException> { j.execute() }
+        val strokes = List(257) { page.red.copy(id = ObjectId("bounded-$it")) }
+        val tooMany = SceneSnapshot.restored(f.frame.sceneId, f.frame.sceneRevision, strokes)
+        assertEquals("page-input-budget", assertIs<BrushRenderAdmissionPoc.Rejected>(o.admitPage(tooMany,
+            f.frame.copy(viewportVersion = 2, requestSequence = 2), f.layer, f.grid, working)).reason)
+        assertEquals(0, o.chargedBytes); o.close(); assertTrue(o.isDrained)
+    }
+
     @Test fun actualMaskAndRgbaStayPeakChargedUntilExecutorAcknowledges() {
         val o = owner(); val job = job(o)
         assertTrue(job.peakBytes > 32768); assertEquals(job.peakBytes, o.chargedBytes)
@@ -124,5 +197,26 @@ class BrushRenderOwnerPocTest {
         o.returnReader(cpu); o.close(); assertEquals(16384, o.chargedBytes); assertFalse(o.isDrained)
         assertTrue(o.reconcileNativeReleased(native)); assertFalse(o.reconcileNativeReleased(native))
         assertTrue(o.isDrained); assertEquals(0, o.chargedBytes)
+    }
+}
+
+
+/** Canonical scene fixture shared by actual ART/Native tests, with a foreign layer to exclude. */
+internal object BrushPageImageFixture {
+    val frame = BrushTileImageFixture.frame
+    val layer = BrushTileImageFixture.layer
+    val grid = BrushTileImageFixture.grid
+    private val dot = StrokeSamples.copyOf(doubleArrayOf(8.0), doubleArrayOf(12.0), floatArrayOf(1f), longArrayOf(0))
+    val red = StrokeObject(ObjectId("page-red"), 1, layer, BrushSpec(BrushKind.MONOLINE, 1, 10.0, 0x80ff0000.toInt()), dot)
+    val blue = red.copy(id = ObjectId("page-blue"), brush = red.brush.copy(argb = 0x800000ff.toInt()))
+    val foreign = red.copy(id = ObjectId("other-page"), layerId = LayerId("other-page"), brush = red.brush.copy(argb = 0xff00ff00.toInt()))
+    fun scene(reverse: Boolean = false) = SceneSnapshot.restored(frame.sceneId, frame.sceneRevision,
+        if (reverse) listOf(blue, red, foreign) else listOf(red, blue, foreign))
+    fun assertCenter(reader: BrushRenderReaderPoc, reversed: Boolean = false) {
+        val offset = (8 * grid.width + 15) * 4
+        assertEquals(if (reversed) 128 else 64, reader.byteAt(offset))
+        assertEquals(0, reader.byteAt(offset + 1))
+        assertEquals(if (reversed) 64 else 128, reader.byteAt(offset + 2))
+        assertEquals(192, reader.byteAt(offset + 3))
     }
 }

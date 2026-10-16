@@ -49,7 +49,7 @@ def main():
         source = ROOT/('canvas-core/src/'+source_set+'/kotlin/dev/notecore/canvas/prototype/'+name+'.kt')
         expected.update('dev.notecore.canvas.prototype.'+name+'.'+method for method in
             re.findall(r'@Test\s+fun\s+(\w+)\(', source.read_text(encoding='utf-8')))
-    assert len(expected) == 74 and set(passed) == expected and len(passed) == 74, run.stdout
+    assert len(expected) == 78 and set(passed) == expected and len(passed) == 78, run.stdout
     assert before == {p.relative_to(ROOT).as_posix(): digest(p) for p in sources}
     assert digest(binary) == binary_sha
     observations = [json.loads(line.removeprefix('NOTECORE_NATIVE_IMAGE ')) for line in run.stdout.splitlines()
@@ -59,7 +59,7 @@ def main():
         if line.startswith('NOTECORE_NATIVE_RENDER ')]
     assert len(render_observations) == 1
     report = {'native_render_observations': render_observations, 'native_image_observations': observations, 'status': 'passed', 'platform': 'Kotlin/Native ARM64 tests executed via iOS Simulator spawn',
-        'device': {'name': device['name'], 'udid': args.device}, 'test_count': len(passed), 'common_test_count': 68, 'native_render_thread_test_count': 3, 'core_graphics_test_count': 3, 'checks': sorted(passed),
+        'device': {'name': device['name'], 'udid': args.device}, 'test_count': len(passed), 'common_test_count': 72, 'native_render_thread_test_count': 3, 'core_graphics_test_count': 3, 'checks': sorted(passed),
         'source_and_build_sha256': before, 'test_binary_sha256': binary_sha,
         'test_output_sha256': digest(build/'run.log'), 'desktop_unlock_required': False,
         'native_image_lease_handoff_verified': True, 'native_render_thread_handoff_verified': True, 'app_swift_executor_render_integration_verified': False, 'shared_geometry_generation_on_kotlin_native_verified': True, 'native_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,
