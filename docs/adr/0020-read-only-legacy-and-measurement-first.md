@@ -105,3 +105,9 @@ F的统一UNKNOWN会永久阻止交付异常后的迟到回执结算。调整为
 采用系统SQLite事务、唯一op身份及事务内base修订核对作为生产port候选；生产实施仍在C1之后。真实Android ART/API36（SQLite3.44.3）与iOS Simulator（3.54.0）隔离进程各20阶段证明合成根/操作原子更新、未提交SIGKILL回滚、提交丢回执/回执后SIGKILL重开、同op重放与payload/base冲突拒绝、事务/DDL版本回滚、受限页数FULL及非破坏性只读未知/损坏拒绝。报告与具体范围见[既有C1入口](../C1未决事项.md)和[能力证据](../../reports/sqlite-platform-capabilities.json)。
 
 明确完整操作身份与根写入必须在同一事务；durable receipt在提交成功之后，模糊结果按原op协调。新版本/损坏不自动重建删除，生产port配置显式WAL/同步级别并记录能力。probe只是隔离可执行证据，不是shared-data或App存储接入；并发writer、实际磁盘IO/断电/fsync/设备、资源事务/GC/checkpoint及生产schema迁移仍未证明。保留原预览文件、同owner/有界executor和C1顺序，不因SQLite局部通过而冻结架构或标DATA整项完成。
+
+## DEV-039：采用受限系统PDF候选，显式规范显示坐标（2026-10-17）
+
+C1前能力调查采用Android PdfRenderer与Apple CoreGraphics/PDFKit为候选；当前不引入第三方PDF SDK、不开放App PDF功能。非零CropBox和四个Rotate的原生PNG匹配独立颜色定位oracle；规范背景页空间候选为CropBox与固有旋转归一后的top-left矩形。CG bitmap输出先前重复翻转问题已修正，局部目标的原点按整页高度适配，不直接套用UIKit惯例。Android clip边缘暴露最大通道差107，4px邻域渲染后取内部core与整页ROI差0；只采用“邻域/归属core分开”的原则，不把固定4px冻结成任意scale的通用参数。
+
+当前密码参数/只读损坏拒绝、文字及Apple大纲可用性分别有原生证据；Android低OS/文档outline、现代密码/复杂内容及矢量保真能力仍缺矩阵。500简单页只取首末页，不证明渐进产品、内存或性能；没有native同步render中途取消证据。生产port仍需seekable只读资源/FD持有、最小权限隔离、bounded调度/迟到取消、tile key/预算与App批注/导出闭环。既有模型/owner/资源权威不变，不以此放行C1/生产存储/PDF需求。详见[原C1入口](../C1未决事项.md)和[PDF平台报告](../../reports/pdf-platform-capabilities.json)。

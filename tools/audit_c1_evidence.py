@@ -16,6 +16,7 @@ CURRENT = {
     'render-viewport-trace': ('source_report_sha256',),
     'android-render-integration': ('source_evidence_sha256', 'sdk_contract_source_sha256'),
     'sqlite-platform-capabilities': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
+    'pdf-platform-capabilities': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
 }
 ARTIFACTS = {
     'android-brush-common-tests': (('test_apk_sha256', None),

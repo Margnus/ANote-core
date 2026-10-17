@@ -1,0 +1,291 @@
+{
+  "schema": "pdf-platform-capabilities-1",
+  "status": "passed",
+  "android": {
+    "serial": "emulator-5580",
+    "api": 36,
+    "fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+    "runtime": "real ART app_process/system PdfRenderer, isolated target-App UID/cache; not App owner/UI integration",
+    "observations": {
+      "pages": [
+        {
+          "index": 0,
+          "width": 300,
+          "height": 180,
+          "native_text_contains_fixture": true,
+          "tile_max_channel_delta": 107,
+          "tile_with_gutter_max_channel_delta": 0,
+          "tile_gutter": 4
+        },
+        {
+          "index": 1,
+          "width": 180,
+          "height": 300,
+          "native_text_contains_fixture": true
+        },
+        {
+          "index": 2,
+          "width": 300,
+          "height": 180,
+          "native_text_contains_fixture": true
+        },
+        {
+          "index": 3,
+          "width": 180,
+          "height": 300,
+          "native_text_contains_fixture": true
+        }
+      ],
+      "password_missing_refused": true,
+      "password_wrong_refused": true,
+      "password_correct_rendered": true,
+      "malformed_refused": true,
+      "invalid_page_refused": true,
+      "closed_page_refused": true,
+      "closed_document_refused": true,
+      "large_page_count": 500,
+      "large_render_requests": [
+        0,
+        499
+      ],
+      "public_outline_api_verified": false,
+      "in_progress_render_cancellation_verified": false
+    },
+    "pixel_oracle": {
+      "all_rotation_color_anchors_matched": true,
+      "tile_raw_max_channel_delta": 107,
+      "tile_4px_gutter_core_max_channel_delta": 0,
+      "password_color_anchors_matched": true
+    },
+    "original_ncp_files": 64,
+    "original_files_unchanged": true
+  },
+  "apple": {
+    "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+    "target": "actual arm64 iOS Simulator CoreGraphics/PDFKit, minimum16.0, SDK iPhoneSimulator27.1.sdk",
+    "binary_build_version": "/Users/lixiaofan/StudioProjects/notecore/build/pdf-capability-bin/PdfCapabilityProbe:\nLoad command 11\n      cmd LC_BUILD_VERSION\n  cmdsize 32\n platform IOSSIMULATOR\n    minos 16.0\n      sdk 27.1\n   ntools 1\n     tool LD\n  version 27037.1\n",
+    "observations": {
+      "in_progress_render_cancellation_verified": false,
+      "invalid_page_refused": true,
+      "large_page_count": 500,
+      "large_render_requests": [
+        0,
+        499
+      ],
+      "malformed_refused": true,
+      "native_text_contains_fixture": true,
+      "outline_items": 1,
+      "pages": [
+        {
+          "crop_box": [
+            40,
+            50,
+            340,
+            230
+          ],
+          "height": 180,
+          "index": 0,
+          "media_box": [
+            0,
+            0,
+            400,
+            300
+          ],
+          "rotation": 0,
+          "tile_gutter": 4,
+          "tile_max_channel_delta": 0,
+          "tile_with_gutter_max_channel_delta": 0,
+          "width": 300
+        },
+        {
+          "crop_box": [
+            40,
+            50,
+            340,
+            230
+          ],
+          "height": 300,
+          "index": 1,
+          "media_box": [
+            0,
+            0,
+            400,
+            300
+          ],
+          "rotation": 90,
+          "width": 180
+        },
+        {
+          "crop_box": [
+            40,
+            50,
+            340,
+            230
+          ],
+          "height": 180,
+          "index": 2,
+          "media_box": [
+            0,
+            0,
+            400,
+            300
+          ],
+          "rotation": 180,
+          "width": 300
+        },
+        {
+          "crop_box": [
+            40,
+            50,
+            340,
+            230
+          ],
+          "height": 300,
+          "index": 3,
+          "media_box": [
+            0,
+            0,
+            400,
+            300
+          ],
+          "rotation": 270,
+          "width": 180
+        }
+      ],
+      "password_correct_rendered": true,
+      "password_missing_refused": true,
+      "password_wrong_refused": true
+    },
+    "pixel_oracle": {
+      "all_rotation_color_anchors_matched": true,
+      "tile_raw_max_channel_delta": 0,
+      "tile_4px_gutter_core_max_channel_delta": 0,
+      "password_color_anchors_matched": true
+    },
+    "original_ncp_files": 31,
+    "original_files_unchanged": true
+  },
+  "source_and_artifact_sha256": {
+    "android-app/build.gradle.kts": "8e8a303cd0440ad234f07d438cfe66fd7600dab05bb0e5956653a436c74f1649",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "5e8d4dd5d2e7b0c91ce0a59979cfd6f2f5abf6973a961840cfbb75e43e0d268d",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "6a417b5d52244a44207ae58da2d052f8ebf260d3dfa53873f1769884ceae8e51",
+    "android-app/src/androidTest/java/dev/notecore/app/BrushPathOffscreen.kt": "1f7fdff5b00257c099a130d73443af501a0453706edcbb04673f71b766fb080d",
+    "android-app/src/androidTest/java/dev/notecore/app/SurfaceFrameHostChecks.kt": "4093d329f8348b595e8f266668b2d92a02bfcb9814d91b27a0caab60494971d1",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "e9d483e221003564044a99277b50eb526a0d8284b79fa8fb3858eb7f601a2fbc",
+    "android-app/src/androidTest/java/dev/notecore/app/probes/PdfCapabilityProbe.java": "d307d6c66702ad76cb3d98e293275f6cb7c973c0f0177d2720f79e91e6a0859f",
+    "android-app/src/androidTest/java/dev/notecore/app/probes/SqliteCrashProbe.java": "79f93dad6b86c3ac5e38b343a51c5669e5569a07273c63aac6853fd35d1db0ba",
+    "android-app/src/main/AndroidManifest.xml": "6e0a87aa06e67e773bbe0238171d2d6f135100eff032efb9aebd9a18d8de55cc",
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "12ddbff5969942e27f99d5b21316b5eaec6146086a5633314ce28192786adc17",
+    "android-app/src/main/java/dev/notecore/app/InkSurfaceHost.kt": "96515e50606d5a3a5f5d742d851c2492bc6c103227c067d02b6c497ee566ad2f",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "e2cf08555b892f82b31690cf0a1920969c98e63f5010fd13d60ee90f0f781308",
+    "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "c98a200170d0e7738c95ed730f487dbc745fc4c009fcd073bb40b357ceb711c0",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "ecfa2bf8f28945b293dce7b5178505f72ade72d2e6a1d35c578bbe116bb8aead",
+    "android-app/src/main/res/drawable/ic_note.xml": "daa79575a3abd07e866404872e51d7fbf29b6430c87937b31806416f5f5b75aa",
+    "android-app/src/main/res/values/strings.xml": "8fd14b09bdae43b965396d9e64313b30b739bdf0b613cea9c7474255b02a765f",
+    "android-app/src/main/res/xml/data_extraction_rules.xml": "ec0f1c6431c2434ac85c7933dd0fe21c430e9601ec4db70d0112557cbebf9993",
+    "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
+    "build/dev039-android-pdf.log": "2a5ccff157ab476d5ba5cb36d1d21cfad82620f8875b6a23daf194eb91c7179d",
+    "build/dev039-apple-pdf-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dev039-apple-pdf.log": "94522d34fff7653337d83fb89d34ff89b225751c5b5ea87182f02287dea6e210",
+    "build/dev039-fixture-idempotent.json": "a73107280eb2fd6db7afe41dd9bd88b2dd4afd6909adc7c65c3e350e79dac6d6",
+    "build/dev039-original-file-hashes.json": "0ae6fc061538fd1ca543c559b29e098e074136d93c6c7326a992bf341a136661",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/large-0.png": "1c7b28c48cd3e3c25519526e25c4b66c6e31a29e4227c2412c9c99e3ed7afb06",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/large-499.png": "301037382762a18f3ee4711203111e06ac900f0f96acab08fe722b7190883643",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/page-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/page-1.png": "8c6ac8911be51635674ba678724225716dec0bac12a5222d9486ed20d7fab73c",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/page-2.png": "641ca08d48386808702524cba94fcc8e510abcde645808466ee4adc7e16ed789",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/page-3.png": "504ddaf8aa360d656958bbb02d4297dc8731e6582b98e0698cbd26ecf7607fe6",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/password.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/tile-gutter.png": "44ce3bda8631645c62396540b5934bcd9a732585af1a25a267f5d3a4af74f220",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/android/tile.png": "920524ddfe4ead6ce2eac58c85a8c8dbd2407c3e247ecd90fed5d13be6e1e3a3",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/large-0.png": "3312121a7357213a2a9c5a597ae3d26dd74385c0f5c5ccd2f909d91a2f287291",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/large-499.png": "4f55fa62c2d41b257b36654bc582f7c64a36505a23a779c1ae595d111380d16e",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/page-0.png": "ac54990b995ab134fae6de168bbfaf4b98d85c51595635e41230207dfb0b4193",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/page-1.png": "6e1ca4f581d6d6f0db79b96e02c83dde62604d41b9c9861b32af10aa9f8a41eb",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/page-2.png": "03ab2ab188eebfd0295353ed04bf307595bfd7693c53e26c8eeccca40db9b6ec",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/page-3.png": "36a4dd2d1d238bcddbe953c12a7c624d77b147769f12662bde7e8de604cc3540",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/password.png": "ac54990b995ab134fae6de168bbfaf4b98d85c51595635e41230207dfb0b4193",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/tile-gutter.png": "8695a945678540a810415d4c4c9db34170d68aaa2373fb334d994ced15c347c6",
+    "build/pdf-capability-91d7bca6-2427-4379-a417-3a8676f91ac5/apple/tile.png": "f07c2fce75d13d06d6f1b20856840fa685d12966ac45f3e734de405d99bf7e10",
+    "build/pdf-capability-bin/PdfCapabilityProbe": "14eae444ec7449b80719b8e555cc678a33ced5be5cf7811327e7a267cecbecf1",
+    "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePoc.kt": "0895d5afbcab6901c29d0b8735b048deb1345fd6cabb7b04abbae0d1cb137647",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidInkFrameExperiment.kt": "c719233f65b2e82c90210a88942d811698e550d2732ef91a938a2598512065f1",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "4e3e22ae481fa2a3f5aab66266a8f93d8e7d5cf822a282f752d6c39b8243ff8e",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "339eff8c0b2e4b3d73b8f24a77c1d440ed08d3038d67d8ac649dd57c89a28f17",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushReductionPoc.kt": "b6d2bfa6bf4e5bf7946e1d711affd9fa52b899a2cf1da33e6c5cced7d7882844",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "1a400ca096b963410cf51d09fde8cdeea30a6b995a29b51825156d8f25a2e521",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTileCachePoc.kt": "a9985d79490f0cce2198a591c90ed2e9d7576a8525f83107b0bd696f0b5c5def",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "55c13cd2680c7f034a61d401ab6f113ebedfc893899762190caffc7a1f94e5f5",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "1c5418e5b485eb8ff8feed9910286ef0676d0417a0c851e9e1c3d57877644e21",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "65f6b68f001eb090a098816857e81e6da69da8ab603b8b274d70221b2cca5549",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "30f990e632feb680a7b9d39836e278f861c880b2fa50a0c252f83c11dc20b0b1",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "f3bf1852df5ce9223a1de2a6b462ccfb2eaeb40c0405ce11e8a163ea0a187bd7",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt": "189d9a1162bc84b11f32f95d9cf1fbcf7abf01ee5468883476e05c004c29dff0",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "127897258aaff666d03829023c0ec8275446fd01301c1843a7fca0ebd9a51a7f",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPoc.kt": "0b4c245d31d595a864513099b945a2d0650b704908f26909348e39bba71a7c22",
+    "fixtures/geometry/brush-golden.json": "a6f6f1dabf01bf1ce7938d2d6ae2dd231ca20678d776208c8a090dc9c54788ee",
+    "fixtures/geometry/brush-paths.json": "396ab01fd7e56f964e623a8300c7f83ed6970df9c3c2e0e8e214b3cbebe0d8fa",
+    "fixtures/pdf/recipe.json": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8",
+    "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
+    "output/pdf/crop-rotations.pdf": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+    "output/pdf/fixture-contact-sheet.png": "0674360b358b76aff5573a10f5aafa5fc888b5f24bae16007f086c0404597ee9",
+    "output/pdf/malformed.pdf": "527110473a3321d9452d1dfcaa4236c2a143c8bdaffe12de493feabff73e46ad",
+    "output/pdf/manifest.json": "832ed50ba24152b463133f6d75f1a7e8243d7d58818e7122a2209099ae1b7ef8",
+    "output/pdf/many-pages.pdf": "e5a85a349e164b7e8c298d85a3ba5b6427ae89364e3a9b62725c011df14a1254",
+    "output/pdf/password.pdf": "4d4a9d7edc8bd5827f345c9b8bd61666c737698c256497430f170e745d80d628",
+    "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+    "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
+    "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "dc996123a270f32010ed21591cf9357cd1fbb91024dc1e695691351a85e1e7da",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "d5e9d113dd7b77f7466abdd5100037140540a8c81989543e08e6657b9446954b",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "1c5291fe1c2809ec458983ae6e15627697466e2b4899d5d67d82b1088154b5c6",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
+    "tools/generate_pdf_fixtures.py": "3787f27d293abc2c8ba994f67acba90847f102f76f00293eb4c0716ea8703d3a",
+    "tools/probes/PdfCapabilityProbe.swift": "f58e3ba63ca3ba4b43452f350efdc841149cf6462f4f9e3d6f5e253676f5c9fc",
+    "tools/verify_pdf_capabilities.py": "e596758d2fce62d350fffc7108b2772c0e08493cb3e7bc57b87d904cd746e10d",
+    "tools/verify_sqlite_capabilities.py": "2ef27ae89aa73712942a55f4f7eedf0e6706261a2d4c7cc04507fa133c24c11e"
+  },
+  "sdk_contract_sha256": {
+    "/Users/lixiaofan/Library/Android/sdk/sources/android-36/android/graphics/pdf/PdfRenderer.java": "031405f934e948d69997975c37515e9e9717311eb7ca25e4d24c816c3e1b7180",
+    "/Users/lixiaofan/Library/Android/sdk/sources/android-36/android/graphics/pdf/PdfProcessor.java": "1226f36e045b120981b6b62982e09b5cc48e73d1cd58fb86259f58b6810589c5",
+    "/Users/lixiaofan/Library/Android/sdk/sources/android-36/android/graphics/pdf/LoadParams.java": "a74efba4084dea26a55520cbedf8078f44f2b06125aeadeab4e78fa2b930cfad",
+    "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CGPDFPage.h": "93b9a974a9f568c1c71caa6d16dbc6179b6069d5f2847af321b021094c513fd9",
+    "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CGPDFDocument.h": "502bf1695dc3ff45468f283b55e39deb44dd4efa6dee10c0dba94ebca4e51242",
+    "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks/PDFKit.framework/Headers/PDFDocument.h": "d5f7d43a34024ba3f26eb518f789b58dd338e62cdf5bfc297e44a634a9138352"
+  },
+  "decision": "Adopt system renderers as limited candidate ports. Normalize canonical PDF page coordinates to CropBox plus intrinsic rotation, top-left display space; adapt CGContext bitmap direction/tile origin explicitly. Keep guarded tile source/core separation; fixed 4px gutter passes this 1x sample only. Android password/text require version gating, no public document-outline API proven; iOS PDFKit outline/text and CG password/crop verified. Do not claim in-progress native cancellation or production App integration.",
+  "scope": "Four synthetic rotations/crop-offset color anchors, native full/tile PNGs and independent marker oracle, guarded-core versus whole-page comparison, test-only RC4-128 password/missing/wrong password, malformed/read-only input, native text/outline capability and selected first/last render requests from a simple 500-page file. No user PDF or production resource/import/task protocol.",
+  "large_document_scope": "Only pages 0 and 499 requested for render; does not prove lazy metadata parsing, memory/latency bounds or production prefetch/cancellation.",
+  "remaining_gates": [
+    "App PDF resource staging/commit and canonical background/annotation integration",
+    "Android older API/OS/PDF module/vendor matrix, modern encrypted/forms/large-image/complex content matrix",
+    "zoom/filter/rotation/general gutter bounds and color/AA/whole-frame composition",
+    "bounded scheduler, generation/late result/cancel between jobs, source/destination lifetime",
+    "production progress/cancel/retry/low-space, export and physical performance/heap/C1",
+    "untrusted PDF process isolation/minimal permissions and source descriptor lifetime protocol"
+  ],
+  "references": [
+    "https://developer.android.com/reference/android/graphics/pdf/PdfRenderer",
+    "https://developer.apple.com/documentation/coregraphics/cgpdfpage/getdrawingtransform(_:rect:rotate:preserveaspectratio:)",
+    "https://developer.apple.com/documentation/coregraphics/cgpdfdocument/unlockwithpassword(_:)"
+  ],
+  "system_runtime_source_equivalence_verified": false,
+  "ordinary_app_pdf_integration_verified": false,
+  "in_progress_native_render_cancellation_verified": false,
+  "physical_device_or_heap_measured": false,
+  "c1_gate_complete": false
+}
