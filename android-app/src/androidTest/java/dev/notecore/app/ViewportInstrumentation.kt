@@ -21,9 +21,11 @@ class ViewportInstrumentation : Instrumentation() {
     private var downTime = 0L
     private var brushPathOnly = false
     private var renderTargetOnly = false
+    private var surfaceFramesOnly = false
     override fun onCreate(arguments: Bundle?) {
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
         renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
+        surfaceFramesOnly = arguments?.getString("notecore_case") == "surface_frames"
         super.onCreate(arguments); start()
     }
     override fun onStart() {
@@ -36,6 +38,12 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (surfaceFramesOnly) {
+                result.putString("surface_frames",SurfaceFrameHostChecks(this,host).verify())
+                result.putString("surface_status","passed")
+                result.putInt("surface_pid",android.os.Process.myPid())
+                finish(Activity.RESULT_OK,result); return
+            }
             setup()
             if (renderTargetOnly) {
                 val until = SystemClock.uptimeMillis() + 5000

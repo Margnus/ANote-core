@@ -24,6 +24,33 @@ class BrushRenderExecutorPocTest {
             assertTrue(e.completeNativeRelease(reader, ResourceReleaseOutcome.RELEASED)); assertTrue(e.isDrained)
         } finally { finish(e) }
     }
+    @Test fun sharedExecutorRequiresOutsideDrainAckAndStaysUsableAfterRenderClose() {
+        val page = BrushPageImageFixture
+        val shared = BoundedOwnerExecutor(4,1048576,"shared-render-storage-test")
+        lateinit var e: BrushRenderExecutorPoc
+        e = BrushRenderExecutorPoc(page.frame,page.layer,32768,262144,
+            permitDelivery = { assertFailsWith<IllegalStateException> { e.settleAfterDrain() }; true }, sharedExecutor = shared)
+        try {
+            val j = assertIs<BrushRenderAdmissionPoc.Accepted>(e.submitPage(page.scene(),page.frame,page.layer,
+                page.grid,65536,16384)).job
+            ready(e,1)
+            shared.drainResults()
+            assertEquals(j.peakBytes,e.chargedBytes)
+            assertNull(e.borrowNative(j))
+            assertEquals(BrushRenderAckPoc.PUBLISHED,e.settleAfterDrain().single().second)
+            val reader = assertNotNull(e.borrowNative(j))
+            e.close(); assertFalse(e.isDrained); assertTrue(shared.status().accepting)
+            assertTrue(e.completeNativeRelease(reader,ResourceReleaseOutcome.RELEASED))
+            assertTrue(e.isDrained)
+            var saved = false
+            assertIs<WorkAdmission.Accepted>(shared.submit(8,{ "still usable" }) {
+                assertEquals("still usable",assertIs<WorkResult.Succeeded<String>>(it).value)
+                saved = true; ResultDisposition.ACKNOWLEDGED
+            })
+            shared.stopAccepting(); assertTrue(shared.awaitWorkerStop(5000)); shared.drainResults()
+            assertTrue(saved); assertTrue(shared.status().isDrained)
+        } finally { e.close(); shared.stopAccepting(); shared.awaitWorkerStop(5000); shared.drainResults(); e.settleAfterDrain() }
+    }
     private val f = BrushTileImageFixture
     private fun submit(e: BrushRenderExecutorPoc, frame: FrameToken = f.frame, c: ChunkedBrushPoc = f.catalog()) =
         assertIs<BrushRenderAdmissionPoc.Accepted>(e.submit(c, frame, f.layer, f.grid, f.rgb, 65536, 8192)).job

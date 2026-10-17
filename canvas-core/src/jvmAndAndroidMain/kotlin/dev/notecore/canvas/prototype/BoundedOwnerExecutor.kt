@@ -58,6 +58,7 @@ class BoundedOwnerExecutor(
         worker = Thread({ workerLoop() }, threadName).apply { isDaemon = false; start() }
     }
     fun checkOwnerThread() { check(Thread.currentThread() === ownerThread) { "Operation requires executor owner thread" } }
+    fun checkOutsideDrain() { checkOwnerThread(); check(!draining) { "ACK requires drain to return" } }
     fun checkWorkerThread() { check(Thread.currentThread() === worker) { "Operation requires executor worker thread" } }
 
     /** Rejected work remains caller-owned and has never been invoked. Charge covers declared peak input/result cost. */

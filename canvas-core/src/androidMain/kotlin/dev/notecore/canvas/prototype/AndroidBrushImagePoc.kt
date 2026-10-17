@@ -38,6 +38,7 @@ internal class AndroidBrushImagePoc private constructor(
     private var storage = 0L
     val allocationBytes: Long get() { checkOwner(); return storage }
     val released: Boolean get() { checkOwner(); return state == State.RELEASED }
+    val canPublish: Boolean get() { checkOwner(); return state == State.READY && owner.canPublish(reader) }
     val releaseUnknown: Boolean get() { checkOwner(); return state == State.UNKNOWN_RELEASE }
     private fun checkOwner() { owner.executorStatus() }
 

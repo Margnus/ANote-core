@@ -32,3 +32,13 @@ DEV-036E最新增量：原holder硬件拒绝保持，真实RenderNode RecordingC
 ## 下一步
 
 DEV-034B 接 Apple 已有 Swift 有界执行器及 CGImage 持有，明确 Kotlin internal 作业与 Swift 的实验边界、回调外 ACK 结算和取消/未知结果；DEV-034C 固定滚动/缩放 trace。owner 丢失/平台资源接管、厂商行存储、GPU fence、真实 heap、任意变换、M-1、C1和 SQLite 均未完成。普通 App 和既有可运行包没有切换新后端。
+
+## DEV-036F增量：原App SurfaceControl呈现与真实回执（2026-10-17）
+
+上文“普通App未切换”属于DEV-034历史。当前API33+普通Android包代码已接入原宿主层级，实际app-host消费完整静态帧；普通包UI仍待验。新增受限opt-in AndroidInkFrameExperiment，不导出原始Bitmap/像素/reader/池；原AndroidBrushImagePoc硬件拒绝不变，只在CPU composite中调用。原NoteStore共享executor/主Handler结算drain外ACK并保留关闭责任，View仅借完整帧；无旁路调度或资源权威。
+
+单个ImageWriter/Reader的RGBA上传核对pixelStride=4、rowStride及原native allowance，完整纸张/裁剪/墨迹一起交付HardwareBuffer。入站Image.getFence的独立句柄交给setBuffer；原ViewRoot事务协调上层Path撤下。静态child在SurfaceView下层，active在原View上层。旧帧/页面/viewport/尺寸变化、API不支持、预算拒绝或失败都保持完整规范Path。
+
+close不把Transaction返回当作完成。真实releaseCallback保留单个SyncFence回执，主owner非阻塞await(Duration.ZERO)确认有效fence完成后才关闭HardwareBuffer/Image/writer/reader和CPU source，归还同一native许可。缺回执/未signal保持charge；歧义或UNKNOWN保留同一对象，禁止破坏性重试/超时归零。post只用于唤醒原owner，有限控制poll不携带第二份数据队列。64MiB总量/48MiB resident及复制预留不是厂商内部heap的实测上限。
+
+[现有报告](../reports/android-render-integration.json)绑定最终2cfe9f5c…包、API36真实compositor及有效release fence。原层级像素/active-static alpha、空页/缩放/resize、等待回退、View移除后迟到ACK、共享存储保存及新NoteStore文件重开2页3笔、UNKNOWN保留48,906,240字节后只读协调为0均通过；原64文件未变。ART95与共享279单列，真实RecordingCanvas拒绝仍通过。普通CUA UI/普通PID新后端消费、长时未signal/歧义交付恢复、API26–32/厂商矩阵、真机heap/M-1/完全owner丢失/C1/SQLite仍待门禁。

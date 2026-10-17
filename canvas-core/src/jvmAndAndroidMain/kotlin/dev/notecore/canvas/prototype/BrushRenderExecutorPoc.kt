@@ -9,10 +9,12 @@ internal class BrushRenderExecutorPoc(
     frame: FrameToken, layer: LayerId, residentBudget: Long, totalBudget: Long, maxJobs: Int = 4,
     private val beforeCompute: (BrushRenderJobPoc) -> Unit = {},
     private val permitDelivery: (BrushRenderJobPoc) -> Boolean = { true },
+    sharedExecutor: BoundedOwnerExecutor? = null,
 ) {
+    private val ownsExecutor = sharedExecutor == null
     private val executor = run {
         require(maxJobs in 1..128 && residentBudget > 0 && totalBudget >= residentBudget)
-        BoundedOwnerExecutor(maxJobs, totalBudget, "NoteCore-mask-worker")
+        sharedExecutor ?: BoundedOwnerExecutor(maxJobs, totalBudget, "NoteCore-mask-worker")
     }
     private val owner = BrushRenderOwnerPoc(frame, layer, residentBudget, totalBudget, maxJobs,
         checkOwner = executor::checkOwnerThread)
@@ -24,7 +26,7 @@ internal class BrushRenderExecutorPoc(
     val chargedBytes: Long get() = owner.chargedBytes
     val retiredBytes: Long get() = owner.retiredBytes
     val pendingJobs: Int get() = owner.pendingJobs
-    val isDrained: Boolean get() = owner.isDrained && executor.status().isDrained
+    val isDrained: Boolean get() = owner.isDrained && dispatched.isEmpty() && acknowledged.isEmpty() && (!ownsExecutor || executor.status().isDrained)
     fun executorStatus() = executor.status()
 
     fun submit(catalog: ChunkedBrushPoc, frame: FrameToken, layer: LayerId, grid: BrushTileGridPoc,
@@ -74,7 +76,13 @@ internal class BrushRenderExecutorPoc(
     }
     fun drain(limit: Int = 16): List<Pair<BrushRenderIdPoc, BrushRenderAckPoc>> {
         executor.drainResults(limit)
+        return settleAfterDrain()
+    }
+    fun settleAfterDrain(): List<Pair<BrushRenderIdPoc, BrushRenderAckPoc>> {
+        executor.checkOutsideDrain()
+        val outstanding = executor.status().entries
         val settled = acknowledged.map { job ->
+            check(outstanding.none { it.ticket === dispatched[job.id]?.ticket })
             val result = owner.acknowledge(job)
             if (result != BrushRenderAckPoc.QUARANTINED) dispatched.remove(job.id)
             job.id to result
@@ -100,7 +108,7 @@ internal class BrushRenderExecutorPoc(
     fun close() {
         executor.checkOwnerThread(); owner.close()
         dispatched.values.forEach { it.cancelled.set(true) }
-        executor.stopAccepting()
+        if (ownsExecutor) executor.stopAccepting()
     }
     fun awaitWorkerStop(timeoutMillis: Long) = executor.awaitWorkerStop(timeoutMillis)
 }

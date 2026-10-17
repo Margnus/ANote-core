@@ -144,7 +144,7 @@ class MainActivity : Activity() {
         status = text(getString(R.string.opened, note.totalStrokeCount), 13f).apply { setPadding(dp(20), dp(4), dp(20), dp(8)) }
         root.addView(status)
         canvas = InkCanvasView(this, note, { save(); updateControls() }, ::showError)
-        root.addView(canvas, LinearLayout.LayoutParams(-1, 0, 1f).apply { setMargins(dp(12), 0, dp(12), dp(12)) })
+        root.addView(if (android.os.Build.VERSION.SDK_INT >= 33) InkSurfaceHost(checkNotNull(canvas),store) else checkNotNull(canvas), LinearLayout.LayoutParams(-1, 0, 1f).apply { setMargins(dp(12), 0, dp(12), dp(12)) })
         updateControls()
     }
     private fun addPageTools(note: PagedPreviewNotebook) {
@@ -251,6 +251,6 @@ class MainActivity : Activity() {
     }
     @Deprecated("Preview uses a single activity")
     override fun onBackPressed() { if (notebook != null) leaveEditor() else super.onBackPressed() }
-    override fun onPause() { canvas?.cancelInk(); save(); super.onPause() }
+    override fun onPause() { canvas?.let { store.detachInk(it) }; canvas?.cancelInk(); save(); super.onPause() }
     override fun onSaveInstanceState(outState: Bundle) { notebook?.let { outState.putString("document", it.documentId) }; super.onSaveInstanceState(outState) }
 }

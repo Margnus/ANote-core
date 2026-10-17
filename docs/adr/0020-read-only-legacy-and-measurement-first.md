@@ -81,3 +81,13 @@ C的实际屏幕拒绝促使修改源图像持有契约，未删除原CPU门禁�
 调整下一候选调查为API33+ [SurfaceControl.Transaction.setBuffer](https://developer.android.com/reference/android/view/SurfaceControl.Transaction)显式releaseCallback/SyncFence边界。尚未采用SurfaceControl作为后端：CPU RGBA到HardwareBuffer的有界上传和生产方完成、原App层级中静态/动态/纸张/裁剪的z序及原子替换、原NoteStore共享executor/drain外ACK与后台/关闭责任均未实现。callback带有效fence时还须确认signal，不将callback触发或Transaction.apply返回当完成；原UI/共享存储worker不做阻塞等待。具体文件级出口复用[C1清单](../C1未决事项.md)，不另建计划authority，不开发更多独立Surface展示来替代普通App集成。
 
 原API26–32完整Path及minSdk26保持，当前CPU holder/UNKNOWN责任契约保持；此节点未新增GPU缓冲区生命周期证明。证据/源码/SDK契约hash见[Android原报告](../../reports/android-render-integration.json)，本机SDK源码hash只绑定所查契约，不证明模拟器系统二进制与该source逐字等价。iOS DEV-036D的provider接入仍按原包/报告有效，Android不继承其结论；M-1/heap/GPU后端比较/任意变换/完全owner丢失/C1/SQLite仍待门禁。
+
+## DEV-036F：有界SurfaceControl候选接入原Android宿主（2026-10-17）
+
+调整E的“尚未采用”为**采用受限的API33+原App接入候选，宿主呈现与释放责任通过，普通UI待验**。原MainActivity使用SurfaceView下层child，InkCanvasView保留上层active输入及完整Path；完整静态帧包含纸张与裁剪，经ImageWriter/Reader上传。只有原ViewRoot applyTransactionOnDraw成功安排完整buffer时才撤去Path，等待/失败/拒绝走完整Path；API26–32不改minSdk而保持原路径。
+
+复用NoteStore的唯一BoundedOwnerExecutor/Handler、原render owner/pool与native许可，在有限drain返回后ACK；关闭render后存储继续工作。上传核对格式/stride并覆盖CPU墨迹、composite、staging与plane的原native allowance。入站fence随事务交付；出站真实releaseCallback的有效SyncFence非阻塞确认完成后，才关闭原生handle并归还CPU source许可。UNKNOWN/无回执/未signal继续保留计费，不以View消失/一次draw/GC/超时替代完成。完全不明交付或清理仍隔离，尚无恢复实证。
+
+真实API36 app-host经原层级的compositor截图对照，证明半透明/静态动态顺序、页面/缩放/尺寸替换、等待完整回退；保存后由新NoteStore重开2页3笔，关闭迟到ACK、真实有效release fence与原生确认丢失后只读协调通过。最终APK 2cfe9f5c…及64原文件保持绑定，报告见[既有Android分范围证据](../../reports/android-render-integration.json)。普通包代码已连接，但CUA未能识别模拟器app，不能把宿主成功或恢复普通PID当作普通UI后端验收。
+
+保留原CPU holder硬件门禁。此决策不冻结生产GPU后端；系统隐藏分配、物理性能、长时未signal/歧义交付、API26–32及厂商运行矩阵、完全owner丢失与跨线程接管仍待验。下一步先完成最终普通包书写/切页/缩放/导航/后台/文件重开与普通PID呈现释放证据；iOS D保持原包范围，跨端DEV-036、M-1/C1/SQLite仍未完成。

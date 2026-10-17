@@ -2,7 +2,7 @@
   "status": "passed",
   "trace_id": "dev034-fixed-viewport-v1",
   "source_report_sha256": {
-    "reports/android-brush-common-tests.json": "4daf96bb68744b999ad93feb6f87db1e8363a18f9559b1d59711cb6648e71f84",
+    "reports/android-brush-common-tests.json": "d121f997381d808f56d4028c79dda1f8e8abbdc6dd0baf34ab1740ac58890e53",
     "reports/ios-host-tests.json": "02cbdb6034bb398254b131cc315e99f65e233ceab2b437cc3b8f94f4d03cdc0e",
     "tools/verify_render_viewport_trace.py": "d4b8a9e66fdf1e5a06800b0c72f737ae3ac1ae94d58a02d071799e77c3f93e81"
   },
@@ -72,43 +72,43 @@
     "android": {
       "queue_wait_bounds_ns": [
         {
-          "submit_elapsed_ns": 71500,
-          "request_to_worker_ns": 134250,
-          "queue_handoff_wait_lower_ns": 62750,
-          "queue_handoff_wait_upper_ns": 134250
+          "submit_elapsed_ns": 467833,
+          "request_to_worker_ns": 606291,
+          "queue_handoff_wait_lower_ns": 138458,
+          "queue_handoff_wait_upper_ns": 606291
         },
         {
-          "submit_elapsed_ns": 159333,
-          "request_to_worker_ns": 189291,
-          "queue_handoff_wait_lower_ns": 29958,
-          "queue_handoff_wait_upper_ns": 189291
+          "submit_elapsed_ns": 1056583,
+          "request_to_worker_ns": 1001250,
+          "queue_handoff_wait_lower_ns": 0,
+          "queue_handoff_wait_upper_ns": 1001250
         },
         {
-          "submit_elapsed_ns": 63125,
-          "request_to_worker_ns": 5334833,
-          "queue_handoff_wait_lower_ns": 5271708,
-          "queue_handoff_wait_upper_ns": 5334833
+          "submit_elapsed_ns": 404541,
+          "request_to_worker_ns": 37758167,
+          "queue_handoff_wait_lower_ns": 37353626,
+          "queue_handoff_wait_upper_ns": 37758167
         },
         {
-          "submit_elapsed_ns": 85417,
-          "request_to_worker_ns": 120250,
-          "queue_handoff_wait_lower_ns": 34833,
-          "queue_handoff_wait_upper_ns": 120250
+          "submit_elapsed_ns": 528417,
+          "request_to_worker_ns": 807833,
+          "queue_handoff_wait_lower_ns": 279416,
+          "queue_handoff_wait_upper_ns": 807833
         }
       ],
       "copies": [
         {
-          "elapsed_ns": 119583,
+          "elapsed_ns": 2007666,
           "row_storage_upper_bytes": 16384
         },
         {
-          "elapsed_ns": 159750,
+          "elapsed_ns": 689417,
           "row_storage_upper_bytes": 16384
         }
       ],
-      "first_native_resident_hold_ns": 14334,
-      "first_native_retired_hold_ns": 13176666,
-      "closed_to_drained_ns": 42250
+      "first_native_resident_hold_ns": 81875,
+      "first_native_retired_hold_ns": 141790875,
+      "closed_to_drained_ns": 238333
     },
     "apple": {
       "queue_wait_bounds_ns": [

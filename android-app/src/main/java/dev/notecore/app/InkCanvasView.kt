@@ -11,6 +11,8 @@ import kotlin.math.hypot
 /** Thin native input/render adapter. Paths are cached per committed revision, not rebuilt per MOVE. */
 @android.annotation.SuppressLint("ViewConstructor") // deliberately programmatic: a canonical notebook is mandatory
 class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, private val changed: () -> Unit, private val error: (String) -> Unit) : View(context) {
+    internal var renderStore: NoteStore? = null
+    internal var surfaceHost: InkSurfaceHost? = null
     var fingerDrawing = true
     var penColor = 0xff253247.toInt()
     var penWidth = 2.5
@@ -61,7 +63,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         }
         navIds = ids; navX = x; navY = y; navSpan = span
     }
-    init { setBackgroundColor(0xffedf2f6.toInt()); isFocusable = true; contentDescription = "手写画布，0笔" }
+    init { setBackgroundColor(Color.TRANSPARENT); isFocusable = true; contentDescription = "手写画布，0笔" }
 
     internal var observedCanvasHardware: Boolean? = null
         private set
@@ -76,7 +78,49 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             android.util.Log.d("NoteCoreRender", "target-observed hardware=${canvas.isHardwareAccelerated} backend=canonical-path width=$width height=$height")
         }
         if (scale <= 0f) return
+        val staticFrame = renderStore?.drawCommittedInk(this, canvas) == true
+        if (!staticFrame) canvas.drawColor(0xffedf2f6.toInt())
         canvas.save(); canvas.translate(offsetX, offsetY); canvas.scale(scale, scale)
+        val page = notebook.currentPage
+        if (!staticFrame) {
+            paintPaperInScene(canvas)
+            if (cachedVersion != notebook.changeVersion || cachedPage != page.id) {
+                paths.clear()
+                for (s in 0 until notebook.strokeCount) {
+                    val stroke = notebook.stroke(s); val samples = stroke.samples; val n = samples.size
+                    val path = Path(); val x = samples.x(0).toFloat(); val sy = samples.y(0).toFloat()
+                    path.moveTo(x, sy)
+                    for (p in 1 until n) path.lineTo(samples.x(p).toFloat(), samples.y(p).toFloat())
+                    val m = stroke.transform
+                    val matrix = Matrix().apply { setValues(floatArrayOf(m.a.toFloat(), m.c.toFloat(), m.tx.toFloat(),
+                        m.b.toFloat(), m.d.toFloat(), m.ty.toFloat(), 0f, 0f, 1f)) }
+                    paths.add(RenderStroke(path, stroke.brush.argb, stroke.brush.width.toFloat(), x, sy,
+                        n == 1 || (0 until n).all { samples.x(it).toFloat() == x && samples.y(it).toFloat() == sy }, matrix))
+                }
+                cachedVersion = notebook.changeVersion; cachedPage = page.id
+                contentDescription = context.getString(R.string.canvas_description, notebook.strokeCount)
+            }
+            for (stroke in paths) {
+                canvas.save(); canvas.concat(stroke.matrix)
+                ink.color = stroke.color; ink.strokeWidth = stroke.width; ink.style = Paint.Style.STROKE
+                if (stroke.dot) { ink.style = Paint.Style.FILL; canvas.drawCircle(stroke.x, stroke.y, stroke.width / 2, ink) }
+                else canvas.drawPath(stroke.path, ink)
+                canvas.restore()
+            }
+        }
+        canvas.clipRect(0f,0f,notebook.currentPage.width.toFloat(),notebook.currentPage.height.toFloat())
+        active?.let {
+            ink.style = Paint.Style.STROKE; ink.color = penColor; ink.strokeWidth = penWidth.toFloat()
+            if (moved) canvas.drawPath(it, ink) else { ink.style = Paint.Style.FILL; canvas.drawCircle(startX, startY, penWidth.toFloat() / 2, ink) }
+        }
+        canvas.restore()
+    }
+    internal fun paintStaticPaper(canvas: Canvas) {
+        canvas.drawColor(0xffedf2f6.toInt())
+        canvas.save(); canvas.translate(offsetX,offsetY); canvas.scale(scale,scale)
+        paintPaperInScene(canvas); canvas.restore()
+    }
+    private fun paintPaperInScene(canvas: Canvas) {
         val page = notebook.currentPage; val pw = page.width.toFloat(); val ph = page.height.toFloat()
         canvas.drawRect(0f, 0f, pw, ph, paper)
         canvas.clipRect(0f, 0f, pw, ph)
@@ -93,34 +137,6 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             var x = spacing
             while (x < pw) { var y = spacing; while (y < ph) { canvas.drawCircle(x, y, 0.8f, guide); y += spacing }; x += spacing }
         }
-        if (cachedVersion != notebook.changeVersion || cachedPage != page.id) {
-            paths.clear()
-            for (s in 0 until notebook.strokeCount) {
-                val stroke = notebook.stroke(s); val samples = stroke.samples; val n = samples.size
-                val path = Path(); val x = samples.x(0).toFloat(); val sy = samples.y(0).toFloat()
-                path.moveTo(x, sy)
-                for (p in 1 until n) path.lineTo(samples.x(p).toFloat(), samples.y(p).toFloat())
-                val m = stroke.transform
-                val matrix = Matrix().apply { setValues(floatArrayOf(m.a.toFloat(), m.c.toFloat(), m.tx.toFloat(),
-                    m.b.toFloat(), m.d.toFloat(), m.ty.toFloat(), 0f, 0f, 1f)) }
-                paths.add(RenderStroke(path, stroke.brush.argb, stroke.brush.width.toFloat(), x, sy,
-                    n == 1 || (0 until n).all { samples.x(it).toFloat() == x && samples.y(it).toFloat() == sy }, matrix))
-            }
-            cachedVersion = notebook.changeVersion; cachedPage = page.id
-            contentDescription = context.getString(R.string.canvas_description, notebook.strokeCount)
-        }
-        for (stroke in paths) {
-            canvas.save(); canvas.concat(stroke.matrix)
-            ink.color = stroke.color; ink.strokeWidth = stroke.width; ink.style = Paint.Style.STROKE
-            if (stroke.dot) { ink.style = Paint.Style.FILL; canvas.drawCircle(stroke.x, stroke.y, stroke.width / 2, ink) }
-            else canvas.drawPath(stroke.path, ink)
-            canvas.restore()
-        }
-        active?.let {
-            ink.style = Paint.Style.STROKE; ink.color = penColor; ink.strokeWidth = penWidth.toFloat()
-            if (moved) canvas.drawPath(it, ink) else { ink.style = Paint.Style.FILL; canvas.drawCircle(startX, startY, penWidth.toFloat() / 2, ink) }
-        }
-        canvas.restore()
     }
     private fun point(event: MotionEvent, index: Int, history: Int = -1): Boolean {
         val x = ((if (history < 0) event.getX(index) else event.getHistoricalX(index, history)) - offsetX) / scale
@@ -186,5 +202,5 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     override fun performClick(): Boolean { super.performClick(); return true }
     fun cancelInk() { notebook.cancelStroke(); active = null; activePointer = -1; activeStylus = false; navigating = false; navIds = emptyList(); parent?.requestDisallowInterceptTouchEvent(false); invalidate() }
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) { refreshPage(); viewport.resize(w.toDouble(), h.toDouble()) }
-    override fun onDetachedFromWindow() { cancelInk(); super.onDetachedFromWindow() }
+    override fun onDetachedFromWindow() { renderStore?.detachInk(this); cancelInk(); super.onDetachedFromWindow() }
 }

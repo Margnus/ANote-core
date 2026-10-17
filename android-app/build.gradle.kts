@@ -28,6 +28,7 @@ tasks.register("verifyPreviewAndroid") {
         val inputs = rootProject.fileTree("shared-core/src/commonMain") { include("**/*.kt") }.files +
             rootProject.fileTree("canvas-core/src/commonMain") { include("**/*.kt") }.files +
             rootProject.fileTree("canvas-core/src/jvmAndAndroidMain") { include("**/*.kt") }.files +
+            rootProject.fileTree("canvas-core/src/androidMain") { include("**/*.kt") }.files +
             fileTree("src/main").files + listOf(buildFile, rootProject.buildFile,
                 rootProject.file("settings.gradle.kts"), rootProject.file("gradle.properties"),
                 rootProject.file("canvas-core/build.gradle.kts"), rootProject.file("shared-core/build.gradle.kts"),
@@ -45,7 +46,7 @@ tasks.register("verifyBrushPathTestBuild") {
     dependsOn("assembleDebug", "assembleDebugAndroidTest")
     doLast {
         val inputs = fileTree("src").files + rootProject.fileTree("canvas-core/src/commonMain").files +
-            rootProject.fileTree("canvas-core/src/jvmAndAndroidMain").files + rootProject.fileTree("shared-core/src/commonMain").files +
+            rootProject.fileTree("canvas-core/src/jvmAndAndroidMain").files + rootProject.fileTree("canvas-core/src/androidMain").files + rootProject.fileTree("shared-core/src/commonMain").files +
             rootProject.fileTree("fixtures/geometry").files + listOf(buildFile, rootProject.buildFile,
                 rootProject.file("canvas-core/build.gradle.kts"), rootProject.file("shared-core/build.gradle.kts"),
                 rootProject.file("settings.gradle.kts"), rootProject.file("gradle.properties"),
