@@ -43,10 +43,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "3542bd3866346abae159e5a3655534b1852ea690646cc94c30f77d154c9c4569",
+      "report_sha256": "9f9fcb7ec74788b1966f9117ff2ec5b46e319f58c59b776ef296a7f1e27bcebb",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 150,
+      "matched_bindings": 151,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -83,12 +83,20 @@
       "scope": "Same fixed synthetic scroll/zoom responsibility trace on actual ART Bitmap and iOS app-host Swift worker/CGImage; no ordinary app integration. Timings are single exploratory runs with deliberate worker gate/owner polling. Wait bounds bracket admission within submit and end at beforeCompute; include handoff overhead, not isolated scheduler latency. Row storage/charge is not peak heap or GPU residency."
     },
     "android-render-integration": {
-      "report_sha256": "0e387e27dad294be569253079aa5f4e59b0b7b01ac0819c02d2675a724a13c45",
+      "report_sha256": "2791851b3773c072790ad17ea0c29b42ce279fb843d9679ef41ce0282717d751",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 75,
+      "matched_bindings": 76,
       "mismatches": [],
       "scope": "Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, cleanup UNKNOWN, actual-receipt recovery after injected post-handoff confirmation loss, delayed owner settlement/backpressure/shared storage and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim."
+    },
+    "sqlite-platform-capabilities": {
+      "report_sha256": "9acb50539e645370ad321ec2b7035be6283f2945eeeebc0bd2a1b3e1aed77789",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 66,
+      "mismatches": [],
+      "scope": "Synthetic state/operation atomicity, actual writer SIGKILL before commit/after commit before receipt/after receipt, replay/conflict/stale rejection, transaction and DDL/version rollback, SQLite max_page_count FULL, read-only unknown schema/corruption refusal. Platform-specific probes are test-only and are not shared-data or App owner integration."
     }
   },
   "errors": [],
@@ -96,5 +104,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "8a9e6aa61ea42b63b640a2f4477131b78dc8688d7af617bfeb6de499f72f92ab"
+  "audit_tool_sha256": "3558f11a5e0016a3f297ee73d731ae3996372c2e68d89c73d7f2a9f151a497a6"
 }

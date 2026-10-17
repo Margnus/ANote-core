@@ -99,3 +99,9 @@ F的统一UNKNOWN会永久阻止交付异常后的迟到回执结算。调整为
 真实原Android层级在实际ViewRoot交付成功后注入确认丢失；callback后软件延迟结算时，旧48,906,240逻辑字节/许可保持，新文档完整Path不发布新池，原存储worker仍能保存。gate放行不能代替真实fence检查；完成后旧owner归零并恢复新帧。原清理UNKNOWN反例保持，完整帧/输入叠加/页面缩放尺寸/迟到ACK/保存新owner重开回归通过。新APK6a417b5d…及原报告[分范围证据](../../reports/android-render-integration.json)绑定该实现。
 
 此注入不证明真实长期未signal或厂商异常率；全部交付/清理失败矩阵与普通包CUA UI仍待验。G前后64文件保持；AVD恢复后、G安装/测试前观察到相对F历史1份共同文件hash变化、原因未核，未覆盖现有文件；历史差异和本轮保留分开。M-1/heap/API26–32/完全owner丢失/任意变换/C1/SQLite未放行。
+
+## DEV-038：SQLite恢复能力调查与持久化候选边界（2026-10-17）
+
+采用系统SQLite事务、唯一op身份及事务内base修订核对作为生产port候选；生产实施仍在C1之后。真实Android ART/API36（SQLite3.44.3）与iOS Simulator（3.54.0）隔离进程各20阶段证明合成根/操作原子更新、未提交SIGKILL回滚、提交丢回执/回执后SIGKILL重开、同op重放与payload/base冲突拒绝、事务/DDL版本回滚、受限页数FULL及非破坏性只读未知/损坏拒绝。报告与具体范围见[既有C1入口](../C1未决事项.md)和[能力证据](../../reports/sqlite-platform-capabilities.json)。
+
+明确完整操作身份与根写入必须在同一事务；durable receipt在提交成功之后，模糊结果按原op协调。新版本/损坏不自动重建删除，生产port配置显式WAL/同步级别并记录能力。probe只是隔离可执行证据，不是shared-data或App存储接入；并发writer、实际磁盘IO/断电/fsync/设备、资源事务/GC/checkpoint及生产schema迁移仍未证明。保留原预览文件、同owner/有界executor和C1顺序，不因SQLite局部通过而冻结架构或标DATA整项完成。
