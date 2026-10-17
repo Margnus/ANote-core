@@ -87,6 +87,10 @@ final class AppleBoundedOwnerExecutor {
             throw AppleExecutorError.wrongOwner
         }
     }
+    func checkOutsideDrain() throws {
+        try checkOwner()
+        guard !draining else { throw AppleExecutorError.recursiveDrain }
+    }
     func submit<Input, Output>(input: Input, chargedBytes: Int64,
                               compute: @escaping (Input) throws -> Output,
                               receive: @escaping (Input, AppleWorkResult<Output>) throws -> AppleResultDisposition) throws -> AppleWorkAdmission {

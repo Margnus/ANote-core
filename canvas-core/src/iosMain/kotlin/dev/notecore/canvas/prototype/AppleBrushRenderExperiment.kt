@@ -47,16 +47,17 @@ class AppleBrushOwnerExperiment(
     fun reject(job: AppleBrushJobExperiment): Boolean = owner.rejectDispatch(job.job)
     fun admitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId, originX: Double, originY: Double,
         width: Int, height: Int, pixelSize: Double, workingBytes: Long, nativeAllowance: Long,
+        maxEdgeTests: Long = 20_000_000,
     ): AppleBrushJobExperiment? {
         check()
-        if (workingBytes <= 0 || nativeAllowance < 0 || width !in 1..4096 || height !in 1..4096 || width.toLong() * height > 8388608 ||
+        if (workingBytes <= 0 || nativeAllowance < 0 || maxEdgeTests <= 0 || width !in 1..4096 || height !in 1..4096 || width.toLong() * height > 8388608 ||
             !originX.isFinite() || !originY.isFinite() || kotlin.math.abs(originX) > 1e9 || kotlin.math.abs(originY) > 1e9 ||
             !pixelSize.isFinite() || pixelSize !in 0.0001..1e6 ||
             kotlin.math.abs(originX + ((width - 1) / 128) * 128 * pixelSize) > 1e9 ||
             kotlin.math.abs(originY + ((height - 1) / 128) * 128 * pixelSize) > 1e9) return null
         return (owner.admitPage(scene, frame, layer,
             BrushFrameGridPoc(PointD(originX, originY), width, height, pixelSize, 4),
-            workingBytes, nativeAllowance) as? BrushRenderAdmissionPoc.Accepted)?.let { AppleBrushJobExperiment(it.job) }
+            workingBytes, nativeAllowance, maxEdgeTests) as? BrushRenderAdmissionPoc.Accepted)?.let { AppleBrushJobExperiment(it.job) }
     }
     fun receive(job: AppleBrushJobExperiment, result: AppleBrushResultExperiment): Boolean = owner.receive(job.job, result.result)
     fun acknowledge(job: AppleBrushJobExperiment): String = owner.acknowledge(job.job).name

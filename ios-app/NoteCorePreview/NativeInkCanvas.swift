@@ -4,6 +4,7 @@ import NoteCanvasPrototype
 
 struct NativeInkCanvas: UIViewRepresentable {
     let note: PagedPreviewNotebook
+    let renderModel: PreviewModel
     let color: Int32
     let width: Double
     let finger: Bool
@@ -12,7 +13,10 @@ struct NativeInkCanvas: UIViewRepresentable {
     let viewportRatio: Double
     let changed: () -> Void
     let failed: (String) -> Void
-    func makeUIView(context: Context) -> InkUIView { let view = InkUIView(note: note); view.lastViewportRequest = viewportRequest; return view }
+    func makeUIView(context: Context) -> InkUIView {
+        let view = InkUIView(note: note); view.renderModel = renderModel
+        view.lastViewportRequest = viewportRequest; return view
+    }
     func updateUIView(_ view: InkUIView, context: Context) {
         if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width { view.cancelInk() }
         view.refreshPage()
@@ -24,11 +28,15 @@ struct NativeInkCanvas: UIViewRepresentable {
         }
         view.changed = changed; view.failed = failed; view.setNeedsDisplay()
     }
-    static func dismantleUIView(_ view: InkUIView, coordinator: ()) { view.cancelInk() }
+    static func dismantleUIView(_ view: InkUIView, coordinator: ()) {
+        view.cancelInk(); view.renderModel?.detachInk(surface: view.surfaceIdentity)
+    }
 }
 
 final class InkUIView: UIView {
     let note: PagedPreviewNotebook
+    weak var renderModel: PreviewModel?
+    let surfaceIdentity = UUID()
     var changed: () -> Void = { }
     var failed: (String) -> Void = { _ in }
     var penColor: Int32 = Int32(bitPattern: 0xff253247)
@@ -92,6 +100,10 @@ final class InkUIView: UIView {
         if oldBounds != .zero && oldBounds != bounds { cancelInk() }
         oldBounds = bounds; refreshPage(); viewport.resize(width: bounds.width, height: bounds.height)
     }
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil { renderModel?.detachInk(surface: surfaceIdentity) }
+    }
     override func draw(_ rect: CGRect) {
         guard let c = UIGraphicsGetCurrentContext(), scale > 0 else { return }
         c.saveGState(); c.translateBy(x: offsetX, y: offsetY); c.scaleBy(x: scale, y: scale)
@@ -120,30 +132,33 @@ final class InkUIView: UIView {
                 }
             }
         }
-        if cachedVersion != note.changeVersion || cachedPage != page.id.value {
-            cached = (0..<note.strokeCount).map { index in
-                let stroke = note.stroke(index: index), samples = stroke.samples, m = stroke.transform
-                let p = UIBezierPath(); p.lineCapStyle = .round; p.lineJoinStyle = .round
-                let start = CGPoint(x: samples.x(index: 0), y: samples.y(index: 0))
-                p.move(to: start)
-                var moved = false
-                for point in 1..<samples.size {
-                    let next = CGPoint(x: samples.x(index: point), y: samples.y(index: point))
-                    p.addLine(to: next); moved = moved || next != start
+        let committedFrameDrawn = renderModel?.drawCommittedInk(c, note: note, view: self) ?? false
+        if !committedFrameDrawn {
+            if cachedVersion != note.changeVersion || cachedPage != page.id.value {
+                cached = (0..<note.strokeCount).map { index in
+                    let stroke = note.stroke(index: index), samples = stroke.samples, m = stroke.transform
+                    let p = UIBezierPath(); p.lineCapStyle = .round; p.lineJoinStyle = .round
+                    let start = CGPoint(x: samples.x(index: 0), y: samples.y(index: 0))
+                    p.move(to: start)
+                    var moved = false
+                    for point in 1..<samples.size {
+                        let next = CGPoint(x: samples.x(index: point), y: samples.y(index: point))
+                        p.addLine(to: next); moved = moved || next != start
+                    }
+                    return CachedStroke(path: p, color: inkColor(stroke.brush.argb), width: stroke.brush.width,
+                        transform: CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty), dot: moved ? nil : start)
                 }
-                return CachedStroke(path: p, color: inkColor(stroke.brush.argb), width: stroke.brush.width,
-                    transform: CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty), dot: moved ? nil : start)
+                cachedVersion = note.changeVersion; cachedPage = page.id.value
+                accessibilityValue = "\(note.strokeCount)笔"
             }
-            cachedVersion = note.changeVersion; cachedPage = page.id.value
-            accessibilityValue = "\(note.strokeCount)笔"
-        }
-        for stroke in cached {
-            c.saveGState(); c.concatenate(stroke.transform)
-            if let dot = stroke.dot {
-                stroke.color.setFill()
-                c.fillEllipse(in: CGRect(x: dot.x - stroke.width / 2, y: dot.y - stroke.width / 2, width: stroke.width, height: stroke.width))
-            } else { stroke.color.setStroke(); stroke.path.lineWidth = stroke.width; stroke.path.stroke() }
-            c.restoreGState()
+            for stroke in cached {
+                c.saveGState(); c.concatenate(stroke.transform)
+                if let dot = stroke.dot {
+                    stroke.color.setFill()
+                    c.fillEllipse(in: CGRect(x: dot.x - stroke.width / 2, y: dot.y - stroke.width / 2, width: stroke.width, height: stroke.width))
+                } else { stroke.color.setStroke(); stroke.path.lineWidth = stroke.width; stroke.path.stroke() }
+                c.restoreGState()
+            }
         }
         if let path = path { inkColor(penColor).setStroke(); path.lineWidth = penWidth; path.stroke() }
         c.restoreGState()

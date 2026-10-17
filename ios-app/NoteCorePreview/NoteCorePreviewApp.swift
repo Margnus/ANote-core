@@ -24,14 +24,158 @@ final class PreviewModel: ObservableObject {
     @Published var exportDocument: PreviewBackup?
     @Published var transferBusy = false
     private let directory: URL
+    private let beforeInkCompute: () throws -> Void
+    private let inkReleaseBoundary: (Bool) throws -> Void
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024)
     private var savedRoot: DocumentRoot?
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: 256 * 1024 * 1024,
-        onOwnerProgress: { [weak self] in self?.pumpWrites() })
-    init(directory: URL? = nil) {
+        onOwnerProgress: { [weak self] in self?.inkOwnerProgress(); self?.pumpWrites() })
+    private struct InkFrameKey: Equatable {
+        let document: String
+        let page: String
+        let revision: Int64
+        let surface: UUID
+        let width: Int32
+        let height: Int32
+        let originX: Double
+        let originY: Double
+        let pixelSize: Double
+        var rect: CGRect { CGRect(x: originX, y: originY, width: Double(width) * pixelSize, height: Double(height) * pixelSize) }
+    }
+    // One render responsibility may outlive its view. No retiring payload queue or new worker.
+    private var inkRenderer: AppleBrushRenderExperiment?
+    private var inkImage: AppleBrushImageExperiment?
+    private var inkPending: AppleBrushDispatchExperiment?
+    private var inkKey: InkFrameKey?
+    private var inkAttempt: InkFrameKey?
+    private var inkGeneration: Int64 = 0
+    private var inkLoggedGeneration: Int64 = -1
+    private var inkRetiring = false
+    private var inkRetryOnProgress = false
+    private weak var inkView: InkUIView?
+    private(set) var inkFramePublications = 0
+    private(set) var inkFrameDraws = 0
+    private(set) var inkRejectedTargets = 0
+    var inkChargedBytes: Int64 { precondition(Thread.isMainThread); return inkRenderer?.chargedBytes ?? 0 }
+    var inkOwnerRetained: Bool { precondition(Thread.isMainThread); return inkRenderer != nil }
+
+    /// Called only on the model owner after the shared executor's finite drain has returned.
+    private func inkOwnerProgress() {
+        guard let renderer = inkRenderer else { return }
+        _ = try! renderer.settleAfterDrain { [self] item, ack in
+            guard item === inkPending else { return }
+            inkPending = nil
+            guard !inkRetiring, ack == "PUBLISHED", let key = inkKey, key == inkAttempt,
+                  current?.documentId == key.document, current?.changeVersion == key.revision,
+                  current?.currentPageId.value == key.page, inkView?.surfaceIdentity == key.surface else { return }
+            switch try! AppleBrushImageExperiment.create(renderer, item, releaseBoundary: inkReleaseBoundary) {
+            case .ready(let image): inkImage = image; inkFramePublications += 1
+            case .cleanupRequired(let image): inkImage = image // Retain UNKNOWN and its charge.
+            case .rejected: break // The canonical Path remains the complete visible result.
+            }
+        }
+        if inkRetiring && renderer.isDrained {
+            inkRenderer = nil; inkRetiring = false
+        }
+        if inkRetryOnProgress { inkRetryOnProgress = false; inkAttempt = nil }
+        inkView?.setNeedsDisplay()
+    }
+    func detachInk(surface: UUID) {
         precondition(Thread.isMainThread)
+        guard inkView?.surfaceIdentity == surface else { return }
+        retireInk(); inkView = nil
+    }
+    private func retireInk() {
+        precondition(Thread.isMainThread)
+        inkKey = nil; inkAttempt = nil; inkPending = nil; inkRetryOnProgress = false
+        if let image = inkImage, (try! image.close()) { inkImage = nil }
+        if let renderer = inkRenderer {
+            inkRetiring = true; try! renderer.close()
+            if renderer.isDrained { inkRenderer = nil; inkRetiring = false }
+        }
+    }
+    func resumeFromBackground() { precondition(Thread.isMainThread); inkView?.setNeedsDisplay() }
+    @discardableResult func reconcileInkRelease() -> Bool {
+        precondition(Thread.isMainThread)
+        guard let image = inkImage, (try! image.reconcileReleased()) else { return false }
+        inkImage = nil; inkOwnerProgress(); return true
+    }
+
+    /// Runtime capability gate: only an actual bitmap destination consumes the CPU holder.
+    /// Rejection keeps the existing full canonical Path renderer; no partial frame is shown.
+    func drawCommittedInk(_ context: CGContext, note: PagedPreviewNotebook, view: InkUIView) -> Bool {
+        precondition(Thread.isMainThread)
+        guard current === note else { return false }
+        if inkView !== view {
+            retireInk(); inkView = view
+        }
+        guard context.data != nil else {
+            inkRejectedTargets += 1
+            #if DEBUG
+            if inkRejectedTargets == 1 { NSLog("NOTECORE_RENDER target-rejected non-bitmap") }
+            #endif
+            return false
+        }
+        let viewport = view.viewport, density = Double(view.contentScaleFactor)
+        let width = ceil(view.bounds.width * density), height = ceil(view.bounds.height * density)
+        let pixelSize = 1 / (viewport.scale * density)
+        guard width.isFinite, height.isFinite, width >= 1, height >= 1, width <= 4096, height <= 4096,
+              width * height <= 4194304, pixelSize.isFinite, pixelSize >= 0.0001, pixelSize <= 1e6 else { return false }
+        let key = InkFrameKey(document: note.documentId, page: note.currentPageId.value, revision: note.changeVersion,
+            surface: view.surfaceIdentity, width: Int32(width), height: Int32(height),
+            originX: -viewport.offsetX / viewport.scale, originY: -viewport.offsetY / viewport.scale, pixelSize: pixelSize)
+        if inkRetiring { return false } // A new document cannot create another pool before the old owner drains.
+        if key != inkKey {
+            guard inkGeneration < Int64.max else { return false }
+            inkGeneration += 1; inkKey = key; inkAttempt = nil; inkPending = nil
+            if let image = inkImage {
+                guard try! image.close() else { retireInk(); return false }
+                inkImage = nil
+            }
+            let root = note.snapshot()
+            let frame = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision, viewportVersion: inkGeneration,
+                sessionGeneration: navigationEpoch, surfaceGeneration: inkGeneration, requestSequence: inkGeneration)
+            if let renderer = inkRenderer { try! renderer.expect(frame, layer: note.currentPage.layerId) }
+            else {
+                inkRenderer = try! AppleBrushRenderExperiment(frame: frame, layer: note.currentPage.layerId,
+                    totalBytes: 64 * 1024 * 1024, maxJobs: 2, residentBytes: 48 * 1024 * 1024, sharedExecutor: executor)
+            }
+        }
+        if let image = inkImage, key == inkAttempt {
+            context.saveGState()
+            context.translateBy(x: key.rect.minX, y: key.rect.maxY); context.scaleBy(x: 1, y: -1)
+            let drawn = try! image.draw(context, in: CGRect(origin: .zero, size: key.rect.size))
+            context.restoreGState()
+            if drawn {
+                inkFrameDraws += 1
+                #if DEBUG
+                if inkLoggedGeneration != inkGeneration {
+                    inkLoggedGeneration = inkGeneration
+                    NSLog("NOTECORE_RENDER frame-presented w=%ld h=%ld charged=%lld", Int(key.width), Int(key.height), inkChargedBytes)
+                }
+                #endif
+                return true
+            }
+        }
+        if inkAttempt != key, let renderer = inkRenderer {
+            inkAttempt = key
+            let root = note.snapshot()
+            let frame = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision, viewportVersion: inkGeneration,
+                sessionGeneration: navigationEpoch, surfaceGeneration: inkGeneration, requestSequence: inkGeneration)
+            inkPending = try! renderer.submitPage(scene: root.scene, frame: frame, layer: note.currentPage.layerId,
+                originX: key.originX, originY: key.originY, width: key.width, height: key.height, pixelSize: key.pixelSize,
+                nativeAllowance: Int64(key.width) * Int64(key.height) * 8, workingBytes: 2 * 1024 * 1024,
+                maxEdgeTests: 100000000, beforeCompute: beforeInkCompute)
+            inkRetryOnProgress = inkPending == nil
+        }
+        return false
+    }
+    init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }) {
+        precondition(Thread.isMainThread)
+        self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
         self.directory = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PreviewNotes", isDirectory: true)
         refresh()
     }
@@ -234,9 +378,10 @@ final class PreviewModel: ObservableObject {
     func close() {
         current?.cancelStroke()
         guard save(), current?.retire() == true else { return }
+        retireInk()
         navigationEpoch += 1; current = nil; savedRoot = nil; refresh()
     }
-    func flushForBackground() { current?.cancelStroke(); save() }
+    func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
     func editPage(content: Bool = true, _ edit: (PagedPreviewNotebook) -> Bool) {
         guard let note = current else { return }
         note.cancelStroke()
@@ -252,7 +397,9 @@ struct NoteCorePreviewApp: App {
     @Environment(\.scenePhase) private var scenePhase
     var body: some Scene {
         WindowGroup { PreviewRoot(model: model).preferredColorScheme(.light) }
-            .onChange(of: scenePhase) { _, phase in if phase != .active { model.flushForBackground() } }
+            .onChange(of: scenePhase) { _, phase in
+                if phase != .active { model.flushForBackground() } else { model.resumeFromBackground() }
+            }
     }
 }
 
@@ -332,7 +479,7 @@ struct PreviewRoot: View {
                         }
                     }.padding(.horizontal).frame(minHeight: 44)
                     Text(model.status).font(.caption).foregroundStyle(.secondary)
-                    NativeInkCanvas(note: note, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
+                    NativeInkCanvas(note: note, renderModel: model, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
                         changed: { model.changed() }, failed: { model.status = $0 })
                         .id(note.documentId)
                         .padding(.horizontal, 12).padding(.bottom, 8)

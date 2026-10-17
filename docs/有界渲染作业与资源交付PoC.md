@@ -74,3 +74,15 @@ Android 实际 Bitmap allocationByteCount 8,192，加 staging 8,192，落在 16,
 此节点验证共同278、ART93、Native79、Swift宿主18，单列不相加。源码/产物见原报告入口；XCTest后恢复普通包并核对payload，不将UI-001转移到新包。本轮没有真机/heap/帧指标，不据130×130验证宣称8百万像素上限均可在交互帧预算内完成。maxEdgeTests/资源上限是可拒绝的工作准入，不是已测帧率；普通App依旧未消费新后端。
 
 下一步在原宿主owner接入有限批量drain/ACK/UNKNOWN保留与真实View呈现；完整静态帧与动态笔交替、导航/后台/重开尚未验收，DEV-036整体保持进行中。A中的“只128×128请求区域”是其历史边界，B扩大了有界输出能力，未开放笔刷或冻结C1。
+
+## DEV-036C：原宿主共享owner与实际目标分流（2026-10-17记录）
+
+Apple render adapter允许注入PreviewModel已有的执行器，借用模式关闭只关闭原render owner，绝不stop共用存储worker。executor新增owner侧“必须位于drain之外”检查；adapter结算前还核对ACK票据已不在执行器中，禁止receive内提前缩减。Model只保留一个adapter，旧owner未drained时不新建第二资源池，新文档可使用完整Path回退；最多2个render作业、声明64MiB total/48MiB resident。纸张、活跃笔和坐标仍由原View负责；新静态帧和完整规范Path互斥，不拼接半帧。
+
+CPU destination时，Model从同一canonical snapshot/layer准备包含页面、revision、surface、viewport网格的请求，旧页/尺寸/视口取消但原任务预算保留到真实ACK。主线程有限批量onOwnerProgress结算后才创建唯一holder，弱View通知不承担责任；View拆除或导航/后台关闭后，Model继续持有pending/UNKNOWN责任。已确认ARC引用释放才归还native permit；UNKNOWN没有自动破坏性重试，保留holder，显式只读协调可结束责任。原native副本2份声明与CPU输出同池计费；CoreGraphics、UIKit、fallback Path、GC和GPU隐藏驻留不是此声明值证明的heap总上限。
+
+四项新增真实app-host测试覆盖：InkUIView CPU目标像素和方向与原绘制对照；共享worker中render关闭后仍保存/重开3笔；渲染被阻塞时View对象确实销毁、Model关闭后保持charge到迟到ACK；UNKNOWN释放仅协调后归零；页/视口/尺寸变化不画旧静态帧、后台恢复可再请求。另在原重送测试中验证receiver内结算被拒绝。22项宿主、79项Native与278项共享分别通过，Android93项来源未变，不把宿主增加计入共同/Android次数。
+
+**真实屏幕结果与CPU宿主不同**：最终普通包1389b318…的普通PID7830只记录data不可访问的目标拒绝，未观察到新帧在普通屏幕消费；详见[报告](../reports/ios-render-integration.json)。DEBUG条件修正后重新绑定源码/宿主/包并恢复完整payload。CUA通过Device Hub验证最终包回退路径下的分页、实写、缩放、后台和文件重开，2页3笔/逐页2、1；5份原文件hash均未变。CPU宿主成功不能升级为屏幕/GPU成功，动态笔到新静态帧的普通屏幕交替仍未验收。
+
+收口采用共享owner与回调外ACK，保留运行时CPU能力门禁；当前普通屏幕不满足已测holder契约，继续原Path。下一接入必须补实际目标复制/保留与释放责任证明，不能直接移除检查。M-1/C1/GPU/heap/SQLite、Android普通App切换未验收。

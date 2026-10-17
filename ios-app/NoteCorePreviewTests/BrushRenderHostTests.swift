@@ -1,10 +1,130 @@
 import XCTest
 import CoreGraphics
+import UIKit
 import NoteCanvasPrototype
 @testable import NoteCorePreview
 
 // Actual app-host Kotlin/Native render -> existing Swift worker -> CGImage responsibility.
 final class BrushRenderHostTests: XCTestCase {
+    @MainActor private func preview(before: @escaping () throws -> Void = {},
+        release: @escaping (Bool) throws -> Void = { _ in }
+    ) throws -> (PreviewModel, InkUIView) {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("notecore-ink-host-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let model = PreviewModel(directory: directory, beforeInkCompute: before, inkReleaseBoundary: release)
+        model.create()
+        let note = try XCTUnwrap(model.current)
+        XCTAssertTrue(note.setPaper(width: 200, height: 200, paper: .blank))
+        for color: UInt32 in [0x80ff0000, 0x800000ff] {
+            note.selectPen(argb: Int32(bitPattern: color), width: 10)
+            XCTAssertTrue(note.beginStroke(x: 50, y: 40, pressure: 1, timeMicros: 0))
+            XCTAssertTrue(note.endStroke(x: 50, y: 40, pressure: 1, timeMicros: 1))
+        }
+        model.changed()
+        let view = InkUIView(note: note); view.renderModel = model; view.contentScaleFactor = 1
+        view.frame = CGRect(x: 0, y: 0, width: 200, height: 200); view.layoutIfNeeded()
+        return (model, view)
+    }
+    @MainActor private func viewImage(_ view: InkUIView) -> CGImage {
+        let format = UIGraphicsImageRendererFormat(); format.scale = 1; format.preferredRange = .standard
+        return UIGraphicsImageRenderer(size: view.bounds.size, format: format).image { _ in view.draw(view.bounds) }.cgImage!
+    }
+    private func pixel(_ image: CGImage, _ x: Int, _ y: Int) throws -> [Int] {
+        let context = try XCTUnwrap(CGContext(data: nil, width: image.width, height: image.height,
+            bitsPerComponent: 8, bytesPerRow: image.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        let bytes = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
+        return (0..<4).map { Int(bytes[(y * image.width + x) * 4 + $0]) }
+    }
+    @MainActor private func eventually(_ condition: () -> Bool) async throws {
+        let until = Date().addingTimeInterval(10)
+        var success = condition()
+        while !success && Date() < until {
+            try await Task.sleep(nanoseconds: 10_000_000); success = condition()
+        }
+        XCTAssertTrue(success)
+    }
+    @MainActor func testPreviewUIViewConsumesSharedFrameThenDetachKeepsStorageUsable() async throws {
+        let (model, view) = try preview()
+        let note = view.note, id = note.documentId
+        let before = viewImage(view)
+        XCTAssertEqual(model.inkRejectedTargets, 0)
+        try await eventually { model.inkFramePublications > 0 }
+        let after = viewImage(view)
+        XCTAssertGreaterThan(model.inkFrameDraws, 0)
+        let expected = try pixel(before, 50, 40), actual = try pixel(after, 50, 40)
+        for i in 0..<4 { XCTAssertLessThanOrEqual(abs(expected[i] - actual[i]), 2) }
+        XCTAssertLessThan(actual[1], 100); XCTAssertGreaterThan(actual[2], 170)
+        XCTAssertEqual(try pixel(after, 50, 160), [255,255,255,255]) // Detect upside-down image.
+        NativeInkCanvas.dismantleUIView(view, coordinator: ())
+        try await eventually { !model.inkOwnerRetained }; XCTAssertEqual(model.inkChargedBytes, 0)
+        note.selectPen(argb: -16777216, width: 2)
+        XCTAssertTrue(note.beginStroke(x: 100, y: 80, pressure: 1, timeMicros: 2))
+        XCTAssertTrue(note.endStroke(x: 100, y: 80, pressure: 1, timeMicros: 3))
+        model.changed(); model.close(); XCTAssertNil(model.current)
+        model.open(id); try await eventually { model.current != nil }
+        XCTAssertEqual(model.current?.totalStrokeCount, 3) // Render close must not stop shared file worker.
+        model.close()
+    }
+    @MainActor func testPreviewViewDisappearsWhileRenderRunsAndModelAcknowledgesAfterClose() async throws {
+        let started = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+        defer { release.signal() }
+        var captured: (PreviewModel, InkUIView)? = try preview(before: {
+            started.signal(); guard release.wait(timeout: .now()+8) == .success else { throw AppleBrushImageFailureExperiment.copy }
+        })
+        let model = try XCTUnwrap(captured).0
+        weak var goneView = captured?.1
+        var view: InkUIView? = captured?.1; captured = nil
+        _ = viewImage(try XCTUnwrap(view))
+        try await eventually { started.wait(timeout: .now()) == .success }
+        let held = model.inkChargedBytes; XCTAssertGreaterThan(held, 0)
+        NativeInkCanvas.dismantleUIView(try XCTUnwrap(view), coordinator: ())
+        view = nil; XCTAssertNil(goneView); model.close(); XCTAssertNil(model.current)
+        XCTAssertTrue(model.inkOwnerRetained); XCTAssertEqual(model.inkChargedBytes, held)
+        release.signal()
+        try await eventually { !model.inkOwnerRetained }
+        XCTAssertEqual(model.inkChargedBytes, 0)
+    }
+    @MainActor func testPreviewUnknownReleaseStaysWithModelUntilReadOnlyReconciliation() async throws {
+        var calls = 0
+        let (model, view) = try preview(release: { after in
+            calls += 1; if after { throw AppleBrushImageFailureExperiment.copy }
+        })
+        _ = viewImage(view); try await eventually { model.inkFramePublications > 0 }
+        _ = viewImage(view)
+        NativeInkCanvas.dismantleUIView(view, coordinator: ())
+        let held = model.inkChargedBytes, attempted = calls
+        XCTAssertGreaterThan(held, 0); XCTAssertTrue(model.inkOwnerRetained)
+        model.close(); XCTAssertEqual(calls, attempted); XCTAssertEqual(model.inkChargedBytes, held)
+        XCTAssertTrue(model.reconcileInkRelease()); XCTAssertEqual(calls, attempted)
+        XCTAssertEqual(model.inkChargedBytes, 0); XCTAssertFalse(model.inkOwnerRetained)
+    }
+    @MainActor func testPreviewPageViewportAndSizeChangeUseCompleteFallbackBeforeNewFrame() async throws {
+        let (model, view) = try preview()
+        let note = view.note
+        _ = viewImage(view); try await eventually { model.inkFramePublications > 0 }
+        _ = viewImage(view); let drawn = model.inkFrameDraws
+        XCTAssertTrue(note.insertPage()); model.changed(); view.refreshPage()
+        XCTAssertEqual(try pixel(viewImage(view), 50, 40), [255,255,255,255])
+        XCTAssertEqual(model.inkFrameDraws, drawn) // Old-page image cannot draw before new ACK.
+        let first = model.inkFramePublications
+        try await eventually { model.inkFramePublications > first }
+        _ = viewImage(view)
+        view.viewport.gesture(oldX: 100, oldY: 100, newX: 90, newY: 90, ratio: 1.5)
+        let beforeZoom = model.inkFrameDraws
+        _ = viewImage(view); XCTAssertEqual(model.inkFrameDraws, beforeZoom)
+        view.frame = CGRect(x: 0, y: 0, width: 180, height: 250); view.layoutIfNeeded()
+        _ = viewImage(view)
+        model.flushForBackground()
+        try await eventually { !model.inkOwnerRetained }
+        XCTAssertEqual(model.inkChargedBytes, 0)
+        model.resumeFromBackground(); _ = viewImage(view)
+        let resume = model.inkFramePublications
+        try await eventually { model.inkFramePublications > resume }
+        _ = viewImage(view); model.close()
+        try await eventually { !model.inkOwnerRetained }
+    }
     private func fixture() throws -> (FrameToken, StrokeObject) {
         let text = "NCPREVIEW\t2\nD\timage-page\tImage\t1\t1\t1\nG\tfirst\tink\t400\t400\tBLANK\t1\nS\tnative-image\tink\t1\tMONOLINE\t1\t-869046631\t7\t4\t1\t0\t0\t1\t0\t0\nP\t4\t10\t1\t0\nP\t16\t21\t0.25\t1\nP\t28\t11\t1\t2\nP\t4\t10\t1\t3\nEND\n"
         let root = try PagedPreviewCodec.shared.decode(text: text)
@@ -76,7 +196,7 @@ final class BrushRenderHostTests: XCTestCase {
         let a = try AppleBrushRenderExperiment(frame: frame, layer: layer)
         var deliveries = 0
         let item = try XCTUnwrap(a.submitPage(scene: root.scene, frame: frame, layer: layer,
-            permitDelivery: { deliveries += 1; return deliveries > 1 }))
+            permitDelivery: { deliveries += 1; XCTAssertThrowsError(try a.settleAfterDrain()); return deliveries > 1 }))
         try await ready(a); XCTAssertEqual(try a.drain(), []); XCTAssertEqual(a.chargedBytes, item.job.peakBytes)
         XCTAssertTrue(try a.retry(item)); XCTAssertEqual(try a.drain(), ["PUBLISHED"])
         guard case .ready(let image) = try AppleBrushImageExperiment.create(a, item) else { return XCTFail("Page image missing") }
@@ -121,7 +241,7 @@ final class BrushRenderHostTests: XCTestCase {
         let (frame, stroke) = try fixture(); let a = try AppleBrushRenderExperiment(frame: frame, layer: stroke.layerId)
         var computes = 0, deliveries = 0
         let item = try XCTUnwrap(a.submit(stroke: stroke, frame: frame, beforeCompute: { computes += 1 },
-            permitDelivery: { deliveries += 1; return deliveries > 1 }))
+            permitDelivery: { deliveries += 1; XCTAssertThrowsError(try a.settleAfterDrain()); return deliveries > 1 }))
         try await ready(a); XCTAssertEqual(try a.drain(), []); XCTAssertEqual(a.chargedBytes, item.job.peakBytes)
         let moved = FrameToken(sceneId: frame.sceneId, sceneRevision: frame.sceneRevision, viewportVersion: 2,
             sessionGeneration: 1, surfaceGeneration: 1, requestSequence: 2)

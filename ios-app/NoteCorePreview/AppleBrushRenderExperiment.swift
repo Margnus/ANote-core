@@ -15,16 +15,19 @@ final class AppleBrushDispatchExperiment {
 final class AppleBrushRenderExperiment {
     let executor: AppleBoundedOwnerExecutor
     let owner: AppleBrushOwnerExperiment
+    private let ownsExecutor: Bool
     private var dispatched: [ObjectIdentifier: AppleBrushDispatchExperiment] = [:]
     private var acknowledged: [AppleBrushDispatchExperiment] = [] // bounded ACK handles, no payloads
-    init(frame: FrameToken, layer: LayerId, totalBytes: Int64 = 262144, maxJobs: Int = 4, residentBytes: Int64 = 32768) throws {
-        executor = try AppleBoundedOwnerExecutor(maxEntries: maxJobs, maxBytes: totalBytes, automaticPump: false)
+    init(frame: FrameToken, layer: LayerId, totalBytes: Int64 = 262144, maxJobs: Int = 4, residentBytes: Int64 = 32768,
+         sharedExecutor: AppleBoundedOwnerExecutor? = nil) throws {
+        ownsExecutor = sharedExecutor == nil
+        executor = try sharedExecutor ?? AppleBoundedOwnerExecutor(maxEntries: maxJobs, maxBytes: totalBytes, automaticPump: false)
         let executor = self.executor
         owner = AppleBrushOwnerExperiment(frame: frame, layer: layer, residentBudget: residentBytes,
             totalBudget: totalBytes, maxJobs: Int32(maxJobs), checkOwner: { try! executor.checkOwner() })
     }
     var chargedBytes: Int64 { owner.chargedBytes }
-    var isDrained: Bool { owner.isDrained && (try! executor.status()).isDrained }
+    var isDrained: Bool { owner.isDrained && dispatched.isEmpty && acknowledged.isEmpty && (!ownsExecutor || (try! executor.status()).isDrained) }
     @discardableResult func submit(stroke: StrokeObject, frame: FrameToken,
         originX: Double = 0.25, originY: Double = 8, width: Int32 = 64, height: Int32 = 32,
         pixelSize: Double = 0.5, nativeAllowance: Int64 = 16384,
@@ -40,12 +43,14 @@ final class AppleBrushRenderExperiment {
         originX: Double = 0.25, originY: Double = 8, width: Int32 = 64, height: Int32 = 32,
         pixelSize: Double = 0.5, nativeAllowance: Int64 = 16384,
         workingBytes: Int64 = 65536,
+        maxEdgeTests: Int64 = 20000000,
         beforeCompute: @escaping () throws -> Void = {},
         permitDelivery: @escaping () throws -> Bool = { true }
     ) throws -> AppleBrushDispatchExperiment? {
         try executor.checkOwner()
         guard let job = owner.admitPage(scene: scene, frame: frame, layer: layer, originX: originX, originY: originY,
-            width: width, height: height, pixelSize: pixelSize, workingBytes: workingBytes, nativeAllowance: nativeAllowance) else { return nil }
+            width: width, height: height, pixelSize: pixelSize, workingBytes: workingBytes, nativeAllowance: nativeAllowance,
+            maxEdgeTests: maxEdgeTests) else { return nil }
         return try dispatch(job, beforeCompute: beforeCompute, permitDelivery: permitDelivery)
     }
     private func dispatch(_ job: AppleBrushJobExperiment, beforeCompute: @escaping () throws -> Void,
@@ -73,10 +78,17 @@ final class AppleBrushRenderExperiment {
     }
     func drain() throws -> [String] {
         _ = try executor.drainResults()
+        return try settleAfterDrain()
+    }
+    func settleAfterDrain(_ receive: (AppleBrushDispatchExperiment, String) -> Void = { _, _ in }) throws -> [String] {
+        try executor.checkOutsideDrain()
         // Only here has drain returned and cleared executor input/result closures, including locals.
+        let outstanding = try executor.status().entries
         let results = acknowledged.map { item -> String in
+            precondition(!outstanding.contains { $0.ticket === item.ticket })
             let ack = owner.acknowledge(job: item.job)
             if ack != "QUARANTINED" { dispatched.removeValue(forKey: ObjectIdentifier(item)) }
+            receive(item, ack)
             return ack
         }
         acknowledged.removeAll(keepingCapacity: true)
@@ -97,7 +109,7 @@ final class AppleBrushRenderExperiment {
     func close() throws {
         try executor.checkOwner(); owner.close()
         for item in dispatched.values { item.cancel() }
-        try executor.stopAccepting()
+        if ownsExecutor { try executor.stopAccepting() }
     }
     // Caller must explicitly establish that this pure CPU job escaped no output. Worker stop alone
     // is insufficient for a general side-effecting computation; this experiment allocates no native data.
