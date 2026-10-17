@@ -1,5 +1,7 @@
 # DEV-034A：Android 平台图像持有适配
 
+DEV-036E最新增量：原holder硬件拒绝保持，真实RenderNode RecordingCanvas反例及原InkCanvasView app-host硬件目标已验，ART94项；普通包仍未消费新后端。64份原文件保留，最新APK仅新增无内容诊断，不能继承旧UI。Bitmap/View释放契约仍不足，SurfaceControl releaseCallback/fence仅为待证明候选；具体决策和同owner/实际层级接入门禁见[既有ADR-0020](adr/0020-read-only-legacy-and-measurement-first.md)、[C1清单](C1未决事项.md)与[Android分范围报告](../reports/android-render-integration.json)。以下DEV-034A范围/旧测试数保留历史口径。
+
 2026-10-15。DEV-034 的第一个可验收子阶段，不代表 Swift 接入、固定视口 trace 或整个 DEV-034 完成。
 
 ## 实现与责任

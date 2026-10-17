@@ -43,15 +43,15 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "03b8c47b1c65160904a4bc75fac5bc911dfe5607005ffbdcfae9e7de9e1d9c32",
+      "report_sha256": "a36e4be88fd41c5a69be9c39cfe9608301aa068573772f4f8af9cd40c1a9af7a",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 148,
+      "matched_bindings": 149,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
     "android-brush-common-tests": {
-      "report_sha256": "155c42e41f66be872fcde42dc20e6c842923c395d051764a8974f02d2a081419",
+      "report_sha256": "4daf96bb68744b999ad93feb6f87db1e8363a18f9559b1d59711cb6648e71f84",
       "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 54,
@@ -75,12 +75,20 @@
       "scope": "Actual iOS app-host APIs, isolated temporary files and CoreGraphics offscreen pixels. Separate test build; not distributable binary UI, real touch, system picker, force-stop or power-loss recovery evidence."
     },
     "render-viewport-trace": {
-      "report_sha256": "13de40b39691a2fd64322520e54113ce9931c4f98990153cfed860b29fb650f4",
+      "report_sha256": "a0d2c5c311e533c9f1aaa0b80704827bb51a41c045d411f75c84feeb66833ad5",
       "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 3,
       "mismatches": [],
       "scope": "Same fixed synthetic scroll/zoom responsibility trace on actual ART Bitmap and iOS app-host Swift worker/CGImage; no ordinary app integration. Timings are single exploratory runs with deliberate worker gate/owner polling. Wait bounds bracket admission within submit and end at beforeCompute; include handoff overhead, not isolated scheduler latency. Row storage/charge is not peak heap or GPU residency."
+    },
+    "android-render-integration": {
+      "report_sha256": "4d5ed016859c8a4fd56d9710dee69c31765589b56a15f843eb2662f65b9901f3",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 66,
+      "mismatches": [],
+      "scope": "Actual app-host hardware destination observation plus source-bound safety decision. Ordinary Android preview remains Path; separate ART hardware rejection regression is not backend acceptance. No physical stylus/frame/heap/GPU-fence/C1/SQLite claim."
     }
   },
   "errors": [],
@@ -88,5 +96,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "22afdb616a00bb70498c159392240a42c0a7c69470559b78224a3896a579abdb"
+  "audit_tool_sha256": "8a9e6aa61ea42b63b640a2f4477131b78dc8688d7af617bfeb6de499f72f92ab"
 }

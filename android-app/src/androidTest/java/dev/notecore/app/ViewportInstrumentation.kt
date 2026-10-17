@@ -20,8 +20,10 @@ class ViewportInstrumentation : Instrumentation() {
     private lateinit var note: PagedPreviewNotebook
     private var downTime = 0L
     private var brushPathOnly = false
+    private var renderTargetOnly = false
     override fun onCreate(arguments: Bundle?) {
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
+        renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
         super.onCreate(arguments); start()
     }
     override fun onStart() {
@@ -35,6 +37,28 @@ class ViewportInstrumentation : Instrumentation() {
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             setup()
+            if (renderTargetOnly) {
+                val until = SystemClock.uptimeMillis() + 5000
+                var observed: Boolean? = null
+                while (observed == null && SystemClock.uptimeMillis() < until) {
+                    runOnMainSync { observed = canvas.observedCanvasHardware }
+                    if (observed == null) SystemClock.sleep(10)
+                }
+                check(observed == true) { "Requires actual hardware onDraw, not a bitmap host" }
+                runOnMainSync {
+                    check(canvas.layerType == android.view.View.LAYER_TYPE_NONE)
+                    check(canvas.width > 0 && canvas.height > 0)
+                    result.putInt("target_width", canvas.width); result.putInt("target_height", canvas.height)
+                    result.putString("target_class", "InkCanvasView.onDraw")
+                    result.putString("target_hardware", canvas.observedCanvasHardware.toString())
+                    check(note.totalStrokeCount == 0 && !note.hasActiveStroke)
+                }
+                result.putInt("target_pid", android.os.Process.myPid())
+                result.putString("render_target_status", "passed")
+                result.putString("render_target_scope", "app-host isolated in-memory canonical page; no ordinary-package UI or new backend consumption")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
             val cx = canvas.width / 2f; val cy = canvas.height / 2f
             event(MotionEvent.ACTION_DOWN, listOf(P(0, cx - 100, cy)))
             event(MotionEvent.ACTION_POINTER_DOWN or (1 shl 8), listOf(P(0, cx - 100, cy), P(1, cx + 100, cy)))

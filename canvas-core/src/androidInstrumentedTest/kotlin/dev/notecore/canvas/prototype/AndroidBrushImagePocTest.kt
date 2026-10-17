@@ -55,6 +55,28 @@ class AndroidBrushImagePocTest {
             assertTrue(image.close()); assertTrue(e.isDrained); assertEquals(0, e.chargedBytes)
         } finally { image.close(); target.recycle(); stop(e) }
     }
+    @Test fun actualHardwareRecordingTargetRejectsWithoutEscapingBitmapOrReleasingPermit() {
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 29) // Public recording API.
+        val e = executor()
+        val j = job(e)
+        val image = assertIs<AndroidBrushImageBuildPoc.Ready>(AndroidBrushImagePoc.create(e, j)).image
+        val node = android.graphics.RenderNode("NoteCore-holder-gate")
+        node.setPosition(0, 0, 64, 32)
+        try {
+            val canvas = node.beginRecording(64, 32)
+            try {
+                assertTrue(canvas.isHardwareAccelerated)
+                val held = e.chargedBytes
+                assertFalse(image.draw(canvas, RectF(0f, 0f, 64f, 32f)))
+                assertEquals(held, e.chargedBytes)
+                assertFalse(image.released)
+            } finally { node.endRecording() }
+            // No Bitmap command escaped: rejection occurs before drawBitmap. No fence is inferred.
+            node.discardDisplayList()
+            stop(e); assertEquals(24576, e.chargedBytes); assertFalse(e.isDrained)
+            assertTrue(image.close()); assertEquals(0, e.chargedBytes); assertTrue(e.isDrained)
+        } finally { node.discardDisplayList(); image.close(); stop(e) }
+    }
     private val f = BrushTileImageFixture
     private fun executor(total: Long = 262144) = BrushRenderExecutorPoc(f.frame, f.layer, 32768, total)
     private fun job(e: BrushRenderExecutorPoc, native: Long = 16384): BrushRenderJobPoc {

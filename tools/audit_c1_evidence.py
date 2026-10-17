@@ -14,6 +14,7 @@ CURRENT = {
     'apple-brush-common-tests': ('source_and_build_sha256',),
     'ios-host-tests': ('source_and_framework_sha256', 'test_build_sha256'),
     'render-viewport-trace': ('source_report_sha256',),
+    'android-render-integration': ('source_evidence_sha256', 'sdk_contract_source_sha256'),
 }
 ARTIFACTS = {
     'android-brush-common-tests': (('test_apk_sha256', None),
@@ -62,7 +63,8 @@ def audit(root):
             if field in data:
                 checks.append(binding(root, '.generated-fixtures/scale/' + relative, data[field]))
         mismatches = [item for item in checks if item['state'] != 'matched']
-        if data.get('status') != 'passed':
+        evidence_status = data.get('evidence_status') if name == 'android-render-integration' else data.get('status')
+        if evidence_status != 'passed':
             errors.append(name + ': report did not pass')
         if not historical and mismatches:
             errors.append(name + ': current evidence binding failed')

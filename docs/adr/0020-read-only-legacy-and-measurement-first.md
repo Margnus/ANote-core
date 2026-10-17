@@ -71,3 +71,13 @@ C的实际屏幕拒绝促使修改源图像持有契约，未删除原CPU门禁�
 最终普通包f31799b9…/PID5747有8次bitmap=0的provider帧消费、真实源释放与owner结算，最终owner-drained charge为0。CUA在最终包重新新建/命名、两页三笔、切页/缩放/后台/文件重开，源图像可见；外部输入后最终两页10笔/逐页9、1，原6份文件hash保持。不声称后来9笔页全部由新后端消费；工作/预算拒绝继续整页规范Path。具体版本、事件、输入归属和包恢复见[原iOS分范围报告](../../reports/ios-render-integration.json)，不继承旧UI-001或早期D候选包验收。
 
 决策：**采用provider回执方案作为未冻结的有界MONOLINE UIKit接入；保留完整失败回退。** 仅iOS最小接入范围通过，不解除Android hardware Canvas检查，不冻结GPU后端/物理模块，不放行C1/SQLite。下一步先明确Android真实目标读者与释放确认；M-1物理触笔/帧/heap、GPU fence/隐藏分配、任意变换、owner完全丢失/跨线程移交继续待验。
+
+## DEV-036E：Android回收责任未满足，保留硬件门禁（2026-10-17）
+
+采用实际目标/安全拒绝证据，**不采用直接硬件Canvas drawBitmap后recycle的接入**。app-host在原InkCanvasView的真实onDraw读到hardware=true、layer默认；ART新增真实RecordingCanvas反例证实原holder在drawBitmap前拒绝，拒绝仍计费、关闭且无外逸后归零。本次只有诊断及验证代码，没有删除保护或新增第二规范模型/执行器/资源池。APK d6e2642e…保留64份原文件并恢复普通进程；CUA未提供Android窗口，app-host不能替代普通包UI或新后端消费，报告准确记为接入受阻。
+
+[Android官方Bitmap](https://developer.android.com/reference/android/graphics/Bitmap#recycle())建议避免回收曾被View使用或还在其他引用中的图像；isRecycled是回收后的Java可用性状态，不证明硬件读者预先结束。[frame commit](https://developer.android.com/reference/android/view/ViewTreeObserver#registerFrameCommitCallback(java.lang.Runnable))仅说明帧已提交交换链；reconfigure的失效/后续draw例子不补齐detach后无draw的任意View读者责任。淘汰无证明的post/invalidate/GC/引用置空/超时释放捷径。int[] drawBitmap的内部复制也不能直接当作既有native许可的有界替代：每次绘制的内部copy驻留/回收仍缺计费与生命周期证据。此结论不是否定所有经充分证明的View组合方案。
+
+调整下一候选调查为API33+ [SurfaceControl.Transaction.setBuffer](https://developer.android.com/reference/android/view/SurfaceControl.Transaction)显式releaseCallback/SyncFence边界。尚未采用SurfaceControl作为后端：CPU RGBA到HardwareBuffer的有界上传和生产方完成、原App层级中静态/动态/纸张/裁剪的z序及原子替换、原NoteStore共享executor/drain外ACK与后台/关闭责任均未实现。callback带有效fence时还须确认signal，不将callback触发或Transaction.apply返回当完成；原UI/共享存储worker不做阻塞等待。具体文件级出口复用[C1清单](../C1未决事项.md)，不另建计划authority，不开发更多独立Surface展示来替代普通App集成。
+
+原API26–32完整Path及minSdk26保持，当前CPU holder/UNKNOWN责任契约保持；此节点未新增GPU缓冲区生命周期证明。证据/源码/SDK契约hash见[Android原报告](../../reports/android-render-integration.json)，本机SDK源码hash只绑定所查契约，不证明模拟器系统二进制与该source逐字等价。iOS DEV-036D的provider接入仍按原包/报告有效，Android不继承其结论；M-1/heap/GPU后端比较/任意变换/完全owner丢失/C1/SQLite仍待门禁。

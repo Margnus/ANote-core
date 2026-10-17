@@ -63,8 +63,18 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     }
     init { setBackgroundColor(0xffedf2f6.toInt()); isFocusable = true; contentDescription = "手写画布，0笔" }
 
+    internal var observedCanvasHardware: Boolean? = null
+        private set
+    private var targetObserved = false
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        observedCanvasHardware = canvas.isHardwareAccelerated
+        // Diagnostic only: inspect the actual destination, not View.isHardwareAccelerated.
+        // No document identity/content; the renderer remains the complete canonical Path.
+        if (!targetObserved && context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+            targetObserved = true
+            android.util.Log.d("NoteCoreRender", "target-observed hardware=${canvas.isHardwareAccelerated} backend=canonical-path width=$width height=$height")
+        }
         if (scale <= 0f) return
         canvas.save(); canvas.translate(offsetX, offsetY); canvas.scale(scale, scale)
         val page = notebook.currentPage; val pw = page.width.toFloat(); val ph = page.height.toFloat()
