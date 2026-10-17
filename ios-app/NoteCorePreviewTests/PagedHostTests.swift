@@ -229,4 +229,118 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(view.accessibilityValue, "0笔")
         XCTAssertEqual(note.changeVersion, 1) // Same root revision, different page projection.
     }
+    @MainActor private func inputView() throws -> InkUIView {
+        let note = try PagedPreviewNotebook.companion.create(documentId: "input-" + UUID().uuidString,
+            title: "Synthetic callbacks", sessionNonce: UUID().uuidString)
+        XCTAssertTrue(note.setPaper(width: 200, height: 200, paper: .blank))
+        let view = InkUIView(note: note)
+        view.frame = CGRect(x: 0, y: 0, width: 200, height: 200); view.layoutIfNeeded()
+        return view
+    }
+    @MainActor func testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions() throws {
+        let view = try inputView(), note = view.note
+        let main = SyntheticInkTouch(30, 0.003)
+        let event = SyntheticInkEvent()
+        event.real = [SyntheticInkTouch(10, 0.001), SyntheticInkTouch(20, 0.002), SyntheticInkTouch(30, 0.003)]
+        view.touchesBegan([main], with: event)
+        XCTAssertTrue(note.hasActiveStroke); XCTAssertEqual(note.strokeCount, 0)
+        // UIKit main touchs are mutable across events; accepted auxiliary values must be copied.
+        event.real?[0].position.x = 199
+        main.position.x = 50; main.seconds = 0.005
+        event.real = [SyntheticInkTouch(40, 0.004), SyntheticInkTouch(50, 0.005)]
+        view.touchesMoved([main], with: event)
+        main.position.x = 70; main.seconds = 0.007
+        event.real = [SyntheticInkTouch(60, 0.006), SyntheticInkTouch(70, 0.007)]
+        var changes = 0; view.changed = { changes += 1 }
+        view.touchesEnded([main], with: event)
+        XCTAssertEqual(changes, 1); XCTAssertEqual(note.strokeCount, 1); XCTAssertEqual(note.pointCount(index: 0), 7)
+        for index in 0..<7 {
+            XCTAssertEqual(note.pointX(index: 0, point: Int32(index)), Double((index + 1) * 10), accuracy: 0.0001)
+            XCTAssertEqual(note.stroke(index: 0).samples.timeMicros(index: Int32(index)), Int64((index + 1) * 1000))
+        }
+        XCTAssertEqual(event.predictionReads, 0); XCTAssertFalse(view.hasInk)
+    }
+    @MainActor func testNilAndEmptyCoalescedFallbackKeepsEqualTimestampPoints() throws {
+        let view = try inputView(), note = view.note
+        let main = SyntheticInkTouch(10, 0.001), event = SyntheticInkEvent()
+        view.touchesBegan([main], with: event) // nil => original main
+        event.real = []; main.position.x = 20
+        view.touchesMoved([main], with: event) // empty => original main, same timestamp/different point
+        main.position.x = 30; main.seconds = 0.002
+        view.touchesEnded([main], with: nil)
+        XCTAssertEqual(note.pointCount(index: 0), 3)
+        XCTAssertEqual(note.pointX(index: 0, point: 1), 20, accuracy: 0.0001)
+        XCTAssertEqual(note.stroke(index: 0).samples.timeMicros(index: 0), note.stroke(index: 0).samples.timeMicros(index: 1))
+        XCTAssertTrue(note.undo()); XCTAssertEqual(note.strokeCount, 0)
+        XCTAssertTrue(note.redo()); XCTAssertEqual(note.pointCount(index: 0), 3)
+    }
+    @MainActor func testInvalidTerminalValuesRejectWholeUnfinishedStrokeAndRecover() throws {
+        let view = try inputView(), note = view.note
+        var failures = 0; view.failed = { _ in failures += 1 }
+        let invalid = [Double.nan, Double.infinity, -1, Double(Int64.max) / 1_000_000]
+        for value in invalid {
+            let main = SyntheticInkTouch(10, 0.001), event = SyntheticInkEvent()
+            view.touchesBegan([main], with: nil)
+            event.real = [SyntheticInkTouch(20, 0.002), SyntheticInkTouch(30, value)]
+            view.touchesEnded([main], with: event)
+            XCTAssertFalse(note.hasActiveStroke); XCTAssertFalse(view.hasInk); XCTAssertEqual(note.strokeCount, 0)
+        }
+        let badPosition = SyntheticInkTouch(30, 0.003); badPosition.position.x = .nan
+        let badForce = SyntheticInkTouch(30, 0.003); badForce.forceValue = .nan
+        let badMaximum = SyntheticInkTouch(30, 0.003); badMaximum.maximumValue = .nan
+        let outOfRange = SyntheticInkTouch(1e10, 0.003)
+        let badOrder = SyntheticInkTouch(30, 0.0005)
+        for bad in [badPosition, badForce, badMaximum, outOfRange, badOrder] {
+            let main = SyntheticInkTouch(10, 0.001), event = SyntheticInkEvent()
+            view.touchesBegan([main], with: nil)
+            event.real = [SyntheticInkTouch(20, 0.002), bad]
+            view.touchesEnded([main], with: event)
+            XCTAssertFalse(note.hasActiveStroke); XCTAssertFalse(view.hasInk); XCTAssertEqual(note.strokeCount, 0)
+        }
+        XCTAssertEqual(failures, invalid.count + 5)
+        let main = SyntheticInkTouch(40, 0.004)
+        view.touchesBegan([main], with: nil); main.seconds = 0.005
+        view.touchesEnded([main], with: nil)
+        XCTAssertEqual(note.strokeCount, 1); XCTAssertEqual(note.pointCount(index: 0), 2)
+    }
+    @MainActor func testCoordinateSnapshotAndResizeCancelRejectsLateUp() throws {
+        let view = try inputView(), note = view.note
+        view.viewport.gesture(oldX: 100, oldY: 100, newX: 100, newY: 100, ratio: 2)
+        let main = SyntheticInkTouch(60, 0.001)
+        view.touchesBegan([main], with: nil)
+        main.position.x = 80; main.seconds = 0.002
+        view.touchesEnded([main], with: nil)
+        XCTAssertEqual(note.pointX(index: 0, point: 0), 80, accuracy: 0.0001)
+        XCTAssertEqual(note.pointX(index: 0, point: 1), 90, accuracy: 0.0001)
+        let next = SyntheticInkTouch(100, 0.003)
+        view.touchesBegan([next], with: nil); XCTAssertTrue(note.hasActiveStroke)
+        view.frame.size.width = 240; view.setNeedsLayout(); view.layoutIfNeeded()
+        XCTAssertFalse(note.hasActiveStroke)
+        next.seconds = 0.004; view.touchesEnded([next], with: nil)
+        XCTAssertEqual(note.strokeCount, 1)
+    }
+
+}
+
+
+/// Synthetic UIKit API callbacks only: no injected OS event or real Pencil/latency claim.
+private final class SyntheticInkTouch: UITouch {
+    var position: CGPoint
+    var seconds: TimeInterval
+    init(_ x: Double, _ seconds: TimeInterval) { self.position = CGPoint(x: x, y: 100); self.seconds = seconds; super.init() }
+    override var timestamp: TimeInterval { seconds }
+    override var type: UITouch.TouchType { .pencil }
+    var forceValue: CGFloat = 0.5
+    var maximumValue: CGFloat = 1
+    override var force: CGFloat { forceValue }
+    override var maximumPossibleForce: CGFloat { maximumValue }
+    override func location(in view: UIView?) -> CGPoint { position }
+}
+private final class SyntheticInkEvent: UIEvent {
+    var real: [SyntheticInkTouch]?
+    var predictionReads = 0
+    override func coalescedTouches(for touch: UITouch) -> [UITouch]? { real }
+    override func predictedTouches(for touch: UITouch) -> [UITouch]? {
+        predictionReads += 1; return [SyntheticInkTouch(199, 1)]
+    }
 }

@@ -10,6 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions()',
+    'testNilAndEmptyCoalescedFallbackKeepsEqualTimestampPoints()',
+    'testInvalidTerminalValuesRejectWholeUnfinishedStrokeAndRecover()',
+    'testCoordinateSnapshotAndResizeCancelRejectsLateUp()',
     'testPreviewRetainedProviderSurvivesCloseAndBlocksNewPoolUntilCallback()',
     'testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner()',
     'testProviderUnknownReconciliationRequiresRealReleaseReceipt()',
@@ -70,6 +74,9 @@ def main():
     provenance = json.loads(fixture.with_suffix('.json').read_text(encoding='utf-8'))
     assert digest(fixture) == provenance['sha256'] and provenance['source_real_user_data'] is False
     before = inputs()
+    sdk = Path(command('xcrun', '--sdk', 'iphonesimulator', '--show-sdk-path').strip())
+    input_headers = [sdk/'System/Library/Frameworks/UIKit.framework/Headers'/name for name in ('UIEvent.h', 'UITouch.h')]
+    input_contracts = {str(path): digest(path) for path in input_headers}
     # Xcode does not rebuild Kotlin itself. Require a successful package build binding this framework
     # to the complete current common source set; hashing stale framework + new source is insufficient.
     built = json.loads((ROOT/'reports/ios-preview-build.json').read_text(encoding='utf-8'))['source_and_build_input_sha256']
@@ -84,11 +91,13 @@ def main():
     with log.open('w') as output:
         run = subprocess.run(['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
             '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id='+args.device,
-            '-derivedDataPath', str(BUILD), 'CODE_SIGNING_ALLOWED=NO', '-resultBundlePath', str(result), 'test'],
+            '-derivedDataPath', str(BUILD), 'CODE_SIGNING_ALLOWED=NO', '-resultBundlePath', str(result),
+            '-collect-test-diagnostics', 'never', 'test'],
             cwd=ROOT, stdout=output, stderr=subprocess.STDOUT, timeout=600)
     if run.returncode:
         raise RuntimeError(log.read_text(encoding='utf-8')[-16000:])
     assert inputs() == before, 'Source changed during native tests'
+    assert input_contracts == {str(path): digest(path) for path in input_headers}, 'SDK input contract changed during native tests'
     summary = json.loads(command('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(result), '--format', 'json'))
     tree = json.loads(command('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(result), '--format', 'json'))
 
@@ -129,6 +138,13 @@ def main():
         'shared_brush_contour_offscreen_verified': True,
         'app_host_swift_executor_kotlin_native_render_verified': True,
         'brush_render_host_test_count': 15,
+        'synthetic_uikit_input_callback_test_count': 4,
+        'input_sdk_contract_sha256': input_contracts,
+        'sdk_header_runtime_equivalence_verified': False,
+        'input_contract_reference': 'https://developer.apple.com/documentation/uikit/uievent/coalescedtouches(for:)',
+        'verbose_failure_sysdiagnose_enabled': False,
+        'coalesced_down_move_up_canonical_retention_verified': True,
+        'synthetic_input_scope': 'Direct original InkUIView callbacks with synthetic UITouch/UIEvent subclasses; not OS delivery, real Pencil or physical latency evidence.',
         'provider_release_receipt_test_count': 3,
         'provider_source_release_owner_verified': True,
         'preview_model_view_lifecycle_test_count': 5,

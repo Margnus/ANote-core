@@ -12,7 +12,7 @@ CURRENT = {
     'verification': ('source_sha256', 'verification_input_sha256'),
     'android-brush-common-tests': ('source_and_build_sha256',),
     'apple-brush-common-tests': ('source_and_build_sha256',),
-    'ios-host-tests': ('source_and_framework_sha256', 'test_build_sha256'),
+    'ios-host-tests': ('source_and_framework_sha256', 'test_build_sha256', 'input_sdk_contract_sha256'),
     'render-viewport-trace': ('source_report_sha256',),
     'android-render-integration': ('source_evidence_sha256', 'sdk_contract_source_sha256'),
     'sqlite-platform-capabilities': ('source_and_artifact_sha256', 'sdk_contract_sha256'),

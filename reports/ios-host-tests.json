@@ -3,81 +3,81 @@
     "closed_drained": true,
     "copies": [
       {
-        "elapsed_ns": 998958,
+        "elapsed_ns": 944166,
         "row_storage_upper_bytes": 16384
       },
       {
-        "elapsed_ns": 979500,
+        "elapsed_ns": 913000,
         "row_storage_upper_bytes": 16384
       }
     ],
     "events": [
       {
         "charged": 24576,
-        "elapsed_ns": 49334667,
+        "elapsed_ns": 38145958,
         "event": "first-held",
         "executor": 0,
         "retired": 0
       },
       {
         "charged": 24576,
-        "elapsed_ns": 49341417,
+        "elapsed_ns": 38151583,
         "event": "scroll-old-retired",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 51743042,
+        "elapsed_ns": 40385791,
         "event": "two-jobs-rejected-third",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 51746000,
+        "elapsed_ns": 40389500,
         "event": "queued-cancelled",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 84485875,
+        "elapsed_ns": 71306291,
         "event": "ready-before-ack",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 24576,
-        "elapsed_ns": 84506125,
+        "elapsed_ns": 71337958,
         "event": "late-and-cancelled-ack",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 49152,
-        "elapsed_ns": 121646959,
+        "elapsed_ns": 108488458,
         "event": "zoom-image-held",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 49152,
-        "elapsed_ns": 133746917,
+        "elapsed_ns": 120587083,
         "event": "closed-two-readers",
         "executor": 0,
         "retired": 49152
       },
       {
         "charged": 24576,
-        "elapsed_ns": 133785334,
+        "elapsed_ns": 120615125,
         "event": "new-reader-released",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 0,
-        "elapsed_ns": 133803709,
+        "elapsed_ns": 120621166,
         "event": "old-reader-released",
         "executor": 0,
         "retired": 0
@@ -87,28 +87,28 @@
     "max_jobs": 2,
     "queue_wait_ns": [
       {
-        "queue_handoff_wait_lower_ns": 6334,
-        "queue_handoff_wait_upper_ns": 32834,
-        "request_to_worker_ns": 32834,
-        "submit_elapsed_ns": 26500
+        "queue_handoff_wait_lower_ns": 5958,
+        "queue_handoff_wait_upper_ns": 37333,
+        "request_to_worker_ns": 37333,
+        "submit_elapsed_ns": 31375
       },
       {
-        "queue_handoff_wait_lower_ns": 7375,
-        "queue_handoff_wait_upper_ns": 34083,
-        "request_to_worker_ns": 34083,
-        "submit_elapsed_ns": 26708
+        "queue_handoff_wait_lower_ns": 15708,
+        "queue_handoff_wait_upper_ns": 40875,
+        "request_to_worker_ns": 40875,
+        "submit_elapsed_ns": 25167
       },
       {
-        "queue_handoff_wait_lower_ns": 32470208,
-        "queue_handoff_wait_upper_ns": 32491167,
-        "request_to_worker_ns": 32491167,
-        "submit_elapsed_ns": 20959
+        "queue_handoff_wait_lower_ns": 30693541,
+        "queue_handoff_wait_upper_ns": 30717291,
+        "request_to_worker_ns": 30717291,
+        "submit_elapsed_ns": 23750
       },
       {
-        "queue_handoff_wait_lower_ns": 13875,
-        "queue_handoff_wait_upper_ns": 32583,
-        "request_to_worker_ns": 32583,
-        "submit_elapsed_ns": 18708
+        "queue_handoff_wait_lower_ns": 5333,
+        "queue_handoff_wait_upper_ns": 29458,
+        "request_to_worker_ns": 29458,
+        "submit_elapsed_ns": 24125
       }
     ],
     "resident_budget": 32768,
@@ -141,21 +141,25 @@
     "udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
     "state": "Booted"
   },
-  "test_count": 25,
+  "test_count": 29,
   "checks": [
     "testActualAndroidFileImportsFreshIdsAndExportsAllPages()",
     "testCancelledQueuedJobAndUnknownComputeRequireAckAndReconciliation()",
+    "testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions()",
     "testCompleteCanonicalPageCompositesBeforeAckAndDrainsHeldImage()",
+    "testCoordinateSnapshotAndResizeCancelRejectsLateUp()",
     "testCopyFailureCleanupUnknownReturnsHolderAndNoDestructiveRetry()",
     "testExactResultRedeliveryAndFrameChangeBeforeAck()",
     "testFailedSaveRetainsRootAcrossCloseAndRepair()",
     "testFixedScrollZoomQueueAndHeldReaderTrace()",
     "testForeignThreadCannotReleaseHolderAndThrowingReceiveRedelivers()",
+    "testInvalidTerminalValuesRejectWholeUnfinishedStrokeAndRecover()",
     "testLateImportCannotReplaceNewActiveOwner()",
     "testLateOpenCannotReplaceNewActiveOwner()",
     "testLegacyNoEditPreservesBytesThenEditMigratesOriginalExtent()",
     "testMultiTileFrameCopiesEntireNativeImageAndClosesAfterHeldReader()",
     "testNativeRendererChangesPageCacheAndAppliesFullAffineDotWidth()",
+    "testNilAndEmptyCoalescedFallbackKeepsEqualTimestampPoints()",
     "testOldImageRejectsDrawAndInsufficientCopyBudgetKeepsPermitFree()",
     "testPagedSaveCloseAndNewOwnerReadAllPages()",
     "testPreviewPageViewportAndSizeChangeUseCompleteFallbackBeforeNewFrame()",
@@ -183,7 +187,7 @@
         },
         "expectedFailures": 0,
         "failedTests": 0,
-        "passedTests": 25,
+        "passedTests": 29,
         "skippedTests": 0,
         "testPlanConfiguration": {
           "configurationId": "1",
@@ -194,19 +198,19 @@
     "environmentDescription": "NoteCorePreview · Built with macOS 27.0.1",
     "expectedFailures": 0,
     "failedTests": 0,
-    "finishTime": 1792224449.406,
-    "passedTests": 25,
+    "finishTime": 1792225229.661,
+    "passedTests": 29,
     "result": "Passed",
     "runtimeWarnings": [],
     "skippedTests": 0,
-    "startTime": 1792224433.421,
+    "startTime": 1792225217.282,
     "statistics": [],
     "testFailures": [],
     "title": "Test - NoteCorePreview",
     "topInsights": [],
-    "totalTestCount": 25
+    "totalTestCount": 29
   },
-  "xcresult": "ios-app/build/host-tests/run-77f38c7e23b143fe81c6f46e7b2b151e.xcresult",
+  "xcresult": "ios-app/build/host-tests/run-4c9d4742136d466c90dbe5d3ff3837cc.xcresult",
   "source_and_framework_sha256": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
@@ -237,13 +241,13 @@
     "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
     "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
     "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85",
-    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "ffeb9a139c51d0734adb0ce51776a51886a0862cf5b0db6e4538dfead8c957e5",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "48f5b36e77b38666dd0f41ffcbd9cf10d4604b7879b1f6156c4704721b53d73c",
     "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "d67030f209d959a8252fd943e44fe262426eaf5d2eb58a85e852f0650909d501",
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "608a6c20717864d15bf043d808522a18c9562498ad3879a1615d7197eed70c03",
     "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "69a65c3ea689a769df1da634c8280a58919359278b06f4a36bf3e5f207cd028b",
     "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
     "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "6ff8a8fc17d4c6d48db92736c4b74d3f297c705a0783b955471938978f3998f2",
-    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "d015fe67e2517c9c37a13b499c0cbce351b32da4cd59c5d78df587cae237f028",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "f8b65ae5536503b17454c11a2866473b8db342ddc284c84066c292871bfa7218",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
     "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "e21f975c7bd1561438911862dd202ca1a98241ce5d713a7d759875b95623da3f",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
@@ -256,7 +260,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "d5e9d113dd7b77f7466abdd5100037140540a8c81989543e08e6657b9446954b",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "1c5291fe1c2809ec458983ae6e15627697466e2b4899d5d67d82b1088154b5c6",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
-    "tools/verify_ios_host.py": "9f7b45a5089cd506b7867218b620c541abb6118838bbcfc2c178fecb96047a28"
+    "tools/verify_ios_host.py": "53b2694774d9da05ca942efff373823ca1622e9de38e18587646ed04e84d110d"
   },
   "framework_verified_build_inputs": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
@@ -298,8 +302,8 @@
   },
   "test_build_sha256": {
     "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "db0b48b17d2a400dac2ff3a26dd1f5bf376c6a106190de46710bda5e129cfb78",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "a4645e34131d8b6f84e24b2c1993302f0ed9c4159bf8a212c365eab372c27959"
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "d8ffcecb80fbd9c95c56004d9ff81bc10926d297a4a23258bea81c740004f09e",
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "c24bb2222a73a994fc5bd2f88b4f212656647dee7feaf63468b1e014e9de01b9"
   },
   "android_fixture_sha256": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
   "android_fixture_provenance": {
@@ -318,6 +322,16 @@
   "shared_brush_contour_offscreen_verified": true,
   "app_host_swift_executor_kotlin_native_render_verified": true,
   "brush_render_host_test_count": 15,
+  "synthetic_uikit_input_callback_test_count": 4,
+  "input_sdk_contract_sha256": {
+    "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIEvent.h": "1404e37134472bbe30773ed2f241a1c358641f0f1f4f5edfe475114ee0bbf77f",
+    "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks/UIKit.framework/Headers/UITouch.h": "c14a3b797e99ac52fffc1d528017db01992358c1559f503e555122026308ff8b"
+  },
+  "sdk_header_runtime_equivalence_verified": false,
+  "input_contract_reference": "https://developer.apple.com/documentation/uikit/uievent/coalescedtouches(for:)",
+  "verbose_failure_sysdiagnose_enabled": false,
+  "coalesced_down_move_up_canonical_retention_verified": true,
+  "synthetic_input_scope": "Direct original InkUIView callbacks with synthetic UITouch/UIEvent subclasses; not OS delivery, real Pencil or physical latency evidence.",
   "provider_release_receipt_test_count": 3,
   "provider_source_release_owner_verified": true,
   "preview_model_view_lifecycle_test_count": 5,
