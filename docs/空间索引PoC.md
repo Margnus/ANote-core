@@ -2,6 +2,12 @@
 
 2026-10-15，DEV-026。这是选择架构的实验，不接入预览渲染、不冻结公共API。实现位于canvas-core的internal prototype；只有页坐标AABB与整数实验ID，不持有文档authority、对象数据或页面选择状态。
 
+## DEV-040A增量（2026-10-17）
+
+原DEV-026测量结论保留其来源范围。当前在原STR上补齐有界replacement/tombstone overlay、完整批次CAS/预算拒绝、完整或拒绝的查询及压实取消/迟到发布契约；实现为internal IncrementalSpatialIndexPoc，不复制规范笔迹/另设Scene。JVM、ART与Kotlin/Native实际运行新9项共同测试，包括原SceneReducer移动/删除/撤销patch、1,500轮随机编辑暴力bbox对照、全页退化、旧位置遮蔽和超限原实例保持。另将原6项索引测试纳入双端库回归。
+
+采用的是增量遮蔽/失败契约候选；并未选择生产grid/STR、完成App索引适配或测得heap/延迟。对象/overlay/批次上限和tree node、entry test、result预算显式区分；压实排序不可中途取消，原owner需准入旧/新实例及在途读者，结果按当前content stamp再核对。查询ID仍无z序且仅bbox粗筛。报告及源码/二进制绑定见[增量索引证据](../reports/incremental-spatial-index.json)，决策与剩余门禁仍维护于原C1和ADR-0020。
+
 ## 可重跑入口
 
 在配置JDK17、GRADLE_USER_HOME与PYTHON_BIN后运行：

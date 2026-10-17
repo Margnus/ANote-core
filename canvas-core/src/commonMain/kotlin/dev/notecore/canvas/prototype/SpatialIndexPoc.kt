@@ -96,16 +96,33 @@ internal class PackedRTreePoc(entries: List<SpatialEntry>, private val fanout: I
         }
     }
 
-    fun query(bounds: BoundsD): SpatialQuery {
+    fun query(bounds: BoundsD): SpatialQuery = checkNotNull(queryWithin(bounds))
+
+    /** A budget failure never exposes a prefix as a complete hit set. Exclusions mask old bounds. */
+    fun queryWithin(bounds: BoundsD, maxEntryTests: Int = Int.MAX_VALUE,
+        maxNodeTests: Int = Int.MAX_VALUE, maxResults: Int = Int.MAX_VALUE,
+        excludedIds: Set<Int> = emptySet(),
+    ): SpatialQuery? {
+        require(maxEntryTests >= 0 && maxNodeTests >= 0 && maxResults >= 0)
         val ids = mutableSetOf<Int>()
         var entryTests = 0; var nodeTests = 0
-        fun visit(node: Node) {
+        fun visit(node: Node): Boolean {
+            if (nodeTests == maxNodeTests) return false
             nodeTests++
-            if (!node.bounds.overlaps(bounds)) return
-            node.entries.forEach { entry -> entryTests++; if (entry.bounds.overlaps(bounds)) ids.add(entry.id) }
-            node.children.forEach(::visit)
+            if (!node.bounds.overlaps(bounds)) return true
+            for (entry in node.entries) {
+                if (entry.id in excludedIds) continue
+                if (entryTests == maxEntryTests) return false
+                entryTests++
+                if (entry.bounds.overlaps(bounds)) {
+                    if (ids.size == maxResults) return false
+                    ids.add(entry.id)
+                }
+            }
+            for (child in node.children) if (!visit(child)) return false
+            return true
         }
-        root?.let(::visit)
+        if (root != null && !visit(root)) return null
         return SpatialQuery(ids, entryTests, nodeTests)
     }
 }

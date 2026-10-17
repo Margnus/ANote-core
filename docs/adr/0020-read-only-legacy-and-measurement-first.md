@@ -111,3 +111,9 @@ F的统一UNKNOWN会永久阻止交付异常后的迟到回执结算。调整为
 C1前能力调查采用Android PdfRenderer与Apple CoreGraphics/PDFKit为候选；当前不引入第三方PDF SDK、不开放App PDF功能。非零CropBox和四个Rotate的原生PNG匹配独立颜色定位oracle；规范背景页空间候选为CropBox与固有旋转归一后的top-left矩形。CG bitmap输出先前重复翻转问题已修正，局部目标的原点按整页高度适配，不直接套用UIKit惯例。Android clip边缘暴露最大通道差107，4px邻域渲染后取内部core与整页ROI差0；只采用“邻域/归属core分开”的原则，不把固定4px冻结成任意scale的通用参数。
 
 当前密码参数/只读损坏拒绝、文字及Apple大纲可用性分别有原生证据；Android低OS/文档outline、现代密码/复杂内容及矢量保真能力仍缺矩阵。500简单页只取首末页，不证明渐进产品、内存或性能；没有native同步render中途取消证据。生产port仍需seekable只读资源/FD持有、最小权限隔离、bounded调度/迟到取消、tile key/预算与App批注/导出闭环。既有模型/owner/资源权威不变，不以此放行C1/生产存储/PDF需求。详见[原C1入口](../C1未决事项.md)和[PDF平台报告](../../reports/pdf-platform-capabilities.json)。
+
+## DEV-040A补充：索引delta的采用边界
+
+原“整笔粗筛→按需分段→有界mask”方向保留；在原STR之上采用internal有界replacement/tombstone overlay作为增量候选。纯bounds/handle派生数据不拥有规范对象，不另建Scene或生产worker。批次必须expected content stamp/before CAS完整校验，超限显式拒绝且原实例不变；查询预算不足只可拒绝，不能返回不完整命中。压实由原owner准入、保留旧/新内存责任、发布前再检查当前scene/revision/session；undo前进revision，重开换session。同步STR排序只支持前后取消，生产调度必须如实处理。
+
+采用上述正确性/失败契约；grid/STR和实际阈值仍不冻结。新增库测试包含规范SceneReducer patch到派生bounds的对照，但生产适配/普通App仍未接入，逻辑条目/测试次数不能替代真实heap、队列、混排、任意几何或真机验收。[当前报告](../../reports/incremental-spatial-index.json)绑定JVM、ART、Kotlin/Native实际执行证据。继续收敛C1失败/身份/预算矩阵，物理门禁保留。

@@ -87,7 +87,7 @@ def main():
     assert hashlib.sha256(adb('exec-out', 'cat', package_path.removeprefix('package:'))).hexdigest() == digest(apk)
     assert files() == baseline
     holder = json.loads((ROOT/'reports/android-brush-common-tests.json').read_text(encoding='utf-8'))
-    assert holder['status'] == 'passed' and holder['test_count'] == 95
+    assert holder['status'] == 'passed' and holder['test_count'] == 110
     assert holder['hardware_recording_rejection_test_count'] == 1 and int(holder['api']) >= 29
     for relative, sha in holder['source_and_build_sha256'].items():
         assert digest(ROOT/relative) == sha, ('Stale hardware gate test', relative)
