@@ -30,10 +30,11 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         check(done) { message }
     }
-    private fun setup(before: () -> Unit = {}, afterRelease: () -> Unit = {}) {
+    private fun setup(before: () -> Unit = {}, afterRelease: () -> Unit = {},
+        afterSubmit: () -> Unit = {}, maySettleRelease: () -> Boolean = { true }) {
         main {
             directory = File(host.cacheDir,"surface-host-${java.util.UUID.randomUUID()}")
-            store = NoteStore.isolated(host,directory,before,afterRelease)
+            store = NoteStore.isolated(host,directory,before,afterRelease,afterSubmit,maySettleRelease)
             note = store.create(); check(note.setPaper(200.0,200.0,PaperKind.BLANK))
             for (color in listOf(0x80ff0000.toInt(),0x800000ff.toInt())) {
                 note.selectPen(color,10.0)
@@ -151,6 +152,51 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Render close stopped shared storage executor") { saved }
         main { store.stopTestBackend() }
 
+        var allowSettlement = false
+        var handoffs = 0
+        var nativeCloses = 0
+        setup(afterRelease = { nativeCloses++ }, afterSubmit = {
+            handoffs++
+            if (handoffs == 1) error("injected confirmation loss after real ViewRoot handoff")
+        }, maySettleRelease = { allowSettlement })
+        eventually("Ambiguous handoff never received its real release receipt") {
+            store.inkReleaseCallbacks>0 && store.inkReleaseDeferred
+        }
+        var handoffHeld = 0L
+        main {
+            handoffHeld = store.inkChargedBytes
+            check(handoffHeld>0 && !store.inkHandoffRecovered && nativeCloses==0 && handoffs==1)
+            check(!store.reconcileInkRelease()) // Receipt alone cannot bypass completion/cleanup.
+            store.detachInk(view); store.detachInk(view)
+            check(store.inkChargedBytes==handoffHeld)
+        }
+        val ambiguousFallback = screenPixel()
+        check(kotlin.math.abs(Color.blue(ambiguousFallback)-191)<=4) { "Ambiguous handoff lost complete Path fallback" }
+        var savedWhileDeferred = false
+        main {
+            store.releaseActive(note)
+            note = store.create()
+            view = InkCanvasView(host,note,{}, { error(it) })
+            host.setContentView(InkSurfaceHost(view,store))
+            check(store.save(note.capture()) { _, error -> check(error==null); savedWhileDeferred = true })
+        }
+        eventually("Deferred release blocked original shared storage worker") { savedWhileDeferred }
+        SystemClock.sleep(150) // Delayed owner settlement, not an emulated unsignaled GPU fence.
+        main {
+            check(store.inkChargedBytes==handoffHeld && store.inkOwnerRetained)
+            check(store.inkFramePublications==0 && handoffs==1 && nativeCloses==0)
+        }
+        val nextFallback = screenPixel()
+        check(Color.red(nextFallback)>245 && Color.green(nextFallback)>245 && Color.blue(nextFallback)>245) {
+            "New document did not retain complete fallback while old pool was held"
+        }
+        main { allowSettlement = true }
+        eventually("Real release proof did not recover handoff and unblock the new document frame") {
+            store.inkHandoffRecovered && store.inkFramePublications>0
+        }
+        main { check(nativeCloses==1 && handoffs==2) }
+        close()
+
         var releaseCalls = 0
         setup(afterRelease = { releaseCalls++; error("injected post-recycle confirmation loss") })
         eventually("Unknown cleanup fixture did not present") { store.inkFramePublications>0 }
@@ -159,6 +205,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         var held = 0L
         main { held = store.inkChargedBytes; check(held>0 && store.inkOwnerRetained); store.detachInk(view); check(releaseCalls==1) }
         main { check(store.reconcileInkRelease()); check(store.inkChargedBytes==0L && !store.inkOwnerRetained); store.stopTestBackend() }
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

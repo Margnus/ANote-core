@@ -20,6 +20,8 @@ annotation class ExperimentalAndroidInkFrame
 class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecutor: BoundedOwnerExecutor,
     private val wakeOwner: () -> Unit, beforeCompute: () -> Unit = {},
     private val afterNativeClose: () -> Unit = {},
+    private val afterBufferSubmitted: () -> Unit = {},
+    private val maySettleRelease: () -> Boolean = { true },
 ) {
     private val renderer = BrushRenderExecutorPoc(frame, layer, 48L*1024*1024, 64L*1024*1024, 2,
         beforeCompute = { beforeCompute() }, sharedExecutor = sharedExecutor)
@@ -71,7 +73,8 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
         private var submitted = false
         private var closing = false
         private var removalRequested = false
-        private var unknown = false
+        private var handoffUnknown = false
+        private var cleanupUnknown = false
         private var nativeHandlesClosed = false
         private val receiptLock = Any()
         private var callbackSeen = false
@@ -80,11 +83,14 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
         var released = false; private set
         var uploadRejected = false; private set
         var rowStride = 0; private set
-        var callbackCount = 0; private set
+        private var receivedCallbacks = 0
+        val callbackCount: Int get() = synchronized(receiptLock) { receivedCallbacks }
         var validFenceObserved = false; private set
-        val releaseUnknown: Boolean get() = unknown || source.releaseUnknown
-        val ready: Boolean get() = !closing && !unknown && source.canPublish && buffer != null
-        val needsPoll: Boolean get() = !released && !releaseUnknown &&
+        var handoffRecovered = false; private set
+        var releaseDeferred = false; private set
+        val releaseUnknown: Boolean get() = handoffUnknown || cleanupUnknown || source.releaseUnknown
+        val ready: Boolean get() = !closing && !releaseUnknown && source.canPublish && buffer != null
+        val needsPoll: Boolean get() = !released && !cleanupUnknown && !source.releaseUnknown &&
             ((!closing && buffer == null && !uploadRejected) || synchronized(receiptLock) { callbackSeen } )
         internal fun upload(paper: (Canvas) -> Unit, transform: Matrix, rect: RectF, clip: RectF) {
             renderer.executorStatus()
@@ -129,14 +135,14 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
                     uploadComposite?.recycle(); uploadComposite = null
                 } catch (_: Throwable) {
                     // Retain ambiguous temporary handles and the original source charge, without retry.
-                    unknown = true; uploadRejected = true
+                    cleanupUnknown = true; uploadRejected = true
                 }
                 if (uploadRejected) close()
             } // These CPU objects never enter a hardware draw.
         }
         fun poll() {
             renderer.executorStatus()
-            if (released || releaseUnknown) return
+            if (released || cleanupUnknown || source.releaseUnknown) return
             if (!closing && buffer == null && !uploadRejected) {
                 try {
                     acquired = checkNotNull(reader).acquireNextImage() ?: return
@@ -152,35 +158,46 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
                     validFenceObserved = true
                     if (!fence.await(Duration.ZERO)) return // Never block UI or the storage worker.
                 }
+                // Fault boundary can defer owner settlement, never replace the real fence proof.
+                if (!maySettleRelease()) { releaseDeferred = true; return }
                 fence?.close()
                 synchronized(receiptLock) { receipt = null }
                 gpuReleased = true
+                if (handoffUnknown) { handoffUnknown = false; handoffRecovered = true }
                 finish()
-            } catch (_: Throwable) { unknown = true }
+            } catch (_: Throwable) { cleanupUnknown = true }
         }
         /** Consumed by ViewRoot atomically with removal of the complete Path fallback. */
         fun schedule(target: SurfaceControl, attachedRoot: AttachedSurfaceControl): Boolean {
             renderer.executorStatus()
             if (!ready || submitted) return false
-            val transaction = SurfaceControl.Transaction()
+            val transaction = try { SurfaceControl.Transaction() } catch (_: Throwable) { return false }
             var inboundFence: SyncFence? = null
+            var scheduled = false
             try {
                 inboundFence = acquired?.fence
+                // setBuffer itself may throw after a native handoff; start responsibility first.
+                submitted = true; child = target; root = attachedRoot
                 transaction.setBuffer(target,checkNotNull(buffer),inboundFence) { fence ->
                     synchronized(receiptLock) {
                         if (callbackSeen) { if (receipt !== fence) fence.close() }
-                        else { callbackSeen = true; receipt = fence; callbackCount++ }
+                        else { callbackSeen = true; receipt = fence; receivedCallbacks++ }
                     }
                     wakeOwner() // Payload stays in this single retained receipt; no payload callback queue.
                 }.setLayer(target,1).setVisibility(target,true)
                 // From this point a thrown/ambiguous native call must retain the original responsibility.
-                submitted = true; child = target; root = attachedRoot
                 if (!attachedRoot.applyTransactionOnDraw(transaction)) {
-                    unknown = true; return false // Do not guess that failure means no native handoff.
+                    handoffUnknown = true // Do not guess that failure means no native handoff.
+                } else {
+                    afterBufferSubmitted()
+                    scheduled = true
                 }
-                return true
-            } catch (_: Throwable) { unknown = true; return false }
-            finally { transaction.close(); inboundFence?.close() }
+            } catch (_: Throwable) { handoffUnknown = submitted }
+            finally {
+                try { transaction.close() } catch (_: Throwable) { cleanupUnknown = true }
+                try { inboundFence?.close() } catch (_: Throwable) { cleanupUnknown = true }
+            }
+            return scheduled && !releaseUnknown
         }
         fun close() {
             renderer.executorStatus()
@@ -195,14 +212,14 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
                             transaction.setBuffer(target,null).setVisibility(target,false)
                             if (root?.applyTransactionOnDraw(transaction) != true) transaction.apply()
                         }
-                    } catch (_: Throwable) { unknown = true }
+                    } catch (_: Throwable) { handoffUnknown = true }
                 }
             }
             root = null; child = null // Pending native transactions own their handles; do not retain old ViewRoot.
             poll()
         }
         private fun finish() {
-            if (!gpuReleased || unknown) return
+            if (!gpuReleased || handoffUnknown || cleanupUnknown) return
             try {
                 buffer?.close(); buffer = null
                 acquired?.close(); acquired = null
@@ -210,12 +227,12 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
                 reader?.close(); reader = null
                 nativeHandlesClosed = true
                 released = source.close()
-            } catch (_: Throwable) { unknown = true }
+            } catch (_: Throwable) { cleanupUnknown = true }
         }
         fun reconcileReleased(): Boolean {
             renderer.executorStatus()
             if (released) return true
-            if (!gpuReleased || !nativeHandlesClosed || unknown) return false
+            if (!gpuReleased || !nativeHandlesClosed || handoffUnknown || cleanupUnknown) return false
             if (!source.reconcileReleased()) return false
             released = true; return true
         }

@@ -42,3 +42,11 @@ DEV-034B 接 Apple 已有 Swift 有界执行器及 CGImage 持有，明确 Kotli
 close不把Transaction返回当作完成。真实releaseCallback保留单个SyncFence回执，主owner非阻塞await(Duration.ZERO)确认有效fence完成后才关闭HardwareBuffer/Image/writer/reader和CPU source，归还同一native许可。缺回执/未signal保持charge；歧义或UNKNOWN保留同一对象，禁止破坏性重试/超时归零。post只用于唤醒原owner，有限控制poll不携带第二份数据队列。64MiB总量/48MiB resident及复制预留不是厂商内部heap的实测上限。
 
 [现有报告](../reports/android-render-integration.json)绑定最终2cfe9f5c…包、API36真实compositor及有效release fence。原层级像素/active-static alpha、空页/缩放/resize、等待回退、View移除后迟到ACK、共享存储保存及新NoteStore文件重开2页3笔、UNKNOWN保留48,906,240字节后只读协调为0均通过；原64文件未变。ART95与共享279单列，真实RecordingCanvas拒绝仍通过。普通CUA UI/普通PID新后端消费、长时未signal/歧义交付恢复、API26–32/厂商矩阵、真机heap/M-1/完全owner丢失/C1/SQLite仍待门禁。
+
+## DEV-036G增量：交付歧义与清理UNKNOWN分开（2026-10-17）
+
+交付可能发生后异常不能直接释放，但后来真实的同buffer releaseCallback及有效fence完成可以恢复责任结算。桥接从setBuffer前开始持有，交付歧义允许继续非阻塞观察原回执；破坏性清理/fence检查UNKNOWN仍隔离，不重试或超时归零。callback计数读取与写入共用原回执锁。原CPU holder硬件门禁和回收后只读协调不变。
+
+真实原App宿主在实际ViewRoot成功接收事务后注入异常，随后用仅可延迟的软件gate保留结算：旧48,906,240逻辑字节持续持有，新文档完整Path、原共享保存可完成，重复detach/协调不得绕过；gate放行后仍检查真实fence，旧owner完成并恢复新帧。普通清理UNKNOWN不被交付恢复误清除。该测试不制造长期未signal GPU fence，不证明实际heap/故障率/完整native失败矩阵。
+
+最终APK6a417b5d…/共享279/ART95与原宿主完整回归通过；[同一Android报告](../reports/android-render-integration.json)保留ordinary UI pending。当前测试前后64文件不变；AVD恢复后、G主包安装/测试前相对F历史有1文件hash变化，原因未核，无增删/历史覆盖，不能声称跨轮完全一致。普通CUA UI/普通PID消费、API26–32及厂商、真实长期未signal/完全owner丢失/任意变换/真机heap/M-1/C1/SQLite继续待验。

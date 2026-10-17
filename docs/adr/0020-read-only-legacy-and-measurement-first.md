@@ -91,3 +91,11 @@ C的实际屏幕拒绝促使修改源图像持有契约，未删除原CPU门禁�
 真实API36 app-host经原层级的compositor截图对照，证明半透明/静态动态顺序、页面/缩放/尺寸替换、等待完整回退；保存后由新NoteStore重开2页3笔，关闭迟到ACK、真实有效release fence与原生确认丢失后只读协调通过。最终APK 2cfe9f5c…及64原文件保持绑定，报告见[既有Android分范围证据](../../reports/android-render-integration.json)。普通包代码已连接，但CUA未能识别模拟器app，不能把宿主成功或恢复普通PID当作普通UI后端验收。
 
 保留原CPU holder硬件门禁。此决策不冻结生产GPU后端；系统隐藏分配、物理性能、长时未signal/歧义交付、API26–32及厂商运行矩阵、完全owner丢失与跨线程接管仍待验。下一步先完成最终普通包书写/切页/缩放/导航/后台/文件重开与普通PID呈现释放证据；iOS D保持原包范围，跨端DEV-036、M-1/C1/SQLite仍未完成。
+
+## DEV-036G：采用同buffer真实回执的交付歧义恢复（2026-10-17）
+
+F的统一UNKNOWN会永久阻止交付异常后的迟到回执结算。调整为交付歧义与破坏性清理UNKNOWN两类责任：在setBuffer前建立可能交付持有；真实releaseCallback及有效SyncFence实际完成后，可消除交付歧义，随后才进行原生句柄关闭和原CPU许可归还。清理/fence检查异常保持隔离，CPU回收确认丢失仍仅在既有事实下显式只读协调；重复close不重新交付或破坏性重试。采用此修复，原资源/调度/内容权威不变。
+
+真实原Android层级在实际ViewRoot交付成功后注入确认丢失；callback后软件延迟结算时，旧48,906,240逻辑字节/许可保持，新文档完整Path不发布新池，原存储worker仍能保存。gate放行不能代替真实fence检查；完成后旧owner归零并恢复新帧。原清理UNKNOWN反例保持，完整帧/输入叠加/页面缩放尺寸/迟到ACK/保存新owner重开回归通过。新APK6a417b5d…及原报告[分范围证据](../../reports/android-render-integration.json)绑定该实现。
+
+此注入不证明真实长期未signal或厂商异常率；全部交付/清理失败矩阵与普通包CUA UI仍待验。G前后64文件保持；AVD恢复后、G安装/测试前观察到相对F历史1份共同文件hash变化、原因未核，未覆盖现有文件；历史差异和本轮保留分开。M-1/heap/API26–32/完全owner丢失/任意变换/C1/SQLite未放行。

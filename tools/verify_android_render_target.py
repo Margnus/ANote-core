@@ -36,7 +36,9 @@ def main():
     stamp = dict(line.split('  ', 1)[::-1] for line in (ROOT/'reports/android-brush-build-inputs.sha256').read_text(encoding='utf-8').splitlines())
     for relative, sha in {**build['source_and_build_input_sha256'], **stamp}.items():
         assert digest(ROOT/relative) == sha, ('Stale build', relative)
-    baseline = json.loads((ROOT/'build/dev036f-files-before.json').read_text(encoding='utf-8'))
+    baseline = json.loads((ROOT/'build/dev036g-files-before.json').read_text(encoding='utf-8'))
+    baseline_drift = json.loads((ROOT/'build/dev036g-baseline-drift.json').read_text(encoding='utf-8'))
+    assert baseline_drift['current_before_test_count'] == len(baseline)
 
     def files():
         names = adb('shell', 'run-as', BUNDLE, 'ls', 'files/preview-notes').decode().splitlines()
@@ -48,13 +50,16 @@ def main():
     adb('install', '-r', str(apk)); adb('install', '-r', str(test))
     output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'surface_frames',
                  BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode()
-    (ROOT/'build/dev036f-target-host.log').write_text(output, encoding='utf-8')
+    (ROOT/'build/dev036g-target-host.log').write_text(output, encoding='utf-8')
     assert 'surface_status=passed' in output, output
     observed = json.loads(re.search(r'surface_frames=(\{.*\})', output).group(1))
     assert all(observed[key] for key in ('app_hierarchy_pixels', 'active_static_alpha', 'page_zoom',
         'actual_release_callback', 'valid_release_fence_observed', 'late_view_ack', 'resize', 'pending_complete_fallback',
-        'shared_storage_after_close', 'saved_new_owner_reopen', 'unknown_readonly_reconciled'))
-    assert observed['unknown_retained_bytes'] > 0
+        'shared_storage_after_close', 'saved_new_owner_reopen', 'unknown_readonly_reconciled',
+        'ambiguous_handoff_recovered', 'deferred_completion_keeps_charge', 'storage_during_deferred_release',
+        'new_frame_after_handoff_recovery'))
+    assert observed['unknown_retained_bytes'] > 0 and observed['handoff_unknown_retained_bytes'] > 0
+    assert observed['long_unsignaled_gpu_fence_tested'] is False
 
     def integer(key):
         return int(re.search(r'\b'+key+r'=(\d+)', output).group(1))
@@ -69,7 +74,7 @@ def main():
     assert any('frame-scheduled' in event['message'] and 'backend=surface-control' in event['message'] for event in events)
     assert any('release-receipt' in event['message'] for event in events)
     assert events[-1]['message'] == 'owner-drained charged=0'
-    (ROOT/'build/dev036f-target-events.json').write_text(json.dumps(events, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'build/dev036g-target-events.json').write_text(json.dumps(events, indent=2)+'\n', encoding='utf-8')
     assert files() == baseline, 'Target test must not write canonical documents'
     # Explicitly restore a normal process after instrumentation; no uninstall/data clear.
     adb('shell', 'am', 'force-stop', BUNDLE)
@@ -92,8 +97,8 @@ def main():
         'canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePoc.kt',
         'canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePocTest.kt',
         'tools/verify_android_render_target.py', 'reports/preview-build.json',
-        'reports/android-brush-build-inputs.sha256', 'build/dev036f-files-before.json',
-        'build/dev036f-target-host.log', 'build/dev036f-target-events.json',
+        'reports/android-brush-build-inputs.sha256', 'build/dev036g-files-before.json', 'build/dev036g-baseline-drift.json',
+        'build/dev036g-target-host.log', 'build/dev036g-target-events.json',
         'reports/android-brush-common-tests.json', 'canvas-core/build/android-brush-tests/run.log',
         holder['test_apk']}
     sdk_sources = [sdk/'sources/android-36'/name for name in (
@@ -101,7 +106,7 @@ def main():
         'android/view/SurfaceView.java', 'android/hardware/SyncFence.java', 'android/media/ImageReader.java',
         'android/media/ImageWriter.java')]
     report = {
-        'schema': 'android-render-integration-2', 'status': 'host_surface_verified_ordinary_ui_pending',
+        'schema': 'android-render-integration-3', 'status': 'host_surface_verified_ordinary_ui_pending',
         'evidence_status': 'passed',
         'artifact_sha256': digest(apk), 'serial': args.serial, 'api': api,
         'device_fingerprint': adb('shell', 'getprop', 'ro.build.fingerprint').decode().strip(),
@@ -118,8 +123,10 @@ def main():
         'ordinary_installed_apk_matches': True,
         'ordinary_screen_target_observed': False, 'ordinary_new_backend_consumption_verified': False,
         'desktop_ui_interaction_verified': False,
-        'ui_limitation': 'CUA getApp rejected both qemu-system-aarch64 and its exact existing binary path. Original app-host hierarchy/compositor tests pass; this does not substitute for ordinary-process UI acceptance. No adb UI input was used to bypass the CUA limitation.',
+        'ui_limitation': 'Earlier CUA getApp rejected both qemu-system-aarch64 and its exact binary path. Current CUA inventory still exposes no Android emulator. Dedicated AVD restored headlessly only for native host tests. Original app-host hierarchy/compositor tests pass; this does not substitute for ordinary-process UI acceptance. No adb UI input was used to bypass the CUA limitation.',
         'original_file_count': len(baseline), 'all_original_files_unchanged': True,
+        'original_files_scope': 'Unchanged relative to the current pre-G-test baseline after AVD restore, not equivalence to F historical baseline.',
+        'historical_baseline_comparison': baseline_drift,
         'no_files_added_or_deleted_by_target_test': True,
         'source_evidence_sha256': {relative: digest(ROOT/relative) for relative in sorted(source_paths)},
         'sdk_contract_source_sha256': {str(path): digest(path) for path in sdk_sources},
@@ -131,18 +138,20 @@ def main():
             {'url': 'https://developer.android.com/reference/android/view/ViewTreeObserver#registerFrameCommitCallback(java.lang.Runnable)',
              'conclusion': 'Hardware frame submitted to swap chain; may not be visible. Callback does not carry a source Bitmap release receipt or SyncFence.'},
             {'url': 'https://developer.android.com/reference/android/view/SurfaceControl.Transaction#setBuffer(android.view.SurfaceControl,android.hardware.HardwareBuffer,android.hardware.SyncFence,java.util.function.Consumer)',
-             'conclusion': 'API33+ explicit compositor buffer release callback; valid returned SyncFence must signal before reuse. This is a candidate separate presentation boundary, not an existing Bitmap/View release mechanism.'},
+             'conclusion': 'API33+ explicit compositor buffer release callback; valid returned SyncFence must signal before reuse. This is the adopted unfrozen surface boundary, not an existing Bitmap/View release mechanism.'},
         ],
-        'decision': 'Adopt only as an unfrozen API33+ host-verified integration. One NoteStore-owned render adapter shares the storage executor; ACK only after drain. Full canonical fallback until ViewRoot-synchronized complete frame submission; dynamic ink stays in the original overlay. Real compositor release callback plus valid SyncFence zero-time completion gates all uploaded/native image release. Original CPU holder hardware rejection remains. API26-32 retain Path. Ordinary UI acceptance is pending.',
+        'decision': 'Adopt only as an unfrozen API33+ host-verified integration. One NoteStore-owned render adapter shares the storage executor; ACK only after drain. Full canonical fallback until ViewRoot-synchronized complete frame submission; dynamic ink stays in the original overlay. Real compositor release callback plus valid SyncFence zero-time completion gates all uploaded/native image release. Ambiguous handoff can recover only after the corresponding actual callback and fence completion; destructive cleanup UNKNOWN remains quarantined. A test-only software gate may delay settlement but cannot bypass the real fence. Original CPU holder hardware rejection remains. API26-32 retain Path. Ordinary UI acceptance is pending.',
         'resource_scope': 'Single native reader; 64MiB total/48MiB resident logical budget. Upload checks measured plane row/pixel stride against reserved allowance (three tight RGBA copies plus 4096-aligned row upper bound). ImageWriter has exactly one fresh dequeue, CPU producer queueing passes acquired producer fence into transaction; no buffer re-use, UI fence wait or new worker. SurfaceView destination queues/driver allocation headers/GC/actual process heap are unmeasured and not bounded by logical charge.',
         'ordinary_backend_code_connected': True,
         'compositor_release_fence_verified_on_emulator': True,
+        'handoff_recovery_verified': True, 'long_unsignaled_gpu_fence_tested': False,
+        'fault_scope': 'One injected exception after an actual successful ViewRoot submission, then actual compositor release receipt. A software settlement gate retains charge and blocks new pool while storage saves; it does not create an unsignaled GPU fence. Gate can only defer and is checked after the real fence check. Cleanup UNKNOWN still requires prior native facts and explicit read-only reconciliation.',
         'remaining_gates': ['ordinary-package CUA UI input/navigation/background/reopen',
                             'API26-32 fallback runtime and broader Android/vendor matrix',
-                            'unsignaled long-lived fence/ambiguous native handoff recovery (no timeout release)',
+                            'real long-lived unsignaled fence; broader ambiguous native handoff/cleanup failure matrix (no timeout release)',
                             'physical latency, frame/heap/driver allocation and production GPU comparison',
                             'arbitrary transforms and complete owner loss/cross-thread transfer'],
-        'scope': 'Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, UNKNOWN and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim.',
+        'scope': 'Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, cleanup UNKNOWN, actual-receipt recovery after injected post-handoff confirmation loss, delayed owner settlement/backpressure/shared storage and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim.',
         'gpu_fence_verified': False, 'physical_device_or_heap_measured': False, 'c1_gate_complete': False,
     }
     (ROOT/'reports/android-render-integration.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')

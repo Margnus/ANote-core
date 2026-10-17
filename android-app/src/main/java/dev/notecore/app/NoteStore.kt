@@ -19,7 +19,8 @@ data class NoteSummary(val id: String, val title: String, val modified: Long)
 /** App lifetime storage owner is the main thread. Only immutable captures / exclusive read results cross IO. */
 @OptIn(ExperimentalAndroidInkFrame::class)
 class NoteStore private constructor(context: Context, private val directory: File = File(context.filesDir, "preview-notes"),
-    private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {}) {
+    private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {},
+    private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true }) {
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
@@ -85,6 +86,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal var inkFrameDraws = 0; private set
     internal var inkReleaseCallbacks = 0; private set
     internal var inkValidFenceObserved = false; private set
+    internal var inkHandoffRecovered = false; private set
+    internal var inkReleaseDeferred = false; private set
     internal val inkChargedBytes: Long get() = inkRenderer?.chargedBytes ?: 0
     internal val inkOwnerRetained: Boolean get() = inkRenderer != null
     private fun pollInkLater() {
@@ -120,6 +123,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 logInk("release-receipt")
             }
             inkValidFenceObserved = inkValidFenceObserved || image.validFenceObserved
+            inkHandoffRecovered = inkHandoffRecovered || image.handoffRecovered
+            inkReleaseDeferred = inkReleaseDeferred || image.releaseDeferred
             if (image.released) { inkImage = null; inkShown = false; logInk("source-released") }
             else if (image.needsPoll) pollInkLater()
         }
@@ -155,7 +160,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             val scene = view.notebook.snapshot().scene
             val frame = FrameToken(scene.id,scene.revision,inkGeneration,inkGeneration,inkGeneration,inkGeneration)
             inkRenderer = AndroidInkFrameExperiment(frame,view.notebook.currentPage.layerId,executor,::requestPump,
-                beforeInkCompute,afterInkNativeClose)
+                beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease)
             inkKey = key
             inkPending = inkRenderer!!.submit(scene,frame,view.notebook.currentPage.layerId,key.x,key.y,
                 key.width,key.height,1/key.scale)
@@ -299,6 +304,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             instance ?: NoteStore(context.applicationContext).also { instance = it }
         }
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
-            afterInkNativeClose: () -> Unit = {}): NoteStore = NoteStore(context, directory,beforeInkCompute,afterInkNativeClose)
+            afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
+            maySettleInkRelease: () -> Boolean = { true }): NoteStore =
+            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease)
     }
 }
