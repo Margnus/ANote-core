@@ -1,8 +1,8 @@
 {
-  "schema": "ios-render-integration-1",
-  "status": "evidence_verified_integration_blocked",
-  "artifact_sha256": "1389b318cc3d1f0eed623ef1855df5e3a070b6acf541978b29df47334c4f19d6",
-  "ordinary_pid": 7830,
+  "schema": "ios-render-integration-2",
+  "status": "verified_bounded_uikit_integration",
+  "artifact_sha256": "f31799b966a5228681ca32d899f80a36891e841b4b983a99cf4b89bbad7ac3b6",
+  "ordinary_pid": 5747,
   "device": {
     "name": "NoteCorePreview",
     "udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
@@ -10,47 +10,211 @@
   },
   "runtime_events": [
     {
-      "timestamp": "2026-10-16 20:26:38.027133+0800",
-      "pid": 7830,
-      "message": "NOTECORE_RENDER target-rejected non-bitmap"
+      "timestamp": "2026-10-17 10:48:07.485388+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:15.837445+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:15.837568+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:16.760432+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:20.142727+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:20.142861+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:22.873215+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:25.021083+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:25.021187+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:29.165708+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:29.606320+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:29.606438+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:30.532650+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:35.318255+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:35.318399+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:38.108961+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:40.107714+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:40.107894+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:44.438421+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:45.433357+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:45.433492+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:45.433577+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER owner-drained charged=0"
+    },
+    {
+      "timestamp": "2026-10-17 10:48:46.237248+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER owner-drained charged=0"
+    },
+    {
+      "timestamp": "2026-10-17 10:49:05.757342+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:49:05.757438+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:49:21.046944+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER owner-drained charged=0"
+    },
+    {
+      "timestamp": "2026-10-17 10:49:31.321677+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER frame-presented w=1134 h=1653 charged=22494024 bitmap=0 source=provider"
+    },
+    {
+      "timestamp": "2026-10-17 10:49:32.919437+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-bytes-freed"
+    },
+    {
+      "timestamp": "2026-10-17 10:49:32.919625+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER provider-owner-settled charged=22494024"
+    },
+    {
+      "timestamp": "2026-10-17 10:49:32.919755+0800",
+      "pid": 5747,
+      "message": "NOTECORE_RENDER owner-drained charged=0"
     }
   ],
-  "runtime_event_scope": "Events selected by ordinary-package PID, excluding XCTest host events. Message names the CPU gate rejection: context.data was nil; this does not identify the hardware backend or prove a GPU fence.",
-  "host_test_count": 22,
-  "model_cpu_view_lifecycle_tests": 4,
-  "model_shared_executor_cpu_view_verified": true,
-  "ordinary_screen_new_backend_consumption_verified": false,
-  "ordinary_screen_cpu_gate_rejection_verified": true,
-  "fallback_ui_observation_method": "Manual CUA through Device Hub com.apple.dt.Devices; observations recorded from actual AX/UI actions, not generated by this collector or inferred from test counts.",
-  "fallback_ui_observations": [
-    "Final ordinary package reopened DEV036C-UIView-20261016 at page 1/1 with 2 existing strokes. Initial creation/rename/two strokes preceded the final DEBUG-flag rebuild and are fixture preparation only; their UI acceptance is not transferred to the final package.",
-    "Added page: page 2/2 showed 0 strokes; actual drag saved 1 stroke, total saved 3.",
-    "Returned to page 1/2: 2 strokes; zoom in/out and fit page retained the page contents.",
-    "Device Hub Home showed system app icons; reopening NoteCore retained page 1/2 and 2 strokes.",
-    "Returned to library and reopened named file: opened total 3, page 1/2 canvas 2 strokes."
+  "runtime_event_scope": "Final ordinary-package PID only; excludes XCTest and the earlier DEV-036D candidate. frame-presented means CGContext draw accepted the complete provider image; CUA separately observes visible strokes. No GPU type, display fence or photon claim.",
+  "host_test_count": 25,
+  "model_view_lifecycle_tests": 5,
+  "provider_release_receipt_tests": 3,
+  "model_shared_executor_view_verified": true,
+  "ordinary_screen_new_backend_consumption_verified": true,
+  "cpu_holder_bitmap_gate_preserved": true,
+  "ordinary_provider_source_release_and_owner_zero_verified": true,
+  "cpu_gate_rejection_historical_artifact_sha256": "1389b318cc3d1f0eed623ef1855df5e3a070b6acf541978b29df47334c4f19d6",
+  "ui_observation_method": "Actual manual CUA actions through Device Hub com.apple.dt.Devices, compact window for dragging. Collector binds these recorded observations; it does not infer UI actions from event counts.",
+  "ui_observations": [
+    "Final package created and named DEV036D-Final-20261017; actual drags produced two crossing strokes of different colors/widths on page 1; complete visible strokes remained after release.",
+    "Added empty page 2 then dragged one stroke; page 2 displayed one stroke without page 1 contents; total saved 3.",
+    "Returned to page 1 (2 strokes), zoomed in/out and fit page; Home visibly showed system app icons; reopened app at page 1/2 with 2 strokes and total saved 3.",
+    "Concurrent external UI activity was reported by CUA; next observed page 1 had 9 strokes and total saved 10. These 7 additional strokes are retained and are not attributed to agent drags or claimed exclusively synthetic.",
+    "Closed to library, reopened final file: total 10, page 1/2 had 9; page 2/2 had 1. Closed again; final ordinary PID recorded provider source release, owner settlement and owner-drained charged=0."
   ],
+  "dynamic_static_acceptance_scope": "Three agent drag commits visibly persisted in the final ordinary package with non-bitmap provider presentation events. Host independently compares complete fallback before ACK to new static pixels with overlapping semi-transparent objects (no double alpha). No in-progress pen-to-photon, high-frequency frame or exclusive backend consumption claim for the later 9-stroke page: bounded work may use full Path fallback.",
   "test_document": {
-    "sha256": "b29fe31ed40f5ac98b9aacfc1dbb51546fe723fcb3a06bf62c8282da04651aa6",
+    "sha256": "f3fd34d95369e37169f99d066743a72dabb6e07b692b9291db8f776e753ea13b",
     "pages": 2,
-    "total_strokes": 3,
+    "total_strokes": 10,
     "page_strokes": [
-      2,
+      9,
       1
     ],
-    "original_file_count": 5,
-    "all_original_files_unchanged": true
+    "original_file_count": 6,
+    "all_original_files_unchanged": true,
+    "final_fixture_agent_drawn_strokes": 3,
+    "concurrent_external_ui_strokes_observed": 7,
+    "exclusive_synthetic_input_claim": false,
+    "total_files_now": 8
+  },
+  "source_contract": {
+    "api": "CGDataProviderCreateWithData / CGDataProviderReleaseDataCallback",
+    "apple_documentation": "https://developer.apple.com/documentation/coregraphics/cgdataprovider/init(datainfo:data:size:releasedata:)",
+    "sdk_header": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CGDataProvider.h",
+    "sdk_header_sha256": "a38f2c335ade4e6f9c530269310cd5f6e0e08d428058830f44f175803bf6484c",
+    "responsibility": "Immutable independent RGBA allocation; accepted provider alone frees bytes through releaseData. Receipt synchronized across threads; Kotlin/native permit settled only on main owner after actual receipt. A retained provider blocks release and new model pool; UNKNOWN additionally requires explicit read-only reconciliation. Core Graphics owns destination-specific copies; no raw GPU resource is borrowed from the Kotlin pool.",
+    "budget_scope": "Original conservative two-copy native allowance and single permit retained. Source bytes and logical charge are bounded; hidden Core Graphics allocations/actual heap/GPU residency are unmeasured."
   },
   "source_evidence_sha256": {
-    "reports/ios-preview-build.json": "76c17a3fb9969de0aad9f07edfd2aaba3b5c2d88b2ba9484fd2ada21e8f4617f",
-    "reports/ios-preview-restored.json": "da9bdd0edd9f0273b54ac3f37845cc89ef38221e9f27c6822574dbaf194dfc6a",
-    "reports/ios-host-tests.json": "94a7265bea2331cce4752ca9f928076fb3a76575a19d57b47b20402af2ed5aea",
-    "reports/ios-runtime-smoke.json": "b12b0a73b7f4cbdcc7df992990eaa2e55c00dd799e3892adf583daf10b0975c2",
-    "build/dev036c-ui-baseline.json": "ee72a02a1059b9ff1fa6569e8b30a0a6d5991d0ffeabdcf38f37ccd1564bba60",
-    "build/dev036c-test-document.json": "65705c86bc38a1065c33ce35c9b63787c0755e6c9caaa401be91d4d590d1f447",
-    "build/dev036c-render-stream.log": "d2bf43c552aca428e27df856dc087012171cac3523133f0807bee65ca8f3dc84",
-    "tools/collect_ios_render_integration.py": "54f1243d301672a0aeeb4a51c90cac180c2ed24e720e6e804429e16b173b671d"
+    "reports/ios-preview-build.json": "455d44c288f4e03aabe753640ab2544b2c5650e01b65fca2302881d3ab97b9a6",
+    "reports/ios-preview-restored.json": "e7f696a7f35395c059572379e59e814ed41f50c72c680322a2f6dad118c37416",
+    "reports/ios-host-tests.json": "02cbdb6034bb398254b131cc315e99f65e233ceab2b437cc3b8f94f4d03cdc0e",
+    "reports/ios-runtime-smoke.json": "c25c71b4e2040e3f7308d4b65b972751f2005e2f7fdd735b71cf1c50b411df65",
+    "build/dev036d-ui-baseline.json": "507e6e6a808ead1fac3a9bad87097a2e5068b65f9bf0efef90156f2362ce8b3b",
+    "build/dev036d-test-document.json": "6a25f1c74d70a1d1c2334a1b3fbd3ac307f1f437f9eba6581eb36e2ac571de07",
+    "build/dev036d-render-stream.log": "915ee74148b40cdbaca01701729ecc69ea5d6dcdf3894e40697d32a48cb32d5e",
+    "build/dev036d-final-two-strokes.png": "356204d5152ecc449267e79aac17200b65dc3e1fba7314bfb0ad4d9c686906c5",
+    "build/dev036d-final-page2.png": "65089c36693cbf2c6936a33913fc0b96a33204c0176e5a057fdd06a281eb6692",
+    "tools/collect_ios_render_integration.py": "ffe71bcbabf970b05194bcadcefe2df39ff024eeffa6f5293451ce136b25f853"
   },
-  "scope": "Complete ink frames and same-model close/ACK/UNKNOWN responsibility are validated in CPU UIKit host targets. Ordinary screen destination rejects the CPU holder and uses the complete legacy Path fallback. The new screen backend is NOT accepted; no physical stylus/frame/heap/GPU, C1, SQLite, forced-stop or new backup-picker acceptance.",
+  "scope": "Bounded MONOLINE ordinary iOS UIKit complete static frame integration and source-lifetime protocol, with full canonical Path fallback on work/budget/failure. Android ordinary backend, physical stylus/frame/heap, GPU fence, arbitrary transforms, complete C1, SQLite, forced-stop and file-picker acceptance remain unverified.",
+  "dev036_cross_platform_complete": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_or_gpu_measured": false
 }

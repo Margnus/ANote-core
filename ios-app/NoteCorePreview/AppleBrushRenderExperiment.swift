@@ -123,11 +123,31 @@ enum AppleBrushImageBuildExperiment {
     case ready(AppleBrushImageExperiment), rejected(String), cleanupRequired(AppleBrushImageExperiment)
 }
 enum AppleBrushImageFailureExperiment: Error { case layout, copy }
+// CG may release on any thread. This receipt owns no Kotlin object and never settles the pool.
+// CGDataProvider.h: releaseData is called when the provider is freed. Only that callback frees bytes.
+private final class AppleBrushSourceReceipt {
+    private let lock = NSLock()
+    private var freed = false
+    var onRelease: (() -> Void)? // Installed on owner before the provider can escape.
+    var confirmed: Bool { lock.lock(); defer { lock.unlock() }; return freed }
+    func release(_ data: UnsafeRawPointer) {
+        UnsafeMutableRawPointer(mutating: data).deallocate()
+        #if DEBUG
+        NSLog("NOTECORE_RENDER provider-bytes-freed")
+        #endif
+        lock.lock(); precondition(!freed); freed = true; lock.unlock()
+        let notify = onRelease
+        DispatchQueue.main.async { notify?() }
+    }
+}
 final class AppleBrushImageExperiment {
     private let adapter: AppleBrushRenderExperiment
     private let reader: AppleBrushReaderExperiment
     private var image: CGImage?
     private var unknown = false
+    private var closing = false
+    private var source: AppleBrushSourceReceipt?
+    private var onSourceRelease: () -> Void = {}
     private(set) var released = false
     private(set) var rowStorageUpperBytes = 0
     private let releaseBoundary: (Bool) throws -> Void
@@ -136,6 +156,7 @@ final class AppleBrushImageExperiment {
         self.adapter = adapter; self.reader = reader; self.releaseBoundary = releaseBoundary
     }
     static func create(_ adapter: AppleBrushRenderExperiment, _ item: AppleBrushDispatchExperiment,
+        trackedSource: Bool = false, onSourceRelease: @escaping () -> Void = {},
         afterCopy: () throws -> Void = {}, releaseBoundary: @escaping (Bool) throws -> Void = { _ in }
     ) throws -> AppleBrushImageBuildExperiment {
         try adapter.executor.checkOwner()
@@ -143,9 +164,38 @@ final class AppleBrushImageExperiment {
         guard item.job.nativeAllowance >= Int64(bytes * 2) else { return .rejected("native-copy-budget") }
         guard let reader = adapter.owner.borrowNative(job: item.job) else { return .rejected("native-reader-unavailable") }
         let holder = AppleBrushImageExperiment(adapter, reader, releaseBoundary)
+        holder.onSourceRelease = onSourceRelease
         do {
             // This scope ends before close on failure: no live context while returning its permit.
             try autoreleasepool {
+                if trackedSource {
+                    let receipt = AppleBrushSourceReceipt()
+                    holder.source = receipt
+                    receipt.onRelease = { [weak holder] in
+                        guard let holder else { return }
+                        // Main owner only; callback itself touches no native-reader authority.
+                        _ = try! holder.finishConfirmedRelease()
+                        holder.onSourceRelease()
+                    }
+                    let data = UnsafeMutableRawPointer.allocate(byteCount: bytes, alignment: 16)
+                    for i in 0..<bytes { data.storeBytes(of: UInt8(reader.byteAt(offset: Int32(i))), toByteOffset: i, as: UInt8.self) }
+                    let info = Unmanaged.passRetained(receipt).toOpaque()
+                    guard let provider = CGDataProvider(dataInfo: info, data: data, size: bytes, releaseData: { info, data, _ in
+                        Unmanaged<AppleBrushSourceReceipt>.fromOpaque(info!).takeRetainedValue().release(data)
+                    }) else {
+                        Unmanaged<AppleBrushSourceReceipt>.fromOpaque(info).release()
+                        receipt.release(data)
+                        throw AppleBrushImageFailureExperiment.layout
+                    }
+                    holder.image = CGImage(width: w, height: h, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: w * 4,
+                        space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue:
+                            CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue),
+                        provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+                    guard holder.image != nil else { throw AppleBrushImageFailureExperiment.layout }
+                    holder.rowStorageUpperBytes = bytes // Conservative original two-copy allowance stays reserved.
+                    try afterCopy()
+                    return
+                }
                 guard let context = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
                     space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue),
                     let data = context.data else { throw AppleBrushImageFailureExperiment.layout }
@@ -165,13 +215,39 @@ final class AppleBrushImageExperiment {
     }
     func draw(_ context: CGContext, in rect: CGRect) throws -> Bool {
         try adapter.executor.checkOwner()
-        guard !released, !unknown, adapter.owner.canPublish(reader: reader), context.data != nil, let image else { return false }
+        guard !released, !closing, !unknown, adapter.owner.canPublish(reader: reader), context.data != nil, let image else { return false }
         context.interpolationQuality = .none; context.draw(image, in: rect); return true
+    }
+    // Separate contract: UIKit may retain the provider. This source remains immutable and charged
+    // until its release callback, independently of the destination's bitmap/GPU implementation.
+    func drawUIKit(_ context: CGContext, in rect: CGRect) throws -> Bool {
+        try adapter.executor.checkOwner()
+        guard source != nil, !released, !closing, !unknown, adapter.owner.canPublish(reader: reader), let image else { return false }
+        context.interpolationQuality = .none; context.draw(image, in: rect); return true
+    }
+    #if DEBUG
+    // Test-only delayed Core Graphics consumer; no app call site or production image export.
+    func retainSourceForTesting(_ retain: (CGDataProvider) -> Void) throws {
+        try adapter.executor.checkOwner()
+        if source != nil, let provider = image?.dataProvider { retain(provider) }
+    }
+    #endif
+    private func finishConfirmedRelease() throws -> Bool {
+        try adapter.executor.checkOwner()
+        if released { return true }
+        guard closing, !unknown, image == nil, source?.confirmed ?? true else { return false }
+        precondition(adapter.owner.release(reader: reader, unknown: false)); released = true
+        #if DEBUG
+        if source != nil { NSLog("NOTECORE_RENDER provider-owner-settled charged=%lld", adapter.chargedBytes) }
+        #endif
+        return true
     }
     @discardableResult func close() throws -> Bool {
         try adapter.executor.checkOwner()
         if released { return true }
         if unknown { return false }
+        if closing { return try finishConfirmedRelease() }
+        closing = true
         do {
             try releaseBoundary(false)
             image = nil // No raw image escapes; relinquish controlled ARC ownership on owner.
@@ -179,11 +255,11 @@ final class AppleBrushImageExperiment {
         } catch {
             unknown = true; precondition(!adapter.owner.release(reader: reader, unknown: true)); return false
         }
-        precondition(adapter.owner.release(reader: reader, unknown: false)); released = true; return true
+        return try finishConfirmedRelease()
     }
     func reconcileReleased() throws -> Bool {
         try adapter.executor.checkOwner()
-        guard unknown, image == nil else { return false }
+        guard unknown, image == nil, source?.confirmed ?? true else { return false }
         precondition(adapter.owner.reconcileReleased(reader: reader)); released = true; return true
     }
 }

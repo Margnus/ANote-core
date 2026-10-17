@@ -1,5 +1,7 @@
 # DEV-034B Apple 渲染桥接（未冻结）
 
+本文件保留DEV-034B的CPU实验范围。DEV-036D已在同一holder/owner内新增独立不可变CGDataProvider源与真实releaseData回执的有界UIKit入口，普通iOS屏幕已验；原CPU draw门禁仍在。provider延迟时直到实际源释放且主owner确认才归还许可，UNKNOWN还需只读协调；不以ARC置空证明目标读者结束。最新范围与剩余GPU/heap/C1门禁见[ADR-0020](adr/0020-read-only-legacy-and-measurement-first.md)和[普通包分范围报告](../reports/ios-render-integration.json)，下文旧测试数/CPU结论不覆盖最新状态。
+
 ## 里程碑卡
 
 - 编号/依据：DEV-034B，DEV-033 owner/ACK 与 DEV-034A native permit；基线 Core 958ff6e（执行规范后续79b00d9）。

@@ -77,7 +77,7 @@ def audit(root):
         'schema': 'c1-evidence-audit-1', 'status': 'failed' if errors else 'passed',
         'reports': reports, 'errors': errors,
         'scope': 'Read-only rehash of recorded inputs and retained artifacts; no rerun or completeness proof. Historical drift is explicit, never promoted to current benchmark evidence. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.',
-        'ordinary_app_backend_integrated': False, 'c1_gate_complete': False,
+        'ordinary_app_backend_integration_verified_by_this_audit': False, 'c1_gate_complete': False,
         'physical_device_or_heap_measured': False,
     }
 

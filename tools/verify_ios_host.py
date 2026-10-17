@@ -10,6 +10,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testPreviewRetainedProviderSurvivesCloseAndBlocksNewPoolUntilCallback()',
+    'testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner()',
+    'testProviderUnknownReconciliationRequiresRealReleaseReceipt()',
     'testPreviewUIViewConsumesSharedFrameThenDetachKeepsStorageUsable()',
     'testPreviewViewDisappearsWhileRenderRunsAndModelAcknowledgesAfterClose()',
     'testPreviewUnknownReleaseStaysWithModelUntilReadOnlyReconciliation()',
@@ -125,11 +128,13 @@ def main():
         'native_offscreen_render_pixels_verified': True,
         'shared_brush_contour_offscreen_verified': True,
         'app_host_swift_executor_kotlin_native_render_verified': True,
-        'brush_render_host_test_count': 12,
-        'preview_model_view_lifecycle_test_count': 4,
+        'brush_render_host_test_count': 15,
+        'provider_release_receipt_test_count': 3,
+        'provider_source_release_owner_verified': True,
+        'preview_model_view_lifecycle_test_count': 5,
         'preview_model_shared_executor_and_cpu_view_verified': True,
         'brush_native_unique_reader_and_ack_budget_verified': True,
-        'brush_scope': 'Unfrozen Apple iosMain shim + existing Swift worker executes common segmented renderer/mask/RGBA; CGImage held through close/UNKNOWN. PreviewModel injects its existing storage executor; real InkUIView CPU target, fallback, detach/close ACK and UNKNOWN responsibility are verified by four host tests. Ordinary package UI requires its separate report. ARC ownership release, not physical heap/GPU reclamation.',
+        'brush_scope': 'Unfrozen Apple iosMain shim + existing Swift worker executes common segmented renderer/mask/RGBA; CGImage held through close/UNKNOWN. PreviewModel injects its existing storage executor; real InkUIView CPU target, fallback, detach/close ACK and UNKNOWN responsibility are verified by five host tests. Ordinary package UI requires its separate report. UIKit model uses an immutable CGDataProvider source and actual releaseData receipt; three tests retain the real provider, release on a foreign thread and require owner settlement, including UNKNOWN. CPU holder bitmap gate remains. Source-byte responsibility, not physical heap/GPU reclamation.',
         'brush_fixture_execution_scope': 'JVM-generated common contour output consumed by real iOS CoreGraphics; not Kotlin/Native runtime generation, AA edge equivalence or app integration',
         'desktop_ui_interaction_verified': False, 'real_touch_input_verified': False,
         'system_file_picker_verified': False, 'process_restart_verified': False,

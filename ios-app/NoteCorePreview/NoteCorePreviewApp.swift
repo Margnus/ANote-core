@@ -70,7 +70,8 @@ final class PreviewModel: ObservableObject {
             guard !inkRetiring, ack == "PUBLISHED", let key = inkKey, key == inkAttempt,
                   current?.documentId == key.document, current?.changeVersion == key.revision,
                   current?.currentPageId.value == key.page, inkView?.surfaceIdentity == key.surface else { return }
-            switch try! AppleBrushImageExperiment.create(renderer, item, releaseBoundary: inkReleaseBoundary) {
+            switch try! AppleBrushImageExperiment.create(renderer, item, trackedSource: true,
+                onSourceRelease: { [weak self] in self?.inkSourceReleased() }, releaseBoundary: inkReleaseBoundary) {
             case .ready(let image): inkImage = image; inkFramePublications += 1
             case .cleanupRequired(let image): inkImage = image // Retain UNKNOWN and its charge.
             case .rejected: break // The canonical Path remains the complete visible result.
@@ -78,9 +79,18 @@ final class PreviewModel: ObservableObject {
         }
         if inkRetiring && renderer.isDrained {
             inkRenderer = nil; inkRetiring = false
+            logInkDrained()
         }
         if inkRetryOnProgress { inkRetryOnProgress = false; inkAttempt = nil }
         inkView?.setNeedsDisplay()
+    }
+    private func inkSourceReleased() {
+        precondition(Thread.isMainThread)
+        if inkImage?.released == true { inkImage = nil }
+        #if DEBUG
+        NSLog("NOTECORE_RENDER source-released charged=%lld", inkChargedBytes)
+        #endif
+        inkOwnerProgress()
     }
     func detachInk(surface: UUID) {
         precondition(Thread.isMainThread)
@@ -93,9 +103,19 @@ final class PreviewModel: ObservableObject {
         if let image = inkImage, (try! image.close()) { inkImage = nil }
         if let renderer = inkRenderer {
             inkRetiring = true; try! renderer.close()
-            if renderer.isDrained { inkRenderer = nil; inkRetiring = false }
+            if renderer.isDrained { inkRenderer = nil; inkRetiring = false; logInkDrained() }
         }
     }
+    private func logInkDrained() {
+        #if DEBUG
+        NSLog("NOTECORE_RENDER owner-drained charged=%lld", inkChargedBytes)
+        #endif
+    }
+    #if DEBUG
+    func retainInkSourceForTesting(_ retain: (CGDataProvider) -> Void) throws {
+        try inkImage?.retainSourceForTesting(retain)
+    }
+    #endif
     func resumeFromBackground() { precondition(Thread.isMainThread); inkView?.setNeedsDisplay() }
     @discardableResult func reconcileInkRelease() -> Bool {
         precondition(Thread.isMainThread)
@@ -103,20 +123,13 @@ final class PreviewModel: ObservableObject {
         inkImage = nil; inkOwnerProgress(); return true
     }
 
-    /// Runtime capability gate: only an actual bitmap destination consumes the CPU holder.
-    /// Rejection keeps the existing full canonical Path renderer; no partial frame is shown.
+    /// Only the callback-tracked provider holder is eligible for UIKit presentation.
+    /// The independent CPU holder's bitmap gate remains unchanged.
     func drawCommittedInk(_ context: CGContext, note: PagedPreviewNotebook, view: InkUIView) -> Bool {
         precondition(Thread.isMainThread)
         guard current === note else { return false }
         if inkView !== view {
             retireInk(); inkView = view
-        }
-        guard context.data != nil else {
-            inkRejectedTargets += 1
-            #if DEBUG
-            if inkRejectedTargets == 1 { NSLog("NOTECORE_RENDER target-rejected non-bitmap") }
-            #endif
-            return false
         }
         let viewport = view.viewport, density = Double(view.contentScaleFactor)
         let width = ceil(view.bounds.width * density), height = ceil(view.bounds.height * density)
@@ -146,14 +159,14 @@ final class PreviewModel: ObservableObject {
         if let image = inkImage, key == inkAttempt {
             context.saveGState()
             context.translateBy(x: key.rect.minX, y: key.rect.maxY); context.scaleBy(x: 1, y: -1)
-            let drawn = try! image.draw(context, in: CGRect(origin: .zero, size: key.rect.size))
+            let drawn = try! image.drawUIKit(context, in: CGRect(origin: .zero, size: key.rect.size))
             context.restoreGState()
             if drawn {
                 inkFrameDraws += 1
                 #if DEBUG
                 if inkLoggedGeneration != inkGeneration {
                     inkLoggedGeneration = inkGeneration
-                    NSLog("NOTECORE_RENDER frame-presented w=%ld h=%ld charged=%lld", Int(key.width), Int(key.height), inkChargedBytes)
+                    NSLog("NOTECORE_RENDER frame-presented w=%ld h=%ld charged=%lld bitmap=%d source=provider", Int(key.width), Int(key.height), inkChargedBytes, context.data == nil ? 0 : 1)
                 }
                 #endif
                 return true

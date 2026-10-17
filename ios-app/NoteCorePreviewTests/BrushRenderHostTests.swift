@@ -57,6 +57,16 @@ final class BrushRenderHostTests: XCTestCase {
         for i in 0..<4 { XCTAssertLessThanOrEqual(abs(expected[i] - actual[i]), 2) }
         XCTAssertLessThan(actual[1], 100); XCTAssertGreaterThan(actual[2], 170)
         XCTAssertEqual(try pixel(after, 50, 160), [255,255,255,255]) // Detect upside-down image.
+        note.selectPen(argb: Int32(bitPattern: 0x8000ff00), width: 10)
+        XCTAssertTrue(note.beginStroke(x: 50, y: 40, pressure: 1, timeMicros: 2))
+        XCTAssertTrue(note.endStroke(x: 50, y: 40, pressure: 1, timeMicros: 3))
+        model.changed()
+        let previous = model.inkFramePublications
+        let pending = try pixel(viewImage(view), 50, 40) // Complete canonical fallback while pending.
+        try await eventually { model.inkFramePublications > previous }
+        let committed = try pixel(viewImage(view), 50, 40)
+        for i in 0..<4 { XCTAssertLessThanOrEqual(abs(pending[i] - committed[i]), 2) }
+        XCTAssertGreaterThan(committed[1], actual[1]) // New green object appears exactly once.
         NativeInkCanvas.dismantleUIView(view, coordinator: ())
         try await eventually { !model.inkOwnerRetained }; XCTAssertEqual(model.inkChargedBytes, 0)
         note.selectPen(argb: -16777216, width: 2)
@@ -64,7 +74,7 @@ final class BrushRenderHostTests: XCTestCase {
         XCTAssertTrue(note.endStroke(x: 100, y: 80, pressure: 1, timeMicros: 3))
         model.changed(); model.close(); XCTAssertNil(model.current)
         model.open(id); try await eventually { model.current != nil }
-        XCTAssertEqual(model.current?.totalStrokeCount, 3) // Render close must not stop shared file worker.
+        XCTAssertEqual(model.current?.totalStrokeCount, 4) // Render close must not stop shared file worker.
         model.close()
     }
     @MainActor func testPreviewViewDisappearsWhileRenderRunsAndModelAcknowledgesAfterClose() async throws {
@@ -124,6 +134,78 @@ final class BrushRenderHostTests: XCTestCase {
         try await eventually { model.inkFramePublications > resume }
         _ = viewImage(view); model.close()
         try await eventually { !model.inkOwnerRetained }
+    }
+    @MainActor func testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner() async throws {
+        let (frame, stroke) = try fixture()
+        let a = try AppleBrushRenderExperiment(frame: frame, layer: stroke.layerId)
+        let item = try XCTUnwrap(a.submit(stroke: stroke, frame: frame))
+        try await ready(a); _ = try a.drain()
+        var ownerNotified = false
+        guard case .ready(let holder) = try AppleBrushImageExperiment.create(a, item, trackedSource: true,
+            onSourceRelease: { XCTAssertTrue(Thread.isMainThread); ownerNotified = true }) else { return XCTFail("provider holder") }
+        nonisolated(unsafe) var retained: CGDataProvider?
+        try holder.retainSourceForTesting { retained = $0 }
+        XCTAssertNotNil(retained)
+        let context = try bitmap()
+        XCTAssertTrue(try holder.drawUIKit(context, in: CGRect(x: 0, y: 0, width: 64, height: 32)))
+        let bytes = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
+        XCTAssertTrue((0..<2048).contains { bytes[$0 * 4 + 3] > 0 })
+        try await stop(a)
+        XCTAssertFalse(try holder.close()); XCTAssertFalse(holder.released)
+        XCTAssertEqual(a.chargedBytes, 24576); XCTAssertFalse(a.isDrained)
+        XCTAssertFalse(try holder.drawUIKit(context, in: .zero))
+        XCTAssertFalse(try holder.close()) // No destructive retry and no timer-based release.
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().async { retained = nil; continuation.resume() }
+        }
+        try await eventually { holder.released && ownerNotified }
+        XCTAssertTrue(a.isDrained); XCTAssertEqual(a.chargedBytes, 0)
+    }
+    @MainActor func testPreviewRetainedProviderSurvivesCloseAndBlocksNewPoolUntilCallback() async throws {
+        let (model, oldView) = try preview()
+        _ = viewImage(oldView); try await eventually { model.inkFramePublications > 0 }
+        _ = viewImage(oldView)
+        nonisolated(unsafe) var retained: CGDataProvider?
+        try model.retainInkSourceForTesting { retained = $0 }
+        XCTAssertNotNil(retained)
+        NativeInkCanvas.dismantleUIView(oldView, coordinator: ())
+        model.close()
+        XCTAssertTrue(model.inkOwnerRetained); let held = model.inkChargedBytes; XCTAssertGreaterThan(held, 0)
+        model.create()
+        let next = InkUIView(note: try XCTUnwrap(model.current)); next.renderModel = model; next.contentScaleFactor = 1
+        next.frame = oldView.frame; next.layoutIfNeeded()
+        let publications = model.inkFramePublications
+        _ = viewImage(next)
+        XCTAssertEqual(model.inkFramePublications, publications); XCTAssertEqual(model.inkChargedBytes, held)
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().async { retained = nil; continuation.resume() }
+        }
+        try await eventually { model.inkChargedBytes == 0 }
+        _ = viewImage(next)
+        try await eventually { model.inkFramePublications > publications }
+        _ = viewImage(next); model.close()
+        try await eventually { !model.inkOwnerRetained }
+        XCTAssertEqual(model.inkChargedBytes, 0)
+    }
+    @MainActor func testProviderUnknownReconciliationRequiresRealReleaseReceipt() async throws {
+        let (frame, stroke) = try fixture()
+        let a = try AppleBrushRenderExperiment(frame: frame, layer: stroke.layerId)
+        let item = try XCTUnwrap(a.submit(stroke: stroke, frame: frame))
+        try await ready(a); _ = try a.drain()
+        guard case .ready(let holder) = try AppleBrushImageExperiment.create(a, item, trackedSource: true,
+            releaseBoundary: { if $0 { throw AppleBrushImageFailureExperiment.copy } }) else { return XCTFail("provider holder") }
+        var retained: CGDataProvider?
+        try holder.retainSourceForTesting { retained = $0 }
+        try await stop(a)
+        XCTAssertFalse(try holder.close()); XCTAssertFalse(try holder.reconcileReleased())
+        XCTAssertEqual(a.chargedBytes, 24576)
+        retained = nil
+        XCTAssertNil(retained)
+        // Actual provider callback alone must not override UNKNOWN.
+        await Task.yield()
+        XCTAssertFalse(holder.released); XCTAssertEqual(a.chargedBytes, 24576)
+        XCTAssertTrue(try holder.reconcileReleased()); XCTAssertTrue(a.isDrained)
+        XCTAssertEqual(a.chargedBytes, 0)
     }
     private func fixture() throws -> (FrameToken, StrokeObject) {
         let text = "NCPREVIEW\t2\nD\timage-page\tImage\t1\t1\t1\nG\tfirst\tink\t400\t400\tBLANK\t1\nS\tnative-image\tink\t1\tMONOLINE\t1\t-869046631\t7\t4\t1\t0\t0\t1\t0\t0\nP\t4\t10\t1\t0\nP\t16\t21\t0.25\t1\nP\t28\t11\t1\t2\nP\t4\t10\t1\t3\nEND\n"

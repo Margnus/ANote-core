@@ -61,3 +61,13 @@ DEV-036A/B已有原作业内完整区域/多tile静态墨迹帧。C把原Preview
 实际新包回退回归完成：重开第一页2笔→加第二页并实写1笔→切回第一/二页、缩放/适合页面→Home后台/返回→从列表关闭再文件重开，最后2页3笔/逐页2、1。原5份文件hash未变。最初创建/命名/首两笔在DEBUG条件修正前的包上完成，仅作为夹具准备，不转移为最终包创建流程验收。未重复系统导入导出或显式强停测试，也不继承旧UI-001。
 
 下一步必须先证明实际呈现目标的图像读取、复制/保留、释放确认和owner责任边界；若涉及GPU在途读者则补相应生命周期证据后再接入。M-1、heap/GPU、完全owner丢失/跨线程接管、任意变换、完整C1及SQLite恢复继续待验。DEV-036整体未验收，本目标按用户授权的“实际接入受阻时交付已验证子范围/具体阻挡”分支交付，不能据此将产品后端记为完成。
+
+## DEV-036D：采用provider源释放回执的有界UIKit接入（2026-10-17）
+
+C的实际屏幕拒绝促使修改源图像持有契约，未删除原CPU门禁。Apple SDK `CGDataProvider.h` 与[官方API](https://developer.apple.com/documentation/coregraphics/cgdataprovider/init(datainfo:data:size:releasedata:))规定provider释放时调用releaseData。采用独立不可变RGBA直接创建CGImage/provider：App在原native allowance内复制一次，provider回调才释放源字节；锁同步回执，回到主owner归还reader许可。原CPU holder的bitmap draw保留，新增UIKit入口只允许具备tracked source的holder。CG内部目标副本由CG持有，App没有提交或提前回收自己的GPU buffer；源回调不是GPU fence或隐藏heap回收证明。
+
+真实app-host25项含3项provider责任反例：保留实际CGDataProvider时close仍计费且禁止画旧帧；在其他线程释放后仅owner结算；UNKNOWN在真实回执前不能协调；Model关闭/新文档期间保持旧池责任，回执后恢复新帧。原Model测试另比对半透明新对象提交时的完整Path和ACK后的完整帧像素。原共享executor、唯一资源池、native许可及有限drain外ACK不变，无旁路队列/Scene。
+
+最终普通包f31799b9…/PID5747有8次bitmap=0的provider帧消费、真实源释放与owner结算，最终owner-drained charge为0。CUA在最终包重新新建/命名、两页三笔、切页/缩放/后台/文件重开，源图像可见；外部输入后最终两页10笔/逐页9、1，原6份文件hash保持。不声称后来9笔页全部由新后端消费；工作/预算拒绝继续整页规范Path。具体版本、事件、输入归属和包恢复见[原iOS分范围报告](../../reports/ios-render-integration.json)，不继承旧UI-001或早期D候选包验收。
+
+决策：**采用provider回执方案作为未冻结的有界MONOLINE UIKit接入；保留完整失败回退。** 仅iOS最小接入范围通过，不解除Android hardware Canvas检查，不冻结GPU后端/物理模块，不放行C1/SQLite。下一步先明确Android真实目标读者与释放确认；M-1物理触笔/帧/heap、GPU fence/隐藏分配、任意变换、owner完全丢失/跨线程移交继续待验。
