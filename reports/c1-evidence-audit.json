@@ -64,10 +64,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "527c9d0c440d8de78ce8862dc227ba41d115eda0c80f6378264232766eaaef33",
+      "report_sha256": "9926aff5049f176c8edfa21b1dc5d68541b93e117d744d39a59dad4349ceaeeb",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 158,
+      "matched_bindings": 159,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -103,35 +103,43 @@
       "mismatches": [],
       "scope": "Same fixed synthetic scroll/zoom responsibility trace on actual ART Bitmap and iOS app-host Swift worker/CGImage; no ordinary app integration. Timings are single exploratory runs with deliberate worker gate/owner polling. Wait bounds bracket admission within submit and end at beforeCompute; include handoff overhead, not isolated scheduler latency. Row storage/charge is not peak heap or GPU residency."
     },
-    "android-render-integration": {
-      "report_sha256": "9b85ce6b02056f9d856cf2fb88821d0c6228060b5e2811bd7ecb200039e26c9b",
-      "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 78,
-      "mismatches": [],
-      "scope": "Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, cleanup UNKNOWN, actual-receipt recovery after injected post-handoff confirmation loss, delayed owner settlement/backpressure/shared storage and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim."
-    },
-    "sqlite-platform-capabilities": {
-      "report_sha256": "7487a66a1ef93339653bf22a5e415088f0b1be0db6e364e189b7698980f09bb4",
+    "android-input-host-tests": {
+      "report_sha256": "3f853ada03cb41ae2233c22ee81e13fb7314180e7d04894554f57423406b834b",
       "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 68,
       "mismatches": [],
+      "scope": "Synthetic native MotionEvent history and terminal batches delivered directly to the original InkCanvasView callback on Android main thread; canonical notebook stays in memory. Oracle uses actual SDK-exposed event scalars, then double scene mapping. Not injected OS events, ordinary UI or physical stylus evidence."
+    },
+    "android-render-integration": {
+      "report_sha256": "bfe50d8c002b870db81785e3ef40b772c7a88f8978924b993e7a1fbe1111b7a0",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 79,
+      "mismatches": [],
+      "scope": "Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, cleanup UNKNOWN, actual-receipt recovery after injected post-handoff confirmation loss, delayed owner settlement/backpressure/shared storage and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim."
+    },
+    "sqlite-platform-capabilities": {
+      "report_sha256": "08daa914cb74a19cea831adb7d6b4ecf925f91e07f030ba44a0e1494846f0e6e",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 69,
+      "mismatches": [],
       "scope": "Synthetic state/operation atomicity, actual writer SIGKILL before commit/after commit before receipt/after receipt, replay/conflict/stale rejection, transaction and DDL/version rollback, SQLite max_page_count FULL, read-only unknown schema/corruption refusal. Platform-specific probes are test-only and are not shared-data or App owner integration."
     },
     "incremental-spatial-index": {
-      "report_sha256": "8911d549ab401e7803aca72abd0c7638c6b291a15a7a8f7f3c6f7e691eb8f9cf",
+      "report_sha256": "ce0c7a60a94cd06007aca86a67d0538f473435edfd12f48c7724fde2275ee2b4",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 137,
+      "matched_bindings": 138,
       "mismatches": [],
       "scope": "Derived immutable STR base plus bounded replacement/tombstone overlay, complete-or-rejected bbox queries, atomic delta admission and compaction content publication contract. Actual JVM, ART and Kotlin/Native library tests. Not a production spatial adapter or a second Scene authority."
     },
     "pdf-platform-capabilities": {
-      "report_sha256": "c8926818125c0efca349ea1f28be96de7559501e95c96a75a547e6627c2bcd4d",
+      "report_sha256": "9d820e1264f877d73101c1bdb70fdf75b7b8681a8bc1793d8777f6a3d500191e",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 99,
+      "matched_bindings": 100,
       "mismatches": [],
       "scope": "Four synthetic rotations/crop-offset color anchors, native full/tile PNGs and independent marker oracle, guarded-core versus whole-page comparison, test-only RC4-128 password/missing/wrong password, malformed/read-only input, native text/outline capability and selected first/last render requests from a simple 500-page file. No user PDF or production resource/import/task protocol."
     }
@@ -141,5 +149,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "6554ec36a8295f97caa352ee57a2f6529761a913fa7f0ea8665fb80cc9822720"
+  "audit_tool_sha256": "ea2bb0e69d7448590eb0dabc91c16e7f893b91ef0f8ae3cb3b449f6338ce326e"
 }

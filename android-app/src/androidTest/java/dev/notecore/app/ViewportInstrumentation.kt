@@ -22,7 +22,9 @@ class ViewportInstrumentation : Instrumentation() {
     private var brushPathOnly = false
     private var renderTargetOnly = false
     private var surfaceFramesOnly = false
+    private var inputBatchesOnly = false
     override fun onCreate(arguments: Bundle?) {
+        inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
         renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
         surfaceFramesOnly = arguments?.getString("notecore_case") == "surface_frames"
@@ -38,6 +40,16 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (inputBatchesOnly) {
+                var inputFailure: Throwable? = null
+                runOnMainSync {
+                    try { result.putString("input_observations", AndroidInputHostChecks(host).verify()) }
+                    catch (failure: Throwable) { inputFailure = failure }
+                }
+                inputFailure?.let { throw it }
+                result.putString("input_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (surfaceFramesOnly) {
                 result.putString("surface_frames",SurfaceFrameHostChecks(this,host).verify())
                 result.putString("surface_status","passed")
