@@ -184,4 +184,57 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(view.accessibilityValue, "0笔")
         XCTAssertEqual(note.changeVersion, 1) // Same root revision, different page projection.
     }
+
+    private func candidateBrushPlan(kind: BrushKind = .highlighter, width: Double = 2,
+                                    transform: Affine2D? = nil) throws -> BrushPathPlan {
+        let text = "NCPREVIEW\t2\nD\tbrush\tBrush\t1\t1\t1\nG\tp\tl\t128\t128\tBLANK\t1\nS\ts\tl\t1\tMONOLINE\t1\t-256\t2\t3\t1\t0\t0\t1\t0\t0\nP\t0\t0\t0\t1\nP\t4\t0\t1\t2\nP\t0\t0\t0\t3\nEND\n"
+        let root = try PagedPreviewCodec.shared.decode(text: text)
+        let samples = try XCTUnwrap(root.scene.objects().first).samples
+        let geometryResult = BrushGeometryBuilder.shared.build(samples: samples,
+            brush: BrushSpec(kind: kind, algorithmVersion: 2, width: width, argb: Int32(bitPattern: 0xffffff00)),
+            budget: BrushGeometryBudget(maxSamples: 20000, maxVertices: 400000, logicalBytes: 8*1024*1024))
+        let geometry = try XCTUnwrap(geometryResult as? BrushGeometryResultReady).geometry
+        let m = transform ?? Affine2D(a: 16, b: 0, c: 0, d: 16, tx: 24, ty: 64)
+        let result = BrushPathPlanner.shared.prepare(geometry: geometry, sceneToTarget: m, precision: .float32, maxVertices: 400000)
+        return try XCTUnwrap(result as? BrushPathPlanResultReady).plan
+    }
+    private func candidateBrushPixels(plan: BrushPathPlan, times: Int = 1) -> [UInt8] {
+        var bytes = [UInt8](repeating: 0, count: 128*128*4)
+        bytes.withUnsafeMutableBytes { data in
+            let context = CGContext(data: data.baseAddress, width: 128, height: 128, bitsPerComponent: 8, bytesPerRow: 512,
+                space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+            let renderer = NativeBrushRenderer(plan: plan)
+            for _ in 0..<times { renderer.draw(in: context) }
+        }
+        return bytes
+    }
+    @MainActor func testCandidateHighlighterSingleFillAndSeparateStrokeAlpha() throws {
+        let plan = try candidateBrushPlan()
+        let once = candidateBrushPixels(plan: plan), twice = candidateBrushPixels(plan: plan, times: 2)
+        XCTAssertEqual(once[(64*128+56)*4+3], 96)
+        XCTAssertEqual(twice[(64*128+56)*4+3], 156)
+        XCTAssertEqual(once[(100*128+56)*4+3], 0)
+    }
+    @MainActor func testCandidatePressureEndpointWidthsUseCommonGeometry() throws {
+        let plan = try candidateBrushPlan(kind: .pressure, width: 8,
+            transform: Affine2D(a: 8, b: 0, c: 0, d: 8, tx: 24, ty: 64))
+        let pixels = candidateBrushPixels(plan: plan)
+        XCTAssertEqual(pixels[(75*128+24)*4+3], 0)
+        XCTAssertEqual(pixels[(88*128+56)*4+3], 255)
+    }
+    @MainActor func testCandidateReflectedAffineRemainsFilled() throws {
+        let plan = try candidateBrushPlan(transform: Affine2D(a: -16, b: 4, c: 2, d: 16, tx: 88, ty: 56))
+        let pixels = candidateBrushPixels(plan: plan)
+        XCTAssertEqual(pixels[(64*128+56)*4+3], 96)
+        XCTAssertEqual(pixels[(100*128+56)*4+3], 0)
+    }
+    @MainActor func testCandidateRendererPreservesCallerCurrentPath() throws {
+        let renderer = NativeBrushRenderer(plan: try candidateBrushPlan())
+        let context = try XCTUnwrap(CGContext(data: nil, width: 128, height: 128, bitsPerComponent: 8, bytesPerRow: 512,
+            space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        context.move(to: CGPoint(x: 1, y: 2)); context.addLine(to: CGPoint(x: 3, y: 4))
+        let before = context.path?.boundingBoxOfPath
+        renderer.draw(in: context)
+        XCTAssertEqual(context.path?.boundingBoxOfPath, before)
+    }
 }

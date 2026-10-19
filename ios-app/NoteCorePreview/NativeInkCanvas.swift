@@ -27,6 +27,39 @@ struct NativeInkCanvas: UIViewRepresentable {
     static func dismantleUIView(_ view: InkUIView, coordinator: ()) { view.cancelInk() }
 }
 
+/// Standalone candidate-2 backend; the algorithm-1 App does not enable this renderer yet.
+final class NativeBrushRenderer {
+    private let path: CGPath
+    private let color: CGColor
+    init(plan: BrushPathPlan) {
+        precondition(plan.fillRule == .nonZero && plan.blendMode == .sourceOver)
+        let outline = CGMutablePath()
+        for contour in 0..<Int(plan.contourCount) {
+            let start = plan.contourStart(contour: Int32(contour)), end = plan.contourEnd(contour: Int32(contour))
+            outline.move(to: CGPoint(x: plan.x(vertex: start), y: plan.y(vertex: start)))
+            for vertex in Int(start + 1)..<Int(end) {
+                outline.addLine(to: CGPoint(x: plan.x(vertex: Int32(vertex)), y: plan.y(vertex: Int32(vertex))))
+            }
+            outline.closeSubpath()
+        }
+        path = outline.copy()!
+        let argb = UInt32(bitPattern: plan.argb)
+        color = UIColor(red: CGFloat((argb >> 16) & 255) / 255, green: CGFloat((argb >> 8) & 255) / 255,
+                        blue: CGFloat(argb & 255) / 255, alpha: CGFloat(argb >> 24) / 255).cgColor
+    }
+    /// The plan is already in context-local target pixels. Preserve the caller's graphics state AND current path.
+    func draw(in context: CGContext) {
+        let previousPath = context.path
+        context.saveGState()
+        defer {
+            context.restoreGState(); context.beginPath()
+            if let previousPath = previousPath { context.addPath(previousPath) }
+        }
+        context.beginPath(); context.setBlendMode(.normal); context.setAlpha(1)
+        context.setFillColor(color); context.addPath(path); context.fillPath(using: .winding)
+    }
+}
+
 final class InkUIView: UIView {
     let note: PagedPreviewNotebook
     var changed: () -> Void = { }

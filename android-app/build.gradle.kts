@@ -1,4 +1,5 @@
 import java.security.MessageDigest
+import org.gradle.api.tasks.testing.Test
 
 plugins {
     id("com.android.application")
@@ -17,9 +18,56 @@ android {
         testInstrumentationRunner = "dev.notecore.app.ViewportInstrumentation"
     }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+    testOptions { unitTests.isIncludeAndroidResources = true }
 }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
-dependencies { implementation(project(":shared-core")) }
+// Pin the API-35 test model as a Gradle input; no runtime SDK fetching or shared Maven cache mutation.
+val robolectricSdk by configurations.creating { isCanBeConsumed = false; isTransitive = false }
+dependencies {
+    implementation(project(":shared-core"))
+    testImplementation(kotlin("test-junit"))
+    testImplementation("org.robolectric:robolectric:4.17")
+    add(robolectricSdk.name, "org.robolectric:android-all-instrumented:15-robolectric-13954326-i7")
+}
+
+val prepareRobolectricSdk by tasks.registering(Copy::class) {
+    from(robolectricSdk)
+    into(rootProject.file(".android-tools/robolectric-sdk"))
+}
+tasks.withType<Test>().configureEach {
+    dependsOn(prepareRobolectricSdk)
+    inputs.files(robolectricSdk)
+    systemProperty("robolectric.offline", "true")
+    systemProperty("robolectric.dependency.dir", rootProject.file(".android-tools/robolectric-sdk").absolutePath)
+    systemProperty("notecore.brush.fixtures", rootProject.file("fixtures/brush/brush-golden.json").absolutePath)
+    inputs.files(rootProject.file("fixtures/brush/brush-golden.json"), rootProject.file("fixtures/brush/brush-manifest.json"))
+    val images = rootProject.file("build/android-brush-images/$name")
+    systemProperty("notecore.brush.images", images.absolutePath)
+    outputs.dir(images)
+}
+
+tasks.register("verifyNativeBrush") {
+    dependsOn("testDebugUnitTest")
+    doLast {
+        val inputs = rootProject.fileTree("canvas-core/src/commonMain") { include("**/*.kt") }.files +
+            rootProject.fileTree("canvas-core/src/jvmAndAndroidMain") { include("**/*.kt") }.files +
+            rootProject.fileTree("shared-core/src/commonMain") { include("**/*.kt") }.files +
+            fileTree("src/main").files + fileTree("src/test").files +
+            rootProject.fileTree("fixtures/brush") { include("*.json") }.files +
+            fileTree("build/test-results/testDebugUnitTest") { include("TEST-*.xml") }.files +
+            rootProject.fileTree("build/android-brush-images/testDebugUnitTest") { include("*.png") }.files + listOf(
+                buildFile, rootProject.buildFile, rootProject.file("settings.gradle.kts"), rootProject.file("gradle.properties"),
+                rootProject.file("canvas-core/build.gradle.kts"), rootProject.file("shared-core/build.gradle.kts"),
+                rootProject.file("tools/collect_android_brush_verification.py"),
+                rootProject.file(".android-tools/robolectric-sdk/android-all-instrumented-15-robolectric-13954326-i7.jar"))
+        val stamp = rootProject.file("reports/android-brush-inputs.sha256")
+        stamp.parentFile.mkdirs()
+        stamp.writeText(inputs.sortedBy { it.relativeTo(rootDir).invariantSeparatorsPath }.joinToString("\n", postfix = "\n") {
+            val sha = MessageDigest.getInstance("SHA-256").digest(it.readBytes()).joinToString("") { b -> "%02x".format(b) }
+            "$sha  ${it.relativeTo(rootDir).invariantSeparatorsPath}"
+        })
+    }
+}
 
 tasks.register("verifyPreviewAndroid") {
     dependsOn("assembleDebug", "lintDebug")
