@@ -27,6 +27,7 @@ kotlin {
         commonTest.dependencies { implementation(kotlin("test")) }
         jvmTest {
             resources.srcDir("../fixtures/input")
+            resources.srcDir("../fixtures/brush")
             dependencies { implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0") }
         }
     }
@@ -48,6 +49,7 @@ tasks.named<Test>("jvmTest") {
     inputs.dir(rootProject.file(".generated-fixtures/scale"))
     systemProperty("notecore.scale.fixture.dir", rootProject.file(".generated-fixtures/scale").absolutePath)
     systemProperty("notecore.scale.manifest", rootProject.file("fixtures/scale/manifest.json").absolutePath)
+    systemProperty("notecore.brush.actual", rootProject.file("build/brush-golden-actual.json").absolutePath)
 }
 
 tasks.register<JavaExec>("runPrototype") {

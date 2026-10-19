@@ -1,6 +1,8 @@
 # NoteCore
 
-独立笔记App与通用画布工程，2026-10-14开始实际开发。2026-10-19 DEV-025已将旧单页编辑/v1写入API移出生产源码，保留v1只读迁入和统一分页v2保存。Windows实际运行verifyPrototype与报告收集通过：JVM216项/23 suites（Core117、shared-core99），架构检查19文件/14 import/0错误；其中12项为迁入测试目录的历史v1夹具检查，新增4项独立兼容读取检查。
+独立笔记App与通用画布工程，2026-10-14开始实际开发。2026-10-19 DEV-026交付共同笔刷几何候选2：MONOLINE、PRESSURE、HIGHLIGHTER的有界数值轮廓、12项公共反例及6组完整顶点黄金样本。Windows实际运行verifyPrototype与报告收集通过：JVM229项/25 suites（Core130、shared-core99），架构20文件/17 import/0错误。新增13项测试，其中黄金测试比较212个固定期望顶点；总数仍含DEV-025保留的12项历史v1夹具检查。
+
+候选2未接原生后端、会话工具或预览codec。现有App继续使用算法1，不会将旧文件偷偷升级；荧光笔NON_ZERO单次填充/SOURCE_OVER的双端实现与像素验证仍待完成。实际数值可预览：运行`python tools/preview_brush_geometry.py`得到`build/brush-golden-preview.svg`，此SVG不是原生绘制验收。见[几何ADR](docs/adr/0021-common-brush-geometry.md)及[黄金样本](fixtures/brush/README.md)。
 
 2026-10-15的Android分页UI、iOS宿主API及安装启动报告仍是历史版本证据，本次核心/API修改后尚未重新构建原生产物。当前Windows的Android SDK缺少platform，且无Xcode，不能据历史报告声称当前双端包通过。iOS真实触摸/系统选择器/强停重开、真机性能、正式存储与C1冻结仍待验收。见[收口ADR](docs/adr/0020-read-only-legacy-preview.md)、[测量交付计划](docs/测量交付计划.md)与[历史运行版本](docs/初步运行版本.md)。
 
@@ -9,6 +11,7 @@
 ## 当前可运行内容
 
 - 平台无关double坐标和矩阵、不可变真实采样、captured scene/layer/tool。
+- 版本化共同笔刷几何PoC：私有有界数组、压力半径、单笔非零并集/颜色参数与明确数值/容量拒绝；未接原生后端。
 - 纯场景命令和patch，内存单写者的修订/幂等/容量检查；Receipt明确MEMORY_ONLY。
 - 迟到frame的revision/generation检查、scene/object/算法版本的几何缓存键。
 - 按字节计费的LRU参考策略及重键/淘汰/超额/溢出反例。
