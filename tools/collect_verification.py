@@ -37,9 +37,9 @@ def main():
         raise SystemExit('No Gradle verification stamp. Run the root verifyPrototype task first.')
     stamp = {}
     for line in stamp_path.read_text(encoding='utf-8').splitlines():
-        digest, relative = line.split('  ', 1)
-        stamp[relative] = digest
-    actual = {str(p.relative_to(ROOT)): digest(p) for p in inputs + suites}
+        recorded_digest, relative = line.split('  ', 1)
+        stamp[relative] = recorded_digest
+    actual = {p.relative_to(ROOT).as_posix(): digest(p) for p in inputs + suites}
     if actual != stamp:
         raise SystemExit('Source/configuration or test XML differs from the successful Gradle verification stamp. Rerun verifyPrototype.')
     totals = {'tests': 0, 'failures': 0, 'errors': 0, 'skipped': 0}
@@ -57,8 +57,8 @@ def main():
         'module_jvm_tests': {module: sum(int(ET.parse(p).getroot().attrib['tests']) for p in suites if module in p.parts) for module in ('canvas-core', 'shared-core')},
         'architecture': json.loads(architecture.stdout),
         'fixture_catalog': json.loads(catalog.stdout),
-        'source_sha256': {str(p.relative_to(ROOT)): digest(p) for p in sources},
-        'verification_input_sha256': {str(p.relative_to(ROOT)): digest(p) for p in inputs},
+        'source_sha256': {p.relative_to(ROOT).as_posix(): digest(p) for p in sources},
+        'verification_input_sha256': {p.relative_to(ROOT).as_posix(): digest(p) for p in inputs},
         'android_build_verified': False, 'apple_build_verified': False,
         'disk_durability_verified': False, 'gpu_lifecycle_verified': False,
         'device_performance_verified': False, 'c1_architecture_gate_complete': False,
@@ -66,7 +66,7 @@ def main():
         'jvm_owner_worker_threads_verified': any(s['suite'].endswith('.BoundedOwnerExecutorTest') and s['tests'] >= 15 for s in results) and totals['failures'] + totals['errors'] + totals['skipped'] == 0,
     }
     (ROOT/'reports').mkdir(exist_ok=True)
-    (ROOT/'reports/verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    (ROOT/'reports/verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if report['status'] != 'passed': raise SystemExit(1)
 

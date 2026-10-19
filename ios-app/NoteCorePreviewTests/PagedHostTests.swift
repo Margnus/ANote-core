@@ -120,10 +120,8 @@ final class PagedHostTests: XCTestCase {
     @MainActor func testLegacyNoEditPreservesBytesThenEditMigratesOriginalExtent() async throws {
         let dir = directory(); try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
-        let legacy = PreviewNotebook(documentId: "legacy-corner", title: "corner")
-        XCTAssertTrue(legacy.beginStroke(x: 900, y: 1300, pressure: 0.3, timeMicros: 1))
-        XCTAssertTrue(legacy.endStroke(x: 999, y: 1399, pressure: 0.8, timeMicros: 2))
-        let original = legacy.capture().encode(), file = dir.appendingPathComponent("legacy-corner.ncp")
+        let original = "NCPREVIEW\t1\nD\tlegacy-corner\tcorner\t2\t1\t1\nS\tink-1\t-14339513\t2.5\t2\nP\t900.0\t1300.0\t0.3\t1\nP\t999.0\t1399.0\t0.8\t2\nEND\n"
+        let file = dir.appendingPathComponent("legacy-corner.ncp")
         try PreviewFileIO.writeUTF8(original, to: file)
         let model = PreviewModel(directory: dir); model.open("legacy-corner")
         try await eventually("v1 opens") { model.current != nil }

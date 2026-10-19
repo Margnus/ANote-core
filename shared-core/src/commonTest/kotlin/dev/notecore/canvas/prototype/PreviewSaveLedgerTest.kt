@@ -1,12 +1,12 @@
 package dev.notecore.canvas.prototype
 
 import dev.notecore.canvas.preview.*
-import dev.notecore.document.LegacyPreviewSaveSnapshot
+import dev.notecore.document.*
 import kotlin.test.*
 
 class PreviewSaveLedgerTest {
-    private fun PreviewNotebook.saveCapture() = LegacyPreviewSaveSnapshot(capture())
-    private fun note(id: String = "note") = PreviewNotebook(id, "first")
+    private fun PagedPreviewNotebook.saveCapture() = capture()
+    private fun note(id: String = "note") = PagedPreviewNotebook.create(id, "first", "ledger-test")
     @Test fun completeLatestSnapshotSupersedesUnsentContentAndCountsOnlyRetainedVersion() {
         val ledger = PreviewSaveLedger(); val note = note(); val first = note.saveCapture()
         assertEquals(PreviewSaveAdmission.ACCEPTED, ledger.offer(first))
@@ -83,19 +83,19 @@ class PreviewSaveLedgerTest {
         assertEquals(PreviewSaveAdmission.ACCEPTED, ledger.offer(equivalent)); assertSame(newer, ledger.latest("note"))
     }
     @Test fun boundedCatalogHeaderKeepsEscapedUnicodeTitleWithoutDecodingStrokeBody() {
-        val notebook = PreviewNotebook("header", "标题\t\n\\")
+        val notebook = PagedPreviewNotebook.create("header", "标题\t\n\\", "header-test")
         notebook.beginStroke(1.0, 2.0, 0.5f, 1); notebook.endStroke(3.0, 4.0, 0.5f, 2)
         val encoded = notebook.saveCapture().encode()
-        val header = PreviewNotebook.header(encoded.lineSequence().take(2).joinToString("\n") + "\n")
-        assertEquals(notebook.title, header.title); assertEquals(1, header.strokeCount)
-        assertEquals(notebook.changeVersion, header.version)
+        val header = PagedPreviewCodec.header(encoded.lineSequence().take(2).joinToString("\n") + "\n")
+        assertEquals(notebook.title, header.title); assertEquals(1, header.objectCount)
+        assertEquals(notebook.changeVersion, header.revision)
         assertEquals("header", header.documentId)
     }
     @Test fun catalogHeaderRejectsUnsupportedTruncatedInvalidAndOversizedData() {
-        listOf("NCPREVIEW\t2\nD\tx\ttitle\t1\t0\t0\n", "NCPREVIEW\t1\n",
+        listOf("NCPREVIEW\t9\nD\tx\ttitle\t1\t0\t0\n", "NCPREVIEW\t1\n",
             "NCPREVIEW\t1\nD\tx\ttitle\t0\t0\t0\n", "NCPREVIEW\t1\nD\tx\ttitle\t1\t501\t0\n",
             "NCPREVIEW\t1\nD\tx\ttitle\t1\t0\t-1\n", "x".repeat(4097)).forEach {
-            assertFailsWith<IllegalArgumentException> { PreviewNotebook.header(it) }
+            assertFailsWith<IllegalArgumentException> { PagedPreviewCodec.header(it) }
         }
     }
 

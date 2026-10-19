@@ -2,7 +2,7 @@ package dev.notecore.canvas.preview
 
 import dev.notecore.canvas.prototype.*
 
-/** Preview-only offline handwriting facade. All mutable operations belong to the UI owner. */
+/** Test-only historical v1 producer. Never included in a platform framework or App. */
 class PreviewNotebook private constructor(
     val documentId: String, initialTitle: String, initial: SceneSnapshot, private var nextObject: Long,
 ) {
@@ -154,7 +154,7 @@ class PreviewNotebook private constructor(
         fun importAsCopy(encoded: String, newDocumentId: String): PreviewNotebook {
             val source = restore(encoded)
             require(newDocumentId != source.documentId) { "Import requires a fresh document identity" }
-            val scene = SceneSnapshot(SceneId(newDocumentId), 0, source.memory.snapshot().copyEntries())
+            val scene = SceneSnapshot.restored(SceneId(newDocumentId), 0, source.memory.snapshot().objects())
             return PreviewNotebook(newDocumentId, source.title, scene, source.nextObject)
         }
         @Throws(IllegalArgumentException::class)
@@ -184,7 +184,7 @@ class PreviewNotebook private constructor(
             }
             require(row() == listOf("END")) { "Missing preview document footer" }
             require(!lines.hasNext() || (lines.next().isEmpty() && !lines.hasNext())) { "Trailing preview data" }
-            return PreviewNotebook(id, title, SceneSnapshot(SceneId(id), 0, objects), nextId).also { it.changeVersion = version }
+            return PreviewNotebook(id, title, SceneSnapshot.restored(SceneId(id), 0, objects.values.toList()), nextId).also { it.changeVersion = version }
         }
     }
 }

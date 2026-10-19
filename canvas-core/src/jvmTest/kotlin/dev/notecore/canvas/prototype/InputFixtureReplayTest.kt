@@ -17,7 +17,9 @@ class InputFixtureReplayTest {
     private fun resource(name: String) = checkNotNull(javaClass.classLoader.getResourceAsStream(name)).use { it.readBytes() }
 
     @Test fun jsonFixturesReplayThroughCommonInputAndSceneAuthority() {
-        val bytes = resource("synthetic-traces.json")
+        // The manifest describes canonical LF JSON, as does validate_fixture_catalog.py.
+        // Windows checkouts may still contain CRLF before a fresh checkout applies .gitattributes.
+        val bytes = resource("synthetic-traces.json").decodeToString().replace("\r\n", "\n").encodeToByteArray()
         val manifest = Json.parseToJsonElement(resource("manifest.json").decodeToString()).jsonObject
         val digest = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
         assertEquals(manifest.text("sha256"), digest)

@@ -27,6 +27,10 @@ def main():
     domain_build = (ROOT/'shared-core/build.gradle.kts').read_text(encoding='utf-8')
     domain_dependencies = re.findall(r'(?:implementation|api|compileOnly)\s*\(\s*project\s*\(\s*"([^"]+)"', domain_build)
     if domain_dependencies != [':canvas-core']: errors.append('shared-core must depend only on canvas-core')
+    # Historical v1 editors/writers are fixtures only; production compatibility is read-only.
+    for path in sources:
+        if re.search(r'\b(?:PreviewNotebook|PreviewNotebookSnapshot|LegacyPreviewSaveSnapshot)\b', path.read_text(encoding='utf-8')):
+            errors.append(f'{path.relative_to(ROOT)}: legacy editable preview API in production source')
     report = {'status': 'failed' if errors else 'passed', 'common_source_files': len(sources),
               'imports_checked': imports, 'errors': errors,
               'modules': ['canvas-core', 'shared-core'], 'project_dependency_direction': 'shared-core -> canvas-core only',
