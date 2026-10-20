@@ -6,7 +6,8 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "236a051cc0f44f4e8d37af83ceba4ab3ff0b3541ba5619a2f928c2be13764d7a",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "439fa1f61fefaa93275c05b5bfd0c1bfa698c9f3f58f4c86066f6de0cde8026a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "88bbfcee8c3571a129bab62c7c15f50f25f51fb2cd01cdbfb88470376d0966e4",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "24f09778fa8b407699307ffcea59b97d39cdf873e23831406cad5236133fb309",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
@@ -37,7 +38,7 @@
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "608a6c20717864d15bf043d808522a18c9562498ad3879a1615d7197eed70c03",
     "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
     "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85",
-    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "d67030f209d959a8252fd943e44fe262426eaf5d2eb58a85e852f0650909d501",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "29042fa09d4ab52904265728a6f7f8c57e8c8ddc25f8b7d04658c8a0bb8a3a07",
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
     "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
@@ -45,10 +46,10 @@
     "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
     "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "69a65c3ea689a769df1da634c8280a58919359278b06f4a36bf3e5f207cd028b",
     "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "2e6400e9bd82f40609c4a9aec8b1ea388faa99ebb4361bbc2845e5be32efe61a",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "62f7064817a9cbe14bf13d05e9a51cc8f9e00e442fd4d0cc3df809a0c34f9c3b",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/__preview.dylib": "aa76befa0bbd1e954f9726932da69b7c908db2d0294a2e72be93829e4eb3cea4",
-    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "af757b2766da35c810d58de1d18927e916b37f84476792362d43fd4011125b99",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "ed9919284d19364d560fa401884f4feda36a541ed059851704ecd7f78e742248",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/Info.plist": "a09aae9143cabe4e5b6c4248d36c71c7f6534c1be03946668658071362576ff0",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
     "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
@@ -59,24 +60,24 @@
     "android-app/src/main/res/drawable/ic_note.xml": "daa79575a3abd07e866404872e51d7fbf29b6430c87937b31806416f5f5b75aa",
     "android-app/src/main/res/values/strings.xml": "8fd14b09bdae43b965396d9e64313b30b739bdf0b613cea9c7474255b02a765f",
     "android-app/src/main/res/xml/data_extraction_rules.xml": "ec0f1c6431c2434ac85c7933dd0fe21c430e9601ec4db70d0112557cbebf9993",
-    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "e2cf08555b892f82b31690cf0a1920969c98e63f5010fd13d60ee90f0f781308",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "26dc8a4d9dc2773fe2369084525f77dd3233a3878524195a073f2dc22e0f33b7",
     "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "c98a200170d0e7738c95ed730f487dbc745fc4c009fcd073bb40b357ceb711c0",
     "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
     "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "1b0a653c61ccc7292bc9cf239688f1547ff32a295ee4445ebfab9d3a2dfda03b",
     "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "ecfa2bf8f28945b293dce7b5178505f72ade72d2e6a1d35c578bbe116bb8aead",
     "android-app/src/main/java/dev/notecore/app/InkSurfaceHost.kt": "96515e50606d5a3a5f5d742d851c2492bc6c103227c067d02b6c497ee566ad2f",
     "android-app/build.gradle.kts": "8e8a303cd0440ad234f07d438cfe66fd7600dab05bb0e5956653a436c74f1649",
-    "android-app/build/outputs/apk/debug/android-app-debug.apk": "0eb4ea05e88ac4706268a5715b0e395a04320edde940afb8240b4bf9f9fec2a9",
-    "android-app/build/reports/lint-results-debug.xml": "936b19202d06c4ab50b8147d785c17702222c3918935e6f23aa05048978ffefb",
-    "dist/NoteCore-0.1.0-preview.apk": "0eb4ea05e88ac4706268a5715b0e395a04320edde940afb8240b4bf9f9fec2a9",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "a7a6a8b5e8749811db5eb5b671a7fd476aa1b69c6d6b761425503a5cac641c05",
-    "reports/ios-preview-build.json": "cadd82e567c40f0cd1aa115edd259a1c57f730a376866f93405b8ece77cac407",
-    "reports/preview-build.json": "7dff67ad416e31305cd6977e10aa42b5e9c8f5d3d00ab03e52bbb90a5b052056",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "af534313dd0af9e529564cda535e3e88cdd65179e94990c5fad59608284d5ce9",
+    "android-app/build/reports/lint-results-debug.xml": "90425a34bea314f9e297cdac54130f0f5ecf59fe9901ec0e1a6e6d84f8e072f3",
+    "dist/NoteCore-0.1.0-preview.apk": "af534313dd0af9e529564cda535e3e88cdd65179e94990c5fad59608284d5ce9",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "1b6bb77a9b5b0c661e0e1b3580f157c8955c631e49b539f46129f9d230504a61",
+    "reports/ios-preview-build.json": "ce9f7fcad5132e82f5f2679ec851294d10890242a389a54d07edee702bd92758",
+    "reports/preview-build.json": "7c876913adeea8766e48deaaeb9b2568ad64dfbc7106b20478d7fd6cbefa782b",
     "tools/check_architecture.py": "afb26011ba765de637dc5e4235c05d86e8f27e0f898e620e7c269dd5df859641",
     "tools/audit_public_boundary.py": "1aa0b921a67ca75523e74fe6bab3d6ec2cf94fe964268aeb637d01702913163b"
   },
-  "objc_declaration_count": 213,
-  "objc_method_count": 751,
+  "objc_declaration_count": 227,
+  "objc_method_count": 798,
   "reviewed_method_count": 19,
   "reviewed_declaration_channels": [
     {
@@ -2161,6 +2162,7 @@
         "capture()",
         "doCopyCurrentPage()",
         "deleteCurrentPage()",
+        "edit(request:)",
         "endStroke(x:y:pressure:timeMicros:)",
         "insertPage()",
         "moveCurrentPage(before:)",
@@ -2238,6 +2240,147 @@
       "methods": [
         "values()"
       ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPPreviewEdit",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditCopyPage",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditDeletePage",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditInsertPage",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditMovePage",
+      "methods": [
+        "init(beforePageId:)",
+        "doCopy(beforePageId:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditRedo",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditRename",
+      "methods": [
+        "init(title:)",
+        "doCopy(title:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditSelectPage",
+      "methods": [
+        "init(pageId:)",
+        "doCopy(pageId:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditSelectPen",
+      "methods": [
+        "init(argb:width:)",
+        "doCopy(argb:width:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditSetPaper",
+      "methods": [
+        "init(width:height:paper:)",
+        "doCopy(width:height:paper:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditUndo",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewFailureKind",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewSessionFailure",
+      "methods": [],
       "nserror_methods": []
     },
     {

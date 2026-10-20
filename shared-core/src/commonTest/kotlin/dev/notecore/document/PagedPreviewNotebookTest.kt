@@ -4,6 +4,17 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedPreviewNotebookTest {
+    @Test fun invalidMetadataDoesNotCancelAcceptedUnfinishedSamples() {
+        val note = note()
+        assertTrue(note.beginStroke(1.0, 2.0, 0.5f, 1))
+        val before = note.snapshot(); val status = note.authorityStatus()
+        assertFalse(note.setPaper(Double.NaN, 600.0, PaperKind.GRID))
+        assertTrue(note.hasActiveStroke)
+        assertFalse(note.rename("\uD800"))
+        assertTrue(note.hasActiveStroke)
+        assertSame(before, note.snapshot()); assertEquals(status, note.authorityStatus())
+        assertTrue(note.endStroke(3.0, 4.0, 0.5f, 2)); assertEquals(2, note.pointCount(0))
+    }
     @Test fun retiredOwnerCannotAcceptLateInputOrEditWhileImmutableCaptureRemainsReadable() {
         val note = note(); draw(note); val before = note.snapshot()
         assertTrue(note.beginStroke(4.0, 5.0, 0.5f, 4)); assertTrue(note.retire())

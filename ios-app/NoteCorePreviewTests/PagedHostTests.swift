@@ -5,6 +5,27 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testTypedEditModelRejectsInvalidParametersWithoutLosingActiveInk() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current), before = note.snapshot()
+        XCTAssertTrue(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
+        model.applyEdit(PreviewEditSetPaper(width: .nan, height: 500, paper: .grid))
+        XCTAssertEqual(note.lastFailure?.kind, PreviewFailureKind.invalidArgument)
+        XCTAssertTrue(note.hasActiveStroke); XCTAssertTrue(note.snapshot() === before)
+        model.applyEdit(PreviewEditUndo.shared)
+        XCTAssertEqual(note.lastFailure?.kind, PreviewFailureKind.historyEmpty); XCTAssertTrue(note.hasActiveStroke)
+        let invalidId = note.edit(request: PreviewEditSelectPage(pageId: ""))
+        XCTAssertFalse(invalidId.accepted); XCTAssertEqual(invalidId.failure?.kind, PreviewFailureKind.invalidArgument)
+        XCTAssertTrue(note.endStroke(x: 3, y: 4, pressure: 0.6, timeMicros: 2)); XCTAssertEqual(note.pointCount(index: 0), 2)
+        model.applyEdit(PreviewEditRename(title: "合法😀")); model.applyEdit(PreviewEditInsertPage.shared)
+        XCTAssertEqual(note.pageCount, 2); XCTAssertNil(note.lastFailure)
+        let file = dir.appendingPathComponent(note.documentId + ".ncp"), expected = try note.capture().encode()
+        try await eventually("typed edits save through original ledger") { (try? String(contentsOf: file, encoding: .utf8)) == expected }
+        model.close(); XCTAssertNil(model.current)
+        let reopened = try PagedPreviewCodec.shared.decode(text: PreviewFileIO.readUTF8(file))
+        XCTAssertEqual(reopened.title, "合法😀"); XCTAssertEqual(reopened.pageCount, 2); XCTAssertEqual(reopened.scene.objectCount, 1)
+    }
     @MainActor func testAuthorityConstructionFailureIsRecoverableInSwift() throws {
         // Swift strings cannot inject malformed UTF-16. Exercise the same annotated
         // constructor's IllegalArgumentException using a representable over-budget root.

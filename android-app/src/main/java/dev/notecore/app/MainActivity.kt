@@ -124,8 +124,8 @@ class MainActivity : Activity() {
         header.addView(button("保存") { save() })
         header.addView(button("导出") { exportBackup() }); root.addView(header)
         val tools = row()
-        undoButton = button("撤销") { canvas?.cancelInk(); if (note.undo()) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
-        redoButton = button("重做") { canvas?.cancelInk(); if (note.redo()) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
+        undoButton = button("撤销") { if (note.edit(PreviewEdit.Undo).accepted) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
+        redoButton = button("重做") { if (note.edit(PreviewEdit.Redo).accepted) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
         tools.addView(undoButton); tools.addView(redoButton)
         tools.addView(Switch(this).apply { text = "手指书写"; isChecked = true; setOnCheckedChangeListener { _, enabled -> canvas?.cancelInk(); canvas?.fingerDrawing = enabled } })
         root.addView(tools)
@@ -149,31 +149,30 @@ class MainActivity : Activity() {
     }
     private fun addPageTools(note: PagedPreviewNotebook) {
         val pages = row()
-        fun action(content: Boolean = true, edit: () -> Boolean) {
-            canvas?.cancelInk()
-            if (edit()) { canvas?.refreshPage(); updateControls(); if (content) save() }
+        fun action(content: Boolean = true, edit: () -> PreviewEditResult) {
+            if (edit().accepted) { canvas?.refreshPage(); updateControls(); if (content) save() }
             else showError(note.lastError)
         }
-        previousPage = button("上一页") { action(false) { note.selectPage(note.page(note.currentPageIndex - 1).id) } }
-        nextPage = button("下一页") { action(false) { note.selectPage(note.page(note.currentPageIndex + 1).id) } }
+        previousPage = button("上一页") { action(false) { note.edit(PreviewEdit.SelectPage(note.page(note.currentPageIndex - 1).id.value)) } }
+        nextPage = button("下一页") { action(false) { note.edit(PreviewEdit.SelectPage(note.page(note.currentPageIndex + 1).id.value)) } }
         pages.addView(previousPage)
         pageLabel = text("").apply { setPadding(dp(8), 0, dp(8), 0); contentDescription = "当前页码" }
         pages.addView(pageLabel); pages.addView(nextPage)
-        pages.addView(button("加页") { action { note.insertPage() } })
-        pages.addView(button("复制页") { action { note.copyCurrentPage() } })
+        pages.addView(button("加页") { action { note.edit(PreviewEdit.InsertPage) } })
+        pages.addView(button("复制页") { action { note.edit(PreviewEdit.CopyPage) } })
         pages.addView(button("删页") {
             AlertDialog.Builder(this).setTitle(if (note.pageCount == 1) "清空最后一页？" else "删除当前页？")
                 .setMessage("可以通过撤销恢复。关闭笔记后不保留撤销记录。")
-                .setNegativeButton("取消", null).setPositiveButton("删除") { _, _ -> action { note.deleteCurrentPage() } }.show()
+                .setNegativeButton("取消", null).setPositiveButton("删除") { _, _ -> action { note.edit(PreviewEdit.DeletePage) } }.show()
         })
-        pages.addView(button("前移") { if (note.currentPageIndex > 0) action { note.moveCurrentPage(note.page(note.currentPageIndex - 1).id) } })
+        pages.addView(button("前移") { if (note.currentPageIndex > 0) action { note.edit(PreviewEdit.MovePage(note.page(note.currentPageIndex - 1).id.value)) } })
         pages.addView(button("后移") { if (note.currentPageIndex < note.pageCount - 1) action {
-            note.moveCurrentPage(if (note.currentPageIndex + 2 < note.pageCount) note.page(note.currentPageIndex + 2).id else null)
+            note.edit(PreviewEdit.MovePage(if (note.currentPageIndex + 2 < note.pageCount) note.page(note.currentPageIndex + 2).id.value else null))
         } })
         pages.addView(button("纸张") {
             val kinds = listOf(PaperKind.BLANK, PaperKind.RULED, PaperKind.GRID, PaperKind.DOTS)
             AlertDialog.Builder(this).setTitle("纸张样式").setItems(arrayOf("空白", "横线", "方格", "点阵")) { _, index ->
-                action { note.setPaper(note.currentPage.width, note.currentPage.height, kinds[index]) }
+                action { note.edit(PreviewEdit.SetPaper(note.currentPage.width, note.currentPage.height, kinds[index])) }
             }.show()
         })
         root.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(pages) })
@@ -191,7 +190,7 @@ class MainActivity : Activity() {
         val note = notebook ?: return
         val field = EditText(this).apply { setText(note.title); selectAll(); maxLines = 1 }
         AlertDialog.Builder(this).setTitle("笔记名称").setView(field).setNegativeButton("取消", null).setPositiveButton("完成") { _, _ ->
-            if (note.rename(field.text.toString())) { updateControls(); save() } else showError(note.lastError)
+            if (note.edit(PreviewEdit.Rename(field.text.toString())).accepted) { updateControls(); save() } else showError(note.lastError)
         }.show()
     }
     private fun save(): Boolean {

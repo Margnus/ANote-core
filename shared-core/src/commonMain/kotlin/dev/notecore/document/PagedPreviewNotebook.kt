@@ -18,6 +18,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var color = 0xff253247.toInt()
     private var width = 2.5
     private var error = ""
+    private var failure: PreviewSessionFailure? = null
     private var retired = false
     private var projectionRevision = -1L
     private var projectionPage: PageId? = null
@@ -39,6 +40,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     val totalStrokeCount: Int get() = root().scene.objectCount
     val strokeCount: Int get() = visible().size
     val lastError: String get() { ownerCheck(); return error }
+    val lastFailure: PreviewSessionFailure? get() { ownerCheck(); return failure }
     val hasActiveStroke: Boolean get() { ownerCheck(); return input != null }
     val hasPendingStroke: Boolean get() { ownerCheck(); return pending != null }
     val canUndo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextUndoOperationId != null }
@@ -61,36 +63,69 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun pointX(index: Int, point: Int): Double = stroke(index).let { it.transform.a * it.samples.x(point) + it.transform.c * it.samples.y(point) + it.transform.tx }
     fun pointY(index: Int, point: Int): Double = stroke(index).let { it.transform.b * it.samples.x(point) + it.transform.d * it.samples.y(point) + it.transform.ty }
     fun pointPressure(index: Int, point: Int): Float = stroke(index).samples.pressure(point)
-    private fun fail(message: String): Boolean { error = message; return false }
+    private fun clearError() { error = ""; failure = null }
+    private fun fail(message: String, kind: PreviewFailureKind, documentReason: DocumentRejection? = null): Boolean {
+        error = message; failure = PreviewSessionFailure(kind, documentReason); return false
+    }
+    /** All request payloads are raw values. Validation precedes cancellation or identity allocation. */
+    fun edit(request: PreviewEdit): PreviewEditResult {
+        ownerCheck()
+        if (retired) {
+            fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+            return PreviewEditResult(false, failure, root().revision)
+        }
+        val accepted = when (request) {
+            is PreviewEdit.Rename -> rename(request.title)
+            is PreviewEdit.SetPaper -> setPaper(request.width, request.height, request.paper)
+            is PreviewEdit.SelectPen -> selectPen(request.argb, request.width)
+            is PreviewEdit.SelectPage -> {
+                if (!validPageId(request.pageId)) fail("页面编号无效", PreviewFailureKind.INVALID_ARGUMENT)
+                else selectPage(PageId(request.pageId))
+            }
+            is PreviewEdit.MovePage -> {
+                if (request.beforePageId != null && !validPageId(request.beforePageId)) fail("页面编号无效", PreviewFailureKind.INVALID_ARGUMENT)
+                else moveCurrentPage(request.beforePageId?.let(::PageId))
+            }
+            PreviewEdit.InsertPage -> insertPage()
+            PreviewEdit.CopyPage -> copyCurrentPage()
+            PreviewEdit.DeletePage -> deleteCurrentPage()
+            PreviewEdit.Undo -> undo()
+            PreviewEdit.Redo -> redo()
+        }
+        if (accepted) clearError()
+        check(accepted || failure != null)
+        return PreviewEditResult(accepted, failure, root().revision)
+    }
+    private fun validPageId(value: String) = value.isNotBlank() && value.length <= 128 && value.hasValidUnicode()
     private fun identity(kind: String): String? {
         while (sequence < Long.MAX_VALUE) {
             val candidate = "$sessionNonce-$kind-${++sequence}"
             if (candidate !in initialIds) return candidate
         }
-        error = "此会话编号已耗尽，请保留笔记并导出备份"; return null
+        fail("此会话编号已耗尽，请保留笔记并导出备份", PreviewFailureKind.IDENTITY_EXHAUSTED); return null
     }
     private fun operation(): CommandId? = identity("op")?.let(::CommandId)
     private fun prepareEdit(): Boolean {
         ownerCheck()
-        if (retired) return fail("此会话已关闭，请重新打开笔记")
-        if (pending != null) return fail("上一笔尚未提交，请先重试保存")
-        cancelStroke(); error = ""; return true
+        if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+        if (pending != null) return fail("上一笔尚未提交，请先重试保存", PreviewFailureKind.PENDING_STROKE)
+        clearError(); return true
     }
     private fun commit(command: DocumentCommand): Boolean = when (val result = memory.commit(command)) {
-        is DocumentCommit.Accepted -> { error = ""; true }
+        is DocumentCommit.Accepted -> { cancelStroke(); clearError(); true }
         is DocumentCommit.Rejected -> fail(when (result.reason) {
             DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
             DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
             else -> "操作未完成，原内容仍保留，请重试"
-        })
+        }, PreviewFailureKind.DOCUMENT_REJECTED, result.reason)
     }
     fun selectPage(id: PageId): Boolean {
         ownerCheck()
-        if (retired) return fail("此会话已关闭，请重新打开笔记")
-        if (root().findPage(id) == null) return fail("页面不存在")
-        if (id == selected) return true
+        if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+        if (root().findPage(id) == null) return fail("页面不存在", PreviewFailureKind.MISSING_PAGE)
+        if (id == selected) { clearError(); return true }
         if (!prepareEdit()) return false
-        selected = id; return true // Presentation-only; no root commit.
+        cancelStroke(); selected = id; clearError(); return true // Presentation-only; no root commit.
     }
     fun insertPage(): Boolean {
         if (!prepareEdit()) return false
@@ -110,7 +145,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (!prepareEdit()) return false
         val root = root(); val source = currentPage; val objects = root.pageObjects(selected)
         val currentPoints = root.scene.objects().sumOf { it.samples.size }
-        if (objects.sumOf { it.samples.size } > PagedPreviewCodec.MAX_POINTS - currentPoints) return fail("复制后将超过预览容量，原页面仍保留")
+        if (objects.sumOf { it.samples.size } > PagedPreviewCodec.MAX_POINTS - currentPoints) return fail("复制后将超过预览容量，原页面仍保留", PreviewFailureKind.CAPACITY)
         val page = PageId(identity("page") ?: return false); val layer = LayerId(identity("layer") ?: return false)
         val mapping = linkedMapOf<ObjectId, ObjectId>()
         for (obj in objects) mapping[obj.id] = ObjectId(identity("ink") ?: return false)
@@ -131,6 +166,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
     fun setPaper(width: Double, height: Double, paper: PaperKind): Boolean {
         if (!prepareEdit()) return false
+        if (!width.isFinite() || !height.isFinite() || width !in 1.0..14_400.0 || height !in 1.0..14_400.0)
+            return fail("纸张尺寸无效", PreviewFailureKind.INVALID_ARGUMENT)
         val root = root(); val op = operation() ?: return false
         return commit(DocumentCommand.SetPaper(op, root.id, root.revision, selected, width, height, paper))
     }
@@ -139,7 +176,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val trimmed = value.trim(); var end = minOf(120, trimmed.length)
         if (end < trimmed.length && end > 0 && trimmed[end - 1].isHighSurrogate() && trimmed[end].isLowSurrogate()) end--
         val title = trimmed.substring(0, end).ifBlank { "未命名笔记" }
-        if (!title.hasValidUnicode()) return fail("标题包含无效字符")
+        if (!title.hasValidUnicode()) return fail("标题包含无效字符", PreviewFailureKind.INVALID_ARGUMENT)
         val root = root(); if (title == root.title) return true
         val op = operation() ?: return false
         return commit(DocumentCommand.Rename(op, root.id, root.revision, title))
@@ -148,7 +185,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun redo(): Boolean = traverse(false)
     private fun traverse(undo: Boolean): Boolean {
         if (!prepareEdit()) return false
-        val status = memory.status(); val top = (if (undo) status.nextUndoOperationId else status.nextRedoOperationId) ?: return false
+        val status = memory.status(); val top = (if (undo) status.nextUndoOperationId else status.nextRedoOperationId) ?: return fail("没有可撤销或重做的操作", PreviewFailureKind.HISTORY_EMPTY)
         val root = root(); val index = currentPageIndex; val op = operation() ?: return false
         val command = if (undo) DocumentCommand.Undo(op, root.id, root.revision, top) else DocumentCommand.Redo(op, root.id, root.revision, top)
         if (!commit(command)) return false
@@ -156,16 +193,17 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
     fun selectPen(argb: Int, width: Double): Boolean {
         ownerCheck()
-        if (retired) return fail("此会话已关闭，请重新打开笔记")
-        if (!width.isFinite() || width !in 0.5..16.0) return fail("笔宽无效")
-        color = argb; this.width = width; return true
+        if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+        if (!width.isFinite() || width !in 0.5..16.0) return fail("笔宽无效", PreviewFailureKind.INVALID_ARGUMENT)
+        color = argb; this.width = width; clearError(); return true
     }
     fun beginStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
         ownerCheck()
-        if (retired) return fail("此会话已关闭，请重新打开笔记")
-        if (pending != null || input != null) return fail("请先完成或重试当前笔画")
+        if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+        if (pending != null) return fail("请先重试当前笔画", PreviewFailureKind.PENDING_STROKE)
+        if (input != null) return fail("请先完成当前笔画", PreviewFailureKind.ACTIVE_STROKE)
         val root = root(); val remaining = PagedPreviewCodec.MAX_POINTS - root.scene.objects().sumOf { it.samples.size }
-        if (remaining <= 0 || root.scene.objectCount >= PagedPreviewCodec.MAX_OBJECTS) return fail("此预览已达到笔迹容量")
+        if (remaining <= 0 || root.scene.objectCount >= PagedPreviewCodec.MAX_OBJECTS) return fail("此预览已达到笔迹容量", PreviewFailureKind.CAPACITY)
         // Reserve identities before accepting real points. Completion never loses its output to an exhausted allocator.
         strokeCommand = operation() ?: return false; strokeObject = ObjectId(identity("ink") ?: return false)
         strokePage = selected; input = InputReplaySession(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining)); inputSequence = 0
@@ -174,22 +212,22 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun appendStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = consume(PointerPhase.MOVE, x, y, pressure, timeMicros)
     fun endStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = consume(PointerPhase.UP, x, y, pressure, timeMicros)
     private fun consume(phase: PointerPhase, x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
-        ownerCheck(); val session = input ?: return fail("没有进行中的笔画")
+        ownerCheck(); val session = input ?: return fail("没有进行中的笔画", PreviewFailureKind.NO_ACTIVE_STROKE)
         val result = try {
             session.consume(InputBatch(inputSequence++, timeMicros, 1, PointerTool.STYLUS, phase, listOf(InputSample(x, y, pressure, timeMicros))),
                 StrokeTarget(root().id, root().findPage(strokePage!!)!!.layerId, BrushSpec(BrushKind.MONOLINE, 1, width, color)))
-        } catch (_: IllegalArgumentException) { cancelStroke(); return fail("输入数据无效，本笔未提交") }
-        if (result is InputResult.Rejected) { cancelStroke(); return fail("输入超限或乱序，本笔未提交") }
+        } catch (_: IllegalArgumentException) { cancelStroke(); return fail("输入数据无效，本笔未提交", PreviewFailureKind.INVALID_INPUT) }
+        if (result is InputResult.Rejected) { cancelStroke(); return fail("输入超限或乱序，本笔未提交", PreviewFailureKind.INVALID_INPUT) }
         if (result is InputResult.Completed) {
             pending = DocumentCommand.Canvas(strokePage!!, result.stroke.command(strokeCommand!!, strokeObject!!, root().revision))
             input = null
             return retryPendingStroke()
         }
-        error = ""; return true
+        clearError(); return true
     }
     fun cancelStroke() { ownerCheck(); input?.close(); input = null }
     fun retryPendingStroke(): Boolean {
-        ownerCheck(); val command = pending ?: return true
+        ownerCheck(); val command = pending ?: run { clearError(); return true }
         if (!commit(command)) return false
         pending = null; return true
     }
@@ -198,7 +236,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     /** Host calls only after immutable snapshot admission. Pending completed ink prevents retirement. */
     fun retire(): Boolean {
         ownerCheck()
-        if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试")
+        if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试", PreviewFailureKind.PENDING_STROKE)
         cancelStroke(); retired = true; return true
     }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */

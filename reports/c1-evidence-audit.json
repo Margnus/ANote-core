@@ -64,10 +64,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "8a755211b9af37fca5e5455291d78488dafb69c055e0167527beee255b5873a5",
+      "report_sha256": "55642e68ab3b9219777b7a3a43db0f964ba890bc046ebf440e960d3ab4c231a3",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 164,
+      "matched_bindings": 168,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -88,15 +88,15 @@
       "scope": "Actual common envelope/path generation, bounded admission, cancellation and coverage tests compiled/run by Kotlin/Native. Includes CoreGraphics RGBA image/alpha/color and nearest/filtered tile consumption. No UIKit touch, physical performance, general filter/transform or heap claim."
     },
     "ios-host-tests": {
-      "report_sha256": "d6a459efeaa91bb9a6b770320c4219062ce90a6a29a311d1b9d47f496a5ebc27",
+      "report_sha256": "3c58a0647babdad9c39f0182612ce560d7dc4cec9da2c3b22b049db31110c70a",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 55,
+      "matched_bindings": 56,
       "mismatches": [],
       "scope": "Actual iOS app-host APIs, isolated temporary files and CoreGraphics offscreen pixels. Separate test build; not distributable binary UI, real touch, system picker, force-stop or power-loss recovery evidence."
     },
     "render-viewport-trace": {
-      "report_sha256": "5c73156e4790c1ba60bea22533ac3cd185605f9168415694a4be562d148d0f5f",
+      "report_sha256": "34725883a56a630d3d489f1587f66fce992c54e2fec734842406da62e4a3feb5",
       "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 3,
@@ -104,58 +104,66 @@
       "scope": "Same fixed synthetic scroll/zoom responsibility trace on actual ART Bitmap and iOS app-host Swift worker/CGImage; no ordinary app integration. Timings are single exploratory runs with deliberate worker gate/owner polling. Wait bounds bracket admission within submit and end at beforeCompute; include handoff overhead, not isolated scheduler latency. Row storage/charge is not peak heap or GPU residency."
     },
     "canonical-title-contract": {
-      "report_sha256": "5db93d2e44958d3a22c1dcd58b5f582ac26fd5c64b7cc2335f3b871c2dad26c1",
+      "report_sha256": "437a3203fdc5271de9bcbaf42d07ff2ea11173a7bb5c2b138facb6ea81a3ed1a",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 80,
+      "matched_bindings": 83,
       "mismatches": [],
       "scope": "Direct document authority commands on JVM/ART/Kotlin Native, plus Android isolated real file-port UTF-8 write/reopen and old-file preservation. Native test uses malformed UTF-16 literals before Objective-C bridging. No new schema, persistence backend, production storage or full App UI acceptance."
     },
     "public-boundary-inventory": {
-      "report_sha256": "ddb543e0cd3a41e26ea5f332b96e604cadfa75c43732ee9f06b1bb96410f7c7b",
+      "report_sha256": "f998572c5342f3d69a4b5448cc2de7c882c782deb636af95b9a91193ea40f162",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 73,
+      "mismatches": [],
+      "scope": "Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count."
+    },
+    "preview-edit-contract": {
+      "report_sha256": "0e2e10c7f9041bbd113b40c7dcad3407b7e1b215673e3626774933df83608622",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 83,
+      "mismatches": [],
+      "scope": "Original preview edit requests on JVM/ART/Kotlin Native. Android checks use synthetic in-memory roots and preserve old files; real model/file-port integration is separately verified by iOS app-host. No new authority, format, production store or ordinary UI acceptance."
+    },
+    "android-input-host-tests": {
+      "report_sha256": "1bead8f513ce2788080440211a30a1f0e0de892b51cc86d3b75fb9b8cf8d3437",
       "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 72,
       "mismatches": [],
-      "scope": "Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count."
-    },
-    "android-input-host-tests": {
-      "report_sha256": "5a521648b8b52627cc0f2aa347407ea1e1e23e41c1eb039f7587596a1c02ff67",
-      "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 70,
-      "mismatches": [],
       "scope": "Synthetic native MotionEvent history and terminal batches delivered directly to the original InkCanvasView callback on Android main thread; canonical notebook stays in memory. Oracle uses actual SDK-exposed event scalars, then double scene mapping. Not injected OS events, ordinary UI or physical stylus evidence."
     },
     "android-render-integration": {
-      "report_sha256": "4a894fea34b185e747b5f39eff9b344bc65cfd459adfc3d9d4beaf00fb522bff",
+      "report_sha256": "977e2e471bcbefa19ce84cb82c93038c6cfc198dd1e8a2f811eea470166bbd7d",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 81,
+      "matched_bindings": 83,
       "mismatches": [],
       "scope": "Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, cleanup UNKNOWN, actual-receipt recovery after injected post-handoff confirmation loss, delayed owner settlement/backpressure/shared storage and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim."
     },
     "sqlite-platform-capabilities": {
-      "report_sha256": "3173292672cfced8d5e794daac5d2cc09ac0fce5fe8d880dc860c19f9971df94",
+      "report_sha256": "acc76ea9a5429cc69d09354fd23c1c1f1cd26e5a31acf63ab5788aa04338c68f",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 71,
+      "matched_bindings": 73,
       "mismatches": [],
       "scope": "Synthetic state/operation atomicity, actual writer SIGKILL before commit/after commit before receipt/after receipt, replay/conflict/stale rejection, transaction and DDL/version rollback, SQLite max_page_count FULL, read-only unknown schema/corruption refusal. Platform-specific probes are test-only and are not shared-data or App owner integration."
     },
     "incremental-spatial-index": {
-      "report_sha256": "89f525af1aa4a36cbaf504600f17b61780f795c65e29bf62e74b2f195afea468",
+      "report_sha256": "374a790fa15d3fd26c8c801ac9ded9f726fa1e4454c8adf50292e9be57364488",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 142,
+      "matched_bindings": 145,
       "mismatches": [],
       "scope": "Derived immutable STR base plus bounded replacement/tombstone overlay, complete-or-rejected bbox queries, atomic delta admission and compaction content publication contract. Actual JVM, ART and Kotlin/Native library tests. Not a production spatial adapter or a second Scene authority."
     },
     "pdf-platform-capabilities": {
-      "report_sha256": "55950e5685bda828d473d64a228ea27a6eee038c192f50d028c722d4002ee7cd",
+      "report_sha256": "a38a560fe1ed736d107341bfcf3d4f544da96c6390e35483311ce77da50048f4",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 102,
+      "matched_bindings": 104,
       "mismatches": [],
       "scope": "Four synthetic rotations/crop-offset color anchors, native full/tile PNGs and independent marker oracle, guarded-core versus whole-page comparison, test-only RC4-128 password/missing/wrong password, malformed/read-only input, native text/outline capability and selected first/last render requests from a simple 500-page file. No user PDF or production resource/import/task protocol."
     }
@@ -165,5 +173,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "a2f74286ec3a50c4f75d3d1196570c2778d62da397b46ee54fb7f938672b5cd3"
+  "audit_tool_sha256": "314addc81641da246f663ee2996492815efc1d8d34079c36a05a92acbb8a0846"
 }

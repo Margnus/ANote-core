@@ -9,7 +9,7 @@
     "version": "0.1.0-preview",
     "artifact": "dist/NoteCore-0.1.0-preview.apk",
     "bytes": 1391400,
-    "sha256": "0eb4ea05e88ac4706268a5715b0e395a04320edde940afb8240b4bf9f9fec2a9",
+    "sha256": "af534313dd0af9e529564cda535e3e88cdd65179e94990c5fad59608284d5ce9",
     "signing": "development debug key",
     "lint_errors": 0,
     "lint_warnings": 9
@@ -18,7 +18,8 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "236a051cc0f44f4e8d37af83ceba4ab3ff0b3541ba5619a2f928c2be13764d7a",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "439fa1f61fefaa93275c05b5bfd0c1bfa698c9f3f58f4c86066f6de0cde8026a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "88bbfcee8c3571a129bab62c7c15f50f25f51fb2cd01cdbfb88470376d0966e4",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "24f09778fa8b407699307ffcea59b97d39cdf873e23831406cad5236133fb309",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
@@ -53,7 +54,7 @@
     "android-app/src/main/res/drawable/ic_note.xml": "daa79575a3abd07e866404872e51d7fbf29b6430c87937b31806416f5f5b75aa",
     "android-app/src/main/res/values/strings.xml": "8fd14b09bdae43b965396d9e64313b30b739bdf0b613cea9c7474255b02a765f",
     "android-app/src/main/res/xml/data_extraction_rules.xml": "ec0f1c6431c2434ac85c7933dd0fe21c430e9601ec4db70d0112557cbebf9993",
-    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "e2cf08555b892f82b31690cf0a1920969c98e63f5010fd13d60ee90f0f781308",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "26dc8a4d9dc2773fe2369084525f77dd3233a3878524195a073f2dc22e0f33b7",
     "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "c98a200170d0e7738c95ed730f487dbc745fc4c009fcd073bb40b357ceb711c0",
     "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
     "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "1b0a653c61ccc7292bc9cf239688f1547ff32a295ee4445ebfab9d3a2dfda03b",
@@ -65,8 +66,8 @@
     "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
     "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
-    "android-app/build/outputs/apk/debug/android-app-debug.apk": "0eb4ea05e88ac4706268a5715b0e395a04320edde940afb8240b4bf9f9fec2a9",
-    "android-app/build/reports/lint-results-debug.xml": "936b19202d06c4ab50b8147d785c17702222c3918935e6f23aa05048978ffefb"
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "af534313dd0af9e529564cda535e3e88cdd65179e94990c5fad59608284d5ce9",
+    "android-app/build/reports/lint-results-debug.xml": "90425a34bea314f9e297cdac54130f0f5ecf59fe9901ec0e1a6e6d84f8e072f3"
   },
   "runtime_report": "reports/android-smoke.json (only valid if APK SHA matches)",
   "production_c1_gate_complete": false,

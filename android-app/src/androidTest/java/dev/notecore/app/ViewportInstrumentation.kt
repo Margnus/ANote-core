@@ -24,7 +24,9 @@ class ViewportInstrumentation : Instrumentation() {
     private var surfaceFramesOnly = false
     private var inputBatchesOnly = false
     private var titleOnly = false
+    private var editOnly = false
     override fun onCreate(arguments: Bundle?) {
+        editOnly = arguments?.getString("notecore_case") == "preview_edit"
         titleOnly = arguments?.getString("notecore_case") == "title_contract"
         inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
@@ -42,6 +44,16 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (editOnly) {
+                var editFailure: Throwable? = null
+                runOnMainSync {
+                    try { result.putString("edit_observations", PreviewEditHostChecks.verify()) }
+                    catch (failure: Throwable) { editFailure = failure }
+                }
+                editFailure?.let { throw it }
+                result.putString("edit_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (titleOnly) {
                 var titleFailure: Throwable? = null
                 runOnMainSync {
