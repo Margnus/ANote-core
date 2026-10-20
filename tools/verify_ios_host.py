@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()',
     'testTypedEditModelRejectsInvalidParametersWithoutLosingActiveInk()',
     'testAuthorityConstructionFailureIsRecoverableInSwift()',
     'testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions()',
@@ -49,7 +50,7 @@ def digest(path):
 
 
 def inputs():
-    files = [*ROOT.glob('canvas-core/src/iosMain/**/*.kt'), *ROOT.glob('ios-app/NoteCorePreview/*.swift'), *ROOT.glob('ios-app/NoteCorePreviewTests/*.swift'),
+    files = [*ROOT.glob('shared-core/src/iosMain/**/*.kt'), *ROOT.glob('canvas-core/src/iosMain/**/*.kt'), *ROOT.glob('ios-app/NoteCorePreview/*.swift'), *ROOT.glob('ios-app/NoteCorePreviewTests/*.swift'),
              *ROOT.glob('shared-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonMain/**/*.kt'),
              ROOT/'ios-app/NoteCorePreview.xcodeproj/project.pbxproj',
              ROOT/'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',
@@ -143,6 +144,7 @@ def main():
         'synthetic_uikit_input_callback_test_count': 4,
         'swift_authority_constructor_failure_recoverable': True,
         'typed_edit_model_failure_and_file_reopen_verified': True,
+        'native_scalar_input_batch_bridge_verified': True,
         'swift_malformed_utf16_injection_tested': False,
         'input_sdk_contract_sha256': input_contracts,
         'sdk_header_runtime_equivalence_verified': False,

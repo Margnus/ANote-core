@@ -63,7 +63,7 @@ def current_inputs(root):
     assert build['status'] == 'passed' and build['build_verified'] is True
     bound = build['source_and_build_input_sha256']
     required = {str(p.relative_to(root)) for pattern in ('canvas-core/src/commonMain/**/*.kt',
-        'canvas-core/src/iosMain/**/*.kt', 'shared-core/src/commonMain/**/*.kt', 'ios-app/NoteCorePreview/*.swift')
+        'canvas-core/src/iosMain/**/*.kt', 'shared-core/src/iosMain/**/*.kt', 'shared-core/src/commonMain/**/*.kt', 'ios-app/NoteCorePreview/*.swift')
         for p in root.glob(pattern)} | {BINARY, 'build.gradle.kts', 'settings.gradle.kts', 'gradle.properties',
         'canvas-core/build.gradle.kts', 'shared-core/build.gradle.kts'}
     assert required <= set(bound), ('Incomplete framework build binding', sorted(required - set(bound)))

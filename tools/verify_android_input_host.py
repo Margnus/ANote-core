@@ -10,7 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = 'dev.notecore.preview'
 CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equal_time_and_undo',
-          'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root'}
+          'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root',
+          'callback_batch_limit_explicit_cancel_and_recover'}
 
 
 def digest(path):
@@ -62,6 +63,7 @@ def main():
     assert 'input_status=passed' in output and 'INSTRUMENTATION_CODE: -1' in output, output
     observed = json.loads(re.search(r'input_observations=(\{.*\})', output).group(1))
     assert len(observed['checks']) == len(CHECKS) and set(observed['checks']) == CHECKS
+    assert observed['callback_real_batch_limit'] == 1024 and observed['down_history_included'] is True
     assert observed['canonical_max_error'] <= 1e-9 and observed['old_float_witness_error'] > 1e-5
     assert observed['batch_sample_count'] == 7 and observed['all_test_notes_in_memory']
     assert files() == before, 'Original Android file set or bytes changed'

@@ -197,34 +197,94 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (!width.isFinite() || width !in 0.5..16.0) return fail("笔宽无效", PreviewFailureKind.INVALID_ARGUMENT)
         color = argb; this.width = width; clearError(); return true
     }
-    fun beginStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
-        ownerCheck()
-        if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
-        if (pending != null) return fail("请先重试当前笔画", PreviewFailureKind.PENDING_STROKE)
-        if (input != null) return fail("请先完成当前笔画", PreviewFailureKind.ACTIVE_STROKE)
-        val root = root(); val remaining = PagedPreviewCodec.MAX_POINTS - root.scene.objects().sumOf { it.samples.size }
-        if (remaining <= 0 || root.scene.objectCount >= PagedPreviewCodec.MAX_OBJECTS) return fail("此预览已达到笔迹容量", PreviewFailureKind.CAPACITY)
-        // Reserve identities before accepting real points. Completion never loses its output to an exhausted allocator.
-        strokeCommand = operation() ?: return false; strokeObject = ObjectId(identity("ink") ?: return false)
-        strokePage = selected; input = InputReplaySession(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining)); inputSequence = 0
-        return consume(PointerPhase.DOWN, x, y, pressure, timeMicros)
-    }
-    fun appendStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = consume(PointerPhase.MOVE, x, y, pressure, timeMicros)
-    fun endStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = consume(PointerPhase.UP, x, y, pressure, timeMicros)
-    private fun consume(phase: PointerPhase, x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
-        ownerCheck(); val session = input ?: return fail("没有进行中的笔画", PreviewFailureKind.NO_ACTIVE_STROKE)
-        val result = try {
-            session.consume(InputBatch(inputSequence++, timeMicros, 1, PointerTool.STYLUS, phase, listOf(InputSample(x, y, pressure, timeMicros))),
-                StrokeTarget(root().id, root().findPage(strokePage!!)!!.layerId, BrushSpec(BrushKind.MONOLINE, 1, width, color)))
-        } catch (_: IllegalArgumentException) { cancelStroke(); return fail("输入数据无效，本笔未提交", PreviewFailureKind.INVALID_INPUT) }
-        if (result is InputResult.Rejected) { cancelStroke(); return fail("输入超限或乱序，本笔未提交", PreviewFailureKind.INVALID_INPUT) }
-        if (result is InputResult.Completed) {
-            pending = DocumentCommand.Canvas(strokePage!!, result.stroke.command(strokeCommand!!, strokeObject!!, root().revision))
-            input = null
-            return retryPendingStroke()
+    val inputBatchLimit: Int get() = PREVIEW_INPUT_BATCH_LIMIT
+    /** Raw buffers are read synchronously and never retained; callers must not mutate during this call. */
+    fun offerRealBatch(phase: PointerPhase, eventTimeMicros: Long, xs: DoubleArray, ys: DoubleArray,
+                       pressures: FloatArray, times: LongArray): PreviewInputResult {
+        realBatchGate(phase)?.let { return it }
+        val count = xs.size
+        if (count > PREVIEW_INPUT_BATCH_LIMIT) return rejectRealBatch(PreviewFailureKind.INPUT_BATCH_CAPACITY)
+        if (count != ys.size || count != pressures.size || count != times.size || eventTimeMicros < 0 ||
+            (phase == PointerPhase.CANCEL && count != 0) ||
+            ((phase == PointerPhase.DOWN || phase == PointerPhase.MOVE) && count == 0))
+            return rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
+        var time = -1L
+        for (i in 0 until count) {
+            if (!xs[i].isFinite() || !ys[i].isFinite() || kotlin.math.abs(xs[i]) > 1e9 || kotlin.math.abs(ys[i]) > 1e9 ||
+                !pressures[i].isFinite() || pressures[i] !in 0f..1f || times[i] < 0 || times[i] < time || times[i] > eventTimeMicros)
+                return rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
+            time = times[i]
         }
-        clearError(); return true
+        val current = root()
+        val session: InputReplaySession
+        val sequence: Long
+        var command = strokeCommand; var objectId = strokeObject; var page = strokePage
+        if (phase == PointerPhase.DOWN) {
+            val remaining = PagedPreviewCodec.MAX_POINTS - current.scene.objects().sumOf { it.samples.size }
+            if (remaining <= 0 || current.scene.objectCount >= PagedPreviewCodec.MAX_OBJECTS ||
+                count > minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining))
+                return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+            command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
+            objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
+            page = selected; session = InputReplaySession(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining)); sequence = 0
+        } else {
+            session = input!!; sequence = inputSequence
+            if (sequence == Long.MAX_VALUE) return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
+        }
+        // All scalar/length/work admission checks precede this bounded copied list.
+        val points = List(count) { InputSample(xs[it], ys[it], pressures[it], times[it]) }
+        val result = session.consume(InputBatch(sequence, eventTimeMicros, 1, PointerTool.STYLUS, phase, points),
+            StrokeTarget(current.id, current.findPage(page!!)!!.layerId, BrushSpec(BrushKind.MONOLINE, 1, width, color)))
+        if (result is InputResult.Rejected) return rejectRealBatch(
+            if (result.reason == InputRejection.CAPACITY) PreviewFailureKind.CAPACITY else PreviewFailureKind.INVALID_INPUT, result.reason)
+        strokeCommand = command; strokeObject = objectId; strokePage = page
+        inputSequence = sequence + 1
+        if (result is InputResult.Cancelled) {
+            input = null; clearError(); return inputResult(PreviewInputDisposition.CANCELLED, 0)
+        }
+        if (result is InputResult.Completed) {
+            pending = DocumentCommand.Canvas(page, result.stroke.command(command!!, objectId!!, current.revision))
+            input = null
+            val committed = retryPendingStroke()
+            return inputResult(if (committed) PreviewInputDisposition.COMMITTED else PreviewInputDisposition.PENDING_COMMIT, count)
+        }
+        input = session; clearError()
+        return inputResult(PreviewInputDisposition.ACCEPTED, count)
     }
+    internal fun realBatchGate(phase: PointerPhase): PreviewInputResult? {
+        ownerCheck()
+        if (retired) return rejectRealBatch(PreviewFailureKind.CLOSED)
+        if (pending != null) return rejectRealBatch(PreviewFailureKind.PENDING_STROKE)
+        if (phase == PointerPhase.DOWN && input != null) return rejectRealBatch(PreviewFailureKind.ACTIVE_STROKE)
+        if (phase != PointerPhase.DOWN && input == null) return rejectRealBatch(PreviewFailureKind.NO_ACTIVE_STROKE)
+        return null
+    }
+    internal fun rejectRealBatch(kind: PreviewFailureKind, reason: InputRejection? = null): PreviewInputResult {
+        ownerCheck()
+        fail(when (kind) {
+            PreviewFailureKind.CLOSED -> "此会话已关闭，请重新打开笔记"
+            PreviewFailureKind.PENDING_STROKE -> "请先重试当前笔画，本批未接收"
+            PreviewFailureKind.ACTIVE_STROKE -> "请先完成当前笔画，本批未接收"
+            PreviewFailureKind.NO_ACTIVE_STROKE -> "没有进行中的笔画"
+            PreviewFailureKind.INPUT_BATCH_CAPACITY -> "输入批次超限，本批未接收"
+            PreviewFailureKind.CAPACITY -> "此预览已达到笔迹容量，本批未接收"
+            PreviewFailureKind.IDENTITY_EXHAUSTED -> "此会话编号已耗尽，本批未接收"
+            else -> "输入数据无效，本批未接收"
+        }, kind)
+        return inputResult(PreviewInputDisposition.REJECTED, 0, reason)
+    }
+    private fun inputResult(disposition: PreviewInputDisposition, accepted: Int, reason: InputRejection? = null) =
+        PreviewInputResult(disposition, accepted, input?.activeRealSamples ?: 0, failure, reason)
+
+    /** Legacy Boolean adapters preserve their explicit unfinished-stroke cancellation on invalid input. */
+    private fun legacyInput(phase: PointerPhase, x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
+        val result = offerRealBatch(phase, timeMicros, doubleArrayOf(x), doubleArrayOf(y), floatArrayOf(pressure), longArrayOf(timeMicros))
+        if (result.disposition == PreviewInputDisposition.REJECTED && phase != PointerPhase.DOWN) cancelStroke()
+        return result.disposition == PreviewInputDisposition.ACCEPTED || result.disposition == PreviewInputDisposition.COMMITTED
+    }
+    fun beginStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = legacyInput(PointerPhase.DOWN, x, y, pressure, timeMicros)
+    fun appendStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = legacyInput(PointerPhase.MOVE, x, y, pressure, timeMicros)
+    fun endStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = legacyInput(PointerPhase.UP, x, y, pressure, timeMicros)
     fun cancelStroke() { ownerCheck(); input?.close(); input = null }
     fun retryPendingStroke(): Boolean {
         ownerCheck(); val command = pending ?: run { clearError(); return true }

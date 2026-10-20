@@ -70,9 +70,9 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             val f = fixture(); val points = (0 until 7).map { i ->
                 Sample(400f + i * 10, 300f + i * 3, 1000L + if (i == 2) 1 else i, 0.2f + i * 0.1f)
             }
-            val native = send(f.view, MotionEvent.ACTION_DOWN, points.take(1)) +
-                send(f.view, MotionEvent.ACTION_MOVE, points.subList(1, 4)) +
-                send(f.view, MotionEvent.ACTION_UP, points.subList(4, 7))
+            val native = send(f.view, MotionEvent.ACTION_DOWN, points.take(3)) +
+                send(f.view, MotionEvent.ACTION_MOVE, points.subList(3, 5)) +
+                send(f.view, MotionEvent.ACTION_UP, points.subList(5, 7))
             check(f.note.strokeCount == 1 && f.note.pointCount(0) == 7 && f.changes[0] == 1)
             for ((i, p) in native.withIndex()) {
                 val expected = f.view.viewport.toScene(p.x.toDouble(), p.y.toDouble())
@@ -105,8 +105,21 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             check(f.note.capture().encode() == before && f.note.strokeCount == 0 && f.changes[0] == 0)
             checks.add("resize_cancels_and_late_up_preserves_root")
         }
+        run {
+            val f = fixture(); val p = Sample(400f, 300f, 1000)
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
+            val oversized = (0..f.note.inputBatchLimit).map { p.copy(time = 1001L + it) }
+            val observed = send(f.view, MotionEvent.ACTION_MOVE, oversized)
+            check(observed.size > f.note.inputBatchLimit) // actual SDK history must exercise the admission limit
+            check(!f.note.hasActiveStroke && f.note.totalStrokeCount == 0 && f.errors.single().contains("超限"))
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 3000)))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 3001)))
+            check(f.note.strokeCount == 1 && f.note.pointCount(0) == 2 && f.changes[0] == 1)
+            checks.add("callback_batch_limit_explicit_cancel_and_recover")
+        }
         return JSONObject().put("checks", JSONArray(checks)).put("old_float_witness_error", oldFloatError)
             .put("canonical_max_error", canonicalError).put("batch_sample_count", 7)
+            .put("callback_real_batch_limit", 1024).put("down_history_included", true)
             .put("all_test_notes_in_memory", true).toString()
     }
 }
