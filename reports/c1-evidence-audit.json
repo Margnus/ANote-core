@@ -64,10 +64,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "f9b962203624f8041803d57435c6bb098ef7feb27f9fb19ff8da091077969939",
+      "report_sha256": "8a755211b9af37fca5e5455291d78488dafb69c055e0167527beee255b5873a5",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 163,
+      "matched_bindings": 164,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -111,6 +111,14 @@
       "mismatches": [],
       "scope": "Direct document authority commands on JVM/ART/Kotlin Native, plus Android isolated real file-port UTF-8 write/reopen and old-file preservation. Native test uses malformed UTF-16 literals before Objective-C bridging. No new schema, persistence backend, production storage or full App UI acceptance."
     },
+    "public-boundary-inventory": {
+      "report_sha256": "ddb543e0cd3a41e26ea5f332b96e604cadfa75c43732ee9f06b1bb96410f7c7b",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 72,
+      "mismatches": [],
+      "scope": "Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count."
+    },
     "android-input-host-tests": {
       "report_sha256": "5a521648b8b52627cc0f2aa347407ea1e1e23e41c1eb039f7587596a1c02ff67",
       "role": "current_regression",
@@ -136,10 +144,10 @@
       "scope": "Synthetic state/operation atomicity, actual writer SIGKILL before commit/after commit before receipt/after receipt, replay/conflict/stale rejection, transaction and DDL/version rollback, SQLite max_page_count FULL, read-only unknown schema/corruption refusal. Platform-specific probes are test-only and are not shared-data or App owner integration."
     },
     "incremental-spatial-index": {
-      "report_sha256": "b717b65970016fd1f660b87abab7f0f572fdb57047e814a5bb8e3636a46cb764",
+      "report_sha256": "89f525af1aa4a36cbaf504600f17b61780f795c65e29bf62e74b2f195afea468",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 141,
+      "matched_bindings": 142,
       "mismatches": [],
       "scope": "Derived immutable STR base plus bounded replacement/tombstone overlay, complete-or-rejected bbox queries, atomic delta admission and compaction content publication contract. Actual JVM, ART and Kotlin/Native library tests. Not a production spatial adapter or a second Scene authority."
     },
@@ -157,5 +165,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "564c38333089021f14f66c2bfc46c037826d8b254933f5cfc026afd32a7ca96b"
+  "audit_tool_sha256": "a2f74286ec3a50c4f75d3d1196570c2778d62da397b46ee54fb7f938672b5cd3"
 }

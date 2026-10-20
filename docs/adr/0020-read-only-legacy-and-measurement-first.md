@@ -117,3 +117,9 @@ C1前能力调查采用Android PdfRenderer与Apple CoreGraphics/PDFKit为候选�
 原“整笔粗筛→按需分段→有界mask”方向保留；在原STR之上采用internal有界replacement/tombstone overlay作为增量候选。纯bounds/handle派生数据不拥有规范对象，不另建Scene或生产worker。批次必须expected content stamp/before CAS完整校验，超限显式拒绝且原实例不变；查询预算不足只可拒绝，不能返回不完整命中。压实由原owner准入、保留旧/新内存责任、发布前再检查当前scene/revision/session；undo前进revision，重开换session。同步STR排序只支持前后取消，生产调度必须如实处理。
 
 采用上述正确性/失败契约；grid/STR和实际阈值仍不冻结。新增库测试包含规范SceneReducer patch到派生bounds的对照，但生产适配/普通App仍未接入，逻辑条目/测试次数不能替代真实heap、队列、混排、任意几何或真机验收。[当前报告](../../reports/incremental-spatial-index.json)绑定JVM、ART、Kotlin/Native实际执行证据。继续收敛C1失败/身份/预算矩阵，物理门禁保留。
+
+## DEV-040F：编译导出不等于稳定公共边界（2026-10-20）
+
+当前shared-core `api/export(canvas-core)`将大量参考类型带到ObjC，现有源码/生成头盘点见[公开边界报告](../../reports/public-boundary-inventory.json)；完整逐组失败/owner与模块责任在[原C1清单](../C1未决事项.md)040F段。19个重点声明中构造/codec的NSError与commit/下标/值构造的无NSError必须区分；声明是编译结构证据，不是所有异常/回调可恢复的保证。默认空ownerCheck也不能证明任意外部调用线程安全。
+
+采用责任收口而保持当前shared-core→canvas-core物理依赖。生产kernel/session/data/platform职责候选应由唯一提交port、validated facade、typed failure/lease和能力表接缝定义；不先建空模块或新增队列/authority，不用移动文件冒充稳定API。淘汰将预览Boolean/nullable/string实验接口、内存回执或全部导出直接冻结为生产SDK的方案；隐藏导出/重分模块须后续消费者编译与实际平台回归。完整conformance、公共SemVer/算法版本、M-1、普通App/owner丢失与C1均保持未通过。
