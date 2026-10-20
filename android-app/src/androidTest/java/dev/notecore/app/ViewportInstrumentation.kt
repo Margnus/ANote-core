@@ -23,7 +23,9 @@ class ViewportInstrumentation : Instrumentation() {
     private var renderTargetOnly = false
     private var surfaceFramesOnly = false
     private var inputBatchesOnly = false
+    private var titleOnly = false
     override fun onCreate(arguments: Bundle?) {
+        titleOnly = arguments?.getString("notecore_case") == "title_contract"
         inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
         renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
@@ -40,6 +42,16 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (titleOnly) {
+                var titleFailure: Throwable? = null
+                runOnMainSync {
+                    try { result.putString("title_observations", CanonicalTitleHostChecks.verify(host)) }
+                    catch (failure: Throwable) { titleFailure = failure }
+                }
+                titleFailure?.let { throw it }
+                result.putString("title_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (inputBatchesOnly) {
                 var inputFailure: Throwable? = null
                 runOnMainSync {

@@ -139,12 +139,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val trimmed = value.trim(); var end = minOf(120, trimmed.length)
         if (end < trimmed.length && end > 0 && trimmed[end - 1].isHighSurrogate() && trimmed[end].isLowSurrogate()) end--
         val title = trimmed.substring(0, end).ifBlank { "未命名笔记" }
-        var i = 0
-        while (i < title.length) {
-            val c = title[i++]
-            if (c.isHighSurrogate()) { if (i == title.length || !title[i++].isLowSurrogate()) return fail("标题包含无效字符") }
-            else if (c.isLowSurrogate()) return fail("标题包含无效字符")
-        }
+        if (!title.hasValidUnicode()) return fail("标题包含无效字符")
         val root = root(); if (title == root.title) return true
         val op = operation() ?: return false
         return commit(DocumentCommand.Rename(op, root.id, root.revision, title))

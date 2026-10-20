@@ -5,7 +5,7 @@ import dev.notecore.canvas.prototype.*
 /** C0 single-owner reference. Page directory and canonical scene publish together, with one root revision.
  * Receipts are MEMORY_ONLY. Full-map copies / identity tombstones / bounded journal are not production storage.
  */
-class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: DocumentBudget = DocumentBudget(),
+class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) constructor(initial: DocumentRoot, private val budget: DocumentBudget = DocumentBudget(),
                               private val ownerCheck: () -> Unit = {}) {
     private data class JournalEntry(val command: DocumentCommand, val receipt: DocumentReceipt, val charge: Long)
     private data class State(val root: DocumentRoot, val journal: Map<CommandId, JournalEntry>,
@@ -16,6 +16,7 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
         initial.scene.objects().map { it.id }.toSet(), initial.scene.objects().associate { it.id to it.objectRevision })
     init {
         ownerCheck()
+        require(initial.title.hasValidUnicode()) { "Invalid Unicode title" }
         require(initial.pageCount <= budget.maxPages && initial.scene.objectCount <= budget.maxObjects)
         require(liveCharge(initial) <= budget.liveBytes && identityCharge(state) <= budget.identityBytes)
     }
@@ -49,7 +50,7 @@ class MemoryDocumentAuthority(initial: DocumentRoot, private val budget: Documen
         ownerCheck()
         val old = state; val root = old.root
         old.journal[command.id]?.let { return if (it.command == command) DocumentCommit.Accepted(it.receipt) else reject(DocumentRejection.REUSED_OPERATION_ID) }
-        if (command is DocumentCommand.Rename && command.title.length > 120) return reject(DocumentRejection.INVALID_TITLE)
+        if (command is DocumentCommand.Rename && (command.title.length > 120 || !command.title.hasValidUnicode())) return reject(DocumentRejection.INVALID_TITLE)
         if (command.documentId != root.id) return reject(DocumentRejection.WRONG_DOCUMENT)
         if (command.baseRevision != root.revision) return reject(DocumentRejection.STALE_ROOT)
         if (root.revision == Long.MAX_VALUE) return reject(DocumentRejection.REVISION_EXHAUSTED)

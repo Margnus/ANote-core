@@ -5,6 +5,19 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testAuthorityConstructionFailureIsRecoverableInSwift() throws {
+        // Swift strings cannot inject malformed UTF-16. Exercise the same annotated
+        // constructor's IllegalArgumentException using a representable over-budget root.
+        let text = "NCPREVIEW\t2\nD\ttitle-host\t合法😀\t2\t0\t0\nG\tfirst\tlayer-a\t400\t400\tBLANK\t0\nG\tsecond\tlayer-b\t400\t400\tBLANK\t0\nEND\n"
+        let root = try PagedPreviewCodec.shared.decode(text: text)
+        let budget = DocumentBudget(maxPages: 1, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
+            journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024)
+        XCTAssertThrowsError(try MemoryDocumentAuthority(initial: root, budget: budget, ownerCheck: {}))
+        let valid = try MemoryDocumentAuthority(initial: root, budget: DocumentBudget(maxPages: 128, maxObjects: 5000,
+            liveBytes: 8*1024*1024, journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
+            historyEntries: 128, historyBytes: 8*1024*1024), ownerCheck: {})
+        XCTAssertEqual(valid.snapshot().title, "合法😀")
+    }
     func testSharedBrushContoursMatchAnalyticCoverageOffscreen() throws {
         struct Fixture: Decodable {
             struct Case: Decodable { let name: String; let alpha: Double; let contours: [[[Double]]]; let oracle_mask: [String] }
