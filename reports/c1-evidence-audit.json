@@ -64,10 +64,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "c750b973fe8a1f1c4ffa47cad66ab9d91268b316f71f5bfa2cc96409a955dc1e",
+      "report_sha256": "579b9c8cc9badcda0b9628994d8c0a86e9806dcd69a0458ad45996c6dcecd9e2",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 173,
+      "matched_bindings": 174,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -135,6 +135,14 @@
       "mismatches": [],
       "scope": "Actual JVM/Kotlin Native raw-batch tests plus source-bound Android original View synthetic MotionEvents and iOS original UIKit callbacks/NSData bridge app-host tests. No ordinary package UI, real OS stylus delivery or physical latency claim. Source byte/count bounds are not measured process heap or a production arena."
     },
+    "ios-preview-ui": {
+      "report_sha256": "4274f4d09f201ddfb6610d6db4236565410178072fa50a5a63e6cc0349cc4105",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 90,
+      "mismatches": [],
+      "scope": "Selected ordinary UIKit simulator UI on current 4c7f78dd package, manually observed through CUA, staged native document bytes and PID-specific provider logs. No host test rerun or physical-device acceptance."
+    },
     "android-input-host-tests": {
       "report_sha256": "87053ca3a93ba471257b0a82c9cb94ec2dd009ebc89bb24986f86e836d668aa2",
       "role": "current_regression",
@@ -160,10 +168,10 @@
       "scope": "Synthetic state/operation atomicity, actual writer SIGKILL before commit/after commit before receipt/after receipt, replay/conflict/stale rejection, transaction and DDL/version rollback, SQLite max_page_count FULL, read-only unknown schema/corruption refusal. Platform-specific probes are test-only and are not shared-data or App owner integration."
     },
     "incremental-spatial-index": {
-      "report_sha256": "1bc63e9328f37adb53310a32097f309b3fec19ec1daa45ecc91ca757600effb4",
+      "report_sha256": "07dc2c77d03688dbb29743cac16b429b78b6d9e4519f9a00f25fc13d89f6ac93",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 149,
+      "matched_bindings": 150,
       "mismatches": [],
       "scope": "Derived immutable STR base plus bounded replacement/tombstone overlay, complete-or-rejected bbox queries, atomic delta admission and compaction content publication contract. Actual JVM, ART and Kotlin/Native library tests. Not a production spatial adapter or a second Scene authority."
     },
@@ -181,5 +189,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "3f68764b90b3c2046d5eb49fa961b939f81b0f057d9de0248aa618c53359362a"
+  "audit_tool_sha256": "4300b56a65c9a8eb5fb54c996c8cec5f1ac0f7a39254e58e35985de163c3a1f9"
 }
