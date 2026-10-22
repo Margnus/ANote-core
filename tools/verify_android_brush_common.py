@@ -28,7 +28,8 @@ def main():
     build = ROOT/'canvas-core/build/android-brush-tests'
     build.mkdir(parents=True, exist_ok=True)
     with (build/'build.log').open('w', encoding='utf-8') as log:
-        subprocess.run([str(ROOT/'gradlew'), '--no-daemon', '--console=plain', '-PenableAndroidTargets=true',
+        wrapper = ROOT / ('gradlew.bat' if os.name == 'nt' else 'gradlew')
+        subprocess.run([str(wrapper), '--no-daemon', '--console=plain', '-PenableAndroidTargets=true',
             ':canvas-core:assembleDebugAndroidTest'], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=300)
     metadata = ROOT/'canvas-core/build/outputs/apk/androidTest/debug/output-metadata.json'
     info = json.loads(metadata.read_text(encoding='utf-8'))
@@ -41,7 +42,7 @@ def main():
     adb('install', '-r', str(apk))
     output = adb('shell', 'am', 'instrument', '-w', '-r',
         'dev.notecore.canvas.poc.test/dev.notecore.canvas.prototype.CoreBrushInstrumentation')
-    (build/'run.log').write_text(output, encoding='utf-8')
+    (build/'run.log').write_text(output, encoding='utf-8', newline='\n')
     assert 'common_brush_status=passed' in output and 'common_brush_tests=110' in output and 'common_brush_ignored=0' in output, output
     assert before == {p.relative_to(ROOT).as_posix(): digest(p) for p in sources} and digest(apk) == apk_sha
     observations = json.loads(re.search(r'native_image_observations=(\[.*\])', output).group(1))
@@ -57,7 +58,7 @@ def main():
         'physical_device_measured': False, 'app_brush_integration_verified': False,
         'native_cost_scope': 'Bitmap allocationByteCount and one exploratory API timing. Includes temporary RGBA ByteBuffer copy; no process peak heap, GPU, GC or delayed reclamation measurement. Release time is recycle API return.',
         'scope': 'Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest and filtered tile seam checks with true neighbor gutter and disjoint device-pixel core clips. Includes Bitmap allocationByteCount observations; no whole-process heap, GPU, arbitrary transform, app UI, touch or device performance claim.'}
-    (ROOT/'reports/android-brush-common-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'reports/android-brush-common-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps({k: v for k, v in report.items() if k != 'source_and_build_sha256'}))
 
 

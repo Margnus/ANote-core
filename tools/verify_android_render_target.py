@@ -50,7 +50,7 @@ def main():
     adb('install', '-r', str(apk)); adb('install', '-r', str(test))
     output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'surface_frames',
                  BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode()
-    (ROOT/'build/dev036g-target-host.log').write_text(output, encoding='utf-8')
+    (ROOT/'build/dev036g-target-host.log').write_text(output, encoding='utf-8', newline='\n')
     assert 'surface_status=passed' in output, output
     observed = json.loads(re.search(r'surface_frames=(\{.*\})', output).group(1))
     assert all(observed[key] for key in ('app_hierarchy_pixels', 'active_static_alpha', 'page_zoom',
@@ -74,7 +74,7 @@ def main():
     assert any('frame-scheduled' in event['message'] and 'backend=surface-control' in event['message'] for event in events)
     assert any('release-receipt' in event['message'] for event in events)
     assert events[-1]['message'] == 'owner-drained charged=0'
-    (ROOT/'build/dev036g-target-events.json').write_text(json.dumps(events, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'build/dev036g-target-events.json').write_text(json.dumps(events, indent=2)+'\n', encoding='utf-8', newline='\n')
     assert files() == baseline, 'Target test must not write canonical documents'
     # Explicitly restore a normal process after instrumentation; no uninstall/data clear.
     adb('shell', 'am', 'force-stop', BUNDLE)
@@ -123,7 +123,7 @@ def main():
         'ordinary_installed_apk_matches': True,
         'ordinary_screen_target_observed': False, 'ordinary_new_backend_consumption_verified': False,
         'desktop_ui_interaction_verified': False,
-        'ui_limitation': 'Earlier CUA getApp rejected both qemu-system-aarch64 and its exact binary path. Current CUA inventory still exposes no Android emulator. Dedicated AVD restored headlessly only for native host tests. Original app-host hierarchy/compositor tests pass; this does not substitute for ordinary-process UI acceptance. No adb UI input was used to bypass the CUA limitation.',
+        'ui_limitation': 'This collector executes native app-host hierarchy/compositor tests and restores an ordinary process. It does not perform or verify desktop UI interactions. Ordinary-process UI and backend consumption require separately retained source-bound evidence; app-host success is not a substitute.',
         'original_file_count': len(baseline), 'all_original_files_unchanged': True,
         'original_files_scope': 'Unchanged relative to the current pre-G-test baseline after AVD restore, not equivalence to F historical baseline.',
         'historical_baseline_comparison': baseline_drift,
@@ -154,7 +154,7 @@ def main():
         'scope': 'Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, cleanup UNKNOWN, actual-receipt recovery after injected post-handoff confirmation loss, delayed owner settlement/backpressure/shared storage and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim.',
         'gpu_fence_verified': False, 'physical_device_or_heap_measured': False, 'c1_gate_complete': False,
     }
-    (ROOT/'reports/android-render-integration.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'reports/android-render-integration.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps({key: report[key] for key in ('status', 'app_host_pid', 'ordinary_pid_after_host',
                      'original_file_count', 'all_original_files_unchanged', 'ordinary_new_backend_consumption_verified')}))
 

@@ -97,7 +97,7 @@ def main():
     report = audit(ROOT)
     report['audit_tool_sha256'] = digest(Path(__file__))
     (ROOT / 'reports/c1-evidence-audit.json').write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(json.dumps({'status': report['status'], 'reports': {
         name: value['binding_state'] for name, value in report['reports'].items()}, 'errors': report['errors']}))
     if report['errors']:

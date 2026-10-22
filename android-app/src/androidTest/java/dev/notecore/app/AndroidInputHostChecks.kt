@@ -4,7 +4,9 @@ import android.app.Activity
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.widget.FrameLayout
-import dev.notecore.document.PagedPreviewNotebook
+import dev.notecore.document.*
+import dev.notecore.canvas.prototype.SceneId
+import dev.notecore.canvas.prototype.LayerId
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.abs
@@ -14,8 +16,10 @@ internal class AndroidInputHostChecks(private val host: Activity) {
     private data class Sample(val x: Float, val y: Float, val time: Long, val pressure: Float = 0.5f)
     private class Fixture(val view: InkCanvasView, val note: PagedPreviewNotebook,
         val errors: MutableList<String>, val changes: IntArray)
-    private fun fixture(): Fixture {
-        val note = PagedPreviewNotebook.create("synthetic-input", "Synthetic callbacks", "input-session")
+    private fun fixture(budget: DocumentBudget? = null): Fixture {
+        val note = PagedPreviewNotebook(DocumentRoot.empty(SceneId("synthetic-input"), "Synthetic callbacks",
+            PageDescriptor(PageId("input-session-page-0"), LayerId("input-session-layer-0"), 595.0, 842.0)),
+            "input-session", budget ?: DocumentBudget())
         check(note.setPaper(14400.0, 12345.0, dev.notecore.document.PaperKind.BLANK))
         val errors = mutableListOf<String>(); val changes = intArrayOf(0)
         val view = InkCanvasView(host, note, { changes[0]++ }, { errors.add(it) })
@@ -45,6 +49,25 @@ internal class AndroidInputHostChecks(private val host: Activity) {
     fun verify(): String {
         check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
         val checks = mutableListOf<String>()
+        run {
+            val f = fixture(DocumentBudget(maxObjects = 1))
+            val p = Sample(400f, 300f, 1000)
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+            val full = f.note.snapshot()
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1002)))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1003)))
+            check(f.note.snapshot() === full && f.note.strokeCount == 1)
+            check(!f.note.hasActiveStroke && !f.note.hasPendingStroke)
+            check(f.changes[0] == 1 && f.errors.size == 1)
+            check(f.note.undo())
+            f.view.refreshPage()
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1004)))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1005)))
+            check(f.note.strokeCount == 1 && f.note.pointCount(0) == 2)
+            check(f.changes[0] == 2 && f.errors.size == 1 && !f.note.hasPendingStroke)
+            checks.add("document_capacity_refusal_and_undo_recovery")
+        }
         var oldFloatError: Double; var canonicalError: Double
         run {
             val f = fixture(); val v = f.view

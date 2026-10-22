@@ -58,7 +58,7 @@ def main():
         'production_c1_gate_complete': False, 'source_xml_and_image_sha256': actual,
         'scope': 'Offscreen native Skia pixels and Android adapter compilation. Not emulator/ART, hardware Canvas, native touch, iOS, color-management equivalence or device performance.',
     }
-    (ROOT/'reports/android-brush-native.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'reports/android-brush-native.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps({k: v for k, v in report.items() if k != 'source_xml_and_image_sha256'}, ensure_ascii=False))
 
 

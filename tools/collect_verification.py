@@ -59,7 +59,7 @@ def main():
         'jvm_owner_worker_threads_verified': any(s['suite'].endswith('.BoundedOwnerExecutorTest') and s['tests'] >= 15 for s in results) and totals['failures'] + totals['errors'] + totals['skipped'] == 0,
     }
     (ROOT/'reports').mkdir(exist_ok=True)
-    (ROOT/'reports/verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'reports/verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if report['status'] != 'passed': raise SystemExit(1)
 

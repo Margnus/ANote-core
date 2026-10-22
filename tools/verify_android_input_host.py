@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = 'dev.notecore.preview'
 CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equal_time_and_undo',
           'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root',
-          'callback_batch_limit_explicit_cancel_and_recover'}
+          'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery'}
 
 
 def digest(path):
@@ -31,12 +31,14 @@ def main():
                               check=True, capture_output=True, timeout=120).stdout
 
     def files():
-        output = adb('shell', "run-as " + BUNDLE + " sh -c 'sha256sum files/preview-notes/*.ncp'").decode('utf-8')
+        output = adb('shell', 'run-as', BUNDLE, 'ls', 'files/preview-notes').decode('utf-8')
         result = {}
-        for line in output.splitlines():
-            sha, name = line.split(None, 1)
-            assert re.fullmatch('[0-9a-f]{64}', sha) and re.fullmatch(r'files/preview-notes/[a-zA-Z0-9-]+\.ncp', name)
-            result[name] = sha
+        for name in output.splitlines():
+            if not re.fullmatch(r'[a-zA-Z0-9-]+\.ncp', name):
+                continue
+            relative = 'files/preview-notes/' + name
+            result[relative] = hashlib.sha256(
+                adb('exec-out', 'run-as', BUNDLE, 'cat', relative)).hexdigest()
         return result
 
     before = files()
@@ -59,7 +61,7 @@ def main():
         assert hashlib.sha256(adb('exec-out', 'cat', remote)).hexdigest() == digest(local)
     output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'input_batches',
                  BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-    log = folder/'run.log'; log.write_text(output, encoding='utf-8')
+    log = folder/'run.log'; log.write_text(output, encoding='utf-8', newline='\n')
     assert 'input_status=passed' in output and 'INSTRUMENTATION_CODE: -1' in output, output
     observed = json.loads(re.search(r'input_observations=(\{.*\})', output).group(1))
     assert len(observed['checks']) == len(CHECKS) and set(observed['checks']) == CHECKS
@@ -68,7 +70,7 @@ def main():
     assert observed['batch_sample_count'] == 7 and observed['all_test_notes_in_memory']
     assert files() == before, 'Original Android file set or bytes changed'
     baseline = folder/'original-files.json'
-    baseline.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8')
+    baseline.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8', newline='\n')
     adb('shell', 'am', 'force-stop', BUNDLE)
     restored = adb('shell', 'am', 'start', '-W', '-n', BUNDLE+'/dev.notecore.app.MainActivity').decode('utf-8')
     assert 'Status: ok' in restored
@@ -95,7 +97,7 @@ def main():
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,
         'c1_gate_complete': False,
     }
-    (ROOT/'reports/android-input-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'reports/android-input-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
 
 

@@ -32,9 +32,9 @@ def main():
               'runtime_report': 'reports/android-smoke.json (only valid if APK SHA matches)',
               'production_c1_gate_complete': False, 'device_performance_verified': False,
               'production_crash_recovery_verified': False}
-    (ROOT/'reports/preview-build.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    (ROOT/'reports/preview-build.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     artifacts = sorted([*output.parent.glob('*.apk'), *output.parent.glob('*.zip')])
-    (output.parent/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in artifacts), encoding='utf-8')
+    (output.parent/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in artifacts), encoding='utf-8', newline='\n')
     print(json.dumps({'status': 'passed', **report['android']}, ensure_ascii=False))
 
 if __name__ == '__main__': main()

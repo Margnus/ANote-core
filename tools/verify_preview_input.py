@@ -9,6 +9,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from verify_ios_host import EXPECTED as EXPECTED_IOS_HOST_CHECKS
+from verify_android_input_host import CHECKS as EXPECTED_ANDROID_INPUT_CHECKS
 
 ROOT = Path(__file__).resolve().parents[1]
 DEVICE = '7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
@@ -41,7 +42,9 @@ def main():
                 bindings[relative] = digest
         bindings[str(path.relative_to(ROOT))] = sha(path)
         if name == 'android-input-host-tests':
-            assert report['check_count'] == 5 and report['observations']['down_history_included'] is True
+            assert report['check_count'] == len(report['checks']) == len(EXPECTED_ANDROID_INPUT_CHECKS)
+            assert set(report['checks']) == EXPECTED_ANDROID_INPUT_CHECKS
+            assert report['observations']['down_history_included'] is True
             assert report['observations']['callback_real_batch_limit'] == 1024
             assert 'callback_batch_limit_explicit_cancel_and_recover' in report['checks']
         else:
@@ -53,7 +56,7 @@ def main():
         *ROOT.glob('shared-core/src/iosMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonMain/**/*.kt'),
         *ROOT.glob('canvas-core/src/iosMain/**/*.kt'), ROOT/'shared-core/build.gradle.kts', ROOT/'canvas-core/build.gradle.kts',
         ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'gradle.properties',
-        ROOT/'tools/verify_ios_host.py', Path(__file__)])
+        ROOT/'tools/verify_ios_host.py', ROOT/'tools/verify_android_input_host.py', Path(__file__)])
     inputs = {str(path.relative_to(ROOT)): sha(path) for path in sources}
     build = [str(ROOT/'gradlew'), '--offline', '--no-daemon', '--console=plain', '-PenableAppleTargets=true']
     if os.environ.get('KOTLIN_NATIVE_HOME'): build.append('-Pkotlin.native.home='+os.environ['KOTLIN_NATIVE_HOME'])
@@ -77,7 +80,7 @@ def main():
     bindings.update({str(p.relative_to(ROOT)): sha(p) for p in (binary, source, xml, log, build_log)})
     report = {
         'schema': 'preview-input-contract-1', 'status': 'passed', 'source_and_artifact_sha256': bindings,
-        'jvm_tests': 8, 'native_tests': 8, 'android_original_adapter_checks': 5, 'swift_host_tests': len(EXPECTED_IOS_HOST_CHECKS),
+        'jvm_tests': 8, 'native_tests': 8, 'android_original_adapter_checks': len(EXPECTED_ANDROID_INPUT_CHECKS), 'swift_host_tests': len(EXPECTED_IOS_HOST_CHECKS),
         'native_checks': sorted(passed), 'max_real_samples_per_batch': 1024,
         'decision': 'Adopt atomic bounded raw real-batch admission on the original notebook and accumulator. Distinguish rejected-zero, accepted-active, committed and accepted-pending; no duplicate terminal resend. Native adapters copy a whole callback before admission, explicitly cancel/report unrecoverable native input refusal, never truncate. Apple NSData shim performs bounded native scalar copies without per-sample Kotlin callbacks.',
         'scope': 'Actual JVM/Kotlin Native raw-batch tests plus source-bound Android original View synthetic MotionEvents and iOS original UIKit callbacks/NSData bridge app-host tests. No ordinary package UI, real OS stylus delivery or physical latency claim. Source byte/count bounds are not measured process heap or a production arena.',
