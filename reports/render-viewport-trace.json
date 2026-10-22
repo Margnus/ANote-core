@@ -2,8 +2,8 @@
   "status": "passed",
   "trace_id": "dev034-fixed-viewport-v1",
   "source_report_sha256": {
-    "reports/android-brush-common-tests.json": "50d9a9809dc16e9677ce694be085f46dc8538492e117056a59b4280925cf5485",
-    "reports/ios-host-tests.json": "7079f4c35a5212e1d216ab3c0afb8797f9d2a10ba09043561f868ff4d57731c0",
+    "reports/android-brush-common-tests.json": "3c3f551a2e62b0c4ee55db0de0cdcb064215dff07a4b8e00f3b1186abc7eb620",
+    "reports/ios-host-tests.json": "4b5541ada7957d5f3d8ab8868f8832fe50e3dcd41071083a632ee92983aae55e",
     "tools/verify_render_viewport_trace.py": "d4b8a9e66fdf1e5a06800b0c72f737ae3ac1ae94d58a02d071799e77c3f93e81"
   },
   "matching_platform_events": [
@@ -72,84 +72,84 @@
     "android": {
       "queue_wait_bounds_ns": [
         {
-          "submit_elapsed_ns": 106959,
-          "request_to_worker_ns": 112459,
-          "queue_handoff_wait_lower_ns": 5500,
-          "queue_handoff_wait_upper_ns": 112459
+          "submit_elapsed_ns": 70250,
+          "request_to_worker_ns": 113875,
+          "queue_handoff_wait_lower_ns": 43625,
+          "queue_handoff_wait_upper_ns": 113875
         },
         {
-          "submit_elapsed_ns": 133959,
-          "request_to_worker_ns": 171292,
-          "queue_handoff_wait_lower_ns": 37333,
-          "queue_handoff_wait_upper_ns": 171292
+          "submit_elapsed_ns": 196583,
+          "request_to_worker_ns": 188125,
+          "queue_handoff_wait_lower_ns": 0,
+          "queue_handoff_wait_upper_ns": 188125
         },
         {
-          "submit_elapsed_ns": 49500,
-          "request_to_worker_ns": 5270333,
-          "queue_handoff_wait_lower_ns": 5220833,
-          "queue_handoff_wait_upper_ns": 5270333
+          "submit_elapsed_ns": 70125,
+          "request_to_worker_ns": 5341250,
+          "queue_handoff_wait_lower_ns": 5271125,
+          "queue_handoff_wait_upper_ns": 5341250
         },
         {
-          "submit_elapsed_ns": 61084,
-          "request_to_worker_ns": 95625,
-          "queue_handoff_wait_lower_ns": 34541,
-          "queue_handoff_wait_upper_ns": 95625
+          "submit_elapsed_ns": 63084,
+          "request_to_worker_ns": 93000,
+          "queue_handoff_wait_lower_ns": 29916,
+          "queue_handoff_wait_upper_ns": 93000
         }
       ],
       "copies": [
         {
-          "elapsed_ns": 125000,
+          "elapsed_ns": 119084,
           "row_storage_upper_bytes": 16384
         },
         {
-          "elapsed_ns": 85250,
+          "elapsed_ns": 116167,
           "row_storage_upper_bytes": 16384
         }
       ],
-      "first_native_resident_hold_ns": 20958,
-      "first_native_retired_hold_ns": 12893042,
-      "closed_to_drained_ns": 31542
+      "first_native_resident_hold_ns": 16167,
+      "first_native_retired_hold_ns": 12886166,
+      "closed_to_drained_ns": 32791
     },
     "apple": {
       "queue_wait_bounds_ns": [
         {
-          "queue_handoff_wait_lower_ns": 39375,
-          "queue_handoff_wait_upper_ns": 73958,
-          "request_to_worker_ns": 73958,
-          "submit_elapsed_ns": 34583
+          "queue_handoff_wait_lower_ns": 6042,
+          "queue_handoff_wait_upper_ns": 34750,
+          "request_to_worker_ns": 34750,
+          "submit_elapsed_ns": 28708
         },
         {
-          "queue_handoff_wait_lower_ns": 25667,
-          "queue_handoff_wait_upper_ns": 66583,
-          "request_to_worker_ns": 66583,
-          "submit_elapsed_ns": 40916
+          "queue_handoff_wait_lower_ns": 5834,
+          "queue_handoff_wait_upper_ns": 26000,
+          "request_to_worker_ns": 26000,
+          "submit_elapsed_ns": 20166
         },
         {
-          "queue_handoff_wait_lower_ns": 51687625,
-          "queue_handoff_wait_upper_ns": 51717708,
-          "request_to_worker_ns": 51717708,
-          "submit_elapsed_ns": 30083
+          "queue_handoff_wait_lower_ns": 32052667,
+          "queue_handoff_wait_upper_ns": 32073500,
+          "request_to_worker_ns": 32073500,
+          "submit_elapsed_ns": 20833
         },
         {
-          "queue_handoff_wait_lower_ns": 3458,
-          "queue_handoff_wait_upper_ns": 41333,
-          "request_to_worker_ns": 41333,
-          "submit_elapsed_ns": 37875
+          "queue_handoff_wait_lower_ns": 5583,
+          "queue_handoff_wait_upper_ns": 28125,
+          "request_to_worker_ns": 28125,
+          "submit_elapsed_ns": 22542
         }
       ],
       "copies": [
         {
-          "elapsed_ns": 1079917,
+          "elapsed_ns": 943000,
           "row_storage_upper_bytes": 16384
         },
         {
-          "elapsed_ns": 1031458,
+          "elapsed_ns": 906459,
           "row_storage_upper_bytes": 16384
         }
       ],
-      "first_native_resident_hold_ns": 15417,
-      "first_native_retired_hold_ns": 126437500,
-      "closed_to_drained_ns": 35584
+      "first_native_resident_hold_ns": 5084,
+      "first_native_retired_hold_ns": 91415875,
+      "closed_to_drained_ns": 42750
     }
   },
   "scope": "Same fixed synthetic scroll/zoom responsibility trace on actual ART Bitmap and iOS app-host Swift worker/CGImage; no ordinary app integration. Timings are single exploratory runs with deliberate worker gate/owner polling. Wait bounds bracket admission within submit and end at beforeCompute; include handoff overhead, not isolated scheduler latency. Row storage/charge is not peak heap or GPU residency.",

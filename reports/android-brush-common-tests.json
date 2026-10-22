@@ -4,70 +4,70 @@
     "events": [
       {
         "event": "first-held",
-        "elapsed_ns": 17145000,
+        "elapsed_ns": 6408542,
         "charged": 24576,
         "retired": 0,
         "executor": 0
       },
       {
         "event": "scroll-old-retired",
-        "elapsed_ns": 17187700,
+        "elapsed_ns": 6424709,
         "charged": 24576,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "two-jobs-rejected-third",
-        "elapsed_ns": 18816500,
+        "elapsed_ns": 6750834,
         "charged": 205216,
         "retired": 24576,
         "executor": 180640
       },
       {
         "event": "queued-cancelled",
-        "elapsed_ns": 18863000,
+        "elapsed_ns": 6758792,
         "charged": 205216,
         "retired": 24576,
         "executor": 180640
       },
       {
         "event": "ready-before-ack",
-        "elapsed_ns": 32766300,
+        "elapsed_ns": 13132084,
         "charged": 205216,
         "retired": 24576,
         "executor": 180640
       },
       {
         "event": "late-and-cancelled-ack",
-        "elapsed_ns": 32896200,
+        "elapsed_ns": 13175250,
         "charged": 24576,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "zoom-image-held",
-        "elapsed_ns": 52146200,
+        "elapsed_ns": 19168375,
         "charged": 49152,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "closed-two-readers",
-        "elapsed_ns": 52555400,
+        "elapsed_ns": 19278084,
         "charged": 49152,
         "retired": 49152,
         "executor": 0
       },
       {
         "event": "new-reader-released",
-        "elapsed_ns": 52638000,
+        "elapsed_ns": 19300084,
         "charged": 24576,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "old-reader-released",
-        "elapsed_ns": 52692600,
+        "elapsed_ns": 19310875,
         "charged": 0,
         "retired": 0,
         "executor": 0
@@ -75,37 +75,37 @@
     ],
     "queue_wait_ns": [
       {
-        "submit_elapsed_ns": 228900,
-        "request_to_worker_ns": 704700,
-        "queue_handoff_wait_lower_ns": 475800,
-        "queue_handoff_wait_upper_ns": 704700
+        "submit_elapsed_ns": 70250,
+        "request_to_worker_ns": 113875,
+        "queue_handoff_wait_lower_ns": 43625,
+        "queue_handoff_wait_upper_ns": 113875
       },
       {
-        "submit_elapsed_ns": 156400,
-        "request_to_worker_ns": 273100,
-        "queue_handoff_wait_lower_ns": 116700,
-        "queue_handoff_wait_upper_ns": 273100
+        "submit_elapsed_ns": 196583,
+        "request_to_worker_ns": 188125,
+        "queue_handoff_wait_lower_ns": 0,
+        "queue_handoff_wait_upper_ns": 188125
       },
       {
-        "submit_elapsed_ns": 721900,
-        "request_to_worker_ns": 14659800,
-        "queue_handoff_wait_lower_ns": 13937900,
-        "queue_handoff_wait_upper_ns": 14659800
+        "submit_elapsed_ns": 70125,
+        "request_to_worker_ns": 5341250,
+        "queue_handoff_wait_lower_ns": 5271125,
+        "queue_handoff_wait_upper_ns": 5341250
       },
       {
-        "submit_elapsed_ns": 116700,
-        "request_to_worker_ns": 265200,
-        "queue_handoff_wait_lower_ns": 148500,
-        "queue_handoff_wait_upper_ns": 265200
+        "submit_elapsed_ns": 63084,
+        "request_to_worker_ns": 93000,
+        "queue_handoff_wait_lower_ns": 29916,
+        "queue_handoff_wait_upper_ns": 93000
       }
     ],
     "copies": [
       {
-        "elapsed_ns": 277500,
+        "elapsed_ns": 119084,
         "row_storage_upper_bytes": 16384
       },
       {
-        "elapsed_ns": 286700,
+        "elapsed_ns": 116167,
         "row_storage_upper_bytes": 16384
       }
     ],
@@ -153,16 +153,16 @@
       "bitmap_allocation_bytes": 8192,
       "bitmap_row_bytes": 256,
       "output_allocation_bytes": 8192,
-      "conversion_elapsed_ns": 1151500,
-      "copy_create_elapsed_ns": 142900,
-      "draw_elapsed_ns": 42500,
-      "release_call_elapsed_ns": 17000
+      "conversion_elapsed_ns": 66542,
+      "copy_create_elapsed_ns": 70500,
+      "draw_elapsed_ns": 14708,
+      "release_call_elapsed_ns": 4542
     }
   ],
   "status": "passed",
   "platform": "Android emulator ART standalone canvas-core test APK",
   "serial": "emulator-5580",
-  "api": "35",
+  "api": "36",
   "test_count": 127,
   "viewport_trace_test_count": 1,
   "android_image_holder_test_count": 9,
@@ -252,8 +252,8 @@
     "tools/verify_android_brush_common.py": "dec3778cb12e46b572f24e9e7e84ffc7d7379b26db078296c91fd7fe2aebf542"
   },
   "test_apk": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
-  "test_apk_sha256": "968f7f2069ec10ccd34284cd234691ac54b3ca6c22b1632f2124cc7591c79124",
-  "test_output_sha256": "b4612a09cedeceec5de277f9ed7d31f584f48aba8956e078c38b18cde1fbf7bd",
+  "test_apk_sha256": "6219fed346eedf271e310756b632fc80e393e89f602d60cc1c30ccc88a670935",
+  "test_output_sha256": "083dc9e3cb07cb3866c53b055589e60d546c740e2aed749543cba766e1705ec4",
   "desktop_unlock_required": false,
   "native_image_lease_handoff_verified": true,
   "android_image_holder_verified": true,

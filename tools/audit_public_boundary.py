@@ -17,7 +17,9 @@ CHANNELS = {
     'NCPDocumentRootCompanion': {'compose(title:scene:pages:)': False},
     'NCPSceneSnapshotCompanion': {'restored(id:revision:objects:)': False},
     'NCPPageDescriptor': {'init(id:layerId:width:height:paper:contentRevision:)': False},
-    'NCPPreviewSaveLedger': {'init(maxDocuments:byteBudget:)': False, 'nextWrite()': False, 'complete(attempt:success:)': False},
+    'NCPPreviewSaveLedger': {'init(maxDocuments:byteBudget:ownerCheck:)': False,
+        'admitNextWrite(availableWorkBytes:maximumWorkBytes:backendAccepting:)': False,
+        'nextWrite()': False, 'complete(attempt:success:)': False},
     'NCPAppleBrushJobExperiment': {'execute(cancelled:)': False},
     'NCPAppleBrushOwnerExperiment': {'release(reader:unknown:)': False, 'close()': False},
 }
