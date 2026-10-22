@@ -49,16 +49,21 @@ internal class AndroidInputHostChecks(private val host: Activity) {
     fun verify(): String {
         check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
         val checks = mutableListOf<String>()
+        var inputReservation = 0L
         run {
             val f = fixture(DocumentBudget(maxObjects = 1))
             val p = Sample(400f, 300f, 1000)
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
+            inputReservation = f.note.inputReservedByteCharge
+            check(inputReservation == 1_130_624L)
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+            check(f.note.inputReservedByteCharge == 0L)
             val full = f.note.snapshot()
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1002)))
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1003)))
             check(f.note.snapshot() === full && f.note.strokeCount == 1)
             check(!f.note.hasActiveStroke && !f.note.hasPendingStroke)
+            check(f.note.inputReservedByteCharge == 0L)
             check(f.changes[0] == 1 && f.errors.size == 1)
             check(f.note.undo())
             f.view.refreshPage()
@@ -143,6 +148,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
         return JSONObject().put("checks", JSONArray(checks)).put("old_float_witness_error", oldFloatError)
             .put("canonical_max_error", canonicalError).put("batch_sample_count", 7)
             .put("callback_real_batch_limit", 1024).put("down_history_included", true)
+            .put("active_input_reservation_bytes", inputReservation).put("input_reservation_released_after_completion", true)
             .put("all_test_notes_in_memory", true).toString()
     }
 }

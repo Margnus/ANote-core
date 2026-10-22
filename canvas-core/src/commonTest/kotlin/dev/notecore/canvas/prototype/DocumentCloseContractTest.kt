@@ -191,10 +191,13 @@ class DocumentCloseContractTest {
         }
     }
     @Test fun sessionLimitsReserveInputBeforeAdmissionAndRejectForeignTokens() {
-        val c = DocumentCloseCoordinator<String, FakeGpuResource>(scene, maxSessions = 1, inputBudget = 536)
+        val underfunded = DocumentCloseCoordinator<String, FakeGpuResource>(scene, inputBudget = 536)
+        assertEquals(SessionOpenFailure.INPUT_BUDGET, assertIs<SessionOpenResult.Rejected>(underfunded.openSession(frame, 10)).reason)
+        assertEquals(0L, underfunded.status().inputReservedBytes)
+        val c = DocumentCloseCoordinator<String, FakeGpuResource>(scene, maxSessions = 1, inputBudget = 1200)
         assertEquals(SessionOpenFailure.INPUT_BUDGET, assertIs<SessionOpenResult.Rejected>(c.openSession(frame, 11)).reason)
         val s = assertIs<SessionOpenResult.Opened>(c.openSession(frame, 10)).session
-        assertEquals(536L, c.status().inputReservedBytes)
+        assertEquals(1200L, c.status().inputReservedBytes)
         assertEquals(SessionOpenFailure.SESSION_LIMIT, assertIs<SessionOpenResult.Rejected>(c.openSession(frame, 1)).reason)
         val foreign = session(coordinator()); assertNull(c.closeSession(foreign)); assertNull(c.pending(foreign))
         assertIs<SessionInputResult.Rejected>(c.consume(foreign, batch(0, PointerPhase.DOWN), target))

@@ -9,6 +9,8 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_ART_TEST_COUNT = 127
+INPUT_ARENA_TEST_COUNT = 17
 
 
 def digest(path):
@@ -43,7 +45,7 @@ def main():
     output = adb('shell', 'am', 'instrument', '-w', '-r',
         'dev.notecore.canvas.poc.test/dev.notecore.canvas.prototype.CoreBrushInstrumentation')
     (build/'run.log').write_text(output, encoding='utf-8', newline='\n')
-    assert 'common_brush_status=passed' in output and 'common_brush_tests=110' in output and 'common_brush_ignored=0' in output, output
+    assert 'common_brush_status=passed' in output and f'common_brush_tests={EXPECTED_ART_TEST_COUNT}' in output and 'common_brush_ignored=0' in output, output
     assert before == {p.relative_to(ROOT).as_posix(): digest(p) for p in sources} and digest(apk) == apk_sha
     observations = json.loads(re.search(r'native_image_observations=(\[.*\])', output).group(1))
     assert len(observations) == 3
@@ -51,13 +53,14 @@ def main():
     assert trace['trace_id'] == 'dev034-fixed-viewport-v1' and trace['closed_drained']
     report = {'render_viewport_trace': trace, 'native_image_observations': observations, 'status': 'passed', 'platform': 'Android emulator ART standalone canvas-core test APK',
         'serial': args.serial, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
-        'test_count': 110, 'viewport_trace_test_count': 1, 'android_image_holder_test_count': 9, 'hardware_recording_rejection_test_count': 1, 'common_test_count': 88, 'real_render_executor_test_count': 7, 'android_bitmap_test_count': 5, 'test_groups': ['SpatialIndexPocTest', 'IncrementalSpatialIndexPocTest', 'BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileBitmapTest', 'BrushRenderOwnerPocTest', 'BrushRenderExecutorPocTest', 'AndroidBrushImagePocTest', 'RenderViewportTraceTest'],
+        'test_count': EXPECTED_ART_TEST_COUNT, 'viewport_trace_test_count': 1, 'android_image_holder_test_count': 9, 'hardware_recording_rejection_test_count': 1, 'common_test_count': 88 + INPUT_ARENA_TEST_COUNT, 'real_render_executor_test_count': 7, 'android_bitmap_test_count': 5, 'test_groups': ['SpatialIndexPocTest', 'IncrementalSpatialIndexPocTest', 'BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileBitmapTest', 'BrushRenderOwnerPocTest', 'BrushRenderExecutorPocTest', 'AndroidBrushImagePocTest', 'RenderViewportTraceTest', 'InputReplayContractTest', 'InputArenaContractTest'],
         'source_and_build_sha256': before, 'test_apk': apk.relative_to(ROOT).as_posix(), 'test_apk_sha256': apk_sha,
         'test_output_sha256': digest(build/'run.log'), 'desktop_unlock_required': False,
         'native_image_lease_handoff_verified': True, 'android_image_holder_verified': True, 'real_bounded_executor_render_handoff_verified': True, 'shared_geometry_and_chunk_mask_on_art_verified': True, 'native_canvas_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,
+        'shared_input_arena_on_art_verified': True, 'input_arena_and_replay_art_tests': INPUT_ARENA_TEST_COUNT,
         'physical_device_measured': False, 'app_brush_integration_verified': False,
         'native_cost_scope': 'Bitmap allocationByteCount and one exploratory API timing. Includes temporary RGBA ByteBuffer copy; no process peak heap, GPU, GC or delayed reclamation measurement. Release time is recycle API return.',
-        'scope': 'Real ART execution of common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest and filtered tile seam checks with true neighbor gutter and disjoint device-pixel core clips. Includes Bitmap allocationByteCount observations; no whole-process heap, GPU, arbitrary transform, app UI, touch or device performance claim.'}
+        'scope': 'Real ART execution of original primitive input arena/replay plus common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest and filtered tile seam checks with true neighbor gutter and disjoint device-pixel core clips. Includes Bitmap allocationByteCount observations; no whole-process heap, GPU, arbitrary transform, app UI, touch or device performance claim.'}
     (ROOT/'reports/android-brush-common-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps({k: v for k, v in report.items() if k != 'source_and_build_sha256'}))
 

@@ -44,6 +44,11 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     val lastFailure: PreviewSessionFailure? get() { ownerCheck(); return failure }
     val hasActiveStroke: Boolean get() { ownerCheck(); return input != null }
     val hasPendingStroke: Boolean get() { ownerCheck(); return pending != null }
+    /** Input ownership only; document/history/save/render budgets remain separate. */
+    val inputReservedByteCharge: Long get() {
+        ownerCheck()
+        return input?.reservedByteCharge ?: (pending?.command as? CanvasCommand.AddStroke)?.samples?.logicalByteCharge ?: 0L
+    }
     val canUndo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextUndoOperationId != null }
     val canRedo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextRedoOperationId != null }
     fun snapshot(): DocumentRoot = root()

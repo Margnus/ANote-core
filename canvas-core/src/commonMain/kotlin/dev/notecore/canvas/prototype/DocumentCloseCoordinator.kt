@@ -63,7 +63,7 @@ class DocumentCloseCoordinator<K : Any, V : Any>(
     fun openSession(initialFrame: FrameToken, maxRealSamples: Int = 100_000): SessionOpenResult {
         ownerCheck()
         require(maxRealSamples in 1..1_000_000)
-        val charge = 256L + maxRealSamples.toLong() * 28
+        val charge = InputReplaySession.reservationBytes(maxRealSamples)
         val failure = when {
             closing -> SessionOpenFailure.CLOSING
             initialFrame.sceneId != sceneId -> SessionOpenFailure.WRONG_SCENE

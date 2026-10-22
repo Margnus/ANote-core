@@ -37,17 +37,19 @@ sealed interface InputResult {
     data class Rejected(val reason: InputRejection) : InputResult
 }
 
-/** Single-owner, bounded reference accumulator. Not a thread-safe queue or a production point arena.
+/** Single-owner reference accumulator with bounded primitive chunks. Not a thread-safe queue or heap cap.
  * Rejected batches leave sequence, active stroke and points unchanged; caller must surface/retry them.
  * A second stylus is rejected explicitly. Finger navigation never alters the admitted ink pointer.
  */
 class InputReplaySession(private val maxRealSamples: Int = 100_000) {
-    private data class Active(val pointerId: Long, val target: StrokeTarget, val samples: MutableList<InputSample>)
+    private data class Active(val pointerId: Long, val target: StrokeTarget, val samples: StrokeSamples.Builder)
     private var active: Active? = null
     private var sequence = -1L
     private var eventTime = -1L
     private var closed = false
     val activeRealSamples: Int get() = active?.samples?.size ?: 0
+    val reservedByteCharge: Long get() = reservationBytes(maxRealSamples)
+    val activePointByteCharge: Long get() = active?.samples?.logicalByteCharge ?: 0L
     init { require(maxRealSamples in 1..1_000_000) }
 
     fun consume(batch: InputBatch, targetAtDown: StrokeTarget): InputResult {
@@ -62,7 +64,7 @@ class InputReplaySession(private val maxRealSamples: Int = 100_000) {
         if (batch.phase == PointerPhase.DOWN && previous != null) return reject(InputRejection.POINTER_BUSY)
         if (batch.phase != PointerPhase.DOWN && (previous == null || previous.pointerId != batch.pointerId))
             return reject(InputRejection.NO_ACTIVE_POINTER)
-        val last = previous?.samples?.lastOrNull()?.timeMicros ?: -1L
+        val last = previous?.samples?.lastTimeMicros ?: -1L
         var time = last
         for (point in batch.real) {
             if (point.timeMicros < time || point.timeMicros > batch.timeMicros) return reject(InputRejection.INVALID_BATCH)
@@ -79,20 +81,21 @@ class InputReplaySession(private val maxRealSamples: Int = 100_000) {
         if (batch.phase != PointerPhase.CANCEL && batch.real.size > maxRealSamples - (previous?.samples?.size ?: 0))
             return reject(InputRejection.CAPACITY)
         sequence = batch.sequence; eventTime = batch.timeMicros
-        if (batch.phase == PointerPhase.CANCEL) { active = null; return InputResult.Cancelled }
-        val stroke = previous ?: Active(batch.pointerId, targetAtDown, mutableListOf())
-        stroke.samples.addAll(batch.real)
+        if (batch.phase == PointerPhase.CANCEL) { previous?.samples?.discard(); active = null; return InputResult.Cancelled }
+        val stroke = previous ?: Active(batch.pointerId, targetAtDown, StrokeSamples.Builder(maxRealSamples))
+        stroke.samples.append(batch.real)
         active = stroke
         if (batch.phase != PointerPhase.UP) return InputResult.Preview(stroke.samples.size, batch.predicted.toList())
-        val points = stroke.samples
-        val completed = CompletedInput(stroke.target, StrokeSamples.copyOf(
-            DoubleArray(points.size) { points[it].x }, DoubleArray(points.size) { points[it].y },
-            FloatArray(points.size) { points[it].pressure }, LongArray(points.size) { points[it].timeMicros },
-        ))
+        val completed = CompletedInput(stroke.target, stroke.samples.finish())
         active = null
         return InputResult.Completed(completed)
     }
 
     /** Discards only an unfinished stroke. Completed outputs belong to the caller and survive closure. */
-    fun close() { active = null; closed = true }
+    fun close() { active?.samples?.discard(); active = null; closed = true }
+
+    companion object {
+        /** Arena plus immutable completion payload and declared overhead, not measured heap. */
+        fun reservationBytes(maxRealSamples: Int): Long = StrokeSamples.Builder.reservationBytes(maxRealSamples)
+    }
 }

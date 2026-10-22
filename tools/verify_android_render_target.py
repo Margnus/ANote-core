@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
+from verify_android_brush_common import EXPECTED_ART_TEST_COUNT
 
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = 'dev.notecore.preview'
@@ -87,7 +88,7 @@ def main():
     assert hashlib.sha256(adb('exec-out', 'cat', package_path.removeprefix('package:'))).hexdigest() == digest(apk)
     assert files() == baseline
     holder = json.loads((ROOT/'reports/android-brush-common-tests.json').read_text(encoding='utf-8'))
-    assert holder['status'] == 'passed' and holder['test_count'] == 110
+    assert holder['status'] == 'passed' and holder['test_count'] == EXPECTED_ART_TEST_COUNT
     assert holder['hardware_recording_rejection_test_count'] == 1 and int(holder['api']) >= 29
     for relative, sha in holder['source_and_build_sha256'].items():
         assert digest(ROOT/relative) == sha, ('Stale hardware gate test', relative)
@@ -118,7 +119,7 @@ def main():
                             'input': 'isolated canonical three-stroke/two-page fixture, actual active touch events; no personal file edits'},
         'hardware_recording_gate_test': {'actual_recording_canvas': True, 'holder_rejects_before_bitmap_draw': True,
                                          'charge_preserved_during_rejection': True, 'closed_after_no_native_escape': True,
-                                         'art_tests': 95, 'scope': 'RenderNode recording only; no GPU reader or fence submitted'},
+                                         'art_tests': holder['test_count'], 'scope': 'RenderNode recording only; no GPU reader or fence submitted'},
         'ordinary_process_restored': True, 'ordinary_pid_after_host': ordinary_pid,
         'ordinary_installed_apk_matches': True,
         'ordinary_screen_target_observed': False, 'ordinary_new_backend_consumption_verified': False,

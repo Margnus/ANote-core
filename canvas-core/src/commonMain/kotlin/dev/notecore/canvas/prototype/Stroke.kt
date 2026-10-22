@@ -19,6 +19,8 @@ class StrokeSamples private constructor(
     private val pressures: FloatArray, private val timesMicros: LongArray,
 ) {
     val size: Int get() = xs.size
+    /** Declared primitive payload plus sample header; not a measured heap allocation. */
+    val logicalByteCharge: Long get() = 128L + size * 28L
     fun x(index: Int): Double = xs[index]
     fun y(index: Int): Double = ys[index]
     fun pressure(index: Int): Float = pressures[index]
@@ -42,6 +44,67 @@ class StrokeSamples private constructor(
         result = 31 * result + ys.contentHashCode()
         result = 31 * result + pressures.contentHashCode()
         return 31 * result + timesMicros.contentHashCode()
+    }
+
+    /** Sole mutable owner until finish; no primitive array escapes this builder. */
+    internal class Builder(private val capacity: Int) {
+        private class Chunk(val capacity: Int) {
+            val xs = DoubleArray(capacity); val ys = DoubleArray(capacity)
+            val pressures = FloatArray(capacity); val times = LongArray(capacity)
+        }
+        private val chunks = mutableListOf<Chunk>()
+        private var open = true
+        private var allocated = 0
+        var size: Int = 0; private set
+        val allocatedPointCapacity: Int get() = allocated
+        val logicalByteCharge: Long get() = if (open) 256L + chunks.size * 128L + allocated * 28L else 0L
+        val lastTimeMicros: Long get() = if (size == 0) -1L else chunks[(size - 1) / CHUNK_POINTS].times[(size - 1) % CHUNK_POINTS]
+        init { require(capacity in 1..1_000_000) }
+
+        fun append(points: List<InputSample>) {
+            check(open)
+            require(points.size <= capacity - size)
+            var time = lastTimeMicros
+            for (point in points) { require(point.timeMicros >= time); time = point.timeMicros }
+            val needed = size + points.size
+            while (allocated < needed) {
+                val count = minOf(CHUNK_POINTS, capacity - allocated)
+                chunks.add(Chunk(count)); allocated += count
+            }
+            for (point in points) {
+                val chunk = chunks[size / CHUNK_POINTS]; val offset = size % CHUNK_POINTS
+                chunk.xs[offset] = point.x; chunk.ys[offset] = point.y
+                chunk.pressures[offset] = point.pressure; chunk.times[offset] = point.timeMicros
+                size++
+            }
+        }
+
+        fun finish(): StrokeSamples {
+            check(open && size > 0)
+            val xs = DoubleArray(size); val ys = DoubleArray(size)
+            val pressures = FloatArray(size); val times = LongArray(size)
+            var copied = 0
+            for (chunk in chunks) {
+                val count = minOf(chunk.capacity, size - copied)
+                chunk.xs.copyInto(xs, copied, 0, count); chunk.ys.copyInto(ys, copied, 0, count)
+                chunk.pressures.copyInto(pressures, copied, 0, count); chunk.times.copyInto(times, copied, 0, count)
+                copied += count
+            }
+            check(copied == size)
+            // Privately created arrays transfer here without copyOf's second full copy.
+            return StrokeSamples(xs, ys, pressures, times).also { discard() }
+        }
+
+        fun discard() { chunks.clear(); size = 0; allocated = 0; open = false }
+
+        companion object {
+            const val CHUNK_POINTS = 256
+            fun reservationBytes(maxSamples: Int): Long {
+                require(maxSamples in 1..1_000_000)
+                val chunks = (maxSamples.toLong() + CHUNK_POINTS - 1) / CHUNK_POINTS
+                return 512L + chunks * 128L + maxSamples * 56L
+            }
+        }
     }
 
     companion object {

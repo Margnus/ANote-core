@@ -6,6 +6,8 @@ import re
 import xml.etree.ElementTree as ET
 from verification_hash import verification_digest
 from pathlib import Path
+from verify_android_brush_common import EXPECTED_ART_TEST_COUNT
+from verify_apple_brush_common import EXPECTED_NATIVE_TEST_COUNT
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -48,11 +50,11 @@ def main():
                     bind(path, sha)
         bind(relative)
         if report_name == 'android-brush-common-tests':
-            assert data['test_count'] == 110 and name in data['test_groups']
+            assert data['test_count'] == EXPECTED_ART_TEST_COUNT and name in data['test_groups']
             bind(data['test_apk'], data['test_apk_sha256'])
             bind('canvas-core/build/android-brush-tests/run.log', data['test_output_sha256'])
         elif report_name == 'apple-brush-common-tests':
-            assert data['test_count'] == 94
+            assert data['test_count'] == EXPECTED_NATIVE_TEST_COUNT
             expected = {'dev.notecore.canvas.prototype.' + name + '.' + m for m in methods}
             assert expected <= set(data['checks'])
             bind('canvas-core/build/bin/iosSimulatorArm64/debugTest/test.kexe', data['test_binary_sha256'])
