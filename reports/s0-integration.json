@@ -1,0 +1,48 @@
+{
+  "schema": "s0-integration-1",
+  "status": "available-host-checks-passed-external-platforms-pending",
+  "date": "2026-10-22",
+  "merge_inputs": {
+    "core_local_checkpoint": "c1ac318",
+    "core_remote": "4e9009b",
+    "blueprint_local_checkpoint": "c3f53fc",
+    "blueprint_remote": "407f452"
+  },
+  "backup": {
+    "local_directory": ".codex/backups/s0-20261022-121309",
+    "core_files_verified": 265,
+    "blueprint_files_verified": 37,
+    "raw_index_and_merge_metadata_saved": true
+  },
+  "preserved_wrapper_sha256": "1d297e00bd21de3ace22b4d7f2de1f9dfa858883d66bbf7c1ccbecccec8f4f3b",
+  "jvm_contract_tests": 331,
+  "native_skia_offscreen_tests": 7,
+  "android_apk_lint_passed": true,
+  "android_test_apk_built": true,
+  "android_test_apk_executed": false,
+  "apple_build_or_tests_run": false,
+  "expected_apple_host_test_names": 36,
+  "c1_complete": false,
+  "requirements_accepted": 0,
+  "remaining": [
+    "Android ordinary UI/PID release and ART",
+    "Apple merged source build/36 host tests/UI",
+    "M-1 physical stylus/heap/performance",
+    "13 current native/mixed report bindings drift or lack artifacts"
+  ],
+  "decisions": {
+    "legacy": "adopt remote LegacyPreviewReader; retain three fixed-byte local regressions",
+    "candidate_two": "comparison-only; no App enablement or production algorithm authority",
+    "golden_resources": "brush/brush-golden.json distinct from geometry mask goldens"
+  },
+  "input_sha256": {
+    "docs/开发执行计划.md": "2f814e1961c01b493af50284cb9cff71618e7e03aa067c74cb71595ca8ec1875",
+    "docs/当前开发状态.md": "85e011088c7573a13de5459b94ae1630d281a9257685adb416ed98382d36761e",
+    "tools/verify_preview_input.py": "1cacbbde3e0e18d4c3361829dfdd1e31fd3e11d1b22f90774a77fd3bc896adc6",
+    "tools/verify_ios_host.py": "407095d9fa35d55f9bf559b339cacf22e9d1d43b941b27445d841c6fd5ad6175",
+    "reports/android-brush-native.json": "3c557d1a19915b3aa6d366ea0ec3fb27bd631c019cf781b28abe2d83ca38beca",
+    "reports/preview-build.json": "802b3af5fc1f5a46063b4f00f94e53a2049ebb3c21ef9b936afcc94b99cf9ed7",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "bd6c1acb41349fbd455ba6792f03eb5d67f9e5f698415d5959c7631f2055bb66"
+  },
+  "scope": "Current Windows JVM, static checks, Android build/lint and host Skia evidence only. Reports with missing/stale native artifacts remain failed in c1-evidence-audit. No product, Apple, ART, real UI or device acceptance."
+}

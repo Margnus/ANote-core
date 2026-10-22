@@ -185,14 +185,7 @@ object PagedPreviewCodec {
         }
         override fun toString(): String = value.toString()
     }
-    private fun validText(value: String) {
-        var i = 0
-        while (i < value.length) {
-            val c = value[i++]
-            if (c.isHighSurrogate()) { require(i < value.length && value[i].isLowSurrogate()); i++ }
-            else require(!c.isLowSurrogate())
-        }
-    }
+    private fun validText(value: String) { require(value.hasValidUnicode()) { "Invalid Unicode text" } }
     private fun escape(value: String): String = buildString {
         validText(value)
         for (c in value) append(when (c) { '\\' -> "\\\\"; '\t' -> "\\t"; '\n' -> "\\n"; '\r' -> "\\r"; else -> c.toString() })

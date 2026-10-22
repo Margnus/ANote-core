@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Run source-bound original Android View input callbacks with native synthetic MotionEvents."""
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+BUNDLE = 'dev.notecore.preview'
+CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equal_time_and_undo',
+          'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root',
+          'callback_batch_limit_explicit_cancel_and_recover'}
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--serial', required=True)
+    parser.add_argument('--adb', required=True)
+    args = parser.parse_args()
+    assert args.serial == 'emulator-5580', 'Only the existing dedicated emulator is authorized'
+    folder = ROOT/'build/android-input-host'; folder.mkdir(parents=True, exist_ok=True)
+
+    def adb(*command):
+        return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT,
+                              check=True, capture_output=True, timeout=120).stdout
+
+    def files():
+        output = adb('shell', "run-as " + BUNDLE + " sh -c 'sha256sum files/preview-notes/*.ncp'").decode('utf-8')
+        result = {}
+        for line in output.splitlines():
+            sha, name = line.split(None, 1)
+            assert re.fullmatch('[0-9a-f]{64}', sha) and re.fullmatch(r'files/preview-notes/[a-zA-Z0-9-]+\.ncp', name)
+            result[name] = sha
+        return result
+
+    before = files()
+    build = json.loads((ROOT/'reports/preview-build.json').read_text(encoding='utf-8'))
+    assert build['status'] == 'passed'
+    apk = ROOT/build['android']['artifact']
+    assert digest(apk) == build['android']['sha256']
+    stamp = dict(line.split('  ', 1)[::-1] for line in
+                 (ROOT/'reports/android-brush-build-inputs.sha256').read_text(encoding='utf-8').splitlines())
+    bindings = {**build['source_and_build_input_sha256'], **stamp}
+    assert 'android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt' in stamp
+    for path, sha in bindings.items():
+        assert digest(ROOT/path) == sha, ('stale input host build', path)
+    test = ROOT/'android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk'
+    adb('install', '-r', str(apk)); adb('install', '-r', str(test))
+    installed = [adb('shell', 'pm', 'path', package).decode('utf-8').strip().removeprefix('package:')
+                 for package in (BUNDLE, BUNDLE+'.test')]
+    for remote, local in zip(installed, (apk, test)):
+        assert re.fullmatch(r'/data/app/[a-zA-Z0-9_./=+~:-]+/base.apk', remote)
+        assert hashlib.sha256(adb('exec-out', 'cat', remote)).hexdigest() == digest(local)
+    output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'input_batches',
+                 BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
+    log = folder/'run.log'; log.write_text(output, encoding='utf-8')
+    assert 'input_status=passed' in output and 'INSTRUMENTATION_CODE: -1' in output, output
+    observed = json.loads(re.search(r'input_observations=(\{.*\})', output).group(1))
+    assert len(observed['checks']) == len(CHECKS) and set(observed['checks']) == CHECKS
+    assert observed['callback_real_batch_limit'] == 1024 and observed['down_history_included'] is True
+    assert observed['canonical_max_error'] <= 1e-9 and observed['old_float_witness_error'] > 1e-5
+    assert observed['batch_sample_count'] == 7 and observed['all_test_notes_in_memory']
+    assert files() == before, 'Original Android file set or bytes changed'
+    baseline = folder/'original-files.json'
+    baseline.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8')
+    adb('shell', 'am', 'force-stop', BUNDLE)
+    restored = adb('shell', 'am', 'start', '-W', '-n', BUNDLE+'/dev.notecore.app.MainActivity').decode('utf-8')
+    assert 'Status: ok' in restored
+    assert files() == before, 'Original Android files changed after ordinary process restore'
+    pid = adb('shell', 'pidof', BUNDLE).decode('utf-8').strip()
+    assert re.fullmatch(r'\d+', pid)
+    for path in (apk, test, log, baseline, Path(__file__), ROOT/'reports/preview-build.json',
+                 ROOT/'reports/android-brush-build-inputs.sha256'):
+        bindings[path.relative_to(ROOT).as_posix()] = digest(path)
+    sdk = Path(args.adb).resolve().parent.parent
+    contracts = [sdk/'sources/android-36/android/view'/name for name in ('MotionEvent.java', 'View.java')]
+    report = {
+        'schema': 'android-input-host-1', 'status': 'passed', 'serial': args.serial,
+        'api': adb('shell', 'getprop', 'ro.build.version.sdk').decode('utf-8').strip(),
+        'checks': sorted(CHECKS), 'check_count': len(CHECKS), 'observations': observed,
+        'apk_sha256': digest(apk), 'test_apk_sha256': digest(test),
+        'ordinary_pid_after_host': int(pid), 'original_file_count': len(before),
+        'all_original_files_unchanged': True, 'ordinary_process_restored': True,
+        'source_and_artifact_sha256': bindings,
+        'sdk_contract_sha256': {str(path): digest(path) for path in contracts},
+        'scope': 'Synthetic native MotionEvent history and terminal batches delivered directly to the original InkCanvasView callback on Android main thread; canonical notebook stays in memory. Oracle uses actual SDK-exposed event scalars, then double scene mapping. Not injected OS events, ordinary UI or physical stylus evidence.',
+        'decision': 'Use double viewport scale/offset for canonical input; float conversion is reserved for derived Path coordinates. Keep current owner, immutable real samples, explicit invalid/cancel behavior and MONOLINE scope.',
+        'ordinary_ui_interaction_verified': False, 'real_stylus_verified': False,
+        'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,
+        'c1_gate_complete': False,
+    }
+    (ROOT/'reports/android-input-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()

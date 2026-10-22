@@ -5,6 +5,7 @@ import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
 import dev.notecore.document.*
+import dev.notecore.canvas.prototype.PointerPhase
 import dev.notecore.canvas.preview.PreviewViewport
 import kotlin.math.hypot
 
@@ -138,18 +139,48 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             while (x < pw) { var y = spacing; while (y < ph) { canvas.drawCircle(x, y, 0.8f, guide); y += spacing }; x += spacing }
         }
     }
-    private fun point(event: MotionEvent, index: Int, history: Int = -1): Boolean {
-        val x = ((if (history < 0) event.getX(index) else event.getHistoricalX(index, history)) - offsetX) / scale
-        val y = ((if (history < 0) event.getY(index) else event.getHistoricalY(index, history)) - offsetY) / scale
-        val pressure = (if (history < 0) event.getPressure(index) else event.getHistoricalPressure(index, history)).coerceIn(0f, 1f)
-        val time = (if (history < 0) event.eventTime else event.getHistoricalEventTime(history)) * 1000
-        if (!notebook.appendStroke(x.toDouble(), y.toDouble(), pressure, time)) { cancelInk(); error(notebook.lastError); return false }
-        active?.lineTo(x, y)
-        moved = moved || kotlin.math.abs(x - startX) + kotlin.math.abs(y - startY) > 0.1f
-        return true
+    /** One owner-thread callback snapshot; float conversion belongs only to derived Path geometry. */
+    private data class InputTransform(val scale: Double, val offsetX: Double, val offsetY: Double) {
+        fun x(raw: Float) = (raw.toDouble() - offsetX) / scale
+        fun y(raw: Float) = (raw.toDouble() - offsetY) / scale
+    }
+    private data class RealBatch(val xs: DoubleArray, val ys: DoubleArray, val pressures: FloatArray, val times: LongArray) {
+        fun offer(note: PagedPreviewNotebook, phase: PointerPhase) = note.offerRealBatch(phase, times.last(), xs, ys, pressures, times)
+    }
+    /** Copy every real history/main scalar before one atomic admission; no MotionEvent survives this call. */
+    private fun realBatch(event: MotionEvent, index: Int, input: InputTransform): RealBatch? {
+        val history = event.historySize
+        if (history < 0 || history >= notebook.inputBatchLimit) {
+            cancelInk(); error("输入批次超限，本笔未提交"); return null
+        }
+        val count = history + 1
+        val xs = DoubleArray(count); val ys = DoubleArray(count); val pressures = FloatArray(count); val times = LongArray(count)
+        for (i in 0 until count) {
+            val current = i == history
+            xs[i] = input.x(if (current) event.getX(index) else event.getHistoricalX(index, i))
+            ys[i] = input.y(if (current) event.getY(index) else event.getHistoricalY(index, i))
+            val pressure = if (current) event.getPressure(index) else event.getHistoricalPressure(index, i)
+            pressures[i] = if (pressure.isFinite()) pressure.coerceIn(0f, 1f) else Float.NaN
+            val millis = if (current) event.eventTime else event.getHistoricalEventTime(i)
+            times[i] = if (millis >= 0 && millis <= Long.MAX_VALUE / 1000) millis * 1000 else -1
+        }
+        return RealBatch(xs, ys, pressures, times)
+    }
+    private fun admit(batch: RealBatch, phase: PointerPhase): PreviewInputResult? {
+        val result = batch.offer(notebook, phase)
+        if (!result.admitted) { cancelInk(); error(notebook.lastError + "；本笔未提交"); return null }
+        return result
+    }
+    private fun appendPath(batch: RealBatch, from: Int = 0) {
+        for (i in from until batch.xs.size) {
+            val x = batch.xs[i].toFloat(); val y = batch.ys[i].toFloat()
+            active?.lineTo(x, y)
+            moved = moved || kotlin.math.abs(x - startX) + kotlin.math.abs(y - startY) > 0.1f
+        }
     }
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (scale <= 0f) return false
+        val input = InputTransform(viewport.scale, viewport.offsetX, viewport.offsetY)
+        if (input.scale <= 0.0) return false
         val action = event.actionMasked
         if (action == MotionEvent.ACTION_DOWN) { navigating = false; suppressSequence = false; navIds = emptyList() }
         if (suppressSequence) { if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) suppressSequence = false; return true }
@@ -167,31 +198,32 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 if (event.getToolType(0) == MotionEvent.TOOL_TYPE_ERASER) { error("预览版暂不支持橡皮尾端，请使用撤销"); return true }
                 val stylus = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                 if (!stylus && !fingerDrawing) return true
-                val x = (event.x - offsetX) / scale; val y = (event.y - offsetY) / scale
-                if (x !in 0f..notebook.currentPage.width.toFloat() || y !in 0f..notebook.currentPage.height.toFloat()) return true
-                notebook.selectPen(penColor, penWidth)
-                if (!notebook.beginStroke(x.toDouble(), y.toDouble(), event.pressure.coerceIn(0f, 1f), event.eventTime * 1000)) {
-                    error(notebook.lastError); return true
-                }
-                activeStylus = stylus; activePointer = event.getPointerId(0); startX = x; startY = y; moved = false
-                active = Path().apply { moveTo(x, y) }; parent.requestDisallowInterceptTouchEvent(true)
+                val batch = realBatch(event, 0, input) ?: return true
+                val x = batch.xs.first(); val y = batch.ys.first()
+                if (!x.isFinite() || !y.isFinite()) { cancelInk(); error("输入数据无效，本笔未提交"); return true }
+                if (x !in 0.0..notebook.currentPage.width || y !in 0.0..notebook.currentPage.height) return true
+                if (!notebook.selectPen(penColor, penWidth)) { error(notebook.lastError); return true }
+                admit(batch, PointerPhase.DOWN) ?: return true
+                activeStylus = stylus; activePointer = event.getPointerId(0); startX = x.toFloat(); startY = y.toFloat(); moved = false
+                active = Path().apply { moveTo(startX, startY) }; appendPath(batch, from = 1)
+                parent.requestDisallowInterceptTouchEvent(true)
             }
             MotionEvent.ACTION_MOVE -> {
                 val index = event.findPointerIndex(activePointer)
                 if (index >= 0 && active != null) {
-                    for (h in 0 until event.historySize) if (!point(event, index, h)) return true
-                    point(event, index)
+                    val batch = realBatch(event, index, input) ?: return true
+                    admit(batch, PointerPhase.MOVE) ?: return true
+                    appendPath(batch)
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                 val index = event.actionIndex
                 if (event.getPointerId(index) == activePointer && active != null) {
-                    for (h in 0 until event.historySize) if (!point(event, index, h)) return true
-                    val x = (event.getX(index) - offsetX) / scale; val y = (event.getY(index) - offsetY) / scale
-                    val ok = notebook.endStroke(x.toDouble(), y.toDouble(), event.getPressure(index).coerceIn(0f, 1f), event.eventTime * 1000)
+                    val batch = realBatch(event, index, input) ?: return true
+                    val result = admit(batch, PointerPhase.UP) ?: return true
                     active = null; activePointer = -1; activeStylus = false
                     suppressSequence = event.pointerCount > 1
-                    if (ok) changed() else error(notebook.lastError)
+                    if (result.disposition == PreviewInputDisposition.COMMITTED) changed() else error(notebook.lastError)
                     parent.requestDisallowInterceptTouchEvent(false); performClick()
                 }
             }

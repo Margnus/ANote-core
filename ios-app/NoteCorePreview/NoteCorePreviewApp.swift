@@ -395,9 +395,11 @@ final class PreviewModel: ObservableObject {
         navigationEpoch += 1; current = nil; savedRoot = nil; refresh()
     }
     func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
+    func applyEdit(_ request: PreviewEdit, content: Bool = true) {
+        editPage(content: content) { $0.edit(request: request).accepted }
+    }
     func editPage(content: Bool = true, _ edit: (PagedPreviewNotebook) -> Bool) {
         guard let note = current else { return }
-        note.cancelStroke()
         guard edit(note) else { status = note.lastError; return }
         revision = note.changeVersion // Published even when only the selected PageId changes.
         if content { save() }
@@ -440,8 +442,8 @@ struct PreviewRoot: View {
                         Button("导出") { model.prepareExport() }.disabled(model.transferBusy)
                     }.padding(.horizontal)
                     HStack {
-                        Button("撤销") { model.editPage { $0.undo() } }.disabled(!note.canUndo)
-                        Button("重做") { model.editPage { $0.redo() } }.disabled(!note.canRedo)
+                        Button("撤销") { model.applyEdit(PreviewEditUndo.shared) }.disabled(!note.canUndo)
+                        Button("重做") { model.applyEdit(PreviewEditRedo.shared) }.disabled(!note.canRedo)
                         Spacer(); Toggle("手指书写", isOn: $finger).fixedSize()
                     }.padding(.horizontal)
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -464,29 +466,27 @@ struct PreviewRoot: View {
                         Text("双指缩放").font(.caption).foregroundStyle(.secondary)
                     }.padding(.horizontal)
                     HStack(spacing: 8) {
-                        Button { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex - 1).id) } } label: {
+                        Button { model.applyEdit(PreviewEditSelectPage(pageId: note.page(index: note.currentPageIndex - 1).id.value), content: false) } label: {
                             Image(systemName: "chevron.left").frame(width: 44, height: 44)
                         }.accessibilityLabel("上一页").disabled(note.currentPageIndex == 0)
                         Text("\(note.currentPageIndex + 1)/\(note.pageCount)").monospacedDigit().fixedSize()
                             .accessibilityLabel("当前页码").accessibilityValue("\(note.currentPageIndex + 1)/\(note.pageCount)")
-                        Button { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex + 1).id) } } label: {
+                        Button { model.applyEdit(PreviewEditSelectPage(pageId: note.page(index: note.currentPageIndex + 1).id.value), content: false) } label: {
                             Image(systemName: "chevron.right").frame(width: 44, height: 44)
                         }.accessibilityLabel("下一页").disabled(note.currentPageIndex == note.pageCount - 1)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 20) {
-                                Button("加页") { model.editPage { $0.insertPage() } }
-                                Button("复制页") { model.editPage { $0.doCopyCurrentPage() } }
+                                Button("加页") { model.applyEdit(PreviewEditInsertPage.shared) }
+                                Button("复制页") { model.applyEdit(PreviewEditCopyPage.shared) }
                                 Button("删页") { note.cancelStroke(); deletingPage = true }
-                                Button("前移") { model.editPage { $0.moveCurrentPage(before: $0.page(index: $0.currentPageIndex - 1).id) } }
+                                Button("前移") { model.applyEdit(PreviewEditMovePage(beforePageId: note.page(index: note.currentPageIndex - 1).id.value)) }
                                     .disabled(note.currentPageIndex == 0)
-                                Button("后移") { model.editPage {
-                                    $0.moveCurrentPage(before: $0.currentPageIndex + 2 < $0.pageCount ? $0.page(index: $0.currentPageIndex + 2).id : nil)
-                                } }.disabled(note.currentPageIndex == note.pageCount - 1)
+                                Button("后移") { model.applyEdit(PreviewEditMovePage(beforePageId: note.currentPageIndex + 2 < note.pageCount ? note.page(index: note.currentPageIndex + 2).id.value : nil)) }.disabled(note.currentPageIndex == note.pageCount - 1)
                                 Menu("纸张") {
-                                    Button("空白") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .blank) } }
-                                    Button("横线") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .ruled) } }
-                                    Button("方格") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .grid) } }
-                                    Button("点阵") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .dots) } }
+                                    Button("空白") { model.applyEdit(PreviewEditSetPaper(width: note.currentPage.width, height: note.currentPage.height, paper: .blank)) }
+                                    Button("横线") { model.applyEdit(PreviewEditSetPaper(width: note.currentPage.width, height: note.currentPage.height, paper: .ruled)) }
+                                    Button("方格") { model.applyEdit(PreviewEditSetPaper(width: note.currentPage.width, height: note.currentPage.height, paper: .grid)) }
+                                    Button("点阵") { model.applyEdit(PreviewEditSetPaper(width: note.currentPage.width, height: note.currentPage.height, paper: .dots)) }
                                 }
                             }.padding(.trailing)
                         }
@@ -520,11 +520,11 @@ struct PreviewRoot: View {
         .alert("笔记名称", isPresented: $renaming) {
             TextField("名称", text: $title)
             Button("取消", role: .cancel) { }
-            Button("完成") { model.editPage { $0.rename(value: title) } }
+            Button("完成") { model.applyEdit(PreviewEditRename(title: title)) }
         }
         .alert("删除当前页？", isPresented: $deletingPage) {
             Button("取消", role: .cancel) { }
-            Button("删除", role: .destructive) { model.editPage { $0.deleteCurrentPage() } }
+            Button("删除", role: .destructive) { model.applyEdit(PreviewEditDeletePage.shared) }
         } message: { Text("最后一页将清空。可以撤销恢复；关闭笔记后不保留撤销记录。") }
         .onChange(of: model.exportDocument != nil) { _, ready in if ready { exporting = true } }
         .fileExporter(isPresented: $exporting, document: model.exportDocument, contentType: .data,

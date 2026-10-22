@@ -1,0 +1,2582 @@
+{
+  "schema": "public-boundary-inventory-1",
+  "status": "passed",
+  "source_and_artifact_sha256": {
+    "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "4379c026b33b26b106da3759812c628fdf845232b93b00dd3f62fb01d3fd9e63",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "ddeeb8ff56eb5888d0c1c2ffd0def244581019c563f6bc4eff82faa99f0d025b",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "236a051cc0f44f4e8d37af83ceba4ab3ff0b3541ba5619a2f928c2be13764d7a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "8c45823294d1fd3508b21ca114a74fc71accfe840c1b40d58254af4763eb5888",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "488ef916fa519824fe2b03d1fbb38e98e177582d305037b84c1490f7a76b01da",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
+    "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "30f990e632feb680a7b9d39836e278f861c880b2fa50a0c252f83c11dc20b0b1",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "339eff8c0b2e4b3d73b8f24a77c1d440ed08d3038d67d8ac649dd57c89a28f17",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "f3bf1852df5ce9223a1de2a6b462ccfb2eaeb40c0405ce11e8a163ea0a187bd7",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTileCachePoc.kt": "a9985d79490f0cce2198a591c90ed2e9d7576a8525f83107b0bd696f0b5c5def",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushReductionPoc.kt": "b6d2bfa6bf4e5bf7946e1d711affd9fa52b899a2cf1da33e6c5cced7d7882844",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "65f6b68f001eb090a098816857e81e6da69da8ab603b8b274d70221b2cca5549",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "1c5418e5b485eb8ff8feed9910286ef0676d0417a0c851e9e1c3d57877644e21",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "55c13cd2680c7f034a61d401ab6f113ebedfc893899762190caffc7a1f94e5f5",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "127897258aaff666d03829023c0ec8275446fd01301c1843a7fca0ebd9a51a7f",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "1a400ca096b963410cf51d09fde8cdeea30a6b995a29b51825156d8f25a2e521",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "4e3e22ae481fa2a3f5aab66266a8f93d8e7d5cf822a282f752d6c39b8243ff8e",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "94d6be027955d65874a62595dc7e26cd0fb980eb48083552b86214a3a6f2f6ee",
+    "ios-app/NoteCorePreview/PreviewFileIO.swift": "608a6c20717864d15bf043d808522a18c9562498ad3879a1615d7197eed70c03",
+    "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "29042fa09d4ab52904265728a6f7f8c57e8c8ddc25f8b7d04658c8a0bb8a3a07",
+    "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
+    "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+    "canvas-core/build.gradle.kts": "ff4258078d9acf534580160acc2a51b2b2eec00aefa55249545baf623b279458",
+    "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
+    "gradle.properties": "c8acaa97dc5d6cb6780cc37f9fa0d81f3527a4c58287ba41e24957101d6a15f1",
+    "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "69a65c3ea689a769df1da634c8280a58919359278b06f4a36bf3e5f207cd028b",
+    "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "fd1f6c90736bad9ecf8c218f8ae89a459e2784e79d9b65d84bf4b91c822ed09a",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/__preview.dylib": "aa76befa0bbd1e954f9726932da69b7c908db2d0294a2e72be93829e4eb3cea4",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "f441763bdb05ff1e6024c57651f5cbca17a384953f20ca6f4a7e8418e5bbaa16",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/Info.plist": "a09aae9143cabe4e5b6c4248d36c71c7f6534c1be03946668658071362576ff0",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPoc.kt": "0b4c245d31d595a864513099b945a2d0650b704908f26909348e39bba71a7c22",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePoc.kt": "0895d5afbcab6901c29d0b8735b048deb1345fd6cabb7b04abbae0d1cb137647",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidInkFrameExperiment.kt": "c719233f65b2e82c90210a88942d811698e550d2732ef91a938a2598512065f1",
+    "android-app/src/main/AndroidManifest.xml": "6e0a87aa06e67e773bbe0238171d2d6f135100eff032efb9aebd9a18d8de55cc",
+    "android-app/src/main/res/drawable/ic_note.xml": "daa79575a3abd07e866404872e51d7fbf29b6430c87937b31806416f5f5b75aa",
+    "android-app/src/main/res/values/strings.xml": "8fd14b09bdae43b965396d9e64313b30b739bdf0b613cea9c7474255b02a765f",
+    "android-app/src/main/res/xml/data_extraction_rules.xml": "ec0f1c6431c2434ac85c7933dd0fe21c430e9601ec4db70d0112557cbebf9993",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "26dc8a4d9dc2773fe2369084525f77dd3233a3878524195a073f2dc22e0f33b7",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "c98a200170d0e7738c95ed730f487dbc745fc4c009fcd073bb40b357ceb711c0",
+    "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "b8e42f2f8a480d1cb5e771e0baee7c5751bf852ae2d5aa026cfdd372e8d83f57",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "ecfa2bf8f28945b293dce7b5178505f72ade72d2e6a1d35c578bbe116bb8aead",
+    "android-app/src/main/java/dev/notecore/app/InkSurfaceHost.kt": "96515e50606d5a3a5f5d742d851c2492bc6c103227c067d02b6c497ee566ad2f",
+    "android-app/build.gradle.kts": "8e8a303cd0440ad234f07d438cfe66fd7600dab05bb0e5956653a436c74f1649",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "c633ef17ff213b4ddbd078057df9f28dc9978d32c80d873aa4036660e506000c",
+    "android-app/build/reports/lint-results-debug.xml": "90425a34bea314f9e297cdac54130f0f5ecf59fe9901ec0e1a6e6d84f8e072f3",
+    "dist/NoteCore-0.1.0-preview.apk": "c633ef17ff213b4ddbd078057df9f28dc9978d32c80d873aa4036660e506000c",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "90361036237e94d6680cf272b3cef9dddfef091c75a375ce0a06a42c8ebdd209",
+    "reports/ios-preview-build.json": "138276c6ab28a29a1b10440df200655dc3a3daf635cbb37b80d62fecef3b454e",
+    "reports/preview-build.json": "c7384499df3dc2cfff875153c27d778e247e93da2e7589dbf67a53d5b4735b0d",
+    "tools/check_architecture.py": "afb26011ba765de637dc5e4235c05d86e8f27e0f898e620e7c269dd5df859641",
+    "tools/audit_public_boundary.py": "e231008853a53270735f647cdca686cde08a9c9dec9ef229e8eeffa68cbd2b3c"
+  },
+  "objc_declaration_count": 230,
+  "objc_method_count": 802,
+  "reviewed_method_count": 19,
+  "reviewed_declaration_channels": [
+    {
+      "objc_name": "NCPMemoryDocumentAuthority",
+      "swift_name": "init(initial:budget:ownerCheck:)",
+      "declares_nserror": true
+    },
+    {
+      "objc_name": "NCPMemoryDocumentAuthority",
+      "swift_name": "commit(command:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPMemoryDocumentAuthority",
+      "swift_name": "snapshot()",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "init(initial:sessionNonce:budget:ownerCheck:)",
+      "declares_nserror": true
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "rename(value:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointX(index:point:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewCodec",
+      "swift_name": "decode(text:)",
+      "declares_nserror": true
+    },
+    {
+      "objc_name": "NCPPagedPreviewCodec",
+      "swift_name": "encode(root:)",
+      "declares_nserror": true
+    },
+    {
+      "objc_name": "NCPPagedPreviewCodec",
+      "swift_name": "header(text:)",
+      "declares_nserror": true
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "create(documentId:title:sessionNonce:)",
+      "declares_nserror": true
+    },
+    {
+      "objc_name": "NCPDocumentRootCompanion",
+      "swift_name": "compose(title:scene:pages:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPSceneSnapshotCompanion",
+      "swift_name": "restored(id:revision:objects:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPageDescriptor",
+      "swift_name": "init(id:layerId:width:height:paper:contentRevision:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewSaveLedger",
+      "swift_name": "init(maxDocuments:byteBudget:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewSaveLedger",
+      "swift_name": "nextWrite()",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewSaveLedger",
+      "swift_name": "complete(attempt:success:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPAppleBrushJobExperiment",
+      "swift_name": "execute(cancelled:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPAppleBrushOwnerExperiment",
+      "swift_name": "release(reader:unknown:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPAppleBrushOwnerExperiment",
+      "swift_name": "close()",
+      "declares_nserror": false
+    }
+  ],
+  "objc_declarations": [
+    {
+      "kind": "interface",
+      "objc_name": "NCPBase",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPMutableSet",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPMutableDictionary",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPNumber",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPByte",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPUByte",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPShort",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPUShort",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInt",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPUInt",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPLong",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPULong",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPFloat",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDouble",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPBoolean",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPKotlinComparable",
+      "methods": [
+        "compareTo(other:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinEnum",
+      "methods": [
+        "init(name:ordinal:)",
+        "compareTo(other:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewSaveAdmission",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewSaveAttempt",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewSaveLedger",
+      "methods": [
+        "init(maxDocuments:byteBudget:)",
+        "complete(attempt:success:)",
+        "latest(documentId:)",
+        "nextWrite()",
+        "offer(snapshot:)",
+        "returnUnstarted(attempt:)",
+        "states()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewSaveState",
+      "methods": [
+        "init(snapshot:inFlight:retryRequired:)",
+        "doCopy(snapshot:inFlight:retryRequired:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewViewport",
+      "methods": [
+        "init()",
+        "configurePage(width:height:)",
+        "gesture(oldX:oldY:newX:newY:ratio:)",
+        "reset()",
+        "resize(width:height:)",
+        "toScene(x:y:)",
+        "toView(x:y:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAdmissionRejection",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPAdmissionResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAdmissionResultAdmitted",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAdmissionResultExisting",
+      "methods": [
+        "init(state:)",
+        "doCopy(state:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAdmissionResultRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAffine2D",
+      "methods": [
+        "init(a:b:c:d:tx:ty:)",
+        "doCopy(a:b:c:d:tx:ty:)",
+        "isEqual(_:)",
+        "hash()",
+        "inverseOrNull()",
+        "map(point:)",
+        "mapBounds(bounds:)",
+        "then(next:)",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAppleBrushJobExperiment",
+      "methods": [
+        "execute(cancelled:)",
+        "unknown(message:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAppleBrushOwnerExperiment",
+      "methods": [
+        "init(frame:layer:residentBudget:totalBudget:maxJobs:checkOwner:)",
+        "acknowledge(job:)",
+        "admit(stroke:frame:originX:originY:width:height:pixelSize:workingBytes:nativeAllowance:)",
+        "admitPage(scene:frame:layer:originX:originY:width:height:pixelSize:workingBytes:nativeAllowance:maxEdgeTests:)",
+        "borrowNative(job:)",
+        "canPublish(reader:)",
+        "cancel(job:)",
+        "close()",
+        "expect(frame:layer:)",
+        "receive(job:result:)",
+        "reconcileNoOutput(job:)",
+        "reconcileReleased(reader:)",
+        "reject(job:)",
+        "release(reader:unknown:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAppleBrushReaderExperiment",
+      "methods": [
+        "byteAt(offset:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPAppleBrushResultExperiment",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPBoundsD",
+      "methods": [
+        "init(left:top:right:bottom:)",
+        "doCopy(left:top:right:bottom:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()",
+        "union(other:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPBrushKind",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPBrushSpec",
+      "methods": [
+        "init(kind:algorithmVersion:width:argb:)",
+        "doCopy(kind:algorithmVersion:width:argb:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPCacheAdmission",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCacheAdmissionInvalidWeight",
+      "methods": [
+        "init()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCacheAdmissionStored",
+      "methods": [
+        "init(displaced:)",
+        "doCopy(displaced:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCacheAdmissionTooLarge",
+      "methods": [
+        "init()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPCanvasCommand",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCanvasCommandAddStroke",
+      "methods": [
+        "init(id:baseRevision:target:objectId:samples:)",
+        "doCopy(id:baseRevision:target:objectId:samples:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCanvasCommandDeleteStroke",
+      "methods": [
+        "init(id:sceneId:baseRevision:objectId:expectedObjectRevision:)",
+        "doCopy(id:sceneId:baseRevision:objectId:expectedObjectRevision:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCanvasCommandTransformStroke",
+      "methods": [
+        "init(id:sceneId:baseRevision:objectId:expectedObjectRevision:transform:)",
+        "doCopy(id:sceneId:baseRevision:objectId:expectedObjectRevision:transform:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCommandId",
+      "methods": [
+        "init(value:)",
+        "doCopy(value:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCommitReceipt",
+      "methods": [
+        "init(commandId:sceneRevision:durability:)",
+        "doCopy(commandId:sceneRevision:durability:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPCommitResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCommitResultAccepted",
+      "methods": [
+        "init(receipt:)",
+        "doCopy(receipt:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCommitResultRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCompletedInput",
+      "methods": [
+        "init(target:samples:)",
+        "command(id:objectId:baseRevision:)",
+        "doCopy(target:samples:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPCompletionUpdate",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPDispatchResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDispatchResultAttemptNumbersExhausted",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDispatchResultBlocked",
+      "methods": [
+        "init(id:reason:)",
+        "doCopy(id:reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDispatchResultBusy",
+      "methods": [
+        "init(id:)",
+        "doCopy(id:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDispatchResultNoWork",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDispatchResultReady",
+      "methods": [
+        "init(attempt:)",
+        "doCopy(attempt:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDispatchResultRetryRequired",
+      "methods": [
+        "init(id:)",
+        "doCopy(id:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDisplacedEntry",
+      "methods": [
+        "init(key:value:)",
+        "doCopy(key:value:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCloseCoordinator",
+      "methods": [
+        "init(sceneId:maxSubmissions:submissionBudget:residentBudget:resourceBudget:maxSessions:inputBudget:maxResources:maxLeases:releaseLane:ownerCheck:)",
+        "acknowledge(offer:)",
+        "beginClose()",
+        "borrowResource(key:)",
+        "canPublish(session:frame:)",
+        "cancelUnallocated(reservation:)",
+        "closeSession(session:)",
+        "complete(attempt:result:)",
+        "completeRelease(ticket:outcome:)",
+        "consume(session:batch:targetAtDown:)",
+        "dispatch(scene:)",
+        "expectFrame(session:frame:)",
+        "nextRelease(lane:)",
+        "observeScene(scene:)",
+        "offerPending(session:)",
+        "offerSubmission(id:)",
+        "openSession(initialFrame:maxRealSamples:)",
+        "pending(session:)",
+        "publishResource(reservation:key:value:)",
+        "reserveResource(bytes:)",
+        "resolveUnknown(handle:outcome:)",
+        "retry(id:)",
+        "returnLease(lease:)",
+        "status()",
+        "submitPending(session:id:objectId:)",
+        "transportFailed(attempt:detail:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentClosePhase",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCloseStatus",
+      "methods": [
+        "init(phase:pendingSessions:inputReservedBytes:submissions:submissionChargedBytes:resources:observedSceneRevision:)",
+        "doCopy(phase:pendingSessions:inputReservedBytes:submissions:submissionChargedBytes:resources:observedSceneRevision:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentSession",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDurability",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPFramePublicationGate",
+      "methods": [
+        "init(initial:)",
+        "canPublish(token:)",
+        "close()",
+        "expect(token:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPFrameToken",
+      "methods": [
+        "init(sceneId:sceneRevision:viewportVersion:sessionGeneration:surfaceGeneration:requestSequence:)",
+        "doCopy(sceneId:sceneRevision:viewportVersion:sessionGeneration:surfaceGeneration:requestSequence:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPGeometryCacheKey",
+      "methods": [
+        "init(sceneId:objectId:objectRevision:brushKind:algorithmVersion:)",
+        "doCopy(sceneId:objectId:objectRevision:brushKind:algorithmVersion:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputBatch",
+      "methods": [
+        "init(sequence:timeMicros:pointerId:tool:phase:real:predicted:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputRejection",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputReplaySession",
+      "methods": [
+        "init(maxRealSamples:)",
+        "close()",
+        "consume(batch:targetAtDown:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPInputResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputResultCancelled",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputResultCompleted",
+      "methods": [
+        "init(stroke:)",
+        "doCopy(stroke:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputResultIgnoredNavigation",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputResultPreview",
+      "methods": [
+        "init(realCount:prediction:)",
+        "doCopy(realCount:prediction:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputResultRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPInputSample",
+      "methods": [
+        "init(x:y:pressure:timeMicros:)",
+        "doCopy(x:y:pressure:timeMicros:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPLayerId",
+      "methods": [
+        "init(value:)",
+        "doCopy(value:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPLeaseReturn",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPMemorySceneCoordinator",
+      "methods": [
+        "init(initial:journalCapacity:)",
+        "commit(patch:)",
+        "snapshot()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPObjectChange",
+      "methods": [
+        "init(before:after:)",
+        "doCopy(before:after:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPObjectId",
+      "methods": [
+        "init(value:)",
+        "doCopy(value:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPOwnedWorkStage",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPOwnedWorkSummary",
+      "methods": [
+        "init(ticket:stage:chargedBytes:deliveryFailure:)",
+        "doCopy(ticket:stage:chargedBytes:deliveryFailure:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPOwnerExecutorStatus",
+      "methods": [
+        "init(accepting:workerStopped:workerFailure:chargedBytes:entries:ownerThreadId:workerThreadId:ownerWakeFailure:)",
+        "doCopy(accepting:workerStopped:workerFailure:chargedBytes:entries:ownerThreadId:workerThreadId:ownerWakeFailure:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPOwnerWorkTicket",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPointD",
+      "methods": [
+        "init(x:y:)",
+        "doCopy(x:y:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPointerPhase",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPointerTool",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPPrepareResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPrepareResultPrepared",
+      "methods": [
+        "init(patch:)",
+        "doCopy(patch:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPrepareResultRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPRecoveryOffer",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPRecoveryPayload",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPRecoveryPayloadBlocked",
+      "methods": [
+        "init(submission:reason:)",
+        "doCopy(submission:reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPRecoveryPayloadConfirmed",
+      "methods": [
+        "init(submission:receipt:)",
+        "doCopy(submission:receipt:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPRecoveryPayloadPending",
+      "methods": [
+        "init(session:completed:proposal:lastAdmissionFailure:)",
+        "doCopy(session:completed:proposal:lastAdmissionFailure:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPRejection",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPReservationFailure",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPReservationResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPReservationResultRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPReservationResultReserved",
+      "methods": [
+        "init(reservation:)",
+        "doCopy(reservation:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPResourceBorrow",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceBorrowBorrowed",
+      "methods": [
+        "init(lease:)",
+        "doCopy(lease:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceBorrowClosed",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceBorrowLeaseLimit",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceBorrowMissing",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceCompletion",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceDrainStatus",
+      "methods": [
+        "init(reservations:readers:releasing:unknown:ready:chargedBytes:isDrained:)",
+        "doCopy(reservations:readers:releasing:unknown:ready:chargedBytes:isDrained:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceHandle",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceLane",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceLease",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceLeasePool",
+      "methods": [
+        "init(residentBudget:totalBudget:maxResources:maxLeases:releaseLane:)",
+        "borrow(key:)",
+        "cancelUnallocated(reservation:)",
+        "close()",
+        "completeRelease(ticket:outcome:)",
+        "drainStatus()",
+        "evict(key:)",
+        "evictAll()",
+        "nextRelease(destination:)",
+        "publish(reservation:key:value:)",
+        "publishRetired(reservation:value:)",
+        "reserve(bytes:)",
+        "reservePeak(bytes:retainedBytes:)",
+        "resolveUnknown(handle:outcome:)",
+        "returnLease(lease:)",
+        "settleReservation(reservation:retainedBytes:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPResourcePublication",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourcePublicationAlreadyOwned",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourcePublicationResident",
+      "methods": [
+        "init(handle:)",
+        "doCopy(handle:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourcePublicationRetired",
+      "methods": [
+        "init(handle:)",
+        "doCopy(handle:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourcePublicationRetiredAfterClose",
+      "methods": [
+        "init(handle:)",
+        "doCopy(handle:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourcePublicationStaleReservation",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourcePublicationUnsettledReservation",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPResourceReleaseDispatch",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceReleaseDispatchIdle",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceReleaseDispatchReady",
+      "methods": [
+        "init(ticket:)",
+        "doCopy(ticket:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceReleaseDispatchWrongLane",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceReleaseOutcome",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceReleaseTicket",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResourceReservation",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResultDisposition",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPResultDrain",
+      "methods": [
+        "init(acknowledged:blocked:)",
+        "doCopy(acknowledged:blocked:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPSceneApplication",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSceneApplicationApplied",
+      "methods": [
+        "init(snapshot:)",
+        "doCopy(snapshot:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSceneApplicationRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSceneId",
+      "methods": [
+        "init(value:)",
+        "doCopy(value:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPScenePatch",
+      "methods": [
+        "changes()",
+        "sameContent(other:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSceneReducer",
+      "methods": [
+        "init()",
+        "apply(scene:patch:)",
+        "prepare(scene:command:)",
+        "prepareChanges(scene:commandId:changes:metadataDirtyBounds:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSceneSnapshot",
+      "methods": [
+        "find(id:)",
+        "objects()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSceneSnapshotCompanion",
+      "methods": [
+        "init()",
+        "empty(id:)",
+        "reordered(scene:objectOrder:)",
+        "restored(id:revision:objects:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSessionInputFailure",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPSessionInputResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSessionInputResultConsumed",
+      "methods": [
+        "init(result:)",
+        "doCopy(result:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSessionInputResultRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSessionOpenFailure",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPSessionOpenResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSessionOpenResultOpened",
+      "methods": [
+        "init(session:)",
+        "doCopy(session:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSessionOpenResultRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSessionStop",
+      "methods": [
+        "init(session:cancelledRealSamples:completedPending:)",
+        "doCopy(session:cancelledRealSamples:completedPending:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPStrokeObject",
+      "methods": [
+        "init(id:objectRevision:layerId:brush:samples:transform:)",
+        "bounds()",
+        "doCopy(id:objectRevision:layerId:brush:samples:transform:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPStrokeSamples",
+      "methods": [
+        "bounds(radius:)",
+        "isEqual(_:)",
+        "hash()",
+        "pressure(index:)",
+        "timeMicros(index:)",
+        "x(index:)",
+        "y(index:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPStrokeSamplesCompanion",
+      "methods": [
+        "init()",
+        "doCopyOf(xs:ys:pressures:timesMicros:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPStrokeSubmission",
+      "methods": [
+        "init(id:objectId:stroke:)",
+        "doCopy(id:objectId:stroke:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPStrokeSubmissionQueue",
+      "methods": [
+        "init(sceneId:maxEntries:byteBudget:)",
+        "collectBlocked(id:)",
+        "collectConfirmed(id:)",
+        "complete(attempt:result:)",
+        "dispatch(scene:)",
+        "enqueue(submission:)",
+        "retry(id:)",
+        "snapshotStates()",
+        "state(id:)",
+        "stopAccepting()",
+        "submission(id:)",
+        "transportFailed(attempt:detail:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPStrokeTarget",
+      "methods": [
+        "init(sceneId:layerId:brush:)",
+        "doCopy(sceneId:layerId:brush:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSubmissionAttempt",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPSubmissionState",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSubmissionStateBlocked",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSubmissionStateConfirmed",
+      "methods": [
+        "init(receipt:)",
+        "doCopy(receipt:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSubmissionStateInFlight",
+      "methods": [
+        "init(attemptNumber:)",
+        "doCopy(attemptNumber:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSubmissionStateQueued",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSubmissionStateRetryRequired",
+      "methods": [
+        "init(detail:)",
+        "doCopy(detail:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPSubmissionSummary",
+      "methods": [
+        "init(id:state:chargedBytes:)",
+        "doCopy(id:state:chargedBytes:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPWeightedLruCache",
+      "methods": [
+        "init(maxBytes:weigh:)",
+        "clear()",
+        "get(key:)",
+        "put(key:value:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPWorkAdmission",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPWorkAdmissionAccepted",
+      "methods": [
+        "init(ticket:)",
+        "doCopy(ticket:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPWorkAdmissionRejected",
+      "methods": [
+        "init(reason:)",
+        "doCopy(reason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPWorkAdmissionFailure",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPWorkResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPWorkResultNotExecuted",
+      "methods": [
+        "init(detail:)",
+        "doCopy(detail:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPWorkResultOutcomeUnknown",
+      "methods": [
+        "init(exceptionType:detail:)",
+        "doCopy(exceptionType:detail:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPWorkResultSucceeded",
+      "methods": [
+        "init(value:)",
+        "doCopy(value:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPApplePreviewInput",
+      "methods": [
+        "init()",
+        "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentAuthorityStatus",
+      "methods": [
+        "init(liveByteCharge:journalByteCharge:identityByteCharge:operationCount:pageCount:objectCount:undoCount:redoCount:historyByteCharge:nextUndoOperationId:nextRedoOperationId:evictedHistoryCount:)",
+        "doCopy(liveByteCharge:journalByteCharge:identityByteCharge:operationCount:pageCount:objectCount:undoCount:redoCount:historyByteCharge:nextUndoOperationId:nextRedoOperationId:evictedHistoryCount:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentBudget",
+      "methods": [
+        "init(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:)",
+        "doCopy(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPDocumentCommand",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandCanvas",
+      "methods": [
+        "init(pageId:command:)",
+        "doCopy(pageId:command:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandCopyPage",
+      "methods": [
+        "init(id:documentId:baseRevision:source:expectedPageRevision:newPageId:newLayerId:objectIds:before:)",
+        "isEqual(_:)",
+        "hash()",
+        "objectIds()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandDeletePage",
+      "methods": [
+        "init(id:documentId:baseRevision:pageId:)",
+        "doCopy(id:documentId:baseRevision:pageId:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandInsertPage",
+      "methods": [
+        "init(id:documentId:baseRevision:page:before:)",
+        "doCopy(id:documentId:baseRevision:page:before:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandMovePage",
+      "methods": [
+        "init(id:documentId:baseRevision:pageId:before:)",
+        "doCopy(id:documentId:baseRevision:pageId:before:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandPreparedCanvas",
+      "methods": [
+        "init(pageId:patch:)",
+        "isEqual(_:)",
+        "hash()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandRedo",
+      "methods": [
+        "init(id:documentId:baseRevision:expectedOperationId:)",
+        "doCopy(id:documentId:baseRevision:expectedOperationId:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandRename",
+      "methods": [
+        "init(id:documentId:baseRevision:title:)",
+        "doCopy(id:documentId:baseRevision:title:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandSetPaper",
+      "methods": [
+        "init(id:documentId:baseRevision:pageId:width:height:paper:)",
+        "doCopy(id:documentId:baseRevision:pageId:width:height:paper:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommandUndo",
+      "methods": [
+        "init(id:documentId:baseRevision:expectedOperationId:)",
+        "doCopy(id:documentId:baseRevision:expectedOperationId:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPDocumentCommit",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommitAccepted",
+      "methods": [
+        "init(receipt:)",
+        "doCopy(receipt:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentCommitRejected",
+      "methods": [
+        "init(reason:sceneReason:)",
+        "doCopy(reason:sceneReason:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentReceipt",
+      "methods": [
+        "affectedPages()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentRejection",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentRoot",
+      "methods": [
+        "findPage(id:)",
+        "page(index:)",
+        "pageObjects(id:)",
+        "pages()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPDocumentRootCompanion",
+      "methods": [
+        "init()",
+        "compose(title:scene:pages:)",
+        "empty(id:title:firstPage:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPMemoryDocumentAuthority",
+      "methods": [
+        "init(initial:budget:ownerCheck:)",
+        "commit(command:)",
+        "snapshot()",
+        "status()"
+      ],
+      "nserror_methods": [
+        "init(initial:budget:ownerCheck:)"
+      ]
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPageDescriptor",
+      "methods": [
+        "init(id:layerId:width:height:paper:contentRevision:)",
+        "doCopy(id:layerId:width:height:paper:contentRevision:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPageId",
+      "methods": [
+        "init(value:)",
+        "doCopy(value:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPagedPreviewCodec",
+      "methods": [
+        "init()",
+        "doCopyAsNew(source:documentId:pageIds:layerIds:objectIds:)",
+        "decode(text:)",
+        "decodingWorkByteCharge(characterCount:)",
+        "encode(root:)",
+        "encodingWorkByteCharge(root:)",
+        "header(text:)",
+        "importAsCopy(text:documentId:pageIds:layerIds:objectIds:)",
+        "retainedByteCharge(root:)"
+      ],
+      "nserror_methods": [
+        "doCopyAsNew(source:documentId:pageIds:layerIds:objectIds:)",
+        "decode(text:)",
+        "decodingWorkByteCharge(characterCount:)",
+        "encode(root:)",
+        "encodingWorkByteCharge(root:)",
+        "header(text:)",
+        "importAsCopy(text:documentId:pageIds:layerIds:objectIds:)",
+        "retainedByteCharge(root:)"
+      ]
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPagedPreviewHeader",
+      "methods": [
+        "init(documentId:title:pageCount:objectCount:revision:formatVersion:)",
+        "doCopy(documentId:title:pageCount:objectCount:revision:formatVersion:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPagedPreviewNotebook",
+      "methods": [
+        "init(initial:sessionNonce:budget:ownerCheck:)",
+        "appendStroke(x:y:pressure:timeMicros:)",
+        "authorityStatus()",
+        "beginStroke(x:y:pressure:timeMicros:)",
+        "cancelStroke()",
+        "capture()",
+        "doCopyCurrentPage()",
+        "deleteCurrentPage()",
+        "edit(request:)",
+        "endStroke(x:y:pressure:timeMicros:)",
+        "insertPage()",
+        "moveCurrentPage(before:)",
+        "offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)",
+        "page(index:)",
+        "pendingStroke()",
+        "pointCount(index:)",
+        "pointPressure(index:point:)",
+        "pointX(index:point:)",
+        "pointY(index:point:)",
+        "redo()",
+        "rename(value:)",
+        "retire()",
+        "retryPendingStroke()",
+        "selectPage(id:)",
+        "selectPen(argb:width:)",
+        "setPaper(width:height:paper:)",
+        "snapshot()",
+        "stroke(index:)",
+        "strokeColor(index:)",
+        "strokeId(index:)",
+        "strokeWidth(index:)",
+        "undo()"
+      ],
+      "nserror_methods": [
+        "init(initial:sessionNonce:budget:ownerCheck:)"
+      ]
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "methods": [
+        "init()",
+        "create(documentId:title:sessionNonce:)"
+      ],
+      "nserror_methods": [
+        "create(documentId:title:sessionNonce:)"
+      ]
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPPreviewSaveSnapshot",
+      "methods": [
+        "encode()",
+        "sameContent(other:)"
+      ],
+      "nserror_methods": [
+        "encode()"
+      ]
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "methods": [
+        "encode()",
+        "sameContent(other:)"
+      ],
+      "nserror_methods": [
+        "encode()"
+      ]
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPagedPreviewSnapshotCompanion",
+      "methods": [
+        "init()",
+        "fromRoot(root:)"
+      ],
+      "nserror_methods": [
+        "fromRoot(root:)"
+      ]
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPaperKind",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPPreviewEdit",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditCopyPage",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditDeletePage",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditInsertPage",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditMovePage",
+      "methods": [
+        "init(beforePageId:)",
+        "doCopy(beforePageId:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditRedo",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditRename",
+      "methods": [
+        "init(title:)",
+        "doCopy(title:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditSelectPage",
+      "methods": [
+        "init(pageId:)",
+        "doCopy(pageId:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditSelectPen",
+      "methods": [
+        "init(argb:width:)",
+        "doCopy(argb:width:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditSetPaper",
+      "methods": [
+        "init(width:height:paper:)",
+        "doCopy(width:height:paper:)",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditUndo",
+      "methods": [
+        "init()",
+        "isEqual(_:)",
+        "hash()",
+        "description()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewEditResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewFailureKind",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewInputDisposition",
+      "methods": [
+        "values()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewInputResult",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewSessionFailure",
+      "methods": [],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinEnumCompanion",
+      "methods": [
+        "init()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinArray",
+      "methods": [
+        "init(size:init:)",
+        "get(index:)",
+        "iterator()",
+        "set(index:value:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinDoubleArray",
+      "methods": [
+        "init(size:)",
+        "init(size:init:)",
+        "get(index:)",
+        "iterator()",
+        "set(index:value:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinFloatArray",
+      "methods": [
+        "init(size:)",
+        "init(size:init:)",
+        "get(index:)",
+        "iterator()",
+        "set(index:value:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinLongArray",
+      "methods": [
+        "init(size:)",
+        "init(size:init:)",
+        "get(index:)",
+        "iterator()",
+        "set(index:value:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinPair",
+      "methods": [
+        "init(first:second:)",
+        "doCopy(first:second:)",
+        "equals(other:)",
+        "hashCode()",
+        "toString()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinThrowable",
+      "methods": [
+        "init()",
+        "init(message:)",
+        "init(cause:)",
+        "init(message:cause:)",
+        "getStackTrace()",
+        "printStackTrace()",
+        "description()",
+        "asError()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinException",
+      "methods": [
+        "init()",
+        "init(message:)",
+        "init(cause:)",
+        "init(message:cause:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinRuntimeException",
+      "methods": [
+        "init()",
+        "init(message:)",
+        "init(cause:)",
+        "init(message:cause:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinIllegalArgumentException",
+      "methods": [
+        "init()",
+        "init(message:)",
+        "init(cause:)",
+        "init(message:cause:)"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "protocol",
+      "objc_name": "NCPKotlinIterator",
+      "methods": [
+        "hasNext()",
+        "next()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinDoubleIterator",
+      "methods": [
+        "init()",
+        "next()",
+        "nextDouble()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinFloatIterator",
+      "methods": [
+        "init()",
+        "next()",
+        "nextFloat()"
+      ],
+      "nserror_methods": []
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPKotlinLongIterator",
+      "methods": [
+        "init()",
+        "next()",
+        "nextLong()"
+      ],
+      "nserror_methods": []
+    }
+  ],
+  "physical_modules": {
+    "shared-core": [
+      "canvas-core"
+    ],
+    "canvas-core": []
+  },
+  "dependency_scope": "Current build files separately checked by check_architecture.py; this map is the reviewed topology, not a transitive binary dependency scan.",
+  "scope": "Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count.",
+  "decision": "Retain the two physical core modules and unfrozen preview facade. Reject direct promotion of exported reference authorities, resource pool internals or experiment shims into a stable SDK. Freeze only a reviewed capability/typed-failure/owner boundary after conformance and C1; hide implementation types as a separately validated ABI change.",
+  "all_exported_apis_safe_for_arbitrary_swift_input": false,
+  "swift_abi_or_semver_frozen": false,
+  "complete_failure_conformance_verified": false,
+  "new_native_execution_performed": false,
+  "physical_device_verified": false,
+  "c1_gate_complete": false
+}

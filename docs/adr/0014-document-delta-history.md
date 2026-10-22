@@ -25,3 +25,8 @@ DocumentCommand增加Undo/Redo，expectedOperationId指向原edit而非前次und
 ## 验证与后续
 
 新增12项common历史反例：多类edit连续全undo/redo、copy身份/样本共享与版本、删页顺序、最后页清空、transform/删除版本单调、成功/失败分支、top/base/doc及原回执、条目horizon、两栈字节/超大拒绝、journal满、epoch耗尽及旧prepared patch。另新增实际JVM worker尝试undo，被owner检查拒绝且栈保持；核心合计170项（canvas-core138、shared-core32）。Android ART历史与双端编译在独立产物报告记证据，不把shared-core实现称为App分页界面。App仍为单页，DEV-024C有界v2兼容codec及DEV-024D双端分页UI/实际保存重开接续；PAGE-02/03、生产API与C1仍未验收。
+
+
+## DEV-040E：标题拒绝与历史保持（2026-10-20）
+
+直接Rename必须在发布root/receipt和变更历史前拒绝非法UTF-16，返回INVALID_TITLE；失败不消费opId，保留redo及原accepted重放receipt。非法初始标题不得成为MemoryDocumentAuthority。复用原codec与预览入口的内部合法性检查，不归一化或更改v2格式；raw immutable root仍可用于codec负例。实际JVM/ART/Kotlin Native反例与Android隔离文件往返见[标题报告](../../reports/canonical-title-contract.json)。Swift构造器将IllegalArgumentException声明为可捕获，实际宿主通过额度负例验证；完整跨端公共API失败矩阵及生产history仍未完成。

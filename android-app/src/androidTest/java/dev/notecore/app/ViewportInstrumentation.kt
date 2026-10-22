@@ -22,7 +22,13 @@ class ViewportInstrumentation : Instrumentation() {
     private var brushPathOnly = false
     private var renderTargetOnly = false
     private var surfaceFramesOnly = false
+    private var inputBatchesOnly = false
+    private var titleOnly = false
+    private var editOnly = false
     override fun onCreate(arguments: Bundle?) {
+        editOnly = arguments?.getString("notecore_case") == "preview_edit"
+        titleOnly = arguments?.getString("notecore_case") == "title_contract"
+        inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
         renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
         surfaceFramesOnly = arguments?.getString("notecore_case") == "surface_frames"
@@ -38,6 +44,36 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (editOnly) {
+                var editFailure: Throwable? = null
+                runOnMainSync {
+                    try { result.putString("edit_observations", PreviewEditHostChecks.verify()) }
+                    catch (failure: Throwable) { editFailure = failure }
+                }
+                editFailure?.let { throw it }
+                result.putString("edit_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
+            if (titleOnly) {
+                var titleFailure: Throwable? = null
+                runOnMainSync {
+                    try { result.putString("title_observations", CanonicalTitleHostChecks.verify(host)) }
+                    catch (failure: Throwable) { titleFailure = failure }
+                }
+                titleFailure?.let { throw it }
+                result.putString("title_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
+            if (inputBatchesOnly) {
+                var inputFailure: Throwable? = null
+                runOnMainSync {
+                    try { result.putString("input_observations", AndroidInputHostChecks(host).verify()) }
+                    catch (failure: Throwable) { inputFailure = failure }
+                }
+                inputFailure?.let { throw it }
+                result.putString("input_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (surfaceFramesOnly) {
                 result.putString("surface_frames",SurfaceFrameHostChecks(this,host).verify())
                 result.putString("surface_status","passed")

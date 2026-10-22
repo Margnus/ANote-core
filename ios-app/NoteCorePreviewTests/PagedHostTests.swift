@@ -5,6 +5,67 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData() throws {
+        func data<T>(_ values: [T]) -> NSData {
+            values.withUnsafeBufferPointer { NSData(bytes: $0.baseAddress, length: $0.count * MemoryLayout<T>.stride) }
+        }
+        let note = try PagedPreviewNotebook.companion.create(documentId: "native-batch", title: "batch", sessionNonce: "native-batch")
+        func offer(_ phase: PointerPhase, _ time: Int64, _ x: NSData, _ y: NSData, _ p: NSData, _ t: NSData) -> PreviewInputResult {
+            ApplePreviewInput.shared.offer(notebook: note, phase: phase, eventTimeMicros: time, xs: x as Data, ys: y as Data, pressures: p as Data, times: t as Data)
+        }
+        let empty = NSData()
+        let oversized = offer(.down, 0, Data(count: (Int(note.inputBatchLimit) + 1) * 8) as NSData, empty, empty, empty)
+        XCTAssertFalse(oversized.admitted); XCTAssertEqual(oversized.failure?.kind, .inputBatchCapacity)
+        let badLength = offer(.down, 1, Data([0xff]) as NSData, empty, empty, empty)
+        XCTAssertFalse(badLength.admitted); XCTAssertEqual(badLength.acceptedSamples, 0)
+        let mutableX = data([1.0, 2.0]).mutableCopy() as! NSMutableData
+        let down = offer(.down, 2, mutableX, data([3.0, 4.0]), data([Float(0.2), Float(0.3)]), data([Int64(1), Int64(2)]))
+        XCTAssertEqual(down.disposition, .accepted); XCTAssertEqual(down.acceptedSamples, 2)
+        mutableX.resetBytes(in: NSRange(location: 0, length: mutableX.length))
+        let badTail = offer(.move, 4, data([3.0, Double.nan]), data([5.0, 6.0]), data([Float(0.4), Float(0.5)]), data([Int64(3), Int64(4)]))
+        XCTAssertFalse(badTail.admitted); XCTAssertEqual(badTail.activeSamples, 2); XCTAssertEqual(badTail.acceptedSamples, 0)
+        let good = offer(.move, 4, data([3.0, 4.0]), data([5.0, 6.0]), data([Float(0.4), Float(0.5)]), data([Int64(3), Int64(4)]))
+        XCTAssertTrue(good.admitted)
+        let up = offer(.up, 4, empty, empty, empty, empty)
+        XCTAssertEqual(up.disposition, .committed); XCTAssertEqual(up.acceptedSamples, 0)
+        XCTAssertEqual(note.pointCount(index: 0), 4); XCTAssertEqual(note.pointX(index: 0, point: 0), 1)
+        XCTAssertEqual(note.pointY(index: 0, point: 0), 3); XCTAssertEqual(note.pointPressure(index: 0, point: 0), Float(0.2))
+        XCTAssertEqual(note.stroke(index: 0).samples.timeMicros(index: 3), 4)
+    }
+    @MainActor func testTypedEditModelRejectsInvalidParametersWithoutLosingActiveInk() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current), before = note.snapshot()
+        XCTAssertTrue(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
+        model.applyEdit(PreviewEditSetPaper(width: .nan, height: 500, paper: .grid))
+        XCTAssertEqual(note.lastFailure?.kind, PreviewFailureKind.invalidArgument)
+        XCTAssertTrue(note.hasActiveStroke); XCTAssertTrue(note.snapshot() === before)
+        model.applyEdit(PreviewEditUndo.shared)
+        XCTAssertEqual(note.lastFailure?.kind, PreviewFailureKind.historyEmpty); XCTAssertTrue(note.hasActiveStroke)
+        let invalidId = note.edit(request: PreviewEditSelectPage(pageId: ""))
+        XCTAssertFalse(invalidId.accepted); XCTAssertEqual(invalidId.failure?.kind, PreviewFailureKind.invalidArgument)
+        XCTAssertTrue(note.endStroke(x: 3, y: 4, pressure: 0.6, timeMicros: 2)); XCTAssertEqual(note.pointCount(index: 0), 2)
+        model.applyEdit(PreviewEditRename(title: "合法😀")); model.applyEdit(PreviewEditInsertPage.shared)
+        XCTAssertEqual(note.pageCount, 2); XCTAssertNil(note.lastFailure)
+        let file = dir.appendingPathComponent(note.documentId + ".ncp"), expected = try note.capture().encode()
+        try await eventually("typed edits save through original ledger") { (try? String(contentsOf: file, encoding: .utf8)) == expected }
+        model.close(); XCTAssertNil(model.current)
+        let reopened = try PagedPreviewCodec.shared.decode(text: PreviewFileIO.readUTF8(file))
+        XCTAssertEqual(reopened.title, "合法😀"); XCTAssertEqual(reopened.pageCount, 2); XCTAssertEqual(reopened.scene.objectCount, 1)
+    }
+    @MainActor func testAuthorityConstructionFailureIsRecoverableInSwift() throws {
+        // Swift strings cannot inject malformed UTF-16. Exercise the same annotated
+        // constructor's IllegalArgumentException using a representable over-budget root.
+        let text = "NCPREVIEW\t2\nD\ttitle-host\t合法😀\t2\t0\t0\nG\tfirst\tlayer-a\t400\t400\tBLANK\t0\nG\tsecond\tlayer-b\t400\t400\tBLANK\t0\nEND\n"
+        let root = try PagedPreviewCodec.shared.decode(text: text)
+        let budget = DocumentBudget(maxPages: 1, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
+            journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024)
+        XCTAssertThrowsError(try MemoryDocumentAuthority(initial: root, budget: budget, ownerCheck: {}))
+        let valid = try MemoryDocumentAuthority(initial: root, budget: DocumentBudget(maxPages: 128, maxObjects: 5000,
+            liveBytes: 8*1024*1024, journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
+            historyEntries: 128, historyBytes: 8*1024*1024), ownerCheck: {})
+        XCTAssertEqual(valid.snapshot().title, "合法😀")
+    }
     func testSharedBrushContoursMatchAnalyticCoverageOffscreen() throws {
         struct Fixture: Decodable {
             struct Case: Decodable { let name: String; let alpha: Double; let contours: [[[Double]]]; let oracle_mask: [String] }

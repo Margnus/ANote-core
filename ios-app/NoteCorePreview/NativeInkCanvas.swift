@@ -202,6 +202,7 @@ final class InkUIView: UIView {
     private func realSamples(_ touch: UITouch, event: UIEvent?) -> [RealSample]? {
         let auxiliary = event?.coalescedTouches(for: touch)
         let touches = auxiliary?.isEmpty == false ? auxiliary! : [touch]
+        guard touches.count <= Int(note.inputBatchLimit) else { return nil }
         let transform = (scale: scale, x: offsetX, y: offsetY)
         guard transform.scale.isFinite, transform.scale > 0 else { return nil }
         var samples: [RealSample] = []; samples.reserveCapacity(touches.count)
@@ -219,6 +220,16 @@ final class InkUIView: UIView {
         }
         return samples
     }
+    private func scalarData<T>(_ values: [T]) -> Data {
+        guard !values.isEmpty else { return Data() }
+        return values.withUnsafeBufferPointer { Data(bytes: $0.baseAddress!, count: $0.count * MemoryLayout<T>.stride) }
+    }
+    private func offerReal(_ samples: [RealSample], phase: PointerPhase) -> PreviewInputResult {
+        // Four bounded native scalar buffers cross once; no per-point Kotlin callbacks or retained UITouchs.
+        ApplePreviewInput.shared.offer(notebook: note, phase: phase, eventTimeMicros: samples.last?.time ?? 0,
+            xs: scalarData(samples.map { Double($0.point.x) }), ys: scalarData(samples.map { Double($0.point.y) }),
+            pressures: scalarData(samples.map { $0.pressure }), times: scalarData(samples.map { $0.time }))
+    }
     private func rejectInput() {
         cancelInk(); failed("输入数据无效，本笔未提交")
     }
@@ -234,12 +245,11 @@ final class InkUIView: UIView {
         guard let samples = realSamples(touch, event: event), let first = samples.first else { rejectInput(); return }
         let p = first.point
         guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
-        note.selectPen(argb: penColor, width: penWidth)
-        guard note.beginStroke(x: p.x, y: p.y, pressure: first.pressure, timeMicros: first.time) else { failed(note.lastError); return }
+        guard note.selectPen(argb: penColor, width: penWidth) else { failed(note.lastError); return }
+        guard offerReal(samples, phase: .down).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
         active = touch; path = UIBezierPath(); path?.lineCapStyle = .round; path?.lineJoinStyle = .round
         path?.move(to: p); path?.addLine(to: CGPoint(x: p.x + 0.01, y: p.y)); setNeedsDisplay()
         for sample in samples.dropFirst() {
-            guard note.appendStroke(x: sample.point.x, y: sample.point.y, pressure: sample.pressure, timeMicros: sample.time) else { cancelInk(); failed(note.lastError); return }
             path?.addLine(to: sample.point)
         }
     }
@@ -247,8 +257,8 @@ final class InkUIView: UIView {
         if navigating { navigate(fingers(event), moving: true); return }
         guard !suppressSequence, let active = active, touches.contains(active), note.hasActiveStroke else { return }
         guard let samples = realSamples(active, event: event) else { rejectInput(); return }
+        guard offerReal(samples, phase: .move).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
         for sample in samples {
-            guard note.appendStroke(x: sample.point.x, y: sample.point.y, pressure: sample.pressure, timeMicros: sample.time) else { cancelInk(); failed(note.lastError); return }
             path?.addLine(to: sample.point)
         }
         setNeedsDisplay()
@@ -261,13 +271,11 @@ final class InkUIView: UIView {
         }
         if suppressSequence { if remaining.isEmpty { suppressSequence = false }; return }
         guard let active = active, touches.contains(active), note.hasActiveStroke else { return }
-        guard let samples = realSamples(active, event: event), let last = samples.last else { rejectInput(); return }
-        for sample in samples.dropLast() {
-            guard note.appendStroke(x: sample.point.x, y: sample.point.y, pressure: sample.pressure, timeMicros: sample.time) else { cancelInk(); failed(note.lastError); return }
-        }
-        let ok = note.endStroke(x: last.point.x, y: last.point.y, pressure: last.pressure, timeMicros: last.time)
+        guard let samples = realSamples(active, event: event), !samples.isEmpty else { rejectInput(); return }
+        let result = offerReal(samples, phase: .up)
+        guard result.admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
         self.active = nil; path = nil; suppressSequence = !remaining.isEmpty
-        if ok { changed() } else { failed(note.lastError) }; setNeedsDisplay()
+        if result.disposition == .committed { changed() } else { failed(note.lastError) }; setNeedsDisplay()
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelInk() }
     func cancelInk() { note.cancelStroke(); active = nil; path = nil; navigating = false; navTouches = []; suppressSequence = false; setNeedsDisplay() }
