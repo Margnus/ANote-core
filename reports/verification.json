@@ -2,7 +2,7 @@
   "phase": "C0/C1 reference prototype",
   "status": "passed",
   "jvm_contract_tests": {
-    "tests": 333,
+    "tests": 344,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -151,12 +151,12 @@
     {
       "suite": "dev.notecore.canvas.prototype.PreviewSaveLedgerTest",
       "tests": 12,
-      "time_seconds": 0.088
+      "time_seconds": 0.09
     },
     {
       "suite": "dev.notecore.document.CanonicalTitleTest",
       "tests": 4,
-      "time_seconds": 0.005
+      "time_seconds": 0.006
     },
     {
       "suite": "dev.notecore.document.DocumentAuthorityTest",
@@ -166,7 +166,7 @@
     {
       "suite": "dev.notecore.document.DocumentHistoryTest",
       "tests": 14,
-      "time_seconds": 0.013
+      "time_seconds": 0.012
     },
     {
       "suite": "dev.notecore.document.DocumentOwnerThreadTest",
@@ -176,47 +176,57 @@
     {
       "suite": "dev.notecore.document.LegacyPreviewReaderTest",
       "tests": 13,
-      "time_seconds": 0.232
+      "time_seconds": 0.23
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReadTest",
       "tests": 3,
-      "time_seconds": 0.004
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PagedPreviewCodecTest",
       "tests": 16,
-      "time_seconds": 0.371
+      "time_seconds": 0.365
     },
     {
       "suite": "dev.notecore.document.PagedPreviewNotebookTest",
       "tests": 12,
-      "time_seconds": 0.01
+      "time_seconds": 0.009
     },
     {
       "suite": "dev.notecore.document.PagedSaveLedgerTest",
       "tests": 9,
-      "time_seconds": 0.005
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PreviewEditTest",
       "tests": 7,
-      "time_seconds": 0.005
+      "time_seconds": 0.006
     },
     {
       "suite": "dev.notecore.document.PreviewInputCapacityTest",
       "tests": 2,
-      "time_seconds": 0.002
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.document.PreviewInputTest",
       "tests": 8,
       "time_seconds": 0.016
+    },
+    {
+      "suite": "dev.notecore.document.PreviewSaveDispatchExecutorTest",
+      "tests": 5,
+      "time_seconds": 0.019
+    },
+    {
+      "suite": "dev.notecore.document.PreviewSaveDispatchTest",
+      "tests": 6,
+      "time_seconds": 0.005
     }
   ],
   "module_jvm_tests": {
     "canvas-core": 212,
-    "shared-core": 121
+    "shared-core": 132
   },
   "architecture": {
     "status": "passed",
@@ -277,7 +287,7 @@
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "127897258aaff666d03829023c0ec8275446fd01301c1843a7fca0ebd9a51a7f",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
-    "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "a1f5d522b5bbbcb63b3ab8a2eed629fb1ee30b8e3fa8d8a5f5674b296e397b4e",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
@@ -360,7 +370,7 @@
     "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/InputFixtureReplayTest.kt": "0aaf90e00d7c68f04a5493b8e207c62271ac2599035b28a92199cfb86a35e8c1",
     "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/ScaleFixtureReplayTest.kt": "62f7856987a131e350b39b9a03576ce84163abd655223fa2662d953103c0cabc",
     "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/SpatialIndexBenchmark.kt": "dfca5a55fb2812c5b1dd706e5a4b1084f03f8125e337d11aff0f0dcbfa38c7d6",
-    "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "a1f5d522b5bbbcb63b3ab8a2eed629fb1ee30b8e3fa8d8a5f5674b296e397b4e",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
@@ -384,8 +394,10 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewEditTest.kt": "3e04d7d198ecf801f71223a2caad537c05168d1459a71ac12738d7691e91cbf3",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputCapacityTest.kt": "7bdd053267f5bfe07a1628edf367ed303cbe1e255dfd1cb86d4df47c32a03343",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputTest.kt": "879f07110eefd9de047ecbad8bd79ada50d598713c1109089f6bed34bbfdbb01",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewSaveDispatchTest.kt": "22c8f725f997d12d2dd74216bff2e13af8ed5213b3d68d928f08e2b13d4a6629",
     "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt": "f7eb1a0780a127267857972c5c410821d31628a1e6628a98e312870b64e135f7",
+    "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewSaveDispatchExecutorTest.kt": "485cfb07e087481386f744eafde677527c45d4988037881737ad7e796e663671",
     "fixtures/brush/brush-golden.json": "ad1aadfbb8c9c85736660a25f708196fb1b33c56b53c5171da1c046165d80679",
     "fixtures/brush/brush-manifest.json": "e8e79de0926a62d7b28f43bbb8c1d166f95f930e3285b0bc47deb5bd419aec17",
     "fixtures/geometry/brush-golden.json": "a6f6f1dabf01bf1ce7938d2d6ae2dd231ca20678d776208c8a090dc9c54788ee",

@@ -26,11 +26,13 @@ final class PreviewModel: ObservableObject {
     private let directory: URL
     private let beforeInkCompute: () throws -> Void
     private let inkReleaseBoundary: (Bool) throws -> Void
-    private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024)
+    private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024,
+        ownerCheck: { precondition(Thread.isMainThread) })
+    private let storageWorkBytes: Int64 = 256 * 1024 * 1024
     private var savedRoot: DocumentRoot?
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
-    private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: 256 * 1024 * 1024,
+    private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
         onOwnerProgress: { [weak self] in self?.inkOwnerProgress(); self?.pumpWrites() })
     private struct InkFrameKey: Equatable {
         let document: String
@@ -360,7 +362,18 @@ final class PreviewModel: ObservableObject {
         pumpWrites(); return true
     }
     private func pumpWrites() {
-        while let attempt = ledger.nextWrite() {
+        while true {
+            let worker = try! executor.status()
+            let dispatch = ledger.admitNextWrite(availableWorkBytes: storageWorkBytes - worker.chargedBytes,
+                maximumWorkBytes: storageWorkBytes, backendAccepting: worker.accepting)
+            guard let attempt = dispatch.attempt else {
+                if dispatch.disposition != .idle && dispatch.disposition != .backpressure {
+                    status = dispatch.disposition == .workCapacity
+                        ? "保存任务超出后台容量，更改仍保留，请保留当前笔记"
+                        : "保存后端暂不可用，更改仍保留，请重试"
+                }
+                return
+            }
             let admission = try! executor.submit(input: (attempt, Self.file(attempt.snapshot.documentId, directory: directory)),
                 chargedBytes: attempt.snapshot.encodingWorkByteCharge, compute: { input in
                     try PreviewFileIO.writeUTF8(input.0.snapshot.encode(), to: input.1)
@@ -381,9 +394,9 @@ final class PreviewModel: ObservableObject {
                     } else if self.current == nil && !success { self.status = "保存失败，更改仍保留，可从列表重新打开并重试" }
                     return .acknowledged // Failure is in the owner ledger before releasing worker responsibility.
                 })
-            if case .rejected = admission {
+            if case .rejected(let reason) = admission {
                 precondition(ledger.returnUnstarted(attempt: attempt))
-                if attempt.snapshot.encodingWorkByteCharge > 256 * 1024 * 1024 { status = "保存后端暂不可用，更改仍保留，请重试" }
+                if reason == .stopped { status = "保存后端暂不可用，更改仍保留，请重试" }
                 return
             }
         }

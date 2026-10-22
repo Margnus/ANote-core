@@ -24,8 +24,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
-    private val executor = BoundedOwnerExecutor(16, 256L * 1024 * 1024, "NoteCore-preview-storage", ::requestPump)
-    private val ledger = PreviewSaveLedger()
+    private val executor = BoundedOwnerExecutor(16, STORAGE_WORK_BYTES, "NoteCore-preview-storage", ::requestPump)
+    private val ledger = PreviewSaveLedger(ownerCheck = executor::checkOwnerThread)
+    private val saveTaskTooLarge = context.getString(R.string.save_task_too_large)
     private data class SaveCallback(val version: Long, val receive: (Long, String?) -> Unit)
     private val saveCallbacks = mutableMapOf<String, SaveCallback>()
     private var viewEpoch = 0L
@@ -218,7 +219,21 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun pumpWrites() {
         executor.checkOwnerThread()
         while (true) {
-            val attempt = ledger.nextWrite() ?: return
+            val worker = executor.status()
+            val dispatch = ledger.admitNextWrite(STORAGE_WORK_BYTES - worker.chargedBytes, STORAGE_WORK_BYTES,
+                worker.accepting && worker.workerFailure == null)
+            val attempt = dispatch.attempt
+            if (attempt == null) {
+                if (dispatch.disposition != PreviewWriteDisposition.IDLE && dispatch.disposition != PreviewWriteDisposition.BACKPRESSURE) {
+                    val ids = if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
+                        dispatch.documentId?.let(::listOf).orEmpty() else saveCallbacks.keys.toList()
+                    for (id in ids) saveCallbacks[id]?.let { receiver ->
+                        notifyUi { receiver.receive(receiver.version, if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
+                            saveTaskTooLarge else "保存后端暂不可用，更改仍保留，请重试") }
+                    }
+                }
+                return
+            }
             val admission = executor.submit(attempt to io, attempt.snapshot.encodingWorkByteCharge, {
                 it.second.write(it.first.snapshot); Unit
             }) { input, result ->
@@ -236,9 +251,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             if (admission is WorkAdmission.Rejected) {
                 check(ledger.returnUnstarted(attempt))
                 // Already admitted snapshot stays pending; a completing job wakes and pumps it later.
-                // An individually oversized encoding cannot fit: surface it and retain for recovery.
-                if (attempt.snapshot.encodingWorkByteCharge > 256L * 1024 * 1024 ||
-                    admission.reason == WorkAdmissionFailure.WORKER_TERMINATED || admission.reason == WorkAdmissionFailure.STOPPED) {
+                if (admission.reason == WorkAdmissionFailure.WORKER_TERMINATED || admission.reason == WorkAdmissionFailure.STOPPED) {
                     notifyUi { saveCallbacks[attempt.snapshot.documentId]?.receive?.invoke(attempt.snapshot.version,
                         "保存后端暂不可用，更改仍保留，请重试") }
                 }
@@ -298,6 +311,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal fun saveStates(): List<PreviewSaveState> { executor.checkOwnerThread(); return ledger.states() }
     internal fun stopTestBackend() { executor.stopAccepting() }
     companion object {
+        private const val STORAGE_WORK_BYTES = 256L * 1024 * 1024
         private const val READ_WORK_BYTES = 160L * 1024 * 1024 // Declared parsing/UTF/buffer reservation, not measured heap.
         @Volatile private var instance: NoteStore? = null
         fun get(context: Context): NoteStore = instance ?: synchronized(this) {
