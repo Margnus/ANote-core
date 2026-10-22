@@ -20,6 +20,7 @@ CURRENT = {
     'preview-input-contract': ('source_and_artifact_sha256',),
     'ios-preview-ui': ('source_and_artifact_sha256',),
     'input-capture-contract': ('source_and_fixture_sha256',),
+    'apple-current-revalidation': ('source_and_artifact_sha256',),
     'android-input-host-tests': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
     'android-render-integration': ('source_evidence_sha256', 'sdk_contract_source_sha256'),
     'sqlite-platform-capabilities': ('source_and_artifact_sha256', 'sdk_contract_sha256'),

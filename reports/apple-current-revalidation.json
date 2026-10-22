@@ -1,0 +1,38 @@
+{
+  "schema": "apple-current-revalidation-1",
+  "status": "passed",
+  "scope": "Current integrated source built and executed on dedicated iOS Simulator. Native111, actual app-host36, ordinary package restored and original76 files preserved. Not current ordinary UI, Android runtime, physical input/heap or full C1 evidence recovery.",
+  "native_tests": 111,
+  "swift_app_host_tests": 36,
+  "artifact_sha256": "cd4828c4b805508ee9566d74fd4fec275f30f0e9383be1bf8e5f0e09dda7b7dc",
+  "preservation": {
+    "original_files": 76,
+    "current_files": 82,
+    "original_hashes_unchanged": true,
+    "added_host_fixture_paths": [
+      "tmp/notecore-ink-host-0C75B485-6F9D-4011-84B5-F2670A946426/303EFC6C-BABC-4856-AB3B-37F8D2837E89.ncp",
+      "tmp/notecore-ink-host-31D96099-E856-470B-AD8D-9170DCD53C41/03039290-E17B-4303-A801-9BFDC0CFBED8.ncp",
+      "tmp/notecore-ink-host-52E753E2-3103-4FC9-AF56-9F2564DF0508/B2CCF387-0DF3-40DB-AA31-967AE8303E34.ncp",
+      "tmp/notecore-ink-host-52E753E2-3103-4FC9-AF56-9F2564DF0508/E9EBCFCF-ABD6-40C6-9CD8-44F78B9E2360.ncp",
+      "tmp/notecore-ink-host-D03B6342-75A0-443B-9F3E-D0E541D00032/89590DD5-3569-411F-A10A-6A5791AC17BB.ncp",
+      "tmp/notecore-ink-host-DD7166F1-3304-4F3B-A832-7B4F1E60B0F0/042E8179-A4B0-4667-8D4F-E69085D8D968.ncp"
+    ],
+    "uninstall_or_data_reset": false
+  },
+  "baseline_drift_scope": "Before current app build/host run, original74 from DEV040I unchanged and2 additional files observed; cause not assigned.",
+  "source_and_artifact_sha256": {
+    "reports/apple-brush-common-tests.json": "88196bfdf3168cb6c5469cac960e0b5c43f728e2169b5487aaaaae1da3f66a46",
+    "reports/ios-host-tests.json": "4b5541ada7957d5f3d8ab8868f8832fe50e3dcd41071083a632ee92983aae55e",
+    "reports/ios-preview-build.json": "782103ea3a4f3723ad8acbbdafd9bfad9f88f9181dc097354d989f4c598d731c",
+    "reports/ios-preview-restored.json": "9be81313fcfba34bdd4104cb55c0ece0330d00e9d9cf7791f0abd892884179dc",
+    "build/dev040o/files-before.json": "a1f566766446eb5cb7fa4d8f2509247e64222739a613a5734a48d0f691ec10dd",
+    "build/dev040o/files-after.json": "c9bd4558188be495cf797c4e2070c35fb3fac37acba6028e7deb7a9ba3871c12",
+    "build/dev040o/preservation.json": "99072c551d6735fdfc675b6438dd981c4e9e1b5ca437054818fb52c17bae3440",
+    "build/dev040o/baseline-drift.json": "eb746e284f5feaf8763855e1a8ee4cf86eb2384b478a2ba34da08218742ae895",
+    "dist/NoteCore-0.1.0-preview-ios-simulator-arm64.app.zip": "cd4828c4b805508ee9566d74fd4fec275f30f0e9383be1bf8e5f0e09dda7b7dc"
+  },
+  "ordinary_ui_verified": false,
+  "physical_device_verified": false,
+  "all_evidence_current": false,
+  "c1_gate_complete": false
+}
