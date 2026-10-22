@@ -1,0 +1,18 @@
+{
+  "schema": "pdf-capability-fixtures-1",
+  "media_box": [0, 0, 400, 300],
+  "crop_box": [40, 50, 340, 230],
+  "rotations": [0, 90, 180, 270],
+  "marker_rgb": [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 0, 255]],
+  "expected_pages": [
+    {"rotation": 0, "width": 300, "height": 180, "marker_xy": [[16, 164], [284, 164], [16, 16], [284, 16]]},
+    {"rotation": 90, "width": 180, "height": 300, "marker_xy": [[16, 16], [16, 284], [164, 16], [164, 284]]},
+    {"rotation": 180, "width": 300, "height": 180, "marker_xy": [[284, 16], [16, 16], [284, 164], [16, 164]]},
+    {"rotation": 270, "width": 180, "height": 300, "marker_xy": [[164, 284], [164, 16], [16, 284], [16, 16]]}
+  ],
+  "password_fixture": "notecore-fixture",
+  "password_scope": "Public synthetic test-only password, RC4-128 compatibility fixture; not a production encryption recommendation or real credential.",
+  "large_document_pages": 500,
+  "large_document_render_requests": [0, 499],
+  "scope": "Synthetic crop/rotation/color/outline/text, password, malformed input and bounded requested-page probes; no user document or physical performance claim."
+}

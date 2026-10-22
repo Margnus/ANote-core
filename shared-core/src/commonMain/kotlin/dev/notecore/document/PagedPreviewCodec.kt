@@ -21,7 +21,7 @@ object PagedPreviewCodec {
         require(text.length <= 4096)
         val cursor = Rows(text)
         return when (cursor.row(2)) {
-            listOf("NCPREVIEW", "1") -> legacyMetadata(cursor.row(6)).first
+            listOf("NCPREVIEW", "1") -> LegacyPreviewReader.header(text)
             listOf("NCPREVIEW", "2") -> metadata(cursor.row(6))
             else -> throw IllegalArgumentException("Unsupported preview version")
         }
@@ -33,7 +33,7 @@ object PagedPreviewCodec {
         val rows = Rows(text)
         when (rows.row(2)) {
             listOf("NCPREVIEW", "1") -> {
-                return decodeLegacy(rows)
+                return LegacyPreviewReader.decode(text)
             }
             listOf("NCPREVIEW", "2") -> Unit
             else -> throw IllegalArgumentException("Unsupported preview version")
@@ -184,39 +184,6 @@ object PagedPreviewCodec {
             value.append(line)
         }
         override fun toString(): String = value.toString()
-    }
-    /** v1 is read-only compatibility. It never constructs a second editable notebook or writes v1. */
-    private fun legacyMetadata(row: List<String>): Pair<PagedPreviewHeader, Long> {
-        require(row[0] == "D")
-        val id = unescape(row[1]); val title = unescape(row[2])
-        val next = row[3].toLong(); val count = row[4].toInt(); val revision = row[5].toLong()
-        require(id.isNotBlank() && id.length <= 128 && title.length <= 120 && next > 0 && count in 0..500 && revision >= 0)
-        return PagedPreviewHeader(id, title, 1, count, revision, 1) to next
-    }
-    private fun decodeLegacy(rows: Rows): DocumentRoot {
-        val (header, next) = legacyMetadata(rows.row(6))
-        val objects = linkedMapOf<ObjectId, StrokeObject>()
-        var points = 0
-        repeat(header.objectCount) {
-            val head = rows.row(5); require(head[0] == "S")
-            val id = ObjectId(head[1]); val number = head[1].removePrefix("ink-").toLong()
-            require(head[1] == "ink-$number" && number in 1 until next && id !in objects)
-            val color = head[2].toInt(); val width = head[3].toDouble(); val size = head[4].toInt()
-            require(width.isFinite() && width in 0.5..16.0 && size in 1..MAX_STROKE_POINTS)
-            require(size <= MAX_POINTS - points); points += size
-            val xs = DoubleArray(size); val ys = DoubleArray(size); val pressures = FloatArray(size); val times = LongArray(size)
-            repeat(size) { index ->
-                val point = rows.row(5); require(point[0] == "P")
-                xs[index] = point[1].toDouble(); ys[index] = point[2].toDouble()
-                pressures[index] = point[3].toFloat(); times[index] = point[4].toLong()
-            }
-            objects[id] = StrokeObject(id, 1, LayerId("ink"), BrushSpec(BrushKind.MONOLINE, 1, width, color),
-                StrokeSamples.copyOf(xs, ys, pressures, times))
-        }
-        require(rows.row(1) == listOf("END")); rows.end()
-        return DocumentRoot.compose(header.title, SceneSnapshot.restored(SceneId(header.documentId), header.revision, objects.values.toList()),
-            listOf(PageDescriptor(PageId("page-1"), LayerId("ink"), 1000.0, 1400.0, contentRevision = header.revision)))
-            .also { retainedByteCharge(it) }
     }
     private fun validText(value: String) {
         var i = 0

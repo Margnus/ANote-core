@@ -8,7 +8,11 @@ if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
     extensions.configure<com.android.build.gradle.LibraryExtension> {
         namespace = "dev.notecore.canvas"
         compileSdk = 36
-        defaultConfig { minSdk = 26 }
+        defaultConfig {
+            minSdk = 26
+            testApplicationId = "dev.notecore.canvas.poc.test"
+            testInstrumentationRunner = "dev.notecore.canvas.prototype.CoreBrushInstrumentation"
+        }
         compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     }
 }
@@ -24,14 +28,32 @@ kotlin {
         val jvmAndAndroidMain by creating { dependsOn(getByName("commonMain")) }
         getByName("jvmMain").dependsOn(jvmAndAndroidMain)
         if (providers.gradleProperty("enableAndroidTargets").orNull == "true") getByName("androidMain").dependsOn(jvmAndAndroidMain)
+        if (providers.gradleProperty("enableAppleTargets").orNull == "true") {
+            val iosMain by creating { dependsOn(getByName("commonMain")) }
+            getByName("iosArm64Main").dependsOn(iosMain)
+            getByName("iosSimulatorArm64Main").dependsOn(iosMain)
+        }
         commonTest.dependencies { implementation(kotlin("test")) }
+        val jvmAndAndroidTest by creating { dependsOn(getByName("commonTest")) }
+        getByName("jvmTest").dependsOn(jvmAndAndroidTest)
+        if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
+            getByName("androidInstrumentedTest") {
+                dependsOn(jvmAndAndroidTest)
+                dependencies { implementation(kotlin("test-junit")); implementation("junit:junit:4.13.2") }
+            }
+        }
         jvmTest {
             resources.srcDir("../fixtures/input")
-            resources.srcDir("../fixtures/brush")
+            resources.srcDir("../fixtures/geometry")
             dependencies { implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0") }
         }
     }
     jvmToolchain(17)
+}
+
+// Keep the independent candidate specification distinct from the existing mask goldens.
+tasks.named<Copy>("jvmTestProcessResources") {
+    from("../fixtures/brush") { into("brush") }
 }
 
 val generateScaleFixtures by tasks.registering(Exec::class) {
@@ -59,4 +81,42 @@ tasks.register<JavaExec>("runPrototype") {
     val mainCompilation = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("main")
     classpath(mainCompilation.output.allOutputs, configurations.named("jvmRuntimeClasspath"))
     mainClass.set("dev.notecore.canvas.prototype.PrototypeDemoKt")
+}
+
+tasks.register<JavaExec>("runSpatialIndexPoc") {
+    group = "verification"
+    description = "Opt-in M-3 desktop AABB experiment; not a physical device benchmark."
+    dependsOn("jvmTestClasses", generateScaleFixtures)
+    val testCompilation = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(testCompilation.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.SpatialIndexBenchmark")
+    args(rootProject.projectDir.absolutePath)
+}
+
+tasks.register<JavaExec>("generateBrushPathFixtures") {
+    group = "verification"
+    dependsOn("jvmTestClasses")
+    val tests = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(tests.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.BrushPathFixtures")
+    args(rootProject.projectDir.absolutePath)
+}
+
+tasks.register<JavaExec>("runBrushPathCosts") {
+    group = "verification"
+    dependsOn("jvmTestClasses", generateScaleFixtures)
+    val tests = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(tests.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.BrushPathCosts")
+    args(rootProject.projectDir.absolutePath)
+}
+
+tasks.register<JavaExec>("runBrushTileCacheCosts") {
+    group = "verification"
+    description = "Synthetic viewport cache/reader accounting trace; not a heap or device benchmark."
+    dependsOn("jvmTestClasses")
+    val tests = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(tests.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.BrushTileCacheCosts")
+    args(rootProject.projectDir.absolutePath)
 }

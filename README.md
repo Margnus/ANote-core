@@ -1,17 +1,38 @@
 # NoteCore
 
-独立笔记App与通用画布工程，2026-10-14开始实际开发。2026-10-19 DEV-027新增目标坐标预检与Android/Swift候选2轮廓适配。实际核心JVM236项/26 suites（Core137、shared-core99），0失败/错误/跳过；架构21文件/18 import通过。Android另有7项Robolectric4.17 NATIVE测试通过，覆盖Skia离屏像素、alpha96/156、压力宽度、仿射与6组固定轮廓对照；它们不是模拟器/ART或GPU验证。
+AI协作与里程碑验收遵循[AI开发实施规范](docs/AI开发实施规范.md)：整体规划、分阶段验收、阶段内连续自主开发，含任务模板与后续推进指令。
 
-Android当前源码已重新编译，debug APK、测试APK与lint通过（0错误、3警告）。新包见`dist/NoteCore-0.1.0-preview.apk`及[构建报告](reports/preview-build.json)，尚未对当前APK安装运行；旧模拟器报告只在SHA匹配时有效。当前发现C盘SDK已含API36，此前按默认D盘SDK及受限可见性推断“本机缺少platform”不准确，已纠正；使用进程内ANDROID_HOME选择现有SDK，不改共享配置。
+继续开发或新会话先读 [当前开发状态](docs/当前开发状态.md)：现行约束、下一交付、验证命令和未通过门禁；下文各 DEV 段落保留历史范围。
 
-候选2仍未启用到默认工具、保存格式或App绘制入口，算法1旧文件不升级。Swift适配与新增4项宿主测试待Mac编译/执行（未来宿主测试总数12项），不能声称双端像素一致。真机输入、系统选择器、重启恢复、GPU/性能与C1/P0未验收。见[原生适配ADR](docs/adr/0022-native-brush-path-adapters.md)、[Native像素报告](reports/android-brush-native.json)、[测量计划](docs/测量交付计划.md)。
+独立笔记App与通用画布工程，2026-10-14开始实际开发。当前D4离线手写预览：Android多页编辑、整本保存/备份与缩放已在模拟器完成实际UI验证；iOS已接入同一分页会话，编译ARM64模拟器.app、安装启动及9项真实宿主API/文件/绘制测试通过，已在 DEV-028 包完成真实书写/系统选择器/强停重开；最新 UI 修复包另通过分页/升级/强停重开回归，详见下方 UI-001。C1生产架构仍未冻结。安装和实际验证结果见[初步运行版本](docs/初步运行版本.md)。
 
 先读[开发执行计划](docs/开发执行计划.md)、[进度](docs/进度.md)、[原型ADR](docs/adr/0001-c1-reference-prototype.md)。完整需求和整体架构在相邻[项目蓝图](https://github.com/Margnus/AI-Note/blob/main/README.md)。
 
+最新顺序按蓝图e066cfb与[ADR-0020](docs/adr/0020-read-only-legacy-and-measurement-first.md)调整：旧单页编辑/写出SDK已收口，v1只读迁入不创建另一owner；接下来优先C0真机基线、共同笔刷几何和密集页索引PoC，再做生产架构冻结及SQLite层。用户已解锁 Mac，本轮补验部分 iOS 交互；真机、多指与转屏等未验证门禁继续保留，不阻挡独立开发。
+
+最新DEV-030已推进[按需分段与覆盖掩码](docs/分段索引与覆盖掩码PoC.md)：S9局部窗口仅生成4/782段，荧光笔回折/分段不重复加深；S2局部候选输入点减少41.4%，同时记录整页退化与索引增长。标准Gradle246项，Android ART和iOS Kotlin/Native各26项实际通过，补齐前轮原生执行。当前普通App包仍属DEV-028，新mask未接入App；审批已恢复，继续正常同步。
+
+DEV-029的[精确直线段派生简化](docs/派生笔迹直线段简化PoC.md)在S2减少87.2%–92.1%路径逻辑字节并完整保留规范点；独立桌面/KLIB测量见[报告](reports/offline-jvm-verification.json)，原生/标准构建以最新节点为准。
+
+最新 DEV-031 已实现[掩码缓存与原生图像消费](docs/掩码缓存与原生图像消费PoC.md)：复用现有资源池，跨视口命中与当前帧发布分离，退休读者继续占用总预算；修复 Kotlin/Native 淘汰 Map.Entry 后访问的异常。标准 Gradle 254 项、Android 55 项共同测试加 2 项 Bitmap/Canvas 检查、iOS Kotlin/Native 55 项通过。40 次固定视口请求命中 22 次，20,480 个覆盖值与无缓存一致。Apple 新 mask 图像消费、滤波/gutter 与真机实际内存继续推进；普通 App 仍为 DEV-028 包，新缓存未接入。
+
+最新 DEV-032 已完成[双端掩码图像与滤波接缝验证](docs/双端掩码图像与滤波接缝PoC.md)：新 mask 在 ART/Kotlin/Native 当场生成，分别由 Bitmap/Canvas、CGImage/CoreGraphics 消费。三笔刷 × 1.5/2.0 倍滤波下，真实邻域 gutter 加设备像素唯一归属裁剪与整块结果一致，无 gutter 对照暴露接缝。标准 Gradle 258 项、Android 63 项、Apple 62 项通过，原生行存储及转换/复制/绘制/释放 API 观测已记录。尚不等于真机内存或任意变换验收；DEV-033 接续总量预算与实际有界作业集成，普通 App 包未切换后端。
+
 ## 当前可运行内容
 
+- DEV-034A：[Android 平台图像持有](docs/平台图像持有适配PoC.md)已封装 Bitmap/native reader、旧帧展示检查、复制失败和未知释放责任；84 项 ART 测试与 272 项共享 JVM 测试通过。仅软件 Canvas，Swift 接入和视口 trace 仍待 B/C，未切换普通 App。
+
+- UI-001：补齐 [iOS 实际操作验证](docs/iOS实际操作验证.md)，修复分页导航随操作区滚出屏幕的问题。最新模拟器包 SHA d8e4a901…，9 项宿主测试、7 项安装启动和新版分页/升级/强停重开回归通过；旧 DEV-028 包完成系统导出/导入逐字节及 fresh 身份核对。三笔刷实验后端仍未启用，DEV-034 计划不变。
+
+- 最新 DEV-033：[有界渲染作业与资源交付](docs/有界渲染作业与资源交付PoC.md)已接通既有 JVM/Android 执行器、真实 mask/RGBA 和资源池。派发前预留全作业，ACK 后才缩减；取消/关闭不提前释放，原生副本许可独占，UNKNOWN 释放继续隔离。标准 Gradle 272 项、Android 78 项、Apple 74 项通过；两端原生图像持有至释放的预算闭环已测，Apple 使用测试 NSThread，App 的 Swift 执行器接入仍待 DEV-034。普通 App 包未更换，C1与真机门禁仍未完成。
+
+- [三笔刷有界路径与离屏验证](docs/共同笔刷路径与离屏验证.md)：共享231项测试、Kotlin/Native运行11项、Android/iOS实际离屏覆盖与alpha；S2成本排除了整页无限制路径缓存，下一步简化/分段与驻留预算。未接入App三笔刷。
+
+- [三笔刷共同覆盖PoC](docs/共同笔刷几何PoC.md)：版本化候选规则、解析oracle、仿射painted bounds和手工黄金格点；未作为原生渲染后端接入。
+
+- [密集页空间索引PoC](docs/空间索引PoC.md)：S2百万点与退化分布上的网格/STR树正确性和桌面成本测量；未接入App，生产结构尚未选定。
+
 - 平台无关double坐标和矩阵、不可变真实采样、captured scene/layer/tool。
-- 版本化共同笔刷几何PoC：私有有界数组、压力半径、单笔非零并集/颜色参数与明确数值/容量拒绝；独立原生适配和Android宿主Skia验证已有结果，尚未接App默认绘制入口。
 - 纯场景命令和patch，内存单写者的修订/幂等/容量检查；Receipt明确MEMORY_ONLY。
 - 迟到frame的revision/generation检查、scene/object/算法版本的几何缓存键。
 - 按字节计费的LRU参考策略及重键/淘汰/超额/溢出反例。
@@ -41,16 +62,6 @@ python3 tools/collect_verification.py
 
 Android包：`bash ci/package-android-preview.sh`（另需ANDROID_HOME）；iOS模拟器包：`bash ci/package-ios-preview.sh`。Android见[接入ADR](docs/adr/0018-android-paged-preview.md)与[分页界面验证](reports/android-paged-smoke.json)；iOS见[接入ADR](docs/adr/0019-ios-paged-preview.md)与[真实宿主API测试](reports/ios-host-tests.json)，不将API测试当作触摸UI验收。
 
-Windows可使用JDK17与Python3，保持环境变量仅在当前进程生效：
-
-```powershell
-$env:JAVA_HOME = '你的JDK17目录'
-$env:GRADLE_USER_HOME = "$PWD/.gradle-user-home"
-$env:PYTHON_BIN = (Get-Command python).Source
-./gradlew.bat --no-daemon --console=plain verifyPrototype
-python tools/collect_verification.py
-```
-
 同一核心验证入口可用于本地或CI：`bash ci/verify.sh`（需JAVA_HOME，Python可通过PYTHON_BIN指定）。未配置GitHub远程工作流或自动发布。
 
 测试HTML在canvas-core/build/reports/tests/jvmTest/index.html，机器报告在[reports/verification.json](reports/verification.json)。后者由实际Gradle XML生成；代码变化后应重新运行测试再生成报告。
@@ -77,10 +88,6 @@ reports/                    # 真实验证记录
 Git仓库：[ANote-core](https://github.com/Margnus/ANote-core)。按用户授权，在验证通过的关键节点提交并推送；蓝图同步至AI-Note。旧App/DrawPanel保持独立。D2已有公共输入回放和5类JSON端到端参考验证，已有规模笔迹与旧字段候选映射，D3已有提交所有权/重试参考模型，现有lease假后端与可控调度模型，用户当前目标为先交付可打包运行版本，正在完成D4离线手写预览；关闭协调器/恢复handoff已有单owner参考实现，真实执行器/原生集成与D5架构冻结继续作为后续门禁。
 
 Apple有界执行器与macOS真实线程对照见[ADR-0010](docs/adr/0010-apple-executor-conformance.md)。运行核心验证后使用 `python3 tools/verify_apple_executor.py`：12项Apple线程检查、9项JVM协议对照。iOS已有独立启动报告，线程协议仍为macOS证据，App保存接入见[DEV-022](docs/adr/0011-preview-owned-storage-pipeline.md)。
-
-## 历史增量记录
-
-以下为各节点当时结果，当前源码和验证范围以上方说明及进度为准。
 
 当前JVM209项测试/22 suites（canvas-core128、shared-core81）；Apple线程12项+Foundation IO6项为macOS证据。双端保存使用最新/在途/失败snapshot账本、有界IO和标题头读取，旧写回不能清除新内容。Android独立窗口/ART/历史/codec/会话/存储/目录报告12项，完整App流程21项，按实际产物SHA记录；不代替真机或生产恢复验收。下一步DEV-023列表复用，DEV-024分页文档域。
 

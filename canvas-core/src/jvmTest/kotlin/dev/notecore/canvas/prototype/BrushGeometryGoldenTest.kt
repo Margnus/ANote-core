@@ -7,7 +7,7 @@ import kotlin.test.*
 
 /** Checked-in specification values are read only. The builder never generates its own expectations. */
 class BrushGeometryGoldenTest {
-    private fun resource(name: String): String = checkNotNull(javaClass.classLoader.getResourceAsStream(name))
+    private fun resource(name: String): String = checkNotNull(javaClass.classLoader.getResourceAsStream("brush/$name"))
         .use { it.readBytes().decodeToString().replace("\r\n", "\n") }
     private fun JsonObject.text(name: String): String = getValue(name).jsonPrimitive.content
     private fun JsonArray.double(index: Int): Double = get(index).jsonPrimitive.double

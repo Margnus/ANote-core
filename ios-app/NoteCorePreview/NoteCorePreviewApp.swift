@@ -24,14 +24,171 @@ final class PreviewModel: ObservableObject {
     @Published var exportDocument: PreviewBackup?
     @Published var transferBusy = false
     private let directory: URL
+    private let beforeInkCompute: () throws -> Void
+    private let inkReleaseBoundary: (Bool) throws -> Void
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024)
     private var savedRoot: DocumentRoot?
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: 256 * 1024 * 1024,
-        onOwnerProgress: { [weak self] in self?.pumpWrites() })
-    init(directory: URL? = nil) {
+        onOwnerProgress: { [weak self] in self?.inkOwnerProgress(); self?.pumpWrites() })
+    private struct InkFrameKey: Equatable {
+        let document: String
+        let page: String
+        let revision: Int64
+        let surface: UUID
+        let width: Int32
+        let height: Int32
+        let originX: Double
+        let originY: Double
+        let pixelSize: Double
+        var rect: CGRect { CGRect(x: originX, y: originY, width: Double(width) * pixelSize, height: Double(height) * pixelSize) }
+    }
+    // One render responsibility may outlive its view. No retiring payload queue or new worker.
+    private var inkRenderer: AppleBrushRenderExperiment?
+    private var inkImage: AppleBrushImageExperiment?
+    private var inkPending: AppleBrushDispatchExperiment?
+    private var inkKey: InkFrameKey?
+    private var inkAttempt: InkFrameKey?
+    private var inkGeneration: Int64 = 0
+    private var inkLoggedGeneration: Int64 = -1
+    private var inkRetiring = false
+    private var inkRetryOnProgress = false
+    private weak var inkView: InkUIView?
+    private(set) var inkFramePublications = 0
+    private(set) var inkFrameDraws = 0
+    private(set) var inkRejectedTargets = 0
+    var inkChargedBytes: Int64 { precondition(Thread.isMainThread); return inkRenderer?.chargedBytes ?? 0 }
+    var inkOwnerRetained: Bool { precondition(Thread.isMainThread); return inkRenderer != nil }
+
+    /// Called only on the model owner after the shared executor's finite drain has returned.
+    private func inkOwnerProgress() {
+        guard let renderer = inkRenderer else { return }
+        _ = try! renderer.settleAfterDrain { [self] item, ack in
+            guard item === inkPending else { return }
+            inkPending = nil
+            guard !inkRetiring, ack == "PUBLISHED", let key = inkKey, key == inkAttempt,
+                  current?.documentId == key.document, current?.changeVersion == key.revision,
+                  current?.currentPageId.value == key.page, inkView?.surfaceIdentity == key.surface else { return }
+            switch try! AppleBrushImageExperiment.create(renderer, item, trackedSource: true,
+                onSourceRelease: { [weak self] in self?.inkSourceReleased() }, releaseBoundary: inkReleaseBoundary) {
+            case .ready(let image): inkImage = image; inkFramePublications += 1
+            case .cleanupRequired(let image): inkImage = image // Retain UNKNOWN and its charge.
+            case .rejected: break // The canonical Path remains the complete visible result.
+            }
+        }
+        if inkRetiring && renderer.isDrained {
+            inkRenderer = nil; inkRetiring = false
+            logInkDrained()
+        }
+        if inkRetryOnProgress { inkRetryOnProgress = false; inkAttempt = nil }
+        inkView?.setNeedsDisplay()
+    }
+    private func inkSourceReleased() {
         precondition(Thread.isMainThread)
+        if inkImage?.released == true { inkImage = nil }
+        #if DEBUG
+        NSLog("NOTECORE_RENDER source-released charged=%lld", inkChargedBytes)
+        #endif
+        inkOwnerProgress()
+    }
+    func detachInk(surface: UUID) {
+        precondition(Thread.isMainThread)
+        guard inkView?.surfaceIdentity == surface else { return }
+        retireInk(); inkView = nil
+    }
+    private func retireInk() {
+        precondition(Thread.isMainThread)
+        inkKey = nil; inkAttempt = nil; inkPending = nil; inkRetryOnProgress = false
+        if let image = inkImage, (try! image.close()) { inkImage = nil }
+        if let renderer = inkRenderer {
+            inkRetiring = true; try! renderer.close()
+            if renderer.isDrained { inkRenderer = nil; inkRetiring = false; logInkDrained() }
+        }
+    }
+    private func logInkDrained() {
+        #if DEBUG
+        NSLog("NOTECORE_RENDER owner-drained charged=%lld", inkChargedBytes)
+        #endif
+    }
+    #if DEBUG
+    func retainInkSourceForTesting(_ retain: (CGDataProvider) -> Void) throws {
+        try inkImage?.retainSourceForTesting(retain)
+    }
+    #endif
+    func resumeFromBackground() { precondition(Thread.isMainThread); inkView?.setNeedsDisplay() }
+    @discardableResult func reconcileInkRelease() -> Bool {
+        precondition(Thread.isMainThread)
+        guard let image = inkImage, (try! image.reconcileReleased()) else { return false }
+        inkImage = nil; inkOwnerProgress(); return true
+    }
+
+    /// Only the callback-tracked provider holder is eligible for UIKit presentation.
+    /// The independent CPU holder's bitmap gate remains unchanged.
+    func drawCommittedInk(_ context: CGContext, note: PagedPreviewNotebook, view: InkUIView) -> Bool {
+        precondition(Thread.isMainThread)
+        guard current === note else { return false }
+        if inkView !== view {
+            retireInk(); inkView = view
+        }
+        let viewport = view.viewport, density = Double(view.contentScaleFactor)
+        let width = ceil(view.bounds.width * density), height = ceil(view.bounds.height * density)
+        let pixelSize = 1 / (viewport.scale * density)
+        guard width.isFinite, height.isFinite, width >= 1, height >= 1, width <= 4096, height <= 4096,
+              width * height <= 4194304, pixelSize.isFinite, pixelSize >= 0.0001, pixelSize <= 1e6 else { return false }
+        let key = InkFrameKey(document: note.documentId, page: note.currentPageId.value, revision: note.changeVersion,
+            surface: view.surfaceIdentity, width: Int32(width), height: Int32(height),
+            originX: -viewport.offsetX / viewport.scale, originY: -viewport.offsetY / viewport.scale, pixelSize: pixelSize)
+        if inkRetiring { return false } // A new document cannot create another pool before the old owner drains.
+        if key != inkKey {
+            guard inkGeneration < Int64.max else { return false }
+            inkGeneration += 1; inkKey = key; inkAttempt = nil; inkPending = nil
+            if let image = inkImage {
+                guard try! image.close() else { retireInk(); return false }
+                inkImage = nil
+            }
+            let root = note.snapshot()
+            let frame = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision, viewportVersion: inkGeneration,
+                sessionGeneration: navigationEpoch, surfaceGeneration: inkGeneration, requestSequence: inkGeneration)
+            if let renderer = inkRenderer { try! renderer.expect(frame, layer: note.currentPage.layerId) }
+            else {
+                inkRenderer = try! AppleBrushRenderExperiment(frame: frame, layer: note.currentPage.layerId,
+                    totalBytes: 64 * 1024 * 1024, maxJobs: 2, residentBytes: 48 * 1024 * 1024, sharedExecutor: executor)
+            }
+        }
+        if let image = inkImage, key == inkAttempt {
+            context.saveGState()
+            context.translateBy(x: key.rect.minX, y: key.rect.maxY); context.scaleBy(x: 1, y: -1)
+            let drawn = try! image.drawUIKit(context, in: CGRect(origin: .zero, size: key.rect.size))
+            context.restoreGState()
+            if drawn {
+                inkFrameDraws += 1
+                #if DEBUG
+                if inkLoggedGeneration != inkGeneration {
+                    inkLoggedGeneration = inkGeneration
+                    NSLog("NOTECORE_RENDER frame-presented w=%ld h=%ld charged=%lld bitmap=%d source=provider", Int(key.width), Int(key.height), inkChargedBytes, context.data == nil ? 0 : 1)
+                }
+                #endif
+                return true
+            }
+        }
+        if inkAttempt != key, let renderer = inkRenderer {
+            inkAttempt = key
+            let root = note.snapshot()
+            let frame = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision, viewportVersion: inkGeneration,
+                sessionGeneration: navigationEpoch, surfaceGeneration: inkGeneration, requestSequence: inkGeneration)
+            inkPending = try! renderer.submitPage(scene: root.scene, frame: frame, layer: note.currentPage.layerId,
+                originX: key.originX, originY: key.originY, width: key.width, height: key.height, pixelSize: key.pixelSize,
+                nativeAllowance: Int64(key.width) * Int64(key.height) * 8, workingBytes: 2 * 1024 * 1024,
+                maxEdgeTests: 100000000, beforeCompute: beforeInkCompute)
+            inkRetryOnProgress = inkPending == nil
+        }
+        return false
+    }
+    init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }) {
+        precondition(Thread.isMainThread)
+        self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
         self.directory = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PreviewNotes", isDirectory: true)
         refresh()
     }
@@ -234,9 +391,10 @@ final class PreviewModel: ObservableObject {
     func close() {
         current?.cancelStroke()
         guard save(), current?.retire() == true else { return }
+        retireInk()
         navigationEpoch += 1; current = nil; savedRoot = nil; refresh()
     }
-    func flushForBackground() { current?.cancelStroke(); save() }
+    func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
     func editPage(content: Bool = true, _ edit: (PagedPreviewNotebook) -> Bool) {
         guard let note = current else { return }
         note.cancelStroke()
@@ -252,7 +410,9 @@ struct NoteCorePreviewApp: App {
     @Environment(\.scenePhase) private var scenePhase
     var body: some Scene {
         WindowGroup { PreviewRoot(model: model).preferredColorScheme(.light) }
-            .onChange(of: scenePhase) { _, phase in if phase != .active { model.flushForBackground() } }
+            .onChange(of: scenePhase) { _, phase in
+                if phase != .active { model.flushForBackground() } else { model.resumeFromBackground() }
+            }
     }
 }
 
@@ -303,31 +463,36 @@ struct PreviewRoot: View {
                         Button("适合页面") { viewportRatio = 0; viewportRequest += 1 }
                         Text("双指缩放").font(.caption).foregroundStyle(.secondary)
                     }.padding(.horizontal)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
-                            Button("上一页") { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex - 1).id) } }
-                                .disabled(note.currentPageIndex == 0)
-                            Text("\(note.currentPageIndex + 1)/\(note.pageCount)").accessibilityLabel("当前页码")
-                            Button("下一页") { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex + 1).id) } }
-                                .disabled(note.currentPageIndex == note.pageCount - 1)
-                            Button("加页") { model.editPage { $0.insertPage() } }
-                            Button("复制页") { model.editPage { $0.doCopyCurrentPage() } }
-                            Button("删页") { note.cancelStroke(); deletingPage = true }
-                            Button("前移") { model.editPage { $0.moveCurrentPage(before: $0.page(index: $0.currentPageIndex - 1).id) } }
-                                .disabled(note.currentPageIndex == 0)
-                            Button("后移") { model.editPage {
-                                $0.moveCurrentPage(before: $0.currentPageIndex + 2 < $0.pageCount ? $0.page(index: $0.currentPageIndex + 2).id : nil)
-                            } }.disabled(note.currentPageIndex == note.pageCount - 1)
-                            Menu("纸张") {
-                                Button("空白") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .blank) } }
-                                Button("横线") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .ruled) } }
-                                Button("方格") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .grid) } }
-                                Button("点阵") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .dots) } }
-                            }
-                        }.padding(.horizontal)
-                    }.frame(minHeight: 36)
+                    HStack(spacing: 8) {
+                        Button { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex - 1).id) } } label: {
+                            Image(systemName: "chevron.left").frame(width: 44, height: 44)
+                        }.accessibilityLabel("上一页").disabled(note.currentPageIndex == 0)
+                        Text("\(note.currentPageIndex + 1)/\(note.pageCount)").monospacedDigit().fixedSize()
+                            .accessibilityLabel("当前页码").accessibilityValue("\(note.currentPageIndex + 1)/\(note.pageCount)")
+                        Button { model.editPage(content: false) { $0.selectPage(id: $0.page(index: $0.currentPageIndex + 1).id) } } label: {
+                            Image(systemName: "chevron.right").frame(width: 44, height: 44)
+                        }.accessibilityLabel("下一页").disabled(note.currentPageIndex == note.pageCount - 1)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                Button("加页") { model.editPage { $0.insertPage() } }
+                                Button("复制页") { model.editPage { $0.doCopyCurrentPage() } }
+                                Button("删页") { note.cancelStroke(); deletingPage = true }
+                                Button("前移") { model.editPage { $0.moveCurrentPage(before: $0.page(index: $0.currentPageIndex - 1).id) } }
+                                    .disabled(note.currentPageIndex == 0)
+                                Button("后移") { model.editPage {
+                                    $0.moveCurrentPage(before: $0.currentPageIndex + 2 < $0.pageCount ? $0.page(index: $0.currentPageIndex + 2).id : nil)
+                                } }.disabled(note.currentPageIndex == note.pageCount - 1)
+                                Menu("纸张") {
+                                    Button("空白") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .blank) } }
+                                    Button("横线") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .ruled) } }
+                                    Button("方格") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .grid) } }
+                                    Button("点阵") { model.editPage { $0.setPaper(width: $0.currentPage.width, height: $0.currentPage.height, paper: .dots) } }
+                                }
+                            }.padding(.trailing)
+                        }
+                    }.padding(.horizontal).frame(minHeight: 44)
                     Text(model.status).font(.caption).foregroundStyle(.secondary)
-                    NativeInkCanvas(note: note, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
+                    NativeInkCanvas(note: note, renderModel: model, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
                         changed: { model.changed() }, failed: { model.status = $0 })
                         .id(note.documentId)
                         .padding(.horizontal, 12).padding(.bottom, 8)

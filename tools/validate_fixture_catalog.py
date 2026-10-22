@@ -4,18 +4,16 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from verification_hash import verification_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
-CRLF = bytes([13, 10])
-LF = bytes([10])
 
 def load(relative):
     return json.loads((ROOT/relative).read_text(encoding='utf-8'))
 
 def main():
     trace = load('fixtures/input/manifest.json')
-    # The recorded digest is over the LF form; a Windows checkout may hold CRLF.
-    payload = (ROOT/'fixtures/input'/trace['file']).read_bytes().replace(CRLF, LF)
+    payload = verification_bytes(ROOT/'fixtures/input'/trace['file'])
     assert len(payload) == trace['bytes'], 'fixture byte length mismatch'
     assert hashlib.sha256(payload).hexdigest() == trace['sha256'], 'fixture digest mismatch'
     scale = load('fixtures/scale/manifest.json')

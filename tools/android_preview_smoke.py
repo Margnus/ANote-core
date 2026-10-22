@@ -134,7 +134,7 @@ def main():
     assert len(set(imported_ids)) == 2
     corrupt_name = 'NoteCoreCorrupt-' + time.strftime('%Y%m%d%H%M%S') + '.ncp'
     with tempfile.TemporaryDirectory(prefix='notecore-backup-smoke-') as tmp:
-        corrupt = Path(tmp)/corrupt_name; corrupt.write_text('NCPREVIEW\t9\ninvalid\n')
+        corrupt = Path(tmp)/corrupt_name; corrupt.write_text('NCPREVIEW\t9\ninvalid\n', encoding='utf-8')
         adb('push', str(corrupt), '/sdcard/Download/' + corrupt_name)
     click(text('导入备份')); click(text(corrupt_name))
     wait(lambda tree: next((n for n in tree.iter('node') if n.attrib.get('text', '').startswith('导入失败：')), None), 'Corrupt backup was not rejected')
@@ -151,10 +151,10 @@ def main():
                          'repeated_import_unique_identity', 'corrupt_backup_rejected', 'original_preserved_after_import', 'viewport_toolbar'],
               'imported_document_ids': imported_ids,
               'saved_strokes': 2, 'saved_real_points': sum(int(r[8]) for r in stroke_rows),
-              'document_sha256': hashlib.sha256(before.encode()).hexdigest(), 'screenshot': str(output.relative_to(ROOT)),
+              'document_sha256': hashlib.sha256(before.encode()).hexdigest(), 'screenshot': output.relative_to(ROOT).as_posix(),
               'real_stylus_verified': False, 'device_performance_verified': False,
               'power_loss_recovery_verified': False}
-    (ROOT/'reports/android-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    (ROOT/'reports/android-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report, ensure_ascii=False, indent=2), flush=True)
 
 if __name__ == '__main__': main()

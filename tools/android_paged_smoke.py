@@ -165,10 +165,10 @@ def main():
                   'page_copy_undo_redo', 'page_delete_undo', 'move_forward_backward_stable_ids', 'all_pages_force_stop_reopen',
                   'whole_document_system_export_from_last_page', 'multi_page_import_fresh_ids_and_original_preserved'],
               'document_sha256': hashlib.sha256(final.encode()).hexdigest(), 'pages': 3, 'strokes': 3,
-              'screenshot': str(screenshot.relative_to(ROOT)), 'screenshot_sha256': hashlib.sha256(image).hexdigest(),
+              'screenshot': screenshot.relative_to(ROOT).as_posix(), 'screenshot_sha256': hashlib.sha256(image).hexdigest(),
               'event_source': 'Android input taps/swipes through real native UI; dedicated emulator',
               'device_performance_verified': False, 'ios_paged_ui_verified': False}
-    (ROOT/'reports/android-paged-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    (ROOT/'reports/android-paged-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report, ensure_ascii=False), flush=True)
 
 

@@ -2,7 +2,7 @@
   "phase": "C0/C1 reference prototype",
   "status": "passed",
   "jvm_contract_tests": {
-    "tests": 236,
+    "tests": 311,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -11,27 +11,72 @@
     {
       "suite": "dev.notecore.canvas.prototype.BoundedOwnerExecutorTest",
       "tests": 16,
-      "time_seconds": 0.1
+      "time_seconds": 0.095
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushEnvelopePocTest",
+      "tests": 7,
+      "time_seconds": 0.053
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushGeometryGoldenTest",
       "tests": 1,
-      "time_seconds": 0.105
+      "time_seconds": 0.1
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushGeometryTest",
       "tests": 12,
-      "time_seconds": 0.027
+      "time_seconds": 0.029
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushGoldenTest",
+      "tests": 1,
+      "time_seconds": 0.117
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushPathPlanTest",
       "tests": 7,
-      "time_seconds": 0.057
+      "time_seconds": 0.005
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushPathPocTest",
+      "tests": 4,
+      "time_seconds": 0.082
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushReductionPocTest",
+      "tests": 7,
+      "time_seconds": 0.141
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushRenderExecutorPocTest",
+      "tests": 7,
+      "time_seconds": 0.15
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushRenderOwnerPocTest",
+      "tests": 14,
+      "time_seconds": 0.219
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushTileCachePocTest",
+      "tests": 8,
+      "time_seconds": 0.043
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushTilePixelsPocTest",
+      "tests": 4,
+      "time_seconds": 0.04
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.ChunkedBrushPocTest",
+      "tests": 8,
+      "time_seconds": 0.047
     },
     {
       "suite": "dev.notecore.canvas.prototype.DocumentCloseContractTest",
       "tests": 15,
-      "time_seconds": 0.015
+      "time_seconds": 0.016
     },
     {
       "suite": "dev.notecore.canvas.prototype.GeometryContractTest",
@@ -39,9 +84,14 @@
       "time_seconds": 0.007
     },
     {
+      "suite": "dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest",
+      "tests": 9,
+      "time_seconds": 0.103
+    },
+    {
       "suite": "dev.notecore.canvas.prototype.InputFixtureReplayTest",
       "tests": 1,
-      "time_seconds": 0.06
+      "time_seconds": 0.067
     },
     {
       "suite": "dev.notecore.canvas.prototype.InputReplayContractTest",
@@ -51,108 +101,114 @@
     {
       "suite": "dev.notecore.canvas.prototype.PresentationContractTest",
       "tests": 6,
-      "time_seconds": 0.003
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.canvas.prototype.PreviewViewportContractTest",
       "tests": 6,
-      "time_seconds": 0.007
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.canvas.prototype.ResourceLeaseContractTest",
       "tests": 15,
-      "time_seconds": 0.009
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.canvas.prototype.ResourceScheduleContractTest",
       "tests": 5,
-      "time_seconds": 0.016
+      "time_seconds": 0.015
     },
     {
       "suite": "dev.notecore.canvas.prototype.ScaleFixtureReplayTest",
       "tests": 3,
-      "time_seconds": 0.669
+      "time_seconds": 0.525
     },
     {
       "suite": "dev.notecore.canvas.prototype.SceneCompositionTest",
       "tests": 4,
-      "time_seconds": 0.002
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.canvas.prototype.SceneContractTest",
       "tests": 9,
-      "time_seconds": 0.003
+      "time_seconds": 0.001
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.SpatialIndexPocTest",
+      "tests": 6,
+      "time_seconds": 0.065
     },
     {
       "suite": "dev.notecore.canvas.prototype.SubmissionQueueContractTest",
       "tests": 15,
-      "time_seconds": 0.024
+      "time_seconds": 0.017
     },
     {
       "suite": "dev.notecore.canvas.prototype.WeightedLruContractTest",
       "tests": 6,
-      "time_seconds": 0.017
-    },
-    {
-      "suite": "dev.notecore.canvas.prototype.PreviewNotebookContractTest",
-      "tests": 12,
-      "time_seconds": 0.353
+      "time_seconds": 0.021
     },
     {
       "suite": "dev.notecore.canvas.prototype.PreviewSaveLedgerTest",
       "tests": 12,
-      "time_seconds": 0.048
+      "time_seconds": 0.117
     },
     {
       "suite": "dev.notecore.document.DocumentAuthorityTest",
       "tests": 18,
-      "time_seconds": 0.026
+      "time_seconds": 0.02
     },
     {
       "suite": "dev.notecore.document.DocumentHistoryTest",
       "tests": 14,
-      "time_seconds": 0.02
+      "time_seconds": 0.013
     },
     {
       "suite": "dev.notecore.document.DocumentOwnerThreadTest",
       "tests": 3,
-      "time_seconds": 0.021
+      "time_seconds": 0.01
+    },
+    {
+      "suite": "dev.notecore.document.LegacyPreviewReaderTest",
+      "tests": 13,
+      "time_seconds": 0.256
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReadTest",
-      "tests": 4,
-      "time_seconds": 0.008
+      "tests": 3,
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PagedPreviewCodecTest",
       "tests": 16,
-      "time_seconds": 0.56
+      "time_seconds": 0.429
     },
     {
       "suite": "dev.notecore.document.PagedPreviewNotebookTest",
       "tests": 11,
-      "time_seconds": 0.008
+      "time_seconds": 0.013
     },
     {
       "suite": "dev.notecore.document.PagedSaveLedgerTest",
       "tests": 9,
-      "time_seconds": 0.004
+      "time_seconds": 0.005
     }
   ],
   "module_jvm_tests": {
-    "canvas-core": 137,
+    "canvas-core": 212,
     "shared-core": 99
   },
   "architecture": {
     "status": "passed",
-    "common_source_files": 21,
-    "imports_checked": 18,
+    "common_source_files": 31,
+    "imports_checked": 25,
     "errors": [],
     "modules": [
       "canvas-core",
       "shared-core"
     ],
     "project_dependency_direction": "shared-core -> canvas-core only",
+    "retired_single_page_stack_absent": true,
     "scope": "commonMain imports and direct project dependencies; not a transitive bytecode audit"
   },
   "fixture_catalog": {
@@ -163,48 +219,96 @@
     "legacy_anchors": 12,
     "scope": "catalog hashes and selected cross-schema facts; no migration/legacy runtime/device validation"
   },
+  "portable_inputs": {
+    "status": "passed",
+    "checks": [
+      "utf8_text_lf_crlf_same_verification_hash",
+      "binary_and_interchange_artifacts_remain_byte_exact",
+      "standalone_cr_is_not_silently_changed",
+      "tool_text_io_explicit_utf8",
+      "stamp_keys_use_platform_independent_forward_slashes"
+    ],
+    "text_reads": 44,
+    "text_writes": 42,
+    "windows_execution_verified": false,
+    "scope": "synthetic LF/CRLF and explicit UTF-8 code checks on current host; no native cross-OS build claim"
+  },
+  "verification_text_hash_policy": "UTF-8 text with CRLF normalized to LF; binary fixtures byte exact",
   "source_sha256": {
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "4e3e22ae481fa2a3f5aab66266a8f93d8e7d5cf822a282f752d6c39b8243ff8e",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushGeometry.kt": "eb9516d210d81e3e994a36831fa0847dfd142120848a92529e52c91bd5f4d918",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPlan.kt": "58893de61e0924fb3903b5243ea3ce14ce1be7e3c7fdd478602f69e476bf8ddd",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "339eff8c0b2e4b3d73b8f24a77c1d440ed08d3038d67d8ac649dd57c89a28f17",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushReductionPoc.kt": "b6d2bfa6bf4e5bf7946e1d711affd9fa52b899a2cf1da33e6c5cced7d7882844",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "1a400ca096b963410cf51d09fde8cdeea30a6b995a29b51825156d8f25a2e521",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTileCachePoc.kt": "a9985d79490f0cce2198a591c90ed2e9d7576a8525f83107b0bd696f0b5c5def",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "55c13cd2680c7f034a61d401ab6f113ebedfc893899762190caffc7a1f94e5f5",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "1c5418e5b485eb8ff8feed9910286ef0676d0417a0c851e9e1c3d57877644e21",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "65f6b68f001eb090a098816857e81e6da69da8ab603b8b274d70221b2cca5549",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "30f990e632feb680a7b9d39836e278f861c880b2fa50a0c252f83c11dc20b0b1",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "f3bf1852df5ce9223a1de2a6b462ccfb2eaeb40c0405ce11e8a163ea0a187bd7",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "c30e200ec90ec5e92dab0dd9751b9288737d56d4900200e94194ea4b472d78fc",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "3eb5bdb8cf04c72d17ad520bc06077ee68ab962fd5e361354a8ad42e1ceda689",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "127897258aaff666d03829023c0ec8275446fd01301c1843a7fca0ebd9a51a7f",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "48b7f6e203d6781b38b2121da8e0b2d601854779fe08dc96e8b6fc3e346ead06",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
     "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "dc996123a270f32010ed21591cf9357cd1fbb91024dc1e695691351a85e1e7da",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "91af3a657c5f9dc6e6b716f3276ee9a4c1c7b984ef996a9e163e6091dcc0e848",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "d5e9d113dd7b77f7466abdd5100037140540a8c81989543e08e6657b9446954b",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "1c5291fe1c2809ec458983ae6e15627697466e2b4899d5d67d82b1088154b5c6",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f"
   },
   "verification_input_sha256": {
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePocTest.kt": "34d7fe05e5bc34c957b904628f853724cba6d9aa62149d03fc3cfc50b06f3050",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/BrushTileBitmapTest.kt": "cd087f5a63b5ab046ccb3eee51ad36bb2582cbea7a7bbab7a1ff1ad5e58aa5bb",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "ef408105e247ce7df4e13f498efb6468f431bef122750bfeb46bab7ae14a0ce2",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/RenderViewportTraceTest.kt": "86467b4221198601aa798ef244548e8853f79482ac7df461e72ded7dad78e98e",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePoc.kt": "0895d5afbcab6901c29d0b8735b048deb1345fd6cabb7b04abbae0d1cb137647",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidInkFrameExperiment.kt": "c719233f65b2e82c90210a88942d811698e550d2732ef91a938a2598512065f1",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "4e3e22ae481fa2a3f5aab66266a8f93d8e7d5cf822a282f752d6c39b8243ff8e",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushGeometry.kt": "eb9516d210d81e3e994a36831fa0847dfd142120848a92529e52c91bd5f4d918",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPlan.kt": "58893de61e0924fb3903b5243ea3ce14ce1be7e3c7fdd478602f69e476bf8ddd",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "339eff8c0b2e4b3d73b8f24a77c1d440ed08d3038d67d8ac649dd57c89a28f17",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushReductionPoc.kt": "b6d2bfa6bf4e5bf7946e1d711affd9fa52b899a2cf1da33e6c5cced7d7882844",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "1a400ca096b963410cf51d09fde8cdeea30a6b995a29b51825156d8f25a2e521",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTileCachePoc.kt": "a9985d79490f0cce2198a591c90ed2e9d7576a8525f83107b0bd696f0b5c5def",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "55c13cd2680c7f034a61d401ab6f113ebedfc893899762190caffc7a1f94e5f5",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "1c5418e5b485eb8ff8feed9910286ef0676d0417a0c851e9e1c3d57877644e21",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "65f6b68f001eb090a098816857e81e6da69da8ab603b8b274d70221b2cca5549",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "30f990e632feb680a7b9d39836e278f861c880b2fa50a0c252f83c11dc20b0b1",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "f3bf1852df5ce9223a1de2a6b462ccfb2eaeb40c0405ce11e8a163ea0a187bd7",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "c30e200ec90ec5e92dab0dd9751b9288737d56d4900200e94194ea4b472d78fc",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "3eb5bdb8cf04c72d17ad520bc06077ee68ab962fd5e361354a8ad42e1ceda689",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "127897258aaff666d03829023c0ec8275446fd01301c1843a7fca0ebd9a51a7f",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "48b7f6e203d6781b38b2121da8e0b2d601854779fe08dc96e8b6fc3e346ead06",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePocTest.kt": "a0af32c6a8a36656650053134560bd77f5df827e4b86898ca3f31e592b6eb739",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushGeometryTest.kt": "8d438ea195c992d26cdeb3917465d3067f44d8460860278b1b6f4733e4d68a53",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushPathPlanTest.kt": "8c8294a0584e33c1fa29d60110a09cc68e72277469716036904f713a2358e6f0",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushPathPocTest.kt": "11bd522704e60bc701175ef63fdc64b2decab4e7f269a7bcd5b8e267956332c0",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushReductionPocTest.kt": "7700ad8fef37abb90162e13b5b0f97b3e8e6b736a4fe889e5547092ff29d5fdd",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPocTest.kt": "77efb2f2deb516bf759afceb3bc3ca237ebfe1d0c4838ca72104a30ec952c1f0",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushTileCachePocTest.kt": "423393291161f4bc7abb1876399e090aa2a92e4fb1cb6f3501b21610f32aed34",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPocTest.kt": "1ce1a529cf49be6e3f589a54d477c8d9641da89198dee28b29bf16dde493e81b",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPocTest.kt": "57831c9c16cb237f2dcf6d796a27b958261a9191842065de59262b5a20a10636",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/ControlledResourceBackend.kt": "a8edb740d7d1d06da46dec475887ceed9fa2ca7c447d8cd9d948182c8705a81a",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/DocumentCloseContractTest.kt": "2b818d969cdc14b82835ffb2298edecd02a809af13e4e317cf3d7281969f31dd",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/GeometryContractTest.kt": "d42e451ff476a21f7110abb3cdd13792dfa1e508431e9a18f1a56c77f27d939c",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPocTest.kt": "9b3de853ab3db7595fc507c9fc34383c7e92e985bfa74517dd829bb96fefd137",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/InputReplayContractTest.kt": "4647f65873f50ee98480435f859d403ae6d6db22af0ca15727b64ca30cede164",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PresentationContractTest.kt": "c6ce484c9886fa6823f99d7550c0b9b6626eaba182da3a1191a00794b5ab2eeb",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PreviewViewportContractTest.kt": "b01cc0423022a8d031d153addc7fc7129eed4877954dd2b848320a0f540d0bf4",
@@ -212,62 +316,93 @@
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/ResourceScheduleContractTest.kt": "7f383d271a39cc00ef1a343a1f152fc756134bdb2a551465315d872e1eb91f53",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/SceneCompositionTest.kt": "b714913f96b016d1d048cecf005419fe78830e24170f8d6fca4fad92157cae05",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/SceneContractTest.kt": "647e753d9f839cd98a969f24ed75a6db5f736496eaa1e05c603ced322b35c905",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/SpatialIndexPocTest.kt": "9bdb9ad382e48daf43d13b881edb6c8823f9dcae21cb95cbbc045af3ee484bf1",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/SubmissionQueueContractTest.kt": "d0656da56400839949c7cbd4022d164ced80c3f2414866cebac775281785088e",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/WeightedLruContractTest.kt": "d266f9fcd5abdea40b72258640f046f417790eb75af7c57e791141c56a64ec3c",
-    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "311d1ea9195ae1933f13227a9d7197441c99ef61c97fd249032643365ea79be2",
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "4379c026b33b26b106da3759812c628fdf845232b93b00dd3f62fb01d3fd9e63",
+    "canvas-core/src/iosSimulatorArm64Test/kotlin/dev/notecore/canvas/prototype/BrushRenderThreadTest.kt": "6a2b758a3329f3ecc6b651f430758a6878618d6464e4b447aba28e8642a5b2a2",
+    "canvas-core/src/iosSimulatorArm64Test/kotlin/dev/notecore/canvas/prototype/BrushTileCGImageTest.kt": "9279e0657410720c5b26d4aaccaf54ecd7891b613cdc39a27acddc26fe12f367",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPoc.kt": "0b4c245d31d595a864513099b945a2d0650b704908f26909348e39bba71a7c22",
+    "canvas-core/src/jvmAndAndroidTest/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPocTest.kt": "91f22393a9ff797811c0c6df6d757599d2748803f58135c09108a557f1565354",
     "canvas-core/src/jvmMain/kotlin/dev/notecore/canvas/prototype/PrototypeDemo.kt": "4a630c7b15826044da7d3d41c494cdce051bd8f79db5f8119a35ded32653d338",
     "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutorTest.kt": "45f439070281e4d11e10aa8a0a62bdd0538f846ad31f0a0d927cb425a862673a",
-    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BrushGeometryGoldenTest.kt": "708c59c5d7d1ac0dd42755aa3b94560e012df18b3a70ef13955095b8a5b110b8",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BrushGeometryGoldenTest.kt": "06cce5b96fdbd1a5c3fbefb97301f55b7cf38bf2b3d7076a7816b5e11e05edd8",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BrushGoldenTest.kt": "6d2cced4be31375bf2557bb74b020f1055139ad8c79038b7f44306a7d4f4f3af",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BrushPathCosts.kt": "f89b1f570ecacb3c12f8630c6f5868cefa2d77a39d1a27f5e0b2f9654565405d",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BrushPathFixtures.kt": "d718ab35fea1f7c16658d4b5db5172fb00d46988ce302e3e46659b9818024485",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BrushReductionCosts.kt": "ef2f50ad7c6ab330507aacaa911ccf096eb6d04ee7080c48fa1965128888bdeb",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/BrushTileCacheCosts.kt": "a64d6d333fc0b4c7621aba4a7fb78b95efe40073f13e6077bd3848caf044856d",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/ChunkedBrushCosts.kt": "d4958d59a7885c1399d10f61b364e75bd4a36ac4f45fd383f2192bc01f4fcd48",
     "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/InputFixtureReplayTest.kt": "0aaf90e00d7c68f04a5493b8e207c62271ac2599035b28a92199cfb86a35e8c1",
     "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/ScaleFixtureReplayTest.kt": "62f7856987a131e350b39b9a03576ce84163abd655223fa2662d953103c0cabc",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/SpatialIndexBenchmark.kt": "dfca5a55fb2812c5b1dd706e5a4b1084f03f8125e337d11aff0f0dcbfa38c7d6",
     "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "b34f0e03c5bafa7208d5fd47dfc567c63948bda476803cf1c52eb34e2630f37a",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "cf923c4890182f1bd0f135070484a73e836ac48be75ff494fecf234e531ca523",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "dc996123a270f32010ed21591cf9357cd1fbb91024dc1e695691351a85e1e7da",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "91af3a657c5f9dc6e6b716f3276ee9a4c1c7b984ef996a9e163e6091dcc0e848",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "d5e9d113dd7b77f7466abdd5100037140540a8c81989543e08e6657b9446954b",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "1c5291fe1c2809ec458983ae6e15627697466e2b4899d5d67d82b1088154b5c6",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
-    "shared-core/src/commonTest/kotlin/dev/notecore/canvas/preview/PreviewNotebook.kt": "d413512b7b0191db6a3b5b4ebaa609bd49e6220970de303d86646b2223337459",
-    "shared-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PreviewNotebookContractTest.kt": "41ce0056b4887b6682357756aa5bff7e50f7f50bf62a4e079357025af28ee3a6",
-    "shared-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PreviewSaveLedgerTest.kt": "818ca671daa270292b2ae55e856499316ecbafb6b3f5d92403657f5eafdfd978",
+    "shared-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PreviewSaveLedgerTest.kt": "5277e034105bda5ab0144b09db50180430bb6ebf90527902e71eb7d2c2554fbd",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentAuthorityTest.kt": "a27d6f9240c3cbc3342cb6ae273096b195cbecad5d95de9efbbe5fc5e935997f",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentHistoryTest.kt": "868fa5fa9381718502d1737d6db59d0585c6ecf8ec1e582f71250042790c30fa",
-    "shared-core/src/commonTest/kotlin/dev/notecore/document/LegacyPreviewReadTest.kt": "f30441662f835509e977a28a277a3e13c23cd329bf533eb14c4114e7493dcff7",
-    "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedPreviewCodecTest.kt": "b42ae126eff63743e15b852db7cefdba1c0680dd4d1168e454c76d5d68b84693",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/LegacyPreviewReaderTest.kt": "6d6b4306db4ebd59676a085e7c0fdbedfd8fabd8bd16dc44ff5a147f9dc33844",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/LegacyPreviewReadTest.kt": "7a8bc39198fdba8eec61b47d30acfbd515256f4801b240b889a7180ef4e7919a",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedPreviewCodecTest.kt": "b982c2bb5af8430af67066dc1817faccf61ceba81c1f4209a3e6f221768dfde8",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedPreviewNotebookTest.kt": "e0ea48a0ae742a1b3d22fa08fa3a3a14c1fa6d148246894a6500f4ab966bab2c",
-    "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedSaveLedgerTest.kt": "6624361935ab18f67be339e1feeb14ab800c5836a480bfe9c888b827344079bf",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedSaveLedgerTest.kt": "88024c2fa8151cd63ed0eeab9c75eadcc63900ad06e3e32f10cbf289c8083a03",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt": "f7eb1a0780a127267857972c5c410821d31628a1e6628a98e312870b64e135f7",
     "fixtures/brush/brush-golden.json": "ad1aadfbb8c9c85736660a25f708196fb1b33c56b53c5171da1c046165d80679",
     "fixtures/brush/brush-manifest.json": "e8e79de0926a62d7b28f43bbb8c1d166f95f930e3285b0bc47deb5bd419aec17",
+    "fixtures/geometry/brush-golden.json": "a6f6f1dabf01bf1ce7938d2d6ae2dd231ca20678d776208c8a090dc9c54788ee",
+    "fixtures/geometry/brush-paths.json": "396ab01fd7e56f964e623a8300c7f83ed6970df9c3c2e0e8e214b3cbebe0d8fa",
     "fixtures/input/manifest.json": "6e77f35eac7bfc41e25c304494e1dd5d69169827439fd06e3be7e392db215fdf",
     "fixtures/input/synthetic-traces.json": "f5608aa6d4707c3a71c95f80e4b54bb7ba33141b92c3fcb93b3aaca465a53bb6",
     "fixtures/legacy/source-schema.json": "7a5d8b5f2ca8ff6fe35b4777720a225831b9f4b81984fc0677b905fc8f5d70d8",
+    "fixtures/pdf/recipe.json": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8",
     "fixtures/scale/manifest.json": "6f8f33488894ea52701603f294b2b5a8b2035cf5a5260c87f3eb82926e2330e6",
     "fixtures/transfer/android-paged-v2.json": "be2ca34cf4628328b2aa1bf6fe08a1c9b04754956664a9890e3eef5817391016",
-    "tools/android_paged_smoke.py": "e5e8f838f0871e8af42c72602aa3fde1bcb550dda529a328be4768b9dde19f3e",
-    "tools/android_preview_smoke.py": "73b9788d7eb92eae25132afb25559a85a7ad1addf8eeb416edcbb0f3e1837ea5",
-    "tools/android_viewport_smoke.py": "efb928c85c9739adc5ebabacf40f25adee77daa66fe94a7bea537f16396e1d28",
-    "tools/check_architecture.py": "70be893c2cc627098b4ea95933a543804e16dab2d2b9b7238253bcea99fe9cbe",
+    "tools/android_paged_smoke.py": "52f19a2fa8b0a9380e9609ae9051ab8c43b5df79cb5d800f549c0371477760d2",
+    "tools/android_preview_smoke.py": "f2c71360b25e05011c69b5da2741f924edf399b7231416bc29f899184831cb8e",
+    "tools/android_viewport_smoke.py": "a86bf64dae5b7df942e5984a956fa967a37397b1ad8705b02d270be6908e0ebf",
+    "tools/audit_c1_evidence.py": "6554ec36a8295f97caa352ee57a2f6529761a913fa7f0ea8665fb80cc9822720",
+    "tools/check_architecture.py": "afb26011ba765de637dc5e4235c05d86e8f27e0f898e620e7c269dd5df859641",
     "tools/collect_android_brush_verification.py": "8cef33498229257bbc65c7fbdec6925149c1f2e6e20a979d1af4b180d032810b",
-    "tools/collect_verification.py": "7d47db2e25d1fc5dd8007fc01afe9a2ba281d676ba6c53f7d1872c6ffcd308bd",
-    "tools/generate_input_fixtures.py": "57a21e0208893c1c3f5d5c817cc3aa292e28133e9b31d8f9fdde610bcde0c810",
-    "tools/generate_scale_fixtures.py": "db9fd5778fee96cb9609cc6d696358c081e9f001399b6c09aebcc5d7f9cfbf06",
-    "tools/ios_runtime_smoke.py": "520c6ce25679f29be4a05db2a6a9acef4fb20211b8d773cf6aa8a6d96145c0d0",
-    "tools/package_android_preview.py": "794b8ae1a8f3ec520cbc81bebb9f857133b82e0c5cf9257e071d27f99fb80014",
-    "tools/package_ios_preview.py": "fb636c83a4fd09999252bd7ba123c867f5cb38ffc578ce501bf544eff1edcd03",
+    "tools/collect_ios_render_integration.py": "ffe71bcbabf970b05194bcadcefe2df39ff024eeffa6f5293451ce136b25f853",
+    "tools/collect_verification.py": "39d3f8bcfe398a8e9f00d75a5aec0ea171a1a01acd75f45330f73791e6fde252",
+    "tools/generate_input_fixtures.py": "a99b25ffe68dee924290d06f10a879d187acd1d43ed110d1c1cf999cdbcb323f",
+    "tools/generate_pdf_fixtures.py": "3787f27d293abc2c8ba994f67acba90847f102f76f00293eb4c0716ea8703d3a",
+    "tools/generate_scale_fixtures.py": "547b928c35c3ba4338a3f114f04d2aa76cbe667ad9037e3b111f62e6b369f1a9",
+    "tools/ios_runtime_smoke.py": "b483ddfa9f09a6512c3aabf75cb37d81cd77f62b829718830a80d7c999b0e472",
+    "tools/package_android_preview.py": "2c7482005c626e5de7dae08e2ed04d6d27d7ad2df622fae9b0e70688d798bfb7",
+    "tools/package_ios_preview.py": "1696e8be1b3fb84857faf548c7ddd5dd33affc7c8022baa5ac60c1a16e78faad",
     "tools/preview_brush_geometry.py": "29ba0cbc604cee0f79af0da06f63dc361050a93aa906d175a98c6bb69d4ec817",
-    "tools/snapshot_legacy_schema.py": "5c86b14a4b327ba0b3ce8266fb2738060e4f309e7e1b4e9fbbe81397cdcbbc5e",
-    "tools/validate_fixture_catalog.py": "f1db8e4281072c0e2e98dde942e2efa0d1cc9154635d85786b435c47ca83d51a",
-    "tools/verify_apple_executor.py": "1dfd591a1c0b25a0a502e931ad30fbf012291c579bc2c0789b6d6baf37bed092",
-    "tools/verify_apple_storage.py": "9ab3a0386d7e40f041d8aee8ea6e07f59fe9cd6f810782c810323aa973990704",
-    "tools/verify_ios_host.py": "8e6e5bb6edd8843c465df03eb4be2430e9bb2b2dcc2659bfa73890bda380baf5",
+    "tools/restore_ios_preview.py": "e1454fc86dd9a461ab22583d69deb926268be2d7ea7d7dfc98b62106646dc9bc",
+    "tools/snapshot_legacy_schema.py": "81fb2467d2402791cf2a3e885f58b8af4441c953108a02ea4c1fbf62d69d70af",
+    "tools/validate_fixture_catalog.py": "95ce88dcad1e35c996034e77aeee686766ac4d34f5f70f7b9c3b1d949f141aa3",
+    "tools/verification_hash.py": "b171b83f09852624b62338cfef12f9f4b92e624fb264390825cec0327e147a37",
+    "tools/verify_android_brush_common.py": "3eefb3e36481d9bb875690bfcfa74345976c81015aeb6a2bd8f952cc6039c3a6",
+    "tools/verify_android_render_target.py": "0c36091f6d1230a47530128a441d02db3fbb1266938bffdbf395e74b280f8a8e",
+    "tools/verify_apple_brush_common.py": "587855d739cf663f8f7164f0253dad529b3045dc969b531b3609aa94e06a0b94",
+    "tools/verify_apple_executor.py": "d4d5e6e685734b575ebfe160f6ea77c7e90ed627111bb18e5716f2fd25d593c9",
+    "tools/verify_apple_storage.py": "5dffedee7ea4cf5c9341eb3e5387052d1a64b0a61c43deb641cbf6e24f3e80cf",
+    "tools/verify_brush_paths_android.py": "038c92af91896d887be2d4f1a01868e274b84e0b26442b99e833c061767e8717",
+    "tools/verify_incremental_spatial_index.py": "6a8234da3f325522a2bbee1cf1320206a3241223d06ebc6c9175791a1603d367",
+    "tools/verify_ios_host.py": "8e124d136219f826854f19c982c2e3f14fe41628c5d482c43c2e0ecd548cb13f",
+    "tools/verify_offline_jvm.py": "bac747b8ca74763943879705cb1d31452c775fb2d8b0b14406b1cf5aa5125f94",
+    "tools/verify_pdf_capabilities.py": "e596758d2fce62d350fffc7108b2772c0e08493cb3e7bc57b87d904cd746e10d",
+    "tools/verify_portable_inputs.py": "29c634f24f4da4bba59835f3049ab6f940bd2a1f93ab796decdd51105e045303",
+    "tools/verify_render_viewport_trace.py": "d4b8a9e66fdf1e5a06800b0c72f737ae3ac1ae94d58a02d071799e77c3f93e81",
+    "tools/verify_sqlite_capabilities.py": "2ef27ae89aa73712942a55f4f7eedf0e6706261a2d4c7cc04507fa133c24c11e",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
-    "canvas-core/build.gradle.kts": "8f96cd84d79d6e723a8917b661c328a9f75e753c305d30895591352488f7e309",
+    "canvas-core/build.gradle.kts": "ac4f2148968181b43b165d52d086f7f48e120ff85289e2e544bf3ec974694709",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
     "gradle.properties": "a29e188235a52da45ce914db097aa8f585297256b2fcb469a51048bf88f542b0",
-    "ci/verify.sh": "8552b90a333d4c4525dc84be7d37ae39e388feddc7ba9c35f0663b72db586afe",
+    "ci/verify.sh": "f057729a584be1e8a184cd720149cd23407e287f1db090dfda2b36e3572fb8c5",
     ".generated-fixtures/scale/S1-ink-current-page.bin": "c1028effd9f94a1d11df339e45884afdfb940ba3073a57da59102b54cebf2f40",
     ".generated-fixtures/scale/S2-ink-dense-page.bin": "22eea352e0ded47f34cabc0c8b543de0126a658377a6ea286cf60130a17c6725",
     ".generated-fixtures/scale/S9-ink-long-stroke.bin": "49e5298371b35f407815f66e14839522dca2201df654094ed4de675e732c65a2",

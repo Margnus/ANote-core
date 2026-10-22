@@ -1,0 +1,159 @@
+{
+  "status": "passed",
+  "trace_id": "dev034-fixed-viewport-v1",
+  "source_report_sha256": {
+    "reports/android-brush-common-tests.json": "50d9a9809dc16e9677ce694be085f46dc8538492e117056a59b4280925cf5485",
+    "reports/ios-host-tests.json": "b1ce1b934e0b5515c578b46ba0aca8d2ee7b721ce5916ff82b3b6b6a0b68ee55",
+    "tools/verify_render_viewport_trace.py": "d4b8a9e66fdf1e5a06800b0c72f737ae3ac1ae94d58a02d071799e77c3f93e81"
+  },
+  "matching_platform_events": [
+    {
+      "event": "first-held",
+      "charged": 24576,
+      "retired": 0,
+      "executor": 0
+    },
+    {
+      "event": "scroll-old-retired",
+      "charged": 24576,
+      "retired": 24576,
+      "executor": 0
+    },
+    {
+      "event": "two-jobs-rejected-third",
+      "charged": 205216,
+      "retired": 24576,
+      "executor": 180640
+    },
+    {
+      "event": "queued-cancelled",
+      "charged": 205216,
+      "retired": 24576,
+      "executor": 180640
+    },
+    {
+      "event": "ready-before-ack",
+      "charged": 205216,
+      "retired": 24576,
+      "executor": 180640
+    },
+    {
+      "event": "late-and-cancelled-ack",
+      "charged": 24576,
+      "retired": 24576,
+      "executor": 0
+    },
+    {
+      "event": "zoom-image-held",
+      "charged": 49152,
+      "retired": 24576,
+      "executor": 0
+    },
+    {
+      "event": "closed-two-readers",
+      "charged": 49152,
+      "retired": 49152,
+      "executor": 0
+    },
+    {
+      "event": "new-reader-released",
+      "charged": 24576,
+      "retired": 24576,
+      "executor": 0
+    },
+    {
+      "event": "old-reader-released",
+      "charged": 0,
+      "retired": 0,
+      "executor": 0
+    }
+  ],
+  "platform_timings": {
+    "android": {
+      "queue_wait_bounds_ns": [
+        {
+          "submit_elapsed_ns": 106959,
+          "request_to_worker_ns": 112459,
+          "queue_handoff_wait_lower_ns": 5500,
+          "queue_handoff_wait_upper_ns": 112459
+        },
+        {
+          "submit_elapsed_ns": 133959,
+          "request_to_worker_ns": 171292,
+          "queue_handoff_wait_lower_ns": 37333,
+          "queue_handoff_wait_upper_ns": 171292
+        },
+        {
+          "submit_elapsed_ns": 49500,
+          "request_to_worker_ns": 5270333,
+          "queue_handoff_wait_lower_ns": 5220833,
+          "queue_handoff_wait_upper_ns": 5270333
+        },
+        {
+          "submit_elapsed_ns": 61084,
+          "request_to_worker_ns": 95625,
+          "queue_handoff_wait_lower_ns": 34541,
+          "queue_handoff_wait_upper_ns": 95625
+        }
+      ],
+      "copies": [
+        {
+          "elapsed_ns": 125000,
+          "row_storage_upper_bytes": 16384
+        },
+        {
+          "elapsed_ns": 85250,
+          "row_storage_upper_bytes": 16384
+        }
+      ],
+      "first_native_resident_hold_ns": 20958,
+      "first_native_retired_hold_ns": 12893042,
+      "closed_to_drained_ns": 31542
+    },
+    "apple": {
+      "queue_wait_bounds_ns": [
+        {
+          "queue_handoff_wait_lower_ns": 5958,
+          "queue_handoff_wait_upper_ns": 37333,
+          "request_to_worker_ns": 37333,
+          "submit_elapsed_ns": 31375
+        },
+        {
+          "queue_handoff_wait_lower_ns": 15708,
+          "queue_handoff_wait_upper_ns": 40875,
+          "request_to_worker_ns": 40875,
+          "submit_elapsed_ns": 25167
+        },
+        {
+          "queue_handoff_wait_lower_ns": 30693541,
+          "queue_handoff_wait_upper_ns": 30717291,
+          "request_to_worker_ns": 30717291,
+          "submit_elapsed_ns": 23750
+        },
+        {
+          "queue_handoff_wait_lower_ns": 5333,
+          "queue_handoff_wait_upper_ns": 29458,
+          "request_to_worker_ns": 29458,
+          "submit_elapsed_ns": 24125
+        }
+      ],
+      "copies": [
+        {
+          "elapsed_ns": 944166,
+          "row_storage_upper_bytes": 16384
+        },
+        {
+          "elapsed_ns": 913000,
+          "row_storage_upper_bytes": 16384
+        }
+      ],
+      "first_native_resident_hold_ns": 5625,
+      "first_native_retired_hold_ns": 82469583,
+      "closed_to_drained_ns": 34083
+    }
+  },
+  "scope": "Same fixed synthetic scroll/zoom responsibility trace on actual ART Bitmap and iOS app-host Swift worker/CGImage; no ordinary app integration. Timings are single exploratory runs with deliberate worker gate/owner polling. Wait bounds bracket admission within submit and end at beforeCompute; include handoff overhead, not isolated scheduler latency. Row storage/charge is not peak heap or GPU residency.",
+  "physical_device_measured": false,
+  "heap_or_gpu_measured": false,
+  "production_c1_gate_complete": false
+}

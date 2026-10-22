@@ -38,8 +38,8 @@ def main():
               'storage_test_source': 'real AtomicFile directory and silent-rename failure / retained reopen / repaired retry / strict UTF-8 and 32MiB preflight, isolated synthetic cache',
               'catalog_test_source': '1000 synthetic rows in a real ListView window, bounded widget creation and recycled-row ID rebinding; not a latency benchmark',
               'real_stylus_verified': False, 'device_performance_verified': False,
-              'source_and_test_apk_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}}
-    (ROOT/'reports/android-viewport-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+              'source_and_test_apk_sha256': {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}}
+    (ROOT/'reports/android-viewport-smoke.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({k: v for k, v in report.items() if k != 'source_and_test_apk_sha256'}, ensure_ascii=False))
 
 if __name__ == '__main__': main()

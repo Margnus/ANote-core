@@ -1,8 +1,5 @@
 * text=auto
-
-# Files in the verifyPrototype hash stamp are digested as raw bytes, so their
-# checkout form must be identical on every platform or reports/*.sha256 can
-# never be reproduced off macOS/Linux. Pin them to LF.
+# Pin source checkout line endings. Verification normalizes source text only; artifacts stay byte exact.
 *.kt text eol=lf
 *.kts text eol=lf
 *.swift text eol=lf
@@ -12,9 +9,10 @@
 *.sh text eol=lf
 *.properties text eol=lf
 *.xml text eol=lf
-
 gradlew text eol=lf
 gradlew.bat text eol=crlf whitespace=cr-at-eol
 *.jar binary
-*.png binary
 *.bin binary
+*.ncp binary
+*.png binary
+*.zip binary

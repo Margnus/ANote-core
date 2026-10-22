@@ -4,6 +4,7 @@ import NoteCanvasPrototype
 
 struct NativeInkCanvas: UIViewRepresentable {
     let note: PagedPreviewNotebook
+    let renderModel: PreviewModel
     let color: Int32
     let width: Double
     let finger: Bool
@@ -12,7 +13,10 @@ struct NativeInkCanvas: UIViewRepresentable {
     let viewportRatio: Double
     let changed: () -> Void
     let failed: (String) -> Void
-    func makeUIView(context: Context) -> InkUIView { let view = InkUIView(note: note); view.lastViewportRequest = viewportRequest; return view }
+    func makeUIView(context: Context) -> InkUIView {
+        let view = InkUIView(note: note); view.renderModel = renderModel
+        view.lastViewportRequest = viewportRequest; return view
+    }
     func updateUIView(_ view: InkUIView, context: Context) {
         if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width { view.cancelInk() }
         view.refreshPage()
@@ -24,7 +28,9 @@ struct NativeInkCanvas: UIViewRepresentable {
         }
         view.changed = changed; view.failed = failed; view.setNeedsDisplay()
     }
-    static func dismantleUIView(_ view: InkUIView, coordinator: ()) { view.cancelInk() }
+    static func dismantleUIView(_ view: InkUIView, coordinator: ()) {
+        view.cancelInk(); view.renderModel?.detachInk(surface: view.surfaceIdentity)
+    }
 }
 
 /// Standalone candidate-2 backend; the algorithm-1 App does not enable this renderer yet.
@@ -62,6 +68,8 @@ final class NativeBrushRenderer {
 
 final class InkUIView: UIView {
     let note: PagedPreviewNotebook
+    weak var renderModel: PreviewModel?
+    let surfaceIdentity = UUID()
     var changed: () -> Void = { }
     var failed: (String) -> Void = { _ in }
     var penColor: Int32 = Int32(bitPattern: 0xff253247)
@@ -125,6 +133,10 @@ final class InkUIView: UIView {
         if oldBounds != .zero && oldBounds != bounds { cancelInk() }
         oldBounds = bounds; refreshPage(); viewport.resize(width: bounds.width, height: bounds.height)
     }
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil { renderModel?.detachInk(surface: surfaceIdentity) }
+    }
     override func draw(_ rect: CGRect) {
         guard let c = UIGraphicsGetCurrentContext(), scale > 0 else { return }
         c.saveGState(); c.translateBy(x: offsetX, y: offsetY); c.scaleBy(x: scale, y: scale)
@@ -153,39 +165,62 @@ final class InkUIView: UIView {
                 }
             }
         }
-        if cachedVersion != note.changeVersion || cachedPage != page.id.value {
-            cached = (0..<note.strokeCount).map { index in
-                let stroke = note.stroke(index: index), samples = stroke.samples, m = stroke.transform
-                let p = UIBezierPath(); p.lineCapStyle = .round; p.lineJoinStyle = .round
-                let start = CGPoint(x: samples.x(index: 0), y: samples.y(index: 0))
-                p.move(to: start)
-                var moved = false
-                for point in 1..<samples.size {
-                    let next = CGPoint(x: samples.x(index: point), y: samples.y(index: point))
-                    p.addLine(to: next); moved = moved || next != start
+        let committedFrameDrawn = renderModel?.drawCommittedInk(c, note: note, view: self) ?? false
+        if !committedFrameDrawn {
+            if cachedVersion != note.changeVersion || cachedPage != page.id.value {
+                cached = (0..<note.strokeCount).map { index in
+                    let stroke = note.stroke(index: index), samples = stroke.samples, m = stroke.transform
+                    let p = UIBezierPath(); p.lineCapStyle = .round; p.lineJoinStyle = .round
+                    let start = CGPoint(x: samples.x(index: 0), y: samples.y(index: 0))
+                    p.move(to: start)
+                    var moved = false
+                    for point in 1..<samples.size {
+                        let next = CGPoint(x: samples.x(index: point), y: samples.y(index: point))
+                        p.addLine(to: next); moved = moved || next != start
+                    }
+                    return CachedStroke(path: p, color: inkColor(stroke.brush.argb), width: stroke.brush.width,
+                        transform: CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty), dot: moved ? nil : start)
                 }
-                return CachedStroke(path: p, color: inkColor(stroke.brush.argb), width: stroke.brush.width,
-                    transform: CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty), dot: moved ? nil : start)
+                cachedVersion = note.changeVersion; cachedPage = page.id.value
+                accessibilityValue = "\(note.strokeCount)笔"
             }
-            cachedVersion = note.changeVersion; cachedPage = page.id.value
-            accessibilityValue = "\(note.strokeCount)笔"
-        }
-        for stroke in cached {
-            c.saveGState(); c.concatenate(stroke.transform)
-            if let dot = stroke.dot {
-                stroke.color.setFill()
-                c.fillEllipse(in: CGRect(x: dot.x - stroke.width / 2, y: dot.y - stroke.width / 2, width: stroke.width, height: stroke.width))
-            } else { stroke.color.setStroke(); stroke.path.lineWidth = stroke.width; stroke.path.stroke() }
-            c.restoreGState()
+            for stroke in cached {
+                c.saveGState(); c.concatenate(stroke.transform)
+                if let dot = stroke.dot {
+                    stroke.color.setFill()
+                    c.fillEllipse(in: CGRect(x: dot.x - stroke.width / 2, y: dot.y - stroke.width / 2, width: stroke.width, height: stroke.width))
+                } else { stroke.color.setStroke(); stroke.path.lineWidth = stroke.width; stroke.path.stroke() }
+                c.restoreGState()
+            }
         }
         if let path = path { inkColor(penColor).setStroke(); path.lineWidth = penWidth; path.stroke() }
         c.restoreGState()
     }
-    private func sample(_ touch: UITouch) -> (CGPoint, Float, Int64) {
-        let raw = touch.location(in: self)
-        let point = CGPoint(x: (raw.x - offsetX) / scale, y: (raw.y - offsetY) / scale)
-        let pressure: Float = touch.maximumPossibleForce > 0 ? Float(max(0, min(1, touch.force / touch.maximumPossibleForce))) : 0.5
-        return (point, pressure, Int64(touch.timestamp * 1_000_000))
+    private struct RealSample { let point: CGPoint; let pressure: Float; let time: Int64 }
+    /// UIKit's coalesced array includes a copy of the main touch. Copy values immediately;
+    /// never append the main touch again, retain auxiliary UITouchs or ingest predictions.
+    private func realSamples(_ touch: UITouch, event: UIEvent?) -> [RealSample]? {
+        let auxiliary = event?.coalescedTouches(for: touch)
+        let touches = auxiliary?.isEmpty == false ? auxiliary! : [touch]
+        let transform = (scale: scale, x: offsetX, y: offsetY)
+        guard transform.scale.isFinite, transform.scale > 0 else { return nil }
+        var samples: [RealSample] = []; samples.reserveCapacity(touches.count)
+        for item in touches {
+            let raw = item.location(in: self)
+            let point = CGPoint(x: (raw.x - transform.x) / transform.scale, y: (raw.y - transform.y) / transform.scale)
+            let seconds = item.timestamp, micros = seconds * 1_000_000
+            let force = item.force, maximum = item.maximumPossibleForce
+            // Double(Int64.max) rounds UP to 2^63. Strict '<' prevents a trapping conversion.
+            guard point.x.isFinite, point.y.isFinite, abs(point.x) <= 1e9, abs(point.y) <= 1e9,
+                  seconds.isFinite, seconds >= 0, micros.isFinite, micros < Double(Int64.max),
+                  force.isFinite, maximum.isFinite else { return nil }
+            let pressure: Float = maximum > 0 ? Float(max(0, min(1, force / maximum))) : 0.5
+            samples.append(RealSample(point: point, pressure: pressure, time: Int64(micros)))
+        }
+        return samples
+    }
+    private func rejectInput() {
+        cancelInk(); failed("输入数据无效，本笔未提交")
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard scale > 0, !suppressSequence else { return }
@@ -196,20 +231,25 @@ final class InkUIView: UIView {
             navigate(direct, moving: false); return
         }
         guard active == nil, let touch = touches.first(where: { $0.type == .pencil || ($0.type == .direct && fingerDrawing) }) else { return }
-        let (p, pressure, time) = sample(touch)
+        guard let samples = realSamples(touch, event: event), let first = samples.first else { rejectInput(); return }
+        let p = first.point
         guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
         note.selectPen(argb: penColor, width: penWidth)
-        guard note.beginStroke(x: p.x, y: p.y, pressure: pressure, timeMicros: time) else { failed(note.lastError); return }
+        guard note.beginStroke(x: p.x, y: p.y, pressure: first.pressure, timeMicros: first.time) else { failed(note.lastError); return }
         active = touch; path = UIBezierPath(); path?.lineCapStyle = .round; path?.lineJoinStyle = .round
         path?.move(to: p); path?.addLine(to: CGPoint(x: p.x + 0.01, y: p.y)); setNeedsDisplay()
+        for sample in samples.dropFirst() {
+            guard note.appendStroke(x: sample.point.x, y: sample.point.y, pressure: sample.pressure, timeMicros: sample.time) else { cancelInk(); failed(note.lastError); return }
+            path?.addLine(to: sample.point)
+        }
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if navigating { navigate(fingers(event), moving: true); return }
         guard !suppressSequence, let active = active, touches.contains(active), note.hasActiveStroke else { return }
-        for touch in event?.coalescedTouches(for: active) ?? [active] {
-            let (p, pressure, time) = sample(touch)
-            guard note.appendStroke(x: p.x, y: p.y, pressure: pressure, timeMicros: time) else { cancelInk(); failed(note.lastError); return }
-            path?.addLine(to: p)
+        guard let samples = realSamples(active, event: event) else { rejectInput(); return }
+        for sample in samples {
+            guard note.appendStroke(x: sample.point.x, y: sample.point.y, pressure: sample.pressure, timeMicros: sample.time) else { cancelInk(); failed(note.lastError); return }
+            path?.addLine(to: sample.point)
         }
         setNeedsDisplay()
     }
@@ -221,8 +261,11 @@ final class InkUIView: UIView {
         }
         if suppressSequence { if remaining.isEmpty { suppressSequence = false }; return }
         guard let active = active, touches.contains(active), note.hasActiveStroke else { return }
-        let (p, pressure, time) = sample(active)
-        let ok = note.endStroke(x: p.x, y: p.y, pressure: pressure, timeMicros: time)
+        guard let samples = realSamples(active, event: event), let last = samples.last else { rejectInput(); return }
+        for sample in samples.dropLast() {
+            guard note.appendStroke(x: sample.point.x, y: sample.point.y, pressure: sample.pressure, timeMicros: sample.time) else { cancelInk(); failed(note.lastError); return }
+        }
+        let ok = note.endStroke(x: last.point.x, y: last.point.y, pressure: last.pressure, timeMicros: last.time)
         self.active = nil; path = nil; suppressSequence = !remaining.isEmpty
         if ok { changed() } else { failed(note.lastError) }; setNeedsDisplay()
     }

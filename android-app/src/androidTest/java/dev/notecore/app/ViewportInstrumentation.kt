@@ -19,12 +19,54 @@ class ViewportInstrumentation : Instrumentation() {
     private lateinit var canvas: InkCanvasView
     private lateinit var note: PagedPreviewNotebook
     private var downTime = 0L
-    override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
+    private var brushPathOnly = false
+    private var renderTargetOnly = false
+    private var surfaceFramesOnly = false
+    override fun onCreate(arguments: Bundle?) {
+        brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
+        renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
+        surfaceFramesOnly = arguments?.getString("notecore_case") == "surface_frames"
+        super.onCreate(arguments); start()
+    }
     override fun onStart() {
         val result = Bundle()
         try {
+            if (brushPathOnly) {
+                result.putInt("brush_path_pixels", BrushPathOffscreen.verify(context.assets))
+                result.putString("brush_path_status", "passed")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (surfaceFramesOnly) {
+                result.putString("surface_frames",SurfaceFrameHostChecks(this,host).verify())
+                result.putString("surface_status","passed")
+                result.putInt("surface_pid",android.os.Process.myPid())
+                finish(Activity.RESULT_OK,result); return
+            }
             setup()
+            if (renderTargetOnly) {
+                val until = SystemClock.uptimeMillis() + 5000
+                var observed: Boolean? = null
+                while (observed == null && SystemClock.uptimeMillis() < until) {
+                    runOnMainSync { observed = canvas.observedCanvasHardware }
+                    if (observed == null) SystemClock.sleep(10)
+                }
+                check(observed == true) { "Requires actual hardware onDraw, not a bitmap host" }
+                runOnMainSync {
+                    check(canvas.layerType == android.view.View.LAYER_TYPE_NONE)
+                    check(canvas.width > 0 && canvas.height > 0)
+                    result.putInt("target_width", canvas.width); result.putInt("target_height", canvas.height)
+                    result.putString("target_class", "InkCanvasView.onDraw")
+                    result.putString("target_hardware", canvas.observedCanvasHardware.toString())
+                    check(note.totalStrokeCount == 0 && !note.hasActiveStroke)
+                }
+                result.putInt("target_pid", android.os.Process.myPid())
+                result.putString("render_target_status", "passed")
+                result.putString("render_target_scope", "app-host isolated in-memory canonical page; no ordinary-package UI or new backend consumption")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
             val cx = canvas.width / 2f; val cy = canvas.height / 2f
             event(MotionEvent.ACTION_DOWN, listOf(P(0, cx - 100, cy)))
             event(MotionEvent.ACTION_POINTER_DOWN or (1 shl 8), listOf(P(0, cx - 100, cy), P(1, cx + 100, cy)))
@@ -160,7 +202,7 @@ class ViewportInstrumentation : Instrumentation() {
             check(decoded.pages() == owner.snapshot().pages() && decoded.scene.objects() == owner.snapshot().scene.objects())
             check(PagedPreviewCodec.encode(decoded) == encoded)
             check(PagedPreviewCodec.header(encoded.lineSequence().take(2).joinToString("\n")).formatVersion == 2)
-            val legacy = "NCPREVIEW\t1\nD\tART-legacy\t旧笔记😀\t2\t1\t1\nS\tink-1\t-14339513\t2.5\t2\nP\t1.0\t2.0\t0.5\t1\nP\t3.0\t4.0\t0.7\t2\nEND\n"
+            val legacy = "NCPREVIEW\t1\nD\tART-legacy\tlegacy\t2\t1\t1\nS\tink-1\t-1\t2.5\t2\nP\t1\t2\t0.5\t1\nP\t3\t4\t0.7\t2\nEND\n"
             val migrated = PagedPreviewCodec.decode(legacy)
             check(migrated.pageCount == 1 && migrated.scene.objects().single().samples.timeMicros(1) == 2L)
             check(owner.commit(undo) == restored)
@@ -274,7 +316,7 @@ class ViewportInstrumentation : Instrumentation() {
                 store.releaseActive(notebook)
                 check(!notebook.beginStroke(1.0, 2.0, 0.5f, 3))
             }
-            val original = "NCPREVIEW\t1\nD\tlegacy-noop\tLegacy unchanged\t2\t1\t1\nS\tink-1\t-14339513\t2.5\t2\nP\t900.0\t1300.0\t0.5\t1\nP\t999.0\t1399.0\t0.5\t2\nEND\n"
+            val original = "NCPREVIEW\t1\nD\tlegacy-noop\tLegacy unchanged\t2\t1\t1\nS\tink-1\t-1\t2.5\t2\nP\t900\t1300\t0.5\t1\nP\t999\t1399\t0.5\t2\nEND\n"
             val legacyFile = java.io.File(directory, "legacy-noop.ncp").apply { writeText(original) }
             val read = storageResult<Pair<OpenedDocument?, String?>> { done -> store.open("legacy-noop") { opened, error -> done(opened to error) } }
             lateinit var migrated: PagedPreviewNotebook

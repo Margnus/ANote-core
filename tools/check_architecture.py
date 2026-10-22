@@ -27,13 +27,16 @@ def main():
     domain_build = (ROOT/'shared-core/build.gradle.kts').read_text(encoding='utf-8')
     domain_dependencies = re.findall(r'(?:implementation|api|compileOnly)\s*\(\s*project\s*\(\s*"([^"]+)"', domain_build)
     if domain_dependencies != [':canvas-core']: errors.append('shared-core must depend only on canvas-core')
-    # Historical v1 editors/writers are fixtures only; production compatibility is read-only.
-    for path in sources:
-        if re.search(r'\b(?:PreviewNotebook|PreviewNotebookSnapshot|LegacyPreviewSaveSnapshot)\b', path.read_text(encoding='utf-8')):
-            errors.append(f'{path.relative_to(ROOT)}: legacy editable preview API in production source')
+    retired = re.compile(r'\b(?:PreviewNotebook|PreviewNotebookSnapshot|PreviewNotebookHeader|LegacyPreviewSaveSnapshot)\b')
+    roots = ['canvas-core/src', 'shared-core/src', 'android-app/src', 'ios-app/NoteCorePreview', 'ios-app/NoteCorePreviewTests']
+    for root in roots:
+        for path in (ROOT/root).rglob('*'):
+            if path.suffix in {'.kt', '.swift'} and retired.search(path.read_text(encoding='utf-8')):
+                errors.append(f'Retired single-page editor/save stack referenced: {path.relative_to(ROOT)}')
     report = {'status': 'failed' if errors else 'passed', 'common_source_files': len(sources),
               'imports_checked': imports, 'errors': errors,
               'modules': ['canvas-core', 'shared-core'], 'project_dependency_direction': 'shared-core -> canvas-core only',
+              'retired_single_page_stack_absent': not any('Retired single-page' in e for e in errors),
               'scope': 'commonMain imports and direct project dependencies; not a transitive bytecode audit'}
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if errors:

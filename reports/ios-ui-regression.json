@@ -1,0 +1,72 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-15T11:34:57.491219+00:00",
+  "scope": "CUA observed targeted regression of updated UI package, upgrading existing DEV028 data; original full create/draw/export/import workflow remains separately scoped to ios-ui-DEV028.json",
+  "ui_automation_host": "Device Hub com.apple.dt.Devices",
+  "device_udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "artifact_sha256": "d8e4a90147c0939c2c7b4115a0ffa6429e845f85dbfa72b30621a3960c26b408",
+  "installed_payload_sha256": {
+    "NoteCorePreview": "e8d3fa04bbcfd58b2713a572d0ea33c8ccd21d95f8b64fb2b4710fcd09285c96",
+    "__preview.dylib": "8050889c2ab4b356b83e0c5c41d971b95226638cd860dd59c0491d4b4c1d9dfe",
+    "NoteCorePreview.debug.dylib": "59ade2905f7250487cca717204a0bdf587059904a544fdf21bfb02f358031fa0",
+    "Info.plist": "f9b3513fe3aed66f5a655231aee76e5ea6e0596028132855f61e13bd6b2a584a",
+    "PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  "ui_checks": [
+    "upgrade_preserves_three_existing_documents",
+    "page_navigation_and_visible_strokes_9_9_2",
+    "navigation_remains_visible_at_action_scroll_end",
+    "paper_menu_open_and_cancel_without_edit",
+    "page_counter_accessibility_value_1_3_2_3_3_3",
+    "first_last_navigation_disabled_correctly",
+    "app_switcher_force_close_home_relaunch",
+    "reopen_after_force_close_9_9_2"
+  ],
+  "files_after_upgrade_and_force_close": [
+    {
+      "file": "0DA12662-648A-4960-85F6-3EA13FB40242.ncp",
+      "sha256": "ad5f67eaadb48bc372dffc63bcb0918aed3321358e180b7be28a93041c9596d5",
+      "bytes": 184,
+      "page_strokes": [
+        0
+      ]
+    },
+    {
+      "file": "9BA59C24-DADD-4A95-A3CD-04D105491851.ncp",
+      "sha256": "ed8daa792a34c53a3cd612c3f94392fbfc689ea58159d228389e09ef420e1b59",
+      "bytes": 59100,
+      "page_strokes": [
+        9,
+        9,
+        2
+      ]
+    },
+    {
+      "file": "FDBE7A65-0023-4C03-83BB-520487C35E5F.ncp",
+      "sha256": "8bfd67e5fefd7ff23e58fb351ab2c0a6c0d753ac672582822d3342e2caeb9d97",
+      "bytes": 58762,
+      "page_strokes": [
+        9,
+        9,
+        2
+      ]
+    }
+  ],
+  "source_and_import_bytes_unchanged": true,
+  "ui_workflow_baseline_report": "reports/ios-ui-DEV028.json",
+  "input_sha256": {
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "04980aeb9fa337f70a0882cd992d23b632b779a343ba7ce7506c24140280aa1a",
+    "reports/ios-preview-build.json": "43a5598acd29b888b620bf676fd143e54bbd99c46c9916fab66ce619623d328c",
+    "reports/ios-runtime-smoke.json": "2676fad51f4bc2f6ad32ba6256b0bf38c03d828b3baf04d8700a2bba1e96fcea",
+    "reports/ios-host-tests.json": "0b70df5174605283330c3ff58aaba4af1d734f2b2cdffb21a42f008f94f6e4d1",
+    "reports/ios-ui-DEV028.json": "83b0c226d627ac7111b6d774d611b7f046bd5a3d827fb0856c67f9965a6d6064"
+  },
+  "unverified": [
+    "new_package_system_picker_workflow_not_repeated",
+    "physical_Pencil_pressure_latency",
+    "true_multitouch_pinch",
+    "rotation_and_tablet_layout",
+    "low_memory_power_loss_production_SQLite"
+  ],
+  "production_c1_gate_complete": false
+}

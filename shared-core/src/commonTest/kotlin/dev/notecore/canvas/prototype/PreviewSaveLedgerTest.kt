@@ -6,7 +6,7 @@ import kotlin.test.*
 
 class PreviewSaveLedgerTest {
     private fun PagedPreviewNotebook.saveCapture() = capture()
-    private fun note(id: String = "note") = PagedPreviewNotebook.create(id, "first", "ledger-test")
+    private fun note(id: String = "note") = PagedPreviewNotebook.create(id, "first", "ledger-session")
     @Test fun completeLatestSnapshotSupersedesUnsentContentAndCountsOnlyRetainedVersion() {
         val ledger = PreviewSaveLedger(); val note = note(); val first = note.saveCapture()
         assertEquals(PreviewSaveAdmission.ACCEPTED, ledger.offer(first))
@@ -83,7 +83,7 @@ class PreviewSaveLedgerTest {
         assertEquals(PreviewSaveAdmission.ACCEPTED, ledger.offer(equivalent)); assertSame(newer, ledger.latest("note"))
     }
     @Test fun boundedCatalogHeaderKeepsEscapedUnicodeTitleWithoutDecodingStrokeBody() {
-        val notebook = PagedPreviewNotebook.create("header", "标题\t\n\\", "header-test")
+        val notebook = PagedPreviewNotebook.create("header", "标题\t\n\\", "header-session")
         notebook.beginStroke(1.0, 2.0, 0.5f, 1); notebook.endStroke(3.0, 4.0, 0.5f, 2)
         val encoded = notebook.saveCapture().encode()
         val header = PagedPreviewCodec.header(encoded.lineSequence().take(2).joinToString("\n") + "\n")

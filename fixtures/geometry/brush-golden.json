@@ -1,0 +1,21 @@
+{
+  "rule_id": "swept-discs-draft-1",
+  "scope": "Hand-derived analytic binary coverage at integer scene points; no antialias or native pixel equivalence",
+  "cases": [
+    {
+      "id": "monoline-dot", "brush": "MONOLINE", "width": 4.0,
+      "points": [[0.0, 0.0, 1.0]], "origin": [-2, -2],
+      "mask": ["..#..", ".###.", "#####", ".###.", "..#.."], "alpha": 1.0
+    },
+    {
+      "id": "pressure-taper", "brush": "PRESSURE", "width": 4.0,
+      "points": [[0.0, 0.0, 0.0], [4.0, 0.0, 1.0]], "origin": [-2, -2],
+      "mask": ["......#..", "....####.", "..#######", "....####.", "......#.."], "alpha": 1.0
+    },
+    {
+      "id": "highlighter-reverse", "brush": "HIGHLIGHTER", "width": 4.0,
+      "points": [[0.0, 0.0, 1.0], [4.0, 0.0, 1.0], [0.0, 0.0, 1.0]], "origin": [-2, -2],
+      "mask": ["..#####..", ".#######.", "#########", ".#######.", "..#####.."], "alpha": 0.25
+    }
+  ]
+}

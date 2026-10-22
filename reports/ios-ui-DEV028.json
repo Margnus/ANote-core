@@ -1,0 +1,41 @@
+{
+  "status": "passed_with_usability_issue",
+  "scope": "CUA observed UI on existing DEV-028 package plus read-only file verification; no physical Pencil/multitouch/performance claim",
+  "ui_automation_host": "Device Hub com.apple.dt.Devices",
+  "device_udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "artifact_sha256": "eeb0dbc5346a9c2d7c92aa33e1c8d5bdfac7f7289fe8f8a6546786e688da307b",
+  "archive_preserved_locally": "dist/NoteCore-0.1.0-preview-ios-simulator-arm64-DEV028.app.zip",
+  "source_document_id": "9BA59C24-DADD-4A95-A3CD-04D105491851",
+  "imported_document_id": "FDBE7A65-0023-4C03-83BB-520487C35E5F",
+  "source_sha256": "ed8daa792a34c53a3cd612c3f94392fbfc689ea58159d228389e09ef420e1b59",
+  "system_export_sha256": "ed8daa792a34c53a3cd612c3f94392fbfc689ea58159d228389e09ef420e1b59",
+  "imported_sha256": "8bfd67e5fefd7ff23e58fb351ab2c0a6c0d753ac672582822d3342e2caeb9d97",
+  "page_strokes": [
+    9,
+    9,
+    2
+  ],
+  "normalized_geometry_style_transform_points_equal": true,
+  "all_imported_identity_sets_fresh": true,
+  "ui_checks": [
+    "new_note_and_rename",
+    "actual_drag_commits_ink",
+    "copy_page_retains_nine_strokes",
+    "insert_page_empty",
+    "undo_redo_1_0_1",
+    "finger_drawing_off_rejects_drag",
+    "zoom_button_then_ink",
+    "save_close_reopen_all_three_pages",
+    "system_file_export_local_folder",
+    "system_file_import_new_document",
+    "app_switcher_force_close_home_relaunch",
+    "reopen_after_force_close_9_9_2"
+  ],
+  "discovered_issue": "horizontal page toolbar scrolls navigation and page count offscreen; fixing before new package validation",
+  "unverified": [
+    "physical_device_Pencil_pressure_latency",
+    "true_multitouch_pinch",
+    "rotation_and_tablet_layout",
+    "production_SQLite"
+  ]
+}

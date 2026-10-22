@@ -108,7 +108,7 @@ def main():
               'sha256':hashlib.sha256(payload).hexdigest(),'bytes':len(payload),
               'validated_by':'Python schema/order/reference projection checks; JVM consumption is verified separately by InputFixtureReplayTest',
               'hardware_performance_baseline':False}
-    (args.output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+    (args.output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n', encoding='utf-8')
     print(json.dumps(manifest,ensure_ascii=False,indent=2))
 
 if __name__=='__main__':main()

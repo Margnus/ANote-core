@@ -10,6 +10,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions()',
+    'testNilAndEmptyCoalescedFallbackKeepsEqualTimestampPoints()',
+    'testInvalidTerminalValuesRejectWholeUnfinishedStrokeAndRecover()',
+    'testCoordinateSnapshotAndResizeCancelRejectsLateUp()',
+    'testPreviewRetainedProviderSurvivesCloseAndBlocksNewPoolUntilCallback()',
+    'testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner()',
+    'testProviderUnknownReconciliationRequiresRealReleaseReceipt()',
+    'testPreviewUIViewConsumesSharedFrameThenDetachKeepsStorageUsable()',
+    'testPreviewViewDisappearsWhileRenderRunsAndModelAcknowledgesAfterClose()',
+    'testPreviewUnknownReleaseStaysWithModelUntilReadOnlyReconciliation()',
+    'testPreviewPageViewportAndSizeChangeUseCompleteFallbackBeforeNewFrame()',
+    'testMultiTileFrameCopiesEntireNativeImageAndClosesAfterHeldReader()',
+    'testCompleteCanonicalPageCompositesBeforeAckAndDrainsHeldImage()',
+    'testFixedScrollZoomQueueAndHeldReaderTrace()',
+    'testForeignThreadCannotReleaseHolderAndThrowingReceiveRedelivers()',
+    'testSwiftWorkerRendersActualPixelsAndCloseKeepsNativeBudget()',
+    'testExactResultRedeliveryAndFrameChangeBeforeAck()',
+    'testCancelledQueuedJobAndUnknownComputeRequireAckAndReconciliation()',
+    'testCopyFailureCleanupUnknownReturnsHolderAndNoDestructiveRetry()',
+    'testOldImageRejectsDrawAndInsufficientCopyBudgetKeepsPermitFree()',
+    'testSharedBrushContoursMatchAnalyticCoverageOffscreen()',
     'testActualAndroidFileImportsFreshIdsAndExportsAllPages()',
     'testCandidateHighlighterSingleFillAndSeparateStrokeAlpha()',
     'testCandidatePressureEndpointWidthsUseCommonGeometry()',
@@ -30,15 +51,16 @@ def digest(path):
 
 
 def inputs():
-    files = [*ROOT.glob('ios-app/NoteCorePreview/*.swift'), *ROOT.glob('ios-app/NoteCorePreviewTests/*.swift'),
+    files = [*ROOT.glob('canvas-core/src/iosMain/**/*.kt'), *ROOT.glob('ios-app/NoteCorePreview/*.swift'), *ROOT.glob('ios-app/NoteCorePreviewTests/*.swift'),
              *ROOT.glob('shared-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonMain/**/*.kt'),
              ROOT/'ios-app/NoteCorePreview.xcodeproj/project.pbxproj',
              ROOT/'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',
              ROOT/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype',
              ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'gradle.properties',
              ROOT/'canvas-core/build.gradle.kts', ROOT/'shared-core/build.gradle.kts',
-             ROOT/'fixtures/transfer/android-paged-v2.ncp', ROOT/'fixtures/transfer/android-paged-v2.json', Path(__file__)]
-    return {str(path.relative_to(ROOT)): digest(path) for path in sorted(files)}
+             ROOT/'fixtures/transfer/android-paged-v2.ncp', ROOT/'fixtures/transfer/android-paged-v2.json',
+             ROOT/'fixtures/geometry/brush-paths.json', Path(__file__)]
+    return {path.relative_to(ROOT).as_posix(): digest(path) for path in sorted(files)}
 
 
 def main():
@@ -56,11 +78,14 @@ def main():
     provenance = json.loads(fixture.with_suffix('.json').read_text(encoding='utf-8'))
     assert digest(fixture) == provenance['sha256'] and provenance['source_real_user_data'] is False
     before = inputs()
+    sdk = Path(command('xcrun', '--sdk', 'iphonesimulator', '--show-sdk-path').strip())
+    input_headers = [sdk/'System/Library/Frameworks/UIKit.framework/Headers'/name for name in ('UIEvent.h', 'UITouch.h')]
+    input_contracts = {str(path): digest(path) for path in input_headers}
     # Xcode does not rebuild Kotlin itself. Require a successful package build binding this framework
     # to the complete current common source set; hashing stale framework + new source is insufficient.
     built = json.loads((ROOT/'reports/ios-preview-build.json').read_text(encoding='utf-8'))['source_and_build_input_sha256']
     def framework_input(path):
-        return '/src/commonMain/' in path or path.endswith('.kts') or path == 'gradle.properties' or path.endswith('.framework/NoteCanvasPrototype')
+        return '/src/iosMain/' in path or '/src/commonMain/' in path or path.endswith('.kts') or path == 'gradle.properties' or path.endswith('.framework/NoteCanvasPrototype')
     expected_framework = {path: sha for path, sha in before.items() if framework_input(path)}
     recorded_framework = {path: sha for path, sha in built.items() if framework_input(path)}
     assert expected_framework == recorded_framework, 'Kotlin framework/source binding is stale; run package-ios-preview.sh first'
@@ -70,11 +95,13 @@ def main():
     with log.open('w') as output:
         run = subprocess.run(['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
             '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id='+args.device,
-            '-derivedDataPath', str(BUILD), 'CODE_SIGNING_ALLOWED=NO', '-resultBundlePath', str(result), 'test'],
+            '-derivedDataPath', str(BUILD), 'CODE_SIGNING_ALLOWED=NO', '-resultBundlePath', str(result),
+            '-collect-test-diagnostics', 'never', 'test'],
             cwd=ROOT, stdout=output, stderr=subprocess.STDOUT, timeout=600)
     if run.returncode:
         raise RuntimeError(log.read_text(encoding='utf-8')[-16000:])
     assert inputs() == before, 'Source changed during native tests'
+    assert input_contracts == {str(path): digest(path) for path in input_headers}, 'SDK input contract changed during native tests'
     summary = json.loads(command('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(result), '--format', 'json'))
     tree = json.loads(command('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(result), '--format', 'json'))
 
@@ -92,21 +119,48 @@ def main():
     host = BUILD/'Build/Products/Debug-iphonesimulator/NoteCorePreview.app'
     executable = host/'NoteCorePreview'
     plugin = host/'PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests'
+    assert digest(host/'PlugIns/NoteCorePreviewTests.xctest/brush-paths.json') == digest(ROOT/'fixtures/geometry/brush-paths.json')
+    attachments = BUILD/('attachments-' + result.stem)
+    command('xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(result), '--output-path', str(attachments))
+    traces = []
+    for path in attachments.rglob('*.json'):
+        data = json.loads(path.read_text(encoding='utf-8'))
+        if isinstance(data, dict) and data.get('trace_id') == 'dev034-fixed-viewport-v1':
+            traces.append(data)
+    assert len(traces) == 1 and traces[0]['closed_drained']
     report = {
+        'render_viewport_trace': traces[0], 'viewport_trace_test_count': 1,
         'status': 'passed', 'platform': 'iOS Simulator ARM64 app-host XCTest',
         'device': {k: device[k] for k in ('name', 'udid', 'state')}, 'test_count': len(actual),
         'checks': sorted(EXPECTED), 'test_summary': summary,
-        'xcresult': str(result.relative_to(ROOT)), 'source_and_framework_sha256': before,
+        'xcresult': result.relative_to(ROOT).as_posix(), 'source_and_framework_sha256': before,
         'framework_verified_build_inputs': expected_framework,
-        'test_build_sha256': {str(p.relative_to(ROOT)): digest(p) for p in (executable, host/'NoteCorePreview.debug.dylib', plugin)},
+        'test_build_sha256': {p.relative_to(ROOT).as_posix(): digest(p) for p in (executable, host/'NoteCorePreview.debug.dylib', plugin)},
         'android_fixture_sha256': digest(fixture), 'android_fixture_provenance': provenance,
         'native_model_file_reopen_verified': True, 'cross_platform_fixture_import_verified': True,
         'native_offscreen_render_pixels_verified': True,
+        'shared_brush_contour_offscreen_verified': True,
+        'app_host_swift_executor_kotlin_native_render_verified': True,
+        'brush_render_host_test_count': 15,
+        'synthetic_uikit_input_callback_test_count': 4,
+        'input_sdk_contract_sha256': input_contracts,
+        'sdk_header_runtime_equivalence_verified': False,
+        'input_contract_reference': 'https://developer.apple.com/documentation/uikit/uievent/coalescedtouches(for:)',
+        'verbose_failure_sysdiagnose_enabled': False,
+        'coalesced_down_move_up_canonical_retention_verified': True,
+        'synthetic_input_scope': 'Direct original InkUIView callbacks with synthetic UITouch/UIEvent subclasses; not OS delivery, real Pencil or physical latency evidence.',
+        'provider_release_receipt_test_count': 3,
+        'provider_source_release_owner_verified': True,
+        'preview_model_view_lifecycle_test_count': 5,
+        'preview_model_shared_executor_and_cpu_view_verified': True,
+        'brush_native_unique_reader_and_ack_budget_verified': True,
+        'brush_scope': 'Unfrozen Apple iosMain shim + existing Swift worker executes common segmented renderer/mask/RGBA; CGImage held through close/UNKNOWN. PreviewModel injects its existing storage executor; real InkUIView CPU target, fallback, detach/close ACK and UNKNOWN responsibility are verified by five host tests. Ordinary package UI requires its separate report. UIKit model uses an immutable CGDataProvider source and actual releaseData receipt; three tests retain the real provider, release on a foreign thread and require owner settlement, including UNKNOWN. CPU holder bitmap gate remains. Source-byte responsibility, not physical heap/GPU reclamation.',
+        'brush_fixture_execution_scope': 'JVM-generated common contour output consumed by real iOS CoreGraphics; not Kotlin/Native runtime generation, AA edge equivalence or app integration',
         'desktop_ui_interaction_verified': False, 'real_touch_input_verified': False,
         'system_file_picker_verified': False, 'process_restart_verified': False,
         'device_performance_verified': False, 'production_c1_gate_complete': False,
         'scope': 'Actual iOS app-host APIs, isolated temporary files and CoreGraphics offscreen pixels. Separate test build; not distributable binary UI, real touch, system picker, force-stop or power-loss recovery evidence.'}
-    (ROOT/'reports/ios-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    (ROOT/'reports/ios-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({k: v for k, v in report.items() if k not in ('source_and_framework_sha256', 'test_summary')}, ensure_ascii=False))
 
 
