@@ -5,6 +5,7 @@ import json
 import re
 from pathlib import Path
 from verification_hash import verification_bytes
+from verify_input_capture import checks as capture_checks
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -12,6 +13,7 @@ def load(relative):
     return json.loads((ROOT/relative).read_text(encoding='utf-8'))
 
 def main():
+    capture_results, capture_summary = capture_checks()
     trace = load('fixtures/input/manifest.json')
     payload = verification_bytes(ROOT/'fixtures/input'/trace['file'])
     assert len(payload) == trace['bytes'], 'fixture byte length mismatch'
@@ -53,6 +55,7 @@ def main():
     assert pen['IMAGE'] == pen['GEOMETRY_LINE_PEN'] == 21
     assert pen['PDF'] == pen['GEOMETRY_DOTTED_PEN'] == 22
     print(json.dumps({'status': 'passed', 'scale_profiles': 3, 'synthetic_scale_points': 1200000,
+                      'capture_contract_checks': len(capture_results), 'capture_origin': capture_summary['origin'],
                       'legacy_source_files': len(paths), 'legacy_anchors': len(source['anchors']),
                       'scope': 'catalog hashes and selected cross-schema facts; no migration/legacy runtime/device validation'}))
 

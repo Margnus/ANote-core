@@ -1,0 +1,267 @@
+{
+  "schema_version": "0.2-draft",
+  "origin": "synthetic",
+  "provider": "notecore-contract-fixture",
+  "provider_build": "draft-1",
+  "session_id": "synthetic-clock-and-snapshots",
+  "device": null,
+  "measured_latency_us": null,
+  "clock": {
+    "domain": "synthetic-monotonic",
+    "unit": "microsecond",
+    "origin_raw": 0
+  },
+  "capabilities": {
+    "history": true,
+    "prediction": true,
+    "pressure": false,
+    "pressure_range": null,
+    "pressure_fallback": 0.5,
+    "tilt": false,
+    "azimuth": false,
+    "refresh_hz": null
+  },
+  "input_policy": "stylus-only",
+  "initial_generation": 1,
+  "coordinate_snapshots": [
+    {
+      "version": 1,
+      "raw_unit": "view-point",
+      "scene_unit": "scene-point",
+      "view_to_scene": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "version": 2,
+      "raw_unit": "view-point",
+      "scene_unit": "scene-point",
+      "view_to_scene": [
+        0.5,
+        0,
+        0,
+        0.5,
+        -1,
+        -2
+      ]
+    }
+  ],
+  "events": [
+    {
+      "sequence": 0,
+      "time_raw": 1000,
+      "generation": 1,
+      "type": "pointer",
+      "pointer_id": 7,
+      "tool": "stylus",
+      "phase": "down",
+      "real_samples": [
+        {
+          "time_raw": 900,
+          "raw_x": 1,
+          "raw_y": 2,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 1,
+          "source": "historical"
+        },
+        {
+          "time_raw": 1000,
+          "raw_x": 2,
+          "raw_y": 3,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 1,
+          "source": "main"
+        }
+      ],
+      "predicted_samples": [],
+      "target_at_down": {
+        "scene_id": "synthetic-page",
+        "layer_id": "synthetic-layer",
+        "brush_id": "monoline-draft"
+      }
+    },
+    {
+      "sequence": 1,
+      "time_raw": 2000,
+      "generation": 1,
+      "type": "pointer",
+      "pointer_id": 7,
+      "tool": "stylus",
+      "phase": "move",
+      "real_samples": [
+        {
+          "time_raw": 2000,
+          "raw_x": 6,
+          "raw_y": 8,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 2,
+          "source": "main"
+        }
+      ],
+      "predicted_samples": [
+        {
+          "time_raw": 2500,
+          "raw_x": 7,
+          "raw_y": 9,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 2,
+          "source": "predicted"
+        }
+      ]
+    },
+    {
+      "sequence": 2,
+      "time_raw": 2200,
+      "generation": 1,
+      "type": "pointer",
+      "pointer_id": 99,
+      "tool": "finger",
+      "phase": "down",
+      "real_samples": [
+        {
+          "time_raw": 2200,
+          "raw_x": 5,
+          "raw_y": 5,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 1,
+          "source": "main"
+        }
+      ],
+      "predicted_samples": [],
+      "target_at_down": {
+        "scene_id": "synthetic-page",
+        "layer_id": "synthetic-layer",
+        "brush_id": "monoline-draft"
+      }
+    },
+    {
+      "sequence": 3,
+      "time_raw": 3000,
+      "generation": 1,
+      "type": "pointer",
+      "pointer_id": 7,
+      "tool": "stylus",
+      "phase": "up",
+      "real_samples": [
+        {
+          "time_raw": 3000,
+          "raw_x": 8,
+          "raw_y": 10,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 2,
+          "source": "main"
+        }
+      ],
+      "predicted_samples": []
+    },
+    {
+      "sequence": 4,
+      "time_raw": 4000,
+      "generation": 1,
+      "type": "pointer",
+      "pointer_id": 7,
+      "tool": "stylus",
+      "phase": "down",
+      "real_samples": [
+        {
+          "time_raw": 4000,
+          "raw_x": 2,
+          "raw_y": 3,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 1,
+          "source": "main"
+        }
+      ],
+      "predicted_samples": [],
+      "target_at_down": {
+        "scene_id": "synthetic-page",
+        "layer_id": "synthetic-layer",
+        "brush_id": "monoline-draft"
+      }
+    },
+    {
+      "sequence": 5,
+      "time_raw": 4500,
+      "generation": 1,
+      "type": "lifecycle",
+      "action": "rotate"
+    },
+    {
+      "sequence": 6,
+      "time_raw": 5000,
+      "generation": 2,
+      "type": "pointer",
+      "pointer_id": 7,
+      "tool": "stylus",
+      "phase": "down",
+      "real_samples": [
+        {
+          "time_raw": 5000,
+          "raw_x": 2,
+          "raw_y": 3,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 2,
+          "source": "main"
+        }
+      ],
+      "predicted_samples": [],
+      "target_at_down": {
+        "scene_id": "synthetic-page",
+        "layer_id": "synthetic-layer",
+        "brush_id": "monoline-draft"
+      }
+    },
+    {
+      "sequence": 7,
+      "time_raw": 6000,
+      "generation": 2,
+      "type": "pointer",
+      "pointer_id": 7,
+      "tool": "stylus",
+      "phase": "up",
+      "real_samples": [
+        {
+          "time_raw": 6000,
+          "raw_x": 4,
+          "raw_y": 5,
+          "pressure_raw": null,
+          "tilt_radians": null,
+          "azimuth_radians": null,
+          "viewport_version": 2,
+          "source": "main"
+        }
+      ],
+      "predicted_samples": []
+    }
+  ],
+  "truncated": false,
+  "counts": {
+    "real_samples": 8,
+    "predicted_samples": 1,
+    "committed_samples": 6,
+    "completed_strokes": 2,
+    "cancelled_strokes": 1,
+    "navigation_samples": 1
+  }
+}

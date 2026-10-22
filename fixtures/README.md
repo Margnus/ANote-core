@@ -13,3 +13,15 @@ python3 tools/generate_input_fixtures.py
 ```
 
 默认每笔96点。规模实验可用--points调整，输出位置用--output指定；生成大样本与测量必须分开，生成耗时不能被用于宣称触笔性能。
+
+## 0.2-draft采集记录候选（DEV-040N）
+
+`input/capture-0.2-synthetic.json`是独立候选，保留原0.1-draft与JVM消费者。`tools/input_capture_contract.py`读取UTF-8 JSON并有界校验：文件16MiB、事件200000、快照4096、回调真实+预测1024点为工具准入，不是生产heap/输入arena阈值。拒绝重复字段、NaN、未知schema与坏后缀，不返回部分成功摘要。
+
+时间保留非负Int64原始整数，clock含域、单位和session origin；原始点先按原单位排序，再用整数差按ns/us/ms向下换算微秒并检查Int64溢出，允许量化后同微秒，不合并真实点。Apple Double秒与Android具体SDK时钟转换尚需原adapter提供可信的转换和采集证据，不能仅改domain字符串冒充已校准。墙钟不参与排序，当前记录不接收延迟结论。
+
+每个点引用独立viewport版本，快照记录view-point→scene-point仿射；校验映射有限且可逆，不用最新矩阵替换历史点。压力有传感器时声明原始范围，无传感器时原始值必须null且显式声明fallback；tilt是相对法线角[0,π/2]，azimuth是平面方向[0,2π]，不支持的轴为null，不能用0伪装能力。provider/build/session、origin与设备元数据分开，synthetic不能附假设备或性能指标；device元数据可校验格式但不能证明来源真实性。
+
+事件sequence连续，generation在detach/rotate/scene-switch后增加并取消未完成输入；完成笔目标在DOWN捕获，预测只在MOVE独立数组且时间晚于event。stylus-only的手指样本只计导航，不把它们投影为笔迹；本校验不模拟完整多指手势。统计中的committed_samples只表示合成记录的UP投影，不是规范authority提交或磁盘回执。停采有未完成输入必须truncated=true，已完成笔统计仍保留；真实截断原因/输出失败仍需采集器报告。
+
+执行`python3 tools/verify_input_capture.py`可检查合法见证与破坏性反例；原catalog/ci也调用同一校验。该候选没有接原生采集器、消费者回放或普通App，不改变笔记格式/C1/生产保存门禁。
