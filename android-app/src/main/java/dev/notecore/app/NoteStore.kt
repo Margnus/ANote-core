@@ -226,7 +226,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             if (attempt == null) {
                 if (dispatch.disposition != PreviewWriteDisposition.IDLE && dispatch.disposition != PreviewWriteDisposition.BACKPRESSURE) {
                     val ids = if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
-                        dispatch.documentId?.let(::listOf).orEmpty() else saveCallbacks.keys.toList()
+                        dispatch.documentId?.let(::listOf).orEmpty() else ledger.states()
+                            .filter { !it.inFlight && !it.retryRequired }.map { it.snapshot.documentId }
                     for (id in ids) saveCallbacks[id]?.let { receiver ->
                         notifyUi { receiver.receive(receiver.version, if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
                             saveTaskTooLarge else "保存后端暂不可用，更改仍保留，请重试") }

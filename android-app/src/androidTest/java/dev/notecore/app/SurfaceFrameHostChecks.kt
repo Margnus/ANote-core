@@ -205,6 +205,37 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         var held = 0L
         main { held = store.inkChargedBytes; check(held>0 && store.inkOwnerRetained); store.detachInk(view); check(releaseCalls==1) }
         main { check(store.reconcileInkRelease()); check(store.inkChargedBytes==0L && !store.inkOwnerRetained); store.stopTestBackend() }
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"long_unsignaled_gpu_fence_tested\":false}"
+
+        val storageStarted = CountDownLatch(1); val storageRelease = CountDownLatch(1)
+        setup(before = { storageStarted.countDown(); check(storageRelease.await(8,TimeUnit.SECONDS)) })
+        check(storageStarted.await(5,TimeUnit.SECONDS))
+        var queuedSuccess = 0; var queuedFailure = 0; var pendingFailure = 0; var pendingSuccess = 0
+        var queuedId = ""; var queuedBytes = ""; var pendingId = ""
+        try {
+            main {
+                queuedId = note.documentId; queuedBytes = note.capture().encode()
+                check(store.save(note.capture()) { _, error -> if (error == null) queuedSuccess++ else queuedFailure++ })
+                check(store.saveStates().single().inFlight)
+                store.stopTestBackend()
+                val pending = PagedPreviewNotebook.create("blocked-${java.util.UUID.randomUUID()}", "Retained after stop", "blocked-session")
+                pendingId = pending.documentId
+                check(store.save(pending.capture()) { _, error -> if (error == null) pendingSuccess++ else pendingFailure++ })
+                check(queuedSuccess == 0 && queuedFailure == 0 && pendingFailure > 0 && pendingSuccess == 0)
+                check(store.saveStates().single { it.snapshot.documentId == queuedId }.inFlight)
+                check(!store.saveStates().single { it.snapshot.documentId == pendingId }.inFlight)
+                store.detachInk(view); store.releaseActive(note); host.setContentView(View(host))
+            }
+        } finally { storageRelease.countDown() }
+        eventually("Stopping admission cancelled an already accepted storage write") {
+            queuedSuccess == 1 && !store.inkOwnerRetained && store.inkChargedBytes == 0L
+        }
+        main {
+            check(queuedFailure == 0 && pendingSuccess == 0 && pendingFailure > 0)
+            check(store.saveStates().single().snapshot.documentId == pendingId)
+            check(!store.saveStates().single().inFlight)
+        }
+        check(File(directory,"$queuedId.ncp").readText(Charsets.UTF_8) == queuedBytes)
+        check(!File(directory,"$pendingId.ncp").exists())
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

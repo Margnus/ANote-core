@@ -25,7 +25,9 @@
   "android_original_store_file_io_scenarios": [
     "shared_storage_after_close",
     "saved_new_owner_reopen",
-    "storage_during_deferred_release"
+    "storage_during_deferred_release",
+    "stopped_backend_keeps_accepted_write",
+    "stopped_backend_rejects_only_pending"
   ],
   "android_original_store_verified": true,
   "android_original_input_regression_checks": 6,
@@ -41,17 +43,20 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "a1f5d522b5bbbcb63b3ab8a2eed629fb1ee30b8e3fa8d8a5f5674b296e397b4e",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewSaveDispatchTest.kt": "22c8f725f997d12d2dd74216bff2e13af8ed5213b3d68d928f08e2b13d4a6629",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewSaveDispatchExecutorTest.kt": "485cfb07e087481386f744eafde677527c45d4988037881737ad7e796e663671",
-    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "7e29298127bba6038454f237f20e9fef4f27295d066ccaf3d17dd0aaabf965f3",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "fea28dd480ab62f0e3820c9699164554aef5f095425bf0edaad3f982aa92aad6",
     "android-app/src/main/res/values/strings.xml": "14abbb5899712efd4ccda8d7edbf540f6c368e908f2768a0c8c2b54af5712f37",
     "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "686228d2d69298b835b822d647cb388aa53df677eefd888fc037ff8b4f47369a",
-    "docs/保存派发与预算契约.md": "166f502623dfac4f99f58fa799c55821751eeb25154d34def983b68f669ecf40",
-    "reports/verification.json": "3f948e4cbc54a2343d67502f7dd7e2febcad1b3d491651afc490f8f257d75b3c",
-    "reports/preview-build.json": "a748463fb9868a15cd233cea1bf89b60b4845547bc35fc93dd716590ab320ada",
-    "reports/android-render-integration.json": "cd8bd754a113a28f82179621627566e36615e8c0c481fd25fb7ba001705494ec",
-    "reports/android-input-host-tests.json": "8aad24b0c55be6a7676f148f209cb37e7fb9fcceb51e50af7ae62700a31dc7db",
+    "docs/保存派发与预算契约.md": "5f0dd0b23e924d87a876167b252147e60ba53c3186caa3efe5620855ef89d8d3",
+    "reports/verification.json": "7086ab7964feb2393a16fa09b231f13940c59682101a6d6ba97d85645ac6c2c7",
+    "reports/preview-build.json": "2693c9aeb7607226c9f6e9fdd4a548e346cb840c5219a8b5bd6d2f95ea3997f5",
+    "reports/android-render-integration.json": "4170200d203f4338c8140976b05298db9e291e5ac55db18440adb45ce4825048",
+    "reports/android-input-host-tests.json": "2b3d0aeb4e80113ada4581020929e43d4feabe4ec99393eee7b3638a1def816d",
     "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewSaveDispatchTest.xml": "a2824664b7068dfc35e88cee2b7b98fdd0b7c6064dd19eafe8a5e05c4032e84e",
-    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewSaveDispatchExecutorTest.xml": "c10f047cf9bd6990b1099d19a3a88d474c1ed6933203b24766f91e3d8e3a244a"
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewSaveDispatchExecutorTest.xml": "c10f047cf9bd6990b1099d19a3a88d474c1ed6933203b24766f91e3d8e3a244a",
+    "android-app/src/androidTest/java/dev/notecore/app/SurfaceFrameHostChecks.kt": "646d9743809cd0723877ea4692e98e7ddf3e69bf65eea4a2be6eac517f85d23a",
+    "tools/verify_android_render_target.py": "f0feea51ee2fa5e9148edc4536c63d00c76e2c1a0518bf77d59efedee8b4b122"
   },
   "decision": "Adopt typed dispatch and explicit owner checks on original preview ledger and existing App storage pumps. Temporary byte pressure keeps eligible order and consumes no identity; permanently oversized documents do not block schedulable documents. Backend unavailable, invalid budgets and identity exhaustion remain typed and retain content. Worker slot rejection returns the exact unstarted attempt.",
-  "scope": "Actual common/JVM budget, owner and recovery tests, real JVM executor/file-codec consumer, plus source-bound original Android NoteStore/PreviewFileIO host regression. Swift wiring is source only pending actual Mac. No production SQLite, total process heap, whole requirement or ordinary UI acceptance."
+  "scope": "Actual common/JVM budget, owner and recovery tests, real JVM executor/file-codec consumer, plus source-bound original Android NoteStore/PreviewFileIO host regression. Swift wiring is source only pending actual Mac. No production SQLite, total process heap, whole requirement or ordinary UI acceptance.",
+  "android_stopped_backend_does_not_prematurely_fail_accepted_io": true
 }
