@@ -29,6 +29,14 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
             current.undo.lastOrNull()?.operationId, current.redo.lastOrNull()?.operationId, current.evictedHistoryCount)
     }
     private fun objectCharge(value: StrokeObject): Long = 256L + value.id.value.length * 2 + value.layerId.value.length * 2 + value.samples.size.toLong() * 28
+    /** Existing authority's live-payload gate, not a reservation of history, journal or system heap. */
+    internal fun additionalStrokeSampleCapacity(objectId: ObjectId, layerId: LayerId): Int {
+        ownerCheck()
+        if (state.root.scene.objectCount >= budget.maxObjects) return 0
+        val header = 256L + (objectId.value.length + layerId.value.length) * 2L
+        val remaining = (budget.liveBytes - liveCharge(state.root) - header).coerceAtLeast(0L)
+        return (remaining / 28L).coerceAtMost(1_000_000L).toInt()
+    }
     private fun liveCharge(root: DocumentRoot): Long = 512L + (root.id.value.length + root.title.length) * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
         root.scene.objects().sumOf(::objectCharge)
     private fun identityCharge(value: State): Long = value.pages.sumOf { 48L + it.value.length * 2 } +

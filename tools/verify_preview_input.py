@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bind actual raw-batch JVM/Native tests to original source-bound ART/UIKit adapter evidence."""
+"""Bind raw-batch/capacity JVM/Native tests to source-bound ART/UIKit adapter evidence."""
 import argparse
 import hashlib
 import json
@@ -66,21 +66,32 @@ def main():
         subprocess.run(build, cwd=ROOT, check=True, stdout=stream, stderr=subprocess.STDOUT, timeout=300)
     binary = ROOT/'shared-core/build/bin/iosSimulatorArm64/debugTest/test.kexe'
     output = command('xcrun', 'simctl', 'spawn', args.device, str(binary),
-        '--ktest_filter=dev.notecore.document.PreviewInputTest.*', '--ktest_logger=GTEST')
+        '--ktest_filter=dev.notecore.document.PreviewInput*Test.*', '--ktest_logger=GTEST')
     log = folder/'native.log'; log.write_text(output, encoding='utf-8')
-    source = ROOT/'shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputTest.kt'
-    expected = {'dev.notecore.document.PreviewInputTest.'+name for name in re.findall(r'@Test\s+fun\s+(\w+)\(', source.read_text(encoding='utf-8'))}
+    suites = ('PreviewInputTest', 'PreviewInputCapacityTest')
+    expected = set()
+    artifacts = []
+    for suite_name in suites:
+        source = ROOT/f'shared-core/src/commonTest/kotlin/dev/notecore/document/{suite_name}.kt'
+        names = re.findall(r'@Test\s+fun\s+(\w+)\(', source.read_text(encoding='utf-8'))
+        assert names and '@Ignore' not in source.read_text(encoding='utf-8')
+        expected.update(f'dev.notecore.document.{suite_name}.'+name for name in names)
+        xml = ROOT/f'shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.{suite_name}.xml'
+        suite = ET.parse(xml).getroot()
+        assert int(suite.attrib['tests']) == len(names) and all(int(suite.attrib[k]) == 0 for k in ('failures', 'errors', 'skipped'))
+        assert {case.attrib['name'].removesuffix('[jvm]') for case in suite.findall('testcase')} == set(names)
+        artifacts.extend((source, xml))
     passed = re.findall(r'^\[\s+OK\s+\]\s+(\S+)', output, re.MULTILINE)
-    assert len(expected) == len(passed) == 8 and set(passed) == expected, output
+    assert len(expected) == len(passed) == 13 and set(passed) == expected, output
     assert inputs == {str(path.relative_to(ROOT)): sha(path) for path in sources}
-    xml = ROOT/'shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputTest.xml'
-    suite = ET.parse(xml).getroot()
-    assert int(suite.attrib['tests']) == 8 and all(int(suite.attrib[k]) == 0 for k in ('failures', 'errors', 'skipped'))
     bindings.update(inputs)
-    bindings.update({str(p.relative_to(ROOT)): sha(p) for p in (binary, source, xml, log, build_log)})
+    bindings.update({str(p.relative_to(ROOT)): sha(p) for p in (binary, log, build_log, *artifacts)})
     report = {
         'schema': 'preview-input-contract-1', 'status': 'passed', 'source_and_artifact_sha256': bindings,
-        'jvm_tests': 8, 'native_tests': 8, 'android_original_adapter_checks': len(EXPECTED_ANDROID_INPUT_CHECKS), 'swift_host_tests': len(EXPECTED_IOS_HOST_CHECKS),
+        'jvm_tests': len(expected), 'native_tests': len(passed), 'android_original_adapter_checks': len(EXPECTED_ANDROID_INPUT_CHECKS), 'swift_host_tests': len(EXPECTED_IOS_HOST_CHECKS),
+        'live_byte_capacity_jvm_native_regressions': 3,
+        'android_live_byte_capacity_callback_verified': 'live_byte_refusal_and_undo_recovery' in EXPECTED_ANDROID_INPUT_CHECKS,
+        'swift_specific_live_byte_callback_case_verified': False,
         'native_checks': sorted(passed), 'max_real_samples_per_batch': 1024,
         'decision': 'Adopt atomic bounded raw real-batch admission on the original notebook and accumulator. Distinguish rejected-zero, accepted-active, committed and accepted-pending; no duplicate terminal resend. Native adapters copy a whole callback before admission, explicitly cancel/report unrecoverable native input refusal, never truncate. Apple NSData shim performs bounded native scalar copies without per-sample Kotlin callbacks.',
         'scope': 'Actual JVM/Kotlin Native raw-batch tests plus source-bound Android original View synthetic MotionEvents and iOS original UIKit callbacks/NSData bridge app-host tests. No ordinary package UI, real OS stylus delivery or physical latency claim. Source byte/count bounds are not measured process heap or a production arena.',

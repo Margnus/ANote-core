@@ -73,6 +73,27 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             check(f.changes[0] == 2 && f.errors.size == 1 && !f.note.hasPendingStroke)
             checks.add("document_capacity_refusal_and_undo_recovery")
         }
+        run {
+            val p = Sample(400f, 300f, 1000)
+            val probe = fixture()
+            send(probe.view, MotionEvent.ACTION_DOWN, listOf(p))
+            send(probe.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+            val f = fixture(DocumentBudget(liveBytes = probe.note.authorityStatus().liveByteCharge))
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+            check(f.note.strokeCount == 1 && !f.note.hasPendingStroke)
+            val full = f.note.snapshot()
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1002)))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1003)))
+            check(f.note.snapshot() === full && !f.note.hasActiveStroke && !f.note.hasPendingStroke)
+            check(f.changes[0] == 1 && f.errors.size == 1 && f.note.canUndo)
+            check(f.note.undo()); f.view.refreshPage()
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1004)))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1005)))
+            check(f.note.strokeCount == 1 && f.note.pointCount(0) == 2 && !f.note.hasPendingStroke)
+            check(f.changes[0] == 2 && f.errors.size == 1)
+            checks.add("live_byte_refusal_and_undo_recovery")
+        }
         var oldFloatError: Double; var canonicalError: Double
         run {
             val f = fixture(); val v = f.view

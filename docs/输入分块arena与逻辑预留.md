@@ -1,5 +1,7 @@
 # 原输入分块arena与逻辑预留
 
+2026-10-22总预算卡增量：原notebook在DOWN用原authority的剩余live正文额度、待分配实际object/layer头及格式上限决定本笔maxRealSamples，arena预留随该容量收紧。正文满额时零接收、不创建pending且不消耗身份，可撤销恢复；共同API在后续整批超额时保留已接收点并允许合法重试/空UP。这里不是journal/history/identity/保存/渲染总预留，平台不可恢复输入拒绝仍有原显式取消/提示策略。结果以[当前状态](当前开发状态.md)和[输入报告](../reports/preview-input-contract.json)的对应版本范围为准。
+
 DEV-040M，2026-10-22。直接用于原InputReplaySession/原notebook，仍为未冻结预览路径，不是生产heap保证。
 
 ## 存储与规范输出

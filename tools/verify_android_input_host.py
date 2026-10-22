@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = 'dev.notecore.preview'
 CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equal_time_and_undo',
           'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root',
-          'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery'}
+          'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery',
+          'live_byte_refusal_and_undo_recovery'}
 
 
 def digest(path):

@@ -103,11 +103,16 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         return PreviewEditResult(accepted, failure, root().revision)
     }
     private fun validPageId(value: String) = value.isNotBlank() && value.length <= 128 && value.hasValidUnicode()
-    private fun identity(kind: String): String? {
-        while (sequence < Long.MAX_VALUE) {
-            val candidate = "$sessionNonce-$kind-${++sequence}"
-            if (candidate !in initialIds) return candidate
+    private fun nextIdentity(kind: String, after: Long = sequence): Pair<String, Long>? {
+        var next = after
+        while (next < Long.MAX_VALUE) {
+            val candidate = "$sessionNonce-$kind-${++next}"
+            if (candidate !in initialIds) return candidate to next
         }
+        return null
+    }
+    private fun identity(kind: String): String? {
+        nextIdentity(kind)?.let { (candidate, next) -> sequence = next; return candidate }
         fail("此会话编号已耗尽，请保留笔记并导出备份", PreviewFailureKind.IDENTITY_EXHAUSTED); return null
     }
     private fun operation(): CommandId? = identity("op")?.let(::CommandId)
@@ -230,9 +235,17 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             if (remaining <= 0 || current.scene.objectCount >= inputObjectLimit ||
                 count > minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining))
                 return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+            // Peek both identities without consuming them: refused DOWN must leave retry/undo usable.
+            val nextOperation = nextIdentity("op")
+                ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
+            val nextObject = nextIdentity("ink", nextOperation.second)
+                ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
+            val liveCapacity = memory.additionalStrokeSampleCapacity(ObjectId(nextObject.first), current.findPage(selected)!!.layerId)
+            val pointCapacity = minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, liveCapacity)
+            if (count > pointCapacity) return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
             objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
-            page = selected; session = InputReplaySession(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining)); sequence = 0
+            page = selected; session = InputReplaySession(pointCapacity); sequence = 0
         } else {
             session = input!!; sequence = inputSequence
             if (sequence == Long.MAX_VALUE) return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)

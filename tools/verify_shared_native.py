@@ -36,7 +36,7 @@ def main():
         assert len(classes) == 1 and '@Ignore' not in text, path
         expected.update(package + '.' + classes[0] + '.' + name
                         for name in re.findall(r'@Test\s+fun\s+(\w+)\(', text))
-    assert len(expected) == 124
+    assert expected, 'No common tests discovered'
     paths = sorted([*ROOT.glob('shared-core/src/commonMain/**/*.kt'), *tests,
                     *ROOT.glob('shared-core/src/iosMain/**/*.kt'),
                     *ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/iosMain/**/*.kt'),
@@ -57,7 +57,7 @@ def main():
     log = folder/'run.log'; log.write_text(output, encoding='utf-8')
     passed = re.findall(r'^\[\s+OK\s+\]\s+(\S+)', output, re.MULTILINE)
     assert len(passed) == len(expected) and set(passed) == expected, output
-    assert '[  PASSED  ] 124 tests.' in output
+    assert f'[  PASSED  ] {len(expected)} tests.' in output
     assert before == {p.relative_to(ROOT).as_posix(): sha(p) for p in paths}
     assert sha(binary) == binary_sha
     bindings = dict(before)
