@@ -6,6 +6,7 @@ import dev.notecore.canvas.prototype.*
 class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(initial: DocumentRoot, private val sessionNonce: String,
                            budget: DocumentBudget = DocumentBudget(), private val ownerCheck: () -> Unit = {}) {
     private val memory = MemoryDocumentAuthority(initial, budget, ownerCheck)
+    private val inputObjectLimit = budget.maxObjects
     private var selected = initial.page(0).id
     private var sequence = 0L
     private val initialIds = (initial.pages().flatMap { listOf(it.id.value, it.layerId.value) } + initial.scene.objects().map { it.id.value }).toSet()
@@ -221,7 +222,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         var command = strokeCommand; var objectId = strokeObject; var page = strokePage
         if (phase == PointerPhase.DOWN) {
             val remaining = PagedPreviewCodec.MAX_POINTS - current.scene.objects().sumOf { it.samples.size }
-            if (remaining <= 0 || current.scene.objectCount >= PagedPreviewCodec.MAX_OBJECTS ||
+            if (remaining <= 0 || current.scene.objectCount >= inputObjectLimit ||
                 count > minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining))
                 return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)

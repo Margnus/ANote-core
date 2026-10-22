@@ -1,0 +1,26 @@
+{
+  "schema": "preview-input-capacity-1",
+  "status": "passed-jvm-and-android-build",
+  "checks": [
+    "fullDocumentRefusesDownBeforeAcceptingInkAndUndoCanRestoreWriting[jvm]",
+    "redoRestoresTheCapacityGateWithoutCreatingAPendingCommand[jvm]"
+  ],
+  "jvm_tests": 2,
+  "shared_regression_tests": 333,
+  "android_apk_lint_and_test_apk_built": true,
+  "native_skia_tests": 7,
+  "android_art_or_ui_executed": false,
+  "apple_compiled_or_executed": false,
+  "input_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "a3d3244416b8f05c9d7881272f14a465c0b82bfd8a11ca77a8d1296bc64021a4",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputCapacityTest.kt": "7bdd053267f5bfe07a1628edf367ed303cbe1e255dfd1cb86d4df47c32a03343",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputCapacityTest.xml": "7084b738419cbbff64bfd1b3e064fca8f44dfe397126331616affc77dac36ec7",
+    "reports/verification.json": "a02789c445379c04faabc15bfacc731171a6f02c97b1bce94147bebe8e53f0be",
+    "reports/preview-build.json": "4734644a6ed0286142536b846f1bbf915cf0ebf513c20db069b8dcec6b44e090",
+    "reports/android-brush-native.json": "771a7702050e559c72dc93f52f5c08e8247bac46ed3b930bbe6df8cab5a945d4",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "bd6c1acb41349fbd455ba6792f03eb5d67f9e5f698415d5959c7631f2055bb66"
+  },
+  "decision": "Adopt document-specific maxObjects preflight on original notebook DOWN before identities/input are accepted. Retain original pending command contract for other commit failures. No new authority or worker.",
+  "scope": "Actual JVM notebook rejection/undo/redo/retry/codec round-trip regression, current Android compilation/lint and unrelated brush pixel regression. Not native adapter runtime, physical heap, overall backpressure, production save or whole ENG-07 acceptance.",
+  "c1_complete": false
+}
