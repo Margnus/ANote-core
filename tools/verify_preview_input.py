@@ -65,10 +65,11 @@ def main():
     with build_log.open('w', encoding='utf-8') as stream:
         subprocess.run(build, cwd=ROOT, check=True, stdout=stream, stderr=subprocess.STDOUT, timeout=300)
     binary = ROOT/'shared-core/build/bin/iosSimulatorArm64/debugTest/test.kexe'
+    suites = ('PreviewInputTest', 'PreviewInputCapacityTest', 'PreviewInputBudgetTest', 'PreviewCommitCapacityTest')
+    test_filter = ':'.join(f'dev.notecore.document.{name}.*' for name in suites)
     output = command('xcrun', 'simctl', 'spawn', args.device, str(binary),
-        '--ktest_filter=dev.notecore.document.PreviewInput*Test.*', '--ktest_logger=GTEST')
+        '--ktest_filter='+test_filter, '--ktest_logger=GTEST')
     log = folder/'native.log'; log.write_text(output, encoding='utf-8')
-    suites = ('PreviewInputTest', 'PreviewInputCapacityTest')
     expected = set()
     artifacts = []
     for suite_name in suites:
@@ -82,7 +83,7 @@ def main():
         assert {case.attrib['name'].removesuffix('[jvm]') for case in suite.findall('testcase')} == set(names)
         artifacts.extend((source, xml))
     passed = re.findall(r'^\[\s+OK\s+\]\s+(\S+)', output, re.MULTILINE)
-    assert len(expected) == len(passed) == 13 and set(passed) == expected, output
+    assert len(expected) == len(passed) == 25 and set(passed) == expected, output
     assert inputs == {str(path.relative_to(ROOT)): sha(path) for path in sources}
     bindings.update(inputs)
     bindings.update({str(p.relative_to(ROOT)): sha(p) for p in (binary, log, build_log, *artifacts)})
@@ -90,6 +91,7 @@ def main():
         'schema': 'preview-input-contract-1', 'status': 'passed', 'source_and_artifact_sha256': bindings,
         'jvm_tests': len(expected), 'native_tests': len(passed), 'android_original_adapter_checks': len(EXPECTED_ANDROID_INPUT_CHECKS), 'swift_host_tests': len(EXPECTED_IOS_HOST_CHECKS),
         'live_byte_capacity_jvm_native_regressions': 3,
+        'input_commit_capacity_jvm_native_regressions': 7,
         'android_live_byte_capacity_callback_verified': 'live_byte_refusal_and_undo_recovery' in EXPECTED_ANDROID_INPUT_CHECKS,
         'swift_specific_live_byte_callback_case_verified': False,
         'native_checks': sorted(passed), 'max_real_samples_per_batch': 1024,

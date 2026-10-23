@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEVICE = '7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
 BUNDLE = 'dev.notecore.preview'
 ANDROID_CHECKS = {'invalid_parameters_keep_active_samples', 'typed_history_and_original_root_edits',
-                  'capacity_refusal_keeps_active_input', 'pending_and_closed_failures_are_explicit'}
+                  'capacity_refusal_keeps_active_input', 'admission_and_closed_failures_are_explicit'}
 
 
 def sha(path):

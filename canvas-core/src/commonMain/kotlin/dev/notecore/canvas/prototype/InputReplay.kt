@@ -22,6 +22,30 @@ class InputBatch(
     init { require(sequence >= 0 && timeMicros >= 0 && pointerId >= 0) }
 }
 
+/** Synchronous scalar view only. Neither sessions nor builders retain a source or caller array. */
+internal interface InputRealSamples {
+    val size: Int
+    fun x(index: Int): Double
+    fun y(index: Int): Double
+    fun pressure(index: Int): Float
+    fun time(index: Int): Long
+}
+internal class InputListSamples(private val points: List<InputSample>) : InputRealSamples {
+    override val size: Int get() = points.size
+    override fun x(index: Int) = points[index].x
+    override fun y(index: Int) = points[index].y
+    override fun pressure(index: Int) = points[index].pressure
+    override fun time(index: Int) = points[index].timeMicros
+}
+private class InputScalarSamples(private val xs: DoubleArray, private val ys: DoubleArray,
+    private val pressures: FloatArray, private val times: LongArray) : InputRealSamples {
+    override val size: Int get() = xs.size
+    override fun x(index: Int) = xs[index]
+    override fun y(index: Int) = ys[index]
+    override fun pressure(index: Int) = pressures[index]
+    override fun time(index: Int) = times[index]
+}
+
 data class CompletedInput(val target: StrokeTarget, val samples: StrokeSamples) {
     /** Only the document authority selects the current base revision at submission. */
     fun command(id: CommandId, objectId: ObjectId, baseRevision: Long) =
@@ -52,40 +76,60 @@ class InputReplaySession(private val maxRealSamples: Int = 100_000) {
     val activePointByteCharge: Long get() = active?.samples?.logicalByteCharge ?: 0L
     init { require(maxRealSamples in 1..1_000_000) }
 
-    fun consume(batch: InputBatch, targetAtDown: StrokeTarget): InputResult {
+    fun consume(batch: InputBatch, targetAtDown: StrokeTarget): InputResult = consume(
+        batch.sequence, batch.timeMicros, batch.pointerId, batch.tool, batch.phase,
+        InputListSamples(batch.real), batch.predicted, targetAtDown)
+
+    /** Real-only producer path. Raw arrays are read synchronously and never retained.
+     * Caller stays on the single owner and must not mutate buffers during this call.
+     * Invalid envelopes/scalars refuse the entire batch without allocating point objects or advancing state.
+     */
+    fun consumeReal(sequence: Long, timeMicros: Long, pointerId: Long, tool: PointerTool, phase: PointerPhase,
+        xs: DoubleArray, ys: DoubleArray, pressures: FloatArray, times: LongArray, targetAtDown: StrokeTarget): InputResult {
+        if (closed) return InputResult.Rejected(InputRejection.CLOSED)
+        if (sequence < 0 || timeMicros < 0 || pointerId < 0 || xs.size != ys.size || xs.size != pressures.size || xs.size != times.size)
+            return InputResult.Rejected(InputRejection.INVALID_BATCH)
+        return consume(sequence, timeMicros, pointerId, tool, phase, InputScalarSamples(xs, ys, pressures, times), emptyList(), targetAtDown)
+    }
+    private fun consume(batchSequence: Long, batchTimeMicros: Long, pointerId: Long, tool: PointerTool, phase: PointerPhase,
+        real: InputRealSamples, predicted: List<InputSample>, targetAtDown: StrokeTarget): InputResult {
         fun reject(reason: InputRejection) = InputResult.Rejected(reason)
         if (closed) return reject(InputRejection.CLOSED)
-        if (batch.sequence <= sequence || batch.timeMicros < eventTime) return reject(InputRejection.EVENT_ORDER)
-        if (batch.tool == PointerTool.FINGER) {
-            sequence = batch.sequence; eventTime = batch.timeMicros
+        if (batchSequence <= sequence || batchTimeMicros < eventTime) return reject(InputRejection.EVENT_ORDER)
+        for (i in 0 until real.size) {
+            val x = real.x(i); val y = real.y(i); val pressure = real.pressure(i)
+            if (!x.isFinite() || !y.isFinite() || kotlin.math.abs(x) > 1e9 || kotlin.math.abs(y) > 1e9 ||
+                !pressure.isFinite() || pressure !in 0f..1f || real.time(i) < 0) return reject(InputRejection.INVALID_BATCH)
+        }
+        if (tool == PointerTool.FINGER) {
+            sequence = batchSequence; eventTime = batchTimeMicros
             return InputResult.IgnoredNavigation
         }
         val previous = active
-        if (batch.phase == PointerPhase.DOWN && previous != null) return reject(InputRejection.POINTER_BUSY)
-        if (batch.phase != PointerPhase.DOWN && (previous == null || previous.pointerId != batch.pointerId))
+        if (phase == PointerPhase.DOWN && previous != null) return reject(InputRejection.POINTER_BUSY)
+        if (phase != PointerPhase.DOWN && (previous == null || previous.pointerId != pointerId))
             return reject(InputRejection.NO_ACTIVE_POINTER)
-        val last = previous?.samples?.lastTimeMicros ?: -1L
-        var time = last
-        for (point in batch.real) {
-            if (point.timeMicros < time || point.timeMicros > batch.timeMicros) return reject(InputRejection.INVALID_BATCH)
-            time = point.timeMicros
+        var time = previous?.samples?.lastTimeMicros ?: -1L
+        for (i in 0 until real.size) {
+            val next = real.time(i)
+            if (next < time || next > batchTimeMicros) return reject(InputRejection.INVALID_BATCH)
+            time = next
         }
-        time = batch.timeMicros
-        for (point in batch.predicted) {
+        time = batchTimeMicros
+        for (point in predicted) {
             if (point.timeMicros <= time) return reject(InputRejection.INVALID_BATCH)
             time = point.timeMicros
         }
-        if (batch.phase == PointerPhase.DOWN && batch.real.isEmpty()) return reject(InputRejection.INVALID_BATCH)
-        if (batch.phase == PointerPhase.MOVE && batch.real.isEmpty() && batch.predicted.isEmpty())
-            return reject(InputRejection.INVALID_BATCH)
-        if (batch.phase != PointerPhase.CANCEL && batch.real.size > maxRealSamples - (previous?.samples?.size ?: 0))
+        if (phase == PointerPhase.DOWN && real.size == 0) return reject(InputRejection.INVALID_BATCH)
+        if (phase == PointerPhase.MOVE && real.size == 0 && predicted.isEmpty()) return reject(InputRejection.INVALID_BATCH)
+        if (phase != PointerPhase.CANCEL && real.size > maxRealSamples - (previous?.samples?.size ?: 0))
             return reject(InputRejection.CAPACITY)
-        sequence = batch.sequence; eventTime = batch.timeMicros
-        if (batch.phase == PointerPhase.CANCEL) { previous?.samples?.discard(); active = null; return InputResult.Cancelled }
-        val stroke = previous ?: Active(batch.pointerId, targetAtDown, StrokeSamples.Builder(maxRealSamples))
-        stroke.samples.append(batch.real)
+        sequence = batchSequence; eventTime = batchTimeMicros
+        if (phase == PointerPhase.CANCEL) { previous?.samples?.discard(); active = null; return InputResult.Cancelled }
+        val stroke = previous ?: Active(pointerId, targetAtDown, StrokeSamples.Builder(maxRealSamples))
+        stroke.samples.append(real)
         active = stroke
-        if (batch.phase != PointerPhase.UP) return InputResult.Preview(stroke.samples.size, batch.predicted.toList())
+        if (phase != PointerPhase.UP) return InputResult.Preview(stroke.samples.size, predicted.toList())
         val completed = CompletedInput(stroke.target, stroke.samples.finish())
         active = null
         return InputResult.Completed(completed)

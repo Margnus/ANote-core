@@ -7,6 +7,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                            budget: DocumentBudget = DocumentBudget(), private val ownerCheck: () -> Unit = {}) {
     private val memory = MemoryDocumentAuthority(initial, budget, ownerCheck)
     private val inputObjectLimit = budget.maxObjects
+    private val inputByteLimit = budget.inputBytes
     private var selected = initial.page(0).id
     private var sequence = 0L
     private val initialIds = (initial.pages().flatMap { listOf(it.id.value, it.layerId.value) } + initial.scene.objects().map { it.id.value }).toSet()
@@ -54,16 +55,14 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun snapshot(): DocumentRoot = root()
     fun page(index: Int): PageDescriptor = root().page(index)
     fun authorityStatus(): DocumentAuthorityStatus { ownerCheck(); return memory.status() }
+    private fun clearProjection() { projection = emptyList(); projectionRevision = -1L; projectionPage = null }
     private fun visible(): List<StrokeObject> {
         val root = root()
-        if (retired) return root.pageObjects(selected) // Retired read access must not rebuild a retained cache.
+        if (retired) return root.pageObjects(selected) // Do not reacquire a retained cache after retirement.
         if (projectionRevision != root.revision || projectionPage != selected) {
             projection = root.pageObjects(selected); projectionRevision = root.revision; projectionPage = selected
         }
         return projection
-    }
-    private fun invalidateProjection() {
-        projection = emptyList(); projectionRevision = -1L; projectionPage = null
     }
     fun stroke(index: Int): StrokeObject = visible()[index]
     fun strokeId(index: Int): String = stroke(index).id.value
@@ -127,7 +126,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         clearError(); return true
     }
     private fun commit(command: DocumentCommand): Boolean = when (val result = memory.commit(command)) {
-        is DocumentCommit.Accepted -> { invalidateProjection(); cancelStroke(); clearError(); true }
+        is DocumentCommit.Accepted -> { clearProjection(); cancelStroke(); clearError(); true }
         is DocumentCommit.Rejected -> fail(when (result.reason) {
             DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
             DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
@@ -140,7 +139,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (root().findPage(id) == null) return fail("页面不存在", PreviewFailureKind.MISSING_PAGE)
         if (id == selected) { clearError(); return true }
         if (!prepareEdit()) return false
-        cancelStroke(); invalidateProjection(); selected = id; clearError(); return true // Presentation-only; no root commit.
+        cancelStroke(); clearProjection(); selected = id; clearError(); return true // Presentation-only; no root commit.
     }
     fun insertPage(): Boolean {
         if (!prepareEdit()) return false
@@ -244,9 +243,15 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                 ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
             val nextObject = nextIdentity("ink", nextOperation.second)
                 ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
-            val liveCapacity = memory.additionalStrokeSampleCapacity(ObjectId(nextObject.first), current.findPage(selected)!!.layerId)
-            val pointCapacity = minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, liveCapacity)
-            if (count > pointCapacity) return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+            val capacity = memory.strokeInputCapacity(ObjectId(nextObject.first), selected)
+            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, capacity.points))
+            if (count > pointCapacity) {
+                if (count > capacity.points && capacity.limitingReason != DocumentRejection.LIVE_BYTE_CAPACITY) {
+                    fail("当前预览编辑容量不足，本批未接收，请先保存或导出现有内容", PreviewFailureKind.DOCUMENT_REJECTED, capacity.limitingReason)
+                    return inputResult(PreviewInputDisposition.REJECTED, 0, InputRejection.CAPACITY)
+                }
+                return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+            }
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
             objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
             page = selected; session = InputReplaySession(pointCapacity); sequence = 0
@@ -254,9 +259,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             session = input!!; sequence = inputSequence
             if (sequence == Long.MAX_VALUE) return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
         }
-        // All scalar/length/work admission checks precede this bounded copied list.
-        val points = List(count) { InputSample(xs[it], ys[it], pressures[it], times[it]) }
-        val result = session.consume(InputBatch(sequence, eventTimeMicros, 1, PointerTool.STYLUS, phase, points),
+        // Original session copies validated scalars directly into its arena; no InputSample/InputBatch lists.
+        val result = session.consumeReal(sequence, eventTimeMicros, 1, PointerTool.STYLUS, phase, xs, ys, pressures, times,
             StrokeTarget(current.id, current.findPage(page!!)!!.layerId, BrushSpec(BrushKind.MONOLINE, 1, width, color)))
         if (result is InputResult.Rejected) return rejectRealBatch(
             if (result.reason == InputRejection.CAPACITY) PreviewFailureKind.CAPACITY else PreviewFailureKind.INVALID_INPUT, result.reason)
@@ -273,6 +277,17 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         }
         input = session; clearError()
         return inputResult(PreviewInputDisposition.ACCEPTED, count)
+    }
+    /** Reserve the entire admitted stroke, including completion overlap, before allocating identities.
+     * Rejection never lowers an active session's capacity or drops its accepted prefix.
+     */
+    private fun affordableInputPoints(maximum: Int): Int {
+        var low = 0; var high = maximum
+        while (low < high) {
+            val mid = low + (high - low + 1) / 2
+            if (InputReplaySession.reservationBytes(mid) <= inputByteLimit) low = mid else high = mid - 1
+        }
+        return low
     }
     internal fun realBatchGate(phase: PointerPhase): PreviewInputResult? {
         ownerCheck()
@@ -320,7 +335,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun retire(): Boolean {
         ownerCheck()
         if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试", PreviewFailureKind.PENDING_STROKE)
-        cancelStroke(); invalidateProjection(); retired = true; return true
+        cancelStroke(); clearProjection(); retired = true; return true
     }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())

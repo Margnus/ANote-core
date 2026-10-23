@@ -56,9 +56,10 @@ def main():
     observed = json.loads(re.search(r'surface_frames=(\{.*\})', output).group(1))
     assert all(observed[key] for key in ('app_hierarchy_pixels', 'active_static_alpha', 'page_zoom',
         'actual_release_callback', 'valid_release_fence_observed', 'late_view_ack', 'resize', 'pending_complete_fallback',
-        'shared_storage_after_close', 'saved_new_owner_reopen', 'unknown_readonly_reconciled',
+        'shared_storage_after_close', 'saved_new_owner_reopen', 'weak_saved_identity_rewrites_after_clear', 'export_picker_single_capture_budget_identity_and_io', 'export_activity_state_and_stale_cancel', 'typed_reader_rejects_original_open_import_without_overwrite', 'lost_view_retires_on_owner_progress_without_bypassing_receipts', 'lost_view_late_worker_ack_without_publication', 'unknown_readonly_reconciled',
         'ambiguous_handoff_recovered', 'deferred_completion_keeps_charge', 'storage_during_deferred_release',
-        'new_frame_after_handoff_recovery', 'stopped_backend_keeps_accepted_write', 'stopped_backend_rejects_only_pending'))
+        'new_frame_after_handoff_recovery', 'stopped_backend_keeps_accepted_write', 'stopped_backend_rejects_only_pending',
+        'terminal_save_notification_drops_receiver_retains_content'))
     assert observed['unknown_retained_bytes'] > 0 and observed['handoff_unknown_retained_bytes'] > 0
     assert observed['long_unsignaled_gpu_fence_tested'] is False
 

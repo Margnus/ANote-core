@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
-    'testSavedVersionSkipsUnchangedIOButChangedFailureRemainsRetryable()',
+    'testSavedIdentitySkipsUnchangedIOButChangedFailureRemainsRetryable()',
     'testPendingExportKeepsFirstCapturedContentUntilConsumerClearsIt()',
     'testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()',
     'testTypedEditModelRejectsInvalidParametersWithoutLosingActiveInk()',
@@ -151,7 +151,7 @@ def main():
         'swift_authority_constructor_failure_recoverable': True,
         'typed_edit_model_failure_and_file_reopen_verified': True,
         'native_scalar_input_batch_bridge_verified': True,
-        'saved_version_failure_recovery_verified': True,
+        'saved_identity_failure_recovery_verified': True,
         'pending_export_capture_handoff_verified': True,
         'swift_malformed_utf16_injection_tested': False,
         'input_sdk_contract_sha256': input_contracts,

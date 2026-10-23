@@ -12,6 +12,9 @@ import java.util.UUID
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
+internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED }
+internal data class ExportPickerAdmission(val disposition: ExportPickerDisposition, val requestCode: Int? = null)
+
 data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean)
 
 data class NoteSummary(val id: String, val title: String, val modified: Long)
@@ -20,7 +23,8 @@ data class NoteSummary(val id: String, val title: String, val modified: Long)
 @OptIn(ExperimentalAndroidInkFrame::class)
 class NoteStore private constructor(context: Context, private val directory: File = File(context.filesDir, "preview-notes"),
     private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {},
-    private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true }) {
+    private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
+    private val exportPickerByteLimit: Long = 8L * 1024 * 1024) {
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
@@ -32,8 +36,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
     internal val activeDocumentId: String? get() { executor.checkOwnerThread(); return activeNotebook?.documentId }
-    // Only a revision in the current authority's monotonic lifetime, never an extra old root owner.
-    private var activeSavedVersion: Long? = null
+    // An identity-only optimization must not retain an obsolete canonical root.
+    private var activeSavedRoot = java.lang.ref.WeakReference<DocumentRoot>(null)
     internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
         executor.checkOwnerThread()
         activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
@@ -41,7 +45,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
             executor::checkOwnerThread)
         activeNotebook = note
-        activeSavedVersion = opened.root.revision.takeIf { opened.persisted && ledger.latest(note.documentId) == null }
+        activeSavedRoot = java.lang.ref.WeakReference(opened.root.takeIf { opened.persisted && ledger.latest(note.documentId) == null })
         return note
     }
     internal fun create(): PagedPreviewNotebook {
@@ -56,20 +60,31 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         activeNotebook = note
     }
     internal fun releaseActive(note: PagedPreviewNotebook) {
-        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedVersion = null
+        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedRoot.clear()
     }
-    private var exportSnapshot: PagedPreviewSnapshot? = null
-    internal val exportRetainedByteCharge: Long get() { executor.checkOwnerThread(); return exportSnapshot?.retainedByteCharge ?: 0L }
-    internal fun beginExport(snapshot: PagedPreviewSnapshot): Boolean {
+    // One app-owner capture while the external picker runs. No timeout/Activity destruction release.
+    internal val exportPickerSession = UUID.randomUUID().toString()
+    private var nextExportRequestCode = 1000
+    private var pendingExport: Pair<Int, PagedPreviewSnapshot>? = null
+    internal val exportReservedByteCharge: Long get() {
+        executor.checkOwnerThread(); return pendingExport?.second?.retainedByteCharge ?: 0L
+    }
+    internal fun beginExportPicker(snapshot: PagedPreviewSnapshot): ExportPickerAdmission {
         executor.checkOwnerThread()
-        if (exportSnapshot != null) return false
-        exportSnapshot = snapshot; return true
+        if (pendingExport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
+        if (snapshot.retainedByteCharge > exportPickerByteLimit) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
+        if (nextExportRequestCode > 65535) return ExportPickerAdmission(ExportPickerDisposition.IDENTITY_EXHAUSTED)
+        val code = nextExportRequestCode++
+        pendingExport = code to snapshot
+        return ExportPickerAdmission(ExportPickerDisposition.READY, code)
     }
-    internal fun takeExportSnapshot(): PagedPreviewSnapshot? {
+    /** Mismatched/duplicate results cannot release or substitute another accepted capture. */
+    internal fun takeExportPicker(requestCode: Int): PagedPreviewSnapshot? {
         executor.checkOwnerThread()
-        return exportSnapshot.also { exportSnapshot = null }
+        val capture = pendingExport?.takeIf { it.first == requestCode } ?: return null
+        pendingExport = null; return capture.second
     }
-    init { executor.checkOwnerThread() }
+    init { executor.checkOwnerThread(); require(exportPickerByteLimit >= 0) }
     private fun requestPump() {
         if (!wakePending.compareAndSet(false, true)) return
         if (!main.post {
@@ -108,6 +123,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun pumpInk() {
         executor.checkOutsideDrain()
         val renderer = inkRenderer ?: return
+        // A lost presentation endpoint must retire on this same owner, including late worker results.
+        // Keep the old pool/image charged until their original receipts drain; never create a replacement here.
+        if (!inkRetiring && inkView.get() == null) retireInk(lostEndpoint = true)
         renderer.settleAfterDrain { request, ack ->
             if (request === inkPending) {
                 inkPending = null
@@ -191,10 +209,10 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         executor.checkOwnerThread()
         if (inkView.get() === view) retireInk()
     }
-    private fun retireInk() {
+    private fun retireInk(lostEndpoint: Boolean = false) {
         executor.checkOwnerThread()
         inkShown = false; inkKey = null; inkPending = null
-        inkImage?.let { it.close(); if (it.released) inkImage = null }
+        inkImage?.let { if (lostEndpoint) it.closeWithoutView() else it.close(); if (it.released) inkImage = null }
         inkRenderer?.let { it.close(); inkRetiring = true }
         inkView.get()?.invalidate()
         requestPump()
@@ -210,7 +228,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun save(snapshot: PagedPreviewSnapshot, callback: (Long, String?) -> Unit): Boolean {
         executor.checkOwnerThread()
-        if (activeNotebook?.snapshot() === snapshot.root && activeSavedVersion == snapshot.version && ledger.latest(snapshot.documentId) == null) {
+        if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot.get() === snapshot.root && ledger.latest(snapshot.documentId) == null) {
             notifyUi { callback(snapshot.version, null) }; return true
         }
         val previous = ledger.latest(snapshot.documentId)
@@ -237,7 +255,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                     val ids = if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
                         dispatch.documentId?.let(::listOf).orEmpty() else ledger.states()
                             .filter { !it.inFlight && !it.retryRequired }.map { it.snapshot.documentId }
-                    for (id in ids) saveCallbacks[id]?.let { receiver ->
+                    // Terminal notification relinquishes only the advisory UI receiver; ledger keeps content.
+                    for (id in ids) saveCallbacks.remove(id)?.let { receiver ->
                         notifyUi { receiver.receive(receiver.version, if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
                             saveTaskTooLarge else "保存后端暂不可用，更改仍保留，请重试") }
                     }
@@ -251,8 +270,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 val success = result is WorkResult.Succeeded
                 check(ledger.complete(original, success))
                 val id = original.snapshot.documentId
-                if (success && activeNotebook?.snapshot() === (original.snapshot as PagedPreviewSnapshot).root)
-                    activeSavedVersion = original.snapshot.version
+                if (success && activeNotebook?.documentId == id) activeSavedRoot = java.lang.ref.WeakReference((original.snapshot as PagedPreviewSnapshot).root)
                 saveCallbacks[id]?.takeIf { it.version == original.snapshot.version }?.let { receiver ->
                     saveCallbacks.remove(id)
                     notifyUi { receiver.receive(original.snapshot.version, if (success) null else "保存失败，更改仍在本机会话中，请重试保存") }
@@ -263,8 +281,11 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 check(ledger.returnUnstarted(attempt))
                 // Already admitted snapshot stays pending; a completing job wakes and pumps it later.
                 if (admission.reason == WorkAdmissionFailure.WORKER_TERMINATED || admission.reason == WorkAdmissionFailure.STOPPED) {
-                    notifyUi { saveCallbacks[attempt.snapshot.documentId]?.receive?.invoke(attempt.snapshot.version,
-                        "保存后端暂不可用，更改仍保留，请重试") }
+                    val id = attempt.snapshot.documentId
+                    saveCallbacks[id]?.takeIf { it.version == attempt.snapshot.version }?.let { receiver ->
+                        saveCallbacks.remove(id)
+                        notifyUi { receiver.receive(receiver.version, "保存后端暂不可用，更改仍保留，请重试") }
+                    }
                 }
                 return
             }
@@ -306,7 +327,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) {
         executor.checkOwnerThread()
-        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedVersion == it.changeVersion), null); return }
+        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
             if (input.second == null) input.third.read(input.first) else (input.second as PagedPreviewSnapshot).root
@@ -330,7 +351,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
-            maySettleInkRelease: () -> Boolean = { true }): NoteStore =
-            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease)
+            maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024): NoteStore =
+            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit)
     }
 }

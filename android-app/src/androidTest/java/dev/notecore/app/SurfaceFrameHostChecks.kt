@@ -121,6 +121,93 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         main { encoded = note.capture().encode(); document = note.documentId
             check(store.save(note.capture()) { _, error -> check(error==null); savedFirst = true }) }
         eventually("Full page snapshot did not save") { savedFirst }
+        var savedAfterWeakClear = false
+        main {
+            val field = NoteStore::class.java.getDeclaredField("activeSavedRoot").apply { isAccessible = true }
+            val savedIdentity = field.get(store) as java.lang.ref.WeakReference<*>
+            check(savedIdentity.get() === note.snapshot())
+            savedIdentity.clear() // deterministic GC-equivalent loss of an optimization, never content
+            check(store.save(note.capture()) { _, error -> check(error == null); savedAfterWeakClear = true })
+            check(!savedAfterWeakClear && store.saveStates().single().inFlight)
+        }
+        eventually("Cleared saved identity did not complete a real queued write") { savedAfterWeakClear }
+        var exported = false
+        lateinit var pickerStore: NoteStore
+        val exportFile = java.io.File(directory, "picker-output.ncp")
+        main {
+            val snapshot = note.capture()
+            val tooSmall = NoteStore.isolated(host, java.io.File(directory, "small-picker"),
+                exportPickerByteLimit = snapshot.retainedByteCharge - 1)
+            check(tooSmall.beginExportPicker(snapshot).disposition == ExportPickerDisposition.CAPACITY)
+            check(tooSmall.exportReservedByteCharge == 0L); tooSmall.stopTestBackend()
+            pickerStore = NoteStore.isolated(host, java.io.File(directory, "exact-picker"),
+                exportPickerByteLimit = snapshot.retainedByteCharge)
+            val first = pickerStore.beginExportPicker(snapshot)
+            check(first.disposition == ExportPickerDisposition.READY && first.requestCode == 1000)
+            val later = PagedPreviewNotebook(snapshot.root, "later-export").apply { check(rename("later")) }.capture()
+            check(pickerStore.beginExportPicker(later).disposition == ExportPickerDisposition.BUSY)
+            check(pickerStore.exportReservedByteCharge == snapshot.retainedByteCharge)
+            check(pickerStore.takeExportPicker(1001) == null)
+            check(pickerStore.takeExportPicker(1000) === snapshot)
+            check(pickerStore.takeExportPicker(1000) == null && pickerStore.exportReservedByteCharge == 0L)
+            check(pickerStore.beginExportPicker(snapshot).requestCode == 1001)
+            check(pickerStore.takeExportPicker(1000) == null && pickerStore.exportReservedByteCharge > 0)
+            // Exercise the original Activity's saved-state/cancellation callbacks with isolated Store content.
+            val storeField = host.javaClass.getDeclaredField("store").apply { isAccessible = true }
+            val codeField = host.javaClass.getDeclaredField("exportRequestCode").apply { isAccessible = true }
+            val sessionField = host.javaClass.getDeclaredField("exportPickerSession").apply { isAccessible = true }
+            val previousStore = storeField.get(host); val previousCode = codeField.get(host); val previousSession = sessionField.get(host)
+            try {
+                storeField.set(host, pickerStore); codeField.set(host, 1001); sessionField.set(host, pickerStore.exportPickerSession)
+                val savedState = android.os.Bundle()
+                host.javaClass.getDeclaredMethod("onSaveInstanceState", android.os.Bundle::class.java).apply { isAccessible = true }.invoke(host, savedState)
+                check(savedState.getInt("exportRequest") == 1001 && savedState.getString("exportSession") == pickerStore.exportPickerSession)
+                val callback = host.javaClass.getDeclaredMethod("onActivityResult", Int::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType, android.content.Intent::class.java).apply { isAccessible = true }
+                callback.invoke(host, 1000, Activity.RESULT_CANCELED, null)
+                check(codeField.get(host) == 1001 && pickerStore.exportReservedByteCharge == snapshot.retainedByteCharge)
+                callback.invoke(host, 1001, Activity.RESULT_CANCELED, null)
+                check(codeField.get(host) == null && pickerStore.exportReservedByteCharge == 0L)
+                callback.invoke(host, 1001, Activity.RESULT_CANCELED, null) // duplicate is harmless
+            } finally {
+                storeField.set(host, previousStore); codeField.set(host, previousCode); sessionField.set(host, previousSession)
+            }
+            check(pickerStore.beginExportPicker(snapshot).requestCode == 1002)
+            val captured = checkNotNull(pickerStore.takeExportPicker(1002))
+            pickerStore.export(android.net.Uri.fromFile(exportFile), captured) { failure ->
+                check(failure == null); exported = true
+            }
+            val sequence = NoteStore::class.java.getDeclaredField("nextExportRequestCode").apply { isAccessible = true }
+            sequence.setInt(pickerStore, 65536)
+            check(pickerStore.beginExportPicker(snapshot).disposition == ExportPickerDisposition.IDENTITY_EXHAUSTED)
+            check(pickerStore.exportReservedByteCharge == 0L)
+        }
+        eventually("Export capture did not transfer to actual IO") { exported }
+        check(exportFile.readText(Charsets.UTF_8) == encoded)
+        check(dev.notecore.document.PagedPreviewCodec.decode(exportFile.readText(Charsets.UTF_8)).scene.objectCount == 3)
+        main { pickerStore.stopTestBackend() }
+        var readerRefusals = 0
+        val rejectedSources = mutableListOf<Pair<java.io.File, String>>()
+        val readerStores = mutableListOf<NoteStore>()
+        for ((label, rejectedText) in listOf("unsupported" to encoded.replace("MONOLINE", "PRESSURE"),
+            "malformed" to encoded.replace("NCPREVIEW\t2", "NCPREVIEW\t99"))) {
+            val sourceDirectory = java.io.File(directory, "reader-$label").apply { check(mkdirs()) }
+            val sourceFile = java.io.File(sourceDirectory, "$document.ncp").apply { writeText(rejectedText, Charsets.UTF_8) }
+            rejectedSources.add(sourceFile to rejectedText)
+            val importDirectory = java.io.File(directory, "reader-import-$label")
+            main {
+                val readerStore = NoteStore.isolated(host, sourceDirectory)
+                val importer = NoteStore.isolated(host, importDirectory)
+                readerStores.add(readerStore); readerStores.add(importer)
+                readerStore.open(document) { opened, error -> check(opened == null && !error.isNullOrEmpty()); readerRefusals++ }
+                importer.importCopy(android.net.Uri.fromFile(sourceFile)) { opened, error ->
+                    check(opened == null && !error.isNullOrEmpty()); check(!importDirectory.exists()); readerRefusals++
+                }
+            }
+        }
+        eventually("Original reader/import worker did not refuse invalid/unsupported sources") { readerRefusals == 4 }
+        for ((file, contents) in rejectedSources) check(file.readText(Charsets.UTF_8) == contents)
+        main { readerStores.forEach { it.stopTestBackend() } }
         close()
         check(store.inkReleaseCallbacks>callbacks) { "Missing actual compositor release callback on close" }
 
@@ -135,6 +222,57 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         eventually("Fresh NoteStore did not reopen saved complete document") { reopened }
         main { store.releaseActive(note); store.stopTestBackend() }
+
+        var allowLostViewSettlement = false
+        setup(maySettleRelease = { allowLostViewSettlement })
+        eventually("Lost-view fixture did not publish an actual source") { store.inkFramePublications > 0 }
+        val lostViewPublications = store.inkFramePublications
+        var savedAfterViewLoss = false
+        var lostViewGeneration = 0L
+        val generationField = NoteStore::class.java.getDeclaredField("inkGeneration").apply { isAccessible = true }
+        main {
+            lostViewGeneration = generationField.getLong(store)
+            view.renderStore = null // endpoint no longer consumes renderer draws; prevent synthetic rebind
+            val weakView = NoteStore::class.java.getDeclaredField("inkView").apply { isAccessible = true }
+                .get(store) as java.lang.ref.WeakReference<*>
+            weakView.clear() // deterministic missing endpoint, no explicit detach/retire call
+            check(store.save(note.capture()) { _, failure -> check(failure == null); savedAfterViewLoss = true })
+        }
+        eventually("Endpoint loss did not retire on original owner progress") {
+            val retiring = NoteStore::class.java.getDeclaredField("inkRetiring").apply { isAccessible = true }.getBoolean(store)
+            savedAfterViewLoss && retiring && store.inkReleaseDeferred
+        }
+        var lostViewHeld = 0L
+        main { lostViewHeld = store.inkChargedBytes; check(lostViewHeld > 0 && store.inkOwnerRetained) }
+        main { view.renderStore = store; view.invalidate() } // retry cannot bypass the old retiring pool
+        test.waitForIdleSync()
+        main {
+            check(generationField.getLong(store) == lostViewGeneration)
+            check(store.inkFramePublications == lostViewPublications && store.inkChargedBytes == lostViewHeld)
+            allowLostViewSettlement = true
+        }
+        eventually("Missing-view old pool did not drain before replacement frame") {
+            store.inkFramePublications > lostViewPublications && generationField.getLong(store) > lostViewGeneration
+        }
+        close()
+
+        val lostStarted = CountDownLatch(1); val lostRelease = CountDownLatch(1)
+        setup(before = { lostStarted.countDown(); check(lostRelease.await(8, TimeUnit.SECONDS)) })
+        check(lostStarted.await(5, TimeUnit.SECONDS))
+        var savedAfterLateLoss = false
+        main {
+            view.renderStore = null
+            (NoteStore::class.java.getDeclaredField("inkView").apply { isAccessible = true }.get(store)
+                as java.lang.ref.WeakReference<*>).clear()
+            check(store.save(note.capture()) { _, failure -> check(failure == null); savedAfterLateLoss = true })
+        }
+        lostRelease.countDown()
+        eventually("Late worker output after endpoint loss was not retired/ACKed") {
+            savedAfterLateLoss && !store.inkOwnerRetained && store.inkChargedBytes == 0L
+        }
+        main { check(store.inkFramePublications == 0); view.renderStore = store; view.invalidate() }
+        eventually("Owner did not recover after late lost-endpoint result drained") { store.inkFramePublications > 0 }
+        close()
 
         val started = CountDownLatch(1); val release = CountDownLatch(1)
         setup(before = { started.countDown(); check(release.await(8,TimeUnit.SECONDS)) })
@@ -220,9 +358,19 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
                 val pending = PagedPreviewNotebook.create("blocked-${java.util.UUID.randomUUID()}", "Retained after stop", "blocked-session")
                 pendingId = pending.documentId
                 check(store.save(pending.capture()) { _, error -> if (error == null) pendingSuccess++ else pendingFailure++ })
-                check(queuedSuccess == 0 && queuedFailure == 0 && pendingFailure > 0 && pendingSuccess == 0)
+                check(queuedSuccess == 0 && queuedFailure == 0 && pendingFailure == 1 && pendingSuccess == 0)
                 check(store.saveStates().single { it.snapshot.documentId == queuedId }.inFlight)
                 check(!store.saveStates().single { it.snapshot.documentId == pendingId }.inFlight)
+                val callbacks = NoteStore::class.java.getDeclaredField("saveCallbacks").apply { isAccessible = true }.get(store) as Map<*, *>
+                check(pendingId !in callbacks && queuedId in callbacks)
+                var throwingReceiverCalled = 0
+                check(store.save(pending.capture()) { _, error ->
+                    check(error != null && pendingId !in callbacks)
+                    throwingReceiverCalled++
+                    throw IllegalStateException("Synthetic destroyed UI receiver")
+                })
+                check(throwingReceiverCalled == 1 && pendingId !in callbacks)
+                check(store.saveStates().single { it.snapshot.documentId == pendingId }.snapshot.sameContent(pending.capture()))
                 store.detachInk(view); store.releaseActive(note); host.setContentView(View(host))
             }
         } finally { storageRelease.countDown() }
@@ -230,12 +378,12 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
             queuedSuccess == 1 && !store.inkOwnerRetained && store.inkChargedBytes == 0L
         }
         main {
-            check(queuedFailure == 0 && pendingSuccess == 0 && pendingFailure > 0)
+            check(queuedFailure == 0 && pendingSuccess == 0 && pendingFailure == 1)
             check(store.saveStates().single().snapshot.documentId == pendingId)
             check(!store.saveStates().single().inFlight)
         }
         check(File(directory,"$queuedId.ncp").readText(Charsets.UTF_8) == queuedBytes)
         check(!File(directory,"$pendingId.ncp").exists())
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

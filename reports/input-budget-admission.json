@@ -1,0 +1,64 @@
+{
+  "schema": "input-budget-admission-1",
+  "date": "2026-10-23",
+  "upstream_core": "6021028",
+  "upstream_blueprint": "eb8a0bb",
+  "status": "passed-jvm-original-android-view-apple-pending",
+  "decision": "Adopt per-notebook arena admission in original DOWN, intersected with upstream canonical live and codec capacity; retain original authority and explicit cancellation/pending responsibilities.",
+  "input_byte_limit_default": 2097152,
+  "default_max_points": 20000,
+  "default_input_reservation_bytes": 1130624,
+  "reservation_is_measured_heap": false,
+  "jvm_contract_tests": {
+    "tests": 358,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input_budget_tests": [
+    "wholeBatchRefusalPreservesPrefixAndAllowsSmallerRetry[jvm]",
+    "chunkBoundaryIsChargedBeforeDownAndCancellationReleasesReservation[jvm]",
+    "pendingAcceptedInkKeepsChargeAfterJournalFailureAndCancellation[jvm]",
+    "insufficientBudgetRejectsBeforeIdentityAndEmptyUpCanFinishExactBudget[jvm]",
+    "arenaAndCanonicalLiveLimitsBothApplyAfterRemoteIntegration[jvm]"
+  ],
+  "android_original_view_checks": [
+    "callback_batch_limit_explicit_cancel_and_recover",
+    "document_capacity_refusal_and_undo_recovery",
+    "double_scene_mapping_before_float_path",
+    "history_terminal_order_equal_time_and_undo",
+    "input_byte_budget_refusal_cancel_and_recovery",
+    "invalid_native_sample_cancels_and_recovers",
+    "live_byte_refusal_and_undo_recovery",
+    "resize_cancels_and_late_up_preserves_root"
+  ],
+  "android_original_file_count": 0,
+  "android_original_files_unchanged": true,
+  "android_ordinary_pid_restored": 1904,
+  "android_apk_sha256": "612df362ee7ed475b23c7cb66c8c59cb8b4ea733bda88a47c4033d562abfa04b",
+  "apple_current_api_rebuild_verified": false,
+  "ordinary_ui_verified": false,
+  "whole_chain_budget_closed": false,
+  "c1_gate_complete": false,
+  "remaining": [
+    "producer and transient batch copies",
+    "old projection and savedRoot/exportSnapshot ownership",
+    "whole-chain overlap and physical heap",
+    "current Apple framework/native/host rebuild",
+    "ordinary Android UI and target devices"
+  ],
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "95557b59eff4ca1cbd61dc865366dc36ba4f94e18dea97d559b0ec717f94dcb2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "ca713881697da2a84f31d5ba6c7c4b95dfb8f3ba0d5a97b707a5052c69eb455f",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputBudgetTest.kt": "b4aaa75519358de11cc6faa241f56f67bf117c036d99347331374518c9ce62c0",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputCapacityTest.kt": "8e895f3c40ceb42c760a2b4661bf1b3581d04576c7dbb91ec227df53f1c9518a",
+    "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt": "6477448c7bf872c69fbe52e9139d15629cf54f43b5df44cdcaf714e04a6e4660",
+    "tools/verify_android_input_host.py": "66d8c8c7c084813ba1dad3fbd4cf5f390ef3ec0ff8b236dd6a973b1b8baa9955",
+    "docs/输入分块arena与逻辑预留.md": "2ece63c5a9502d30e2815466ac6db66b0b4b3af6a1dffa90f5164f9f02eaa842",
+    "reports/verification.json": "920687d8c60ce48a9bc85da2f7450e38a58de974adbd655ed75b4d7a2fafcbe2",
+    "reports/preview-build.json": "11d08c35749c88b4eff0d4e8cf79b12c8dd5c4ec700521689c63abb26f7cd1d1",
+    "reports/android-input-host-tests.json": "ee9a20d218faaab725021f7ea6aca71e1fe5f74d3955d50250087fc6492bb226",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputBudgetTest.xml": "6480d7c87979f025ce0841a57f6e014b7efab17f19ea8224516492c31aba4633"
+  }
+}

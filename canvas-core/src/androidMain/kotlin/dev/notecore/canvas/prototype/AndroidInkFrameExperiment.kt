@@ -199,7 +199,10 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
             }
             return scheduled && !releaseUnknown
         }
-        fun close() {
+        fun close() = close(requestOnDraw = true)
+        /** A vanished presentation endpoint cannot be asked to draw its own removal transaction. */
+        fun closeWithoutView() = close(requestOnDraw = false)
+        private fun close(requestOnDraw: Boolean) {
             renderer.executorStatus()
             if (released) return
             closing = true
@@ -210,7 +213,7 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
                     try {
                         SurfaceControl.Transaction().use { transaction ->
                             transaction.setBuffer(target,null).setVisibility(target,false)
-                            if (root?.applyTransactionOnDraw(transaction) != true) transaction.apply()
+                            if (!requestOnDraw || root?.applyTransactionOnDraw(transaction) != true) transaction.apply()
                         }
                     } catch (_: Throwable) { handoffUnknown = true }
                 }

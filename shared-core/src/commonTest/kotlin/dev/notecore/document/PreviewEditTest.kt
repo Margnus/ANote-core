@@ -60,15 +60,15 @@ class PreviewEditTest {
         accepted(n, PreviewEdit.Rename("after")); assertFalse(n.hasActiveStroke) // valid edit explicitly cancels
     }
     @Test fun pendingCompletedCommandRemainsOwnedAcrossRejectedEdits() {
-        val n = note(DocumentBudget(journalEntries = 1)); accepted(n, PreviewEdit.Rename("filled"))
-        assertTrue(n.beginStroke(1.0, 2.0, .5f, 1)); assertFalse(n.endStroke(3.0, 4.0, .6f, 2))
+        val fault = PendingInputOwnerFault(); val n = fault.note; accepted(n, PreviewEdit.Rename("filled"))
+        assertTrue(n.beginStroke(1.0, 2.0, .5f, 1)); fault.arm(); assertFailsWith<IllegalStateException> { n.endStroke(3.0, 4.0, .6f, 2) }
         val pending = n.pendingStroke(); val before = n.snapshot()
         for (request in listOf(PreviewEdit.Rename("later"), PreviewEdit.SetPaper(400.0, 600.0, PaperKind.DOTS),
                 PreviewEdit.InsertPage, PreviewEdit.CopyPage, PreviewEdit.DeletePage, PreviewEdit.MovePage(null), PreviewEdit.Undo, PreviewEdit.Redo)) {
             assertEquals(PreviewFailureKind.PENDING_STROKE, n.edit(request).failure?.kind)
             assertSame(pending, n.pendingStroke()); assertSame(before, n.snapshot())
         }
-        assertFalse(n.retire()); assertFalse(n.retryPendingStroke()); assertSame(pending, n.pendingStroke())
+        assertFalse(n.retire()); fault.arm(); assertFailsWith<IllegalStateException> { n.retryPendingStroke() }; assertSame(pending, n.pendingStroke())
     }
     @Test fun closedSessionRejectsAllRequestsBeforeInvalidPayloadValidation() {
         val n = note(); assertTrue(n.retire()); val before = n.snapshot()

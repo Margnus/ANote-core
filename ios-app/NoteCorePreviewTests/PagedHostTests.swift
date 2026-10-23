@@ -5,7 +5,7 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
-    @MainActor func testSavedVersionSkipsUnchangedIOButChangedFailureRemainsRetryable() async throws {
+    @MainActor func testSavedIdentitySkipsUnchangedIOButChangedFailureRemainsRetryable() async throws {
         let dir = directory(), moved = directory()
         defer { try? FileManager.default.removeItem(at: dir); try? FileManager.default.removeItem(at: moved) }
         let model = PreviewModel(directory: dir); model.create()
@@ -13,6 +13,8 @@ final class PagedHostTests: XCTestCase {
         draw(note); model.changed()
         let file = dir.appendingPathComponent(note.documentId + ".ncp")
         let original = try note.capture().encode()
+        let savedIdentity = note.snapshot()
+        defer { withExtendedLifetime(savedIdentity) {} }
         try await eventually("initial saved marker") { model.status.hasPrefix("已保存") && (try? String(contentsOf: file, encoding: .utf8)) == original }
         try FileManager.default.moveItem(at: dir, to: moved)
         try Data("blocked directory".utf8).write(to: dir)
@@ -28,7 +30,8 @@ final class PagedHostTests: XCTestCase {
         model.close(); XCTAssertNil(model.current)
         let reopened = PreviewModel(directory: dir); reopened.open(note.documentId)
         try await eventually("reopen adopts saved revision") { reopened.current != nil }
-        XCTAssertTrue(reopened.save()); XCTAssertTrue(reopened.status.hasPrefix("已保存"))
+        XCTAssertTrue(reopened.save())
+        try await eventually("reopened save completes even if weak identity expires") { reopened.status.hasPrefix("已保存") }
         reopened.close()
     }
     @MainActor func testPendingExportKeepsFirstCapturedContentUntilConsumerClearsIt() async throws {
@@ -106,11 +109,11 @@ final class PagedHostTests: XCTestCase {
         let text = "NCPREVIEW\t2\nD\ttitle-host\t合法😀\t2\t0\t0\nG\tfirst\tlayer-a\t400\t400\tBLANK\t0\nG\tsecond\tlayer-b\t400\t400\tBLANK\t0\nEND\n"
         let root = try PagedPreviewCodec.shared.decode(text: text)
         let budget = DocumentBudget(maxPages: 1, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
-            journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024)
+            journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
         XCTAssertThrowsError(try MemoryDocumentAuthority(initial: root, budget: budget, ownerCheck: {}))
         let valid = try MemoryDocumentAuthority(initial: root, budget: DocumentBudget(maxPages: 128, maxObjects: 5000,
             liveBytes: 8*1024*1024, journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
-            historyEntries: 128, historyBytes: 8*1024*1024), ownerCheck: {})
+            historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024), ownerCheck: {})
         XCTAssertEqual(valid.snapshot().title, "合法😀")
     }
     func testSharedBrushContoursMatchAnalyticCoverageOffscreen() throws {
@@ -313,7 +316,7 @@ final class PagedHostTests: XCTestCase {
         let text = "NCPREVIEW\t2\nD\trender\tRender\t2\t1\t1\nG\tfirst\tlayer-a\t400\t400\tBLANK\t1\nG\tsecond\tlayer-b\t400\t400\tBLANK\t0\nS\tdot\tlayer-a\t1\tMONOLINE\t1\t-65536\t10\t1\t4\t0\t0\t2\t0\t0\nP\t50\t100\t0.5\t1\nEND\n"
         let root = try PagedPreviewCodec.shared.decode(text: text)
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
-            journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024)
+            journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
         let note = try PagedPreviewNotebook(initial: root, sessionNonce: "render-session", budget: budget, ownerCheck: { precondition(Thread.isMainThread) })
         let view = InkUIView(note: note); view.frame = CGRect(x: 0, y: 0, width: 400, height: 400); view.layoutIfNeeded()
         func image() -> CGImage {

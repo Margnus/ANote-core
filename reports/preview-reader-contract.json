@@ -1,0 +1,54 @@
+{
+  "schema": "preview-reader-contract-1",
+  "date": "2026-10-23",
+  "base_core": "3d163d9",
+  "status": "passed-jvm-original-android-worker-apple-pending",
+  "decision": "Adopt typed preview read/capability boundary over original codec and immutable root; original Android and Swift open/import consumers wired. Keep trusted raw codec and canonical brush support unchanged.",
+  "shared_jvm_tests": {
+    "tests": 365,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "typed_reader_tests": [
+    "supportedCanonicalContentIsUnchangedAndExistingRootIsNotCloned[jvm]",
+    "oldReadOnlyFormatStillMigratesThroughTheSameReader[jvm]",
+    "characterCapacityRefusesBeforeParsingAndDoesNotAffectLaterReads[jvm]",
+    "malformedVersionsTruncationAndScalarsReturnRefusalWithoutPartialRoot[jvm]",
+    "validCanonicalBrushesUnsupportedByPreviewAreRefusedWithoutLossyConversion[jvm]"
+  ],
+  "android_original_worker_refusals": 4,
+  "unsupported_and_malformed_sources_unchanged": true,
+  "rejected_import_created_no_directory": true,
+  "normal_saved_owner_reopen_verified": true,
+  "original_file_count": 1,
+  "all_original_files_unchanged": true,
+  "current_apple_build_native_host_verified": false,
+  "ordinary_ui_verified": false,
+  "stable_sdk_or_universal_exception_safety_approved": false,
+  "c1_gate_complete": false,
+  "remaining": [
+    "current Apple framework/native/host rebuild for new reader symbols",
+    "complete stable boundary whitelist and independent ENG19 host",
+    "owner loss/transfer and platform fallback matrix",
+    "ordinary UI, target devices and physical/whole-chain budgets"
+  ],
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "2c44bde93b3ccaff60598b167fe642ef5012f4b089f23a9cf8a567a5729b92c8",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "236a051cc0f44f4e8d37af83ceba4ab3ff0b3541ba5619a2f928c2be13764d7a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewDocumentReaderTest.kt": "1583e7e9a018724de457c6d15f52984f2a8d5335689c7f6af98d6c7d45dffc92",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "c2af191e3b2e7188664b75b1933ac4bc776511aad850e451ad48d959c4dec75a",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "62f146f378dbae9ac66d70c414a422dddceba10c477c4d497e775b922af42ae3",
+    "android-app/src/androidTest/java/dev/notecore/app/SurfaceFrameHostChecks.kt": "7960b098baf7f648f8b0fb7d55df5f06bf57122a4d121b574e086b8140bff467",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "f15f2f8952d5fff3e94a761232a973c4b1dbdfeec4ca7a9b6ae8155c94d64a47",
+    "tools/verify_android_render_target.py": "5342f062eeb21a7a496a5532d68a59fd9150063f5c82501efa478380ab00db4c",
+    "docs/保存派发与预算契约.md": "2140e480f1f82035671255e8591b74c8c64af078320a97b2693d776bc2b3d7f8",
+    "reports/verification.json": "e5867dac1005866ddd5e2d65216cc45a16490671c4b0e91aeb481dfc2e29bc94",
+    "reports/preview-build.json": "e174dd10b02eb63cafdd376415ca0f6e26940f2174a560a016f465b22e95f85a",
+    "reports/android-render-integration.json": "61d1019e37b370ee8d2aff4fec75fbe35cb8143346f96472496824f4609dffc5",
+    "build/dev036g-target-host.log": "882ddfa78e5b5cff18373ed94b6e258acd87e22fe458f201f4fb04e3617b85fd",
+    "build/dev036g-files-before.json": "196b7d0f86852e465a7a67a069cdf27cf6a08c9c9efd51556638a6faee971998",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewDocumentReaderTest.xml": "463a44bc14b46ba75e143168b2a9659515326fff32f9fa064d5307d58ca0aabf"
+  }
+}

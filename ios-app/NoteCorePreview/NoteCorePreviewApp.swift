@@ -29,8 +29,8 @@ final class PreviewModel: ObservableObject {
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024,
         ownerCheck: { precondition(Thread.isMainThread) })
     private let storageWorkBytes: Int64 = 256 * 1024 * 1024
-    // Revision is meaningful only within the current authority's monotonic lifetime.
-    private var savedVersion: Int64?
+    // Identity-only saved shortcut; the authority/ledger own content while it is needed.
+    private weak var savedRoot: DocumentRoot?
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
@@ -67,6 +67,9 @@ final class PreviewModel: ObservableObject {
     /// Called only on the model owner after the shared executor's finite drain has returned.
     private func inkOwnerProgress() {
         guard let renderer = inkRenderer else { return }
+        // The model owner is still alive; retire a vanished presentation endpoint before settling late output.
+        // This does not transfer a pool or acknowledge a missing native release.
+        if !inkRetiring && inkView == nil { retireInk() }
         _ = try! renderer.settleAfterDrain { [self] item, ack in
             guard item === inkPending else { return }
             inkPending = nil
@@ -210,19 +213,20 @@ final class PreviewModel: ObservableObject {
         precondition(Thread.isMainThread && current == nil)
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
-            historyEntries: 128, historyBytes: 8 * 1024 * 1024)
+            historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
         current = try PagedPreviewNotebook(initial: root, sessionNonce: UUID().uuidString, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
-        savedVersion = persisted && ledger.latest(documentId: root.id.value) == nil ? root.revision : nil
+        savedRoot = persisted && ledger.latest(documentId: root.id.value) == nil ? root : nil
         revision = root.revision
     }
+    private static func readPreview(_ encoded: String) throws -> DocumentRoot {
+        let read = PreviewDocumentReader.shared.read(text: encoded)
+        guard let root = read.root else { throw CocoaError(.fileReadCorruptFile) }
+        return root
+    }
     private static func validateRenderable(_ root: DocumentRoot) throws {
-        for stroke in root.scene.objects() {
-            let m = stroke.transform
-            guard stroke.brush.kind == .monoline, stroke.brush.algorithmVersion == 1,
-                  [m.a, m.b, m.c, m.d, m.tx, m.ty].allSatisfy({ $0.isFinite && abs($0) <= 1e12 })
-            else { throw CocoaError(.fileReadUnsupportedScheme) }
-        }
+        guard PreviewDocumentReader.shared.accept(root: root).failure == nil
+        else { throw CocoaError(.fileReadUnsupportedScheme) }
     }
     func create() {
         guard current == nil else { return }
@@ -270,7 +274,7 @@ final class PreviewModel: ObservableObject {
             if let captured = input.2 as? PagedPreviewSnapshot { root = captured.root }
             else {
                 guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
-                root = try PagedPreviewCodec.shared.decode(text: PreviewFileIO.readUTF8(input.0))
+                root = try Self.readPreview(PreviewFileIO.readUTF8(input.0))
             }
             guard root.id.value == input.1 else { throw CocoaError(.fileReadCorruptFile) }
             try Self.validateRenderable(root)
@@ -318,8 +322,7 @@ final class PreviewModel: ObservableObject {
         request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: 160 * 1024 * 1024, compute: { input in
             defer { if input.1 { input.0.stopAccessingSecurityScopedResource() } }
             let encoded = try PreviewFileIO.readUTF8(input.0)
-            let source = try PagedPreviewCodec.shared.decode(text: encoded)
-            try Self.validateRenderable(source)
+            let source = try Self.readPreview(encoded)
             let pages = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.id, PageId(value: UUID().uuidString)) })
             let layers = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.layerId, LayerId(value: UUID().uuidString)) })
             let objects = Dictionary(uniqueKeysWithValues: source.scene.objects().map { ($0.id, ObjectId(value: UUID().uuidString)) })
@@ -351,7 +354,7 @@ final class PreviewModel: ObservableObject {
         guard let note = current else { return true }
         guard note.retryPendingStroke() else { status = note.lastError; return false }
         let snapshot = note.capture(), previous = ledger.latest(documentId: note.documentId)
-        if savedVersion == snapshot.version && previous == nil {
+        if savedRoot === snapshot.root && previous == nil {
             status = "已保存到本机 · \(note.totalStrokeCount) 笔"; return true
         }
         let admission = ledger.offer(snapshot: snapshot)
@@ -384,9 +387,8 @@ final class PreviewModel: ObservableObject {
                     if case .succeeded = result { success = true } else { success = false }
                     precondition(self.ledger.complete(attempt: input.0, success: success))
                     let snapshot = input.0.snapshot
-                    if success, let captured = snapshot as? PagedPreviewSnapshot,
-                       self.current?.snapshot() === captured.root {
-                        self.savedVersion = snapshot.version
+                    if success && self.current?.documentId == snapshot.documentId {
+                        self.savedRoot = (snapshot as? PagedPreviewSnapshot)?.root
                     }
                     if self.current?.documentId == snapshot.documentId && self.current?.changeVersion == snapshot.version {
                         if let current = self.current, current.hasPendingStroke { self.status = current.lastError }
@@ -407,7 +409,7 @@ final class PreviewModel: ObservableObject {
         current?.cancelStroke()
         guard save(), current?.retire() == true else { return }
         retireInk()
-        navigationEpoch += 1; current = nil; savedVersion = nil; refresh()
+        navigationEpoch += 1; current = nil; savedRoot = nil; refresh()
     }
     func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
     func applyEdit(_ request: PreviewEdit, content: Bool = true) {

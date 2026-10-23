@@ -7,6 +7,11 @@ import dev.notecore.canvas.prototype.*
  */
 class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) constructor(initial: DocumentRoot, private val budget: DocumentBudget = DocumentBudget(),
                               private val ownerCheck: () -> Unit = {}) {
+    private companion object {
+        const val COMMAND_HEADER_BYTES = 4096L
+        const val POINT_BYTES = 28L
+    }
+    private fun objectIdentityCharge(id: ObjectId): Long = 80L + id.value.length * 2L
     private data class JournalEntry(val command: DocumentCommand, val receipt: DocumentReceipt, val charge: Long)
     private data class State(val root: DocumentRoot, val journal: Map<CommandId, JournalEntry>,
                              val pages: Set<PageId>, val layers: Set<LayerId>, val objects: Set<ObjectId>,
@@ -35,15 +40,40 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
         if (state.root.scene.objectCount >= budget.maxObjects) return 0
         val header = 256L + (objectId.value.length + layerId.value.length) * 2L
         val remaining = (budget.liveBytes - liveCharge(state.root) - header).coerceAtLeast(0L)
-        return (remaining / 28L).coerceAtMost(1_000_000L).toInt()
+        return (remaining / POINT_BYTES).coerceAtMost(1_000_000L).toInt()
+    }
+    internal data class StrokeInputCapacity(val points: Int, val limitingReason: DocumentRejection)
+    /** Single-owner planning for one new stroke on the current root; no reservation or mutable fork. */
+    internal fun strokeInputCapacity(objectId: ObjectId, pageId: PageId): StrokeInputCapacity {
+        ownerCheck(); val current = state; val root = current.root
+        fun refused(reason: DocumentRejection) = StrokeInputCapacity(0, reason)
+        if (root.revision == Long.MAX_VALUE) return refused(DocumentRejection.REVISION_EXHAUSTED)
+        if (current.journal.size >= budget.journalEntries) return refused(DocumentRejection.JOURNAL_CAPACITY)
+        val journal = ((budget.journalBytes - current.journal.values.sumOf { it.charge } - COMMAND_HEADER_BYTES).coerceAtLeast(0L) / POINT_BYTES).coerceAtMost(1_000_000L).toInt()
+        if (journal == 0) return refused(DocumentRejection.JOURNAL_CAPACITY)
+        val page = root.findPage(pageId) ?: return refused(DocumentRejection.MISSING_PAGE)
+        val live = additionalStrokeSampleCapacity(objectId, page.layerId)
+        if (live == 0) return refused(DocumentRejection.LIVE_BYTE_CAPACITY)
+        if (objectId in current.objects) return refused(DocumentRejection.REUSED_IDENTITY)
+        if (objectIdentityCharge(objectId) > budget.identityBytes - identityCharge(current))
+            return refused(DocumentRejection.IDENTITY_CAPACITY)
+        val fixedHistory = DocumentDelta.projectedStrokeCharge(root, page, objectId, 0)
+        val history = ((budget.historyBytes - fixedHistory).coerceAtLeast(0L) / POINT_BYTES).coerceAtMost(1_000_000L).toInt()
+        val points = minOf(journal, live, history)
+        val reason = when (points) {
+            journal -> DocumentRejection.JOURNAL_CAPACITY
+            live -> DocumentRejection.LIVE_BYTE_CAPACITY
+            else -> DocumentRejection.HISTORY_CAPACITY
+        }
+        return StrokeInputCapacity(points, reason)
     }
     private fun liveCharge(root: DocumentRoot): Long = 512L + (root.id.value.length + root.title.length) * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
         root.scene.objects().sumOf(::objectCharge)
     private fun identityCharge(value: State): Long = value.pages.sumOf { 48L + it.value.length * 2 } +
-        value.layers.sumOf { 48L + it.value.length * 2 } + value.objects.sumOf { 80L + it.value.length * 2 }
-    private fun commandCharge(command: DocumentCommand): Long = 4096L + when (command) {
+        value.layers.sumOf { 48L + it.value.length * 2 } + value.objects.sumOf(::objectIdentityCharge)
+    private fun commandCharge(command: DocumentCommand): Long = COMMAND_HEADER_BYTES + when (command) {
         is DocumentCommand.Canvas -> when (val action = command.command) {
-            is CanvasCommand.AddStroke -> action.samples.size.toLong() * 28
+            is CanvasCommand.AddStroke -> action.samples.size.toLong() * POINT_BYTES
             else -> 0L
         }
         is DocumentCommand.CopyPage -> command.objectMappingCount * 768L
@@ -229,6 +259,11 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
             is PrepareResult.Rejected -> return reject(DocumentRejection.SCENE_REJECTED, prepared.reason)
             is PrepareResult.Prepared -> prepared.patch
         }
+        // Original commands have passed canonical preparation above. Reject oversized history before
+        // copying the complete scene map. External prepared patches keep their existing CAS-first check.
+        if (historyDelta == null && command !is DocumentCommand.PreparedCanvas &&
+            DocumentDelta.projectedCharge(root, title, pages, changes, affected) > budget.historyBytes)
+            return reject(DocumentRejection.HISTORY_CAPACITY)
         val application = SceneReducer.apply(root.scene, patch)
         if (application is SceneApplication.Rejected) return reject(DocumentRejection.SCENE_REJECTED, application.reason)
         var scene = (application as SceneApplication.Applied).snapshot

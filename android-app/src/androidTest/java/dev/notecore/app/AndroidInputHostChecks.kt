@@ -16,11 +16,11 @@ internal class AndroidInputHostChecks(private val host: Activity) {
     private data class Sample(val x: Float, val y: Float, val time: Long, val pressure: Float = 0.5f)
     private class Fixture(val view: InkCanvasView, val note: PagedPreviewNotebook,
         val errors: MutableList<String>, val changes: IntArray)
-    private fun fixture(budget: DocumentBudget? = null): Fixture {
+    private fun fixture(budget: DocumentBudget? = null, preparePaper: Boolean = true): Fixture {
         val note = PagedPreviewNotebook(DocumentRoot.empty(SceneId("synthetic-input"), "Synthetic callbacks",
             PageDescriptor(PageId("input-session-page-0"), LayerId("input-session-layer-0"), 595.0, 842.0)),
             "input-session", budget ?: DocumentBudget())
-        check(note.setPaper(14400.0, 12345.0, dev.notecore.document.PaperKind.BLANK))
+        if (preparePaper) check(note.setPaper(14400.0, 12345.0, dev.notecore.document.PaperKind.BLANK))
         val errors = mutableListOf<String>(); val changes = intArrayOf(0)
         val view = InkCanvasView(host, note, { changes[0]++ }, { errors.add(it) })
         // A parent is required by the original View's interception contract. No user notebook/file.
@@ -93,6 +93,54 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             check(f.note.strokeCount == 1 && f.note.pointCount(0) == 2 && !f.note.hasPendingStroke)
             check(f.changes[0] == 2 && f.errors.size == 1)
             checks.add("live_byte_refusal_and_undo_recovery")
+        }
+        run {
+            val p = Sample(400f, 300f, 1000)
+            val refused = fixture(DocumentBudget(inputBytes = 695))
+            val before = refused.note.snapshot()
+            send(refused.view, MotionEvent.ACTION_DOWN, listOf(p))
+            send(refused.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+            check(refused.note.snapshot() === before && refused.errors.size == 1)
+            check(!refused.note.hasActiveStroke && !refused.note.hasPendingStroke)
+            check(refused.note.inputReservedByteCharge == 0L)
+            val f = fixture(DocumentBudget(inputBytes = 752)) // exact two-point reservation
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
+            check(f.note.inputReservedByteCharge == 752L)
+            send(f.view, MotionEvent.ACTION_MOVE, listOf(p.copy(time = 1001), p.copy(time = 1002)))
+            check(f.errors.size == 1 && !f.note.hasActiveStroke && f.note.strokeCount == 0)
+            check(f.note.inputReservedByteCharge == 0L) // native adapter explicitly cancels rejected stroke
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1003)))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1004)))
+            check(f.note.strokeCount == 1 && f.note.pointCount(0) == 2 && f.changes[0] == 1)
+            check(f.errors.size == 1 && f.note.inputReservedByteCharge == 0L)
+            checks.add("input_byte_budget_refusal_cancel_and_recovery")
+        }
+        run {
+            val f = fixture(DocumentBudget(historyBytes = 0), preparePaper = false)
+            val before = f.note.snapshot(); val status = f.note.authorityStatus()
+            val p = Sample(400f, 300f, 1000)
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+            check(!f.note.hasPendingStroke && !f.note.hasActiveStroke && f.note.totalStrokeCount == 0 && f.errors.size == 1)
+            check(f.note.lastFailure?.documentReason == DocumentRejection.HISTORY_CAPACITY)
+            check(f.note.snapshot() === before && f.note.authorityStatus() == status)
+            check(f.note.inputReservedByteCharge == 0L && f.note.retire())
+            checks.add("history_capacity_refuses_down_without_owning_samples")
+        }
+        run {
+            val baselineIdentity = fixture(preparePaper = false).note.authorityStatus().identityByteCharge
+            for ((budget, preparePaper, reason) in listOf(
+                Triple(DocumentBudget(journalEntries = 1), true, DocumentRejection.JOURNAL_CAPACITY),
+                Triple(DocumentBudget(identityBytes = baselineIdentity), false, DocumentRejection.IDENTITY_CAPACITY))) {
+                val f = fixture(budget, preparePaper); val before = f.note.snapshot(); val status = f.note.authorityStatus()
+                val p = Sample(400f, 300f, 1000)
+                send(f.view, MotionEvent.ACTION_DOWN, listOf(p)); send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+                check(f.note.lastFailure?.documentReason == reason && f.errors.size == 1)
+                check(f.note.snapshot() === before && f.note.authorityStatus() == status)
+                check(!f.note.hasPendingStroke && !f.note.hasActiveStroke && f.note.inputReservedByteCharge == 0L)
+                check(f.note.retire())
+            }
+            checks.add("journal_identity_capacity_refuses_before_real_view_ownership")
         }
         var oldFloatError: Double; var canonicalError: Double
         run {

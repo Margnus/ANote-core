@@ -1,0 +1,51 @@
+{
+  "schema": "history-budget-preflight-1",
+  "date": "2026-10-23",
+  "base_core": "0dbf672",
+  "status": "passed-jvm-original-android-host-apple-pending",
+  "decision": "Adopt shared projected/accepted sparse-delta accounting; reject oversized original commands after canonical preparation and before whole scene/root copying. Keep final guard and external PreparedCanvas CAS-first validation.",
+  "shared_jvm_tests": {
+    "tests": 374,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "history_preflight_tests": [
+    "projectedChargeMatchesActualHistoryAcrossMetadataAndMembershipEdits[jvm]",
+    "oversizedHistoryRefusesAtomicallyAndDoesNotConsumeOperationIdentity[jvm]",
+    "externalPreparedPatchStillReportsStaleObjectBeforeHistoryCapacity[jvm]",
+    "exactIndependentHistoryBoundaryRemains1704BytesForTwoPointStroke[jvm]"
+  ],
+  "independent_two_point_history_charge": 1704,
+  "one_byte_less_refuses_without_publication": true,
+  "external_stale_prepared_patch_precedence_preserved": true,
+  "original_android_view_checks": 9,
+  "pending_history_rejection_keeps_samples_and_charge": true,
+  "down_reserves_all_history_journal_identity": false,
+  "pending_ink_persistently_recoverable_at_capacity": false,
+  "actual_allocation_heap_or_latency_measured": false,
+  "current_apple_framework_native_host_verified": false,
+  "ordinary_ui_verified": false,
+  "whole_chain_budget_closed": false,
+  "c1_gate_complete": false,
+  "original_file_count": 1,
+  "all_original_files_unchanged": true,
+  "remaining": [
+    "DOWN journal/history/identity admission and pending capacity recovery",
+    "current Apple framework/shared Native/host rebuild",
+    "cross-owner obligations, ordinary UI and target devices/whole-chain physical budgets"
+  ],
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "41751daab5d0888923d465354be8d3f4545f9958c7d725a9cc7bc56201307bcc",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "a07d6dcdb4c9a5235a20de4d9b28f58bc6f4c8ab96c4c046e36eb88d032ef9be",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentHistoryPreflightTest.kt": "4b7b893f760dfec24dbfac6923dffa7692e9514e16d7fc2878fb27f454b0dd22",
+    "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt": "5a18c9a22e43c56c07a6542c98904b481019a7b218ef1b7a71b2553ac2079a7b",
+    "tools/verify_android_input_host.py": "449f0ef07c5d41987a8983be17bdcbb79125877b5d04b6ab494c8c8dde638c87",
+    "docs/保存派发与预算契约.md": "132be1fea8d135bb34b2b1562f35c8188a370c6900113cf096fd811668f60ee6",
+    "reports/verification.json": "28bb15d0b122c4ddd7d3ac97f19de019372ed625afffe34150ca9dfaf5f91b42",
+    "reports/preview-build.json": "0aa6e1f3d3f148b9cd02bdde4f40771330ed11c2ba17ea14cef125ad7d71a02e",
+    "reports/android-input-host-tests.json": "83f4706146968c1842c9c2843db102da06eff117aea0a992f0aa775bfd8b984b",
+    "reports/android-render-integration.json": "cff549f6cbf4c14aac06d7e38a5383a0dd8dc4b776dd028a0e463655bcb9338c",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentHistoryPreflightTest.xml": "5a935d6afdd64ea9d0a2a14c65ca0a5dff0a2303a18039b994bc709ccb553a8e"
+  }
+}

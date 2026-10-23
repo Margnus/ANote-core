@@ -81,16 +81,16 @@ class PagedPreviewNotebookTest {
     }
     @Test fun completedRejectedInkRetainsExactCommandAndSamplesAcrossCancelAndAllPageActions() {
         val root = DocumentRoot.empty(SceneId("bounded"), "title", PageDescriptor(PageId("a"), LayerId("a"), 595.0, 842.0))
-        val note = PagedPreviewNotebook(root, "bounded-session", DocumentBudget(journalEntries = 1))
+        val fault = PendingInputOwnerFault(root, "bounded-session"); val note = fault.note
         draw(note); val before = note.snapshot(); assertTrue(note.beginStroke(10.0, 20.0, 0.5f, 4))
-        assertFalse(note.endStroke(30.0, 40.0, 0.7f, 5)); val pending = note.pendingStroke()!!
+        fault.arm(); assertFailsWith<IllegalStateException> { note.endStroke(30.0, 40.0, 0.7f, 5) }; val pending = note.pendingStroke()!!
         val command = pending.command as CanvasCommand.AddStroke
         assertEquals(PageId("a"), pending.pageId); assertEquals(2, command.samples.size); assertEquals(10.0, command.samples.x(0))
         note.cancelStroke(); assertTrue(note.hasPendingStroke)
         assertFalse(note.retire()); assertSame(pending, note.pendingStroke())
         assertFalse(note.insertPage()); assertFalse(note.copyCurrentPage()); assertFalse(note.deleteCurrentPage())
         assertFalse(note.moveCurrentPage(null)); assertFalse(note.setPaper(400.0, 600.0, PaperKind.GRID)); assertFalse(note.rename("changed"))
-        assertFalse(note.undo()); assertFalse(note.redo()); assertFalse(note.retryPendingStroke())
+        assertFalse(note.undo()); assertFalse(note.redo()); fault.arm(); assertFailsWith<IllegalStateException> { note.retryPendingStroke() }
         assertFalse(note.beginStroke(1.0, 2.0, 0.5f, 6))
         assertSame(pending, note.pendingStroke()); assertSame(before, note.snapshot())
         assertEquals(1, note.capture().root.scene.objectCount) // Capture never claims the retained completion was committed.

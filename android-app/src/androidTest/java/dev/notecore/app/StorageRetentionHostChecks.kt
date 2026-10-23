@@ -58,13 +58,18 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             checks.add("repair_retries_exact_root")
             main {
                 val first = note.capture()
-                check(store.beginExport(first)); check(store.exportRetainedByteCharge == first.retainedByteCharge)
+                val firstRequest = store.beginExportPicker(first)
+                check(firstRequest.disposition == ExportPickerDisposition.READY)
+                check(store.exportReservedByteCharge == first.retainedByteCharge)
                 check(note.rename("Later export"))
-                check(!store.beginExport(note.capture()))
-                check(store.takeExportSnapshot() === first); check(store.exportRetainedByteCharge == 0L)
+                check(store.beginExportPicker(note.capture()).disposition == ExportPickerDisposition.BUSY)
+                check(store.takeExportPicker(checkNotNull(firstRequest.requestCode)) === first); check(store.exportReservedByteCharge == 0L)
                 val later = note.capture()
-                check(store.beginExport(later)); check(store.takeExportSnapshot() === later)
-                check(store.takeExportSnapshot() == null && store.exportRetainedByteCharge == 0L)
+                val nextRequest = store.beginExportPicker(later)
+                check(nextRequest.disposition == ExportPickerDisposition.READY)
+                check(store.takeExportPicker(checkNotNull(firstRequest.requestCode)) == null)
+                check(store.takeExportPicker(checkNotNull(nextRequest.requestCode)) === later)
+                check(store.takeExportPicker(nextRequest.requestCode) == null && store.exportReservedByteCharge == 0L)
                 // This edit was for export only; retain it through the original save handoff before close.
                 completed = false
                 check(store.save(later) { _, error -> check(error == null); completed = true })
