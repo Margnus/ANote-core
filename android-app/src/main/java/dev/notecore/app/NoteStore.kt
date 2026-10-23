@@ -96,9 +96,11 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         executor.checkOwnerThread()
         check(!ownerRetiring) { "Store owner is retiring" }
         activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
-        val note = PagedPreviewNotebook(opened.root, UUID.randomUUID().toString(),
+        val result = PagedPreviewNotebook.open(opened.root, UUID.randomUUID().toString(),
             DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
             executor::checkOwnerThread)
+        // This internal entry receives only the reader-validated root and fixed supported budget.
+        val note = checkNotNull(result.notebook) { "Unsupported preview adoption: ${result.failure}/${result.documentReason}" }
         activeNotebook = note
         activeSavedRoot = java.lang.ref.WeakReference(opened.root.takeIf { opened.persisted && ledger.latest(note.documentId) == null })
         return note

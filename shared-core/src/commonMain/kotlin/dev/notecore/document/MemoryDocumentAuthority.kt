@@ -7,9 +7,21 @@ import dev.notecore.canvas.prototype.*
  */
 class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) constructor(initial: DocumentRoot, private val budget: DocumentBudget = DocumentBudget(),
                               private val ownerCheck: () -> Unit = {}) {
-    private companion object {
+    internal companion object {
         const val COMMAND_HEADER_BYTES = 4096L
         const val POINT_BYTES = 28L
+        private fun objectCharge(value: StrokeObject): Long = 256L + value.id.value.length * 2 + value.layerId.value.length * 2 + value.samples.size.toLong() * 28
+        private fun liveCharge(root: DocumentRoot): Long = 512L + (root.id.value.length + root.title.length) * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
+            root.scene.objects().sumOf(::objectCharge)
+        /** Same initial-state formulas as the authority, without constructing a mutable owner. */
+        fun initialCapacityFailure(root: DocumentRoot, budget: DocumentBudget): DocumentRejection? = when {
+            root.pageCount > budget.maxPages -> DocumentRejection.PAGE_CAPACITY
+            root.scene.objectCount > budget.maxObjects -> DocumentRejection.OBJECT_CAPACITY
+            liveCharge(root) > budget.liveBytes -> DocumentRejection.LIVE_BYTE_CAPACITY
+            root.pages().sumOf { 48L + it.id.value.length * 2 + 48L + it.layerId.value.length * 2 } +
+                root.scene.objects().sumOf { 80L + it.id.value.length * 2L } > budget.identityBytes -> DocumentRejection.IDENTITY_CAPACITY
+            else -> null
+        }
     }
     private fun objectIdentityCharge(id: ObjectId): Long = 80L + id.value.length * 2L
     private data class JournalEntry(val command: DocumentCommand, val receipt: DocumentReceipt, val charge: Long)
@@ -22,8 +34,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     init {
         ownerCheck()
         require(initial.title.hasValidUnicode()) { "Invalid Unicode title" }
-        require(initial.pageCount <= budget.maxPages && initial.scene.objectCount <= budget.maxObjects)
-        require(liveCharge(initial) <= budget.liveBytes && identityCharge(state) <= budget.identityBytes)
+        require(initialCapacityFailure(initial, budget) == null)
     }
     fun snapshot(): DocumentRoot { ownerCheck(); return state.root }
     fun status(): DocumentAuthorityStatus {
@@ -33,7 +44,6 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
             current.undo.size, current.redo.size, (current.undo + current.redo).sumOf { it.charge },
             current.undo.lastOrNull()?.operationId, current.redo.lastOrNull()?.operationId, current.evictedHistoryCount)
     }
-    private fun objectCharge(value: StrokeObject): Long = 256L + value.id.value.length * 2 + value.layerId.value.length * 2 + value.samples.size.toLong() * 28
     /** Existing authority's live-payload gate, not a reservation of history, journal or system heap. */
     internal fun additionalStrokeSampleCapacity(objectId: ObjectId, layerId: LayerId): Int {
         ownerCheck()
@@ -67,8 +77,6 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
         }
         return StrokeInputCapacity(points, reason)
     }
-    private fun liveCharge(root: DocumentRoot): Long = 512L + (root.id.value.length + root.title.length) * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
-        root.scene.objects().sumOf(::objectCharge)
     private fun identityCharge(value: State): Long = value.pages.sumOf { 48L + it.value.length * 2 } +
         value.layers.sumOf { 48L + it.value.length * 2 } + value.objects.sumOf(::objectIdentityCharge)
     private fun commandCharge(command: DocumentCommand): Long = COMMAND_HEADER_BYTES + when (command) {

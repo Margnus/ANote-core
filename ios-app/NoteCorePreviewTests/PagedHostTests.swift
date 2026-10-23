@@ -5,6 +5,24 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testValidatedOpeningReturnsTypedFailureAndUsesOriginalNotebook() throws {
+        let root = DocumentRoot.companion.empty(id: SceneId(value: "validated-swift"), title: "unchanged",
+            firstPage: PageDescriptor(id: PageId(value: "page"), layerId: LayerId(value: "layer"),
+                width: 595, height: 842, paper: .blank, contentRevision: 0))
+        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+            journalEntries: 128, journalBytes: 8 * 1024 * 1024, identityBytes: 2 * 1024 * 1024,
+            historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
+        let refused = PagedPreviewNotebook.companion.open(initial: root, sessionNonce: "bad nonce", budget: budget,
+            ownerCheck: { precondition(Thread.isMainThread) })
+        XCTAssertNil(refused.notebook); XCTAssertEqual(refused.failure, .invalidSessionNonce)
+        let opening = PagedPreviewNotebook.companion.open(initial: root, sessionNonce: "swift-valid", budget: budget,
+            ownerCheck: { precondition(Thread.isMainThread) })
+        XCTAssertNil(opening.failure)
+        let note = try XCTUnwrap(opening.notebook)
+        XCTAssertTrue(note.snapshot() === root)
+        draw(note); XCTAssertEqual(note.totalStrokeCount, 1)
+        XCTAssertEqual(root.scene.objectCount, 0); XCTAssertTrue(note.retire())
+    }
     @MainActor func testFullSaveLedgerRejectsRetirementUntilRetainedWritesAreExplicitlyRetried() async throws {
         let dir = directory(); try Data("blocked".utf8).write(to: dir)
         defer { try? FileManager.default.removeItem(at: dir) }

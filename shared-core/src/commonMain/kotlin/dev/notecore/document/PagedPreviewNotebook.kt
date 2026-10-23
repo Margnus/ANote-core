@@ -27,7 +27,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var projection: List<StrokeObject> = emptyList()
     init {
         ownerCheck()
-        require(sessionNonce.length in 1..48 && sessionNonce.all { it.isLetterOrDigit() && it.code < 128 || it == '-' })
+        require(validSessionNonce(sessionNonce))
         require(budget.maxPages <= PagedPreviewCodec.MAX_PAGES && budget.maxObjects <= PagedPreviewCodec.MAX_OBJECTS && budget.liveBytes <= 8L * 1024 * 1024)
         PagedPreviewCodec.retainedByteCharge(initial)
     }
@@ -341,6 +341,27 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())
 
     companion object {
+        private fun validSessionNonce(value: String) = value.length in 1..48 &&
+            value.all { it.isLetterOrDigit() && it.code < 128 || it == '-' }
+
+        /** Validated adoption of one immutable root. No owner/IO/allocator failures are caught.
+         * Validation creates no authority; only a successful result constructs the original notebook.
+         */
+        fun open(initial: DocumentRoot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
+                 ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
+            ownerCheck()
+            if (!validSessionNonce(sessionNonce)) return PreviewNotebookOpen(null, PreviewOpenFailure.INVALID_SESSION_NONCE)
+            if (budget.maxPages > PagedPreviewCodec.MAX_PAGES || budget.maxObjects > PagedPreviewCodec.MAX_OBJECTS || budget.liveBytes > 8L * 1024 * 1024)
+                return PreviewNotebookOpen(null, PreviewOpenFailure.UNSUPPORTED_BUDGET)
+            val read = PreviewDocumentReader.accept(initial)
+            if (read.failure != null) return PreviewNotebookOpen(null, when (read.failure) {
+                PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT -> PreviewOpenFailure.UNSUPPORTED_CONTENT
+                else -> PreviewOpenFailure.INVALID_CONTENT
+            })
+            val capacity = MemoryDocumentAuthority.initialCapacityFailure(initial, budget)
+            if (capacity != null) return PreviewNotebookOpen(null, PreviewOpenFailure.DOCUMENT_CAPACITY, capacity)
+            return PreviewNotebookOpen(PagedPreviewNotebook(initial, sessionNonce, budget, ownerCheck), null)
+        }
         @Throws(IllegalArgumentException::class)
         fun create(documentId: String, title: String, sessionNonce: String): PagedPreviewNotebook = PagedPreviewNotebook(
             DocumentRoot.empty(SceneId(documentId), title, PageDescriptor(PageId("$sessionNonce-page-0"), LayerId("$sessionNonce-layer-0"), 595.0, 842.0)), sessionNonce)

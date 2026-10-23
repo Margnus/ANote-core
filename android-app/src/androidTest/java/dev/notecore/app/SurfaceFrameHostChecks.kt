@@ -327,8 +327,19 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         val started = CountDownLatch(1); val release = CountDownLatch(1)
         setup(before = { started.countDown(); check(release.await(8,TimeUnit.SECONDS)) })
         check(started.await(5,TimeUnit.SECONDS))
-        val waiting = screenPixel()
-        check(kotlin.math.abs(Color.blue(waiting)-191)<=4) { "Pending shared frame lost complete canonical fallback" }
+        val pendingFallbackFirstPixel = screenPixel()
+        var waiting = pendingFallbackFirstPixel
+        var pendingFallbackObservations = 1
+        val fallbackDeadline = SystemClock.uptimeMillis()+2000
+        // Frame commit is submission, not display. Observe compositor readiness explicitly;
+        // retain the first pixel in evidence rather than asserting no transient startup blank.
+        fun fallbackMatches() = kotlin.math.abs(Color.red(waiting)-127)<=4 &&
+            kotlin.math.abs(Color.green(waiting)-63)<=4 && kotlin.math.abs(Color.blue(waiting)-191)<=4
+        while (!fallbackMatches() && SystemClock.uptimeMillis()<fallbackDeadline) {
+            SystemClock.sleep(20); waiting = screenPixel(); pendingFallbackObservations++
+        }
+        check(fallbackMatches()) { "Pending shared frame lost complete canonical fallback: first=${Integer.toHexString(pendingFallbackFirstPixel)} last=${Integer.toHexString(waiting)} observations=$pendingFallbackObservations" }
+        main { check(store.inkFramePublications == 0 && release.count == 1L) }
         main { store.detachInk(view); store.releaseActive(note); host.setContentView(View(host)); check(store.inkOwnerRetained); check(store.inkChargedBytes>0) }
         release.countDown()
         eventually("Late shared-executor result was not ACKed after View removal") { !store.inkOwnerRetained && store.inkChargedBytes==0L }
@@ -501,6 +512,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Read-only reconciliation did not finish owner retirement") {
             reconciledRetirement && store.ownerRetirementStatus().workerStopped && store.inkChargedBytes == 0L
         }
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"queued_draw_removal_lost_endpoint_without_draw\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"pending_fallback_first_argb\":$pendingFallbackFirstPixel,\"pending_fallback_observations\":$pendingFallbackObservations,\"startup_no_transient_blank_verified\":false,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"queued_draw_removal_lost_endpoint_without_draw\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

@@ -62,6 +62,9 @@ def main():
         'terminal_save_notification_drops_receiver_retains_content'))
     assert observed['unknown_retained_bytes'] > 0 and observed['handoff_unknown_retained_bytes'] > 0
     assert observed['long_unsignaled_gpu_fence_tested'] is False
+    assert observed['startup_no_transient_blank_verified'] is False
+    assert observed['pending_fallback_observations'] >= 1
+    assert isinstance(observed['pending_fallback_first_argb'], int)
     assert all(observed[key] for key in ('retiring_owner_waits_native_receipts',
         'retiring_owner_acks_late_work_and_save', 'retiring_owner_unknown_readonly_reconciled', 'queued_draw_removal_lost_endpoint_without_draw'))
 

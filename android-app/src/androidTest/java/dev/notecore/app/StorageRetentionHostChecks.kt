@@ -29,6 +29,13 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         val checks = mutableListOf<String>()
         main {
             store = NoteStore.isolated(host, directory); note = store.create()
+            val original = note.snapshot()
+            val refused = PagedPreviewNotebook.open(original, "bad nonce", ownerCheck = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) })
+            check(refused.notebook == null && refused.failure == PreviewOpenFailure.INVALID_SESSION_NONCE)
+            val capacity = PagedPreviewNotebook.open(original, "checked", DocumentBudget(liveBytes = 0))
+            check(capacity.notebook == null && capacity.documentReason == DocumentRejection.LIVE_BYTE_CAPACITY)
+            check(note.snapshot() === original && store.activeDocumentId == original.id.value)
+            checks.add("validated_open_refusal_preserves_original_store_owner")
             check(store.save(note.capture()) { _, error -> check(error == null); completed = true })
         }
         try {
