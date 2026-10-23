@@ -4,70 +4,70 @@
     "events": [
       {
         "event": "first-held",
-        "elapsed_ns": 16192800,
+        "elapsed_ns": 16400600,
         "charged": 24576,
         "retired": 0,
         "executor": 0
       },
       {
         "event": "scroll-old-retired",
-        "elapsed_ns": 16252900,
+        "elapsed_ns": 16457400,
         "charged": 24576,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "two-jobs-rejected-third",
-        "elapsed_ns": 17400500,
+        "elapsed_ns": 17480000,
         "charged": 205216,
         "retired": 24576,
         "executor": 180640
       },
       {
         "event": "queued-cancelled",
-        "elapsed_ns": 17600600,
+        "elapsed_ns": 17525400,
         "charged": 205216,
         "retired": 24576,
         "executor": 180640
       },
       {
         "event": "ready-before-ack",
-        "elapsed_ns": 32648400,
+        "elapsed_ns": 31717100,
         "charged": 205216,
         "retired": 24576,
         "executor": 180640
       },
       {
         "event": "late-and-cancelled-ack",
-        "elapsed_ns": 32794800,
+        "elapsed_ns": 31847400,
         "charged": 24576,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "zoom-image-held",
-        "elapsed_ns": 47165200,
+        "elapsed_ns": 47159400,
         "charged": 49152,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "closed-two-readers",
-        "elapsed_ns": 47583800,
+        "elapsed_ns": 47497900,
         "charged": 49152,
         "retired": 49152,
         "executor": 0
       },
       {
         "event": "new-reader-released",
-        "elapsed_ns": 47665500,
+        "elapsed_ns": 47572100,
         "charged": 24576,
         "retired": 24576,
         "executor": 0
       },
       {
         "event": "old-reader-released",
-        "elapsed_ns": 47712300,
+        "elapsed_ns": 47617300,
         "charged": 0,
         "retired": 0,
         "executor": 0
@@ -75,37 +75,37 @@
     ],
     "queue_wait_ns": [
       {
-        "submit_elapsed_ns": 241100,
-        "request_to_worker_ns": 594400,
-        "queue_handoff_wait_lower_ns": 353300,
-        "queue_handoff_wait_upper_ns": 594400
+        "submit_elapsed_ns": 247500,
+        "request_to_worker_ns": 807500,
+        "queue_handoff_wait_lower_ns": 560000,
+        "queue_handoff_wait_upper_ns": 807500
       },
       {
-        "submit_elapsed_ns": 362400,
-        "request_to_worker_ns": 458600,
-        "queue_handoff_wait_lower_ns": 96200,
-        "queue_handoff_wait_upper_ns": 458600
+        "submit_elapsed_ns": 468700,
+        "request_to_worker_ns": 560800,
+        "queue_handoff_wait_lower_ns": 92100,
+        "queue_handoff_wait_upper_ns": 560800
       },
       {
-        "submit_elapsed_ns": 431000,
-        "request_to_worker_ns": 13331800,
-        "queue_handoff_wait_lower_ns": 12900800,
-        "queue_handoff_wait_upper_ns": 13331800
+        "submit_elapsed_ns": 185200,
+        "request_to_worker_ns": 13681700,
+        "queue_handoff_wait_lower_ns": 13496500,
+        "queue_handoff_wait_upper_ns": 13681700
       },
       {
-        "submit_elapsed_ns": 133600,
-        "request_to_worker_ns": 301300,
-        "queue_handoff_wait_lower_ns": 167700,
-        "queue_handoff_wait_upper_ns": 301300
+        "submit_elapsed_ns": 119800,
+        "request_to_worker_ns": 239700,
+        "queue_handoff_wait_lower_ns": 119900,
+        "queue_handoff_wait_upper_ns": 239700
       }
     ],
     "copies": [
       {
-        "elapsed_ns": 355600,
+        "elapsed_ns": 473800,
         "row_storage_upper_bytes": 16384
       },
       {
-        "elapsed_ns": 303300,
+        "elapsed_ns": 359100,
         "row_storage_upper_bytes": 16384
       }
     ],
@@ -153,21 +153,21 @@
       "bitmap_allocation_bytes": 8192,
       "bitmap_row_bytes": 256,
       "output_allocation_bytes": 8192,
-      "conversion_elapsed_ns": 1369200,
-      "copy_create_elapsed_ns": 153900,
-      "draw_elapsed_ns": 52800,
-      "release_call_elapsed_ns": 19200
+      "conversion_elapsed_ns": 1160000,
+      "copy_create_elapsed_ns": 164000,
+      "draw_elapsed_ns": 53600,
+      "release_call_elapsed_ns": 31800
     }
   ],
   "status": "passed",
   "platform": "Android emulator ART standalone canvas-core test APK",
   "serial": "emulator-5580",
   "api": "35",
-  "test_count": 127,
+  "test_count": 132,
   "viewport_trace_test_count": 1,
   "android_image_holder_test_count": 9,
   "hardware_recording_rejection_test_count": 1,
-  "common_test_count": 105,
+  "common_test_count": 110,
   "real_render_executor_test_count": 7,
   "android_bitmap_test_count": 5,
   "test_groups": [
@@ -187,14 +187,15 @@
     "AndroidBrushImagePocTest",
     "RenderViewportTraceTest",
     "InputReplayContractTest",
-    "InputArenaContractTest"
+    "InputArenaContractTest",
+    "InputScalarReplayTest"
   ],
   "source_and_build_sha256": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "canvas-core/build.gradle.kts": "ac4f2148968181b43b165d52d086f7f48e120ff85289e2e544bf3ec974694709",
     "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePocTest.kt": "34d7fe05e5bc34c957b904628f853724cba6d9aa62149d03fc3cfc50b06f3050",
     "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/BrushTileBitmapTest.kt": "cd087f5a63b5ab046ccb3eee51ad36bb2582cbea7a7bbab7a1ff1ad5e58aa5bb",
-    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "126e03ccd72c7f770969f099e0b4bdcf8e4e75738fd56f3e086ea88f51479f45",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "e53b9d3cf50076112f9fdfc119122f1cbff0b9e48745cf6b2522f4fe084afd27",
     "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/RenderViewportTraceTest.kt": "86467b4221198601aa798ef244548e8853f79482ac7df461e72ded7dad78e98e",
     "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePoc.kt": "0895d5afbcab6901c29d0b8735b048deb1345fd6cabb7b04abbae0d1cb137647",
     "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidInkFrameExperiment.kt": "325177f7bbee4ec0338a3da52cd62fd3e7a2afea281dde256c94f974e20d9c56",
@@ -211,13 +212,13 @@
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "6136c2528b6b1f392ac71a21d28282376b0bd482a1da6153bf9ecac638c4b84d",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "30f990e632feb680a7b9d39836e278f861c880b2fa50a0c252f83c11dc20b0b1",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "0d65a99bb6dfc4fc1cc3fc5f8679724b3ac963f4980ffb94c091e7f4da126397",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "aa205b66e186bac192b19a53f6104065d212de9c24fb8c3edb033ea81b3cb930",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
-    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "c2af191e3b2e7188664b75b1933ac4bc776511aad850e451ad48d959c4dec75a",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePocTest.kt": "a0af32c6a8a36656650053134560bd77f5df827e4b86898ca3f31e592b6eb739",
@@ -235,6 +236,7 @@
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPocTest.kt": "9b3de853ab3db7595fc507c9fc34383c7e92e985bfa74517dd829bb96fefd137",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/InputArenaContractTest.kt": "ca1df4e883ca344d4d8473a3289778df73c043a9db88a630d68b6059ca99cc3f",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/InputReplayContractTest.kt": "4647f65873f50ee98480435f859d403ae6d6db22af0ca15727b64ca30cede164",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/InputScalarReplayTest.kt": "d8359d234942b986a6d73fd56aa93ef1931c01c0e130b7d97fb56225847c4ce0",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PresentationContractTest.kt": "c6ce484c9886fa6823f99d7550c0b9b6626eaba182da3a1191a00794b5ab2eeb",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PreviewViewportContractTest.kt": "b01cc0423022a8d031d153addc7fc7129eed4877954dd2b848320a0f540d0bf4",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/ResourceLeaseContractTest.kt": "b305d100669c5f156dba3ca22db4208837cb9e2a27fe31ce17abbf6dbbcc3302",
@@ -249,11 +251,11 @@
     "canvas-core/src/jvmAndAndroidTest/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPocTest.kt": "91f22393a9ff797811c0c6df6d757599d2748803f58135c09108a557f1565354",
     "gradle.properties": "a29e188235a52da45ce914db097aa8f585297256b2fcb469a51048bf88f542b0",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
-    "tools/verify_android_brush_common.py": "dec3778cb12e46b572f24e9e7e84ffc7d7379b26db078296c91fd7fe2aebf542"
+    "tools/verify_android_brush_common.py": "cb9807e66e01867fc59b7bdbeab829b4911c04566c27dd0cb205ad84ca95bb50"
   },
   "test_apk": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
-  "test_apk_sha256": "b344a05774bb82ed34747638781ada72498f2021737a3bafca156f697b2e75ff",
-  "test_output_sha256": "fa6cc6a5395f1e301927fe0b36cba69a01dbe5e82692c6e0f55faac011e6817e",
+  "test_apk_sha256": "a53129cd2f00422100ca5a38623016088af784ca59d5bf05cee2b4971fb5705c",
+  "test_output_sha256": "d4c704e4dd1cd22636b7c327a2af158746e2df4edb3b9853a7f87e56ac03a6a5",
   "desktop_unlock_required": false,
   "native_image_lease_handoff_verified": true,
   "android_image_holder_verified": true,
@@ -262,7 +264,7 @@
   "native_canvas_mask_image_consumption_verified": true,
   "native_brush_path_rasterizer_verified": false,
   "shared_input_arena_on_art_verified": true,
-  "input_arena_and_replay_art_tests": 17,
+  "input_arena_and_replay_art_tests": 22,
   "physical_device_measured": false,
   "app_brush_integration_verified": false,
   "native_cost_scope": "Bitmap allocationByteCount and one exploratory API timing. Includes temporary RGBA ByteBuffer copy; no process peak heap, GPU, GC or delayed reclamation measurement. Release time is recycle API return.",

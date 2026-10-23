@@ -1,0 +1,58 @@
+{
+  "schema": "scalar-input-arena-1",
+  "date": "2026-10-23",
+  "base_core": "c1fd413",
+  "status": "passed-jvm-art-original-app-host-apple-pending",
+  "decision": "Adopt original producer scalar views into the same session state machine and private primitive arena. Remove original notebook per-point InputSample and copied InputBatch lists; retain legacy prediction/list API.",
+  "shared_jvm_tests": {
+    "tests": 370,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "scalar_contract_tests": [
+    "scalarAndLegacyPathsMatchAcrossChunksAndCallerArraysNeverEscape[jvm]",
+    "invalidSuffixAndRegressingTimeRejectWholeBatchWithoutAdvancingPrefixOrSequence[jvm]",
+    "mixedPredictionNavigationAndPointerRefusalUseTheSameStateMachine[jvm]",
+    "capacityRefusesSuffixThenEmptyUpAndCancellationKeepOriginalOwnershipRules[jvm]",
+    "invalidEnvelopeAndShapeRefuseBeforeAnyPointAllocationAndClosedIsTerminal[jvm]"
+  ],
+  "art_library_tests": 132,
+  "scalar_contract_tests_on_art": 5,
+  "original_android_view_checks": 8,
+  "original_store_surface_host_verified": true,
+  "concurrent_array_mutation_supported": false,
+  "apple_library_tests_expected_from_source_only": 116,
+  "apple_current_native_framework_host_verified": false,
+  "measured_heap_or_latency_improvement": false,
+  "cross_language_zero_copy_verified": false,
+  "ordinary_ui_verified": false,
+  "whole_chain_budget_closed": false,
+  "stable_sdk_approved": false,
+  "c1_gate_complete": false,
+  "original_file_count": 1,
+  "all_original_files_unchanged": true,
+  "remaining": [
+    "current Apple library116/framework/Swift host rebuild",
+    "native producer/Data/temporary metadata and whole-chain overlap",
+    "physical heap/frame/latency and target devices",
+    "ordinary Android UI and other finite C1 decisions"
+  ],
+  "source_and_artifact_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "aa205b66e186bac192b19a53f6104065d212de9c24fb8c3edb033ea81b3cb930",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/InputScalarReplayTest.kt": "d8359d234942b986a6d73fd56aa93ef1931c01c0e130b7d97fb56225847c4ce0",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "e53b9d3cf50076112f9fdfc119122f1cbff0b9e48745cf6b2522f4fe084afd27",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "9b9752ee7ceacf70ffb1a087fa52e03f3c542bea7e1009ece1fdeec08b566596",
+    "tools/verify_android_brush_common.py": "cb9807e66e01867fc59b7bdbeab829b4911c04566c27dd0cb205ad84ca95bb50",
+    "tools/verify_apple_brush_common.py": "3921911089d1f9cbd54ce350d98dc142f7dd9ad8ee91014737ac497864b3c33e",
+    "docs/输入分块arena与逻辑预留.md": "3c89542b10f3b98df7a03a2d50a3724a65af0dc7899722192509d9f693d070de",
+    "reports/verification.json": "11bd455106de02dd47046bb1a97a575b4bdd78f79f1cd5d633efbaee4b12e3c8",
+    "reports/preview-build.json": "a9b7f88a694ec067a71ec073c2d051bf4fcf140276ecf6fb61a4856862991cbe",
+    "reports/android-brush-common-tests.json": "a49515109edc9a26b3826dff4903f1a0f0ab6ee0ee666c1881e046f9be0e6bbe",
+    "reports/android-input-host-tests.json": "90326f264ff5f90555d2d8142cb447d031d1d53e7182fd4aaa93612d43858516",
+    "reports/android-render-integration.json": "3649fb377207e37114e33d07e0ed1cc2e3a91b4d8378bf3c45c1d4f158c30bc9",
+    "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.InputScalarReplayTest.xml": "5bffbe3d72a91530fb1e005200e71fa7e9061315a72f56b1da38fca71bb89a58"
+  },
+  "session_retains_source_arrays_after_call": false
+}

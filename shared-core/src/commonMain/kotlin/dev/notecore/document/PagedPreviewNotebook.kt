@@ -252,9 +252,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             session = input!!; sequence = inputSequence
             if (sequence == Long.MAX_VALUE) return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
         }
-        // All scalar/length/work admission checks precede this bounded copied list.
-        val points = List(count) { InputSample(xs[it], ys[it], pressures[it], times[it]) }
-        val result = session.consume(InputBatch(sequence, eventTimeMicros, 1, PointerTool.STYLUS, phase, points),
+        // Original session copies validated scalars directly into its arena; no InputSample/InputBatch lists.
+        val result = session.consumeReal(sequence, eventTimeMicros, 1, PointerTool.STYLUS, phase, xs, ys, pressures, times,
             StrokeTarget(current.id, current.findPage(page!!)!!.layerId, BrushSpec(BrushKind.MONOLINE, 1, width, color)))
         if (result is InputResult.Rejected) return rejectRealBatch(
             if (result.reason == InputRejection.CAPACITY) PreviewFailureKind.CAPACITY else PreviewFailureKind.INVALID_INPUT, result.reason)

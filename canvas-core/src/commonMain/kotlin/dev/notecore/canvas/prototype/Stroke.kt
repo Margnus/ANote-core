@@ -61,20 +61,25 @@ class StrokeSamples private constructor(
         val lastTimeMicros: Long get() = if (size == 0) -1L else chunks[(size - 1) / CHUNK_POINTS].times[(size - 1) % CHUNK_POINTS]
         init { require(capacity in 1..1_000_000) }
 
-        fun append(points: List<InputSample>) {
+        fun append(points: List<InputSample>) = append(InputListSamples(points))
+        fun append(points: InputRealSamples) {
             check(open)
-            require(points.size <= capacity - size)
+            require(points.size >= 0 && points.size <= capacity - size)
             var time = lastTimeMicros
-            for (point in points) { require(point.timeMicros >= time); time = point.timeMicros }
+            for (i in 0 until points.size) {
+                require(points.x(i).isFinite() && points.y(i).isFinite() && kotlin.math.abs(points.x(i)) <= 1e9 && kotlin.math.abs(points.y(i)) <= 1e9)
+                require(points.pressure(i).isFinite() && points.pressure(i) in 0f..1f && points.time(i) >= time && points.time(i) >= 0)
+                time = points.time(i)
+            }
             val needed = size + points.size
             while (allocated < needed) {
                 val count = minOf(CHUNK_POINTS, capacity - allocated)
                 chunks.add(Chunk(count)); allocated += count
             }
-            for (point in points) {
+            for (i in 0 until points.size) {
                 val chunk = chunks[size / CHUNK_POINTS]; val offset = size % CHUNK_POINTS
-                chunk.xs[offset] = point.x; chunk.ys[offset] = point.y
-                chunk.pressures[offset] = point.pressure; chunk.times[offset] = point.timeMicros
+                chunk.xs[offset] = points.x(i); chunk.ys[offset] = points.y(i)
+                chunk.pressures[offset] = points.pressure(i); chunk.times[offset] = points.time(i)
                 size++
             }
         }
