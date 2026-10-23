@@ -5,6 +5,53 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testSavedVersionSkipsUnchangedIOButChangedFailureRemainsRetryable() async throws {
+        let dir = directory(), moved = directory()
+        defer { try? FileManager.default.removeItem(at: dir); try? FileManager.default.removeItem(at: moved) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current)
+        draw(note); model.changed()
+        let file = dir.appendingPathComponent(note.documentId + ".ncp")
+        let original = try note.capture().encode()
+        try await eventually("initial saved marker") { model.status.hasPrefix("已保存") && (try? String(contentsOf: file, encoding: .utf8)) == original }
+        try FileManager.default.moveItem(at: dir, to: moved)
+        try Data("blocked directory".utf8).write(to: dir)
+        XCTAssertTrue(model.save()); XCTAssertTrue(model.status.hasPrefix("已保存"))
+        XCTAssertTrue(note.rename(value: "Changed while storage unavailable")); model.changed()
+        try await eventually("changed root did not inherit saved marker") { model.status.contains("保存失败") }
+        let changed = try note.capture().encode()
+        XCTAssertNotEqual(changed, original)
+        try FileManager.default.removeItem(at: dir)
+        try FileManager.default.moveItem(at: moved, to: dir)
+        XCTAssertTrue(model.save())
+        try await eventually("repair saves retained current root") { model.status.hasPrefix("已保存") && (try? String(contentsOf: file, encoding: .utf8)) == changed }
+        model.close(); XCTAssertNil(model.current)
+        let reopened = PreviewModel(directory: dir); reopened.open(note.documentId)
+        try await eventually("reopen adopts saved revision") { reopened.current != nil }
+        XCTAssertTrue(reopened.save()); XCTAssertTrue(reopened.status.hasPrefix("已保存"))
+        reopened.close()
+    }
+    @MainActor func testPendingExportKeepsFirstCapturedContentUntilConsumerClearsIt() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current); draw(note)
+        let original = try note.capture().encode()
+        model.prepareExport()
+        XCTAssertTrue(note.rename(value: "Later export"))
+        model.prepareExport() // A second request cannot replace the accepted capture.
+        try await eventually("first export ready") { !model.transferBusy && model.exportDocument != nil }
+        let first = try XCTUnwrap(model.exportDocument?.data)
+        XCTAssertEqual(String(data: first, encoding: .utf8), original)
+        model.prepareExport(); XCTAssertEqual(model.exportDocument?.data, first)
+        model.exportDocument = nil // Same ownership release as exporter cancellation/completion.
+        model.prepareExport()
+        let later = try note.capture().encode()
+        try await eventually("next export admitted after clear") { !model.transferBusy && model.exportDocument != nil }
+        XCTAssertEqual(String(data: try XCTUnwrap(model.exportDocument?.data), encoding: .utf8), later)
+        model.exportDocument = nil; XCTAssertTrue(model.save())
+        try await eventually("post-export root saved") { model.status.hasPrefix("已保存") }
+        model.close()
+    }
     @MainActor func testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData() throws {
         func data<T>(_ values: [T]) -> NSData {
             values.withUnsafeBufferPointer { NSData(bytes: $0.baseAddress, length: $0.count * MemoryLayout<T>.stride) }

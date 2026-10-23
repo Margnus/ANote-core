@@ -25,7 +25,9 @@ class ViewportInstrumentation : Instrumentation() {
     private var inputBatchesOnly = false
     private var titleOnly = false
     private var editOnly = false
+    private var storageRetentionOnly = false
     override fun onCreate(arguments: Bundle?) {
+        storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
         editOnly = arguments?.getString("notecore_case") == "preview_edit"
         titleOnly = arguments?.getString("notecore_case") == "title_contract"
         inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
@@ -44,6 +46,11 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (storageRetentionOnly) {
+                result.putString("storage_observations", StorageRetentionHostChecks(this, host).verify())
+                result.putString("storage_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (editOnly) {
                 var editFailure: Throwable? = null
                 runOnMainSync {

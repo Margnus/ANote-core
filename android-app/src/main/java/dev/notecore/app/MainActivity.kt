@@ -213,21 +213,21 @@ class MainActivity : Activity() {
         val note = notebook ?: return
         canvas?.cancelInk()
         if (!note.retryPendingStroke()) { showError(note.lastError); return }
-        store.exportSnapshot = note.capture()
+        if (!store.beginExport(note.capture())) { showError("备份导出尚未结束，请先完成或取消当前导出"); return }
         try {
             startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE); type = "application/octet-stream"
                 putExtra(Intent.EXTRA_TITLE, "NoteCore-${note.documentId}.ncp")
             }, 101)
         } catch (_: android.content.ActivityNotFoundException) {
-            store.exportSnapshot = null; showError("系统文件选择器不可用")
+            store.takeExportSnapshot(); showError("系统文件选择器不可用")
         }
     }
     @Deprecated("Framework result callback keeps the preview dependency-free")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 101) {
-            val snapshot = store.exportSnapshot; store.exportSnapshot = null
+            val snapshot = store.takeExportSnapshot()
             if (resultCode != RESULT_OK) return
             val uri = data?.data ?: return showError("未获取导出位置，请重试")
             if (snapshot == null) { showError("会话已重建，请重新导出"); return }

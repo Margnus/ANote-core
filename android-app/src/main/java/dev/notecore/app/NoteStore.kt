@@ -32,7 +32,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
     internal val activeDocumentId: String? get() { executor.checkOwnerThread(); return activeNotebook?.documentId }
-    private var activeSavedRoot: DocumentRoot? = null
+    // Only a revision in the current authority's monotonic lifetime, never an extra old root owner.
+    private var activeSavedVersion: Long? = null
     internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
         executor.checkOwnerThread()
         activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
@@ -40,7 +41,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
             executor::checkOwnerThread)
         activeNotebook = note
-        activeSavedRoot = opened.root.takeIf { opened.persisted && ledger.latest(note.documentId) == null }
+        activeSavedVersion = opened.root.revision.takeIf { opened.persisted && ledger.latest(note.documentId) == null }
         return note
     }
     internal fun create(): PagedPreviewNotebook {
@@ -55,11 +56,19 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         activeNotebook = note
     }
     internal fun releaseActive(note: PagedPreviewNotebook) {
-        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedRoot = null
+        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedVersion = null
     }
-    var exportSnapshot: PagedPreviewSnapshot? = null
-        get() { executor.checkOwnerThread(); return field }
-        set(value) { executor.checkOwnerThread(); field = value }
+    private var exportSnapshot: PagedPreviewSnapshot? = null
+    internal val exportRetainedByteCharge: Long get() { executor.checkOwnerThread(); return exportSnapshot?.retainedByteCharge ?: 0L }
+    internal fun beginExport(snapshot: PagedPreviewSnapshot): Boolean {
+        executor.checkOwnerThread()
+        if (exportSnapshot != null) return false
+        exportSnapshot = snapshot; return true
+    }
+    internal fun takeExportSnapshot(): PagedPreviewSnapshot? {
+        executor.checkOwnerThread()
+        return exportSnapshot.also { exportSnapshot = null }
+    }
     init { executor.checkOwnerThread() }
     private fun requestPump() {
         if (!wakePending.compareAndSet(false, true)) return
@@ -201,7 +210,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun save(snapshot: PagedPreviewSnapshot, callback: (Long, String?) -> Unit): Boolean {
         executor.checkOwnerThread()
-        if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot === snapshot.root && ledger.latest(snapshot.documentId) == null) {
+        if (activeNotebook?.snapshot() === snapshot.root && activeSavedVersion == snapshot.version && ledger.latest(snapshot.documentId) == null) {
             notifyUi { callback(snapshot.version, null) }; return true
         }
         val previous = ledger.latest(snapshot.documentId)
@@ -242,7 +251,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 val success = result is WorkResult.Succeeded
                 check(ledger.complete(original, success))
                 val id = original.snapshot.documentId
-                if (success && activeNotebook?.documentId == id) activeSavedRoot = (original.snapshot as PagedPreviewSnapshot).root
+                if (success && activeNotebook?.snapshot() === (original.snapshot as PagedPreviewSnapshot).root)
+                    activeSavedVersion = original.snapshot.version
                 saveCallbacks[id]?.takeIf { it.version == original.snapshot.version }?.let { receiver ->
                     saveCallbacks.remove(id)
                     notifyUi { receiver.receive(original.snapshot.version, if (success) null else "保存失败，更改仍在本机会话中，请重试保存") }
@@ -296,7 +306,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) {
         executor.checkOwnerThread()
-        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot === it.snapshot()), null); return }
+        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedVersion == it.changeVersion), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
             if (input.second == null) input.third.read(input.first) else (input.second as PagedPreviewSnapshot).root

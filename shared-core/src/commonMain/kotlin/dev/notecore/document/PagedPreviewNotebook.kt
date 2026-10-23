@@ -56,10 +56,14 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun authorityStatus(): DocumentAuthorityStatus { ownerCheck(); return memory.status() }
     private fun visible(): List<StrokeObject> {
         val root = root()
+        if (retired) return root.pageObjects(selected) // Retired read access must not rebuild a retained cache.
         if (projectionRevision != root.revision || projectionPage != selected) {
             projection = root.pageObjects(selected); projectionRevision = root.revision; projectionPage = selected
         }
         return projection
+    }
+    private fun invalidateProjection() {
+        projection = emptyList(); projectionRevision = -1L; projectionPage = null
     }
     fun stroke(index: Int): StrokeObject = visible()[index]
     fun strokeId(index: Int): String = stroke(index).id.value
@@ -123,7 +127,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         clearError(); return true
     }
     private fun commit(command: DocumentCommand): Boolean = when (val result = memory.commit(command)) {
-        is DocumentCommit.Accepted -> { cancelStroke(); clearError(); true }
+        is DocumentCommit.Accepted -> { invalidateProjection(); cancelStroke(); clearError(); true }
         is DocumentCommit.Rejected -> fail(when (result.reason) {
             DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
             DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
@@ -136,7 +140,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (root().findPage(id) == null) return fail("页面不存在", PreviewFailureKind.MISSING_PAGE)
         if (id == selected) { clearError(); return true }
         if (!prepareEdit()) return false
-        cancelStroke(); selected = id; clearError(); return true // Presentation-only; no root commit.
+        cancelStroke(); invalidateProjection(); selected = id; clearError(); return true // Presentation-only; no root commit.
     }
     fun insertPage(): Boolean {
         if (!prepareEdit()) return false
@@ -316,7 +320,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun retire(): Boolean {
         ownerCheck()
         if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试", PreviewFailureKind.PENDING_STROKE)
-        cancelStroke(); retired = true; return true
+        cancelStroke(); invalidateProjection(); retired = true; return true
     }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())

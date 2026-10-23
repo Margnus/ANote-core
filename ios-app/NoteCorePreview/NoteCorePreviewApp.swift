@@ -29,7 +29,8 @@ final class PreviewModel: ObservableObject {
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024,
         ownerCheck: { precondition(Thread.isMainThread) })
     private let storageWorkBytes: Int64 = 256 * 1024 * 1024
-    private var savedRoot: DocumentRoot?
+    // Revision is meaningful only within the current authority's monotonic lifetime.
+    private var savedVersion: Int64?
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
@@ -212,7 +213,7 @@ final class PreviewModel: ObservableObject {
             historyEntries: 128, historyBytes: 8 * 1024 * 1024)
         current = try PagedPreviewNotebook(initial: root, sessionNonce: UUID().uuidString, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
-        savedRoot = persisted && ledger.latest(documentId: root.id.value) == nil ? root : nil
+        savedVersion = persisted && ledger.latest(documentId: root.id.value) == nil ? root.revision : nil
         revision = root.revision
     }
     private static func validateRenderable(_ root: DocumentRoot) throws {
@@ -350,7 +351,7 @@ final class PreviewModel: ObservableObject {
         guard let note = current else { return true }
         guard note.retryPendingStroke() else { status = note.lastError; return false }
         let snapshot = note.capture(), previous = ledger.latest(documentId: note.documentId)
-        if savedRoot === snapshot.root && previous == nil {
+        if savedVersion == snapshot.version && previous == nil {
             status = "已保存到本机 · \(note.totalStrokeCount) 笔"; return true
         }
         let admission = ledger.offer(snapshot: snapshot)
@@ -383,8 +384,9 @@ final class PreviewModel: ObservableObject {
                     if case .succeeded = result { success = true } else { success = false }
                     precondition(self.ledger.complete(attempt: input.0, success: success))
                     let snapshot = input.0.snapshot
-                    if success && self.current?.documentId == snapshot.documentId {
-                        self.savedRoot = (snapshot as? PagedPreviewSnapshot)?.root
+                    if success, let captured = snapshot as? PagedPreviewSnapshot,
+                       self.current?.snapshot() === captured.root {
+                        self.savedVersion = snapshot.version
                     }
                     if self.current?.documentId == snapshot.documentId && self.current?.changeVersion == snapshot.version {
                         if let current = self.current, current.hasPendingStroke { self.status = current.lastError }
@@ -405,7 +407,7 @@ final class PreviewModel: ObservableObject {
         current?.cancelStroke()
         guard save(), current?.retire() == true else { return }
         retireInk()
-        navigationEpoch += 1; current = nil; savedRoot = nil; refresh()
+        navigationEpoch += 1; current = nil; savedVersion = nil; refresh()
     }
     func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
     func applyEdit(_ request: PreviewEdit, content: Bool = true) {

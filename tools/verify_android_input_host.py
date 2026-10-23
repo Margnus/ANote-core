@@ -13,6 +13,9 @@ CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equa
           'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root',
           'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery',
           'live_byte_refusal_and_undo_recovery'}
+STORAGE_CHECKS = {'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
+                  'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
+                  'foreign_same_revision_is_not_acknowledged_as_saved'}
 
 
 def digest(path):
@@ -70,6 +73,13 @@ def main():
     assert observed['canonical_max_error'] <= 1e-9 and observed['old_float_witness_error'] > 1e-5
     assert observed['batch_sample_count'] == 7 and observed['all_test_notes_in_memory']
     assert observed['active_input_reservation_bytes'] == 1_130_624 and observed['input_reservation_released_after_completion']
+    storage_output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'storage_retention',
+                         BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
+    storage_log = folder/'storage-retention.log'; storage_log.write_text(storage_output, encoding='utf-8', newline='\n')
+    assert 'storage_status=passed' in storage_output and 'INSTRUMENTATION_CODE: -1' in storage_output, storage_output
+    storage = json.loads(re.search(r'storage_observations=(\{.*\})', storage_output).group(1))
+    assert len(storage['checks']) == len(STORAGE_CHECKS) and set(storage['checks']) == STORAGE_CHECKS
+    assert storage['original_note_files_used'] is False and storage['system_file_picker_verified'] is False
     assert files() == before, 'Original Android file set or bytes changed'
     baseline = folder/'original-files.json'
     baseline.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8', newline='\n')
@@ -79,7 +89,7 @@ def main():
     assert files() == before, 'Original Android files changed after ordinary process restore'
     pid = adb('shell', 'pidof', BUNDLE).decode('utf-8').strip()
     assert re.fullmatch(r'\d+', pid)
-    for path in (apk, test, log, baseline, Path(__file__), ROOT/'reports/preview-build.json',
+    for path in (apk, test, log, storage_log, baseline, Path(__file__), ROOT/'reports/preview-build.json',
                  ROOT/'reports/android-brush-build-inputs.sha256'):
         bindings[path.relative_to(ROOT).as_posix()] = digest(path)
     sdk = Path(args.adb).resolve().parent.parent
@@ -88,19 +98,20 @@ def main():
         'schema': 'android-input-host-1', 'status': 'passed', 'serial': args.serial,
         'api': adb('shell', 'getprop', 'ro.build.version.sdk').decode('utf-8').strip(),
         'checks': sorted(CHECKS), 'check_count': len(CHECKS), 'observations': observed,
+        'storage_retention_checks': storage, 'storage_retention_check_count': len(STORAGE_CHECKS),
         'apk_sha256': digest(apk), 'test_apk_sha256': digest(test),
         'ordinary_pid_after_host': int(pid), 'original_file_count': len(before),
         'all_original_files_unchanged': True, 'ordinary_process_restored': True,
         'source_and_artifact_sha256': bindings,
         'sdk_contract_sha256': {str(path): digest(path) for path in contracts},
-        'scope': 'Synthetic native MotionEvent history and terminal batches delivered directly to the original InkCanvasView callback on Android main thread; canonical notebook stays in memory. Oracle uses actual SDK-exposed event scalars, then double scene mapping. Not injected OS events, ordinary UI or physical stylus evidence.',
+        'scope': 'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView with in-memory canonical notebooks, plus six original NoteStore/worker real-file and export-slot checks in a unique cache directory. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, physical stylus or power-loss evidence.',
         'decision': 'Use double viewport scale/offset for canonical input; float conversion is reserved for derived Path coordinates. Keep current owner, immutable real samples, explicit invalid/cancel behavior and MONOLINE scope.',
         'ordinary_ui_interaction_verified': False, 'real_stylus_verified': False,
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,
         'c1_gate_complete': False,
     }
     (ROOT/'reports/android-input-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
-    print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
+    print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'storage_retention_check_count', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
 
 
 if __name__ == '__main__':
