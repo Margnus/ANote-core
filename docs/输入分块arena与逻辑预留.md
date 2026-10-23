@@ -31,3 +31,10 @@ InputReplaySession.reservedByteCharge是配置的峰值额度，activePointByteC
 pending command/ID等非点元数据尚须汇入整体预算，不包含在pending规范样本的logical charge内。调用方的InputBatch/预测列表、原生采集/跨语言复制、正文/历史/保存/渲染、平台隐藏分配及GC延后不包含在该预留内。原预览每批1024、每笔20000、全文200000的准入不变；完整生产point arena/producer预算、整体背压与设备heap仍需后续收敛，不能凭该公式关闭ENG-07/C1。
 
 当前公共块边界/冻结/拒绝/预测/跨笔反例纳入原JVM及ART库runner，原View补验active预留/完成归零，pending预留由原notebook回归覆盖。Apple必须在Mac重建framework/App及相关宿主，不转用旧Native报告。真实结果见[输入arena报告](../reports/input-arena.json)。
+
+
+## 原notebook消费输入额度（2026-10-23）
+
+映射ENG-06/ENG-07/ENG-14，基线6021028；已先整合远端live字节准入。目标是在原双端notebook而非旁路模型消费arena预留：DocumentBudget.inputBytes为每个notebook的活动输入逻辑额度（默认2MiB），DOWN前取点上限与额度同时满足的最大容量；预算连1点都不足或首批超限时，在session/身份分配前零接收。活动笔固定已预留容量，后续整批拒绝保持原前缀/序号，调用者可缩小批次重试或明确取消。取消释放未完成输入；完成失败的pending规范点继续持有责任。
+
+验收：不足预算不分配身份；精确预算/256→257块边界；超限批不部分接收且较小重试可提交/格式往返；关闭/取消与pending拒绝保留；原Android View回调预算拒绝与恢复。共享JVM及原Android宿主实际执行，Apple当前编译/宿主仍待Mac。默认20k点预算不变。此字段只约束原输入组件，平台原始事件/临时批数组、文档/历史/render/保存等仍有独立责任，不能声称总heap或C1完成。

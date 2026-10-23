@@ -7,6 +7,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                            budget: DocumentBudget = DocumentBudget(), private val ownerCheck: () -> Unit = {}) {
     private val memory = MemoryDocumentAuthority(initial, budget, ownerCheck)
     private val inputObjectLimit = budget.maxObjects
+    private val inputByteLimit = budget.inputBytes
     private var selected = initial.page(0).id
     private var sequence = 0L
     private val initialIds = (initial.pages().flatMap { listOf(it.id.value, it.layerId.value) } + initial.scene.objects().map { it.id.value }).toSet()
@@ -241,7 +242,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             val nextObject = nextIdentity("ink", nextOperation.second)
                 ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
             val liveCapacity = memory.additionalStrokeSampleCapacity(ObjectId(nextObject.first), current.findPage(selected)!!.layerId)
-            val pointCapacity = minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, liveCapacity)
+            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, liveCapacity))
             if (count > pointCapacity) return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
             objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
@@ -269,6 +270,17 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         }
         input = session; clearError()
         return inputResult(PreviewInputDisposition.ACCEPTED, count)
+    }
+    /** Reserve the entire admitted stroke, including completion overlap, before allocating identities.
+     * Rejection never lowers an active session's capacity or drops its accepted prefix.
+     */
+    private fun affordableInputPoints(maximum: Int): Int {
+        var low = 0; var high = maximum
+        while (low < high) {
+            val mid = low + (high - low + 1) / 2
+            if (InputReplaySession.reservationBytes(mid) <= inputByteLimit) low = mid else high = mid - 1
+        }
+        return low
     }
     internal fun realBatchGate(phase: PointerPhase): PreviewInputResult? {
         ownerCheck()

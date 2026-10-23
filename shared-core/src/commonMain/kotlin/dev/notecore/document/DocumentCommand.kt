@@ -51,9 +51,11 @@ sealed interface DocumentCommand {
 data class DocumentBudget(val maxPages: Int = 128, val maxObjects: Int = 5000, val liveBytes: Long = 8L * 1024 * 1024,
                           val journalEntries: Int = 128, val journalBytes: Long = 8L * 1024 * 1024,
                           val identityBytes: Long = 2L * 1024 * 1024,
-                          val historyEntries: Int = 128, val historyBytes: Long = 8L * 1024 * 1024) {
+                          val historyEntries: Int = 128, val historyBytes: Long = 8L * 1024 * 1024,
+                          /** Per-notebook active input reservation; independent of retained document/history quotas. */
+                          val inputBytes: Long = 2L * 1024 * 1024) {
     init { require(maxPages in 1..4096 && maxObjects in 1..100_000 && liveBytes >= 0 && journalEntries in 1..16_384 && journalBytes >= 0 && identityBytes >= 0)
-        require(historyEntries in 1..16_384 && historyBytes >= 0) }
+        require(historyEntries in 1..16_384 && historyBytes >= 0 && inputBytes >= 0) }
 }
 enum class DocumentRejection { WRONG_DOCUMENT, STALE_ROOT, REVISION_EXHAUSTED, MISSING_PAGE, WRONG_LAYER, STALE_PAGE,
     REUSED_OPERATION_ID, REUSED_IDENTITY, COPY_MAPPING, INVALID_PAGE, INVALID_TITLE, SCENE_REJECTED, NO_CHANGE,
