@@ -32,7 +32,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
     internal val activeDocumentId: String? get() { executor.checkOwnerThread(); return activeNotebook?.documentId }
-    private var activeSavedRoot: DocumentRoot? = null
+    // An identity-only optimization must not retain an obsolete canonical root.
+    private var activeSavedRoot = java.lang.ref.WeakReference<DocumentRoot>(null)
     internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
         executor.checkOwnerThread()
         activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
@@ -40,7 +41,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
             executor::checkOwnerThread)
         activeNotebook = note
-        activeSavedRoot = opened.root.takeIf { opened.persisted && ledger.latest(note.documentId) == null }
+        activeSavedRoot = java.lang.ref.WeakReference(opened.root.takeIf { opened.persisted && ledger.latest(note.documentId) == null })
         return note
     }
     internal fun create(): PagedPreviewNotebook {
@@ -55,7 +56,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         activeNotebook = note
     }
     internal fun releaseActive(note: PagedPreviewNotebook) {
-        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedRoot = null
+        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedRoot.clear()
     }
     var exportSnapshot: PagedPreviewSnapshot? = null
         get() { executor.checkOwnerThread(); return field }
@@ -201,7 +202,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun save(snapshot: PagedPreviewSnapshot, callback: (Long, String?) -> Unit): Boolean {
         executor.checkOwnerThread()
-        if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot === snapshot.root && ledger.latest(snapshot.documentId) == null) {
+        if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot.get() === snapshot.root && ledger.latest(snapshot.documentId) == null) {
             notifyUi { callback(snapshot.version, null) }; return true
         }
         val previous = ledger.latest(snapshot.documentId)
@@ -242,7 +243,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 val success = result is WorkResult.Succeeded
                 check(ledger.complete(original, success))
                 val id = original.snapshot.documentId
-                if (success && activeNotebook?.documentId == id) activeSavedRoot = (original.snapshot as PagedPreviewSnapshot).root
+                if (success && activeNotebook?.documentId == id) activeSavedRoot = java.lang.ref.WeakReference((original.snapshot as PagedPreviewSnapshot).root)
                 saveCallbacks[id]?.takeIf { it.version == original.snapshot.version }?.let { receiver ->
                     saveCallbacks.remove(id)
                     notifyUi { receiver.receive(original.snapshot.version, if (success) null else "保存失败，更改仍在本机会话中，请重试保存") }
@@ -296,7 +297,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) {
         executor.checkOwnerThread()
-        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot === it.snapshot()), null); return }
+        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
             if (input.second == null) input.third.read(input.first) else (input.second as PagedPreviewSnapshot).root

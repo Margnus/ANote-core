@@ -121,6 +121,16 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         main { encoded = note.capture().encode(); document = note.documentId
             check(store.save(note.capture()) { _, error -> check(error==null); savedFirst = true }) }
         eventually("Full page snapshot did not save") { savedFirst }
+        var savedAfterWeakClear = false
+        main {
+            val field = NoteStore::class.java.getDeclaredField("activeSavedRoot").apply { isAccessible = true }
+            val savedIdentity = field.get(store) as java.lang.ref.WeakReference<*>
+            check(savedIdentity.get() === note.snapshot())
+            savedIdentity.clear() // deterministic GC-equivalent loss of an optimization, never content
+            check(store.save(note.capture()) { _, error -> check(error == null); savedAfterWeakClear = true })
+            check(!savedAfterWeakClear && store.saveStates().single().inFlight)
+        }
+        eventually("Cleared saved identity did not complete a real queued write") { savedAfterWeakClear }
         close()
         check(store.inkReleaseCallbacks>callbacks) { "Missing actual compositor release callback on close" }
 
@@ -236,6 +246,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         check(File(directory,"$queuedId.ncp").readText(Charsets.UTF_8) == queuedBytes)
         check(!File(directory,"$pendingId.ncp").exists())
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

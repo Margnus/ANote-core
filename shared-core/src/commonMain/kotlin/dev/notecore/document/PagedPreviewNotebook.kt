@@ -55,6 +55,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun snapshot(): DocumentRoot = root()
     fun page(index: Int): PageDescriptor = root().page(index)
     fun authorityStatus(): DocumentAuthorityStatus { ownerCheck(); return memory.status() }
+    private fun clearProjection() { projection = emptyList(); projectionRevision = -1L; projectionPage = null }
     private fun visible(): List<StrokeObject> {
         val root = root()
         if (projectionRevision != root.revision || projectionPage != selected) {
@@ -124,7 +125,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         clearError(); return true
     }
     private fun commit(command: DocumentCommand): Boolean = when (val result = memory.commit(command)) {
-        is DocumentCommit.Accepted -> { cancelStroke(); clearError(); true }
+        is DocumentCommit.Accepted -> { clearProjection(); cancelStroke(); clearError(); true }
         is DocumentCommit.Rejected -> fail(when (result.reason) {
             DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
             DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
@@ -137,7 +138,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (root().findPage(id) == null) return fail("页面不存在", PreviewFailureKind.MISSING_PAGE)
         if (id == selected) { clearError(); return true }
         if (!prepareEdit()) return false
-        cancelStroke(); selected = id; clearError(); return true // Presentation-only; no root commit.
+        cancelStroke(); clearProjection(); selected = id; clearError(); return true // Presentation-only; no root commit.
     }
     fun insertPage(): Boolean {
         if (!prepareEdit()) return false
@@ -328,7 +329,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun retire(): Boolean {
         ownerCheck()
         if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试", PreviewFailureKind.PENDING_STROKE)
-        cancelStroke(); retired = true; return true
+        cancelStroke(); clearProjection(); retired = true; return true
     }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())

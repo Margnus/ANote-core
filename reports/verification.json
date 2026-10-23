@@ -2,7 +2,7 @@
   "phase": "C0/C1 reference prototype",
   "status": "passed",
   "jvm_contract_tests": {
-    "tests": 358,
+    "tests": 360,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -156,87 +156,92 @@
     {
       "suite": "dev.notecore.canvas.prototype.PreviewSaveLedgerTest",
       "tests": 12,
-      "time_seconds": 0.095
+      "time_seconds": 0.094
     },
     {
       "suite": "dev.notecore.document.CanonicalTitleTest",
       "tests": 4,
-      "time_seconds": 0.006
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.document.DocumentAuthorityTest",
       "tests": 18,
-      "time_seconds": 0.015
+      "time_seconds": 0.017
     },
     {
       "suite": "dev.notecore.document.DocumentHistoryTest",
       "tests": 14,
-      "time_seconds": 0.011
+      "time_seconds": 0.016
     },
     {
       "suite": "dev.notecore.document.DocumentOwnerThreadTest",
       "tests": 3,
-      "time_seconds": 0.009
+      "time_seconds": 0.011
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReaderTest",
       "tests": 13,
-      "time_seconds": 0.253
+      "time_seconds": 0.24
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReadTest",
       "tests": 3,
-      "time_seconds": 0.005
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PagedPreviewCodecTest",
       "tests": 16,
-      "time_seconds": 0.433
+      "time_seconds": 0.425
     },
     {
       "suite": "dev.notecore.document.PagedPreviewNotebookTest",
       "tests": 12,
-      "time_seconds": 0.012
+      "time_seconds": 0.013
     },
     {
       "suite": "dev.notecore.document.PagedSaveLedgerTest",
       "tests": 9,
-      "time_seconds": 0.006
+      "time_seconds": 0.007
     },
     {
       "suite": "dev.notecore.document.PreviewEditTest",
       "tests": 7,
-      "time_seconds": 0.006
+      "time_seconds": 0.009
     },
     {
       "suite": "dev.notecore.document.PreviewInputBudgetTest",
       "tests": 5,
-      "time_seconds": 0.003
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PreviewInputCapacityTest",
       "tests": 5,
-      "time_seconds": 0.003
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PreviewInputTest",
       "tests": 8,
-      "time_seconds": 0.011
+      "time_seconds": 0.013
+    },
+    {
+      "suite": "dev.notecore.document.PreviewProjectionRetentionTest",
+      "tests": 2,
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchExecutorTest",
       "tests": 5,
-      "time_seconds": 0.027
+      "time_seconds": 0.024
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchTest",
       "tests": 6,
-      "time_seconds": 0.005
+      "time_seconds": 0.008
     }
   ],
   "module_jvm_tests": {
     "canvas-core": 218,
-    "shared-core": 140
+    "shared-core": 142
   },
   "architecture": {
     "status": "passed",
@@ -307,7 +312,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "ca713881697da2a84f31d5ba6c7c4b95dfb8f3ba0d5a97b707a5052c69eb455f",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "236a051cc0f44f4e8d37af83ceba4ab3ff0b3541ba5619a2f928c2be13764d7a",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "95557b59eff4ca1cbd61dc865366dc36ba4f94e18dea97d559b0ec717f94dcb2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "f57acf7dbc99558cac238be1a0349e3677f4c32a0cc783e3ddb3418530c86c76",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "8c45823294d1fd3508b21ca114a74fc71accfe840c1b40d58254af4763eb5888",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "ddeeb8ff56eb5888d0c1c2ffd0def244581019c563f6bc4eff82faa99f0d025b",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f"
@@ -391,7 +396,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "ca713881697da2a84f31d5ba6c7c4b95dfb8f3ba0d5a97b707a5052c69eb455f",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "236a051cc0f44f4e8d37af83ceba4ab3ff0b3541ba5619a2f928c2be13764d7a",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "95557b59eff4ca1cbd61dc865366dc36ba4f94e18dea97d559b0ec717f94dcb2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "f57acf7dbc99558cac238be1a0349e3677f4c32a0cc783e3ddb3418530c86c76",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "8c45823294d1fd3508b21ca114a74fc71accfe840c1b40d58254af4763eb5888",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "ddeeb8ff56eb5888d0c1c2ffd0def244581019c563f6bc4eff82faa99f0d025b",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
@@ -411,6 +416,7 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewSaveDispatchTest.kt": "22c8f725f997d12d2dd74216bff2e13af8ed5213b3d68d928f08e2b13d4a6629",
     "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt": "f7eb1a0780a127267857972c5c410821d31628a1e6628a98e312870b64e135f7",
+    "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewProjectionRetentionTest.kt": "27bdb2432b5c78e5e157383ffa9bdbebebd03b6aa34dd36472a414907a2c01a4",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewSaveDispatchExecutorTest.kt": "485cfb07e087481386f744eafde677527c45d4988037881737ad7e796e663671",
     "fixtures/brush/brush-golden.json": "ad1aadfbb8c9c85736660a25f708196fb1b33c56b53c5171da1c046165d80679",
     "fixtures/brush/brush-manifest.json": "e8e79de0926a62d7b28f43bbb8c1d166f95f930e3285b0bc47deb5bd419aec17",
@@ -446,7 +452,7 @@
     "tools/verification_hash.py": "b171b83f09852624b62338cfef12f9f4b92e624fb264390825cec0327e147a37",
     "tools/verify_android_brush_common.py": "dec3778cb12e46b572f24e9e7e84ffc7d7379b26db078296c91fd7fe2aebf542",
     "tools/verify_android_input_host.py": "66d8c8c7c084813ba1dad3fbd4cf5f390ef3ec0ff8b236dd6a973b1b8baa9955",
-    "tools/verify_android_render_target.py": "6717d36e1e60fd86aff12bf20740de103cce8334de56cf5022eb1322dbcaa4bf",
+    "tools/verify_android_render_target.py": "609a809ce14a658fcdf178efcedd78ac54001deca64620749f2ab2e415a654df",
     "tools/verify_apple_brush_common.py": "b03e0c32bcf0a5722295b6fa95239642a9a107ae04cca63f18255a42f2bc0d73",
     "tools/verify_apple_executor.py": "d4d5e6e685734b575ebfe160f6ea77c7e90ed627111bb18e5716f2fd25d593c9",
     "tools/verify_apple_storage.py": "5dffedee7ea4cf5c9341eb3e5387052d1a64b0a61c43deb641cbf6e24f3e80cf",

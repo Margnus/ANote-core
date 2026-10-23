@@ -29,7 +29,8 @@ final class PreviewModel: ObservableObject {
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024,
         ownerCheck: { precondition(Thread.isMainThread) })
     private let storageWorkBytes: Int64 = 256 * 1024 * 1024
-    private var savedRoot: DocumentRoot?
+    // Identity-only saved shortcut; the authority/ledger own content while it is needed.
+    private weak var savedRoot: DocumentRoot?
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
