@@ -45,7 +45,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     fun importCopy(uri: Uri): DocumentRoot {
         val bytes = checkNotNull(resolver.openInputStream(uri)).use(::readBounded)
         val id = UUID.randomUUID().toString(); check(!file(id).exists())
-        val source = PagedPreviewCodec.decode(decode(bytes)); validateRenderable(source)
+        val source = readPreview(decode(bytes))
         return PagedPreviewCodec.copyAsNew(source, SceneId(id),
             source.pages().associate { it.id to PageId(UUID.randomUUID().toString()) },
             source.pages().associate { it.layerId to LayerId(UUID.randomUUID().toString()) },
@@ -88,15 +88,11 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
     fun read(id: String): DocumentRoot = AtomicFile(file(id)).openRead().use { stream ->
         require(stream.channel.size() <= 32L * 1024 * 1024)
-        PagedPreviewCodec.decode(decode(readBounded(stream))).also { require(it.id.value == id); validateRenderable(it) }
+        readPreview(decode(readBounded(stream))).also { require(it.id.value == id) }
     }
-    /** Preview renderer capability gate: unsupported content stays on disk without lossy conversion. */
-    private fun validateRenderable(root: DocumentRoot) {
-        for (stroke in root.scene.objects()) {
-            require(stroke.brush.kind == BrushKind.MONOLINE && stroke.brush.algorithmVersion == 1)
-            val m = stroke.transform
-            require(listOf(m.a, m.b, m.c, m.d, m.tx, m.ty).all { it.isFinite() && kotlin.math.abs(it) <= 1e12 })
-            for (i in 0 until stroke.samples.size) require(kotlin.math.abs(stroke.samples.x(i)) <= 1e12 && kotlin.math.abs(stroke.samples.y(i)) <= 1e12)
-        }
+    /** Typed shared reader owns format/content refusal; only local worker IO errors escape this adapter. */
+    private fun readPreview(text: String): DocumentRoot {
+        val result = PreviewDocumentReader.read(text)
+        return requireNotNull(result.root) { "Preview document refused: ${result.failure}" }
     }
 }

@@ -216,13 +216,14 @@ final class PreviewModel: ObservableObject {
         savedRoot = persisted && ledger.latest(documentId: root.id.value) == nil ? root : nil
         revision = root.revision
     }
+    private static func readPreview(_ encoded: String) throws -> DocumentRoot {
+        let read = PreviewDocumentReader.shared.read(text: encoded)
+        guard let root = read.root else { throw CocoaError(.fileReadCorruptFile) }
+        return root
+    }
     private static func validateRenderable(_ root: DocumentRoot) throws {
-        for stroke in root.scene.objects() {
-            let m = stroke.transform
-            guard stroke.brush.kind == .monoline, stroke.brush.algorithmVersion == 1,
-                  [m.a, m.b, m.c, m.d, m.tx, m.ty].allSatisfy({ $0.isFinite && abs($0) <= 1e12 })
-            else { throw CocoaError(.fileReadUnsupportedScheme) }
-        }
+        guard PreviewDocumentReader.shared.accept(root: root).failure == nil
+        else { throw CocoaError(.fileReadUnsupportedScheme) }
     }
     func create() {
         guard current == nil else { return }
@@ -270,7 +271,7 @@ final class PreviewModel: ObservableObject {
             if let captured = input.2 as? PagedPreviewSnapshot { root = captured.root }
             else {
                 guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
-                root = try PagedPreviewCodec.shared.decode(text: PreviewFileIO.readUTF8(input.0))
+                root = try Self.readPreview(PreviewFileIO.readUTF8(input.0))
             }
             guard root.id.value == input.1 else { throw CocoaError(.fileReadCorruptFile) }
             try Self.validateRenderable(root)
@@ -318,8 +319,7 @@ final class PreviewModel: ObservableObject {
         request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: 160 * 1024 * 1024, compute: { input in
             defer { if input.1 { input.0.stopAccessingSecurityScopedResource() } }
             let encoded = try PreviewFileIO.readUTF8(input.0)
-            let source = try PagedPreviewCodec.shared.decode(text: encoded)
-            try Self.validateRenderable(source)
+            let source = try Self.readPreview(encoded)
             let pages = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.id, PageId(value: UUID().uuidString)) })
             let layers = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.layerId, LayerId(value: UUID().uuidString)) })
             let objects = Dictionary(uniqueKeysWithValues: source.scene.objects().map { ($0.id, ObjectId(value: UUID().uuidString)) })
