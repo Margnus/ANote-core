@@ -6,6 +6,73 @@ import NoteCanvasPrototype
 
 // Actual app-host Kotlin/Native render -> existing Swift worker -> CGImage responsibility.
 final class BrushRenderHostTests: XCTestCase {
+    @MainActor func testRetiringOwnerKeepsUnknownUntilReadOnlyReleaseReconciliation() async throws {
+        var releaseCalls = 0
+        var fixture: (PreviewModel, InkUIView)? = try preview(release: { after in
+            releaseCalls += 1
+            if after { throw AppleBrushImageFailureExperiment.copy }
+        })
+        var model: PreviewModel? = fixture?.0
+        var view: InkUIView? = fixture?.1; fixture = nil
+        weak var observer = model
+        _ = viewImage(try XCTUnwrap(view))
+        try await eventually { (model?.inkFramePublications ?? 0) > 0 }
+        var finished = false
+        XCTAssertEqual(model?.beginOwnerRetirement { status in
+            XCTAssertEqual(status.renderBytes, 0); XCTAssertTrue(status.workerStopped); finished = true
+        }, .started)
+        view = nil; model = nil
+        let attempted = releaseCalls
+        XCTAssertGreaterThan(attempted, 0); XCTAssertFalse(finished); XCTAssertNotNil(observer)
+        var reconciled = false
+        try await eventually { reconciled = observer?.reconcileInkRelease() ?? false; return reconciled }
+        XCTAssertEqual(releaseCalls, attempted) // Reconciliation cannot repeat destructive cleanup.
+        try await eventually { finished && observer == nil }
+    }
+    @MainActor func testRetiringOwnerSurvivesExternalProviderUntilRealReleaseAndWorkerStop() async throws {
+        var fixture: (PreviewModel, InkUIView)? = try preview()
+        var model: PreviewModel? = fixture?.0
+        var view: InkUIView? = fixture?.1; fixture = nil
+        weak var observer = model
+        _ = viewImage(try XCTUnwrap(view))
+        try await eventually { (model?.inkFramePublications ?? 0) > 0 }
+        var heldProvider: CGDataProvider?
+        try model?.retainInkSourceForTesting { heldProvider = $0 }
+        XCTAssertNotNil(heldProvider)
+        var finished = false
+        XCTAssertEqual(model?.beginOwnerRetirement { status in
+            XCTAssertEqual(status.phase, .retired); XCTAssertTrue(status.workerStopped)
+            XCTAssertEqual(status.renderBytes, 0); finished = true
+        }, .started)
+        NativeInkCanvas.dismantleUIView(try XCTUnwrap(view), coordinator: ())
+        view = nil; model = nil
+        XCTAssertNotNil(observer); XCTAssertFalse(finished)
+        XCTAssertGreaterThan(observer?.ownerRetirementStatus.renderBytes ?? 0, 0)
+        heldProvider = nil // The real CG provider callback must settle the original permit.
+        try await eventually { finished && observer == nil }
+    }
+    @MainActor func testRetiringOwnerAcknowledgesLateWorkerAndFinishesQueuedSaveBeforeRelease() async throws {
+        let started = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+        defer { release.signal() }
+        var fixture: (PreviewModel, InkUIView)? = try preview(before: {
+            started.signal()
+            guard release.wait(timeout: .now()+8) == .success else { throw AppleBrushImageFailureExperiment.copy }
+        })
+        var model: PreviewModel? = fixture?.0
+        var view: InkUIView? = fixture?.1; fixture = nil
+        weak var observer = model
+        _ = viewImage(try XCTUnwrap(view))
+        try await eventually { started.wait(timeout: .now()) == .success }
+        var finished = false
+        XCTAssertEqual(model?.beginOwnerRetirement { status in
+            XCTAssertTrue(status.workerStopped); XCTAssertEqual(status.pendingWrites, 0)
+            XCTAssertEqual(status.renderBytes, 0); finished = true
+        }, .started)
+        view = nil; model = nil
+        XCTAssertNotNil(observer); XCTAssertFalse(finished)
+        release.signal()
+        try await eventually { finished && observer == nil }
+    }
     @MainActor private func preview(before: @escaping () throws -> Void = {},
         release: @escaping (Bool) throws -> Void = { _ in }
     ) throws -> (PreviewModel, InkUIView) {

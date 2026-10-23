@@ -3,81 +3,81 @@
     "closed_drained": true,
     "copies": [
       {
-        "elapsed_ns": 1024333,
+        "elapsed_ns": 1096291,
         "row_storage_upper_bytes": 16384
       },
       {
-        "elapsed_ns": 964416,
+        "elapsed_ns": 1061209,
         "row_storage_upper_bytes": 16384
       }
     ],
     "events": [
       {
         "charged": 24576,
-        "elapsed_ns": 45617167,
+        "elapsed_ns": 60425250,
         "event": "first-held",
         "executor": 0,
         "retired": 0
       },
       {
         "charged": 24576,
-        "elapsed_ns": 45630375,
+        "elapsed_ns": 60448333,
         "event": "scroll-old-retired",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 47901625,
+        "elapsed_ns": 62718708,
         "event": "two-jobs-rejected-third",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 47910459,
+        "elapsed_ns": 62726250,
         "event": "queued-cancelled",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 84606834,
+        "elapsed_ns": 107028083,
         "event": "ready-before-ack",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 24576,
-        "elapsed_ns": 84710125,
+        "elapsed_ns": 107132916,
         "event": "late-and-cancelled-ack",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 49152,
-        "elapsed_ns": 130190625,
+        "elapsed_ns": 167870125,
         "event": "zoom-image-held",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 49152,
-        "elapsed_ns": 141295834,
+        "elapsed_ns": 180024708,
         "event": "closed-two-readers",
         "executor": 0,
         "retired": 49152
       },
       {
         "charged": 24576,
-        "elapsed_ns": 141351959,
+        "elapsed_ns": 180104750,
         "event": "new-reader-released",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 0,
-        "elapsed_ns": 141361667,
+        "elapsed_ns": 180117375,
         "event": "old-reader-released",
         "executor": 0,
         "retired": 0
@@ -87,28 +87,28 @@
     "max_jobs": 2,
     "queue_wait_ns": [
       {
-        "queue_handoff_wait_lower_ns": 6458,
-        "queue_handoff_wait_upper_ns": 60916,
-        "request_to_worker_ns": 60916,
-        "submit_elapsed_ns": 54458
+        "queue_handoff_wait_lower_ns": 4500,
+        "queue_handoff_wait_upper_ns": 55500,
+        "request_to_worker_ns": 55500,
+        "submit_elapsed_ns": 51000
       },
       {
-        "queue_handoff_wait_lower_ns": 9708,
-        "queue_handoff_wait_upper_ns": 49042,
-        "request_to_worker_ns": 49042,
-        "submit_elapsed_ns": 39334
+        "queue_handoff_wait_lower_ns": 12833,
+        "queue_handoff_wait_upper_ns": 65625,
+        "request_to_worker_ns": 65625,
+        "submit_elapsed_ns": 52792
       },
       {
-        "queue_handoff_wait_lower_ns": 36164417,
-        "queue_handoff_wait_upper_ns": 36224042,
-        "request_to_worker_ns": 36224042,
-        "submit_elapsed_ns": 59625
+        "queue_handoff_wait_lower_ns": 42864750,
+        "queue_handoff_wait_upper_ns": 42914792,
+        "request_to_worker_ns": 42914792,
+        "submit_elapsed_ns": 50042
       },
       {
-        "queue_handoff_wait_lower_ns": 6833,
-        "queue_handoff_wait_upper_ns": 55458,
-        "request_to_worker_ns": 55458,
-        "submit_elapsed_ns": 48625
+        "queue_handoff_wait_lower_ns": 22250,
+        "queue_handoff_wait_upper_ns": 82416,
+        "request_to_worker_ns": 82416,
+        "submit_elapsed_ns": 60166
       }
     ],
     "resident_budget": 32768,
@@ -141,7 +141,7 @@
     "udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
     "state": "Booted"
   },
-  "test_count": 38,
+  "test_count": 45,
   "checks": [
     "testActualAndroidFileImportsFreshIdsAndExportsAllPages()",
     "testAuthorityConstructionFailureIsRecoverableInSwift()",
@@ -158,6 +158,7 @@
     "testFailedSaveRetainsRootAcrossCloseAndRepair()",
     "testFixedScrollZoomQueueAndHeldReaderTrace()",
     "testForeignThreadCannotReleaseHolderAndThrowingReceiveRedelivers()",
+    "testFullSaveLedgerRejectsRetirementUntilRetainedWritesAreExplicitlyRetried()",
     "testInvalidTerminalValuesRejectWholeUnfinishedStrokeAndRecover()",
     "testLateImportCannotReplaceNewActiveOwner()",
     "testLateOpenCannotReplaceNewActiveOwner()",
@@ -167,6 +168,9 @@
     "testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()",
     "testNilAndEmptyCoalescedFallbackKeepsEqualTimestampPoints()",
     "testOldImageRejectsDrawAndInsufficientCopyBudgetKeepsPermitFree()",
+    "testOwnerRetirementRefusesActiveInputAndOutstandingExportWithoutCancellingThem()",
+    "testOwnerRetirementRetainsFailedWritesUntilExplicitRepairAndRetry()",
+    "testOwnerRetirementWritesAcceptedRootThenStopsAndReleasesOwner()",
     "testPagedSaveCloseAndNewOwnerReadAllPages()",
     "testPendingExportKeepsFirstCapturedContentUntilConsumerClearsIt()",
     "testPreviewPageViewportAndSizeChangeUseCompleteFallbackBeforeNewFrame()",
@@ -176,6 +180,9 @@
     "testPreviewViewDisappearsWhileRenderRunsAndModelAcknowledgesAfterClose()",
     "testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner()",
     "testProviderUnknownReconciliationRequiresRealReleaseReceipt()",
+    "testRetiringOwnerAcknowledgesLateWorkerAndFinishesQueuedSaveBeforeRelease()",
+    "testRetiringOwnerKeepsUnknownUntilReadOnlyReleaseReconciliation()",
+    "testRetiringOwnerSurvivesExternalProviderUntilRealReleaseAndWorkerStop()",
     "testSavedIdentitySkipsUnchangedIOButChangedFailureRemainsRetryable()",
     "testSharedBrushContoursMatchAnalyticCoverageOffscreen()",
     "testSwiftWorkerRendersActualPixelsAndCloseKeepsNativeBudget()",
@@ -196,7 +203,7 @@
         },
         "expectedFailures": 0,
         "failedTests": 0,
-        "passedTests": 38,
+        "passedTests": 45,
         "skippedTests": 0,
         "testPlanConfiguration": {
           "configurationId": "1",
@@ -207,31 +214,25 @@
     "environmentDescription": "NoteCorePreview · Built with macOS 27.0.1",
     "expectedFailures": 0,
     "failedTests": 0,
-    "finishTime": 1792755980.715,
-    "passedTests": 38,
+    "finishTime": 1792757360.437,
+    "passedTests": 45,
     "result": "Passed",
-    "runtimeWarnings": [
-      {
-        "issueType": "Runtime Warning",
-        "message": "Thread running at User-interactive quality-of-service class waiting on a lower QoS thread running at Default quality-of-service class. Investigate ways to avoid priority inversions",
-        "sourceURL": "file:///Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift"
-      }
-    ],
+    "runtimeWarnings": [],
     "skippedTests": 0,
-    "startTime": 1792755961.518,
+    "startTime": 1792757351.113,
     "statistics": [],
     "testFailures": [],
     "title": "Test - NoteCorePreview",
     "topInsights": [
       {
         "category": "Longest Test Runs",
-        "impact": "14% of duration",
-        "text": "1 longest test run with outlier durations exceeding 0.21s (three standard deviations)"
+        "impact": "8% of duration",
+        "text": "1 longest test run with outlier durations exceeding 0.17s (three standard deviations)"
       }
     ],
-    "totalTestCount": 38
+    "totalTestCount": 45
   },
-  "xcresult": "ios-app/build/host-tests/run-0770b233888a40f4b646c93f8a19c6be.xcresult",
+  "xcresult": "ios-app/build/host-tests/run-ab133885e0924f2c9db80b4b54fa9f2a.xcresult",
   "source_and_framework_sha256": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "canvas-core/build.gradle.kts": "ac4f2148968181b43b165d52d086f7f48e120ff85289e2e544bf3ec974694709",
@@ -265,12 +266,12 @@
     "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
     "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85",
     "ios-app/NoteCorePreview/NativeInkCanvas.swift": "257c58bdd0b47e1bcbf724e0733735185258a87d4838e9c1bc05b94fc198cada",
-    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "126a3a54d3ca9ac2905fc13415c235e6f9894818f6dd8eb2f04aa8c2c9d5c199",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "f36188263087d5eaa8f62707b993edd024df9b6aaa59b5088664887257d0ca75",
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "608a6c20717864d15bf043d808522a18c9562498ad3879a1615d7197eed70c03",
     "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "69a65c3ea689a769df1da634c8280a58919359278b06f4a36bf3e5f207cd028b",
     "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
-    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "6ff8a8fc17d4c6d48db92736c4b74d3f297c705a0783b955471938978f3998f2",
-    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "2c1b27e5f54881581749ebf05cd084eb8dc8dabe3381825d01853a92be3957c3",
+    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "cf750fe9573d0532e54dffcd4edb77c326ce1c447fd70f56e50834124dfcacd9",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "628dd3d78ce40bfbba8ed0f203e125d59d5ceb4660d3cc1be8dcfb696570f9ce",
     "settings.gradle.kts": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
     "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "9a4af325fee0220a4c18b3ba03e6776c0021ee82d2ddf50df3da6ba389460483",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
@@ -288,7 +289,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "ddeeb8ff56eb5888d0c1c2ffd0def244581019c563f6bc4eff82faa99f0d025b",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "d0d7cf73ee3699118c8eb59e95ff2b2e4381bb8e67b48fc9b582fc962775f94f",
     "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
-    "tools/verify_ios_host.py": "64c8052184d71fce5fa9801d5545ed61725ca65e64086c9852b764857840058e"
+    "tools/verify_ios_host.py": "4981d65797ee0e562d87c395c00349a1a5079fba61dd35533cc0d50f6c480cd8"
   },
   "framework_verified_build_inputs": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
@@ -337,8 +338,8 @@
   },
   "test_build_sha256": {
     "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "f9463d48b5c8ba03745f37297902f426a4fb0fcb077482a295629ba91d811724",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "31b3882baf03a48b67dac66f35425935729920d999c1c7653eff3155448e0ffb"
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "928801da076fe27f83556c8eb214054b0ce91f8ddf25876847b180ff4a6c88c2",
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "621f608ea23b6160943c53a546729d6c287c1912967f873f5b481a20ec767d26"
   },
   "android_fixture_sha256": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
   "android_fixture_provenance": {
@@ -356,7 +357,9 @@
   "native_offscreen_render_pixels_verified": true,
   "shared_brush_contour_offscreen_verified": true,
   "app_host_swift_executor_kotlin_native_render_verified": true,
-  "brush_render_host_test_count": 15,
+  "brush_render_host_test_count": 18,
+  "explicit_owner_retirement_test_count": 7,
+  "explicit_owner_retirement_scope": "Original Model self-retains through accepted IO and real provider/worker drain, then stops its original worker and relinquishes that retention. Refuses active/pending input and outstanding transfers; failed writes require explicit retry. No abrupt process/owner-thread loss or cross-thread owner transfer proof.",
   "synthetic_uikit_input_callback_test_count": 4,
   "swift_authority_constructor_failure_recoverable": true,
   "typed_edit_model_failure_and_file_reopen_verified": true,
@@ -375,10 +378,10 @@
   "synthetic_input_scope": "Direct original InkUIView callbacks with synthetic UITouch/UIEvent subclasses; not OS delivery, real Pencil or physical latency evidence.",
   "provider_release_receipt_test_count": 3,
   "provider_source_release_owner_verified": true,
-  "preview_model_view_lifecycle_test_count": 5,
+  "preview_model_view_lifecycle_test_count": 8,
   "preview_model_shared_executor_and_cpu_view_verified": true,
   "brush_native_unique_reader_and_ack_budget_verified": true,
-  "brush_scope": "Unfrozen Apple iosMain shim + existing Swift worker executes common segmented renderer/mask/RGBA; CGImage held through close/UNKNOWN. PreviewModel injects its existing storage executor; real InkUIView CPU target, fallback, detach/close ACK and UNKNOWN responsibility are verified by five host tests. Ordinary package UI requires its separate report. UIKit model uses an immutable CGDataProvider source and actual releaseData receipt; three tests retain the real provider, release on a foreign thread and require owner settlement, including UNKNOWN. CPU holder bitmap gate remains. Source-byte responsibility, not physical heap/GPU reclamation.",
+  "brush_scope": "Unfrozen Apple iosMain shim + existing Swift worker executes common segmented renderer/mask/RGBA; CGImage held through close/UNKNOWN. PreviewModel injects its existing storage executor; eight model/view lifecycle tests cover real InkUIView CPU delivery, fallback, close ACK, UNKNOWN and explicit owner retirement through provider/late-worker settlement. Ordinary package UI requires its separate report. Three provider tests retain the real source, release on a foreign thread and require owner settlement. CPU holder bitmap gate remains. Source-byte responsibility, not physical heap/GPU reclamation.",
   "brush_fixture_execution_scope": "JVM-generated common contour output consumed by real iOS CoreGraphics; not Kotlin/Native runtime generation, AA edge equivalence or app integration",
   "desktop_ui_interaction_verified": false,
   "real_touch_input_verified": false,

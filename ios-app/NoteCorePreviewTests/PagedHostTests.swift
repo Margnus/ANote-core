@@ -5,6 +5,100 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testFullSaveLedgerRejectsRetirementUntilRetainedWritesAreExplicitlyRetried() async throws {
+        let dir = directory(); try Data("blocked".utf8).write(to: dir)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir)
+        var accepted: [String: String] = [:]
+        for _ in 0..<8 {
+            model.create(); let note = try XCTUnwrap(model.current)
+            accepted[note.documentId] = try note.capture().encode()
+            model.close(); XCTAssertNil(model.current)
+        }
+        model.create(); let blocked = try XCTUnwrap(model.current)
+        accepted[blocked.documentId] = try blocked.capture().encode()
+        XCTAssertEqual(model.beginOwnerRetirement(), .saveRejected)
+        XCTAssertTrue(model.current === blocked); XCTAssertEqual(model.ownerRetirementStatus.phase, .active)
+        XCTAssertEqual(model.ownerRetirementStatus.pendingWrites, 8)
+        try await eventually("all accepted failed snapshots remain retryable") { model.ownerRetirementStatus.retryRequired == 8 }
+        try FileManager.default.removeItem(at: dir)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        XCTAssertTrue(model.retryRetainedWrites())
+        try await eventually("explicit retry frees old document slots") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertTrue(model.current === blocked)
+        var finished = false
+        XCTAssertEqual(model.beginOwnerRetirement { state in
+            XCTAssertTrue(state.workerStopped); XCTAssertEqual(state.pendingWrites, 0); finished = true
+        }, .started)
+        try await eventually("ninth document saves before owner retirement") { finished }
+        for (id, expected) in accepted {
+            XCTAssertEqual(try String(contentsOf: dir.appendingPathComponent(id + ".ncp"), encoding: .utf8), expected)
+        }
+    }
+    @MainActor func testOwnerRetirementWritesAcceptedRootThenStopsAndReleasesOwner() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        var model: PreviewModel? = PreviewModel(directory: dir)
+        model?.create()
+        let note = try XCTUnwrap(model?.current); draw(note); model?.changed()
+        let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+        weak var observer = model
+        var finished = false
+        XCTAssertEqual(model?.beginOwnerRetirement { status in
+            XCTAssertEqual(status.phase, .retired); XCTAssertTrue(status.workerStopped)
+            XCTAssertEqual(status.pendingWrites, 0); XCTAssertEqual(status.renderBytes, 0)
+            finished = true
+        }, .started)
+        XCTAssertNil(model?.current)
+        model?.create(); model?.open(note.documentId); model?.prepareExport()
+        XCTAssertNil(model?.current); XCTAssertFalse(model?.transferBusy ?? true)
+        XCTAssertEqual(model?.beginOwnerRetirement(), .alreadyRetiring)
+        model = nil
+        try await eventually("owner retirement completed") { finished && observer == nil }
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), expected)
+    }
+    @MainActor func testOwnerRetirementRetainsFailedWritesUntilExplicitRepairAndRetry() async throws {
+        let dir = directory(); try Data("blocked".utf8).write(to: dir)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var model: PreviewModel? = PreviewModel(directory: dir); model?.create()
+        let note = try XCTUnwrap(model?.current); draw(note); model?.changed()
+        let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+        weak var observer = model
+        var finished = false
+        XCTAssertEqual(model?.beginOwnerRetirement { status in
+            XCTAssertTrue(status.workerStopped); XCTAssertEqual(status.pendingWrites, 0); finished = true
+        }, .started)
+        model = nil
+        try await eventually("failed retirement still holds original write") { observer?.ownerRetirementStatus.retryRequired == 1 }
+        XCTAssertFalse(finished); XCTAssertNotNil(observer)
+        XCTAssertEqual(observer?.ownerRetirementStatus.phase, .retiring)
+        XCTAssertFalse(observer?.ownerRetirementStatus.workerStopped ?? true)
+        try FileManager.default.removeItem(at: dir)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        XCTAssertEqual(observer?.retryRetainedWrites(), true)
+        try await eventually("repair releases the original owner") { finished && observer == nil }
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), expected)
+    }
+    @MainActor func testOwnerRetirementRefusesActiveInputAndOutstandingExportWithoutCancellingThem() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current)
+        XCTAssertTrue(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
+        XCTAssertEqual(model.beginOwnerRetirement(), .inputPending)
+        XCTAssertTrue(note.hasActiveStroke); XCTAssertEqual(model.ownerRetirementStatus.phase, .active)
+        note.cancelStroke() // Explicit caller cancellation, not a side effect of retirement refusal.
+        model.prepareExport()
+        XCTAssertEqual(model.beginOwnerRetirement(), .transferPending)
+        try await eventually("export is held by original consumer") { !model.transferBusy && model.exportDocument != nil }
+        let bytes = model.exportDocument?.data
+        XCTAssertEqual(model.beginOwnerRetirement(), .transferPending)
+        XCTAssertEqual(model.exportDocument?.data, bytes)
+        model.exportDocument = nil
+        var finished = false
+        XCTAssertEqual(model.beginOwnerRetirement { _ in finished = true }, .started)
+        try await eventually("idle terminal owner stops") { finished }
+        XCTAssertEqual(model.beginOwnerRetirement(), .retired)
+        XCTAssertFalse(model.retryRetainedWrites())
+    }
     @MainActor func testSavedIdentitySkipsUnchangedIOButChangedFailureRemainsRetryable() async throws {
         let dir = directory(), moved = directory()
         defer { try? FileManager.default.removeItem(at: dir); try? FileManager.default.removeItem(at: moved) }

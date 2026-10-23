@@ -14,11 +14,20 @@ struct PreviewBackup: FileDocument {
 }
 
 struct LocalNote: Identifiable { let id: String; let title: String; let date: Date }
+enum PreviewOwnerRetirementRequest { case started, alreadyRetiring, retired, inputPending, transferPending, saveRejected }
+enum PreviewOwnerPhase { case active, retiring, retired }
+struct PreviewOwnerRetirementStatus {
+    let phase: PreviewOwnerPhase
+    let pendingWrites: Int
+    let retryRequired: Int
+    let renderBytes: Int64
+    let workerStopped: Bool
+}
 
 final class PreviewModel: ObservableObject {
     @Published var notes: [LocalNote] = []
     @Published var catalogError = false
-    @Published var current: PagedPreviewNotebook?
+    @Published private(set) var current: PagedPreviewNotebook?
     @Published var status = ""
     @Published var revision: Int64 = 0
     @Published var exportDocument: PreviewBackup?
@@ -34,7 +43,57 @@ final class PreviewModel: ObservableObject {
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
-        onOwnerProgress: { [weak self] in self?.inkOwnerProgress(); self?.pumpWrites() })
+        onOwnerProgress: { [weak self] in self?.inkOwnerProgress(); self?.pumpWrites(); self?.advanceOwnerRetirement() })
+    private var ownerRetiring = false
+    private var ownerRetired = false
+    private var ownerStopRequested = false
+    // The original owner retains responsibility, not a replacement owner or queue.
+    private var retirementKeepAlive: PreviewModel?
+    private var retirementObserver: ((PreviewOwnerRetirementStatus) -> Void)?
+    var ownerRetirementStatus: PreviewOwnerRetirementStatus {
+        precondition(Thread.isMainThread)
+        let saves = ledger.states()
+        return PreviewOwnerRetirementStatus(phase: ownerRetired ? .retired : ownerRetiring ? .retiring : .active,
+            pendingWrites: saves.count, retryRequired: saves.filter { $0.retryRequired }.count,
+            renderBytes: inkChargedBytes, workerStopped: (try! executor.status()).workerStopped)
+    }
+    @discardableResult func beginOwnerRetirement(
+        onRetired: ((PreviewOwnerRetirementStatus) -> Void)? = nil
+    ) -> PreviewOwnerRetirementRequest {
+        precondition(Thread.isMainThread)
+        if ownerRetired { return .retired }
+        if ownerRetiring { return .alreadyRetiring }
+        if current?.hasActiveStroke == true || current?.hasPendingStroke == true { return .inputPending }
+        if transferBusy || exportDocument != nil { return .transferPending }
+        guard save() else { return .saveRejected }
+        // No more document/transfer admission; accepted IO still uses the same worker and ledger.
+        ownerRetiring = true; retirementKeepAlive = self; retirementObserver = onRetired
+        precondition(current?.retire() ?? true)
+        navigationEpoch += 1; current = nil; savedRoot = nil
+        retireInk(); inkView = nil
+        advanceOwnerRetirement()
+        return .started
+    }
+    @discardableResult func retryRetainedWrites() -> Bool {
+        precondition(Thread.isMainThread)
+        guard !ownerRetired && !ownerStopRequested else { return false }
+        for entry in ledger.states() where entry.retryRequired {
+            guard ledger.offer(snapshot: entry.snapshot) == .accepted else { return false }
+        }
+        pumpWrites(); advanceOwnerRetirement(); return true
+    }
+    private func advanceOwnerRetirement() {
+        precondition(Thread.isMainThread)
+        guard ownerRetiring && !ownerRetired else { return }
+        let worker = try! executor.status()
+        guard ledger.states().isEmpty, inkRenderer == nil, inkImage == nil, worker.entries.isEmpty else { return }
+        if !ownerStopRequested { ownerStopRequested = true; try! executor.stopAccepting() }
+        guard (try! executor.status()).isDrained else { return }
+        ownerRetired = true
+        let observer = retirementObserver; retirementObserver = nil
+        observer?(ownerRetirementStatus)
+        retirementKeepAlive = nil
+    }
     private struct InkFrameKey: Equatable {
         let document: String
         let page: String
@@ -97,6 +156,7 @@ final class PreviewModel: ObservableObject {
         NSLog("NOTECORE_RENDER source-released charged=%lld", inkChargedBytes)
         #endif
         inkOwnerProgress()
+        advanceOwnerRetirement()
     }
     func detachInk(surface: UUID) {
         precondition(Thread.isMainThread)
@@ -126,7 +186,7 @@ final class PreviewModel: ObservableObject {
     @discardableResult func reconcileInkRelease() -> Bool {
         precondition(Thread.isMainThread)
         guard let image = inkImage, (try! image.reconcileReleased()) else { return false }
-        inkImage = nil; inkOwnerProgress(); return true
+        inkImage = nil; inkOwnerProgress(); advanceOwnerRetirement(); return true
     }
 
     /// Only the callback-tracked provider holder is eligible for UIKit presentation.
@@ -229,7 +289,7 @@ final class PreviewModel: ObservableObject {
         else { throw CocoaError(.fileReadUnsupportedScheme) }
     }
     func create() {
-        guard current == nil else { return }
+        guard !ownerRetiring, current == nil else { return }
         navigationEpoch += 1
         let nonce = UUID().uuidString
         let root = DocumentRoot.companion.empty(id: SceneId(value: UUID().uuidString), title: "未命名笔记",
@@ -244,6 +304,7 @@ final class PreviewModel: ObservableObject {
         return (disk.filter { !ids.contains($0.id) } + retained).sorted { $0.date > $1.date }
     }
     func refresh() {
+        guard !ownerRetiring else { return }
         request(input: directory, bytes: 2 * 1024 * 1024, compute: { root in
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
             return try PreviewFileIO.catalog(root).map { url -> LocalNote in
@@ -264,7 +325,7 @@ final class PreviewModel: ObservableObject {
         }
     }
     func open(_ id: String) {
-        guard current == nil else { return }
+        guard !ownerRetiring, current == nil else { return }
         navigationEpoch += 1
         let navigation = navigationEpoch, epoch = storageEpoch
         let retained = ledger.latest(documentId: id)
@@ -297,7 +358,7 @@ final class PreviewModel: ObservableObject {
     }
     func changed() { revision = current?.changeVersion ?? 0; save() }
     func prepareExport() {
-        guard !transferBusy, exportDocument == nil, let note = current else { return }
+        guard !ownerRetiring, !transferBusy, exportDocument == nil, let note = current else { return }
         note.cancelStroke()
         guard note.retryPendingStroke() else { status = note.lastError; return }
         transferBusy = true; status = "正在准备备份…"
@@ -315,7 +376,7 @@ final class PreviewModel: ObservableObject {
         }
     }
     func importCopy(_ url: URL) {
-        guard !transferBusy else { return }
+        guard !ownerRetiring, !transferBusy else { return }
         transferBusy = true; status = "正在校验并导入…"
         let scoped = url.startAccessingSecurityScopedResource()
         let id = UUID().uuidString, navigation = navigationEpoch
@@ -455,7 +516,7 @@ struct PreviewRoot: View {
                         Button("返回") { model.close() }
                         Spacer()
                         Button(note.title) { note.cancelStroke(); title = note.title; renaming = true }.font(.headline).lineLimit(1)
-                        Spacer(); Button("保存") { model.save() }
+                        Spacer(); Button("保存") { model.retryRetainedWrites(); model.save() }
                         Button("导出") { model.prepareExport() }.disabled(model.transferBusy)
                     }.padding(.horizontal)
                     HStack {
