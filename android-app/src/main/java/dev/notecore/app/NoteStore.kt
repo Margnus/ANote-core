@@ -255,7 +255,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                     val ids = if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
                         dispatch.documentId?.let(::listOf).orEmpty() else ledger.states()
                             .filter { !it.inFlight && !it.retryRequired }.map { it.snapshot.documentId }
-                    for (id in ids) saveCallbacks[id]?.let { receiver ->
+                    // Terminal notification relinquishes only the advisory UI receiver; ledger keeps content.
+                    for (id in ids) saveCallbacks.remove(id)?.let { receiver ->
                         notifyUi { receiver.receive(receiver.version, if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
                             saveTaskTooLarge else "保存后端暂不可用，更改仍保留，请重试") }
                     }
@@ -280,8 +281,11 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 check(ledger.returnUnstarted(attempt))
                 // Already admitted snapshot stays pending; a completing job wakes and pumps it later.
                 if (admission.reason == WorkAdmissionFailure.WORKER_TERMINATED || admission.reason == WorkAdmissionFailure.STOPPED) {
-                    notifyUi { saveCallbacks[attempt.snapshot.documentId]?.receive?.invoke(attempt.snapshot.version,
-                        "保存后端暂不可用，更改仍保留，请重试") }
+                    val id = attempt.snapshot.documentId
+                    saveCallbacks[id]?.takeIf { it.version == attempt.snapshot.version }?.let { receiver ->
+                        saveCallbacks.remove(id)
+                        notifyUi { receiver.receive(receiver.version, "保存后端暂不可用，更改仍保留，请重试") }
+                    }
                 }
                 return
             }
