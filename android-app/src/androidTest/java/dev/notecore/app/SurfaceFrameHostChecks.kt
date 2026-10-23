@@ -36,6 +36,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
     }
     private fun setup(before: () -> Unit = {}, afterRelease: () -> Unit = {},
         afterSubmit: () -> Unit = {}, maySettleRelease: () -> Boolean = { true }) {
+        val firstFrame = CountDownLatch(1)
         main {
             directory = File(host.cacheDir,"surface-host-${java.util.UUID.randomUUID()}")
             store = NoteStore.isolated(host,directory,before,afterRelease,afterSubmit,maySettleRelease)
@@ -46,8 +47,12 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
             }
             view = InkCanvasView(host,note,{}, { error(it) })
             host.setContentView(InkSurfaceHost(view,store))
+            view.viewTreeObserver.registerFrameCommitCallback { firstFrame.countDown() }
         }
         test.waitForIdleSync()
+        // Idle main queue does not prove a newly installed hierarchy submitted its fallback.
+        // Frame commit is only a fixture prerequisite, never the source-release proof.
+        check(firstFrame.await(5,TimeUnit.SECONDS)) { "New fixture did not submit its initial ViewRoot frame" }
     }
     private fun point(): Pair<Int,Int> {
         var result = 0 to 0
@@ -261,6 +266,46 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         close()
 
+        // Keep the actual surface alive but cancel ViewRoot draw. Removing the hierarchy
+        // would release the buffer itself and mask the queued-removal defect.
+        var allowQueuedSettlement = false
+        setup(maySettleRelease = { allowQueuedSettlement })
+        eventually("Queued-removal fixture did not reach original ViewRoot handoff") { store.inkFramePublications > 0 && store.inkFrameDraws > 0 }
+        check(kotlin.math.abs(Color.blue(screenPixel())-191)<=4)
+        val noDraw = android.view.ViewTreeObserver.OnPreDrawListener { false }
+        var queuedSaved = false
+        var queuedRemovalPublications = 0
+        var queuedRemovalBytes = ""; var queuedRemovalDocument = ""
+        try {
+            main {
+                host.window.decorView.viewTreeObserver.addOnPreDrawListener(noDraw)
+                queuedRemovalPublications = store.inkFramePublications
+                queuedRemovalDocument = note.documentId; queuedRemovalBytes = note.capture().encode()
+                store.detachInk(view)
+                val image = checkNotNull(NoteStore::class.java.getDeclaredField("inkImage").apply { isAccessible = true }.get(store))
+                check(image.javaClass.getDeclaredField("removalQueuedOnDraw").apply { isAccessible = true }.getBoolean(image))
+                view.renderStore = null
+                (NoteStore::class.java.getDeclaredField("inkView").apply { isAccessible = true }.get(store)
+                    as java.lang.ref.WeakReference<*>).clear()
+                check(store.save(note.capture()) { _, error -> check(error == null); queuedSaved = true })
+            }
+            eventually("Queued removal did not release without any later ViewRoot draw") {
+                queuedSaved && store.inkReleaseDeferred && store.inkReleaseCallbacks > 0
+            }
+            main {
+                check(store.inkChargedBytes > 0 && store.inkOwnerRetained && store.inkValidFenceObserved)
+                check(store.inkFramePublications == queuedRemovalPublications)
+                allowQueuedSettlement = true
+            }
+            eventually("Superseded removal did not settle original resources") { !store.inkOwnerRetained && store.inkChargedBytes == 0L }
+            check(File(directory,"$queuedRemovalDocument.ncp").readText(Charsets.UTF_8) == queuedRemovalBytes)
+        } finally {
+            main { host.window.decorView.viewTreeObserver.removeOnPreDrawListener(noDraw) }
+        }
+        main { view.renderStore = store; view.invalidate() }
+        eventually("Original store did not recover after queued-removal endpoint loss") { store.inkFramePublications > queuedRemovalPublications }
+        close()
+
         val lostStarted = CountDownLatch(1); val lostRelease = CountDownLatch(1)
         setup(before = { lostStarted.countDown(); check(lostRelease.await(8, TimeUnit.SECONDS)) })
         check(lostStarted.await(5, TimeUnit.SECONDS))
@@ -456,6 +501,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Read-only reconciliation did not finish owner retirement") {
             reconciledRetirement && store.ownerRetirementStatus().workerStopped && store.inkChargedBytes == 0L
         }
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"queued_draw_removal_lost_endpoint_without_draw\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

@@ -73,6 +73,7 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
         private var submitted = false
         private var closing = false
         private var removalRequested = false
+        private var removalQueuedOnDraw = false
         private var handoffUnknown = false
         private var cleanupUnknown = false
         private var nativeHandlesClosed = false
@@ -206,23 +207,30 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
             renderer.executorStatus()
             if (released) return
             closing = true
-            if (submitted && !removalRequested) {
+            // Supersede a known queued removal once if its draw endpoint disappears.
+            // Ambiguous native calls must remain quarantined, without destructive retries.
+            val supersedeQueued = !requestOnDraw && removalQueuedOnDraw && !handoffUnknown && !cleanupUnknown
+            if (submitted && (!removalRequested || supersedeQueued)) {
                 removalRequested = true
+                removalQueuedOnDraw = false
                 val target = child
                 if (target != null && target.isValid) {
                     try {
                         SurfaceControl.Transaction().use { transaction ->
                             transaction.setBuffer(target,null).setVisibility(target,false)
-                            if (!requestOnDraw || root?.applyTransactionOnDraw(transaction) != true) transaction.apply()
+                            if (requestOnDraw && root?.applyTransactionOnDraw(transaction) == true) removalQueuedOnDraw = true
+                            else transaction.apply()
                         }
                     } catch (_: Throwable) { handoffUnknown = true }
                 }
             }
-            root = null; child = null // Pending native transactions own their handles; do not retain old ViewRoot.
+            root = null // Never retain the old ViewRoot, even while its removal waits for draw.
+            if (!removalQueuedOnDraw) child = null
             poll()
         }
         private fun finish() {
             if (!gpuReleased || handoffUnknown || cleanupUnknown) return
+            child = null; removalQueuedOnDraw = false
             try {
                 buffer?.close(); buffer = null
                 acquired?.close(); acquired = null

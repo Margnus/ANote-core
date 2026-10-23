@@ -184,7 +184,10 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         val renderer = inkRenderer ?: return
         // A lost presentation endpoint must retire on this same owner, including late worker results.
         // Keep the old pool/image charged until their original receipts drain; never create a replacement here.
-        if (!inkRetiring && inkView.get() == null) retireInk(lostEndpoint = true)
+        if (inkView.get() == null) {
+            if (!inkRetiring) retireInk(lostEndpoint = true)
+            else inkImage?.closeWithoutView() // Upgrade a prior known on-draw removal on this same image.
+        }
         renderer.settleAfterDrain { request, ack ->
             if (request === inkPending) {
                 inkPending = null
