@@ -242,9 +242,15 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                 ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
             val nextObject = nextIdentity("ink", nextOperation.second)
                 ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
-            val liveCapacity = memory.additionalStrokeSampleCapacity(ObjectId(nextObject.first), current.findPage(selected)!!.layerId)
-            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, liveCapacity))
-            if (count > pointCapacity) return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+            val capacity = memory.strokeInputCapacity(ObjectId(nextObject.first), selected)
+            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, capacity.points))
+            if (count > pointCapacity) {
+                if (count > capacity.points && capacity.limitingReason != DocumentRejection.LIVE_BYTE_CAPACITY) {
+                    fail("当前预览编辑容量不足，本批未接收，请先保存或导出现有内容", PreviewFailureKind.DOCUMENT_REJECTED, capacity.limitingReason)
+                    return inputResult(PreviewInputDisposition.REJECTED, 0, InputRejection.CAPACITY)
+                }
+                return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+            }
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
             objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
             page = selected; session = InputReplaySession(pointCapacity); sequence = 0

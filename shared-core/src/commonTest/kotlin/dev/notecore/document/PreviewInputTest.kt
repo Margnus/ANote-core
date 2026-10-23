@@ -59,11 +59,11 @@ class PreviewInputTest {
         assertEquals(count, n.pointCount(0)); assertEquals(count.toDouble(), n.pointX(0, count - 1))
     }
     @Test fun terminalAcceptedButPendingIsNotARejectedBatchOrAReasonToResend() {
-        val n = note(DocumentBudget(journalEntries = 1)); assertTrue(n.rename("filled"))
+        val fault = PendingInputOwnerFault(); val n = fault.note; assertTrue(n.rename("filled"))
         assertTrue(offer(n, PointerPhase.DOWN, 1, 2).admitted)
-        val result = offer(n, PointerPhase.UP, 3, 4)
-        assertEquals(PreviewInputDisposition.PENDING_COMMIT, result.disposition); assertTrue(result.admitted); assertEquals(2, result.acceptedSamples)
-        assertEquals(DocumentRejection.JOURNAL_CAPACITY, result.failure?.documentReason); assertEquals(0, n.totalStrokeCount)
+        fault.arm()
+        assertFailsWith<IllegalStateException> { offer(n, PointerPhase.UP, 3, 4) }
+        assertEquals(0, n.totalStrokeCount)
         val pending = n.pendingStroke(); val samples = (pending!!.command as CanvasCommand.AddStroke).samples
         assertEquals(4, samples.size)
         assertEquals(samples.logicalByteCharge, n.inputReservedByteCharge)
@@ -94,4 +94,27 @@ class PreviewInputTest {
         allowed = false; assertFailsWith<IllegalStateException> { offer(n, PointerPhase.DOWN, 1) }
         allowed = true; assertSame(before, n.snapshot()); assertTrue(offer(n, PointerPhase.DOWN, 1).admitted)
     }
+}
+
+
+/** No production hook: a trusted owner checker fails only after completion has installed pending. */
+internal class PendingInputOwnerFault(
+    root: DocumentRoot = DocumentRoot.empty(SceneId("fault"), "fault", PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0)),
+    nonce: String = "fault-session", budget: DocumentBudget = DocumentBudget(),
+) {
+    private var armed = false
+    private var probing = false
+    val note: PagedPreviewNotebook
+    init {
+        var current: PagedPreviewNotebook? = null
+        note = PagedPreviewNotebook(root, nonce, budget) {
+            if (armed && !probing) {
+                probing = true
+                val pending = try { current?.hasPendingStroke == true } finally { probing = false }
+                if (pending) { armed = false; error("Synthetic unavailable commit owner") }
+            }
+        }
+        current = note
+    }
+    fun arm() { armed = true }
 }

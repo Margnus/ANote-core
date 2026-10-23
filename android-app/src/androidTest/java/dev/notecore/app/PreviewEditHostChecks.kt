@@ -31,13 +31,13 @@ internal object PreviewEditHostChecks {
         check(rejected.failure?.documentReason == DocumentRejection.PAGE_CAPACITY && bounded.hasActiveStroke)
         check(bounded.endStroke(3.0, 4.0, .6f, 2))
         val pending = note(DocumentBudget(journalEntries = 1)); check(pending.edit(PreviewEdit.Rename("filled")).accepted)
-        check(pending.beginStroke(1.0, 2.0, .5f, 1) && !pending.endStroke(3.0, 4.0, .6f, 2))
-        val command = pending.pendingStroke(); check(pending.edit(PreviewEdit.DeletePage).failure?.kind == PreviewFailureKind.PENDING_STROKE)
-        check(pending.pendingStroke() === command && !pending.retire())
+        check(!pending.beginStroke(1.0, 2.0, .5f, 1))
+        check(pending.lastFailure?.documentReason == DocumentRejection.JOURNAL_CAPACITY)
+        check(!pending.hasPendingStroke && pending.retire())
         check(n.retire())
         check(n.edit(PreviewEdit.SelectPage("")).failure?.kind == PreviewFailureKind.CLOSED)
         return JSONObject().put("checks", JSONArray(listOf("invalid_parameters_keep_active_samples", "typed_history_and_original_root_edits",
-            "capacity_refusal_keeps_active_input", "pending_and_closed_failures_are_explicit")))
+            "capacity_refusal_keeps_active_input", "admission_and_closed_failures_are_explicit")))
             .put("synthetic_memory_only", true).toString()
     }
 }

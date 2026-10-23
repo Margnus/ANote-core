@@ -12,7 +12,7 @@ BUNDLE = 'dev.notecore.preview'
 CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equal_time_and_undo',
           'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root',
           'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery',
-          'live_byte_refusal_and_undo_recovery', 'input_byte_budget_refusal_cancel_and_recovery', 'history_capacity_keeps_pending_without_publishing_root'}
+          'live_byte_refusal_and_undo_recovery', 'input_byte_budget_refusal_cancel_and_recovery', 'history_capacity_refuses_down_without_owning_samples', 'journal_identity_capacity_refuses_before_real_view_ownership'}
 
 
 def digest(path):

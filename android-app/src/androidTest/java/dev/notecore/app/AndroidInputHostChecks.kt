@@ -121,14 +121,26 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             val p = Sample(400f, 300f, 1000)
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
-            check(f.note.hasPendingStroke && f.note.totalStrokeCount == 0 && f.errors.size == 1)
+            check(!f.note.hasPendingStroke && !f.note.hasActiveStroke && f.note.totalStrokeCount == 0 && f.errors.size == 1)
             check(f.note.lastFailure?.documentReason == DocumentRejection.HISTORY_CAPACITY)
-            val pending = f.note.pendingStroke()
             check(f.note.snapshot() === before && f.note.authorityStatus() == status)
-            check(!f.note.retryPendingStroke()); f.note.cancelStroke()
-            check(f.note.pendingStroke() === pending && f.note.inputReservedByteCharge == 184L)
-            check(!f.note.retire())
-            checks.add("history_capacity_keeps_pending_without_publishing_root")
+            check(f.note.inputReservedByteCharge == 0L && f.note.retire())
+            checks.add("history_capacity_refuses_down_without_owning_samples")
+        }
+        run {
+            val baselineIdentity = fixture(preparePaper = false).note.authorityStatus().identityByteCharge
+            for ((budget, preparePaper, reason) in listOf(
+                Triple(DocumentBudget(journalEntries = 1), true, DocumentRejection.JOURNAL_CAPACITY),
+                Triple(DocumentBudget(identityBytes = baselineIdentity), false, DocumentRejection.IDENTITY_CAPACITY))) {
+                val f = fixture(budget, preparePaper); val before = f.note.snapshot(); val status = f.note.authorityStatus()
+                val p = Sample(400f, 300f, 1000)
+                send(f.view, MotionEvent.ACTION_DOWN, listOf(p)); send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+                check(f.note.lastFailure?.documentReason == reason && f.errors.size == 1)
+                check(f.note.snapshot() === before && f.note.authorityStatus() == status)
+                check(!f.note.hasPendingStroke && !f.note.hasActiveStroke && f.note.inputReservedByteCharge == 0L)
+                check(f.note.retire())
+            }
+            checks.add("journal_identity_capacity_refuses_before_real_view_ownership")
         }
         var oldFloatError: Double; var canonicalError: Double
         run {

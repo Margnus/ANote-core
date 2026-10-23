@@ -213,7 +213,7 @@ final class PreviewModel: ObservableObject {
         precondition(Thread.isMainThread && current == nil)
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
-            historyEntries: 128, historyBytes: 8 * 1024 * 1024)
+            historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
         current = try PagedPreviewNotebook(initial: root, sessionNonce: UUID().uuidString, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
         savedRoot = persisted && ledger.latest(documentId: root.id.value) == nil ? root : nil

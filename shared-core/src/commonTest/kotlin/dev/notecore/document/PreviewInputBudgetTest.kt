@@ -52,15 +52,15 @@ class PreviewInputBudgetTest {
         n.cancelStroke(); assertTrue(n.retire())
         assertFalse(offer(n, PointerPhase.DOWN, 301).admitted)
     }
-    @Test fun pendingAcceptedInkKeepsChargeAfterJournalFailureAndCancellation() {
-        val n = note(InputReplaySession.reservationBytes(2), 1)
+    @Test fun pendingAcceptedInkKeepsChargeAfterOwnerFailureAndCancellation() {
+        val fault = PendingInputOwnerFault(budget = DocumentBudget(inputBytes = InputReplaySession.reservationBytes(2))); val n = fault.note
         assertTrue(n.rename("filled"))
         assertTrue(offer(n, PointerPhase.DOWN, 1).admitted)
-        assertEquals(PreviewInputDisposition.PENDING_COMMIT, offer(n, PointerPhase.UP, 2).disposition)
+        fault.arm(); assertFailsWith<IllegalStateException> { offer(n, PointerPhase.UP, 2) }
         val pending = n.pendingStroke()
         assertEquals(184L, n.inputReservedByteCharge)
         n.cancelStroke(); assertSame(pending, n.pendingStroke()); assertEquals(184L, n.inputReservedByteCharge)
-        assertFalse(n.retryPendingStroke()); assertFalse(n.retire())
+        fault.arm(); assertFailsWith<IllegalStateException> { n.retryPendingStroke() }; assertFalse(n.retire())
         assertFalse(offer(n, PointerPhase.DOWN, 3).admitted)
         assertSame(pending, n.pendingStroke())
     }
