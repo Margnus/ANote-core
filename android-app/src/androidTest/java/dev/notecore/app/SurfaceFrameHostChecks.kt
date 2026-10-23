@@ -223,6 +223,57 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Fresh NoteStore did not reopen saved complete document") { reopened }
         main { store.releaseActive(note); store.stopTestBackend() }
 
+        var allowLostViewSettlement = false
+        setup(maySettleRelease = { allowLostViewSettlement })
+        eventually("Lost-view fixture did not publish an actual source") { store.inkFramePublications > 0 }
+        val lostViewPublications = store.inkFramePublications
+        var savedAfterViewLoss = false
+        var lostViewGeneration = 0L
+        val generationField = NoteStore::class.java.getDeclaredField("inkGeneration").apply { isAccessible = true }
+        main {
+            lostViewGeneration = generationField.getLong(store)
+            view.renderStore = null // endpoint no longer consumes renderer draws; prevent synthetic rebind
+            val weakView = NoteStore::class.java.getDeclaredField("inkView").apply { isAccessible = true }
+                .get(store) as java.lang.ref.WeakReference<*>
+            weakView.clear() // deterministic missing endpoint, no explicit detach/retire call
+            check(store.save(note.capture()) { _, failure -> check(failure == null); savedAfterViewLoss = true })
+        }
+        eventually("Endpoint loss did not retire on original owner progress") {
+            val retiring = NoteStore::class.java.getDeclaredField("inkRetiring").apply { isAccessible = true }.getBoolean(store)
+            savedAfterViewLoss && retiring && store.inkReleaseDeferred
+        }
+        var lostViewHeld = 0L
+        main { lostViewHeld = store.inkChargedBytes; check(lostViewHeld > 0 && store.inkOwnerRetained) }
+        main { view.renderStore = store; view.invalidate() } // retry cannot bypass the old retiring pool
+        test.waitForIdleSync()
+        main {
+            check(generationField.getLong(store) == lostViewGeneration)
+            check(store.inkFramePublications == lostViewPublications && store.inkChargedBytes == lostViewHeld)
+            allowLostViewSettlement = true
+        }
+        eventually("Missing-view old pool did not drain before replacement frame") {
+            store.inkFramePublications > lostViewPublications && generationField.getLong(store) > lostViewGeneration
+        }
+        close()
+
+        val lostStarted = CountDownLatch(1); val lostRelease = CountDownLatch(1)
+        setup(before = { lostStarted.countDown(); check(lostRelease.await(8, TimeUnit.SECONDS)) })
+        check(lostStarted.await(5, TimeUnit.SECONDS))
+        var savedAfterLateLoss = false
+        main {
+            view.renderStore = null
+            (NoteStore::class.java.getDeclaredField("inkView").apply { isAccessible = true }.get(store)
+                as java.lang.ref.WeakReference<*>).clear()
+            check(store.save(note.capture()) { _, failure -> check(failure == null); savedAfterLateLoss = true })
+        }
+        lostRelease.countDown()
+        eventually("Late worker output after endpoint loss was not retired/ACKed") {
+            savedAfterLateLoss && !store.inkOwnerRetained && store.inkChargedBytes == 0L
+        }
+        main { check(store.inkFramePublications == 0); view.renderStore = store; view.invalidate() }
+        eventually("Owner did not recover after late lost-endpoint result drained") { store.inkFramePublications > 0 }
+        close()
+
         val started = CountDownLatch(1); val release = CountDownLatch(1)
         setup(before = { started.countDown(); check(release.await(8,TimeUnit.SECONDS)) })
         check(started.await(5,TimeUnit.SECONDS))
@@ -323,6 +374,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         check(File(directory,"$queuedId.ncp").readText(Charsets.UTF_8) == queuedBytes)
         check(!File(directory,"$pendingId.ncp").exists())
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

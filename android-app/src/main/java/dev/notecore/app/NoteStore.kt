@@ -123,6 +123,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun pumpInk() {
         executor.checkOutsideDrain()
         val renderer = inkRenderer ?: return
+        // A lost presentation endpoint must retire on this same owner, including late worker results.
+        // Keep the old pool/image charged until their original receipts drain; never create a replacement here.
+        if (!inkRetiring && inkView.get() == null) retireInk(lostEndpoint = true)
         renderer.settleAfterDrain { request, ack ->
             if (request === inkPending) {
                 inkPending = null
@@ -206,10 +209,10 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         executor.checkOwnerThread()
         if (inkView.get() === view) retireInk()
     }
-    private fun retireInk() {
+    private fun retireInk(lostEndpoint: Boolean = false) {
         executor.checkOwnerThread()
         inkShown = false; inkKey = null; inkPending = null
-        inkImage?.let { it.close(); if (it.released) inkImage = null }
+        inkImage?.let { if (lostEndpoint) it.closeWithoutView() else it.close(); if (it.released) inkImage = null }
         inkRenderer?.let { it.close(); inkRetiring = true }
         inkView.get()?.invalidate()
         requestPump()

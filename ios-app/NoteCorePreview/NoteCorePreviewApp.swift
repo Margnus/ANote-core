@@ -67,6 +67,9 @@ final class PreviewModel: ObservableObject {
     /// Called only on the model owner after the shared executor's finite drain has returned.
     private func inkOwnerProgress() {
         guard let renderer = inkRenderer else { return }
+        // The model owner is still alive; retire a vanished presentation endpoint before settling late output.
+        // This does not transfer a pool or acknowledge a missing native release.
+        if !inkRetiring && inkView == nil { retireInk() }
         _ = try! renderer.settleAfterDrain { [self] item, ack in
             guard item === inkPending else { return }
             inkPending = nil
