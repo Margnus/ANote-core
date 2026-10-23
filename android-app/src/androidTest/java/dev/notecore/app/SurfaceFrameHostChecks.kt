@@ -131,6 +131,61 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
             check(!savedAfterWeakClear && store.saveStates().single().inFlight)
         }
         eventually("Cleared saved identity did not complete a real queued write") { savedAfterWeakClear }
+        var exported = false
+        lateinit var pickerStore: NoteStore
+        val exportFile = java.io.File(directory, "picker-output.ncp")
+        main {
+            val snapshot = note.capture()
+            val tooSmall = NoteStore.isolated(host, java.io.File(directory, "small-picker"),
+                exportPickerByteLimit = snapshot.retainedByteCharge - 1)
+            check(tooSmall.beginExportPicker(snapshot).disposition == ExportPickerDisposition.CAPACITY)
+            check(tooSmall.exportReservedByteCharge == 0L); tooSmall.stopTestBackend()
+            pickerStore = NoteStore.isolated(host, java.io.File(directory, "exact-picker"),
+                exportPickerByteLimit = snapshot.retainedByteCharge)
+            val first = pickerStore.beginExportPicker(snapshot)
+            check(first.disposition == ExportPickerDisposition.READY && first.requestCode == 1000)
+            val later = PagedPreviewNotebook(snapshot.root, "later-export").apply { check(rename("later")) }.capture()
+            check(pickerStore.beginExportPicker(later).disposition == ExportPickerDisposition.BUSY)
+            check(pickerStore.exportReservedByteCharge == snapshot.retainedByteCharge)
+            check(pickerStore.takeExportPicker(1001) == null)
+            check(pickerStore.takeExportPicker(1000) === snapshot)
+            check(pickerStore.takeExportPicker(1000) == null && pickerStore.exportReservedByteCharge == 0L)
+            check(pickerStore.beginExportPicker(snapshot).requestCode == 1001)
+            check(pickerStore.takeExportPicker(1000) == null && pickerStore.exportReservedByteCharge > 0)
+            // Exercise the original Activity's saved-state/cancellation callbacks with isolated Store content.
+            val storeField = host.javaClass.getDeclaredField("store").apply { isAccessible = true }
+            val codeField = host.javaClass.getDeclaredField("exportRequestCode").apply { isAccessible = true }
+            val sessionField = host.javaClass.getDeclaredField("exportPickerSession").apply { isAccessible = true }
+            val previousStore = storeField.get(host); val previousCode = codeField.get(host); val previousSession = sessionField.get(host)
+            try {
+                storeField.set(host, pickerStore); codeField.set(host, 1001); sessionField.set(host, pickerStore.exportPickerSession)
+                val savedState = android.os.Bundle()
+                host.javaClass.getDeclaredMethod("onSaveInstanceState", android.os.Bundle::class.java).apply { isAccessible = true }.invoke(host, savedState)
+                check(savedState.getInt("exportRequest") == 1001 && savedState.getString("exportSession") == pickerStore.exportPickerSession)
+                val callback = host.javaClass.getDeclaredMethod("onActivityResult", Int::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType, android.content.Intent::class.java).apply { isAccessible = true }
+                callback.invoke(host, 1000, Activity.RESULT_CANCELED, null)
+                check(codeField.get(host) == 1001 && pickerStore.exportReservedByteCharge == snapshot.retainedByteCharge)
+                callback.invoke(host, 1001, Activity.RESULT_CANCELED, null)
+                check(codeField.get(host) == null && pickerStore.exportReservedByteCharge == 0L)
+                callback.invoke(host, 1001, Activity.RESULT_CANCELED, null) // duplicate is harmless
+            } finally {
+                storeField.set(host, previousStore); codeField.set(host, previousCode); sessionField.set(host, previousSession)
+            }
+            check(pickerStore.beginExportPicker(snapshot).requestCode == 1002)
+            val captured = checkNotNull(pickerStore.takeExportPicker(1002))
+            pickerStore.export(android.net.Uri.fromFile(exportFile), captured) { failure ->
+                check(failure == null); exported = true
+            }
+            val sequence = NoteStore::class.java.getDeclaredField("nextExportRequestCode").apply { isAccessible = true }
+            sequence.setInt(pickerStore, 65536)
+            check(pickerStore.beginExportPicker(snapshot).disposition == ExportPickerDisposition.IDENTITY_EXHAUSTED)
+            check(pickerStore.exportReservedByteCharge == 0L)
+        }
+        eventually("Export capture did not transfer to actual IO") { exported }
+        check(exportFile.readText(Charsets.UTF_8) == encoded)
+        check(dev.notecore.document.PagedPreviewCodec.decode(exportFile.readText(Charsets.UTF_8)).scene.objectCount == 3)
+        main { pickerStore.stopTestBackend() }
         close()
         check(store.inkReleaseCallbacks>callbacks) { "Missing actual compositor release callback on close" }
 
@@ -246,6 +301,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         check(File(directory,"$queuedId.ncp").readText(Charsets.UTF_8) == queuedBytes)
         check(!File(directory,"$pendingId.ncp").exists())
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

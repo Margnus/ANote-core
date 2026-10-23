@@ -1,0 +1,73 @@
+{
+  "schema": "export-picker-ownership-1",
+  "date": "2026-10-23",
+  "base_core": "426bd07",
+  "status": "passed-original-android-store-activity-callback-io-system-picker-pending",
+  "decision": "Adopt original Store single bounded capture with non-reused request code and Activity saved Store identity. Keep accepted snapshot until matching cancellation/result then original bounded worker IO. No new queue or authority.",
+  "retained_capture_limit": 8388608,
+  "request_code_range": [
+    1000,
+    65535
+  ],
+  "request_codes_reused_in_store_lifetime": false,
+  "shared_jvm_tests": {
+    "tests": 360,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "original_host_observations": {
+    "app_hierarchy_pixels": true,
+    "active_static_alpha": true,
+    "page_zoom": true,
+    "resize": true,
+    "pending_complete_fallback": true,
+    "actual_release_callback": true,
+    "valid_release_fence_observed": true,
+    "late_view_ack": true,
+    "shared_storage_after_close": true,
+    "saved_new_owner_reopen": true,
+    "weak_saved_identity_rewrites_after_clear": true,
+    "export_picker_single_capture_budget_identity_and_io": true,
+    "export_activity_state_and_stale_cancel": true,
+    "unknown_retained_bytes": 22937600,
+    "unknown_readonly_reconciled": true,
+    "ambiguous_handoff_recovered": true,
+    "deferred_completion_keeps_charge": true,
+    "storage_during_deferred_release": true,
+    "new_frame_after_handoff_recovery": true,
+    "handoff_unknown_retained_bytes": 22937600,
+    "stopped_backend_keeps_accepted_write": true,
+    "stopped_backend_rejects_only_pending": true,
+    "long_unsignaled_gpu_fence_tested": false
+  },
+  "original_file_count": 1,
+  "all_original_files_unchanged": true,
+  "actual_activity_saved_bundle_and_cancel_callback_verified": true,
+  "full_activity_recreation_verified": false,
+  "process_death_verified": false,
+  "ordinary_system_picker_ui_verified": false,
+  "current_apple_build_verified": false,
+  "whole_chain_or_physical_heap_closed": false,
+  "c1_gate_complete": false,
+  "remaining": [
+    "real system picker success/cancel/unavailable and complete Activity recreation",
+    "process death has no memory capture recovery",
+    "initial IDs, transient batch copies and cross-budget overlap",
+    "current Apple rebuild and ordinary UI/target devices"
+  ],
+  "source_and_artifact_sha256": {
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "f62abfc4d06e8a2308b8ea0e4c4fc348af39695dedf80c67abfd6c32fa8b2346",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "fd469b2807e7880599f81dbb2f836c99163ff1b886efd37524f06d8115d726cb",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "ecfa2bf8f28945b293dce7b5178505f72ade72d2e6a1d35c578bbe116bb8aead",
+    "android-app/src/main/res/values/strings.xml": "6265b23c4b4503805d2749a509b28a2fe8b219a16460ee58362f7e1c50ce68db",
+    "android-app/src/androidTest/java/dev/notecore/app/SurfaceFrameHostChecks.kt": "7f59c172bafceb2b1f5ad1d9f3eb030756e8fec50ed7710a88601ceddfa68c98",
+    "tools/verify_android_render_target.py": "1660d949ea1052da42f2ff51c1de6413746e655e923e365ca7b7b71430f50897",
+    "docs/保存派发与预算契约.md": "ce936274a78f870f75ec765758b2da954c5a28f4f87f9d07c755cf8f2b04f854",
+    "reports/verification.json": "6340fee2b88125294958aa62fe1e407c48fdabf1155441fc51a64172457decf4",
+    "reports/preview-build.json": "44800eb078a4b8fc3c3590307493c51b5b98606b624f804d739f82a7812afa93",
+    "reports/android-render-integration.json": "798329087f9c390936618b8bf7d32f017f804625b877d8b1316d651afb434f67",
+    "build/dev036g-target-host.log": "22745f1e1a5aee9fd2151b1314ac3880641946e9c7158f762b1d7dda5d885100",
+    "build/dev036g-files-before.json": "196b7d0f86852e465a7a67a069cdf27cf6a08c9c9efd51556638a6faee971998"
+  }
+}

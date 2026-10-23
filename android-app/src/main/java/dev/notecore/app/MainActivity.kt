@@ -17,6 +17,8 @@ import dev.notecore.document.*
 class MainActivity : Activity() {
     private lateinit var root: LinearLayout
     private lateinit var store: NoteStore
+    private var exportRequestCode: Int? = null
+    private var exportPickerSession: String? = null
     private var notebook: PagedPreviewNotebook? = null
     private var canvas: InkCanvasView? = null
     private var status: TextView? = null
@@ -48,6 +50,8 @@ class MainActivity : Activity() {
                 if (notebook != null) leaveEditor() else finish()
             }
         }
+        exportRequestCode = savedInstanceState?.getInt("exportRequest", -1)?.takeIf { it in 1000..65535 }
+        exportPickerSession = savedInstanceState?.getString("exportSession")
         val id = savedInstanceState?.getString("document") ?: store.activeDocumentId
         if (id == null) library() else open(id)
     }
@@ -211,23 +215,41 @@ class MainActivity : Activity() {
     }
     private fun exportBackup() {
         val note = notebook ?: return
+        if (exportRequestCode != null) { showError(getString(R.string.export_picker_busy)); return }
         canvas?.cancelInk()
         if (!note.retryPendingStroke()) { showError(note.lastError); return }
-        store.exportSnapshot = note.capture()
+        val admission = store.beginExportPicker(note.capture())
+        val code = admission.requestCode
+        if (code == null) {
+            showError(getString(when (admission.disposition) {
+                ExportPickerDisposition.BUSY -> R.string.export_picker_busy
+                ExportPickerDisposition.IDENTITY_EXHAUSTED -> R.string.export_picker_identity_exhausted
+                else -> R.string.export_picker_capacity
+            }))
+            return
+        }
+        exportRequestCode = code; exportPickerSession = store.exportPickerSession
         try {
             startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE); type = "application/octet-stream"
                 putExtra(Intent.EXTRA_TITLE, "NoteCore-${note.documentId}.ncp")
-            }, 101)
+            }, code)
         } catch (_: android.content.ActivityNotFoundException) {
-            store.exportSnapshot = null; showError("系统文件选择器不可用")
+            store.takeExportPicker(code); exportRequestCode = null; exportPickerSession = null
+            showError("系统文件选择器不可用")
+        } catch (_: SecurityException) {
+            store.takeExportPicker(code); exportRequestCode = null; exportPickerSession = null
+            showError("系统文件选择器不可用")
         }
     }
     @Deprecated("Framework result callback keeps the preview dependency-free")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 101) {
-            val snapshot = store.exportSnapshot; store.exportSnapshot = null
+        if (requestCode in 1000..65535) {
+            if (requestCode != exportRequestCode) return
+            val session = exportPickerSession
+            exportRequestCode = null; exportPickerSession = null
+            val snapshot = if (session == store.exportPickerSession) store.takeExportPicker(requestCode) else null
             if (resultCode != RESULT_OK) return
             val uri = data?.data ?: return showError("未获取导出位置，请重试")
             if (snapshot == null) { showError("会话已重建，请重新导出"); return }
@@ -251,5 +273,7 @@ class MainActivity : Activity() {
     @Deprecated("Preview uses a single activity")
     override fun onBackPressed() { if (notebook != null) leaveEditor() else super.onBackPressed() }
     override fun onPause() { canvas?.let { store.detachInk(it) }; canvas?.cancelInk(); save(); super.onPause() }
-    override fun onSaveInstanceState(outState: Bundle) { notebook?.let { outState.putString("document", it.documentId) }; super.onSaveInstanceState(outState) }
+    override fun onSaveInstanceState(outState: Bundle) {
+        exportRequestCode?.let { outState.putInt("exportRequest", it); outState.putString("exportSession", exportPickerSession) }
+        notebook?.let { outState.putString("document", it.documentId) }; super.onSaveInstanceState(outState) }
 }

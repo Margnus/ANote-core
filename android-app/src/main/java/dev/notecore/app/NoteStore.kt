@@ -12,6 +12,9 @@ import java.util.UUID
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
+internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED }
+internal data class ExportPickerAdmission(val disposition: ExportPickerDisposition, val requestCode: Int? = null)
+
 data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean)
 
 data class NoteSummary(val id: String, val title: String, val modified: Long)
@@ -20,7 +23,8 @@ data class NoteSummary(val id: String, val title: String, val modified: Long)
 @OptIn(ExperimentalAndroidInkFrame::class)
 class NoteStore private constructor(context: Context, private val directory: File = File(context.filesDir, "preview-notes"),
     private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {},
-    private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true }) {
+    private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
+    private val exportPickerByteLimit: Long = 8L * 1024 * 1024) {
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
@@ -58,10 +62,29 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal fun releaseActive(note: PagedPreviewNotebook) {
         executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedRoot.clear()
     }
-    var exportSnapshot: PagedPreviewSnapshot? = null
-        get() { executor.checkOwnerThread(); return field }
-        set(value) { executor.checkOwnerThread(); field = value }
-    init { executor.checkOwnerThread() }
+    // One app-owner capture while the external picker runs. No timeout/Activity destruction release.
+    internal val exportPickerSession = UUID.randomUUID().toString()
+    private var nextExportRequestCode = 1000
+    private var pendingExport: Pair<Int, PagedPreviewSnapshot>? = null
+    internal val exportReservedByteCharge: Long get() {
+        executor.checkOwnerThread(); return pendingExport?.second?.retainedByteCharge ?: 0L
+    }
+    internal fun beginExportPicker(snapshot: PagedPreviewSnapshot): ExportPickerAdmission {
+        executor.checkOwnerThread()
+        if (pendingExport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
+        if (snapshot.retainedByteCharge > exportPickerByteLimit) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
+        if (nextExportRequestCode > 65535) return ExportPickerAdmission(ExportPickerDisposition.IDENTITY_EXHAUSTED)
+        val code = nextExportRequestCode++
+        pendingExport = code to snapshot
+        return ExportPickerAdmission(ExportPickerDisposition.READY, code)
+    }
+    /** Mismatched/duplicate results cannot release or substitute another accepted capture. */
+    internal fun takeExportPicker(requestCode: Int): PagedPreviewSnapshot? {
+        executor.checkOwnerThread()
+        val capture = pendingExport?.takeIf { it.first == requestCode } ?: return null
+        pendingExport = null; return capture.second
+    }
+    init { executor.checkOwnerThread(); require(exportPickerByteLimit >= 0) }
     private fun requestPump() {
         if (!wakePending.compareAndSet(false, true)) return
         if (!main.post {
@@ -321,7 +344,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
-            maySettleInkRelease: () -> Boolean = { true }): NoteStore =
-            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease)
+            maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024): NoteStore =
+            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit)
     }
 }
