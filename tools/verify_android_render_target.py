@@ -62,6 +62,8 @@ def main():
         'terminal_save_notification_drops_receiver_retains_content'))
     assert observed['unknown_retained_bytes'] > 0 and observed['handoff_unknown_retained_bytes'] > 0
     assert observed['long_unsignaled_gpu_fence_tested'] is False
+    assert all(observed[key] for key in ('retiring_owner_waits_native_receipts',
+        'retiring_owner_acks_late_work_and_save', 'retiring_owner_unknown_readonly_reconciled'))
 
     def integer(key):
         return int(re.search(r'\b'+key+r'=(\d+)', output).group(1))

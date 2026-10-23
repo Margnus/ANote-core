@@ -28,7 +28,11 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
             main { done = condition() }
             if (!done) SystemClock.sleep(20)
         }
-        check(done) { message }
+        var state = ""
+        if (!done) main {
+            state = "status=${store.ownerRetirementStatus()} publications=${store.inkFramePublications} draws=${store.inkFrameDraws} callbacks=${store.inkReleaseCallbacks} deferred=${store.inkReleaseDeferred}"
+        }
+        check(done) { "$message; $state" }
     }
     private fun setup(before: () -> Unit = {}, afterRelease: () -> Unit = {},
         afterSubmit: () -> Unit = {}, maySettleRelease: () -> Boolean = { true }) {
@@ -225,7 +229,8 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
 
         var allowLostViewSettlement = false
         setup(maySettleRelease = { allowLostViewSettlement })
-        eventually("Lost-view fixture did not publish an actual source") { store.inkFramePublications > 0 }
+        eventually("Lost-view fixture did not reach original ViewRoot handoff") { store.inkFramePublications > 0 && store.inkFrameDraws > 0 }
+        check(kotlin.math.abs(Color.blue(screenPixel())-191)<=4)
         val lostViewPublications = store.inkFramePublications
         var savedAfterViewLoss = false
         var lostViewGeneration = 0L
@@ -337,7 +342,8 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
 
         var releaseCalls = 0
         setup(afterRelease = { releaseCalls++; error("injected post-recycle confirmation loss") })
-        eventually("Unknown cleanup fixture did not present") { store.inkFramePublications>0 }
+        eventually("Unknown cleanup fixture did not reach original ViewRoot handoff") { store.inkFramePublications>0 && store.inkFrameDraws>0 }
+        check(kotlin.math.abs(Color.blue(screenPixel())-191)<=4)
         main { store.detachInk(view); store.releaseActive(note); host.setContentView(View(host)) }
         eventually("No release callback for unknown cleanup fixture") { store.inkReleaseCallbacks>0 && releaseCalls>0 }
         var held = 0L
@@ -384,6 +390,72 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         check(File(directory,"$queuedId.ncp").readText(Charsets.UTF_8) == queuedBytes)
         check(!File(directory,"$pendingId.ncp").exists())
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        var allowOwnerSettlement = false
+        setup(maySettleRelease = { allowOwnerSettlement })
+        eventually("Retirement fixture did not reach original ViewRoot handoff") { store.inkFramePublications > 0 && store.inkFrameDraws > 0 }
+        check(kotlin.math.abs(Color.blue(screenPixel())-191)<=4)
+        var retiredOwnerCallbacks = 0
+        var retiredDocument = ""; var retiredContent = ""
+        main {
+            retiredDocument = note.documentId; retiredContent = note.capture().encode()
+            check(store.beginOwnerRetirement { state ->
+                check(state.workerStopped && state.renderBytes == 0L && state.pendingWrites == 0)
+                retiredOwnerCallbacks++
+            } == StoreRetirementRequest.STARTED)
+            host.setContentView(View(host))
+        }
+        eventually("Retiring owner lost the real release callback") { store.inkReleaseDeferred && store.inkReleaseCallbacks > 0 }
+        main {
+            check(retiredOwnerCallbacks == 0 && store.inkChargedBytes > 0)
+            check(store.inkValidFenceObserved && !store.ownerRetirementStatus().workerStopped)
+            check(store.beginOwnerRetirement() == StoreRetirementRequest.ALREADY_RETIRING)
+            allowOwnerSettlement = true
+        }
+        eventually("Retiring owner did not finish real release and original worker") {
+            retiredOwnerCallbacks == 1 && store.ownerRetirementStatus().workerStopped
+        }
+        check(File(directory,"$retiredDocument.ncp").readText(Charsets.UTF_8) == retiredContent)
+
+        val retireStarted = CountDownLatch(1); val retireRelease = CountDownLatch(1)
+        setup(before = { retireStarted.countDown(); check(retireRelease.await(8,TimeUnit.SECONDS)) })
+        check(retireStarted.await(5,TimeUnit.SECONDS))
+        var lateRetired = false
+        var lateDocument = ""; var lateContent = ""
+        try {
+            main {
+                lateDocument = note.documentId; lateContent = note.capture().encode()
+                check(store.beginOwnerRetirement { lateRetired = true } == StoreRetirementRequest.STARTED)
+                host.setContentView(View(host))
+                check(!lateRetired && store.inkChargedBytes > 0 && !store.ownerRetirementStatus().workerStopped)
+            }
+        } finally { retireRelease.countDown() }
+        eventually("Retirement did not ACK late CPU output and queued save") {
+            lateRetired && store.inkChargedBytes == 0L && store.ownerRetirementStatus().workerStopped
+        }
+        check(File(directory,"$lateDocument.ncp").readText(Charsets.UTF_8) == lateContent)
+
+        var retiredCleanupCalls = 0
+        setup(afterRelease = { retiredCleanupCalls++; error("retirement cleanup confirmation loss") })
+        eventually("Unknown retirement fixture did not reach original ViewRoot handoff") { store.inkFramePublications > 0 && store.inkFrameDraws > 0 }
+        check(kotlin.math.abs(Color.blue(screenPixel())-191)<=4)
+        var reconciledRetirement = false
+        main {
+            check(store.beginOwnerRetirement { reconciledRetirement = true } == StoreRetirementRequest.STARTED)
+            host.setContentView(View(host))
+        }
+        eventually("Unknown release did not preserve original retirement charge") {
+            retiredCleanupCalls > 0 && store.inkReleaseCallbacks > 0 && store.inkChargedBytes > 0
+        }
+        main {
+            val attempts = retiredCleanupCalls
+            check(!reconciledRetirement && !store.ownerRetirementStatus().workerStopped)
+            check(store.beginOwnerRetirement() == StoreRetirementRequest.ALREADY_RETIRING)
+            check(store.reconcileInkRelease())
+            check(retiredCleanupCalls == attempts)
+        }
+        eventually("Read-only reconciliation did not finish owner retirement") {
+            reconciledRetirement && store.ownerRetirementStatus().workerStopped && store.inkChargedBytes == 0L
+        }
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

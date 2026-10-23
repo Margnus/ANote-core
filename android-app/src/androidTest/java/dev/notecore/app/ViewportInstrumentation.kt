@@ -26,7 +26,9 @@ class ViewportInstrumentation : Instrumentation() {
     private var titleOnly = false
     private var editOnly = false
     private var storageRetentionOnly = false
+    private var ownerRetirementOnly = false
     override fun onCreate(arguments: Bundle?) {
+        ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
         editOnly = arguments?.getString("notecore_case") == "preview_edit"
         titleOnly = arguments?.getString("notecore_case") == "title_contract"
@@ -46,6 +48,11 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (ownerRetirementOnly) {
+                result.putString("owner_observations", OwnerRetirementHostChecks(this, host).verify())
+                result.putString("owner_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (storageRetentionOnly) {
                 result.putString("storage_observations", StorageRetentionHostChecks(this, host).verify())
                 result.putString("storage_status", "passed")

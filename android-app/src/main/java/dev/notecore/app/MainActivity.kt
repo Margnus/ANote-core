@@ -125,7 +125,7 @@ class MainActivity : Activity() {
         header.addView(button("返回") { leaveEditor() })
         titleView = text(note.title, 18f).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END; setPadding(dp(8), 0, dp(8), 0); setOnClickListener { rename() } }
         header.addView(titleView, LinearLayout.LayoutParams(0, dp(48), 1f))
-        header.addView(button("保存") { save() })
+        header.addView(button("保存") { store.retryRetainedWrites(); save() })
         header.addView(button("导出") { exportBackup() }); root.addView(header)
         val tools = row()
         undoButton = button("撤销") { if (note.edit(PreviewEdit.Undo).accepted) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
@@ -224,6 +224,7 @@ class MainActivity : Activity() {
             showError(getString(when (admission.disposition) {
                 ExportPickerDisposition.BUSY -> R.string.export_picker_busy
                 ExportPickerDisposition.IDENTITY_EXHAUSTED -> R.string.export_picker_identity_exhausted
+                ExportPickerDisposition.OWNER_CLOSED -> R.string.export_picker_owner_closed
                 else -> R.string.export_picker_capacity
             }))
             return

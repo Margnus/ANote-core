@@ -12,8 +12,12 @@ import java.util.UUID
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED }
+internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED, OWNER_CLOSED }
 internal data class ExportPickerAdmission(val disposition: ExportPickerDisposition, val requestCode: Int? = null)
+internal enum class StoreOwnerPhase { ACTIVE, RETIRING, RETIRED }
+internal enum class StoreRetirementRequest { STARTED, ALREADY_RETIRING, RETIRED, INPUT_PENDING, TRANSFER_PENDING, WORK_PENDING, SAVE_REJECTED }
+internal data class StoreRetirementStatus(val phase: StoreOwnerPhase, val pendingWrites: Int,
+    val retryRequired: Int, val renderBytes: Long, val workerStopped: Boolean)
 
 data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean)
 
@@ -35,11 +39,62 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val saveCallbacks = mutableMapOf<String, SaveCallback>()
     private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
+    private var ownerRetiring = false
+    private var ownerRetired = false
+    private var ownerStopRequested = false
+    private var requestsInFlight = 0
+    private var retirementObserver: ((StoreRetirementStatus) -> Unit)? = null
+    internal fun ownerRetirementStatus(): StoreRetirementStatus {
+        executor.checkOwnerThread()
+        val states = ledger.states()
+        return StoreRetirementStatus(if (ownerRetired) StoreOwnerPhase.RETIRED else if (ownerRetiring) StoreOwnerPhase.RETIRING else StoreOwnerPhase.ACTIVE,
+            states.size, states.count { it.retryRequired }, inkChargedBytes, executor.status().workerStopped)
+    }
+    internal fun beginOwnerRetirement(onRetired: ((StoreRetirementStatus) -> Unit)? = null): StoreRetirementRequest {
+        executor.checkOwnerThread()
+        if (ownerRetired) return StoreRetirementRequest.RETIRED
+        if (ownerRetiring) return StoreRetirementRequest.ALREADY_RETIRING
+        if (activeNotebook?.let { it.hasActiveStroke || it.hasPendingStroke } == true) return StoreRetirementRequest.INPUT_PENDING
+        if (pendingExport != null) return StoreRetirementRequest.TRANSFER_PENDING
+        if (requestsInFlight != 0 || executor.status().entries.any {
+            it.stage == OwnedWorkStage.DELIVERING || it.stage == OwnedWorkStage.DELIVERY_BLOCKED
+        }) return StoreRetirementRequest.WORK_PENDING
+        val note = activeNotebook
+        if (note != null && !save(note.capture()) { _, _ -> }) return StoreRetirementRequest.SAVE_REJECTED
+        ownerRetiring = true; retirementObserver = onRetired; viewEpoch++
+        if (note != null) releaseActive(note, lostEndpoint = true) else retireInk(lostEndpoint = true)
+        inkView.clear()
+        advanceOwnerRetirement()
+        return StoreRetirementRequest.STARTED
+    }
+    internal fun retryRetainedWrites(): Boolean {
+        executor.checkOwnerThread()
+        val worker = executor.status()
+        if (ownerRetired || ownerStopRequested || !worker.accepting || worker.entries.any {
+            it.stage == OwnedWorkStage.DELIVERING || it.stage == OwnedWorkStage.DELIVERY_BLOCKED
+        }) return false
+        for (entry in ledger.states().filter { it.retryRequired }) {
+            if (ledger.offer(entry.snapshot) != PreviewSaveAdmission.ACCEPTED) return false
+        }
+        pumpWrites(); advanceOwnerRetirement(); return true
+    }
+    private fun advanceOwnerRetirement() {
+        executor.checkOutsideDrain()
+        if (!ownerRetiring || ownerRetired) return
+        val worker = executor.status()
+        if (ledger.states().isNotEmpty() || inkRenderer != null || inkImage != null || worker.entries.isNotEmpty()) return
+        if (!ownerStopRequested) { ownerStopRequested = true; executor.stopAccepting() }
+        if (!executor.status().isDrained) return
+        ownerRetired = true
+        val observer = retirementObserver; retirementObserver = null
+        if (observer != null) notifyUi { observer(ownerRetirementStatus()) }
+    }
     internal val activeDocumentId: String? get() { executor.checkOwnerThread(); return activeNotebook?.documentId }
     // An identity-only optimization must not retain an obsolete canonical root.
     private var activeSavedRoot = java.lang.ref.WeakReference<DocumentRoot>(null)
     internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
         executor.checkOwnerThread()
+        check(!ownerRetiring) { "Store owner is retiring" }
         activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
         val note = PagedPreviewNotebook(opened.root, UUID.randomUUID().toString(),
             DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
@@ -50,17 +105,19 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     internal fun create(): PagedPreviewNotebook {
         executor.checkOwnerThread()
+        check(!ownerRetiring) { "Store owner is retiring" }
         val nonce = UUID.randomUUID().toString()
         return adopt(OpenedDocument(DocumentRoot.empty(SceneId(UUID.randomUUID().toString()), "未命名笔记",
             PageDescriptor(PageId("$nonce-page"), LayerId("$nonce-layer"), 595.0, 842.0)), false))
     }
     internal fun attachActive(note: PagedPreviewNotebook) {
         executor.checkOwnerThread()
+        check(!ownerRetiring) { "Store owner is retiring" }
         check(activeNotebook == null || activeNotebook === note) { "Release the previous owner only after snapshot admission" }
         activeNotebook = note
     }
-    internal fun releaseActive(note: PagedPreviewNotebook) {
-        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(); check(note.retire()); activeNotebook = null; activeSavedRoot.clear()
+    internal fun releaseActive(note: PagedPreviewNotebook, lostEndpoint: Boolean = false) {
+        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(lostEndpoint); check(note.retire()); activeNotebook = null; activeSavedRoot.clear()
     }
     // One app-owner capture while the external picker runs. No timeout/Activity destruction release.
     internal val exportPickerSession = UUID.randomUUID().toString()
@@ -71,6 +128,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     internal fun beginExportPicker(snapshot: PagedPreviewSnapshot): ExportPickerAdmission {
         executor.checkOwnerThread()
+        if (ownerRetiring) return ExportPickerAdmission(ExportPickerDisposition.OWNER_CLOSED)
         if (pendingExport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
         if (snapshot.retainedByteCharge > exportPickerByteLimit) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
         if (nextExportRequestCode > 65535) return ExportPickerAdmission(ExportPickerDisposition.IDENTITY_EXHAUSTED)
@@ -92,6 +150,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             executor.drainResults(16)
             pumpInk()
             pumpWrites()
+            advanceOwnerRetirement()
             if (executor.status().entries.firstOrNull()?.stage == OwnedWorkStage.READY) requestPump()
         }) { wakePending.set(false); error("Storage owner event loop unavailable") }
     }
@@ -177,6 +236,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     @android.annotation.TargetApi(33)
     internal fun drawCommittedInk(view: InkCanvasView, canvas: android.graphics.Canvas): Boolean {
         executor.checkOwnerThread()
+        if (ownerRetiring) return false
         if (android.os.Build.VERSION.SDK_INT < 33 || !canvas.isHardwareAccelerated) return false
         val key = keyFor(view) ?: return false
         if (inkView.get() !== view) { retireInk(); inkView = java.lang.ref.WeakReference(view) }
@@ -218,9 +278,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         requestPump()
     }
     internal fun reconcileInkRelease(): Boolean {
-        executor.checkOwnerThread()
+        executor.checkOutsideDrain()
         if (inkImage?.reconcileReleased() != true) return false
-        inkImage = null; pumpInk(); return true
+        inkImage = null; pumpInk(); advanceOwnerRetirement(); return true
     }
     private fun notifyUi(action: () -> Unit) {
         // Ownership was transferred to ledger / durable file before this advisory UI notification.
@@ -228,6 +288,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun save(snapshot: PagedPreviewSnapshot, callback: (Long, String?) -> Unit): Boolean {
         executor.checkOwnerThread()
+        if (ownerRetiring) {
+            notifyUi { callback(snapshot.version, "当前会话已结束，原内容仍保留") }; return false
+        }
         if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot.get() === snapshot.root && ledger.latest(snapshot.documentId) == null) {
             notifyUi { callback(snapshot.version, null) }; return true
         }
@@ -294,10 +357,13 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun <I : Any, R : Any> request(input: I, bytes: Long, compute: (I) -> R,
                                           rejected: () -> Unit, receive: (WorkResult<R>) -> Unit) {
         executor.checkOwnerThread()
+        if (ownerRetiring) { notifyUi(rejected); return }
+        requestsInFlight++
         val admission = executor.submit(input, bytes, compute) { _, result ->
+            requestsInFlight--
             notifyUi { receive(result) }; ResultDisposition.ACKNOWLEDGED
         }
-        if (admission is WorkAdmission.Rejected) notifyUi(rejected)
+        if (admission is WorkAdmission.Rejected) { requestsInFlight--; notifyUi(rejected) }
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot, callback: (String?) -> Unit) {
         request(Triple(uri, snapshot, io), snapshot.encodingWorkByteCharge, { input ->

@@ -17,6 +17,9 @@ CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equa
 STORAGE_CHECKS = {'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
+OWNER_CHECKS = {'wrong_thread_retirement_rejected', 'accepted_root_saved_before_terminal_worker_stop',
+                'failed_root_retained_until_explicit_retry', 'active_input_and_picker_refuse_without_loss',
+                'pending_read_and_delivery_refuse_retirement', 'full_ledger_retry_frees_slot_before_retirement'}
 
 
 def digest(path):
@@ -81,6 +84,14 @@ def main():
     storage = json.loads(re.search(r'storage_observations=(\{.*\})', storage_output).group(1))
     assert len(storage['checks']) == len(STORAGE_CHECKS) and set(storage['checks']) == STORAGE_CHECKS
     assert storage['original_note_files_used'] is False and storage['system_file_picker_verified'] is False
+    owner_output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'owner_retirement',
+                       BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
+    owner_log = folder/'owner-retirement.log'; owner_log.write_text(owner_output, encoding='utf-8', newline='\n')
+    assert 'owner_status=passed' in owner_output and 'INSTRUMENTATION_CODE: -1' in owner_output, owner_output
+    owner = json.loads(re.search(r'owner_observations=(\{.*\})', owner_output).group(1))
+    assert len(owner['checks']) == len(OWNER_CHECKS) and set(owner['checks']) == OWNER_CHECKS
+    assert owner['original_note_files_used'] is False and owner['gc_timing_verified'] is False
+    assert owner['abrupt_owner_or_thread_loss_verified'] is False
     assert files() == before, 'Original Android file set or bytes changed'
     baseline = folder/'original-files.json'
     baseline.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8', newline='\n')
@@ -90,7 +101,7 @@ def main():
     assert files() == before, 'Original Android files changed after ordinary process restore'
     pid = adb('shell', 'pidof', BUNDLE).decode('utf-8').strip()
     assert re.fullmatch(r'\d+', pid)
-    for path in (apk, test, log, storage_log, baseline, Path(__file__), ROOT/'reports/preview-build.json',
+    for path in (apk, test, log, storage_log, owner_log, baseline, Path(__file__), ROOT/'reports/preview-build.json',
                  ROOT/'reports/android-brush-build-inputs.sha256'):
         bindings[path.relative_to(ROOT).as_posix()] = digest(path)
     sdk = Path(args.adb).resolve().parent.parent
@@ -100,19 +111,20 @@ def main():
         'api': adb('shell', 'getprop', 'ro.build.version.sdk').decode('utf-8').strip(),
         'checks': sorted(CHECKS), 'check_count': len(CHECKS), 'observations': observed,
         'storage_retention_checks': storage, 'storage_retention_check_count': len(STORAGE_CHECKS),
+        'owner_retirement_checks': owner, 'owner_retirement_check_count': len(OWNER_CHECKS),
         'apk_sha256': digest(apk), 'test_apk_sha256': digest(test),
         'ordinary_pid_after_host': int(pid), 'original_file_count': len(before),
         'all_original_files_unchanged': True, 'ordinary_process_restored': True,
         'source_and_artifact_sha256': bindings,
         'sdk_contract_sha256': {str(path): digest(path) for path in contracts},
-        'scope': 'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView with in-memory canonical notebooks, plus six original NoteStore/worker real-file and export-slot checks in a unique cache directory. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, physical stylus or power-loss evidence.',
+        'scope': 'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, six original NoteStore/worker file/export retention checks and six explicit Store retirement checks in unique cache directories. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence.',
         'decision': 'Use double viewport scale/offset for canonical input; float conversion is reserved for derived Path coordinates. Keep current owner, immutable real samples, explicit invalid/cancel behavior and MONOLINE scope.',
         'ordinary_ui_interaction_verified': False, 'real_stylus_verified': False,
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,
         'c1_gate_complete': False,
     }
     (ROOT/'reports/android-input-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
-    print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'storage_retention_check_count', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
+    print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'storage_retention_check_count', 'owner_retirement_check_count', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
 
 
 if __name__ == '__main__':
