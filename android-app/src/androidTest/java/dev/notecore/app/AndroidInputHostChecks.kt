@@ -16,11 +16,11 @@ internal class AndroidInputHostChecks(private val host: Activity) {
     private data class Sample(val x: Float, val y: Float, val time: Long, val pressure: Float = 0.5f)
     private class Fixture(val view: InkCanvasView, val note: PagedPreviewNotebook,
         val errors: MutableList<String>, val changes: IntArray)
-    private fun fixture(budget: DocumentBudget? = null): Fixture {
+    private fun fixture(budget: DocumentBudget? = null, preparePaper: Boolean = true): Fixture {
         val note = PagedPreviewNotebook(DocumentRoot.empty(SceneId("synthetic-input"), "Synthetic callbacks",
             PageDescriptor(PageId("input-session-page-0"), LayerId("input-session-layer-0"), 595.0, 842.0)),
             "input-session", budget ?: DocumentBudget())
-        check(note.setPaper(14400.0, 12345.0, dev.notecore.document.PaperKind.BLANK))
+        if (preparePaper) check(note.setPaper(14400.0, 12345.0, dev.notecore.document.PaperKind.BLANK))
         val errors = mutableListOf<String>(); val changes = intArrayOf(0)
         val view = InkCanvasView(host, note, { changes[0]++ }, { errors.add(it) })
         // A parent is required by the original View's interception contract. No user notebook/file.
@@ -114,6 +114,21 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             check(f.note.strokeCount == 1 && f.note.pointCount(0) == 2 && f.changes[0] == 1)
             check(f.errors.size == 1 && f.note.inputReservedByteCharge == 0L)
             checks.add("input_byte_budget_refusal_cancel_and_recovery")
+        }
+        run {
+            val f = fixture(DocumentBudget(historyBytes = 0), preparePaper = false)
+            val before = f.note.snapshot(); val status = f.note.authorityStatus()
+            val p = Sample(400f, 300f, 1000)
+            send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
+            send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
+            check(f.note.hasPendingStroke && f.note.totalStrokeCount == 0 && f.errors.size == 1)
+            check(f.note.lastFailure?.documentReason == DocumentRejection.HISTORY_CAPACITY)
+            val pending = f.note.pendingStroke()
+            check(f.note.snapshot() === before && f.note.authorityStatus() == status)
+            check(!f.note.retryPendingStroke()); f.note.cancelStroke()
+            check(f.note.pendingStroke() === pending && f.note.inputReservedByteCharge == 184L)
+            check(!f.note.retire())
+            checks.add("history_capacity_keeps_pending_without_publishing_root")
         }
         var oldFloatError: Double; var canonicalError: Double
         run {

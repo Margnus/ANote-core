@@ -229,6 +229,11 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
             is PrepareResult.Rejected -> return reject(DocumentRejection.SCENE_REJECTED, prepared.reason)
             is PrepareResult.Prepared -> prepared.patch
         }
+        // Original commands have passed canonical preparation above. Reject oversized history before
+        // copying the complete scene map. External prepared patches keep their existing CAS-first check.
+        if (historyDelta == null && command !is DocumentCommand.PreparedCanvas &&
+            DocumentDelta.projectedCharge(root, title, pages, changes, affected) > budget.historyBytes)
+            return reject(DocumentRejection.HISTORY_CAPACITY)
         val application = SceneReducer.apply(root.scene, patch)
         if (application is SceneApplication.Rejected) return reject(DocumentRejection.SCENE_REJECTED, application.reason)
         var scene = (application as SceneApplication.Applied).snapshot
