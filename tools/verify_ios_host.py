@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown()',
     'testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook()',
     'testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen()',
     'testValidatedOpeningReturnsTypedFailureAndUsesOriginalNotebook()',

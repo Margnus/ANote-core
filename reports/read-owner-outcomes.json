@@ -1,0 +1,58 @@
+{
+  "schema": "read-owner-outcomes-1",
+  "status": "passed",
+  "scope": "Actual original Android Store/Swift Model worker-to-owner read outcomes and UI message/status consumers, isolated cache fixtures; no ordinary GUI or physical performance/durability claim",
+  "known_failures": [
+    "invalid/unsupported format",
+    "unsupported preview content",
+    "character capacity",
+    "file byte capacity",
+    "invalid UTF8",
+    "document identity mismatch",
+    "recognized file IO failure"
+  ],
+  "known_business_refusals_return_through_successful_worker_delivery": true,
+  "unknown_non_io_error_injected_and_kept_distinct": true,
+  "swift_system_cocoa_corruption_not_mislabeled_utf8": true,
+  "checks": [
+    "known refusals create no owner and preserve exact fixture bytes",
+    "missing file reports IO without promising nonexistent file is retained",
+    "injected unknown is distinct and preserves existing valid fixture",
+    "unsupported retained ledger snapshot is refused, kept by identity, then repaired and actually written",
+    "valid retained snapshot identity is not cloned",
+    "later valid file opens after refusals",
+    "existing pending save/retry/reopen and lifecycle suites pass"
+  ],
+  "original_android_files_unchanged": 66,
+  "original_ios_files_unchanged": 14,
+  "decision": "Adopt platform-local immutable Opened/Refused results on the original worker and owner. Existing retained-ledger preference, epoch guards, queue refusal and ACK remain. No new authority/queue/persistence schema.",
+  "limits": [
+    "Unknown failure is controlled non-IO injection, not spontaneous OS fault proof",
+    "Ordinary UI message wiring is present; host assertions cover owner callback/status, no current CUA GUI acceptance",
+    "Shared common code unchanged; prior Native169 is not counted as a new run",
+    "No full public SDK/owner loss/cross-thread, unconfirmed IO interruption, power loss or physical heap/stylus validation"
+  ],
+  "ordinary_ui_verified": false,
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt": "16bc402e480c0edf2cdad0dd95772bc6aef8cb71347c44687bf8fe94cc607113",
+    "android-app/src/androidTest/java/dev/notecore/app/ReadFailureHostChecks.kt": "3d1fb64ef1d5dd6cd7a4cbbc057fc81c163ae1b2fa34dc9276c7a0019aa34f57",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "24d1a5d5e4216121512e04e27d86a9ea89e9226ab3b92a25f514c959f22ee179",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "388d9a5337a1949c11c1e3e7b510f14c85c50859a876dce1819872067d0466d4",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "8495d443f4964998e4e538995515fdb121802bf7a84e4ccfeba8f14e4d52ffcb",
+    "build/read-owner/android-package.json": "c89e937c5eadd50b8270d0cdba2cd77dd9701fdfe23dc65004e7b919fa6b12ed",
+    "build/read-owner/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/read-owner/ios-before.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "e756f38cc19c29aabbe0f8622b65aeaebf3fbab2acf3924229323c4c9411ca40",
+    "ios-app/NoteCorePreview/PreviewFileIO.swift": "835222a780d454964a630456ad6e44edfaf8d42cd63714fb2a26c249180b19d9",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "d9d35c3b66a149a0635e7ff5aa96441f04e288ad43f9ce02e89a140c332e5878",
+    "reports/android-input-host-tests.json": "e25b0c74c5bc81cf5096b590eb916bb5f0936f9ae94f277d2707bf4a693798c3",
+    "reports/ios-host-tests.json": "7d75457262b6f6ff8fb98eed2ce897b8ad05812d098824c99fe0c1c22f7dca61",
+    "reports/ios-preview-build.json": "cd1f15ae744ba1b21823ddd9e373dd4d8af55069d4f793b69376d273fa758760",
+    "reports/ios-preview-restored.json": "d494d3ae519067234b999137578dd4a5442a3108ac5d552e41dd4c2f3d7c72ca",
+    "reports/preview-build.json": "b423400a0b382f4ac2ad5b985eb91e4b86378cde377257ec5929246a5cc6a3e8",
+    "reports/verification.json": "6020d2b67f2bce0b74276b2f0f0e5e29fb8bc8aa505432e673bbc5fa43a19b61",
+    "tools/verify_read_owner_outcomes.py": "cf4536cdb3d1a38cbb619cce86af6f24e60ab4fc9be666011f941bb671207c68"
+  }
+}

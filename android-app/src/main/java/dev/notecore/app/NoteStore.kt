@@ -28,8 +28,8 @@ data class NoteSummary(val id: String, val title: String, val modified: Long)
 class NoteStore private constructor(context: Context, private val directory: File = File(context.filesDir, "preview-notes"),
     private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {},
     private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
-    private val exportPickerByteLimit: Long = 8L * 1024 * 1024) {
-    private val io = PreviewFileIO(directory, context.applicationContext.contentResolver)
+    private val exportPickerByteLimit: Long = 8L * 1024 * 1024, private val beforeOpenRead: () -> Unit = {}) {
+    private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
     private val executor = BoundedOwnerExecutor(16, STORAGE_WORK_BYTES, "NoteCore-preview-storage", ::requestPump)
@@ -426,14 +426,19 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot() && activeSavedPending.get() === it.pendingStroke(), it.captureRecovery()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
-            if (input.second == null) input.third.readRecovery(input.first) else (input.second as PagedPreviewSnapshot)
+            if (input.second == null) input.third.readOutcome(input.first) else input.third.acceptRecovery(input.second as PagedPreviewSnapshot, input.first)
         }, { callback(null, "后台队列繁忙，请重新打开笔记") }) { result ->
             if (viewEpoch != epoch) {
                 // No mutable/read payload is posted; retry a pure read after this result is ACKed.
                 main.post { open(id, callback) }
-            } else callback((result as? WorkResult.Succeeded)?.value?.let { OpenedDocument(it.root, retained == null, it) },
-                if (result !is WorkResult.Succeeded) "笔记读取失败或含暂不支持的笔刷，原文件已保留"
-                else retained?.let { "有更改尚未保存，请点击保存重试" })
+            } else when (result) {
+                is WorkResult.Succeeded -> when (val reading = result.value) {
+                    is LocalRecoveryRead.Opened -> callback(OpenedDocument(reading.snapshot.root, retained == null, reading.snapshot),
+                        retained?.let { "有更改尚未保存，请点击保存重试" })
+                    is LocalRecoveryRead.Refused -> callback(null, reading.reason.message)
+                }
+                else -> callback(null, "读取结果暂无法确认，请稍后重试")
+            }
         }
     }
     internal fun saveStates(): List<PreviewSaveState> { executor.checkOwnerThread(); return ledger.states() }
@@ -447,7 +452,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
-            maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024): NoteStore =
-            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit)
+            maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024, beforeOpenRead: () -> Unit = {}): NoteStore =
+            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead)
     }
 }

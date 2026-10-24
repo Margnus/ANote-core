@@ -253,9 +253,11 @@ final class PreviewModel: ObservableObject {
         }
         return false
     }
+    private let beforeOpenRead: () throws -> Void
     init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
-         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil) {
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, beforeOpenRead: @escaping () throws -> Void = {}) {
         precondition(Thread.isMainThread)
+        self.beforeOpenRead = beforeOpenRead
         self.documentBudget = documentBudget
         self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
         self.directory = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PreviewNotes", isDirectory: true)
@@ -342,18 +344,10 @@ final class PreviewModel: ObservableObject {
         let navigation = navigationEpoch, epoch = storageEpoch
         let retained = ledger.latest(documentId: id)
         status = "正在打开…"
-        request(input: (Self.file(id, directory: directory), id, retained), bytes: 160 * 1024 * 1024, compute: { input in
-            let captured: PagedPreviewSnapshot
-            if let retained = input.2 as? PagedPreviewSnapshot { captured = retained }
-            else {
-                guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
-                let reading = try PreviewRecoveryCodec.shared.read(text: PreviewFileIO.readUTF8(input.0))
-                guard let snapshot = reading.snapshot else { throw CocoaError(.fileReadCorruptFile) }
-                captured = snapshot
-            }
-            guard captured.documentId == input.1 else { throw CocoaError(.fileReadCorruptFile) }
-            try Self.validateRenderable(captured.root)
-            return captured
+        request(input: (Self.file(id, directory: directory), id, retained, beforeOpenRead), bytes: 160 * 1024 * 1024, compute: { input in
+            if let retained = input.2 as? PagedPreviewSnapshot { return PreviewFileIO.acceptRecovery(retained, documentId: input.1) }
+            guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
+            return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)
         }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
             guard self.navigationEpoch == navigation && self.current == nil else { return }
             if self.storageEpoch != epoch {
@@ -361,12 +355,17 @@ final class PreviewModel: ObservableObject {
                 DispatchQueue.main.async { self.open(id) }; return
             }
             switch result {
-            case .succeeded(let captured):
+            case .succeeded(let reading):
+                let captured: PagedPreviewSnapshot
+                switch reading {
+                case .opened(let snapshot): captured = snapshot
+                case .refused(let failure): self.status = failure.message; return
+                }
                 do { try self.adopt(captured.root, persisted: retained == nil, recovery: captured) }
                 catch { self.status = "打开失败，原文件仍保留"; return }
                 let note = self.current!
                 self.status = note.hasPendingStroke ? "已恢复未提交笔迹，请点击保存重试提交" : (retained == nil ? "已打开 · \(note.totalStrokeCount) 笔" : "有更改尚未保存，请重试保存")
-            case .outcomeUnknown: self.status = "读取失败，原文件已保留"
+            case .outcomeUnknown: self.status = "读取结果暂无法确认，请稍后重试"
             }
         }
     }

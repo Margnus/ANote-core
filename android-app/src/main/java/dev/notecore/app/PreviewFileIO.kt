@@ -6,13 +6,31 @@ import android.util.AtomicFile
 import dev.notecore.canvas.prototype.*
 import dev.notecore.document.*
 import java.io.File
+import java.io.IOException
+import java.nio.charset.CharacterCodingException
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
 import java.util.UUID
 
+/** Platform-local read result; no mutable document or secondary storage ownership. */
+internal enum class LocalReadFailure(val message: String) {
+    INVALID_FORMAT("笔记格式无效或版本不支持，原文件已保留"),
+    UNSUPPORTED_CONTENT("当前预览不支持此笔记内容，原文件已保留"),
+    CHARACTER_CAPACITY("笔记内容超过预览容量，原文件已保留"),
+    BYTE_CAPACITY("笔记文件超过预览读取容量，原文件已保留"),
+    INVALID_UTF8("笔记文本编码无效，原文件已保留"),
+    WRONG_DOCUMENT("笔记身份与文件不一致，原文件已保留"),
+    IO_FAILURE("笔记文件读取失败，请检查文件后重试")
+}
+internal sealed interface LocalRecoveryRead {
+    data class Opened(val snapshot: PagedPreviewSnapshot) : LocalRecoveryRead
+    data class Refused(val reason: LocalReadFailure) : LocalRecoveryRead
+}
+private class ReadRefused(val reason: LocalReadFailure) : IllegalArgumentException(reason.name)
+
 /** Serial worker capability. Contains immutable filesystem/resolver handles, no UI or owner ledger. */
-internal class PreviewFileIO(private val directory: File, private val resolver: ContentResolver) {
+internal class PreviewFileIO(private val directory: File, private val resolver: ContentResolver, private val beforeRead: () -> Unit = {}) {
     private fun ensureDirectory() { check(directory.isDirectory || directory.mkdirs()) { "Storage directory unavailable" } }
     private fun file(id: String): File {
         require(id.matches(Regex("[a-zA-Z0-9-]{1,128}")))
@@ -80,7 +98,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
         while (true) {
             val count = input.read(buffer); if (count < 0) break
-            require(output.size().toLong() + count <= 32L * 1024 * 1024)
+            if (output.size().toLong() + count > 32L * 1024 * 1024) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
             output.write(buffer, 0, count)
         }
         return output.toByteArray()
@@ -91,10 +109,33 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         require(it.pending == null) { "Pending recovery requires the original owner" }; it.root
     }
     fun readRecovery(id: String): PagedPreviewSnapshot = AtomicFile(file(id)).openRead().use { stream ->
-        require(stream.channel.size() <= 32L * 1024 * 1024)
-        val result = PreviewRecoveryCodec.read(decode(readBounded(stream)))
-        requireNotNull(result.snapshot) { "Preview recovery refused: ${result.failure}" }.also { require(it.documentId == id) }
+        if (stream.channel.size() > 32L * 1024 * 1024) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+        val text = try { decode(readBounded(stream)) } catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
+        val result = PreviewRecoveryCodec.read(text)
+        val snapshot = result.snapshot ?: throw ReadRefused(when (checkNotNull(result.failure)) {
+            PreviewReadFailure.CHARACTER_CAPACITY -> LocalReadFailure.CHARACTER_CAPACITY
+            PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT -> LocalReadFailure.INVALID_FORMAT
+            PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT -> LocalReadFailure.UNSUPPORTED_CONTENT
+        })
+        if (snapshot.documentId != id) throw ReadRefused(LocalReadFailure.WRONG_DOCUMENT)
+        snapshot
     }
+    fun acceptRecovery(snapshot: PagedPreviewSnapshot, id: String): LocalRecoveryRead {
+        val content = PreviewDocumentReader.accept(snapshot.root)
+        val reason = content.failure
+        if (reason != null) return LocalRecoveryRead.Refused(when (reason) {
+            PreviewReadFailure.CHARACTER_CAPACITY -> LocalReadFailure.CHARACTER_CAPACITY
+            PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT -> LocalReadFailure.INVALID_FORMAT
+            PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT -> LocalReadFailure.UNSUPPORTED_CONTENT
+        })
+        return if (snapshot.documentId == id) LocalRecoveryRead.Opened(snapshot) else LocalRecoveryRead.Refused(LocalReadFailure.WRONG_DOCUMENT)
+    }
+    fun readOutcome(id: String): LocalRecoveryRead = try {
+        beforeRead()
+        LocalRecoveryRead.Opened(readRecovery(id))
+    } catch (refusal: ReadRefused) { LocalRecoveryRead.Refused(refusal.reason) }
+      catch (_: IOException) { LocalRecoveryRead.Refused(LocalReadFailure.IO_FAILURE) }
+
     /** Typed shared reader owns format/content refusal; only local worker IO errors escape this adapter. */
     private fun readPreview(text: String): DocumentRoot {
         val result = PreviewDocumentReader.read(text)

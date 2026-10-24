@@ -25,6 +25,7 @@ CURRENT = {
     'recovery-framing': ('source_and_artifact_sha256',),
     'validated-creation': ('source_and_artifact_sha256',),
     'typed-recovery-read': ('source_and_artifact_sha256',),
+    'read-owner-outcomes': ('source_and_artifact_sha256',),
     'input-capture-contract': ('source_and_fixture_sha256',),
     'apple-current-revalidation': ('source_and_artifact_sha256',),
     'shared-native-contracts': ('source_and_artifact_sha256',),

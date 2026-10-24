@@ -92,7 +92,7 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
                 check(reading.snapshot == null && reading.failure == reason)
                 file.writeText(corrupt, Charsets.UTF_8)
                 var refused = false
-                main { store.open(recovery.documentId) { value, error -> check(value == null && error != null); refused = true } }
+                main { store.open(recovery.documentId) { value, error -> check(value == null && error == (if (reason == PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT) LocalReadFailure.UNSUPPORTED_CONTENT.message else LocalReadFailure.INVALID_FORMAT.message)); refused = true } }
                 eventually("Malformed checkpoint was not refused") { refused }
                 main { check(store.activeDocumentId == null) }
                 check(file.readText(Charsets.UTF_8) == corrupt)

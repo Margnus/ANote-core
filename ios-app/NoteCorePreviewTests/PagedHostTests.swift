@@ -69,9 +69,51 @@ final class PagedHostTests: XCTestCase {
             XCTAssertThrowsError(try PreviewRecoveryCodec.shared.decode(text: corrupt))
             try PreviewFileIO.writeUTF8(corrupt, to: file)
             refused.open("pending-swift")
-            try await eventually("malformed recovery refuses entire opening") { refused.status.contains("读取失败") }
+            try await eventually("malformed recovery refuses entire opening") { refused.status == (reason == .unsupportedPreviewContent ? LocalReadFailure.unsupportedContent.message : LocalReadFailure.invalidFormat.message) }
             XCTAssertNil(refused.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), corrupt)
         }
+    }
+    @MainActor func testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let id = "read-failures", file = dir.appendingPathComponent("read-failures.ncp")
+        let valid = "NCPREVIEW\t2\nD\tread-failures\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+        let snapshot = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: valid).snapshot)
+        if case .opened(let same) = PreviewFileIO.acceptRecovery(snapshot, documentId: id) { XCTAssertTrue(same === snapshot) }
+        else { XCTFail("Retained snapshot rejected") }
+        let unsupported = valid.replacingOccurrences(of: "\t0\t0\nG", with: "\t1\t0\nG").replacingOccurrences(of: "END\n", with:
+            "S\tink\tlayer\t1\tPRESSURE\t1\t-1\t2.5\t1\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.0\t2.0\t0.5\t1\nEND\n")
+        let unsupportedSnapshot = try PagedPreviewSnapshot.companion.fromRoot(root: PagedPreviewCodec.shared.decode(text: unsupported))
+        if case .refused(let reason) = PreviewFileIO.acceptRecovery(unsupportedSnapshot, documentId: id) { XCTAssertEqual(reason.message, LocalReadFailure.unsupportedContent.message) }
+        else { XCTFail("Unsupported retained content accepted") }
+        let model = PreviewModel(directory: dir)
+        for (bytes, reason) in [(Data("bad format".utf8), LocalReadFailure.invalidFormat),
+            (Data(valid.replacingOccurrences(of: id, with: "other-note").utf8), .wrongDocument),
+            (Data([0xc3, 0x28]), .invalidUTF8), (Data(repeating: 120, count: 16_000_001), .characterCapacity)] {
+            try bytes.write(to: file); model.open(id)
+            try await eventually("known read refusal reaches owner") { model.status == reason.message }
+            XCTAssertNil(model.current); XCTAssertEqual(try Data(contentsOf: file), bytes)
+        }
+        let handle = try FileHandle(forWritingTo: file)
+        try handle.truncate(atOffset: UInt64(PreviewFileIO.maxReadBytes + 1)); try handle.close()
+        let large = try Data(contentsOf: file)
+        model.open(id); try await eventually("byte capacity reaches owner") { model.status == LocalReadFailure.byteCapacity.message }
+        XCTAssertNil(model.current); XCTAssertEqual(try Data(contentsOf: file), large)
+        try FileManager.default.removeItem(at: file)
+        model.open(id); try await eventually("known file IO reaches owner") { model.status == LocalReadFailure.ioFailure.message }
+        XCTAssertNil(model.current)
+        // A system Cocoa corruption error is IO, not proof that our UTF-8 decoding failed.
+        try PreviewFileIO.writeUTF8(valid, to: file)
+        let systemIO = PreviewModel(directory: dir, beforeOpenRead: { throw CocoaError(.fileReadCorruptFile) })
+        systemIO.open(id); try await eventually("system IO is not mislabeled as UTF8") { systemIO.status == LocalReadFailure.ioFailure.message }
+        XCTAssertNil(systemIO.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), valid)
+        enum Probe: Error { case injected }
+        let unknown = PreviewModel(directory: dir, beforeOpenRead: { throw Probe.injected })
+        try PreviewFileIO.writeUTF8(valid, to: file)
+        unknown.open(id); try await eventually("unrecognized error remains unknown") { unknown.status == "读取结果暂无法确认，请稍后重试" }
+        XCTAssertNil(unknown.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), valid)
+        model.open(id); try await eventually("later valid read recovers") { model.current != nil }
+        XCTAssertEqual(model.current?.documentId, id); model.close()
     }
     @MainActor func testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook() async throws {
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,

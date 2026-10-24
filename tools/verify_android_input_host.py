@@ -14,7 +14,7 @@ CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equa
           'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery',
           'live_byte_refusal_and_undo_recovery', 'input_byte_budget_refusal_cancel_and_recovery',
           'history_capacity_refuses_down_without_owning_samples', 'journal_identity_capacity_refuses_before_real_view_ownership'}
-STORAGE_CHECKS = {'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
+STORAGE_CHECKS = {'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
 OWNER_CHECKS = {'wrong_thread_retirement_rejected', 'accepted_root_saved_before_terminal_worker_stop',
