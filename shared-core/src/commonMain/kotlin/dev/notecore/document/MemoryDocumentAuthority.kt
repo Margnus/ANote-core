@@ -36,6 +36,14 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
         require(initial.title.hasValidUnicode()) { "Invalid Unicode title" }
         require(initialCapacityFailure(initial, budget) == null)
     }
+    /** Allocation probe over the original budgeted tombstones/journal; no secondary identity index.
+     * Caller supplies an already validated generated identity. Deleted/undone identities stay reserved.
+     */
+    internal fun identityWasUsed(value: String): Boolean {
+        ownerCheck(); val current = state
+        return PageId(value) in current.pages || LayerId(value) in current.layers ||
+            ObjectId(value) in current.objects || CommandId(value) in current.journal
+    }
     fun snapshot(): DocumentRoot { ownerCheck(); return state.root }
     fun status(): DocumentAuthorityStatus {
         ownerCheck(); val current = state

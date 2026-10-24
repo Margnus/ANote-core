@@ -4,6 +4,19 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedPreviewNotebookTest {
+    @Test fun reusedNonceSkipsInitialIdentitiesAcrossKindsWithoutDuplicatingIndex() {
+        val root = DocumentRoot.empty(SceneId("collision"), "title",
+            PageDescriptor(PageId("reuse-op-1"), LayerId("reuse-ink-3"), 595.0, 842.0))
+        val note = assertNotNull(PagedPreviewNotebook.open(root, "reuse").notebook)
+        draw(note)
+        assertEquals("reuse-op-2", note.authorityStatus().nextUndoOperationId?.value)
+        assertEquals("reuse-ink-4", note.stroke(0).id.value)
+        val reopened = assertNotNull(PagedPreviewNotebook.open(note.capture().root, "reuse").notebook)
+        draw(reopened)
+        assertEquals(2, reopened.totalStrokeCount)
+        assertNotEquals(reopened.stroke(0).id, reopened.stroke(1).id)
+        assertEquals(root.page(0), reopened.snapshot().page(0).copy(contentRevision = 0))
+    }
     @Test fun invalidMetadataDoesNotCancelAcceptedUnfinishedSamples() {
         val note = note()
         assertTrue(note.beginStroke(1.0, 2.0, 0.5f, 1))

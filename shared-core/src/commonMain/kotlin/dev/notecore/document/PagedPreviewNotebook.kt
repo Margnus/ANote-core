@@ -10,7 +10,6 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private val inputByteLimit = budget.inputBytes
     private var selected = initial.page(0).id
     private var sequence = 0L
-    private var initialIds = (initial.pages().flatMap { listOf(it.id.value, it.layerId.value) } + initial.scene.objects().map { it.id.value }).toSet()
     private var input: InputReplaySession? = null
     private var inputSequence = 0L
     private var strokePage: PageId? = null
@@ -110,7 +109,10 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         var next = after
         while (next < Long.MAX_VALUE) {
             val candidate = "$sessionNonce-$kind-${++next}"
-            if (candidate !in initialIds) return candidate to next
+            val retained = pending
+            val pendingObject = (retained?.command as? CanvasCommand.AddStroke)?.objectId?.value
+            if (!memory.identityWasUsed(candidate) && candidate != retained?.id?.value && candidate != pendingObject)
+                return candidate to next
         }
         return null
     }
@@ -363,8 +365,6 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             snapshot.pending?.let { command ->
                 note.pending = command
                 note.selected = command.pageId
-                val stroke = command.command as CanvasCommand.AddStroke
-                note.initialIds = note.initialIds + command.id.value + stroke.objectId.value
             }
             return opened
         }

@@ -1,0 +1,30 @@
+{
+  "schema": "identity-retention-1",
+  "status": "passed",
+  "scope": "Current shared JVM and Kotlin/Native common tests; original authority identity allocation only",
+  "jvm_tests": 408,
+  "native_tests": 171,
+  "checks": [
+    "DocumentAuthorityTest.allocationProbeUsesOriginalTombstonesAndJournalWithoutMutation",
+    "PagedPreviewNotebookTest.reusedNonceSkipsInitialIdentitiesAcrossKindsWithoutDuplicatingIndex",
+    "PreviewRecoveryTest.exactPendingRoundtripAndOriginalOwnerExplicitRetryOnce"
+  ],
+  "decision": "Remove notebook initialIds index; probe original budgeted authority tombstones/journal and original pending command/object identities. No new index, authority or persistence format.",
+  "limits": [
+    "No physical heap measurement or complete chain peak budget",
+    "No rebuilt Android/Swift App, ordinary UI or current platform host claim",
+    "No power loss, unconfirmed IO interruption or complete owner transfer validation"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "reports/shared-native-contracts.json": "48956f54fab9680a5a4d190fa4799c1eaa4488103a9bba5bb9e54a3cafc45f3d",
+    "reports/verification.json": "68afac7713a572ee261db9bf74ee6ab1de66de72d04e35f701dc8c15b0eb497a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "e9fa06c7da77c4af259220620c08d4b4dd974fe52f5195ebc97ec9c2015e3d83",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "d364bf47df50a1da77cb8b186d22729968f18c3eb948ec12eadab41b559aab66",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentAuthorityTest.kt": "1360364c7ff32ef8ce625649f76ac452a7f77f120a06c9fb607c3015bf665488",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedPreviewNotebookTest.kt": "7681905f7a2a50e047a8f85bca3dcc7b370a1471cdfa3e765d116226eef33140",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewRecoveryTest.kt": "e764e879daa9a74babb4f28227fb3ad29d32e638cf20f09e74fa6828381d6b22",
+    "tools/verify_identity_retention.py": "01bddc2247a3659c544103f11d2cdd3f7d0b25afdc0ff6e7020f4b9cd6b7371b"
+  }
+}

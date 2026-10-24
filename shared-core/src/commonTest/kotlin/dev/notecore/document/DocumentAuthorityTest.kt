@@ -21,6 +21,25 @@ class DocumentAuthorityTest {
         return DocumentCommand.Canvas(page.id, CanvasCommand.AddStroke(CommandId("add-$key"), authority.snapshot().revision,
             StrokeTarget(doc, page.layerId, BrushSpec(BrushKind.MONOLINE, 1, 2.0, 0xff000000.toInt())), ObjectId(key), samples))
     }
+    @Test fun allocationProbeUsesOriginalTombstonesAndJournalWithoutMutation() {
+        var owned = true
+        val authority = MemoryDocumentAuthority(root(), ownerCheck = { check(owned) })
+        accept(authority, insert(authority)); accept(authority, add(authority))
+        accept(authority, DocumentCommand.DeletePage(CommandId("remove-b"), doc, authority.snapshot().revision, b.id))
+        assertNull(authority.snapshot().findPage(b.id))
+        assertTrue(authority.identityWasUsed(b.id.value)); assertTrue(authority.identityWasUsed(b.layerId.value))
+        accept(authority, DocumentCommand.DeletePage(CommandId("clear-a"), doc, authority.snapshot().revision, a.id))
+        assertEquals(0, authority.snapshot().scene.objectCount)
+        assertTrue(authority.identityWasUsed("stroke-a"))
+        accept(authority, DocumentCommand.Undo(CommandId("undo-remove"), doc, authority.snapshot().revision, CommandId("clear-a")))
+        val before = authority.snapshot(); val status = authority.status()
+        for (id in listOf(a.id.value, a.layerId.value, b.id.value, b.layerId.value, "stroke-a", "add-stroke-a", "remove-b", "undo-remove"))
+            assertTrue(authority.identityWasUsed(id), id)
+        assertFalse(authority.identityWasUsed("fresh"))
+        assertSame(before, authority.snapshot()); assertEquals(status, authority.status())
+        owned = false
+        assertFailsWith<IllegalStateException> { authority.identityWasUsed("fresh") }
+    }
     @Test fun directoryIsDefensivelyOwnedAndRejectsOrphanObjectsOrDuplicateMembership() {
         val pages = mutableListOf(a); val initial = DocumentRoot.compose("title", SceneSnapshot.empty(doc), pages); pages.clear()
         assertEquals(1, initial.pageCount)
