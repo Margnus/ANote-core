@@ -126,10 +126,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "9b69d97b9587298cecfe441a2910030ac25ac9c9a98f51fef66fecc63ed8c85e",
+      "report_sha256": "a1117aebe9a5fd4a6dd17ff977d440608df6492a887edbe3d67f1ed6dca41021",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 213,
+      "matched_bindings": 215,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -860,6 +860,14 @@
       "mismatches": [],
       "scope": "Current ordinary UIKit CUA case only, with PID-specific files/provider logs and targeted SIGKILL: new named note, dot/lines, undo/redo, two pages/paper/tool, zoom, Home/foreground, normal close/reopen, saved ordinary file restart. Three extra strokes appeared outside recorded CUA instructions; source unestablished, user reported not using the simulator, all retained and never attributed to controlled input. Separately seed a unique synthetic recovery envelope copied from the actual saved UI document, open on ordinary owner, SIGKILL while pending, reopen, explicit save once, repeat save, SIGKILL and reopen committed file. The seed is not evidence that the ordinary worker wrote a pending checkpoint. Prior original-worker host tests remain separate. No unconfirmed-write kill, replacement crash window, power-loss, complete owner loss, killed-process native receipt, physical stylus/heap or full C1 claim."
     },
+    "android-ordinary-recovery-ui": {
+      "report_sha256": "c521a4d96a26c41231d02ddd2aeeff76f803664a9f5a529ac5861f17481895fb",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 183,
+      "mismatches": [],
+      "scope": "Selected ordinary API36 emulator UI, actual files, SurfaceControl callbacks and two force-stop reopens"
+    },
     "input-capture-contract": {
       "report_sha256": "98a205b21134805374cd49506e4c2807b5f12eba358f73510e5ec913ad1015e2",
       "role": "current_regression",
@@ -1154,7 +1162,7 @@
           "path": "tools/audit_c1_evidence.py",
           "state": "changed",
           "expected": "eb2c3590d12fdffc308a5c817e3312fd7e11aca14d99be9c25061908a978ab2c",
-          "actual": "4e23296759a771b5e10888b9fcdac0094dc14955fbb72bb9d09f7baf54cad0bf"
+          "actual": "2188e71d1d660bf3556fc27b0cadd8b31e3d05ae72de29ddc01a0f098fb3e4b4"
         },
         {
           "path": "tools/audit_public_boundary.py",
@@ -1214,7 +1222,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "5a47d02539250c709738965798f9bb20f3e7520939a349f77b1b657b8533142d",
-          "actual": "9b69d97b9587298cecfe441a2910030ac25ac9c9a98f51fef66fecc63ed8c85e"
+          "actual": "a1117aebe9a5fd4a6dd17ff977d440608df6492a887edbe3d67f1ed6dca41021"
         },
         {
           "path": "reports/android-brush-common-tests.json",
@@ -1394,5 +1402,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "4e23296759a771b5e10888b9fcdac0094dc14955fbb72bb9d09f7baf54cad0bf"
+  "audit_tool_sha256": "2188e71d1d660bf3556fc27b0cadd8b31e3d05ae72de29ddc01a0f098fb3e4b4"
 }
