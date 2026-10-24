@@ -12,3 +12,6 @@ dependencyResolutionManagement {
 rootProject.name = "NoteCore"
 include(":canvas-core", ":shared-core")
 if (providers.gradleProperty("enableAndroidTargets").orNull == "true") include(":android-app")
+
+if (providers.gradleProperty("enableAndroidTargets").orNull == "true" &&
+    providers.gradleProperty("enableSampleHost").orNull == "true") include(":samples:sketch-host")

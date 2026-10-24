@@ -126,35 +126,56 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "a1117aebe9a5fd4a6dd17ff977d440608df6492a887edbe3d67f1ed6dca41021",
+      "report_sha256": "d00bcb66d95e4c1dbbdd1bea1c057f16ecfe769674e6513f35a493a7151bcbc1",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 215,
+      "matched_bindings": 217,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
     "android-brush-common-tests": {
       "report_sha256": "ea45ed4030465222ccba47a6b87c72abeaa6f5cfaa90f6f040270f06e38a38a0",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 63,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 62,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "Real ART execution of original primitive input arena/replay plus common geometry/reduction/chunk index/subpixel mask tests in an isolated test-only library APK. Includes actual Android Bitmap/Canvas premultiplication, color/alpha and nearest and filtered tile seam checks with true neighbor gutter and disjoint device-pixel core clips. Includes Bitmap allocationByteCount observations; no whole-process heap, GPU, arbitrary transform, app UI, touch or device performance claim."
     },
     "apple-brush-common-tests": {
       "report_sha256": "f1dc316ac738a67e5fb198479380b07c2a8c72257c6ee4f2c0674a7fea1a41cf",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 57,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 56,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "Actual common primitive input arena/replay, envelope/path generation, bounded admission, cancellation and coverage tests compiled/run by Kotlin/Native. Includes CoreGraphics RGBA image/alpha/color and nearest/filtered tile consumption. No UIKit touch, physical performance, general filter/transform or heap claim."
     },
     "ios-host-tests": {
       "report_sha256": "874e705feddf433979e1ca851cf3ee8a7ce8ca72840af5ba694f433d96d6144f",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 63,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 62,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "Actual iOS app-host APIs, isolated temporary files and CoreGraphics offscreen pixels. Separate test build; not distributable binary UI, real touch, system picker, force-stop or power-loss recovery evidence."
     },
     "render-viewport-trace": {
@@ -182,7 +203,7 @@
       "report_sha256": "e63bab2c521470d0d71cf82d4b25e4c156553b26a2cbe8f49f431ab268b00c47",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 65,
+      "matched_bindings": 64,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -261,6 +282,12 @@
           "state": "changed",
           "expected": "c2af191e3b2e7188664b75b1933ac4bc776511aad850e451ad48d959c4dec75a",
           "actual": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea"
+        },
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt",
@@ -358,16 +385,29 @@
     "public-boundary-inventory": {
       "report_sha256": "c935ddc65a5e3a2fa6e0a96aa1836b43a5bb62c32b32544e0ac6649b8b370598",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 81,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 79,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        },
+        {
+          "path": "tools/check_architecture.py",
+          "state": "changed",
+          "expected": "afb26011ba765de637dc5e4235c05d86e8f27e0f898e620e7c269dd5df859641",
+          "actual": "abcc309a6e5820e8fea5845a4a6867e93f0e903d8301a749b92150d85deae8a3"
+        }
+      ],
       "scope": "Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count."
     },
     "preview-edit-contract": {
       "report_sha256": "0cf0ea90b6d6d6dad39e15780014d51dfb73172305827dd39f5701ca93db2bfe",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 64,
+      "matched_bindings": 63,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -446,6 +486,12 @@
           "state": "changed",
           "expected": "c2af191e3b2e7188664b75b1933ac4bc776511aad850e451ad48d959c4dec75a",
           "actual": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea"
+        },
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt",
@@ -550,7 +596,7 @@
       "report_sha256": "966c8d3bef060c797a487f520a167331a2fb971363b7a7612cff5402e4201bb0",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 103,
+      "matched_bindings": 102,
       "mismatches": [
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
@@ -587,6 +633,12 @@
           "state": "changed",
           "expected": "62f146f378dbae9ac66d70c414a422dddceba10c477c4d497e775b922af42ae3",
           "actual": "a15b0a9e59645f2419a4d3113afb0c0aa4cc2581891d6d656956c0a766577ac1"
+        },
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
         },
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
@@ -727,7 +779,7 @@
       "report_sha256": "c674133f774aceef296f1c68d54814db6dde80989e2ab9f4a6c49b9f2835e33f",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 69,
+      "matched_bindings": 68,
       "mismatches": [
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
@@ -782,6 +834,12 @@
           "state": "changed",
           "expected": "686228d2d69298b835b822d647cb388aa53df677eefd888fc037ff8b4f47369a",
           "actual": "34babbb9c033fe73e23ee018da619f97fe44c30953aabc407a2ea6d2bce44061"
+        },
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
         },
         {
           "path": "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype",
@@ -855,18 +913,40 @@
     "ios-ordinary-recovery-ui": {
       "report_sha256": "78edb6527752c9b3bf2eeabbdf34d6b492bf539efc9e17c4ea70352744a11cb5",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 119,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 118,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "Current ordinary UIKit CUA case only, with PID-specific files/provider logs and targeted SIGKILL: new named note, dot/lines, undo/redo, two pages/paper/tool, zoom, Home/foreground, normal close/reopen, saved ordinary file restart. Three extra strokes appeared outside recorded CUA instructions; source unestablished, user reported not using the simulator, all retained and never attributed to controlled input. Separately seed a unique synthetic recovery envelope copied from the actual saved UI document, open on ordinary owner, SIGKILL while pending, reopen, explicit save once, repeat save, SIGKILL and reopen committed file. The seed is not evidence that the ordinary worker wrote a pending checkpoint. Prior original-worker host tests remain separate. No unconfirmed-write kill, replacement crash window, power-loss, complete owner loss, killed-process native receipt, physical stylus/heap or full C1 claim."
     },
     "android-ordinary-recovery-ui": {
       "report_sha256": "c521a4d96a26c41231d02ddd2aeeff76f803664a9f5a529ac5861f17481895fb",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 183,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 182,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "Selected ordinary API36 emulator UI, actual files, SurfaceControl callbacks and two force-stop reopens"
+    },
+    "second-host-android": {
+      "report_sha256": "056676482a9588b14d883c838e17bd30bf7af5d4e2d4c017b8456d15dc176ce1",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 69,
+      "mismatches": [],
+      "scope": "Independent API36 Android memory-sketch consumer: instrumented exact real samples, injected tools/background, readonly policy, owner and actual Activity recreation; selected CUA ordinary flow separately observed"
     },
     "input-capture-contract": {
       "report_sha256": "98a205b21134805374cd49506e4c2807b5f12eba358f73510e5ec913ad1015e2",
@@ -918,32 +998,53 @@
     "shared-native-contracts": {
       "report_sha256": "169652cbc7652fcd1c11c5b4131f4cc26600353f706ad6960d970e995ccb4c46",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 67,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 66,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "All current shared-core common tests compiled and executed on Kotlin/Native, including save dispatch, title, history, capacity, edit, input and codecs. No JVM-only worker tests, native file IO, UIKit delivery, current ordinary UI, physical performance or durability claim."
     },
     "android-input-host-tests": {
       "report_sha256": "ddf2f9c8f7f9342bacff5586a6600e05d4e6b71d3ab251ce9b00ce338664a692",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 85,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 84,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, six original NoteStore/worker file/export retention checks and six explicit Store retirement checks in unique cache directories. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence."
     },
     "android-render-integration": {
       "report_sha256": "30a1fc5963ac51bc77785d3bb9522643124224c1232feb0326315fc0651a6c4a",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 94,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 93,
+      "mismatches": [
+        {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        }
+      ],
       "scope": "Actual original Android app-host hierarchy consumes complete compositor frames and active/static replacement, page/zoom, source release/fence, detach/late ACK, cleanup UNKNOWN, actual-receipt recovery after injected post-handoff confirmation loss, delayed owner settlement/backpressure/shared storage and saved new-owner reopen. Ordinary code is connected, but no ordinary-process UI acceptance. No physical stylus/frame/heap, production GPU backend, C1 or SQLite claim."
     },
     "sqlite-platform-capabilities": {
       "report_sha256": "60eef9fc49db85342d045d4eeaca05f67c4a499e38e4afa74c7a6b617d11514c",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 59,
+      "matched_bindings": 58,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -1024,6 +1125,12 @@
           "actual": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea"
         },
         {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        },
+        {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt",
           "state": "changed",
           "expected": "a1f5d522b5bbbcb63b3ab8a2eed629fb1ee30b8e3fa8d8a5f5674b296e397b4e",
@@ -1066,7 +1173,7 @@
       "report_sha256": "a74abb03cd7d58f90322e68c3e2d78dbc0ce2241ca653672634b5da92bc792c3",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 137,
+      "matched_bindings": 135,
       "mismatches": [
         {
           "path": "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.xml",
@@ -1162,13 +1269,19 @@
           "path": "tools/audit_c1_evidence.py",
           "state": "changed",
           "expected": "eb2c3590d12fdffc308a5c817e3312fd7e11aca14d99be9c25061908a978ab2c",
-          "actual": "2188e71d1d660bf3556fc27b0cadd8b31e3d05ae72de29ddc01a0f098fb3e4b4"
+          "actual": "987a58de3d2ac43a3ba668e8409f621fbd8d9caacd13720ec282a07af47e4980"
         },
         {
           "path": "tools/audit_public_boundary.py",
           "state": "changed",
           "expected": "137c047d36771556091e764a8cbd5a7dd108310409770de2c01233052538f52e",
           "actual": "93eb77b70589e01eaf1c250bc0afcfd5811d5f1c79dc7e53480dc53befa0c362"
+        },
+        {
+          "path": "tools/check_architecture.py",
+          "state": "changed",
+          "expected": "afb26011ba765de637dc5e4235c05d86e8f27e0f898e620e7c269dd5df859641",
+          "actual": "abcc309a6e5820e8fea5845a4a6867e93f0e903d8301a749b92150d85deae8a3"
         },
         {
           "path": "tools/verify_android_brush_common.py",
@@ -1219,10 +1332,16 @@
           "actual": "5871ec752495653e533c55392fb982a1ad26cd602688a8fbf048a28f0e837898"
         },
         {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        },
+        {
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "5a47d02539250c709738965798f9bb20f3e7520939a349f77b1b657b8533142d",
-          "actual": "a1117aebe9a5fd4a6dd17ff977d440608df6492a887edbe3d67f1ed6dca41021"
+          "actual": "d00bcb66d95e4c1dbbdd1bea1c057f16ecfe769674e6513f35a493a7151bcbc1"
         },
         {
           "path": "reports/android-brush-common-tests.json",
@@ -1267,7 +1386,7 @@
       "report_sha256": "6342d7b59815a72748e7c5a28233e01e1c3d7b746b420c060b2e3f40b479fec0",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 90,
+      "matched_bindings": 89,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -1348,6 +1467,12 @@
           "actual": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea"
         },
         {
+          "path": "settings.gradle.kts",
+          "state": "changed",
+          "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
+          "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        },
+        {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt",
           "state": "changed",
           "expected": "a1f5d522b5bbbcb63b3ab8a2eed629fb1ee30b8e3fa8d8a5f5674b296e397b4e",
@@ -1388,12 +1513,21 @@
     }
   },
   "errors": [
+    "android-brush-common-tests: current evidence binding failed",
+    "apple-brush-common-tests: current evidence binding failed",
+    "ios-host-tests: current evidence binding failed",
     "render-viewport-trace: current evidence binding failed",
     "canonical-title-contract: current evidence binding failed",
+    "public-boundary-inventory: current evidence binding failed",
     "preview-edit-contract: current evidence binding failed",
     "preview-input-contract: current evidence binding failed",
     "ios-preview-ui: current evidence binding failed",
+    "ios-ordinary-recovery-ui: current evidence binding failed",
+    "android-ordinary-recovery-ui: current evidence binding failed",
     "apple-current-revalidation: current evidence binding failed",
+    "shared-native-contracts: current evidence binding failed",
+    "android-input-host-tests: current evidence binding failed",
+    "android-render-integration: current evidence binding failed",
     "sqlite-platform-capabilities: current evidence binding failed",
     "incremental-spatial-index: current evidence binding failed",
     "pdf-platform-capabilities: current evidence binding failed"
@@ -1402,5 +1536,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "2188e71d1d660bf3556fc27b0cadd8b31e3d05ae72de29ddc01a0f098fb3e4b4"
+  "audit_tool_sha256": "987a58de3d2ac43a3ba668e8409f621fbd8d9caacd13720ec282a07af47e4980"
 }
