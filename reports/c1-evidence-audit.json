@@ -126,10 +126,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "4bd0349d235d81c63cd5ee26056237f17d219397c49fd92793d39405a4a1c5e4",
+      "report_sha256": "9b69d97b9587298cecfe441a2910030ac25ac9c9a98f51fef66fecc63ed8c85e",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 211,
+      "matched_bindings": 213,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -852,6 +852,14 @@
       ],
       "scope": "Current ordinary UIKit Simulator selected UI observed through CUA: new named note, dark dot/line, undo/redo, blue line on grid page two, zoom/fit/page isolation, Home/foreground and normal library close/reopen. Retained file bytes, PID-specific provider source-release/owner logs and original PNGs corroborate this manual observation. Hashes and AX snippets are not a pixel oracle."
     },
+    "ios-ordinary-recovery-ui": {
+      "report_sha256": "78edb6527752c9b3bf2eeabbdf34d6b492bf539efc9e17c4ea70352744a11cb5",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 119,
+      "mismatches": [],
+      "scope": "Current ordinary UIKit CUA case only, with PID-specific files/provider logs and targeted SIGKILL: new named note, dot/lines, undo/redo, two pages/paper/tool, zoom, Home/foreground, normal close/reopen, saved ordinary file restart. Three extra strokes appeared outside recorded CUA instructions; source unestablished, user reported not using the simulator, all retained and never attributed to controlled input. Separately seed a unique synthetic recovery envelope copied from the actual saved UI document, open on ordinary owner, SIGKILL while pending, reopen, explicit save once, repeat save, SIGKILL and reopen committed file. The seed is not evidence that the ordinary worker wrote a pending checkpoint. Prior original-worker host tests remain separate. No unconfirmed-write kill, replacement crash window, power-loss, complete owner loss, killed-process native receipt, physical stylus/heap or full C1 claim."
+    },
     "input-capture-contract": {
       "report_sha256": "98a205b21134805374cd49506e4c2807b5f12eba358f73510e5ec913ad1015e2",
       "role": "current_regression",
@@ -1050,7 +1058,7 @@
       "report_sha256": "a74abb03cd7d58f90322e68c3e2d78dbc0ce2241ca653672634b5da92bc792c3",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 138,
+      "matched_bindings": 137,
       "mismatches": [
         {
           "path": "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.xml",
@@ -1143,6 +1151,12 @@
           "actual": "a143f2eb05cad2e079fd4b753e821c9fad18715ac5f528dd9a161654e87ded6b"
         },
         {
+          "path": "tools/audit_c1_evidence.py",
+          "state": "changed",
+          "expected": "eb2c3590d12fdffc308a5c817e3312fd7e11aca14d99be9c25061908a978ab2c",
+          "actual": "4e23296759a771b5e10888b9fcdac0094dc14955fbb72bb9d09f7baf54cad0bf"
+        },
+        {
           "path": "tools/audit_public_boundary.py",
           "state": "changed",
           "expected": "137c047d36771556091e764a8cbd5a7dd108310409770de2c01233052538f52e",
@@ -1200,7 +1214,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "5a47d02539250c709738965798f9bb20f3e7520939a349f77b1b657b8533142d",
-          "actual": "4bd0349d235d81c63cd5ee26056237f17d219397c49fd92793d39405a4a1c5e4"
+          "actual": "9b69d97b9587298cecfe441a2910030ac25ac9c9a98f51fef66fecc63ed8c85e"
         },
         {
           "path": "reports/android-brush-common-tests.json",
@@ -1380,5 +1394,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "eb2c3590d12fdffc308a5c817e3312fd7e11aca14d99be9c25061908a978ab2c"
+  "audit_tool_sha256": "4e23296759a771b5e10888b9fcdac0094dc14955fbb72bb9d09f7baf54cad0bf"
 }
