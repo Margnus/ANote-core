@@ -1,0 +1,54 @@
+{
+  "schema": "typed-recovery-read-1",
+  "status": "passed",
+  "scope": "Original pure bounded recovery reader: complete snapshot or typed refusal; shared JVM/Native plus actual Android Store/Swift Model worker reads; no ordinary UI or physical durability claim",
+  "shared_checks": [
+    "fullCheckpointRetainsPendingUntilOriginalOwnerExplicitlyCommitsOnce",
+    "malformedOrOverCapacityInputNeverReturnsPartialBaseAndLaterReadStillWorks",
+    "ordinaryV1V2RemainReadableWithoutManufacturingPending",
+    "validButUnsupportedOrdinaryAndEnvelopeContentKeepCapabilityRefusal"
+  ],
+  "native_checks": [
+    "fullCheckpointRetainsPendingUntilOriginalOwnerExplicitlyCommitsOnce",
+    "malformedOrOverCapacityInputNeverReturnsPartialBaseAndLaterReadStillWorks",
+    "ordinaryV1V2RemainReadableWithoutManufacturingPending",
+    "validButUnsupportedOrdinaryAndEnvelopeContentKeepCapabilityRefusal"
+  ],
+  "ordinary_v1_v2_and_pending_preserved": true,
+  "unsupported_ordinary_base_and_pending_capability_refusal": true,
+  "malformed_input_never_returns_base_only": true,
+  "legacy_throwing_decode_swift_runtime_refusal_verified": true,
+  "android_original_files_unchanged": 66,
+  "ios_original_files_unchanged": 14,
+  "decision": "Adopt typed read on original codec, reuse existing canonical reader/decoder and full checkpoint. No IO/owner/callback inside content boundary; Android/Swift map refusal at original worker adapters. Legacy throwing decode stays available.",
+  "limits": [
+    "Only decoder IllegalArgument validation is mapped; other exception types are not caught. Reader executes no IO, owner or callback",
+    "No mutable session until existing owner openRecovery; decoding never commits pending",
+    "No stable public whitelist or arbitrary constructor/null/index/owner safety claim",
+    "No unconfirmed IO interruption, replacement crash window, power loss, physical heap/stylus or current ordinary UI verification"
+  ],
+  "ordinary_ui_verified": false,
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt": "007c130e77e07b9883c7dd5c322c69e45cf24ad2696c85d2af360343219f2f61",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "d6265067628f2c369cf0429e8c97a94e270d70b879962c7d24a476640c05d005",
+    "build/typed-recovery-read/android-package.json": "7b91855e75dd8925dc1ac4a1e24c12d479342fc014d24780543a44acccf94214",
+    "build/typed-recovery-read/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/typed-recovery-read/ios-before.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "8944d00409531940edce5b57f0492dc49a47e5613652a6ba2f5f5e4292fbdca2",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "91d2ef69499bbf8f9536fe10a96c9de7c772447758701f1de5bedef29fb9eb88",
+    "reports/android-input-host-tests.json": "483a3e83338c2208a0d447f9da909d8b1cc09b274132d3fe0aa7eba9327c5afa",
+    "reports/ios-host-tests.json": "a258c4d7b62ae597adea6e27e23b731b46ddb671e5a9745f5348304eaee513d1",
+    "reports/ios-preview-build.json": "f58072701074ca12524c163a4d24cdb239a4cedd763a29b65401f048ebe7409c",
+    "reports/ios-preview-restored.json": "31a59bcf2a5e435b6eba399b8a19da4bd8875d96128be6ac74aecc5f98b2b09a",
+    "reports/preview-build.json": "2cd9952ca7a761360d8eefa6ab86aff4067508070c846bb8da1325b7313c9f31",
+    "reports/public-boundary-inventory.json": "d1b77a7fff199d8ac7ff1e9e6cb262c0e4ddc76842757722f635ffcf278c1ea1",
+    "reports/shared-native-contracts.json": "bbfb69882719b68f63a42932467df73bf879de7df2942c4b9159d1564eb1f74f",
+    "reports/verification.json": "6dd40ba6aa9b38a64b23a346819365df05c8fae82d0ae61c50562e64cac79678",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryReaderTest.xml": "1b8f9b93a164f10ecd384b2a20fbc4c5dc361f17d3a637740b48ba3a7965100a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "f6b7f56003c53915483507392031c4c3ba5486fbfa5092d38a5662fba3418923",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewRecoveryReaderTest.kt": "313776d1f92ad5ff9d3d4da4e2f98a9d66badb59c7b0e09d6e66a518e9881eed",
+    "tools/verify_typed_recovery_read.py": "977eb568dc9626fb13508c777f55e0387b73d95bc4217ad726f35855b65728a5"
+  }
+}

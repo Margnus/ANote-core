@@ -14,6 +14,9 @@ final class PagedHostTests: XCTestCase {
         let operation = "reused-op-1".utf16.map { String(format: "%04x", $0) }.joined()
         let encoded = "NCRECOVERY\t1\nD\tpending-swift\tpending\t1\t0\t0\n\(base.utf16.count)\t\(ink.utf16.count)\t\(operation)\n" + base + ink + "RECOVERY-END\n"
         let checkpoint = try PreviewRecoveryCodec.shared.decode(text: encoded)
+        let reading = PreviewRecoveryCodec.shared.read(text: encoded)
+        XCTAssertNil(reading.failure); XCTAssertTrue(reading.snapshot!.sameContent(other: checkpoint))
+        XCTAssertNotNil(reading.snapshot?.pending)
         let file = dir.appendingPathComponent("pending-swift.ncp")
         try PreviewFileIO.writeUTF8(encoded, to: file)
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
@@ -57,7 +60,13 @@ final class PagedHostTests: XCTestCase {
         let signedOperation = encoded.replacingOccurrences(of: "\t\(operation)\n", with: "\t-001\(operation.dropFirst(4))\n")
         let signedLength = encoded.replacingOccurrences(of: "\n\(base.utf16.count)\t", with: "\n+\(base.utf16.count)\t")
         let refused = PreviewModel(directory: dir)
-        for corrupt in [String(encoded.dropLast()), signedOperation, signedLength] {
+        let refusedInputs: [(String, PreviewReadFailure)] = [
+            (String(encoded.dropLast()), .invalidOrUnsupportedFormat), (signedOperation, .invalidOrUnsupportedFormat),
+            (signedLength, .invalidOrUnsupportedFormat), (encoded.replacingOccurrences(of: "MONOLINE", with: "PRESSURE"), .unsupportedPreviewContent)]
+        for (corrupt, reason) in refusedInputs {
+            let reading = PreviewRecoveryCodec.shared.read(text: corrupt)
+            XCTAssertNil(reading.snapshot); XCTAssertEqual(reading.failure, reason)
+            XCTAssertThrowsError(try PreviewRecoveryCodec.shared.decode(text: corrupt))
             try PreviewFileIO.writeUTF8(corrupt, to: file)
             refused.open("pending-swift")
             try await eventually("malformed recovery refuses entire opening") { refused.status.contains("读取失败") }

@@ -11,7 +11,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "2c44bde93b3ccaff60598b167fe642ef5012f4b089f23a9cf8a567a5729b92c8",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "8c45823294d1fd3508b21ca114a74fc71accfe840c1b40d58254af4763eb5888",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "5ab9075832a0d1bcb0fca8c074b2f14bacdb3fdd2cecc63b5c917cb698e22833",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "455f6876cf5b6afea3d2576ed6958e2ceebe346d157a9ea3bbfc4a45e486f8eb",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "f6b7f56003c53915483507392031c4c3ba5486fbfa5092d38a5662fba3418923",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "4d08dbc77bd6ba4ee86f5918e0670122b3c7a14c8c47c38f3ff21e34f6073690",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "51d19b7053371506991c9fb0fdfaab00e851184da5ea22234b462a1489228166",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
@@ -45,7 +45,7 @@
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "608a6c20717864d15bf043d808522a18c9562498ad3879a1615d7197eed70c03",
     "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
     "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85",
-    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "c2189825cf7286eb04b8e97dc4c22d4299e9999f84067a69041e550edec95b82",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "8944d00409531940edce5b57f0492dc49a47e5613652a6ba2f5f5e4292fbdca2",
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "settings.gradle.kts": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc",
     "canvas-core/build.gradle.kts": "ac4f2148968181b43b165d52d086f7f48e120ff85289e2e544bf3ec974694709",
@@ -53,10 +53,10 @@
     "gradle.properties": "a29e188235a52da45ce914db097aa8f585297256b2fcb469a51048bf88f542b0",
     "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "69a65c3ea689a769df1da634c8280a58919359278b06f4a36bf3e5f207cd028b",
     "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "5eda8168412b500ef3d9d73657c793d4b613183be99bc2e70bb6146a7d446d1e",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "acb90f7aff1113aa5786bff9545554c1f0ecc54df0111245053451aea503e463",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/__preview.dylib": "aa76befa0bbd1e954f9726932da69b7c908db2d0294a2e72be93829e4eb3cea4",
-    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "f686a2194fc4898fd8a2f1702b06b1ae7f4e14103fd4c3b4a42b1e31bbc5c3d2",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "4ce514411c7ffdb7d26b1751d888f353b4e853a5711dceee6dbf7d84bc85f5d5",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/Info.plist": "a09aae9143cabe4e5b6c4248d36c71c7f6534c1be03946668658071362576ff0",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
     "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
@@ -72,22 +72,32 @@
     "android-app/src/main/java/dev/notecore/app/NativeBrushRenderer.kt": "e696190da1627d8115a4870f9145869fdf71d3302644a1faa990d337fe8420f7",
     "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "11a0312579ee6133f5f97ce10abac9748b9ef34808cb26cf4554206126083531",
     "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "b8e42f2f8a480d1cb5e771e0baee7c5751bf852ae2d5aa026cfdd372e8d83f57",
-    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "a15b0a9e59645f2419a4d3113afb0c0aa4cc2581891d6d656956c0a766577ac1",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "d6265067628f2c369cf0429e8c97a94e270d70b879962c7d24a476640c05d005",
     "android-app/src/main/java/dev/notecore/app/InkSurfaceHost.kt": "96515e50606d5a3a5f5d742d851c2492bc6c103227c067d02b6c497ee566ad2f",
     "android-app/build.gradle.kts": "66b56c66a2215054d1b605e75fccf35adcc1aaabf63ae159026727daf3ba9ab7",
-    "android-app/build/outputs/apk/debug/android-app-debug.apk": "29e12a93137bdbd41890d366fa029bcbfa7fe99a0603734acc3b83dbbd9300e5",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "0b292114c700810e4f3e191ab3f85517f79c45ac24ab9d96619b10a06c1a9379",
     "android-app/build/reports/lint-results-debug.xml": "d755da477584db66afddedc6a4903f77e050f55d5d6453d23b70b72c9440b4c2",
-    "dist/NoteCore-0.1.0-preview.apk": "29e12a93137bdbd41890d366fa029bcbfa7fe99a0603734acc3b83dbbd9300e5",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "d6991b41595ca78f3e3dd01ead3229cebacc6a86a57a876e45d9204b85c23b6b",
-    "reports/ios-preview-build.json": "da37365558848b8d79e8d389088035d8e135a50de743c863abec849662792918",
-    "reports/preview-build.json": "55a972b572489759e66235ee7826c9cdb9f1db775c847fcb2d972c071ff25b17",
+    "dist/NoteCore-0.1.0-preview.apk": "0b292114c700810e4f3e191ab3f85517f79c45ac24ab9d96619b10a06c1a9379",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "f2fe1ab632dc12d5e89c33d166d8db5b066d489d144a3ea3427a843b36b02cf7",
+    "reports/ios-preview-build.json": "f58072701074ca12524c163a4d24cdb239a4cedd763a29b65401f048ebe7409c",
+    "reports/preview-build.json": "2cd9952ca7a761360d8eefa6ab86aff4067508070c846bb8da1325b7313c9f31",
     "tools/check_architecture.py": "abcc309a6e5820e8fea5845a4a6867e93f0e903d8301a749b92150d85deae8a3",
-    "tools/audit_public_boundary.py": "96db3d4231b93c6680664e30ac22964d2c6ca60ec91ff1fdec3be84af63db4d8"
+    "tools/audit_public_boundary.py": "392c1d165b30c4ce509923ddb45149da32299475d3c1fc9ceab5b316284b7719"
   },
-  "objc_declaration_count": 255,
-  "objc_method_count": 865,
-  "reviewed_method_count": 22,
+  "objc_declaration_count": 256,
+  "objc_method_count": 866,
+  "reviewed_method_count": 24,
   "reviewed_declaration_channels": [
+    {
+      "objc_name": "NCPPreviewRecoveryCodec",
+      "swift_name": "decode(text:)",
+      "declares_nserror": true
+    },
+    {
+      "objc_name": "NCPPreviewRecoveryCodec",
+      "swift_name": "read(text:)",
+      "declares_nserror": false
+    },
     {
       "objc_name": "NCPMemoryDocumentAuthority",
       "swift_name": "init(initial:budget:ownerCheck:)",
@@ -2653,13 +2663,20 @@
         "init()",
         "decode(text:)",
         "encode(snapshot:)",
-        "header(text:)"
+        "header(text:)",
+        "read(text:)"
       ],
       "nserror_methods": [
         "decode(text:)",
         "encode(snapshot:)",
         "header(text:)"
       ]
+    },
+    {
+      "kind": "interface",
+      "objc_name": "NCPPreviewRecoveryRead",
+      "methods": [],
+      "nserror_methods": []
     },
     {
       "kind": "interface",

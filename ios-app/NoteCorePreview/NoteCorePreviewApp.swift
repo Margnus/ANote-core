@@ -347,7 +347,9 @@ final class PreviewModel: ObservableObject {
             if let retained = input.2 as? PagedPreviewSnapshot { captured = retained }
             else {
                 guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
-                captured = try PreviewRecoveryCodec.shared.decode(text: PreviewFileIO.readUTF8(input.0))
+                let reading = try PreviewRecoveryCodec.shared.read(text: PreviewFileIO.readUTF8(input.0))
+                guard let snapshot = reading.snapshot else { throw CocoaError(.fileReadCorruptFile) }
+                captured = snapshot
             }
             guard captured.documentId == input.1 else { throw CocoaError(.fileReadCorruptFile) }
             try Self.validateRenderable(captured.root)

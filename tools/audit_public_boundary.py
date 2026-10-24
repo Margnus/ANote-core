@@ -10,6 +10,7 @@ HEADER = 'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasProto
 BINARY = 'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype'
 # Expected declaration channels for reviewed examples, NOT an exhaustive list of throwing paths.
 CHANNELS = {
+    'NCPPreviewRecoveryCodec': {'decode(text:)': True, 'read(text:)': False},
     'NCPMemoryDocumentAuthority': {'init(initial:budget:ownerCheck:)': True, 'commit(command:)': False, 'snapshot()': False},
     'NCPPagedPreviewNotebook': {'init(initial:sessionNonce:budget:ownerCheck:)': True, 'rename(value:)': False, 'pointX(index:point:)': False},
     'NCPPagedPreviewCodec': {'decode(text:)': True, 'encode(root:)': True, 'header(text:)': True},

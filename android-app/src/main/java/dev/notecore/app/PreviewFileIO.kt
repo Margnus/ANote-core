@@ -92,7 +92,8 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     fun readRecovery(id: String): PagedPreviewSnapshot = AtomicFile(file(id)).openRead().use { stream ->
         require(stream.channel.size() <= 32L * 1024 * 1024)
-        PreviewRecoveryCodec.decode(decode(readBounded(stream))).also { require(it.documentId == id) }
+        val result = PreviewRecoveryCodec.read(decode(readBounded(stream)))
+        requireNotNull(result.snapshot) { "Preview recovery refused: ${result.failure}" }.also { require(it.documentId == id) }
     }
     /** Typed shared reader owns format/content refusal; only local worker IO errors escape this adapter. */
     private fun readPreview(text: String): DocumentRoot {

@@ -5,7 +5,23 @@ import dev.notecore.canvas.prototype.*
 /** Internal preview checkpoint envelope in the original atomic file. Never a second authority or journal.
  * Older readers refuse its magic; committed v1/v2 files remain readable without rewriting them.
  */
+/** Full immutable checkpoint or refusal; never a base-only fallback or mutable session. */
+class PreviewRecoveryRead internal constructor(val snapshot: PagedPreviewSnapshot?, val failure: PreviewReadFailure?)
+
 object PreviewRecoveryCodec {
+    private class ContentRefusal(val reason: PreviewReadFailure) : IllegalArgumentException("Preview refused: $reason")
+    private fun previewRoot(text: String): DocumentRoot {
+        val result = PreviewDocumentReader.read(text)
+        return result.root ?: throw ContentRefusal(requireNotNull(result.failure))
+    }
+    /** Pure bounded content boundary. Decode/validation only; no IO, owner or callbacks to catch. */
+    fun read(text: String): PreviewRecoveryRead {
+        if (text.length > PagedPreviewCodec.MAX_CHARACTERS) return PreviewRecoveryRead(null, PreviewReadFailure.CHARACTER_CAPACITY)
+        return try { PreviewRecoveryRead(decode(text), null) }
+        catch (refusal: ContentRefusal) { PreviewRecoveryRead(null, refusal.reason) }
+        catch (_: IllegalArgumentException) { PreviewRecoveryRead(null, PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT) }
+    }
+
     private const val MAGIC = "NCRECOVERY\t1\n"
     private const val END = "RECOVERY-END\n"
     private fun payload(root: DocumentRoot, pending: DocumentCommand.Canvas): DocumentRoot {
@@ -50,8 +66,7 @@ object PreviewRecoveryCodec {
     fun decode(text: String): PagedPreviewSnapshot {
         require(text.length <= PagedPreviewCodec.MAX_CHARACTERS)
         if (!text.startsWith(MAGIC)) {
-            val read = PreviewDocumentReader.read(text)
-            return PagedPreviewSnapshot(requireNotNull(read.root) { "Preview refused: ${read.failure}" })
+            return PagedPreviewSnapshot(previewRoot(text))
         }
         val metadataEnd = text.indexOf('\n', MAGIC.length)
         require(metadataEnd in MAGIC.length..4096)
@@ -73,8 +88,8 @@ object PreviewRecoveryCodec {
         require(text.substring(inkStart + inkSize) == END)
         val baseText = text.substring(baseStart, inkStart)
         require(baseText.substringAfter('\n').substringBefore('\n') == text.substring(MAGIC.length, metadataEnd))
-        val base = requireNotNull(PreviewDocumentReader.read(baseText).root)
-        val ink = requireNotNull(PreviewDocumentReader.read(text.substring(inkStart, inkStart + inkSize)).root)
+        val base = previewRoot(baseText)
+        val ink = previewRoot(text.substring(inkStart, inkStart + inkSize))
         require(ink.id == base.id && ink.title == "" && ink.revision == 0L && ink.pageCount == 1 && ink.scene.objectCount == 1)
         val page = ink.page(0); val originalPage = requireNotNull(base.findPage(page.id))
         require(page == originalPage.copy(contentRevision = 0))

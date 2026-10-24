@@ -49,6 +49,8 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             eventually("Recovery retry did not complete") { completed && store.saveStates().isEmpty() }
             val file = File(dir, "${recovery.documentId}.ncp")
             check(file.readText() == recovery.encode())
+            val reading = PreviewRecoveryCodec.read(file.readText(Charsets.UTF_8))
+            check(reading.failure == null && checkNotNull(reading.snapshot).sameContent(recovery) && reading.snapshot?.pending != null)
             main {
                 var refused = false
                 check(!store.save(note.capture()) { _, error -> check(error != null); refused = true })
@@ -82,7 +84,12 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             val signedOperation = rows[0] + "\n" + rows[1] + "\n" + frame[0] + "\t" + frame[1] + "\t-001" + frame[2].drop(4) + "\n" + rows[3]
             val signedLength = encoded.replace("\n${frame[0]}\t", "\n+${frame[0]}\t")
             main { check(store.releaseActive(note)); store.stopTestBackend(); store = NoteStore.isolated(host, dir) }
-            for (corrupt in listOf(encoded.dropLast(1), signedOperation, signedLength)) {
+            for ((corrupt, reason) in listOf(encoded.dropLast(1) to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
+                signedOperation to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
+                signedLength to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
+                encoded.replace("MONOLINE", "PRESSURE") to PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)) {
+                val reading = PreviewRecoveryCodec.read(corrupt)
+                check(reading.snapshot == null && reading.failure == reason)
                 file.writeText(corrupt, Charsets.UTF_8)
                 var refused = false
                 main { store.open(recovery.documentId) { value, error -> check(value == null && error != null); refused = true } }
