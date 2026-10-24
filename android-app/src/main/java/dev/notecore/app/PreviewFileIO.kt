@@ -39,6 +39,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         }
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {
+        require(snapshot.pending == null) { "Recovery checkpoint is not an interchange export" }
         val encoded = snapshot.encode(); require(encoded.length <= 16_000_000)
         checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(encoded.toByteArray(Charsets.UTF_8)); it.flush() }
     }
@@ -73,7 +74,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             val value = input.read(); require(value >= 0 && bytes.size() < 4096) { "Invalid catalog header" }
             bytes.write(value); if (value == 10) newlines++
         }
-        PagedPreviewCodec.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
+        PreviewRecoveryCodec.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
     }
     private fun readBounded(input: java.io.InputStream): ByteArray {
         val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
@@ -86,9 +87,12 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     private fun decode(bytes: ByteArray): String = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
         .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
-    fun read(id: String): DocumentRoot = AtomicFile(file(id)).openRead().use { stream ->
+    fun read(id: String): DocumentRoot = readRecovery(id).let {
+        require(it.pending == null) { "Pending recovery requires the original owner" }; it.root
+    }
+    fun readRecovery(id: String): PagedPreviewSnapshot = AtomicFile(file(id)).openRead().use { stream ->
         require(stream.channel.size() <= 32L * 1024 * 1024)
-        readPreview(decode(readBounded(stream))).also { require(it.id.value == id) }
+        PreviewRecoveryCodec.decode(decode(readBounded(stream))).also { require(it.documentId == id) }
     }
     /** Typed shared reader owns format/content refusal; only local worker IO errors escape this adapter. */
     private fun readPreview(text: String): DocumentRoot {

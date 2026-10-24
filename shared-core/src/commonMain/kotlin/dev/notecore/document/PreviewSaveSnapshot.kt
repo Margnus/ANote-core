@@ -10,4 +10,6 @@ sealed interface PreviewSaveSnapshot {
     @Throws(IllegalArgumentException::class)
     fun encode(): String
     fun sameContent(other: PreviewSaveSnapshot): Boolean
+    /** Same-version replacement is restricted to a strict extension of the identical committed root. */
+    fun strictlyExtends(other: PreviewSaveSnapshot): Boolean = false
 }

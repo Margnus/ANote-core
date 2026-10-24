@@ -21,12 +21,13 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         check(done) { message }
     }
     fun verify(): String {
+        PendingRecoveryHostChecks(test, host).verify()
         val directory = File(host.cacheDir, "storage-retention-${java.util.UUID.randomUUID()}")
         val moved = File(directory.path + "-saved")
         lateinit var store: NoteStore
         lateinit var note: PagedPreviewNotebook
         var completed = false
-        val checks = mutableListOf<String>()
+        val checks = mutableListOf("pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen")
         main {
             store = NoteStore.isolated(host, directory); note = store.create()
             val original = note.snapshot()

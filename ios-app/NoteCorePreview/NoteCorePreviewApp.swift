@@ -40,6 +40,8 @@ final class PreviewModel: ObservableObject {
     private let storageWorkBytes: Int64 = 256 * 1024 * 1024
     // Identity-only saved shortcut; the authority/ledger own content while it is needed.
     private weak var savedRoot: DocumentRoot?
+    private weak var savedPending: DocumentCommandCanvas?
+    private let documentBudget: DocumentBudget?
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
@@ -252,8 +254,9 @@ final class PreviewModel: ObservableObject {
         return false
     }
     init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
-         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }) {
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil) {
         precondition(Thread.isMainThread)
+        self.documentBudget = documentBudget
         self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
         self.directory = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PreviewNotes", isDirectory: true)
         refresh()
@@ -269,16 +272,19 @@ final class PreviewModel: ObservableObject {
         })
         if case .rejected = admission { rejected() }
     }
-    private func adopt(_ root: DocumentRoot, persisted: Bool) throws {
+    func adopt(_ root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot? = nil) throws {
         precondition(Thread.isMainThread && current == nil)
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+        let budget = documentBudget ?? DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
             historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
-        let opening = PagedPreviewNotebook.companion.open(initial: root, sessionNonce: UUID().uuidString, budget: budget,
+        let checkpoint = try recovery ?? PagedPreviewSnapshot.companion.fromRoot(root: root)
+        guard checkpoint.root === root else { throw CocoaError(.fileReadCorruptFile) }
+        let opening = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: UUID().uuidString, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
         guard let notebook = opening.notebook else { throw CocoaError(.fileReadCorruptFile) }
         current = notebook
         savedRoot = persisted && ledger.latest(documentId: root.id.value) == nil ? root : nil
+        savedPending = savedRoot != nil ? recovery?.pending : nil
         revision = root.revision
     }
     private static func readPreview(_ encoded: String) throws -> DocumentRoot {
@@ -314,7 +320,7 @@ final class PreviewModel: ObservableObject {
                 let id = url.deletingPathExtension().lastPathComponent
                 let title: String
                 if let encoded = try? PreviewFileIO.readHeaderUTF8(url),
-                   let header = try? PagedPreviewCodec.shared.header(text: encoded), header.documentId == id {
+                   let header = try? PreviewRecoveryCodec.shared.header(text: encoded), header.documentId == id {
                     title = header.title
                 } else { title = "待恢复的笔记" }
                 return LocalNote(id: id, title: title, date: date)
@@ -333,15 +339,15 @@ final class PreviewModel: ObservableObject {
         let retained = ledger.latest(documentId: id)
         status = "正在打开…"
         request(input: (Self.file(id, directory: directory), id, retained), bytes: 160 * 1024 * 1024, compute: { input in
-            let root: DocumentRoot
-            if let captured = input.2 as? PagedPreviewSnapshot { root = captured.root }
+            let captured: PagedPreviewSnapshot
+            if let retained = input.2 as? PagedPreviewSnapshot { captured = retained }
             else {
                 guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
-                root = try Self.readPreview(PreviewFileIO.readUTF8(input.0))
+                captured = try PreviewRecoveryCodec.shared.decode(text: PreviewFileIO.readUTF8(input.0))
             }
-            guard root.id.value == input.1 else { throw CocoaError(.fileReadCorruptFile) }
-            try Self.validateRenderable(root)
-            return root // Immutable only. The main owner creates the mutable session after navigation checks.
+            guard captured.documentId == input.1 else { throw CocoaError(.fileReadCorruptFile) }
+            try Self.validateRenderable(captured.root)
+            return captured
         }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
             guard self.navigationEpoch == navigation && self.current == nil else { return }
             if self.storageEpoch != epoch {
@@ -349,11 +355,11 @@ final class PreviewModel: ObservableObject {
                 DispatchQueue.main.async { self.open(id) }; return
             }
             switch result {
-            case .succeeded(let root):
-                do { try self.adopt(root, persisted: retained == nil) }
+            case .succeeded(let captured):
+                do { try self.adopt(captured.root, persisted: retained == nil, recovery: captured) }
                 catch { self.status = "打开失败，原文件仍保留"; return }
                 let note = self.current!
-                self.status = retained == nil ? "已打开 · \(note.totalStrokeCount) 笔" : "有更改尚未保存，请重试保存"
+                self.status = note.hasPendingStroke ? "已恢复未提交笔迹，请点击保存重试提交" : (retained == nil ? "已打开 · \(note.totalStrokeCount) 笔" : "有更改尚未保存，请重试保存")
             case .outcomeUnknown: self.status = "读取失败，原文件已保留"
             }
         }
@@ -415,16 +421,17 @@ final class PreviewModel: ObservableObject {
     }
     @discardableResult func save() -> Bool {
         guard let note = current else { return true }
-        guard note.retryPendingStroke() else { status = note.lastError; return false }
-        let snapshot = note.capture(), previous = ledger.latest(documentId: note.documentId)
-        if savedRoot === snapshot.root && previous == nil {
-            status = "已保存到本机 · \(note.totalStrokeCount) 笔"; return true
+        _ = note.retryPendingStroke()
+        revision = note.changeVersion
+        let snapshot = note.captureRecovery(), previous = ledger.latest(documentId: note.documentId)
+        if savedRoot === snapshot.root && savedPending === snapshot.pending && previous == nil {
+            status = note.hasPendingStroke ? "未提交笔迹已保存为恢复记录，请重试提交" : "已保存到本机 · \(note.totalStrokeCount) 笔"; return true
         }
         let admission = ledger.offer(snapshot: snapshot)
         guard admission == .accepted else {
             status = admission == .versionConflict ? "保存内容发生冲突，请保留当前笔记并导出备份" : "保存队列已满或内容版本过期，请保留当前笔记并重试"; return false
         }
-        if previous?.version != snapshot.version { storageEpoch += 1 }
+        if previous == nil || !previous!.sameContent(other: snapshot) { storageEpoch += 1 }
         status = "正在保存… · \(note.totalStrokeCount) 笔"
         pumpWrites(); return true
     }
@@ -452,12 +459,12 @@ final class PreviewModel: ObservableObject {
                     let snapshot = input.0.snapshot
                     if success && self.current?.documentId == snapshot.documentId {
                         self.savedRoot = (snapshot as? PagedPreviewSnapshot)?.root
+                        self.savedPending = (snapshot as? PagedPreviewSnapshot)?.pending
                     }
-                    if self.current?.documentId == snapshot.documentId && self.current?.changeVersion == snapshot.version {
-                        if let current = self.current, current.hasPendingStroke { self.status = current.lastError }
-                        else if let current = self.current, !snapshot.sameContent(other: current.capture()) {
-                            self.status = "保存内容发生冲突，请保留当前笔记并导出备份"
-                        } else { self.status = success ? "已保存到本机 · \(self.current?.totalStrokeCount ?? 0) 笔" : "保存失败，更改仍保留在本机会话，请重试" }
+                    if let current = self.current, current.documentId == snapshot.documentId,
+                       snapshot.sameContent(other: current.captureRecovery()) {
+                        self.status = success ? (current.hasPendingStroke ? "未提交笔迹已保存为恢复记录，请重试提交" : "已保存到本机 · \(current.totalStrokeCount) 笔")
+                            : "保存失败，更改仍保留在本机会话，请重试"
                     } else if self.current == nil && !success { self.status = "保存失败，更改仍保留，可从列表重新打开并重试" }
                     return .acknowledged // Failure is in the owner ledger before releasing worker responsibility.
                 })
@@ -470,9 +477,13 @@ final class PreviewModel: ObservableObject {
     }
     func close() {
         current?.cancelStroke()
-        guard save(), current?.retire() == true else { return }
+        guard save(), let note = current else { return }
+        if note.hasPendingStroke {
+            guard savedRoot === note.snapshot(), savedPending === note.pendingStroke(), ledger.latest(documentId: note.documentId) == nil,
+                  note.retireAfterRecovery(snapshot: note.captureRecovery()) else { return }
+        } else { guard note.retire() else { return } }
         retireInk()
-        navigationEpoch += 1; current = nil; savedRoot = nil; refresh()
+        navigationEpoch += 1; current = nil; savedRoot = nil; savedPending = nil; refresh()
     }
     func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
     func applyEdit(_ request: PreviewEdit, content: Bool = true) {

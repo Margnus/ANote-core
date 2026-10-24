@@ -10,7 +10,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private val inputByteLimit = budget.inputBytes
     private var selected = initial.page(0).id
     private var sequence = 0L
-    private val initialIds = (initial.pages().flatMap { listOf(it.id.value, it.layerId.value) } + initial.scene.objects().map { it.id.value }).toSet()
+    private var initialIds = (initial.pages().flatMap { listOf(it.id.value, it.layerId.value) } + initial.scene.objects().map { it.id.value }).toSet()
     private var input: InputReplaySession? = null
     private var inputSequence = 0L
     private var strokePage: PageId? = null
@@ -325,7 +325,9 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun endStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = legacyInput(PointerPhase.UP, x, y, pressure, timeMicros)
     fun cancelStroke() { ownerCheck(); input?.close(); input = null }
     fun retryPendingStroke(): Boolean {
-        ownerCheck(); val command = pending ?: run { clearError(); return true }
+        ownerCheck()
+        if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+        val command = pending ?: run { clearError(); return true }
         if (!commit(command)) return false
         pending = null; return true
     }
@@ -337,10 +339,35 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试", PreviewFailureKind.PENDING_STROKE)
         cancelStroke(); clearProjection(); retired = true; return true
     }
+    /** Host may transfer responsibility only after this exact checkpoint's atomic IO receipt.
+     * Retain the immutable command here too; the retired session can never submit it again.
+     */
+    fun retireAfterRecovery(snapshot: PagedPreviewSnapshot): Boolean {
+        ownerCheck()
+        if (pending == null || snapshot.root !== root() || snapshot.pending !== pending) return false
+        cancelStroke(); clearProjection(); retired = true; return true
+    }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())
 
+    /** Complete accepted input, including an uncommitted completion. Active input is never a checkpoint. */
+    fun captureRecovery(): PagedPreviewSnapshot { ownerCheck(); return PagedPreviewSnapshot(root(), pending) }
+
     companion object {
+        /** Validate the entire immutable checkpoint before constructing the original authority. No auto-commit. */
+        fun openRecovery(snapshot: PagedPreviewSnapshot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
+                         ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
+            ownerCheck()
+            val opened = open(snapshot.root, sessionNonce, budget, ownerCheck)
+            val note = opened.notebook ?: return opened
+            snapshot.pending?.let { command ->
+                note.pending = command
+                note.selected = command.pageId
+                val stroke = command.command as CanvasCommand.AddStroke
+                note.initialIds = note.initialIds + command.id.value + stroke.objectId.value
+            }
+            return opened
+        }
         private fun validSessionNonce(value: String) = value.length in 1..48 &&
             value.all { it.isLetterOrDigit() && it.code < 128 || it == '-' }
 
@@ -368,17 +395,22 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
 }
 
-/** Pure immutable full-document capture for the existing bounded storage pipeline's next adapter. */
-class PagedPreviewSnapshot internal constructor(val root: DocumentRoot) : PreviewSaveSnapshot {
+/** Immutable original save input. Recovery does not advance the committed document revision. */
+class PagedPreviewSnapshot internal constructor(val root: DocumentRoot, val pending: DocumentCommand.Canvas? = null) : PreviewSaveSnapshot {
+    init { if (pending != null) PreviewRecoveryCodec.validate(root, pending) }
     override val documentId: String get() = root.id.value
     override val title: String get() = root.title
     override val version: Long get() = root.revision
-    override val retainedByteCharge: Long = PagedPreviewCodec.retainedByteCharge(root)
-    override val encodingWorkByteCharge: Long = PagedPreviewCodec.encodingWorkByteCharge(root)
-    override fun encode(): String = PagedPreviewCodec.encode(root)
-    override fun sameContent(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot &&
+    override val retainedByteCharge: Long = PagedPreviewCodec.retainedByteCharge(root) +
+        (pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L)
+    override val encodingWorkByteCharge: Long = PagedPreviewCodec.encodingWorkByteCharge(root) +
+        (pending?.let { PreviewRecoveryCodec.pendingWorkCharge(it) } ?: 0L)
+    override fun encode(): String = if (pending == null) PagedPreviewCodec.encode(root) else PreviewRecoveryCodec.encode(this)
+    override fun sameContent(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot && pending == other.pending &&
         (root === other.root || documentId == other.documentId && version == other.version && title == other.title &&
             root.pages() == other.root.pages() && root.scene.objects() == other.root.scene.objects())
+    override fun strictlyExtends(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot &&
+        root === other.root && other.pending == null && pending != null
     companion object {
         @Throws(IllegalArgumentException::class)
         fun fromRoot(root: DocumentRoot): PagedPreviewSnapshot = PagedPreviewSnapshot(root)

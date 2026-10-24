@@ -5,6 +5,60 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen() async throws {
+        let dir = directory(), moved = directory()
+        defer { try? FileManager.default.removeItem(at: dir); try? FileManager.default.removeItem(at: moved) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let base = "NCPREVIEW\t2\nD\tpending-swift\tpending\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+        let ink = "NCPREVIEW\t2\nD\tpending-swift\t\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\treused-ink-2\tlayer\t1\tMONOLINE\t1\t-14339513\t2.5\t3\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.25\t2.5\t0.125\t7\nP\t3.0\t4.0\t0.625\t9\nP\t8.0\t6.0\t1.0\t10\nEND\n"
+        let operation = "reused-op-1".utf16.map { String(format: "%04x", $0) }.joined()
+        let encoded = "NCRECOVERY\t1\nD\tpending-swift\tpending\t1\t0\t0\n\(base.utf16.count)\t\(ink.utf16.count)\t\(operation)\n" + base + ink + "RECOVERY-END\n"
+        let checkpoint = try PreviewRecoveryCodec.shared.decode(text: encoded)
+        let file = dir.appendingPathComponent("pending-swift.ncp")
+        try PreviewFileIO.writeUTF8(encoded, to: file)
+        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+            journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
+            historyEntries: 128, historyBytes: 0, inputBytes: 2 * 1024 * 1024)
+        try FileManager.default.removeItem(at: dir); try Data("blocked".utf8).write(to: dir)
+        let model = PreviewModel(directory: dir, documentBudget: budget)
+        // Same adoption boundary used by open, with a validated but not-yet-persisted checkpoint.
+        try model.adopt(checkpoint.root, persisted: false, recovery: checkpoint)
+        let note = try XCTUnwrap(model.current)
+        XCTAssertTrue(note.captureRecovery().sameContent(other: checkpoint)); XCTAssertEqual(note.totalStrokeCount, 0)
+        XCTAssertTrue(model.save()); model.close(); XCTAssertTrue(model.current === note)
+        try await eventually("pending checkpoint failed IO retains full content") { model.ownerRetirementStatus.retryRequired == 1 }
+        XCTAssertTrue(note.hasPendingStroke); XCTAssertTrue(note.captureRecovery().sameContent(other: checkpoint))
+        try FileManager.default.removeItem(at: dir); try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        XCTAssertTrue(model.retryRetainedWrites())
+        try await eventually("pending checkpoint writes through original worker") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(try PreviewFileIO.readUTF8(file), try checkpoint.encode())
+        model.close(); XCTAssertNil(model.current); XCTAssertFalse(note.retryPendingStroke())
+        let reopened = PreviewModel(directory: dir); reopened.open("pending-swift")
+        try await eventually("fresh default owner retains pending without automatic commit") { reopened.current?.hasPendingStroke == true }
+        let restored = try XCTUnwrap(reopened.current)
+        XCTAssertTrue(restored.pendingStroke()!.isEqual(checkpoint.pending)); XCTAssertTrue(restored.retryPendingStroke())
+        XCTAssertTrue(restored.retryPendingStroke()); XCTAssertEqual(restored.totalStrokeCount, 1); XCTAssertEqual(restored.changeVersion, 1)
+        let held = directory()
+        defer { try? FileManager.default.removeItem(at: held) }
+        try FileManager.default.moveItem(at: dir, to: held); try Data("blocked".utf8).write(to: dir)
+        XCTAssertTrue(reopened.save())
+        try await eventually("actual failed IO remains in original ledger") { reopened.ownerRetirementStatus.retryRequired == 1 }
+        XCTAssertEqual(try PreviewFileIO.readUTF8(held.appendingPathComponent("pending-swift.ncp")), try checkpoint.encode())
+        XCTAssertTrue(restored.totalStrokeCount == 1 && !restored.hasPendingStroke)
+        try FileManager.default.removeItem(at: dir); try FileManager.default.moveItem(at: held, to: dir)
+        XCTAssertTrue(reopened.retryRetainedWrites())
+        try await eventually("repair writes canonical replacement") { reopened.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertTrue(try PreviewFileIO.readUTF8(file).hasPrefix("NCPREVIEW\t2\n"))
+        reopened.close(); XCTAssertNil(reopened.current)
+        let final = PreviewModel(directory: dir); final.open("pending-swift")
+        try await eventually("normal new owner reopens one committed stroke") { final.current?.totalStrokeCount == 1 }
+        XCTAssertFalse(final.current!.hasPendingStroke)
+        final.close()
+        let corrupt = String(encoded.dropLast()); try PreviewFileIO.writeUTF8(corrupt, to: file)
+        let refused = PreviewModel(directory: dir); refused.open("pending-swift")
+        try await eventually("truncated recovery refuses entire opening") { refused.status.contains("读取失败") }
+        XCTAssertNil(refused.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), corrupt)
+    }
     @MainActor func testValidatedOpeningReturnsTypedFailureAndUsesOriginalNotebook() throws {
         let root = DocumentRoot.companion.empty(id: SceneId(value: "validated-swift"), title: "unchanged",
             firstPage: PageDescriptor(id: PageId(value: "page"), layerId: LayerId(value: "layer"),

@@ -12,14 +12,14 @@ import java.util.UUID
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED, OWNER_CLOSED }
+internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED, OWNER_CLOSED, PENDING_RECOVERY }
 internal data class ExportPickerAdmission(val disposition: ExportPickerDisposition, val requestCode: Int? = null)
 internal enum class StoreOwnerPhase { ACTIVE, RETIRING, RETIRED }
 internal enum class StoreRetirementRequest { STARTED, ALREADY_RETIRING, RETIRED, INPUT_PENDING, TRANSFER_PENDING, WORK_PENDING, SAVE_REJECTED }
 internal data class StoreRetirementStatus(val phase: StoreOwnerPhase, val pendingWrites: Int,
     val retryRequired: Int, val renderBytes: Long, val workerStopped: Boolean)
 
-data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean)
+data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean, val recovery: PagedPreviewSnapshot = PagedPreviewSnapshot.fromRoot(root))
 
 data class NoteSummary(val id: String, val title: String, val modified: Long)
 
@@ -35,7 +35,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val executor = BoundedOwnerExecutor(16, STORAGE_WORK_BYTES, "NoteCore-preview-storage", ::requestPump)
     private val ledger = PreviewSaveLedger(ownerCheck = executor::checkOwnerThread)
     private val saveTaskTooLarge = context.getString(R.string.save_task_too_large)
-    private data class SaveCallback(val version: Long, val receive: (Long, String?) -> Unit)
+    private data class SaveCallback(val snapshot: PagedPreviewSnapshot, val receive: (Long, String?) -> Unit)
     private val saveCallbacks = mutableMapOf<String, SaveCallback>()
     private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
@@ -92,17 +92,20 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal val activeDocumentId: String? get() { executor.checkOwnerThread(); return activeNotebook?.documentId }
     // An identity-only optimization must not retain an obsolete canonical root.
     private var activeSavedRoot = java.lang.ref.WeakReference<DocumentRoot>(null)
+    private var activeSavedPending = java.lang.ref.WeakReference<DocumentCommand.Canvas>(null)
     internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
         executor.checkOwnerThread()
         check(!ownerRetiring) { "Store owner is retiring" }
+        require(opened.root === opened.recovery.root) { "Checkpoint/root mismatch" }
         activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
-        val result = PagedPreviewNotebook.open(opened.root, UUID.randomUUID().toString(),
+        val result = PagedPreviewNotebook.openRecovery(opened.recovery, UUID.randomUUID().toString(),
             DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
             executor::checkOwnerThread)
         // This internal entry receives only the reader-validated root and fixed supported budget.
         val note = checkNotNull(result.notebook) { "Unsupported preview adoption: ${result.failure}/${result.documentReason}" }
         activeNotebook = note
         activeSavedRoot = java.lang.ref.WeakReference(opened.root.takeIf { opened.persisted && ledger.latest(note.documentId) == null })
+        activeSavedPending = java.lang.ref.WeakReference(opened.recovery.pending.takeIf { opened.persisted && ledger.latest(note.documentId) == null })
         return note
     }
     internal fun create(): PagedPreviewNotebook {
@@ -118,8 +121,14 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         check(activeNotebook == null || activeNotebook === note) { "Release the previous owner only after snapshot admission" }
         activeNotebook = note
     }
-    internal fun releaseActive(note: PagedPreviewNotebook, lostEndpoint: Boolean = false) {
-        executor.checkOwnerThread(); check(activeNotebook === note); retireInk(lostEndpoint); check(note.retire()); activeNotebook = null; activeSavedRoot.clear()
+    internal fun releaseActive(note: PagedPreviewNotebook, lostEndpoint: Boolean = false): Boolean {
+        executor.checkOwnerThread(); check(activeNotebook === note)
+        if (note.hasPendingStroke) {
+            if (activeSavedRoot.get() !== note.snapshot() || activeSavedPending.get() !== note.pendingStroke() || ledger.latest(note.documentId) != null) return false
+            check(note.retireAfterRecovery(note.captureRecovery()))
+        } else check(note.retire())
+        retireInk(lostEndpoint); activeNotebook = null; activeSavedRoot.clear(); activeSavedPending.clear()
+        return true
     }
     // One app-owner capture while the external picker runs. No timeout/Activity destruction release.
     internal val exportPickerSession = UUID.randomUUID().toString()
@@ -131,6 +140,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal fun beginExportPicker(snapshot: PagedPreviewSnapshot): ExportPickerAdmission {
         executor.checkOwnerThread()
         if (ownerRetiring) return ExportPickerAdmission(ExportPickerDisposition.OWNER_CLOSED)
+        if (snapshot.pending != null) return ExportPickerAdmission(ExportPickerDisposition.PENDING_RECOVERY)
         if (pendingExport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
         if (snapshot.retainedByteCharge > exportPickerByteLimit) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
         if (nextExportRequestCode > 65535) return ExportPickerAdmission(ExportPickerDisposition.IDENTITY_EXHAUSTED)
@@ -296,7 +306,13 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         if (ownerRetiring) {
             notifyUi { callback(snapshot.version, "当前会话已结束，原内容仍保留") }; return false
         }
-        if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot.get() === snapshot.root && ledger.latest(snapshot.documentId) == null) {
+        val active = activeNotebook
+        if (active?.documentId == snapshot.documentId && active.hasPendingStroke &&
+            (snapshot.root !== active.snapshot() || snapshot.pending !== active.pendingStroke())) {
+            notifyUi { callback(snapshot.version, "仍有未提交笔迹，请保留完整恢复记录后重试") }; return false
+        }
+        if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot.get() === snapshot.root &&
+            activeSavedPending.get() === snapshot.pending && ledger.latest(snapshot.documentId) == null) {
             notifyUi { callback(snapshot.version, null) }; return true
         }
         val previous = ledger.latest(snapshot.documentId)
@@ -306,8 +322,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 "保存内容发生冲突，请保留当前笔记并导出备份" else "保存队列已满或内容版本过期，请保留当前笔记并重试") }
             return false
         }
-        if (previous?.version != snapshot.version) viewEpoch++
-        saveCallbacks[snapshot.documentId] = SaveCallback(snapshot.version, callback)
+        if (previous == null || !previous.sameContent(snapshot)) viewEpoch++
+        saveCallbacks[snapshot.documentId] = SaveCallback(ledger.latest(snapshot.documentId) as PagedPreviewSnapshot, callback)
         pumpWrites()
         return true
     }
@@ -325,7 +341,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                             .filter { !it.inFlight && !it.retryRequired }.map { it.snapshot.documentId }
                     // Terminal notification relinquishes only the advisory UI receiver; ledger keeps content.
                     for (id in ids) saveCallbacks.remove(id)?.let { receiver ->
-                        notifyUi { receiver.receive(receiver.version, if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
+                        notifyUi { receiver.receive(receiver.snapshot.version, if (dispatch.disposition == PreviewWriteDisposition.WORK_CAPACITY)
                             saveTaskTooLarge else "保存后端暂不可用，更改仍保留，请重试") }
                     }
                 }
@@ -338,8 +354,12 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 val success = result is WorkResult.Succeeded
                 check(ledger.complete(original, success))
                 val id = original.snapshot.documentId
-                if (success && activeNotebook?.documentId == id) activeSavedRoot = java.lang.ref.WeakReference((original.snapshot as PagedPreviewSnapshot).root)
-                saveCallbacks[id]?.takeIf { it.version == original.snapshot.version }?.let { receiver ->
+                if (success && activeNotebook?.documentId == id) {
+                    val captured = original.snapshot as PagedPreviewSnapshot
+                    activeSavedRoot = java.lang.ref.WeakReference(captured.root)
+                    activeSavedPending = java.lang.ref.WeakReference(captured.pending)
+                }
+                saveCallbacks[id]?.takeIf { it.snapshot.sameContent(original.snapshot) }?.let { receiver ->
                     saveCallbacks.remove(id)
                     notifyUi { receiver.receive(original.snapshot.version, if (success) null else "保存失败，更改仍在本机会话中，请重试保存") }
                 }
@@ -350,9 +370,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 // Already admitted snapshot stays pending; a completing job wakes and pumps it later.
                 if (admission.reason == WorkAdmissionFailure.WORKER_TERMINATED || admission.reason == WorkAdmissionFailure.STOPPED) {
                     val id = attempt.snapshot.documentId
-                    saveCallbacks[id]?.takeIf { it.version == attempt.snapshot.version }?.let { receiver ->
+                    saveCallbacks[id]?.takeIf { it.snapshot.sameContent(attempt.snapshot) }?.let { receiver ->
                         saveCallbacks.remove(id)
-                        notifyUi { receiver.receive(receiver.version, "保存后端暂不可用，更改仍保留，请重试") }
+                        notifyUi { receiver.receive(receiver.snapshot.version, "保存后端暂不可用，更改仍保留，请重试") }
                     }
                 }
                 return
@@ -398,15 +418,15 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) {
         executor.checkOwnerThread()
-        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot()), null); return }
+        activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot() && activeSavedPending.get() === it.pendingStroke(), it.captureRecovery()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
-            if (input.second == null) input.third.read(input.first) else (input.second as PagedPreviewSnapshot).root
+            if (input.second == null) input.third.readRecovery(input.first) else (input.second as PagedPreviewSnapshot)
         }, { callback(null, "后台队列繁忙，请重新打开笔记") }) { result ->
             if (viewEpoch != epoch) {
                 // No mutable/read payload is posted; retry a pure read after this result is ACKed.
                 main.post { open(id, callback) }
-            } else callback((result as? WorkResult.Succeeded)?.value?.let { OpenedDocument(it, retained == null) },
+            } else callback((result as? WorkResult.Succeeded)?.value?.let { OpenedDocument(it.root, retained == null, it) },
                 if (result !is WorkResult.Succeeded) "笔记读取失败或含暂不支持的笔刷，原文件已保留"
                 else retained?.let { "有更改尚未保存，请点击保存重试" })
         }

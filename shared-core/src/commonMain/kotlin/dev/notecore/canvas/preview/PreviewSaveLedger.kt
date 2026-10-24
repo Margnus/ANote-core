@@ -39,9 +39,11 @@ class PreviewSaveLedger(private val maxDocuments: Int = 8, private val byteBudge
         if (entry != null && snapshot.version < entry.latest.version) return PreviewSaveAdmission.STALE_VERSION
         if (entry == null && entries.size >= maxDocuments) return PreviewSaveAdmission.DOCUMENT_CAPACITY
         if (entry != null && snapshot.version == entry.latest.version) {
-            if (snapshot !== entry.latest && !entry.latest.sameContent(snapshot)) return PreviewSaveAdmission.VERSION_CONFLICT
-            entry.retryRequired = false
-            return PreviewSaveAdmission.ACCEPTED
+            if (snapshot === entry.latest || entry.latest.sameContent(snapshot)) {
+                entry.retryRequired = false
+                return PreviewSaveAdmission.ACCEPTED
+            }
+            if (!snapshot.strictlyExtends(entry.latest)) return PreviewSaveAdmission.VERSION_CONFLICT
         }
         val oldCharge = if (entry == null) 0L else charge(entry.latest, entry.flight)
         val newCharge = charge(snapshot, entry?.flight)

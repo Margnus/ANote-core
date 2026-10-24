@@ -145,7 +145,7 @@ class MainActivity : Activity() {
         viewportTools.addView(text("双指缩放", 12f))
         root.addView(viewportTools)
         addPageTools(note)
-        status = text(getString(R.string.opened, note.totalStrokeCount), 13f).apply { setPadding(dp(20), dp(4), dp(20), dp(8)) }
+        status = text(if (note.hasPendingStroke) "已恢复未提交笔迹，请点击保存重试提交" else getString(R.string.opened, note.totalStrokeCount), 13f).apply { setPadding(dp(20), dp(4), dp(20), dp(8)) }
         root.addView(status)
         canvas = InkCanvasView(this, note, { save(); updateControls() }, ::showError)
         root.addView(if (android.os.Build.VERSION.SDK_INT >= 33) InkSurfaceHost(checkNotNull(canvas),store) else checkNotNull(canvas), LinearLayout.LayoutParams(-1, 0, 1f).apply { setMargins(dp(12), 0, dp(12), dp(12)) })
@@ -199,19 +199,22 @@ class MainActivity : Activity() {
     }
     private fun save(): Boolean {
         val note = notebook ?: return true
-        if (!note.retryPendingStroke()) { showError(note.lastError); return false }
-        val snapshot = note.capture(); val generation = viewGeneration
+        val beforeRetry = note.changeVersion
+        note.retryPendingStroke()
+        if (note.changeVersion != beforeRetry) { canvas?.refreshPage(); updateControls() }
+        val snapshot = note.captureRecovery(); val generation = viewGeneration
         status?.text = getString(R.string.saving, note.totalStrokeCount)
         return store.save(snapshot) { version, failure ->
             if (generation != viewGeneration || notebook !== note || isFinishing) return@save
             if (failure != null) showError(failure)
-            if (failure == null && version == note.changeVersion && !note.hasPendingStroke) status?.text = getString(R.string.saved, note.totalStrokeCount)
+            if (failure == null && snapshot.sameContent(note.captureRecovery())) status?.text =
+                if (note.hasPendingStroke) "未提交笔迹已保存为恢复记录，请重试提交" else getString(R.string.saved, note.totalStrokeCount)
         }
     }
     private fun leaveEditor() {
         canvas?.cancelInk()
         val note = notebook ?: return
-        if (save()) { store.releaseActive(note); library() }
+        if (save() && store.releaseActive(note)) { library() }
     }
     private fun exportBackup() {
         val note = notebook ?: return
