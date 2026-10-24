@@ -64,6 +64,29 @@ final class PagedHostTests: XCTestCase {
             XCTAssertNil(refused.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), corrupt)
         }
     }
+    @MainActor func testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook() async throws {
+        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+            journalEntries: 128, journalBytes: 8 * 1024 * 1024, identityBytes: 2 * 1024 * 1024,
+            historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
+        let invalid = PagedPreviewNotebook.companion.createValidated(documentId: "invalid", title: "title", sessionNonce: "swift",
+            width: .nan, height: 842, paper: .blank, budget: budget, ownerCheck: { precondition(Thread.isMainThread) })
+        XCTAssertNil(invalid.notebook); XCTAssertEqual(invalid.failure, .invalidPage)
+        let badId = PagedPreviewNotebook.companion.createValidated(documentId: String(repeating: "a", count: 129), title: "title", sessionNonce: "swift",
+            width: 595, height: 842, paper: .blank, budget: budget, ownerCheck: { precondition(Thread.isMainThread) })
+        XCTAssertNil(badId.notebook); XCTAssertEqual(badId.failure, .invalidDocumentId)
+        let longTitle = PagedPreviewNotebook.companion.createValidated(documentId: "valid", title: String(repeating: "a", count: 121), sessionNonce: "swift",
+            width: 595, height: 842, paper: .blank, budget: budget, ownerCheck: { precondition(Thread.isMainThread) })
+        XCTAssertNil(longTitle.notebook); XCTAssertEqual(longTitle.failure, .invalidTitle)
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir)
+        model.create(); let note = try XCTUnwrap(model.current)
+        XCTAssertTrue(note.currentPageId.value.hasSuffix("-page-0"))
+        draw(note); model.changed(); let expected = try note.capture().encode()
+        model.close(); try await eventually("created notebook persisted before reopen") { model.current == nil && model.ownerRetirementStatus.pendingWrites == 0 }
+        model.open(note.documentId)
+        try await eventually("factory notebook reopens through original model") { model.current?.totalStrokeCount == 1 }
+        XCTAssertEqual(try model.current!.capture().encode(), expected); model.close()
+    }
     @MainActor func testValidatedOpeningReturnsTypedFailureAndUsesOriginalNotebook() throws {
         let root = DocumentRoot.companion.empty(id: SceneId(value: "validated-swift"), title: "unchanged",
             firstPage: PageDescriptor(id: PageId(value: "page"), layerId: LayerId(value: "layer"),

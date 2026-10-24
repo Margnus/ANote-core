@@ -31,6 +31,15 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         main {
             store = NoteStore.isolated(host, directory); note = store.create()
             val original = note.snapshot()
+            val creation = PagedPreviewNotebook.createValidated("bad", "title", "checked", width = Double.NaN, ownerCheck = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) })
+            check(creation.notebook == null && creation.failure == PreviewOpenFailure.INVALID_PAGE)
+            check(store.activeDocumentId == original.id.value && note.snapshot() === original)
+            check(note.currentPageId.value.endsWith("-page-0")) // Store create consumed the factory notebook directly.
+            val created = PagedPreviewNotebook.createValidated("independent", "合法标题", "checked", paper = PaperKind.GRID, ownerCheck = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) })
+            val independent = checkNotNull(created.notebook)
+            check(independent.currentPage.paper == PaperKind.GRID && independent.beginStroke(1.0, 2.0, .5f, 1) && independent.endStroke(3.0, 4.0, 1f, 2))
+            check(store.activeDocumentId == original.id.value && note.snapshot() === original)
+            checks.add("validated_creation_refusal_and_independent_authority")
             val refused = PagedPreviewNotebook.open(original, "bad nonce", ownerCheck = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) })
             check(refused.notebook == null && refused.failure == PreviewOpenFailure.INVALID_SESSION_NONCE)
             val capacity = PagedPreviewNotebook.open(original, "checked", DocumentBudget(liveBytes = 0))

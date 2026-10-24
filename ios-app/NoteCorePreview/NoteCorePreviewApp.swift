@@ -272,11 +272,14 @@ final class PreviewModel: ObservableObject {
         })
         if case .rejected = admission { rejected() }
     }
-    func adopt(_ root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot? = nil) throws {
-        precondition(Thread.isMainThread && current == nil)
-        let budget = documentBudget ?? DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+    private var previewBudget: DocumentBudget {
+        documentBudget ?? DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
             historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
+    }
+    func adopt(_ root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot? = nil) throws {
+        precondition(Thread.isMainThread && current == nil)
+        let budget = previewBudget
         let checkpoint = try recovery ?? PagedPreviewSnapshot.companion.fromRoot(root: root)
         guard checkpoint.root === root else { throw CocoaError(.fileReadCorruptFile) }
         let opening = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: UUID().uuidString, budget: budget,
@@ -297,14 +300,15 @@ final class PreviewModel: ObservableObject {
         else { throw CocoaError(.fileReadUnsupportedScheme) }
     }
     func create() {
+        precondition(Thread.isMainThread)
         guard !ownerRetiring, current == nil else { return }
+        let opening = PagedPreviewNotebook.companion.createValidated(documentId: UUID().uuidString, title: "未命名笔记",
+            sessionNonce: UUID().uuidString, width: 595, height: 842, paper: .blank, budget: previewBudget,
+            ownerCheck: { precondition(Thread.isMainThread) })
+        guard let note = opening.notebook else { status = "新建失败，已有笔记仍保留"; return }
         navigationEpoch += 1
-        let nonce = UUID().uuidString
-        let root = DocumentRoot.companion.empty(id: SceneId(value: UUID().uuidString), title: "未命名笔记",
-            firstPage: PageDescriptor(id: PageId(value: nonce+"-page"), layerId: LayerId(value: nonce+"-layer"),
-                width: 595, height: 842, paper: .blank, contentRevision: 0))
-        do { try adopt(root, persisted: false); save() }
-        catch { status = "新建失败，已有笔记仍保留" }
+        current = note; savedRoot = nil; savedPending = nil; revision = note.changeVersion
+        save()
     }
     private func overlay(_ disk: [LocalNote]) -> [LocalNote] {
         let retained = ledger.states().map { LocalNote(id: $0.snapshot.documentId, title: $0.snapshot.title + "（未保存）", date: Date()) }

@@ -4,8 +4,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Looper
 import dev.notecore.document.*
-import dev.notecore.canvas.prototype.SceneId
-import dev.notecore.canvas.prototype.LayerId
 import java.util.UUID
 
 /** Host-owned resource: borrowed Canvas is valid only during draw; never retained by the resource. */
@@ -17,9 +15,8 @@ class SketchSession(tools: List<SketchTool>, val background: PageBackground) {
     val tools = tools.toList()
     init { require(tools.isNotEmpty()) }
     private val owner: () -> Unit = { check(Looper.myLooper() == Looper.getMainLooper()) { "Sketch owner must be the main thread" } }
-    private val initial = DocumentRoot.empty(SceneId(UUID.randomUUID().toString()), "内存草图",
-        PageDescriptor(PageId("sketch-page"), LayerId("sketch-layer"), 595.0, 842.0))
-    val notebook = PagedPreviewNotebook.open(initial, UUID.randomUUID().toString(), DocumentBudget(), owner).notebook!!
+    val notebook = checkNotNull(PagedPreviewNotebook.createValidated(UUID.randomUUID().toString(), "内存草图",
+        UUID.randomUUID().toString(), ownerCheck = owner).notebook)
     var readOnly = false
         private set
     var toolIndex = 0

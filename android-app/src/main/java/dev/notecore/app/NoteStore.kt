@@ -111,9 +111,14 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal fun create(): PagedPreviewNotebook {
         executor.checkOwnerThread()
         check(!ownerRetiring) { "Store owner is retiring" }
-        val nonce = UUID.randomUUID().toString()
-        return adopt(OpenedDocument(DocumentRoot.empty(SceneId(UUID.randomUUID().toString()), "未命名笔记",
-            PageDescriptor(PageId("$nonce-page"), LayerId("$nonce-layer"), 595.0, 842.0)), false))
+        check(activeNotebook == null) { "Release the previous owner only after snapshot admission" }
+        val result = PagedPreviewNotebook.createValidated(UUID.randomUUID().toString(), "未命名笔记", UUID.randomUUID().toString(),
+            budget = DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
+            ownerCheck = executor::checkOwnerThread)
+        val note = checkNotNull(result.notebook) { "Unsupported preview creation: ${result.failure}/${result.documentReason}" }
+        activeNotebook = note
+        activeSavedRoot.clear(); activeSavedPending.clear()
+        return note
     }
     internal fun attachActive(note: PagedPreviewNotebook) {
         executor.checkOwnerThread()

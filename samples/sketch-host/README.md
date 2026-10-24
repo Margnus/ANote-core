@@ -10,6 +10,8 @@
 
 产物为 `samples/sketch-host/build/outputs/apk/debug/sketch-host-debug.apk`。安装后打开“NoteCore 内存草图”；蓝/红工具和横线背景由宿主注入。只读阻止输入/编辑；活动笔或已完成 pending 存在时不切换工具/只读。输入拒绝保留已接受前缀，明确取消才放弃未完成笔；已完成 pending 不被取消，原 Notebook 的显式重试保留原命令。样例不是对恶意宿主的权限隔离：宿主本身仍拥有 Notebook。
 
-实际专用模拟器仪器复验入口 `tools/run_sketch_host.py` 会先核对 NoteCore 原包及66份文件基线，再安装独立样例/仪器包；只用于已有 NoteCorePreview / emulator-5554，不是通用真机运行脚本。`tools/verify_sketch_host.py` 核对编译输入戳、APK类、依赖、实际事件标量/资源像素/Activity重建结果与CUA观察。当前证据见 `reports/second-host-android.json`。
+实际专用模拟器仪器复验入口 `tools/run_sketch_host.py` 会先核对 NoteCore 原包及66份文件基线，再安装独立样例/仪器包；只用于已有 NoteCorePreview / emulator-5554，不是通用真机运行脚本。`tools/verify_sketch_host.py` 核对编译输入戳、APK类、依赖、实际事件标量/资源像素/Activity重建结果与CUA观察。最初普通CUA证据保留在 `reports/second-host-android.json` 的固定包范围；当前validated新建入口及重新编译的样例仪器证据见 `reports/validated-creation.json`。使用 `--case-directory build/<本轮目录>` 保留不同版本的设备证据，不能覆盖旧baseline来冒称保持。
 
 只采用为 ENG-19 的可运行 Android 第二消费者子范围；MONOLINE、固定单页、普通 canonical Path。背景回调只借用本帧 Canvas，不得保留 Canvas/Activity。规范 Path/Matrix 按 root revision 缓存，活动 Path 只是派生呈现。没有第二文档模型、worker 或原生图像池。未冻结 SDK，真机、完整资源生命周期/heap/触笔、Apple 样例及 C1 仍待验。
+
+当前样例直接使用 `PagedPreviewNotebook.createValidated` 返回的原会话，显式传主线程 ownerCheck；没有临时 Notebook → snapshot → 第二次 adopt。DocumentBudget/enum 是已验证值；宿主依旧对 owner 实现负责，不将默认空检查解释为线程安全。

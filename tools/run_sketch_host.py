@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """Run the isolated sample on the authorized dedicated AVD; never operate ordinary UI or NoteCore data."""
-import hashlib,json,subprocess
+import argparse,hashlib,json,subprocess
 from pathlib import Path
-root=Path(__file__).resolve().parents[1]; out=root/'build/sketch-host'
+root=Path(__file__).resolve().parents[1]
+parser=argparse.ArgumentParser()
+parser.add_argument('--case-directory', default='build/sketch-host')
+args=parser.parse_args()
+out=(root/args.case_directory).resolve()
+assert out.is_relative_to((root/'build').resolve()), 'Evidence must remain under repository build/'
+out.mkdir(parents=True,exist_ok=True)
 adb='/Users/lixiaofan/Library/Android/sdk/platform-tools/adb'
 def call(*args):return subprocess.check_output([adb,'-s','emulator-5554',*args],timeout=90)
 def snapshot():

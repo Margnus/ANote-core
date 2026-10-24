@@ -389,6 +389,23 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             if (capacity != null) return PreviewNotebookOpen(null, PreviewOpenFailure.DOCUMENT_CAPACITY, capacity)
             return PreviewNotebookOpen(PagedPreviewNotebook(initial, sessionNonce, budget, ownerCheck), null)
         }
+        /** Raw creation parameters are validated before canonical value constructors or mutable authority.
+         * Budget/paper are already-valid values. Owner/programmer/allocator failures are never caught.
+         */
+        fun createValidated(documentId: String, title: String, sessionNonce: String,
+                            width: Double = 595.0, height: Double = 842.0, paper: PaperKind = PaperKind.BLANK,
+                            budget: DocumentBudget = DocumentBudget(), ownerCheck: () -> Unit): PreviewNotebookOpen {
+            ownerCheck()
+            if (documentId.isBlank() || documentId.length > 128 || !documentId.hasValidUnicode())
+                return PreviewNotebookOpen(null, PreviewOpenFailure.INVALID_DOCUMENT_ID)
+            if (title.length > 120 || !title.hasValidUnicode()) return PreviewNotebookOpen(null, PreviewOpenFailure.INVALID_TITLE)
+            if (!validSessionNonce(sessionNonce)) return PreviewNotebookOpen(null, PreviewOpenFailure.INVALID_SESSION_NONCE)
+            if (!width.isFinite() || !height.isFinite() || width !in 1.0..14_400.0 || height !in 1.0..14_400.0)
+                return PreviewNotebookOpen(null, PreviewOpenFailure.INVALID_PAGE)
+            val initial = DocumentRoot.empty(SceneId(documentId), title,
+                PageDescriptor(PageId("$sessionNonce-page-0"), LayerId("$sessionNonce-layer-0"), width, height, paper))
+            return open(initial, sessionNonce, budget, ownerCheck)
+        }
         @Throws(IllegalArgumentException::class)
         fun create(documentId: String, title: String, sessionNonce: String): PagedPreviewNotebook = PagedPreviewNotebook(
             DocumentRoot.empty(SceneId(documentId), title, PageDescriptor(PageId("$sessionNonce-page-0"), LayerId("$sessionNonce-layer-0"), 595.0, 842.0)), sessionNonce)
