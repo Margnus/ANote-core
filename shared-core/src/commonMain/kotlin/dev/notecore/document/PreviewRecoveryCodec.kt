@@ -60,6 +60,11 @@ object PreviewRecoveryCodec {
         val framing = text.substring(metadataEnd + 1, frameEnd)
         require(framing.count { it == '\t' } == 2)
         val fields = framing.split('\t')
+        // Numeric parsers accept signs (and platform-dependent Unicode digits). Framing is ASCII,
+        // not signed arithmetic: otherwise -001 silently becomes a different operation character.
+        require(fields[0].isNotEmpty() && fields[0].all { it in '0'..'9' })
+        require(fields[1].isNotEmpty() && fields[1].all { it in '0'..'9' })
+        require(fields[2].all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' })
         val baseSize = fields[0].toInt(); val inkSize = fields[1].toInt()
         require(baseSize > 0 && inkSize > 0 && fields[2].length in 4..512 && fields[2].length % 4 == 0)
         val operation = fields[2].chunked(4).map { it.toInt(16).toChar() }.joinToString("")

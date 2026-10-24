@@ -77,12 +77,20 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
                 check(error == null); note = store.adopt(checkNotNull(value)); check(!note.hasPendingStroke && note.totalStrokeCount == 1); opened = true
             } }
             eventually("Canonical replacement did not reopen") { opened }
-            val valid = file.readText(); file.writeText(recovery.encode().dropLast(1))
+            val valid = file.readText()
+            val encoded = recovery.encode(); val rows = encoded.split('\n', limit = 4); val frame = rows[2].split('\t')
+            val signedOperation = rows[0] + "\n" + rows[1] + "\n" + frame[0] + "\t" + frame[1] + "\t-001" + frame[2].drop(4) + "\n" + rows[3]
+            val signedLength = encoded.replace("\n${frame[0]}\t", "\n+${frame[0]}\t")
             main { check(store.releaseActive(note)); store.stopTestBackend(); store = NoteStore.isolated(host, dir) }
-            var refused = false
-            main { store.open(recovery.documentId) { value, error -> check(value == null && error != null); refused = true } }
-            eventually("Truncated checkpoint was not refused") { refused }
-            check(file.readText() == recovery.encode().dropLast(1)); file.writeText(valid)
+            for (corrupt in listOf(encoded.dropLast(1), signedOperation, signedLength)) {
+                file.writeText(corrupt, Charsets.UTF_8)
+                var refused = false
+                main { store.open(recovery.documentId) { value, error -> check(value == null && error != null); refused = true } }
+                eventually("Malformed checkpoint was not refused") { refused }
+                main { check(store.activeDocumentId == null) }
+                check(file.readText(Charsets.UTF_8) == corrupt)
+            }
+            file.writeText(valid, Charsets.UTF_8)
         } finally { main { store.stopTestBackend() }; dir.deleteRecursively() }
     }
 }

@@ -70,6 +70,28 @@ class PreviewRecoveryTest {
         }
         assertEquals(recovery.documentId, PreviewRecoveryCodec.header(text.lineSequence().take(2).joinToString("\n") + "\n").documentId)
     }
+    @Test fun signedOrNonAsciiFramingCannotChangeRecoveredOperationIdentity() {
+        val text = recovery().encode()
+        val lines = text.split('\n', limit = 4)
+        val frame = lines[2].split('\t')
+        fun framed(base: String = frame[0], ink: String = frame[1], op: String = frame[2]) =
+            lines[0] + "\n" + lines[1] + "\n" + "$base\t$ink\t$op\n" + lines[3]
+        // The old radix parser accepted -001 and recovered a different operation beginning U+FFFF.
+        for (op in listOf("-001", "+001", "ＦＦＦＦ", "٠٠٧٢")) {
+            assertFailsWith<IllegalArgumentException>(op) { PreviewRecoveryCodec.decode(framed(op = op + frame[2].drop(4))) }
+        }
+        for (index in 0..1) for (length in listOf("+" + frame[index], "０" + frame[index])) {
+            assertFailsWith<IllegalArgumentException> {
+                PreviewRecoveryCodec.decode(if (index == 0) framed(base = length) else framed(ink = length))
+            }
+        }
+        val unicode = "笔\uD83D\uDE80"
+        val unicodeHex = unicode.map { it.code.toString(16).padStart(4, '0') }.joinToString("")
+        val decodedUnicode = PreviewRecoveryCodec.decode(framed(op = unicodeHex))
+        assertEquals(unicode, decodedUnicode.pending!!.id.value)
+        assertTrue(decodedUnicode.sameContent(PreviewRecoveryCodec.decode(decodedUnicode.encode())))
+        assertTrue(PreviewRecoveryCodec.decode(text).sameContent(PreviewRecoveryCodec.decode(framed(op = frame[2].uppercase()))))
+    }
     @Test fun recoveryRetirementRequiresExactRootAndCommandAndCannotResubmit() {
         val recovery = recovery(); val note = assertNotNull(PagedPreviewNotebook.openRecovery(recovery, "reused").notebook)
         assertFalse(note.retireAfterRecovery(PagedPreviewSnapshot.fromRoot(recovery.root)))

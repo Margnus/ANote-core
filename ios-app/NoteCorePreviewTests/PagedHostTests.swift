@@ -54,10 +54,15 @@ final class PagedHostTests: XCTestCase {
         try await eventually("normal new owner reopens one committed stroke") { final.current?.totalStrokeCount == 1 }
         XCTAssertFalse(final.current!.hasPendingStroke)
         final.close()
-        let corrupt = String(encoded.dropLast()); try PreviewFileIO.writeUTF8(corrupt, to: file)
-        let refused = PreviewModel(directory: dir); refused.open("pending-swift")
-        try await eventually("truncated recovery refuses entire opening") { refused.status.contains("读取失败") }
-        XCTAssertNil(refused.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), corrupt)
+        let signedOperation = encoded.replacingOccurrences(of: "\t\(operation)\n", with: "\t-001\(operation.dropFirst(4))\n")
+        let signedLength = encoded.replacingOccurrences(of: "\n\(base.utf16.count)\t", with: "\n+\(base.utf16.count)\t")
+        let refused = PreviewModel(directory: dir)
+        for corrupt in [String(encoded.dropLast()), signedOperation, signedLength] {
+            try PreviewFileIO.writeUTF8(corrupt, to: file)
+            refused.open("pending-swift")
+            try await eventually("malformed recovery refuses entire opening") { refused.status.contains("读取失败") }
+            XCTAssertNil(refused.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), corrupt)
+        }
     }
     @MainActor func testValidatedOpeningReturnsTypedFailureAndUsesOriginalNotebook() throws {
         let root = DocumentRoot.companion.empty(id: SceneId(value: "validated-swift"), title: "unchanged",

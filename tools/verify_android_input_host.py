@@ -31,12 +31,14 @@ def main():
     parser.add_argument('--serial', required=True)
     parser.add_argument('--adb', required=True)
     args = parser.parse_args()
-    assert args.serial == 'emulator-5580', 'Only the existing dedicated emulator is authorized'
+    assert args.serial in ('emulator-5580', 'emulator-5554'), 'Only the existing dedicated emulator is authorized'
     folder = ROOT/'build/android-input-host'; folder.mkdir(parents=True, exist_ok=True)
 
     def adb(*command):
         return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT,
                               check=True, capture_output=True, timeout=120).stdout
+
+    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode('utf-8').strip() == 'NoteCorePreview'
 
     def files():
         output = adb('shell', 'run-as', BUNDLE, 'ls', 'files/preview-notes').decode('utf-8')

@@ -22,6 +22,7 @@ CURRENT = {
     'ios-ordinary-recovery-ui': ('source_and_artifact_sha256',),
     'android-ordinary-recovery-ui': ('source_and_artifact_sha256',),
     'second-host-android': ('source_and_artifact_sha256',),
+    'recovery-framing': ('source_and_artifact_sha256',),
     'input-capture-contract': ('source_and_fixture_sha256',),
     'apple-current-revalidation': ('source_and_artifact_sha256',),
     'shared-native-contracts': ('source_and_artifact_sha256',),
