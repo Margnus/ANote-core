@@ -262,7 +262,7 @@ final class PagedHostTests: XCTestCase {
         let bytes = model.exportDocument?.data
         XCTAssertEqual(model.beginOwnerRetirement(), .transferPending)
         XCTAssertEqual(model.exportDocument?.data, bytes)
-        model.exportDocument = nil
+        model.finishExport()
         var finished = false
         XCTAssertEqual(model.beginOwnerRetirement { _ in finished = true }, .started)
         try await eventually("idle terminal owner stops") { finished }
@@ -310,14 +310,62 @@ final class PagedHostTests: XCTestCase {
         let first = try XCTUnwrap(model.exportDocument?.data)
         XCTAssertEqual(String(data: first, encoding: .utf8), original)
         model.prepareExport(); XCTAssertEqual(model.exportDocument?.data, first)
-        model.exportDocument = nil // Same ownership release as exporter cancellation/completion.
+        model.finishExport() // Same ownership release as exporter cancellation/completion.
         model.prepareExport()
         let later = try note.capture().encode()
         try await eventually("next export admitted after clear") { !model.transferBusy && model.exportDocument != nil }
         XCTAssertEqual(String(data: try XCTUnwrap(model.exportDocument?.data), encoding: .utf8), later)
-        model.exportDocument = nil; XCTAssertTrue(model.save())
+        model.finishExport(); XCTAssertTrue(model.save())
         try await eventually("post-export root saved") { model.status.hasPrefix("已保存") }
         model.close()
+    }
+    @MainActor func testExportResultCapacityRefusalKeepsSourceAndExactChargeUntilConsumerRelease() async throws {
+        let fixture = try PagedPreviewNotebook.companion.create(documentId: "export-budget", title: "中文😀", sessionNonce: "export-budget")
+        draw(fixture)
+        let root = fixture.snapshot(), encoded = try fixture.capture().encode()
+        let bytes = Data(encoded.utf8), charge = 512 + bytes.count
+        XCTAssertNotEqual(bytes.count, encoded.utf16.count)
+        for limit in [0, charge - 1, charge] {
+            let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+            let model = PreviewModel(directory: dir, exportResultByteLimit: limit)
+            try model.adopt(root, persisted: false)
+            XCTAssertTrue(model.save())
+            try await eventually("source written before export capacity check") { model.status.hasPrefix("已保存") }
+            let file = dir.appendingPathComponent("export-budget.ncp")
+            let original = try Data(contentsOf: file)
+            model.prepareExport()
+            try await eventually("original worker export completes") { !model.transferBusy }
+            XCTAssertTrue(model.current?.snapshot() === root)
+            XCTAssertEqual(try Data(contentsOf: file), original)
+            if limit < charge {
+                XCTAssertNil(model.exportDocument); XCTAssertEqual(model.exportRetainedByteCharge, 0)
+                XCTAssertEqual(model.status, "备份超过预览导出容量，原笔记仍保留")
+                if limit == charge - 1 {
+                    XCTAssertTrue(model.current!.rename(value: "a"))
+                    let smaller = try model.current!.capture().encode()
+                    model.prepareExport()
+                    try await eventually("same owner retries smaller result at unchanged capacity") { !model.transferBusy && model.exportDocument != nil }
+                    XCTAssertEqual(model.exportDocument?.data, Data(smaller.utf8))
+                    XCTAssertEqual(model.exportRetainedByteCharge, 512 + smaller.utf8.count)
+                    model.finishExport(); XCTAssertEqual(model.exportRetainedByteCharge, 0)
+                }
+            } else {
+                XCTAssertEqual(model.exportDocument?.data, bytes)
+                XCTAssertEqual(model.exportRetainedByteCharge, charge)
+                XCTAssertEqual(model.beginOwnerRetirement(), .transferPending)
+                model.prepareExport(); XCTAssertEqual(model.exportDocument?.data, bytes)
+                XCTAssertEqual(model.exportRetainedByteCharge, charge)
+                model.finishExport(); model.finishExport()
+                XCTAssertNil(model.exportDocument); XCTAssertEqual(model.exportRetainedByteCharge, 0)
+                model.prepareExport()
+                try await eventually("same result accepted after consumer releases prior one") { !model.transferBusy && model.exportDocument != nil }
+                XCTAssertEqual(model.exportDocument?.data, bytes)
+                XCTAssertEqual(model.exportRetainedByteCharge, charge)
+                model.finishExport(); XCTAssertEqual(model.exportRetainedByteCharge, 0)
+            }
+            XCTAssertEqual(model.beginOwnerRetirement(), .started)
+            try await eventually("export owner drains after release or refusal") { model.ownerRetirementStatus.phase == .retired }
+        }
     }
     @MainActor func testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData() throws {
         func data<T>(_ values: [T]) -> NSData {

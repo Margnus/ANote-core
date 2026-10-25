@@ -1,0 +1,38 @@
+{
+  "schema": "export-result-budget-1",
+  "status": "passed",
+  "scope": "Original Swift Model/worker/UI result holder; actual app-host file/capacity/retry/retirement regression, no ordinary picker or physical heap claim",
+  "swift_host_tests": 51,
+  "required_test": "testExportResultCapacityRefusalKeepsSourceAndExactChargeUntilConsumerRelease()",
+  "counterexample": "With result limit configured but no admission, original export produced PreviewBackup despite zero capacity; retained xcresult summary and source bind this failure.",
+  "decision": "Original worker counts UTF8 before allocating Data; default owner result quota 32MiB includes 512 fixed logical bytes. Typed capacity refusal preserves source. One private-set immutable backup remains charged until finishExport releases the owner reference.",
+  "checks": [
+    "zero/one-byte-short/exact Unicode UTF8 boundary",
+    "source root identity and saved file bytes unchanged by refusal",
+    "same owner retries smaller result at unchanged quota",
+    "repeated prepare cannot replace accepted result",
+    "post-worker result stays charged and blocks retirement until explicit consumer release",
+    "release clears charge, permits a fresh export and normal owner retirement"
+  ],
+  "original_ios_files_unchanged": 14,
+  "limits": [
+    "Logical fixed overhead is not measured heap or Foundation/SwiftUI/system picker private copies",
+    "No new Android/shared Native run or ordinary GUI/picker acceptance",
+    "No complete chain peak quota, abrupt owner transfer, unconfirmed IO or power-loss proof"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "build/export-result-budget/before-model.swift": "dae750542ad5a565c351344f5e5d0f15c644e304a3443eaa6874384c32e6fb2f",
+    "build/export-result-budget/before-summary.json": "d5d9c4e06b486234042390855edd2d4729256fa83eaf981a84b175d6c623bf33",
+    "build/export-result-budget/before-test.log": "321f6981cf13a4ca17729cec9400b20ebf6f14459af1e6e489c9db1a2293792b",
+    "build/export-result-budget/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/producer-scratch/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "81a3f643dc842d67a8616c4aacf6d9be8c42106370f9738f615c503c31324e51",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "a8c41ea6bcbe7f9582f032243581a6bebad7dd078934eb38ceb1cc96d9e4a443",
+    "reports/ios-host-tests.json": "82e666022a033429fd54adb17c07fd496c066df462d630ed15fcd94ffe4603bd",
+    "reports/ios-preview-build.json": "93fb98cc59f195e9d999dcb10e99e137625a2b9ac2ee1e77e75d1f0882ccfe62",
+    "reports/ios-preview-restored.json": "c92895e5daf1caf6b5cd65738bd89b09f96e5e6b75c15afe5a33d342588f34ee",
+    "tools/verify_export_result_budget.py": "3f76cfee381e16ff8193b53127c1b578210e6e148c716b5ca1f513aa557f9bea"
+  }
+}

@@ -4,7 +4,7 @@ import NoteCanvasPrototype
 
 struct PreviewBackup: FileDocument {
     static var readableContentTypes: [UTType] { [.data] }
-    var data: Data
+    let data: Data
     init(data: Data) { self.data = data }
     init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents else { throw CocoaError(.fileReadCorruptFile) }
@@ -12,6 +12,8 @@ struct PreviewBackup: FileDocument {
     }
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
 }
+
+private enum PreparedExport { case ready(PreviewBackup), capacity }
 
 struct LocalNote: Identifiable { let id: String; let title: String; let date: Date }
 enum PreviewOwnerRetirementRequest { case started, alreadyRetiring, retired, inputPending, transferPending, saveRejected }
@@ -30,7 +32,16 @@ final class PreviewModel: ObservableObject {
     @Published private(set) var current: PagedPreviewNotebook?
     @Published var status = ""
     @Published var revision: Int64 = 0
-    @Published var exportDocument: PreviewBackup?
+    @Published private(set) var exportDocument: PreviewBackup?
+    private let exportResultByteLimit: Int
+    var exportRetainedByteCharge: Int {
+        precondition(Thread.isMainThread)
+        return exportDocument.map { 512 + $0.data.count } ?? 0
+    }
+    func finishExport() {
+        precondition(Thread.isMainThread)
+        exportDocument = nil
+    }
     @Published var transferBusy = false
     private let directory: URL
     private let beforeInkCompute: () throws -> Void
@@ -255,8 +266,10 @@ final class PreviewModel: ObservableObject {
     }
     private let beforeOpenRead: () throws -> Void
     init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
-         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, beforeOpenRead: @escaping () throws -> Void = {}) {
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, exportResultByteLimit: Int = 32 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}) {
         precondition(Thread.isMainThread)
+        precondition(exportResultByteLimit >= 0)
+        self.exportResultByteLimit = exportResultByteLimit
         self.beforeOpenRead = beforeOpenRead
         self.documentBudget = documentBudget
         self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
@@ -375,15 +388,21 @@ final class PreviewModel: ObservableObject {
         note.cancelStroke()
         guard note.retryPendingStroke() else { status = note.lastError; return }
         transferBusy = true; status = "正在准备备份…"
-        let snapshot = note.capture()
-        request(input: snapshot, bytes: snapshot.encodingWorkByteCharge, compute: { captured in
+        let snapshot = note.capture(), resultLimit = exportResultByteLimit
+        request(input: snapshot, bytes: snapshot.encodingWorkByteCharge, compute: { captured -> PreparedExport in
             let encoded = try captured.encode()
-            guard encoded.utf16.count <= 16_000_000 else { throw CocoaError(.fileWriteOutOfSpace) }
-            return PreviewBackup(data: Data(encoded.utf8))
+            // Count UTF8 without constructing Data; the owner keeps this result after worker ACK.
+            guard encoded.utf16.count <= 16_000_000, resultLimit >= 512,
+                  encoded.utf8.count <= resultLimit - 512 else { return .capacity }
+            return .ready(PreviewBackup(data: Data(encoded.utf8)))
         }, rejected: { transferBusy = false; status = "后台队列繁忙，请重新导出" }) { result in
             self.transferBusy = false
             switch result {
-            case .succeeded(let document): self.exportDocument = document
+            case .succeeded(let prepared):
+                switch prepared {
+                case .ready(let document): self.exportDocument = document
+                case .capacity: self.status = "备份超过预览导出容量，原笔记仍保留"
+                }
             case .outcomeUnknown: self.status = "备份生成失败，笔记仍保留，请重试"
             }
         }
@@ -625,13 +644,13 @@ struct PreviewRoot: View {
         .onChange(of: model.exportDocument != nil) { _, ready in if ready { exporting = true } }
         .fileExporter(isPresented: $exporting, document: model.exportDocument, contentType: .data,
             defaultFilename: "NoteCore-backup.ncp") { result in
-                model.exportDocument = nil
+                model.finishExport()
                 switch result {
                 case .success: model.status = "备份已导出"
                 case .failure: model.status = "导出未完成，请重试"
                 }
             }
-        .onChange(of: exporting) { _, showing in if !showing { model.exportDocument = nil } }
+        .onChange(of: exporting) { _, showing in if !showing { model.finishExport() } }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.data]) { result in
             switch result {
             case .success(let url): model.importCopy(url)
