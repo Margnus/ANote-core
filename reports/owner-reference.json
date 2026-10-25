@@ -1,0 +1,35 @@
+{
+  "schema": "owner-reference-1",
+  "status": "passed",
+  "scope": "Original Apple App main-owner explicit service lifetime; Simulator host tests, no ordinary GUI or physical-device claim",
+  "swift_host_tests": 54,
+  "required_tests": [
+    "testOwnerReferenceDropKeepsFailedWriteUntilOriginalRetirement()",
+    "testOwnerReferenceDropKeepsProviderUntilOriginalRetirement()"
+  ],
+  "counterexample": "Both pre-retirement reference-drop tests failed on original Model: failed accepted write owner vanished; held CG provider outlived its Model.",
+  "decision": "Reuse original self-retention field from init until explicit retirement confirms original ledger/native holders/worker drained. Recover via a retained route to the same owner, never a replacement authority.",
+  "original_note_files_preserved": 14,
+  "limits": [
+    "All external handles lost leaves an inaccessible retained service; caller must retain a route and explicitly retire",
+    "No mutable thread transfer, dead-owner-thread takeover or process durability",
+    "No new Android/shared Native run, total physical heap, M-1 or pen acceptance"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "build/owner-reference/before-device.log": "81433491c579edbe13fcf4995e2520f6725a26b0d777c764e09cbb7f97eeee45",
+    "build/owner-reference/before-model.swift": "9da7722364a2668eccc03ae6ab8d99ef3010a404bc36135e04f7128aac1d6163",
+    "build/owner-reference/before-summary.json": "e2718f3442e385a62aff1e4d1f596b0f0245c71409c14e1afd5e1609e5ab6888",
+    "build/owner-reference/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/owner-reference/ios-before.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "docs/owner交接与失败责任矩阵.md": "679bd5c0a83edb7065bbec31370f6822c403df85e267bda26e58e72a2b5cfe0e",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "28fd9914677e1e5fbd06cf33a3466a241803ae0be2da9942a5a2b0b361d27b58",
+    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "047556c749865765fc359ec6adaf659a83a075d753e727faf2a7b508686317f7",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "ac7ed93c759e793d42672075ba6238d94107ca3bf0a2a0f3fb4eee47df896c50",
+    "reports/ios-host-tests.json": "8cd883bbf616f2a998f35a8fa52b5cca5e3ab60a8aad1058e88d864e6362ed09",
+    "reports/ios-preview-build.json": "5b1e0aaab0f12483f3cb70b5d88b2707b367809fee7d957482f516d3c6f11508",
+    "reports/ios-preview-restored.json": "3ccb8edb7da1a9bef8fdd5996af2b2b41a1320baaef1149d6ea4112584810bd1",
+    "tools/verify_owner_reference.py": "c7b8c3a1b26d2b98966c5eae4874a1e388ba6db9d5232bbebd287f56a40b8c89"
+  }
+}

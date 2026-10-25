@@ -68,8 +68,9 @@ final class PreviewModel: ObservableObject {
     private var ownerRetiring = false
     private var ownerRetired = false
     private var ownerStopRequested = false
-    // The original owner retains responsibility, not a replacement owner or queue.
-    private var retirementKeepAlive: PreviewModel?
+    // Explicit service lifetime: ARC reference loss is not a close/release receipt.
+    // The caller must retain a route to this owner and explicitly retire it.
+    private var ownerKeepAlive: PreviewModel?
     private var retirementObserver: ((PreviewOwnerRetirementStatus) -> Void)?
     var ownerRetirementStatus: PreviewOwnerRetirementStatus {
         precondition(Thread.isMainThread)
@@ -88,7 +89,7 @@ final class PreviewModel: ObservableObject {
         if transferBusy || exportDocument != nil { return .transferPending }
         guard save() else { return .saveRejected }
         // No more document/transfer admission; accepted IO still uses the same worker and ledger.
-        ownerRetiring = true; retirementKeepAlive = self; retirementObserver = onRetired
+        ownerRetiring = true; retirementObserver = onRetired
         precondition(current?.retire() ?? true)
         navigationEpoch += 1; current = nil; savedRoot = nil
         retireInk(); inkView = nil
@@ -114,7 +115,7 @@ final class PreviewModel: ObservableObject {
         notes = []
         let observer = retirementObserver; retirementObserver = nil
         observer?(ownerRetirementStatus)
-        retirementKeepAlive = nil
+        ownerKeepAlive = nil
     }
     private struct InkFrameKey: Equatable {
         let document: String
@@ -285,6 +286,7 @@ final class PreviewModel: ObservableObject {
         self.documentBudget = documentBudget
         self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
         self.directory = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PreviewNotes", isDirectory: true)
+        ownerKeepAlive = self
         refresh()
     }
     private static func file(_ id: String, directory: URL) -> URL {

@@ -6,6 +6,34 @@ import NoteCanvasPrototype
 
 // Actual app-host Kotlin/Native render -> existing Swift worker -> CGImage responsibility.
 final class BrushRenderHostTests: XCTestCase {
+    @MainActor func testOwnerReferenceDropKeepsProviderUntilOriginalRetirement() async throws {
+        var fixture: (PreviewModel, InkUIView)? = try preview()
+        var model: PreviewModel? = fixture?.0
+        var view: InkUIView? = fixture?.1; fixture = nil
+        weak var observer = model
+        let identity = ObjectIdentifier(try XCTUnwrap(model))
+        _ = viewImage(try XCTUnwrap(view))
+        try await eventually { (model?.inkFramePublications ?? 0) > 0 && model?.ownerRetirementStatus.pendingWrites == 0 }
+        var heldProvider: CGDataProvider?
+        try model?.retainInkSourceForTesting { heldProvider = $0 }
+        XCTAssertNotNil(heldProvider)
+        model = nil
+        // Yield beyond delivery/ACK, without interpreting elapsed time as a release receipt.
+        await Task.yield()
+        model = try XCTUnwrap(observer)
+        XCTAssertEqual(ObjectIdentifier(model!), identity)
+        XCTAssertGreaterThan(model?.ownerRetirementStatus.renderBytes ?? 0, 0)
+        var finished = false
+        XCTAssertEqual(model?.beginOwnerRetirement { status in
+            XCTAssertTrue(status.workerStopped); XCTAssertEqual(status.renderBytes, 0); finished = true
+        }, .started)
+        NativeInkCanvas.dismantleUIView(try XCTUnwrap(view), coordinator: ())
+        view = nil; model = nil
+        XCTAssertNotNil(observer); XCTAssertFalse(finished)
+        XCTAssertGreaterThan(observer?.ownerRetirementStatus.renderBytes ?? 0, 0)
+        heldProvider = nil
+        try await eventually { finished && observer == nil }
+    }
     @MainActor func testRetiringOwnerKeepsUnknownUntilReadOnlyReleaseReconciliation() async throws {
         var releaseCalls = 0
         var fixture: (PreviewModel, InkUIView)? = try preview(release: { after in

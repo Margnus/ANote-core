@@ -226,6 +226,33 @@ final class PagedHostTests: XCTestCase {
         try await eventually("owner retirement completed") { finished && observer == nil }
         XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), expected)
     }
+    @MainActor func testOwnerReferenceDropKeepsFailedWriteUntilOriginalRetirement() async throws {
+        let dir = directory(); try Data("blocked".utf8).write(to: dir)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var model: PreviewModel? = PreviewModel(directory: dir); model?.create()
+        let note = try XCTUnwrap(model?.current); draw(note); model?.changed()
+        let identity = ObjectIdentifier(try XCTUnwrap(model))
+        let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+        weak var observer = model
+        model = nil
+        try await eventually("original owner retains failed accepted write before retirement") {
+            observer?.ownerRetirementStatus.retryRequired == 1
+        }
+        model = try XCTUnwrap(observer)
+        XCTAssertEqual(ObjectIdentifier(model!), identity); XCTAssertTrue(model?.current === note)
+        XCTAssertEqual(model?.ownerRetirementStatus.phase, .active)
+        try FileManager.default.removeItem(at: dir)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        XCTAssertEqual(model?.retryRetainedWrites(), true)
+        try await eventually("original owner writes repaired file") { model?.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), expected)
+        var finished = false
+        XCTAssertEqual(model?.beginOwnerRetirement { status in
+            XCTAssertTrue(status.workerStopped); XCTAssertEqual(status.pendingWrites, 0); finished = true
+        }, .started)
+        model = nil
+        try await eventually("explicit retirement releases original owner") { finished && observer == nil }
+    }
     @MainActor func testOwnerRetirementRetainsFailedWritesUntilExplicitRepairAndRetry() async throws {
         let dir = directory(); try Data("blocked".utf8).write(to: dir)
         defer { try? FileManager.default.removeItem(at: dir) }
