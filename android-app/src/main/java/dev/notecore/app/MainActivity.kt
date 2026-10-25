@@ -17,6 +17,7 @@ import dev.notecore.document.*
 class MainActivity : Activity() {
     private lateinit var root: LinearLayout
     private lateinit var store: NoteStore
+    private val editorIdentity = java.util.UUID.randomUUID().toString()
     private var exportRequestCode: Int? = null
     private var exportPickerSession: String? = null
     private var notebook: PagedPreviewNotebook? = null
@@ -71,13 +72,15 @@ class MainActivity : Activity() {
     }
     private fun row() = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(12), dp(4), dp(12), dp(4)) }
     private fun library() {
+        notebook?.let { store.forgetEditor(it, editorIdentity) }
         viewGeneration++; val generation = viewGeneration
         notebook = null; canvas = null; status = null; root.removeAllViews()
         root.addView(text("NoteCore", 30f).apply { setPadding(dp(24), dp(20), dp(24), dp(4)) })
         root.addView(text("离线手写 · 预览版", 14f).apply { setPadding(dp(24), 0, dp(24), dp(16)) })
         root.addView(button("新建笔记") {
-            val note = store.create()
-            editor(note); save()
+            val note = store.createForEditor()
+            if (note == null) showError("其他窗口正在编辑，或原笔记尚待保存，请完成后重试")
+            else { editor(note); save() }
         }, LinearLayout.LayoutParams(-1, dp(56)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         root.addView(button("导入备份") {
             try {
@@ -115,11 +118,13 @@ class MainActivity : Activity() {
         root.removeAllViews(); root.addView(text("正在打开…").apply { setPadding(dp(24), dp(24), 0, 0) })
         store.open(id) { note, failure ->
             if (generation != viewGeneration || isFinishing || isDestroyed) return@open
-            if (note != null) { editor(store.adopt(note)); failure?.let(::showError) } else { library(); showError(failure ?: "无法打开笔记") }
+            val adopted = note?.let(store::adoptForEditor)
+            if (adopted != null) { editor(adopted); failure?.let(::showError) }
+            else { library(); showError(failure ?: "其他窗口正在编辑，或原笔记尚待保存，请重试") }
         }
     }
     private fun editor(note: PagedPreviewNotebook) {
-        store.attachActive(note)
+        if (!store.attachEditor(note, editorIdentity)) { library(); showError("编辑窗口已满或会话已切换，请返回后重试"); return }
         viewGeneration++; notebook = note; root.removeAllViews()
         val header = row()
         header.addView(button("返回") { leaveEditor() })
@@ -214,7 +219,14 @@ class MainActivity : Activity() {
     private fun leaveEditor() {
         canvas?.cancelInk()
         val note = notebook ?: return
-        if (save() && store.releaseActive(note)) { library() }
+        val before = note.changeVersion
+        val departure = store.leaveEditor(note, editorIdentity)
+        if (note.changeVersion != before) { canvas?.refreshPage(); updateControls() }
+        when (departure) {
+            EditorDeparture.DETACHED, EditorDeparture.DOCUMENT_CLOSED -> library()
+            EditorDeparture.RETRY_REQUIRED -> showError("原笔记尚待保存，请点击保存重试后返回")
+            EditorDeparture.STALE -> { library(); showError("此编辑窗口已结束，请重新打开笔记") }
+        }
     }
     private fun exportBackup() {
         val note = notebook ?: return
@@ -277,6 +289,10 @@ class MainActivity : Activity() {
     @Deprecated("Preview uses a single activity")
     override fun onBackPressed() { if (notebook != null) leaveEditor() else super.onBackPressed() }
     override fun onPause() { canvas?.let { store.detachInk(it) }; canvas?.cancelInk(); save(); super.onPause() }
+    override fun onDestroy() {
+        notebook?.let { store.forgetEditor(it, editorIdentity) }
+        super.onDestroy()
+    }
     override fun onSaveInstanceState(outState: Bundle) {
         exportRequestCode?.let { outState.putInt("exportRequest", it); outState.putString("exportSession", exportPickerSession) }
         notebook?.let { outState.putString("document", it.documentId) }; super.onSaveInstanceState(outState) }

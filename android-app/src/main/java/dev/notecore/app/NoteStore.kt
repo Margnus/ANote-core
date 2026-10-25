@@ -18,6 +18,7 @@ internal enum class StoreOwnerPhase { ACTIVE, RETIRING, RETIRED }
 internal enum class StoreRetirementRequest { STARTED, ALREADY_RETIRING, RETIRED, INPUT_PENDING, TRANSFER_PENDING, WORK_PENDING, SAVE_REJECTED }
 internal data class StoreRetirementStatus(val phase: StoreOwnerPhase, val pendingWrites: Int,
     val retryRequired: Int, val renderBytes: Long, val workerStopped: Boolean)
+internal enum class EditorDeparture { DETACHED, DOCUMENT_CLOSED, RETRY_REQUIRED, STALE }
 
 data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean, val recovery: PagedPreviewSnapshot = PagedPreviewSnapshot.fromRoot(root))
 
@@ -51,6 +52,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
+    // Main-owner presentation identities only. Never retain an Activity or another content authority.
+    private val editors = mutableSetOf<String>()
+    internal val editorCount: Int get() { executor.checkOwnerThread(); return editors.size }
     private var ownerRetiring = false
     private var ownerRetired = false
     private var ownerStopRequested = false
@@ -66,6 +70,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         executor.checkOwnerThread()
         if (ownerRetired) return StoreRetirementRequest.RETIRED
         if (ownerRetiring) return StoreRetirementRequest.ALREADY_RETIRING
+        if (editors.isNotEmpty()) return StoreRetirementRequest.WORK_PENDING
         if (activeNotebook?.let { it.hasActiveStroke || it.hasPendingStroke } == true) return StoreRetirementRequest.INPUT_PENDING
         if (pendingExport != null) return StoreRetirementRequest.TRANSFER_PENDING
         if (requestsInFlight != 0 || executor.status().entries.any {
@@ -139,8 +144,47 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         check(activeNotebook == null || activeNotebook === note) { "Release the previous owner only after snapshot admission" }
         activeNotebook = note
     }
+    internal fun attachEditor(note: PagedPreviewNotebook, identity: String): Boolean {
+        executor.checkOwnerThread()
+        if (ownerRetiring || identity.isBlank() || identity.length > 64 ||
+            (activeNotebook != null && activeNotebook !== note) ||
+            (identity !in editors && editors.size >= 8)) return false
+        attachActive(note); editors.add(identity); return true
+    }
+    internal fun forgetEditor(note: PagedPreviewNotebook, identity: String) {
+        executor.checkOwnerThread()
+        if (activeNotebook === note) editors.remove(identity)
+        // Destruction/recreation is not a request to retire the shared document.
+    }
+    internal fun leaveEditor(note: PagedPreviewNotebook, identity: String): EditorDeparture {
+        executor.checkOwnerThread()
+        if (activeNotebook !== note || identity !in editors) return EditorDeparture.STALE
+        note.retryPendingStroke()
+        if (!saveOwned(note.captureRecovery())) return EditorDeparture.RETRY_REQUIRED
+        if (editors.size > 1) { editors.remove(identity); return EditorDeparture.DETACHED }
+        if (note.hasActiveStroke) return EditorDeparture.RETRY_REQUIRED
+        editors.remove(identity)
+        if (releaseActive(note)) return EditorDeparture.DOCUMENT_CLOSED
+        editors.add(identity) // Pending recovery needs the original confirmed write, not mere admission.
+        return EditorDeparture.RETRY_REQUIRED
+    }
+    private fun prepareEditorDocument(id: String?): Boolean {
+        executor.checkOwnerThread()
+        if (ownerRetiring) return false
+        val note = activeNotebook ?: return true
+        if (note.documentId == id) return true
+        if (editors.isNotEmpty() || note.hasActiveStroke) return false
+        return saveOwned(note.captureRecovery()) && releaseActive(note)
+    }
+    internal fun createForEditor(): PagedPreviewNotebook? = if (prepareEditorDocument(null)) create() else null
+    internal fun adoptForEditor(opened: OpenedDocument): PagedPreviewNotebook? {
+        executor.checkOwnerThread()
+        if (opened.root !== opened.recovery.root) return null
+        return if (prepareEditorDocument(opened.root.id.value)) adopt(opened) else null
+    }
     internal fun releaseActive(note: PagedPreviewNotebook, lostEndpoint: Boolean = false): Boolean {
         executor.checkOwnerThread(); check(activeNotebook === note)
+        if (editors.isNotEmpty()) return false
         if (note.hasPendingStroke) {
             if (activeSavedRoot.get() !== note.snapshot() || activeSavedPending.get() !== note.pendingStroke() || ledger.latest(note.documentId) != null) return false
             check(note.retireAfterRecovery(note.captureRecovery()))
@@ -319,29 +363,33 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         // Ownership was transferred to ledger / durable file before this advisory UI notification.
         runCatching(action).onFailure { Log.e("NoteCoreStorage", "UI notification failed after storage handoff", it) }
     }
-    fun save(snapshot: PagedPreviewSnapshot, callback: (Long, String?) -> Unit): Boolean {
+    fun save(snapshot: PagedPreviewSnapshot, callback: (Long, String?) -> Unit): Boolean = saveSnapshot(snapshot, callback)
+    private fun saveOwned(snapshot: PagedPreviewSnapshot): Boolean = saveSnapshot(snapshot, null)
+    private fun saveSnapshot(snapshot: PagedPreviewSnapshot, callback: ((Long, String?) -> Unit)?): Boolean {
         executor.checkOwnerThread()
         if (ownerRetiring) {
-            notifyUi { callback(snapshot.version, "当前会话已结束，原内容仍保留") }; return false
+            if (callback != null) notifyUi { callback(snapshot.version, "当前会话已结束，原内容仍保留") }; return false
         }
         val active = activeNotebook
         if (active?.documentId == snapshot.documentId && active.hasPendingStroke &&
             (snapshot.root !== active.snapshot() || snapshot.pending !== active.pendingStroke())) {
-            notifyUi { callback(snapshot.version, "仍有未提交笔迹，请保留完整恢复记录后重试") }; return false
+            if (callback != null) notifyUi { callback(snapshot.version, "仍有未提交笔迹，请保留完整恢复记录后重试") }; return false
         }
         if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot.get() === snapshot.root &&
             activeSavedPending.get() === snapshot.pending && ledger.latest(snapshot.documentId) == null) {
-            notifyUi { callback(snapshot.version, null) }; return true
+            if (callback != null) notifyUi { callback(snapshot.version, null) }; return true
         }
         val previous = ledger.latest(snapshot.documentId)
         val admission = ledger.offer(snapshot)
         if (admission != PreviewSaveAdmission.ACCEPTED) {
-            notifyUi { callback(snapshot.version, if (admission == PreviewSaveAdmission.VERSION_CONFLICT)
+            if (callback != null) notifyUi { callback(snapshot.version, if (admission == PreviewSaveAdmission.VERSION_CONFLICT)
                 "保存内容发生冲突，请保留当前笔记并导出备份" else "保存队列已满或内容版本过期，请保留当前笔记并重试") }
             return false
         }
         if (previous == null || !previous.sameContent(snapshot)) viewEpoch++
-        saveCallbacks[snapshot.documentId] = SaveCallback(ledger.latest(snapshot.documentId) as PagedPreviewSnapshot, callback)
+        if (callback != null) saveCallbacks[snapshot.documentId] = SaveCallback(ledger.latest(snapshot.documentId) as PagedPreviewSnapshot, callback)
+        else if (saveCallbacks[snapshot.documentId]?.snapshot?.sameContent(snapshot) == false) saveCallbacks.remove(snapshot.documentId)
+        // Departure has no UI receiver; keep an existing receiver for this exact accepted content.
         pumpWrites()
         return true
     }
@@ -461,6 +509,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) {
         executor.checkOwnerThread()
+        if (ownerRetiring || (editors.isNotEmpty() && activeNotebook?.documentId != id)) {
+            notifyUi { callback(null, "其他窗口正在编辑，或原笔记尚待保存，请完成后重试") }; return
+        }
         activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot() && activeSavedPending.get() === it.pendingStroke(), it.captureRecovery()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->

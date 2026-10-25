@@ -1,0 +1,37 @@
+{
+  "schema": "editor-attachments-1",
+  "status": "passed",
+  "scope": "Original Android Store/worker and MainActivity actual launch/back-button callback/recreate with isolated cache Store injected only by instrumentation; not ordinary OS touch or full multi-document/window acceptance",
+  "decision": "Original Store holds at most eight bounded presentation identities. Leaving one editor preserves shared Notebook. Last explicit departure requires original save admission and confirmed pending recovery before original retirement. Destruction only forgets its own presentation identity.",
+  "checks": [
+    "actual_activity_shared_editor_departure",
+    "pending_editor_failure_retry_original_recovery",
+    "shared_editor_detach_capacity_and_reopen"
+  ],
+  "input_checks": 11,
+  "storage_checks": 11,
+  "owner_checks": 9,
+  "jvm_tests": 414,
+  "original_android_files_preserved": 66,
+  "limits": [
+    "Single active document remains a preview limit; another document is refused while editors remain, without replacing authority or crashing",
+    "Actual Activity recreation proves identical Notebook/root; toolbar state and complete simultaneous OS window delivery not accepted",
+    "Save UI fan-out for all windows, Apple per-window navigation and arbitrary duplicate directory services remain unfinished",
+    "No new shared Native/Apple run, M-1/heap/pen, process takeover, physical peak quota or power-loss evidence"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/EditorAttachmentHostChecks.kt": "78874edc9da5143103b82132fe43e56a02a563af01bea64a0b238fd5bfdbbf42",
+    "android-app/src/androidTest/java/dev/notecore/app/OwnerRetirementHostChecks.kt": "aa2b55803d29beaefbf240f65ec79b8997c5bfd20ef03dc443328053395eee5d",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "6ce178dce41e6fd6433fa624e1f6a3ee94349135e49175d74af8201ce2d47698",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "1428dd4d4622585379826b7c57e0f8a960eb919cab78cbb3eec9b534da08c432",
+    "build/android-input-host/original-files.json": "eeeb9b671f424be4453c58c9fd356c1866d92d7628d6913c34aac93025e8619c",
+    "build/catalog-budget/android-after.json": "145419900fd43982d97f271b054af7d2904d1b1afb5bb7f24a49b61d4bdebc6e",
+    "docs/owner交接与失败责任矩阵.md": "7a785d4f79534a77956b801880c2b7c2b80b7f4f936ccda4bf696d640e1f09c0",
+    "reports/android-input-host-tests.json": "c540073f19158bc3c6fb940f072475df536c6c9ffdc2783b9c598321ffa62e2a",
+    "reports/preview-build.json": "51e90109bf6a8ed7774852df19cb5aaf3c149ff5560313b7679088c40e9c8026",
+    "reports/verification.json": "c491b216059fb76ee4ec1b247152d00c71c8939c655b24716ef58ad924d62766",
+    "tools/verify_editor_attachments.py": "316b0ae30882491b677ee0cca1688b625427fe5e5c6bd1af65563ac269b03027"
+  }
+}
