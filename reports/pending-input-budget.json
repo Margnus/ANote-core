@@ -1,0 +1,55 @@
+{
+  "schema": "pending-input-budget-1",
+  "status": "passed",
+  "scope": "Shared JVM/Native and original Android/Swift consumer host input and pending recovery admission; no ordinary UI or physical heap claim",
+  "jvm_tests": 410,
+  "native_tests": 173,
+  "swift_host_tests": 49,
+  "android_input_groups": 10,
+  "android_storage_groups": 10,
+  "android_owner_groups": 6,
+  "checks": [
+    "recoveryCannotAdoptPendingAboveItsInputBudgetAndRefusalKeepsCheckpoint",
+    "maximumIdentityMetadataIsChargedAndRestoredAtExactBoundary",
+    "original Android and Swift consumers reject zero/one-byte-short input capacity and accept exact pending charge",
+    "checkpoint and original owner pending unchanged on refusal; retry commits once",
+    "DOWN reserves arena plus maximum retained command metadata before accepting real samples",
+    "original worker IO failure/retry/new owner/canonical reopen regression"
+  ],
+  "decision": "Adopt original pendingCharge for retained input; reserve 3072 logical metadata bytes at DOWN and refuse recovery over inputBytes before authority creation. Existing format, authority, ledger and worker retained.",
+  "original_files_unchanged": {
+    "android": 66,
+    "ios": 14
+  },
+  "limits": [
+    "Logical reservation is not measured heap or complete producer/render/save peak admission",
+    "Input capacity refusal takes precedence over other open validation when pending exceeds budget",
+    "No ordinary GUI, physical stylus/M-1, full owner transfer, unconfirmed IO interruption or power loss verification"
+  ],
+  "ordinary_ui_verified": false,
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt": "1acf2ee38113532b82fe287dc3b377c256bc9d5da74b955e19bbd38429ef1139",
+    "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt": "34a75482e003127a335d1e37289bf23e0b6ac08b14fe64e1f94176ff85a555d9",
+    "build/pending-input-budget/android-after.json": "145419900fd43982d97f271b054af7d2904d1b1afb5bb7f24a49b61d4bdebc6e",
+    "build/pending-input-budget/android-before.json": "145419900fd43982d97f271b054af7d2904d1b1afb5bb7f24a49b61d4bdebc6e",
+    "build/pending-input-budget/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/pending-input-budget/ios-before.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "58e234c83f3054ab035b9ddb8925e90f05127a16d0a70ac72c0fde1fc16874b3",
+    "reports/android-input-host-tests.json": "592dec1b85f584b3db3c64e30c8fbd5e50254cc85163e18753d22dbd26d82c30",
+    "reports/ios-host-tests.json": "7c326618c3d6135d313cbaac1811a31540b753422433b2f909577e1a02335ba6",
+    "reports/ios-preview-build.json": "45018c8cf26f44294162f8747123fd4e7a354997fdb25cdfd386e4ebe76f41f2",
+    "reports/ios-preview-restored.json": "e7d538634b701c6f6ce8c7789051b5a9127d11e0862e4a264403305bc99e2fd0",
+    "reports/preview-build.json": "9d13ccb94013911393c5ff8a45001056641e8143061562f7ad80d02215acd694",
+    "reports/shared-native-contracts.json": "8abfe42c74ca0ffc43be05efd0bcb1147863235aa6edba041d565e14ad5bcf65",
+    "reports/verification.json": "1793c8252d2b61e006a99a7d8c0676377859288e79cdef47d5f23dee3d0abb55",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "126e0b3463728b90805f44b74d825cda60812c096768a8a9f43e38a6bd4ccd5b",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewNotebookOpen.kt": "2dd49c6902aff3050c38c84ab87d82ec7d9236d9748be1ecde6686d525e53015",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "aec24c968cf154679ac57d5b4fb4df4211410b15a9d10c9b7845b5b6a2dc9ced",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputBudgetTest.kt": "776a6cc4169e2285451303ad77ee6e69c56be688b8ae766cc246b80db62c71e7",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewRecoveryTest.kt": "1f327d5bf6550b2aa700d67840c8952733954310bf8582e8e81553bf2bcf9f3a",
+    "tools/verify_android_input_host.py": "10bcde919c6a7803ecf1b3368937cfbf3f55d71a9052340df0e209ce09b924d6",
+    "tools/verify_pending_input_budget.py": "6e08856b259ddc71655bce113aeced0bbcc8fbef1a8e928a2ff3b4909730ad75"
+  }
+}

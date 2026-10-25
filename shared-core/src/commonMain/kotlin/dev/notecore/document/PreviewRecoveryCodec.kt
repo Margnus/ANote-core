@@ -40,6 +40,8 @@ object PreviewRecoveryCodec {
         require(pending.id.value.hasValidUnicode() && pending.pageId.value.hasValidUnicode())
         require(PreviewDocumentReader.accept(payload(root, pending)).failure == null)
     }
+    // Canonical IDs are at most 128 UTF-16 units. Covers all four retained command identities.
+    internal const val PENDING_METADATA_RESERVATION = 2048L + 4L * 128 * 2
     internal fun pendingCharge(pending: DocumentCommand.Canvas): Long {
         val stroke = pending.command as CanvasCommand.AddStroke
         return 2048L + (pending.id.value.length + pending.pageId.value.length + stroke.objectId.value.length +

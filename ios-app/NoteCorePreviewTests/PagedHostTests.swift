@@ -17,6 +17,25 @@ final class PagedHostTests: XCTestCase {
         let reading = PreviewRecoveryCodec.shared.read(text: encoded)
         XCTAssertNil(reading.failure); XCTAssertTrue(reading.snapshot!.sameContent(other: checkpoint))
         XCTAssertNotNil(reading.snapshot?.pending)
+        // Exact original command metadata plus three real samples: 2048 + 2*(11+4+12+5) + 3*28.
+        let inputCharge: Int64 = 2196
+        for bytes in [Int64(0), inputCharge - 1, inputCharge] {
+            let inputBudget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+                journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
+                historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: bytes)
+            let result = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: "consumer",
+                budget: inputBudget, ownerCheck: { precondition(Thread.isMainThread) })
+            if bytes < inputCharge {
+                XCTAssertNil(result.notebook); XCTAssertEqual(result.failure, .inputCapacity)
+            } else {
+                let note = try XCTUnwrap(result.notebook)
+                XCTAssertEqual(note.inputReservedByteCharge, inputCharge)
+                XCTAssertTrue(note.pendingStroke()!.isEqual(checkpoint.pending))
+                XCTAssertTrue(note.retryPendingStroke()); XCTAssertTrue(note.retryPendingStroke())
+                XCTAssertEqual(note.totalStrokeCount, 1); XCTAssertEqual(note.inputReservedByteCharge, 0)
+            }
+            XCTAssertEqual(try checkpoint.encode(), encoded)
+        }
         let file = dir.appendingPathComponent("pending-swift.ncp")
         try PreviewFileIO.writeUTF8(encoded, to: file)
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,

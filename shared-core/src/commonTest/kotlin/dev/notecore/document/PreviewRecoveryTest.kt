@@ -32,6 +32,41 @@ class PreviewRecoveryTest {
         assertTrue(note.captureRecovery().encode().startsWith("NCPREVIEW\t2\n"))
         assertEquals(2, PreviewRecoveryCodec.decode(note.captureRecovery().encode()).root.scene.objectCount)
     }
+    @Test fun recoveryCannotAdoptPendingAboveItsInputBudgetAndRefusalKeepsCheckpoint() {
+        val checkpoint = recovery(); val encoded = checkpoint.encode()
+        val command = assertNotNull(checkpoint.pending); val stroke = command.command as CanvasCommand.AddStroke
+        val charge = 2048L + 2L * (command.id.value.length + command.pageId.value.length +
+            stroke.objectId.value.length + stroke.target.layerId.value.length) + 3L * 28
+        assertEquals(charge, PreviewRecoveryCodec.pendingCharge(command))
+        for (bytes in listOf(0L, charge - 1)) {
+            val refused = PagedPreviewNotebook.openRecovery(checkpoint, "consumer", DocumentBudget(inputBytes = bytes))
+            assertNull(refused.notebook); assertEquals(PreviewOpenFailure.INPUT_CAPACITY, refused.failure)
+            assertEquals(encoded, checkpoint.encode()); assertSame(command, checkpoint.pending)
+        }
+        val note = assertNotNull(PagedPreviewNotebook.openRecovery(checkpoint, "consumer", DocumentBudget(inputBytes = charge)).notebook)
+        assertEquals(charge, note.inputReservedByteCharge); assertSame(command, note.pendingStroke())
+        note.cancelStroke(); assertEquals(charge, note.inputReservedByteCharge)
+        assertTrue(note.retryPendingStroke()); assertTrue(note.retryPendingStroke())
+        assertEquals(1, note.totalStrokeCount); assertEquals(0L, note.inputReservedByteCharge)
+        // Low budget permits reading existing content; it cannot accept new input without its full reservation.
+        assertFalse(note.beginStroke(1.0, 1.0, .5f, 30))
+        assertEquals(1, note.totalStrokeCount)
+    }
+    @Test fun maximumIdentityMetadataIsChargedAndRestoredAtExactBoundary() {
+        val page = PageDescriptor(PageId("p".repeat(128)), LayerId("l".repeat(128)), 595.0, 842.0)
+        val root = DocumentRoot.empty(SceneId("max-identities"), "", page)
+        val samples = (recovery().pending!!.command as CanvasCommand.AddStroke).samples
+        val pending = DocumentCommand.Canvas(page.id, CanvasCommand.AddStroke(CommandId("c".repeat(128)), 0,
+            StrokeTarget(root.id, page.layerId, BrushSpec(BrushKind.MONOLINE, 1, 2.0, 0xff000000.toInt())),
+            ObjectId("o".repeat(128)), samples))
+        val checkpoint = PagedPreviewSnapshot(root, pending)
+        val charge = 3072L + 3 * 28
+        assertEquals(charge, PreviewRecoveryCodec.pendingCharge(pending))
+        assertNull(PagedPreviewNotebook.openRecovery(checkpoint, "consumer", DocumentBudget(inputBytes = charge - 1)).notebook)
+        val note = assertNotNull(PagedPreviewNotebook.openRecovery(checkpoint, "consumer", DocumentBudget(inputBytes = charge)).notebook)
+        assertEquals(charge, note.inputReservedByteCharge); assertSame(pending, note.pendingStroke())
+        assertTrue(note.retryPendingStroke()); assertEquals(3, note.pointCount(0)); assertEquals(0L, note.inputReservedByteCharge)
+    }
     @Test fun oldFlightCannotConfirmExtensionAndFailureRetainsExactRecovery() {
         val recovery = recovery(); val base = PagedPreviewSnapshot.fromRoot(recovery.root)
         val ledger = PreviewSaveLedger(byteBudget = base.retainedByteCharge + recovery.retainedByteCharge)

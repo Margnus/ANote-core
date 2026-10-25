@@ -38,6 +38,23 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             armed = true
             try { note.endStroke(8.0, 6.0, 1f, 10); error("Expected owner fault") } catch (e: IllegalStateException) { check(!armed) }
             recovery = note.captureRecovery()
+            val checkpoint = recovery.encode()
+            val command = checkNotNull(recovery.pending)
+            val stroke = command.command as CanvasCommand.AddStroke
+            val charge = 2048L + 2L * (command.id.value.length + command.pageId.value.length +
+                stroke.objectId.value.length + stroke.target.layerId.value.length) + 3L * 28
+            for (bytes in listOf(0L, charge - 1, charge)) {
+                val result = PagedPreviewNotebook.openRecovery(recovery, "consumer", DocumentBudget(inputBytes = bytes),
+                    ownerCheck = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) })
+                if (bytes < charge) check(result.notebook == null && result.failure == PreviewOpenFailure.INPUT_CAPACITY)
+                else {
+                    val restored = checkNotNull(result.notebook)
+                    check(restored.inputReservedByteCharge == charge && restored.pendingStroke() === recovery.pending)
+                    check(restored.retryPendingStroke() && restored.retryPendingStroke())
+                    check(restored.totalStrokeCount == 1 && restored.inputReservedByteCharge == 0L)
+                }
+                check(recovery.encode() == checkpoint && note.hasPendingStroke)
+            }
             check(store.save(recovery) { _, error -> check(error != null); failed++ })
             check(!store.releaseActive(note)) // Admission is never an atomic-write receipt.
         }

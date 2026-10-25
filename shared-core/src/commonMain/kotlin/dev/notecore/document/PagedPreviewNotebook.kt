@@ -47,7 +47,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     /** Input ownership only; document/history/save/render budgets remain separate. */
     val inputReservedByteCharge: Long get() {
         ownerCheck()
-        return input?.reservedByteCharge ?: (pending?.command as? CanvasCommand.AddStroke)?.samples?.logicalByteCharge ?: 0L
+        return input?.let { it.reservedByteCharge + PreviewRecoveryCodec.PENDING_METADATA_RESERVATION } ?: pending?.let(PreviewRecoveryCodec::pendingCharge) ?: 0L
     }
     val canUndo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextUndoOperationId != null }
     val canRedo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextRedoOperationId != null }
@@ -287,7 +287,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         var low = 0; var high = maximum
         while (low < high) {
             val mid = low + (high - low + 1) / 2
-            if (InputReplaySession.reservationBytes(mid) <= inputByteLimit) low = mid else high = mid - 1
+            if (InputReplaySession.reservationBytes(mid) + PreviewRecoveryCodec.PENDING_METADATA_RESERVATION <= inputByteLimit) low = mid else high = mid - 1
         }
         return low
     }
@@ -360,6 +360,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         fun openRecovery(snapshot: PagedPreviewSnapshot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
                          ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
             ownerCheck()
+            if (snapshot.pending?.let(PreviewRecoveryCodec::pendingCharge)?.let { it > budget.inputBytes } == true)
+                return PreviewNotebookOpen(null, PreviewOpenFailure.INPUT_CAPACITY)
             val opened = open(snapshot.root, sessionNonce, budget, ownerCheck)
             val note = opened.notebook ?: return opened
             snapshot.pending?.let { command ->
