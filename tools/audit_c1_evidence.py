@@ -22,6 +22,8 @@ CURRENT = {
     'ios-ordinary-recovery-ui': ('source_and_artifact_sha256',),
     'android-ordinary-recovery-ui': ('source_and_artifact_sha256',),
     'second-host-android': ('source_and_artifact_sha256',),
+    'second-host-ios': ('source_and_artifact_sha256',),
+    'independent-consumers': ('source_and_artifact_sha256',),
     'recovery-framing': ('source_and_artifact_sha256',),
     'validated-creation': ('source_and_artifact_sha256',),
     'typed-recovery-read': ('source_and_artifact_sha256',),

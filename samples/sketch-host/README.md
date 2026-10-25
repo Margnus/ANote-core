@@ -12,6 +12,6 @@
 
 实际专用模拟器仪器复验入口 `tools/run_sketch_host.py` 会先核对 NoteCore 原包及66份文件基线，再安装独立样例/仪器包；只用于已有 NoteCorePreview / emulator-5554，不是通用真机运行脚本。`tools/verify_sketch_host.py` 核对编译输入戳、APK类、依赖、实际事件标量/资源像素/Activity重建结果与CUA观察。最初普通CUA证据保留在 `reports/second-host-android.json` 的固定包范围；当前validated新建入口及重新编译的样例仪器证据见 `reports/validated-creation.json`。使用 `--case-directory build/<本轮目录>` 保留不同版本的设备证据，不能覆盖旧baseline来冒称保持。
 
-只采用为 ENG-19 的可运行 Android 第二消费者子范围；MONOLINE、固定单页、普通 canonical Path。背景回调只借用本帧 Canvas，不得保留 Canvas/Activity。规范 Path/Matrix 按 root revision 缓存，活动 Path 只是派生呈现。没有第二文档模型、worker 或原生图像池。未冻结 SDK，真机、完整资源生命周期/heap/触笔、Apple 样例及 C1 仍待验。
+只采用为 ENG-19 的可运行 Android 第二消费者子范围；MONOLINE、固定单页、普通 canonical Path。背景回调只借用本帧 Canvas，不得保留 Canvas/Activity。规范 Path/Matrix 按 root revision 缓存，活动 Path 只是派生呈现。没有第二文档模型、worker 或原生图像池。未冻结 SDK，真机、完整资源生命周期/heap/触笔、完整跨端SDK conformance及 C1 仍待验；Apple独立内存样例现见[独立Apple宿主](../sketch-host-ios/README.md)，其当前实际证据与本样例旧包UI范围分开记录。
 
 当前样例直接使用 `PagedPreviewNotebook.createValidated` 返回的原会话，显式传主线程 ownerCheck；没有临时 Notebook → snapshot → 第二次 adopt。DocumentBudget/enum 是已验证值；宿主依旧对 owner 实现负责，不将默认空检查解释为线程安全。
