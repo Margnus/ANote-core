@@ -367,6 +367,75 @@ final class PagedHostTests: XCTestCase {
             try await eventually("export owner drains after release or refusal") { model.ownerRetirementStatus.phase == .retired }
         }
     }
+    @MainActor func testCatalogCapacityPreservesCompleteOldRowsAndChargesRetainedOverlay() async throws {
+        let dir = directory(), held = directory()
+        defer { try? FileManager.default.removeItem(at: dir); try? FileManager.default.removeItem(at: held) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        func fixture(_ id: String, title: String = "中文😀") -> String {
+            "NCPREVIEW\t2\nD\t\(id)\t\(title)\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+        }
+        for id in ["catalog-a", "catalog-b"] { try Data(fixture(id).utf8).write(to: dir.appendingPathComponent(id + ".ncp")) }
+        for limit in [Int64(0), 1587, 1588] {
+            let model = PreviewModel(directory: dir, catalogResultByteLimit: limit)
+            if limit < 1588 {
+                try await eventually("catalog quota refuses whole result") { model.catalogError }
+                XCTAssertTrue(model.notes.isEmpty); XCTAssertEqual(model.catalogRetainedByteCharge, 0)
+                XCTAssertEqual(model.status, "列表超过预览元数据容量，原列表与文件仍保留")
+            } else {
+                try await eventually("exact metadata bytes accepted") { model.notes.count == 2 }
+                XCTAssertFalse(model.catalogError); XCTAssertEqual(model.catalogRetainedByteCharge, 1588)
+                let extra = dir.appendingPathComponent("extra.ncp")
+                try Data(fixture("extra").utf8).write(to: extra)
+                model.refresh(); try await eventually("larger metadata result refuses without replacing prior rows") { model.catalogError }
+                XCTAssertEqual(model.notes.count, 2); XCTAssertEqual(model.catalogRetainedByteCharge, 1588)
+                XCTAssertEqual(model.status, "列表超过预览元数据容量，原列表与文件仍保留")
+                try FileManager.default.removeItem(at: extra)
+                model.refresh(); try await eventually("same catalog owner repairs capacity refusal") { !model.catalogError }
+            }
+            XCTAssertEqual(model.beginOwnerRetirement(), .started)
+            try await eventually("catalog owner retires") { model.ownerRetirementStatus.phase == .retired }
+            XCTAssertEqual(model.catalogRetainedByteCharge, 0)
+        }
+        let model = PreviewModel(directory: dir)
+        try await eventually("two initial disk notes") { model.notes.count == 2 }
+        try FileManager.default.moveItem(at: dir, to: held); try Data("blocked".utf8).write(to: dir)
+        model.refresh()
+        try await eventually("IO failure reaches existing list owner") { model.catalogError }
+        XCTAssertEqual(Set(model.notes.map { $0.id }), Set(["catalog-a", "catalog-b"]))
+        try FileManager.default.removeItem(at: dir); try FileManager.default.moveItem(at: held, to: dir)
+        model.refresh(); try await eventually("catalog IO repair") { !model.catalogError }
+        let title = String(repeating: "中", count: 118) + "😀"
+        for index in 2..<2000 {
+            let number = String(index), id = "n" + String(repeating: "0", count: 127 - number.count) + number
+            try Data(fixture(id, title: title).utf8).write(to: dir.appendingPathComponent(id + ".ncp"))
+        }
+        model.refresh(); try await eventually("all 2000 notes without truncation") { model.notes.count == 2000 && !model.catalogError }
+        XCTAssertEqual(model.notes.filter { $0.id.utf16.count == 128 && $0.title == title }.count, 1998)
+        let ids = Set(model.notes.map { $0.id })
+        let overflow = dir.appendingPathComponent("overflow.ncp")
+        try Data(fixture("overflow").utf8).write(to: overflow)
+        model.refresh(); try await eventually("2001 explicitly refused") { model.catalogError }
+        XCTAssertEqual(Set(model.notes.map { $0.id }), ids)
+        XCTAssertEqual(try String(contentsOf: overflow, encoding: .utf8), fixture("overflow"))
+        try FileManager.default.removeItem(at: overflow)
+        model.refresh(); try await eventually("full catalog recovers after capacity repair") { !model.catalogError }
+        try FileManager.default.moveItem(at: dir, to: held); try Data("blocked".utf8).write(to: dir)
+        for _ in 0..<8 {
+            model.create(); XCTAssertNotNil(model.current)
+            XCTAssertTrue(model.current!.rename(value: String(repeating: "中", count: 120)))
+            XCTAssertTrue(model.save()); model.close(); XCTAssertNil(model.current)
+        }
+        try await eventually("eight accepted writes retained after IO failure") { model.ownerRetirementStatus.retryRequired == 8 }
+        model.refresh(); try await eventually("ledger overlays complete old disk list") { model.notes.count == 2008 && model.catalogError }
+        XCTAssertEqual(model.notes.filter { $0.title.hasSuffix("（未保存）") }.count, 8)
+        XCTAssertLessThanOrEqual(model.catalogRetainedByteCharge, 2 * 1024 * 1024)
+        try FileManager.default.removeItem(at: dir); try FileManager.default.moveItem(at: held, to: dir)
+        XCTAssertTrue(model.retryRetainedWrites())
+        try await eventually("original ledger writes complete after repair") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("catalog owner releases snapshot on retirement") { model.ownerRetirementStatus.phase == .retired }
+        XCTAssertEqual(model.catalogRetainedByteCharge, 0)
+    }
     @MainActor func testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData() throws {
         func data<T>(_ values: [T]) -> NSData {
             values.withUnsafeBufferPointer { NSData(bytes: $0.baseAddress, length: $0.count * MemoryLayout<T>.stride) }

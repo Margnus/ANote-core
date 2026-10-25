@@ -13,6 +13,8 @@ import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
 import java.util.UUID
 
+internal class CatalogCapacityRefusal : RuntimeException()
+
 /** Platform-local read result; no mutable document or secondary storage ownership. */
 internal enum class LocalReadFailure(val message: String) {
     INVALID_FORMAT("笔记格式无效或版本不支持，原文件已保留"),
@@ -80,11 +82,16 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
                 if (name.endsWith(".ncp") || name.endsWith(".ncp.bak")) {
                     val id = name.removeSuffix(".bak").removeSuffix(".ncp")
                     if (id.matches(Regex("[a-zA-Z0-9-]{1,128}"))) ids.add(id)
-                    require(ids.size <= 2000) { "Preview catalog capacity; paged production catalog required" }
+                    if (ids.size > PreviewCatalogBudget.maxDiskRows) throw CatalogCapacityRefusal()
                 }
             }
         }
-        return ids.map { id -> NoteSummary(id, runCatching { readHeader(id).title }.getOrDefault("待恢复的笔记"), file(id).lastModified()) }
+        return ids.map { id ->
+            val title = try { readHeader(id).title }
+                catch (_: IOException) { "待恢复的笔记" }
+                catch (_: IllegalArgumentException) { "待恢复的笔记" }
+            NoteSummary(id, title, file(id).lastModified())
+        }
     }
     private fun readHeader(id: String): PagedPreviewHeader = AtomicFile(file(id)).openRead().use { stream ->
         val input = stream.buffered(256); val bytes = java.io.ByteArrayOutputStream(1024); var newlines = 0

@@ -13,6 +13,8 @@ struct PreviewBackup: FileDocument {
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
 }
 
+private enum PreparedCatalog { case complete([LocalNote]), capacity }
+
 private enum PreparedExport { case ready(PreviewBackup), capacity }
 
 struct LocalNote: Identifiable { let id: String; let title: String; let date: Date }
@@ -27,12 +29,18 @@ struct PreviewOwnerRetirementStatus {
 }
 
 final class PreviewModel: ObservableObject {
-    @Published var notes: [LocalNote] = []
+    @Published private(set) var notes: [LocalNote] = []
     @Published var catalogError = false
     @Published private(set) var current: PagedPreviewNotebook?
     @Published var status = ""
     @Published var revision: Int64 = 0
     @Published private(set) var exportDocument: PreviewBackup?
+    private let catalogResultByteLimit: Int64
+    var catalogRetainedByteCharge: Int64 {
+        precondition(Thread.isMainThread)
+        return PreviewCatalogBudget.shared.resultByteCharge(rows: Int32(notes.count),
+            textCodeUnits: notes.reduce(0) { $0 + Int64($1.id.utf16.count + $1.title.utf16.count) })
+    }
     private let exportResultByteLimit: Int
     var exportRetainedByteCharge: Int {
         precondition(Thread.isMainThread)
@@ -103,6 +111,7 @@ final class PreviewModel: ObservableObject {
         if !ownerStopRequested { ownerStopRequested = true; try! executor.stopAccepting() }
         guard (try! executor.status()).isDrained else { return }
         ownerRetired = true
+        notes = []
         let observer = retirementObserver; retirementObserver = nil
         observer?(ownerRetirementStatus)
         retirementKeepAlive = nil
@@ -266,9 +275,11 @@ final class PreviewModel: ObservableObject {
     }
     private let beforeOpenRead: () throws -> Void
     init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
-         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, exportResultByteLimit: Int = 32 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}) {
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, exportResultByteLimit: Int = 32 * 1024 * 1024, catalogResultByteLimit: Int64 = 2 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}) {
         precondition(Thread.isMainThread)
         precondition(exportResultByteLimit >= 0)
+        precondition(catalogResultByteLimit >= 0)
+        self.catalogResultByteLimit = catalogResultByteLimit
         self.exportResultByteLimit = exportResultByteLimit
         self.beforeOpenRead = beforeOpenRead
         self.documentBudget = documentBudget
@@ -325,16 +336,35 @@ final class PreviewModel: ObservableObject {
         current = note; savedRoot = nil; savedPending = nil; revision = note.changeVersion
         save()
     }
-    private func overlay(_ disk: [LocalNote]) -> [LocalNote] {
+    private func installCatalog(_ disk: [LocalNote], failure: String? = nil) {
+        precondition(Thread.isMainThread)
         let retained = ledger.states().map { LocalNote(id: $0.snapshot.documentId, title: $0.snapshot.title + "（未保存）", date: Date()) }
         let ids = Set(retained.map { $0.id })
-        return (disk.filter { !ids.contains($0.id) } + retained).sorted { $0.date > $1.date }
+        var rows = retained.count
+        var text = retained.reduce(Int64(0)) { $0 + Int64($1.id.utf16.count + $1.title.utf16.count) }
+        var valid = retained.allSatisfy { (1...128).contains($0.id.utf16.count) && $0.title.utf16.count <= 125 }
+        for row in disk where !ids.contains(row.id) {
+            rows += 1; text += Int64(row.id.utf16.count + row.title.utf16.count)
+            valid = valid && (1...128).contains(row.id.utf16.count) && row.title.utf16.count <= 125
+        }
+        guard valid, rows <= Int(PreviewCatalogBudget.shared.maxOwnerRows),
+              PreviewCatalogBudget.shared.resultByteCharge(rows: Int32(rows), textCodeUnits: text) <= catalogResultByteLimit else {
+            catalogError = true; status = "列表超过预览元数据容量，原列表与文件仍保留"; return
+        }
+        notes = (disk.filter { !ids.contains($0.id) } + retained).sorted { $0.date > $1.date }
+        catalogError = failure != nil
+        if let failure { status = failure }
     }
     func refresh() {
         guard !ownerRetiring else { return }
-        request(input: directory, bytes: 2 * 1024 * 1024, compute: { root in
+        let pathUnits = directory.path.utf16.count
+        guard pathUnits <= Int32.max else { catalogError = true; status = "列表路径超过预览容量，原列表仍保留"; return }
+        request(input: directory, bytes: PreviewCatalogBudget.shared.workByteCharge(directoryPathCodeUnits: Int32(pathUnits)), compute: { root -> PreparedCatalog in
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-            return try PreviewFileIO.catalog(root).map { url -> LocalNote in
+            let urls: [URL]
+            do { urls = try PreviewFileIO.catalog(root) }
+            catch is CatalogCapacityRefusal { return .capacity }
+            return .complete(urls.map { url -> LocalNote in
                 let date = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
                 let id = url.deletingPathExtension().lastPathComponent
                 let title: String
@@ -343,11 +373,15 @@ final class PreviewModel: ObservableObject {
                     title = header.title
                 } else { title = "待恢复的笔记" }
                 return LocalNote(id: id, title: title, date: date)
-            }
-        }, rejected: { notes = overlay(notes); catalogError = true; status = "后台队列繁忙，请重新打开列表" }) { result in
+            })
+        }, rejected: { installCatalog(notes, failure: "后台队列繁忙，请重新打开列表") }) { result in
             switch result {
-            case .succeeded(let disk): self.notes = self.overlay(disk); self.catalogError = false
-            case .outcomeUnknown: self.notes = self.overlay(self.notes); self.catalogError = true; self.status = "列表读取失败，原文件与未保存内容仍保留"
+            case .succeeded(let prepared):
+                switch prepared {
+                case .complete(let disk): self.installCatalog(disk)
+                case .capacity: self.installCatalog(self.notes, failure: "列表超过预览记录容量，原列表与文件仍保留")
+                }
+            case .outcomeUnknown: self.installCatalog(self.notes, failure: "列表读取失败，原列表与文件仍保留")
             }
         }
     }

@@ -1,0 +1,60 @@
+{
+  "schema": "catalog-budget-1",
+  "status": "passed",
+  "scope": "Shared declared catalog sizing and original Android Store/Swift Model worker-owner complete metadata adoption; no production paged-library or physical heap claim",
+  "jvm_tests": 413,
+  "native_tests": 176,
+  "swift_host_tests": 52,
+  "android_storage_groups": 11,
+  "shared_catalog_tests": [
+    "dev.notecore.document.PreviewCatalogBudgetTest.completeDiskAndRetainedOverlayFitDeclaredResultQuotaWithoutTruncation",
+    "dev.notecore.document.PreviewCatalogBudgetTest.invalidCountsAndTextNeverProduceAChargeForPartialCatalogs",
+    "dev.notecore.document.PreviewCatalogBudgetTest.pathReservationCoversBothResultSnapshotsAndChangesBeforeWorkerAdmission"
+  ],
+  "counterexample": "Actual original Android Store lost both prior disk rows on real directory IO refusal; retained log/source show [] before owner snapshot adoption.",
+  "decision": "Use existing owner metadata snapshot; shared work reservation includes path/URL staging, header workspace and old/new result overlap. Check complete merged metadata against default 2MiB before merge/sort. Known disk-row capacity refusal is distinct from IO/unknown; failure preserves old rows and original ledger overlay. Clear owner snapshot at final retirement.",
+  "checks": [
+    "Unicode zero/one-byte-short/exact 1588-byte two-row metadata boundary",
+    "complete 2000 disk rows including 1998 maximum IDs/Unicode titles",
+    "2001 explicitly refused without partial publication or file mutation; repaired catalog refreshes",
+    "real directory IO refusal keeps complete old disk rows",
+    "eight failed saves overlay all 2000 disk rows; original ledger retry writes them after repair",
+    "owner retirement clears retained metadata charge"
+  ],
+  "original_files_unchanged": {
+    "android": 66,
+    "ios": 14
+  },
+  "limits": [
+    "512 declared bytes per row and platform staging allowances are policies, not measured heap",
+    "Foundation/OS enumerator, UI/runtime capacities and reclamation lag remain unmeasured",
+    "No current ordinary GUI, physical device/stylus, full aggregate quota or power-loss verification"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/CatalogRetentionHostChecks.kt": "6958a8a76596862091975fdb6cdaf7db177e75e7295ca7a5e6885fd42038644b",
+    "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "48b9ba684a7980f54e49716f530c146d08fc75942c0b29c006b07e95a30a0dd1",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "b707551e854338bba581c40b5f86da994cabc2ec3246424af8f779ccebb489ac",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "156d0c47294ccefb84a5a3242dcb7b37db523eac510eb2a6df5b544a70b2bd1f",
+    "build/catalog-budget/android-after.json": "145419900fd43982d97f271b054af7d2904d1b1afb5bb7f24a49b61d4bdebc6e",
+    "build/catalog-budget/android-before.json": "145419900fd43982d97f271b054af7d2904d1b1afb5bb7f24a49b61d4bdebc6e",
+    "build/catalog-budget/before-host.log": "6b49782a45bc83d7403219334c3aa7ac920a67f623d12359446e6695b907ddc6",
+    "build/catalog-budget/before-store.kt": "388d9a5337a1949c11c1e3e7b510f14c85c50859a876dce1819872067d0466d4",
+    "build/catalog-budget/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/catalog-budget/ios-before.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "9da7722364a2668eccc03ae6ab8d99ef3010a404bc36135e04f7128aac1d6163",
+    "ios-app/NoteCorePreview/PreviewFileIO.swift": "a92df1120db5a095636a6867d546a824d5c2c79f929f4189fddb0f9b4f792e8b",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "9efe4100a0ee99f2f7e3d520468041e8536c17fda039088cf4eb57cd30ebd84c",
+    "reports/android-input-host-tests.json": "a5e490d8b79a897498547aab23b7013bb9340b817e328e08486b7a08abc51d3e",
+    "reports/ios-host-tests.json": "8835626e4818ff5febf4cb743942ce97b657d6ff5b0b50ff5e715b92eaae73fa",
+    "reports/ios-preview-build.json": "9ec67a6f432fa837a4dcd49a91c5a4a8fdb8c59b47873cae8076cf6a286aac65",
+    "reports/ios-preview-restored.json": "b4d088c58875fd44bd11475d9e526d71a852c5b4cdea4bdedade98590b08690e",
+    "reports/preview-build.json": "3089f9faf619b3c35ce600d8de9582770d5f515c8f90737128cad872511b8e34",
+    "reports/shared-native-contracts.json": "85d37b275b223ecbbcf995e2986b0957ef0e67eea2ddcbddf175cbae31278847",
+    "reports/verification.json": "2af640434d564a226aa2632502c0927dc28e38c1230984b0b74aaeeb23ea833b",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewCatalogBudget.kt": "d9972bc5c6e9dd21a1fafde2df70560cc5086a1871f7acf55277250691596f64",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewCatalogBudgetTest.kt": "13af19a26575c06d03c3221583e3f3bfadb6796eacc29b28bf53d8eec8f2b074",
+    "tools/verify_catalog_budget.py": "1011ab62d81229fd771f7ebf0870c4721bad7d36806420da55020530c3bce556"
+  }
+}

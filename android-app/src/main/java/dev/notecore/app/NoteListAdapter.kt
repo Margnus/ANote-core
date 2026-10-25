@@ -17,7 +17,7 @@ internal class NoteListAdapter(private val rowHeight: Int, private val createRow
     internal var createdRowCount = 0; private set
     fun replace(value: List<NoteSummary>) {
         check(Looper.myLooper() == Looper.getMainLooper())
-        require(value.size <= 2008) // 2000 disk rows plus at most 8 not-yet-persisted owner documents.
+        require(value.size <= dev.notecore.document.PreviewCatalogBudget.maxOwnerRows) // 2000 disk rows plus at most 8 not-yet-persisted owner documents.
         notes = value.toList(); notifyDataSetChanged()
     }
     override fun getCount(): Int = notes.size

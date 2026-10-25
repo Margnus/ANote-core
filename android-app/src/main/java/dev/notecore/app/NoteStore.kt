@@ -21,6 +21,11 @@ internal data class StoreRetirementStatus(val phase: StoreOwnerPhase, val pendin
 
 data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean, val recovery: PagedPreviewSnapshot = PagedPreviewSnapshot.fromRoot(root))
 
+private sealed interface CatalogReadOutcome {
+    data class Complete(val rows: List<NoteSummary>) : CatalogReadOutcome
+    data object Capacity : CatalogReadOutcome
+}
+
 data class NoteSummary(val id: String, val title: String, val modified: Long)
 
 /** App lifetime storage owner is the main thread. Only immutable captures / exclusive read results cross IO. */
@@ -28,7 +33,8 @@ data class NoteSummary(val id: String, val title: String, val modified: Long)
 class NoteStore private constructor(context: Context, private val directory: File = File(context.filesDir, "preview-notes"),
     private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {},
     private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
-    private val exportPickerByteLimit: Long = 8L * 1024 * 1024, private val beforeOpenRead: () -> Unit = {}) {
+    private val exportPickerByteLimit: Long = 8L * 1024 * 1024, private val beforeOpenRead: () -> Unit = {},
+    private val catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit) {
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
@@ -37,6 +43,12 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val saveTaskTooLarge = context.getString(R.string.save_task_too_large)
     private data class SaveCallback(val snapshot: PagedPreviewSnapshot, val receive: (Long, String?) -> Unit)
     private val saveCallbacks = mutableMapOf<String, SaveCallback>()
+    private var catalogSnapshot: List<NoteSummary> = emptyList()
+    internal val catalogRetainedByteCharge: Long get() {
+        executor.checkOwnerThread()
+        return PreviewCatalogBudget.resultByteCharge(catalogSnapshot.size,
+            catalogSnapshot.sumOf { it.id.length.toLong() + it.title.length })
+    }
     private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
     private var ownerRetiring = false
@@ -86,6 +98,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         if (!ownerStopRequested) { ownerStopRequested = true; executor.stopAccepting() }
         if (!executor.status().isDrained) return
         ownerRetired = true
+        catalogSnapshot = emptyList()
         val observer = retirementObserver; retirementObserver = null
         if (observer != null) notifyUi { observer(ownerRetirementStatus()) }
     }
@@ -159,7 +172,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         val capture = pendingExport?.takeIf { it.first == requestCode } ?: return null
         pendingExport = null; return capture.second
     }
-    init { executor.checkOwnerThread(); require(exportPickerByteLimit >= 0) }
+    init { executor.checkOwnerThread(); require(exportPickerByteLimit >= 0 && catalogResultByteLimit >= 0) }
     private fun requestPump() {
         if (!wakePending.compareAndSet(false, true)) return
         if (!main.post {
@@ -409,13 +422,38 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 if (result is WorkResult.Succeeded) null else "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖")
         }
     }
+    private fun deliverCatalog(disk: List<NoteSummary>, failure: String?, callback: (List<NoteSummary>, String?) -> Unit) {
+        executor.checkOwnerThread()
+        val retained = retainedSummaries(); val ids = retained.map { it.id }.toSet()
+        var rows = retained.size
+        var text = retained.sumOf { it.id.length.toLong() + it.title.length }
+        var valid = retained.all { it.id.length in 1..128 && it.title.length <= 125 }
+        for (row in disk) if (row.id !in ids) {
+            rows++; text += row.id.length.toLong() + row.title.length
+            valid = valid && row.id.length in 1..128 && row.title.length <= 125
+        }
+        if (!valid || rows > PreviewCatalogBudget.maxOwnerRows ||
+            PreviewCatalogBudget.resultByteCharge(rows, text) > catalogResultByteLimit) {
+            callback(catalogSnapshot, "列表超过预览元数据容量，原列表与文件仍保留"); return
+        }
+        val merged = (disk.filter { it.id !in ids } + retained).sortedByDescending { it.modified }
+        catalogSnapshot = java.util.Collections.unmodifiableList(merged)
+        callback(catalogSnapshot, failure)
+    }
     fun list(callback: (List<NoteSummary>, String?) -> Unit) {
-        request(io, 2L * 1024 * 1024, { it.catalog() }, { callback(retainedSummaries(), "后台队列繁忙，请重新打开列表") }) { result ->
-            val disk = (result as? WorkResult.Succeeded)?.value.orEmpty()
-            // Overlay current owner captures at delivery, never read ledger from the worker.
-            val retained = retainedSummaries(); val ids = retained.map { it.id }.toSet()
-            callback((disk.filter { it.id !in ids } + retained).sortedByDescending { it.modified },
-                if (result is WorkResult.Succeeded) null else "列表读取失败，原文件与未保存内容仍保留")
+        executor.checkOwnerThread()
+        if (ownerRetiring) { callback(catalogSnapshot, "此会话已关闭，请重新打开列表"); return }
+        request(io, PreviewCatalogBudget.workByteCharge(directory.path.length), {
+            try { CatalogReadOutcome.Complete(it.catalog()) as CatalogReadOutcome }
+            catch (_: CatalogCapacityRefusal) { CatalogReadOutcome.Capacity }
+        },
+            { deliverCatalog(catalogSnapshot, "后台队列繁忙，请重新打开列表", callback) }) { result ->
+            // Only a complete successful enumeration may replace the prior owner snapshot.
+            when (val outcome = (result as? WorkResult.Succeeded)?.value) {
+                is CatalogReadOutcome.Complete -> deliverCatalog(outcome.rows, null, callback)
+                CatalogReadOutcome.Capacity -> deliverCatalog(catalogSnapshot, "列表超过预览记录容量，原列表与文件仍保留", callback)
+                null -> deliverCatalog(catalogSnapshot, "列表读取失败，原列表与文件仍保留", callback)
+            }
         }
     }
     private fun retainedSummaries(): List<NoteSummary> = ledger.states().map {
@@ -452,7 +490,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
-            maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024, beforeOpenRead: () -> Unit = {}): NoteStore =
-            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead)
+            maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024, beforeOpenRead: () -> Unit = {},
+            catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit): NoteStore =
+            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead,catalogResultByteLimit)
     }
 }

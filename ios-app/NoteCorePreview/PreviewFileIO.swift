@@ -17,6 +17,8 @@ enum LocalReadFailure {
 }
 enum LocalRecoveryRead { case opened(PagedPreviewSnapshot), refused(LocalReadFailure) }
 
+enum CatalogCapacityRefusal: Error { case tooManyRows }
+
 private enum TextReadRefusal: Error { case byteCapacity, invalidUTF8 }
 
 // Preview text IO only. No UIKit, mutable owner collections or production storage schema.
@@ -101,7 +103,7 @@ enum PreviewFileIO {
             let id = url.deletingPathExtension().lastPathComponent
             guard id.range(of: "^[a-zA-Z0-9-]{1,128}$", options: .regularExpression) != nil,
                   try url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else { continue }
-            guard urls.count < 2000 else { throw CocoaError(.fileReadTooLarge) }
+            guard urls.count < Int(PreviewCatalogBudget.shared.maxDiskRows) else { throw CatalogCapacityRefusal.tooManyRows }
             urls.append(url)
         }
         if let error = enumerationError { throw error }

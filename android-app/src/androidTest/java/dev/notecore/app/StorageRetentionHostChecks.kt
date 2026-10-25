@@ -21,6 +21,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         check(done) { message }
     }
     fun verify(): String {
+        CatalogRetentionHostChecks(test, host).verify()
         PendingRecoveryHostChecks(test, host).verify()
         ReadFailureHostChecks(test, host).verify()
         val directory = File(host.cacheDir, "storage-retention-${java.util.UUID.randomUUID()}")
@@ -28,7 +29,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         lateinit var store: NoteStore
         lateinit var note: PagedPreviewNotebook
         var completed = false
-        val checks = mutableListOf("read_failure_classification_to_owner", "pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen")
+        val checks = mutableListOf("catalog_capacity_failure_preserves_owner_snapshot", "read_failure_classification_to_owner", "pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen")
         main {
             store = NoteStore.isolated(host, directory); note = store.create()
             val original = note.snapshot()
