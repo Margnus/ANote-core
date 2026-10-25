@@ -27,6 +27,8 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     private val paths = mutableListOf<RenderStroke>()
     private var active: Path? = null
     private var activePointer = -1
+    private var inputOperation: String? = null
+    private val ownsInput: Boolean get() = inputOperation != null && inputOperation == notebook.activeInputOperationId
     private var startX = 0f; private var startY = 0f
     private var moved = false
     val viewport = PreviewViewport()
@@ -110,7 +112,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             }
         }
         canvas.clipRect(0f,0f,notebook.currentPage.width.toFloat(),notebook.currentPage.height.toFloat())
-        active?.let {
+        active?.takeIf { ownsInput }?.let {
             ink.style = Paint.Style.STROKE; ink.color = penColor; ink.strokeWidth = penWidth.toFloat()
             if (moved) canvas.drawPath(it, ink) else { ink.style = Paint.Style.FILL; canvas.drawCircle(startX, startY, penWidth.toFloat() / 2, ink) }
         }
@@ -179,6 +181,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         }
     }
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (active != null && !ownsInput) cancelInk()
         val input = InputTransform(viewport.scale, viewport.offsetX, viewport.offsetY)
         if (input.scale <= 0.0) return false
         val action = event.actionMasked
@@ -195,6 +198,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         }
         when (action) {
             MotionEvent.ACTION_DOWN -> {
+                if (notebook.hasActiveStroke) { error("其他画布正在输入，请完成后重试"); return true }
                 if (event.getToolType(0) == MotionEvent.TOOL_TYPE_ERASER) { error("预览版暂不支持橡皮尾端，请使用撤销"); return true }
                 val stylus = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                 if (!stylus && !fingerDrawing) return true
@@ -204,6 +208,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 if (x !in 0.0..notebook.currentPage.width || y !in 0.0..notebook.currentPage.height) return true
                 if (!notebook.selectPen(penColor, penWidth)) { error(notebook.lastError); return true }
                 admit(batch, PointerPhase.DOWN) ?: return true
+                inputOperation = notebook.activeInputOperationId
                 activeStylus = stylus; activePointer = event.getPointerId(0); startX = x.toFloat(); startY = y.toFloat(); moved = false
                 active = Path().apply { moveTo(startX, startY) }; appendPath(batch, from = 1)
                 parent.requestDisallowInterceptTouchEvent(true)
@@ -221,7 +226,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 if (event.getPointerId(index) == activePointer && active != null) {
                     val batch = realBatch(event, index, input) ?: return true
                     val result = admit(batch, PointerPhase.UP) ?: return true
-                    active = null; activePointer = -1; activeStylus = false
+                    active = null; inputOperation = null; activePointer = -1; activeStylus = false
                     suppressSequence = event.pointerCount > 1
                     if (result.disposition == PreviewInputDisposition.COMMITTED) changed() else error(notebook.lastError)
                     parent.requestDisallowInterceptTouchEvent(false); performClick()
@@ -232,7 +237,11 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         invalidate(); return true
     }
     override fun performClick(): Boolean { super.performClick(); return true }
-    fun cancelInk() { notebook.cancelStroke(); active = null; activePointer = -1; activeStylus = false; navigating = false; navIds = emptyList(); parent?.requestDisallowInterceptTouchEvent(false); invalidate() }
+    fun cancelInk() {
+        if (ownsInput) notebook.cancelStroke()
+        active = null; inputOperation = null; activePointer = -1; activeStylus = false; navigating = false; navIds = emptyList()
+        parent?.requestDisallowInterceptTouchEvent(false); invalidate()
+    }
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) { refreshPage(); viewport.resize(w.toDouble(), h.toDouble()) }
     override fun onDetachedFromWindow() { renderStore?.detachInk(this); cancelInk(); super.onDetachedFromWindow() }
 }

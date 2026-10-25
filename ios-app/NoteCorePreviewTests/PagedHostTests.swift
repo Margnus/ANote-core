@@ -809,6 +809,42 @@ final class PagedHostTests: XCTestCase {
         view.frame = CGRect(x: 0, y: 0, width: 200, height: 200); view.layoutIfNeeded()
         return view
     }
+    @MainActor func testSiblingSurfaceCannotCancelOrAppendAnotherAcceptedInput() throws {
+        let a = try inputView(), note = a.note
+        let touchA = SyntheticInkTouch(10, 1)
+        a.touchesBegan([touchA], with: nil)
+        XCTAssertTrue(note.hasActiveStroke)
+        let b = InkUIView(note: note)
+        b.frame = a.frame; b.layoutIfNeeded() // Initial configuration must not cancel A.
+        b.cancelInk()
+        XCTAssertTrue(note.hasActiveStroke, "idle sibling cancelled original accepted input")
+        let touchB = SyntheticInkTouch(100, 2)
+        b.touchesBegan([touchB], with: nil) // Competing DOWN must preserve A.
+        XCTAssertTrue(note.hasActiveStroke); XCTAssertTrue(a.hasInk); XCTAssertFalse(b.hasInk)
+        touchA.position.x = 20; touchA.seconds = 1.1
+        a.touchesEnded([touchA], with: nil)
+        XCTAssertEqual(note.totalStrokeCount, 1); XCTAssertEqual(note.pointCount(index: 0), 2)
+        XCTAssertEqual(note.pointX(index: 0, point: 0), 10, accuracy: 0.001)
+        XCTAssertEqual(note.pointX(index: 0, point: 1), 20, accuracy: 0.001)
+        touchA.position.x = 30; touchA.seconds = 3
+        a.touchesBegan([touchA], with: nil)
+        note.cancelStroke() // An explicit App-level action cancels A, whose UIKit touch remains stale.
+        touchB.position.x = 100; touchB.seconds = 4
+        b.touchesBegan([touchB], with: nil)
+        touchA.position.x = 199; touchA.seconds = 4.1
+        a.touchesMoved([touchA], with: nil); a.touchesEnded([touchA], with: nil)
+        a.cancelInk(); NativeInkCanvas.dismantleUIView(a, coordinator: ())
+        XCTAssertTrue(note.hasActiveStroke, "stale sibling affected later input")
+        var changes = 0; b.changed = { changes += 1 }
+        touchB.position.x = 120; touchB.seconds = 4.2
+        b.touchesEnded([touchB], with: nil)
+        XCTAssertEqual(note.totalStrokeCount, 2); XCTAssertEqual(changes, 1)
+        XCTAssertEqual(note.pointCount(index: 1), 2)
+        XCTAssertEqual(note.pointX(index: 1, point: 0), 100, accuracy: 0.001)
+        XCTAssertEqual(note.pointX(index: 1, point: 1), 120, accuracy: 0.001)
+        XCTAssertFalse(note.hasActiveStroke); XCTAssertEqual(note.inputReservedByteCharge, 0)
+        XCTAssertTrue(note.retire())
+    }
     @MainActor func testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions() throws {
         let view = try inputView(), note = view.note
         let main = SyntheticInkTouch(30, 0.003)

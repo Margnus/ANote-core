@@ -49,6 +49,35 @@ internal class AndroidInputHostChecks(private val host: Activity) {
     fun verify(): String {
         check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
         val checks = mutableListOf<String>()
+        run {
+            val f = fixture(); val a = f.view; val note = f.note
+            val p = Sample(400f, 300f, 1000)
+            send(a, MotionEvent.ACTION_DOWN, listOf(p))
+            val changes = intArrayOf(0)
+            val b = InkCanvasView(host, note, { changes[0]++ }, { })
+            FrameLayout(host).addView(b); b.layout(0, 0, 997, 751)
+            b.cancelInk()
+            check(note.hasActiveStroke) { "Idle sibling cancelled original accepted input" }
+            send(b, MotionEvent.ACTION_DOWN, listOf(p.copy(x = 500f, time = 1001)))
+            check(note.hasActiveStroke)
+            send(a, MotionEvent.ACTION_UP, listOf(p.copy(x = 420f, time = 1002)))
+            check(note.totalStrokeCount == 1 && note.pointCount(0) == 2 && f.changes[0] == 1 && changes[0] == 0)
+            val first = note.stroke(0)
+            send(a, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 2000)))
+            note.cancelStroke() // Explicit App operation; A keeps a stale native pointer.
+            send(b, MotionEvent.ACTION_DOWN, listOf(p.copy(x = 500f, time = 3000)))
+            send(a, MotionEvent.ACTION_MOVE, listOf(p.copy(x = 700f, time = 3001)))
+            send(a, MotionEvent.ACTION_UP, listOf(p.copy(x = 800f, time = 3002)))
+            a.cancelInk(); (a.parent as FrameLayout).removeView(a)
+            check(note.hasActiveStroke) { "Stale sibling affected later accepted input" }
+            send(b, MotionEvent.ACTION_UP, listOf(p.copy(x = 520f, time = 3003)))
+            check(note.totalStrokeCount == 2 && note.stroke(0) === first && note.pointCount(1) == 2)
+            check(changes[0] == 1 && f.changes[0] == 1 && !note.hasActiveStroke && note.inputReservedByteCharge == 0L)
+            check(abs(note.pointX(1, 0) - (500.0 - b.viewport.offsetX) / b.viewport.scale) < 1e-9)
+            check(abs(note.pointX(1, 1) - (520.0 - b.viewport.offsetX) / b.viewport.scale) < 1e-9)
+            check(note.retire())
+            checks.add("sibling_surface_preserves_original_input_and_rejects_stale_events")
+        }
         var inputReservation = 0L
         run {
             val f = fixture(DocumentBudget(maxObjects = 1))

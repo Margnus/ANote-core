@@ -1,7 +1,7 @@
 {
   "schema": "shared-native-contracts-1",
   "status": "passed",
-  "test_count": 176,
+  "test_count": 177,
   "checks": [
     "dev.notecore.canvas.prototype.PreviewSaveLedgerTest.boundedCatalogHeaderKeepsEscapedUnicodeTitleWithoutDecodingStrokeBody",
     "dev.notecore.canvas.prototype.PreviewSaveLedgerTest.byteRejectionIsAtomicAndCallerStillOwnsRejectedSnapshot",
@@ -142,6 +142,7 @@
     "dev.notecore.document.PreviewInputCapacityTest.liveBytesBoundWholeBatchesAndEmptyUpCommitsAllAdmittedPoints",
     "dev.notecore.document.PreviewInputCapacityTest.liveBytesFullRefusesDownWithoutPendingAndUndoRestoresWriting",
     "dev.notecore.document.PreviewInputCapacityTest.redoRestoresTheCapacityGateWithoutCreatingAPendingCommand",
+    "dev.notecore.document.PreviewInputTest.acceptedInputIdentityTracksOnlyOriginalDownAndNeverAliasesLaterStroke",
     "dev.notecore.document.PreviewInputTest.batchLimitAndInvalidDownDoNotConsumeIdentityOrAcceptedPrefix",
     "dev.notecore.document.PreviewInputTest.eventClockRejectionDoesNotAdvanceSequenceAndEqualTimestampDistinctPointsStayReal",
     "dev.notecore.document.PreviewInputTest.invalidSuffixAndMalformedLengthsRejectWholeBatchAndAllowSameTimeRetry",
@@ -218,7 +219,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "e9fa06c7da77c4af259220620c08d4b4dd974fe52f5195ebc97ec9c2015e3d83",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "236a051cc0f44f4e8d37af83ceba4ab3ff0b3541ba5619a2f928c2be13764d7a",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "126e0b3463728b90805f44b74d825cda60812c096768a8a9f43e38a6bd4ccd5b",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "aec0cc15ce598b87348c43e084b8cc85388ace94b2c9ef9abad405d3af5d0f00",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewCatalogBudget.kt": "d9972bc5c6e9dd21a1fafde2df70560cc5086a1871f7acf55277250691596f64",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "2c44bde93b3ccaff60598b167fe642ef5012f4b089f23a9cf8a567a5729b92c8",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "8c45823294d1fd3508b21ca114a74fc71accfe840c1b40d58254af4763eb5888",
@@ -242,7 +243,7 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewEditTest.kt": "2faea150c2050f86f55c70841e3f2c6c96d2a91b720e37383d72a6519ac53fae",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputBudgetTest.kt": "776a6cc4169e2285451303ad77ee6e69c56be688b8ae766cc246b80db62c71e7",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputCapacityTest.kt": "41230bf9c5d5fde7f6b04c5cac52d3d06ebeed71bf9167acd727857d28e6f02d",
-    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputTest.kt": "cca2a784230ed2a05ce89a0a272936468bd9aedf95540c1b13273f358b282dfa",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputTest.kt": "cc946a0e8488941bd74c812cf59ea047ada8f35ab03b2563d648ffed43ff60b1",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewNotebookCreationTest.kt": "9f466981042cf7b45de08a2d64c6f1b64e70099de47d8e66d105a8b76ce91bca",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewNotebookOpenTest.kt": "fa1188e576c03a11b110fba3cd9b8fa379ef19e98016a30d54a6cbdbdd0ba42e",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewRecoveryReaderTest.kt": "313776d1f92ad5ff9d3d4da4e2f98a9d66badb59c7b0e09d6e66a518e9881eed",
@@ -250,9 +251,9 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewSaveDispatchTest.kt": "22c8f725f997d12d2dd74216bff2e13af8ed5213b3d68d928f08e2b13d4a6629",
     "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
     "tools/verify_shared_native.py": "5871ec752495653e533c55392fb982a1ad26cd602688a8fbf048a28f0e837898",
-    "shared-core/build/bin/iosSimulatorArm64/debugTest/test.kexe": "fa5f73f9db84d889447c4591b27359b19144dd08642588be362d0c1a66ea3556",
-    "build/shared-native/run.log": "18df1ef79d232b0b9e365843f55e8bdba4a480635fea6c031246f0d8a501877e",
-    "build/shared-native/build.log": "431a1ef7a1e6b61cd9b4890ffde9a645c8baeddc417d81904f2cb4cb77cfdd8a"
+    "shared-core/build/bin/iosSimulatorArm64/debugTest/test.kexe": "b214e55d2089f0df99a76ef22b7792a9c4b8f353d9aacd25e9e99f26afc38a5d",
+    "build/shared-native/run.log": "554f483d23b11c434b60589af964bf309a701d4ce0bd08d4223dac1df0b75ee3",
+    "build/shared-native/build.log": "93cfe36eb8efe541eb140f6f3256bb54a91ebeeaa870ae74d78a3512c25fa78e"
   },
   "scope": "All current shared-core common tests compiled and executed on Kotlin/Native, including save dispatch, title, history, capacity, edit, input and codecs. No JVM-only worker tests, native file IO, UIKit delivery, current ordinary UI, physical performance or durability claim.",
   "jvm_only_worker_tests_included": false,

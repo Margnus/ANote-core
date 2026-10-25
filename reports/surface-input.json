@@ -1,0 +1,48 @@
+{
+  "schema": "surface-input-1",
+  "status": "passed",
+  "scope": "Original Android/iOS Views, synthetic native callbacks sharing exactly one Notebook; no OS multiwindow or physical input acceptance",
+  "jvm_tests": 414,
+  "native_tests": 177,
+  "swift_host_tests": 55,
+  "decision": "A surface retains the original accepted DOWN operation identity and matches it before continuation/cancel/active-path drawing. Global App cancellation stays explicit; competing DOWN refuses before changing shared pen. No new identity, authority or content copy.",
+  "counterexample": "Original Apple idle sibling initial layout/cancel cancelled another surface accepted stroke; retained original source and actual failed XCTest.",
+  "checks": [
+    "idle sibling layout/cancel preserves prefix",
+    "competing DOWN cannot replace input or shared tool",
+    "global cancel and later DOWN leave old surface stale",
+    "stale MOVE/UP/cancel/dismantle cannot append/commit/cancel later input",
+    "canonical accepted two-point strokes commit once, original first object preserved",
+    "identity null after cancel/complete/retire, later DOWN does not alias, owner check retained"
+  ],
+  "original_ios_files_preserved": 14,
+  "limits": [
+    "Same-document multiwindow App navigation/rendering, duplicate services for one directory and full SDK white list remain unapproved",
+    "A host must use the identity guard on the original owner thread; this does not make Core arbitrary foreign calls safe",
+    "No mutable thread takeover, complete chain physical heap, M-1/pen or power-loss evidence"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt": "375c3d884f39e339100f59d0572c0fddae25fb2a56390d94787dcbfaee69288b",
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "2e4ea35216f85c66db02b4cbc990232076a882e8b29aae6f2c4cc24f36815328",
+    "build/surface-input/before-native.kt": "b8e42f2f8a480d1cb5e771e0baee7c5751bf852ae2d5aa026cfdd372e8d83f57",
+    "build/surface-input/before-native.swift": "f8264c4441f75db88b2d6fe44adf25c29012a01ea50a0e225b2f3cedc258fa01",
+    "build/surface-input/before-summary.json": "9fa8ff47ce8065f7405edc6f5d851cdec29a52c142edaf29137c300104b472c2",
+    "build/surface-input/before.log": "30494cbe69df35f9f401278fed1236255397e7d83d6fd05437e15e34b841c7e3",
+    "build/surface-input/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "docs/owner交接与失败责任矩阵.md": "fcb329259a43753a37c938be89d22e50a209a5ebc58875ec95db10ab75afba00",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "c0e05e81a9b1a3e7f0b5028690657ec2b95b6ddc39edcff3c6378e1b9782568a",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "3d7e232a0ebc023bdf44d21c8d53f9658953f9d06b44b6a914d2a7b25f320954",
+    "reports/android-input-host-tests.json": "61b3bc85ca0aa83e11d6919962c4545dcee161f52b1c9615c09d37491856a152",
+    "reports/ios-host-tests.json": "e034068caddf17d7b73c9234972425edcadf63c422854c99e03ec6e52eb3cde6",
+    "reports/ios-preview-build.json": "9776b14cdc8b4c8babf0a2f3431d731367b4ac4409efa7a280a5e8782403a323",
+    "reports/ios-preview-restored.json": "7766179bcfe38d156af60f3ee3fa8dd4f9cabbe3d60bb5f8d6c7be4e4595a666",
+    "reports/preview-build.json": "08a6a2202491ea72caa85845c0949f3129138b6a7ce94e612b9451a49d65ece9",
+    "reports/shared-native-contracts.json": "4762c3be2495435bb24552d714fdf5ad7fc53954906570dd84df50226e58e1b5",
+    "reports/verification.json": "a0485dd5b0deac5cc539316140af4419007dedeb8c7f4909ddbc21b8d86386b8",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "aec0cc15ce598b87348c43e084b8cc85388ace94b2c9ef9abad405d3af5d0f00",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputTest.kt": "cc946a0e8488941bd74c812cf59ea047ada8f35ab03b2563d648ffed43ff60b1",
+    "tools/verify_surface_input.py": "fe3512a50e81ceb465db69798603887aeb2e221c4802e51504f9377742fedce6"
+  }
+}

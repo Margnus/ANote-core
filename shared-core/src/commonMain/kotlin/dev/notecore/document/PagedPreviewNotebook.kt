@@ -43,6 +43,10 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     val lastError: String get() { ownerCheck(); return error }
     val lastFailure: PreviewSessionFailure? get() { ownerCheck(); return failure }
     val hasActiveStroke: Boolean get() { ownerCheck(); return input != null }
+    /** Original accepted DOWN identity; a surface must match it before MOVE/UP/cancellation.
+     * Null after cancellation/completion. This is not a content revision or a new authority.
+     */
+    val activeInputOperationId: String? get() { ownerCheck(); return if (input != null) strokeCommand?.value else null }
     val hasPendingStroke: Boolean get() { ownerCheck(); return pending != null }
     /** Input ownership only; document/history/save/render budgets remain separate. */
     val inputReservedByteCharge: Long get() {

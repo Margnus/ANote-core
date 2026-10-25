@@ -76,7 +76,9 @@ final class InkUIView: UIView {
     var penWidth: Double = 2.5
     var fingerDrawing = true
     private var active: UITouch?
-    var hasInk: Bool { active != nil }
+    private var inputOperation: String?
+    private var ownsInput: Bool { inputOperation != nil && inputOperation == note.activeInputOperationId }
+    var hasInk: Bool { active != nil && ownsInput }
     private var path: UIBezierPath?
     private struct CachedStroke {
         let path: UIBezierPath
@@ -193,7 +195,7 @@ final class InkUIView: UIView {
                 c.restoreGState()
             }
         }
-        if let path = path { inkColor(penColor).setStroke(); path.lineWidth = penWidth; path.stroke() }
+        if ownsInput, let path = path { inkColor(penColor).setStroke(); path.lineWidth = penWidth; path.stroke() }
         c.restoreGState()
     }
     private struct RealSample { let point: CGPoint; let pressure: Float; let time: Int64 }
@@ -245,6 +247,7 @@ final class InkUIView: UIView {
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard scale > 0, !suppressSequence else { return }
+        if active != nil && !ownsInput { cancelInk() }
         if active?.type == .pencil { return }
         let direct = fingers(event)
         if navigating || direct.count >= 2 || (!fingerDrawing && !direct.isEmpty) {
@@ -252,11 +255,13 @@ final class InkUIView: UIView {
             navigate(direct, moving: false); return
         }
         guard active == nil, let touch = touches.first(where: { $0.type == .pencil || ($0.type == .direct && fingerDrawing) }) else { return }
+        guard !note.hasActiveStroke else { failed("其他画布正在输入，请完成后重试"); return }
         guard let samples = realSamples(touch, event: event), let first = samples.first else { rejectInput(); return }
         let p = first.point
         guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
         guard note.selectPen(argb: penColor, width: penWidth) else { failed(note.lastError); return }
         guard offerReal(samples, phase: .down).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
+        inputOperation = note.activeInputOperationId
         active = touch; path = UIBezierPath(); path?.lineCapStyle = .round; path?.lineJoinStyle = .round
         path?.move(to: p); path?.addLine(to: CGPoint(x: p.x + 0.01, y: p.y)); setNeedsDisplay()
         for sample in samples.dropFirst() {
@@ -265,7 +270,7 @@ final class InkUIView: UIView {
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if navigating { navigate(fingers(event), moving: true); return }
-        guard !suppressSequence, let active = active, touches.contains(active), note.hasActiveStroke else { return }
+        guard !suppressSequence, let active = active, touches.contains(active), ownsInput else { return }
         guard let samples = realSamples(active, event: event) else { rejectInput(); return }
         guard offerReal(samples, phase: .move).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
         for sample in samples {
@@ -280,13 +285,16 @@ final class InkUIView: UIView {
             return
         }
         if suppressSequence { if remaining.isEmpty { suppressSequence = false }; return }
-        guard let active = active, touches.contains(active), note.hasActiveStroke else { return }
+        guard let active = active, touches.contains(active), ownsInput else { return }
         guard let samples = realSamples(active, event: event), !samples.isEmpty else { rejectInput(); return }
         let result = offerReal(samples, phase: .up)
         guard result.admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
-        self.active = nil; path = nil; suppressSequence = !remaining.isEmpty
+        self.active = nil; inputOperation = nil; path = nil; suppressSequence = !remaining.isEmpty
         if result.disposition == .committed { changed() } else { failed(note.lastError) }; setNeedsDisplay()
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelInk() }
-    func cancelInk() { note.cancelStroke(); active = nil; path = nil; navigating = false; navTouches = []; suppressSequence = false; setNeedsDisplay() }
+    func cancelInk() {
+        if ownsInput { note.cancelStroke() }
+        active = nil; inputOperation = nil; path = nil; navigating = false; navTouches = []; suppressSequence = false; setNeedsDisplay()
+    }
 }

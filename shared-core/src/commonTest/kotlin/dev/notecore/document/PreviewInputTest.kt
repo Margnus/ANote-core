@@ -4,6 +4,24 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PreviewInputTest {
+    @Test fun acceptedInputIdentityTracksOnlyOriginalDownAndNeverAliasesLaterStroke() {
+        var checks = 0
+        val n = note(guard = { checks++ })
+        assertNull(n.activeInputOperationId)
+        assertTrue(offer(n, PointerPhase.DOWN, 1).admitted)
+        val original = assertNotNull(n.activeInputOperationId)
+        val prefix = n.inputReservedByteCharge
+        assertFalse(offer(n, PointerPhase.DOWN, 2).admitted)
+        assertEquals(original, n.activeInputOperationId); assertEquals(prefix, n.inputReservedByteCharge)
+        assertTrue(offer(n, PointerPhase.MOVE, 2).admitted); assertEquals(original, n.activeInputOperationId)
+        n.cancelStroke(); assertNull(n.activeInputOperationId)
+        assertTrue(offer(n, PointerPhase.DOWN, 3).admitted)
+        val later = assertNotNull(n.activeInputOperationId); assertNotEquals(original, later)
+        assertTrue(offer(n, PointerPhase.UP, 4).admitted); assertNull(n.activeInputOperationId)
+        assertEquals(later, n.authorityStatus().nextUndoOperationId?.value)
+        val before = checks; assertNull(n.activeInputOperationId); assertEquals(before + 1, checks)
+        assertTrue(n.retire()); assertNull(n.activeInputOperationId)
+    }
     private fun note(budget: DocumentBudget = DocumentBudget(), guard: () -> Unit = {}) = PagedPreviewNotebook(
         DocumentRoot.empty(SceneId("batch"), "batch", PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0)), "batch-session", budget, guard)
     private fun offer(n: PagedPreviewNotebook, phase: PointerPhase, vararg times: Long, event: Long = times.lastOrNull() ?: 0): PreviewInputResult =
