@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testMaximumProducerBatchPreservesAllScalarsAndRejectsOversizeBeforeRecovery()',
     'testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown()',
     'testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook()',
     'testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen()',
@@ -160,7 +161,7 @@ def main():
         'brush_render_host_test_count': 18,
         'explicit_owner_retirement_test_count': 7,
         'explicit_owner_retirement_scope': 'Original Model self-retains through accepted IO and real provider/worker drain, then stops its original worker and relinquishes that retention. Refuses active/pending input and outstanding transfers; failed writes require explicit retry. No abrupt process/owner-thread loss or cross-thread owner transfer proof.',
-        'synthetic_uikit_input_callback_test_count': 4,
+        'synthetic_uikit_input_callback_test_count': 5,
         'swift_authority_constructor_failure_recoverable': True,
         'typed_edit_model_failure_and_file_reopen_verified': True,
         'native_scalar_input_batch_bridge_verified': True,

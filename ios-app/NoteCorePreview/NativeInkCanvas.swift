@@ -220,15 +220,25 @@ final class InkUIView: UIView {
         }
         return samples
     }
-    private func scalarData<T>(_ values: [T]) -> Data {
-        guard !values.isEmpty else { return Data() }
-        return values.withUnsafeBufferPointer { Data(bytes: $0.baseAddress!, count: $0.count * MemoryLayout<T>.stride) }
+    /// Fill one bounded native buffer directly; no mapped scalar array survives beside Data.
+    private func scalarData<T>(_ samples: [RealSample], value: (RealSample) -> T) -> Data {
+        var data = Data(count: samples.count * MemoryLayout<T>.stride)
+        data.withUnsafeMutableBytes { (destination: UnsafeMutableRawBufferPointer) in
+            for (index, sample) in samples.enumerated() {
+                var scalar = value(sample)
+                withUnsafeBytes(of: &scalar) { source in
+                    destination.baseAddress!.advanced(by: index * MemoryLayout<T>.stride)
+                        .copyMemory(from: source.baseAddress!, byteCount: source.count)
+                }
+            }
+        }
+        return data
     }
     private func offerReal(_ samples: [RealSample], phase: PointerPhase) -> PreviewInputResult {
         // Four bounded native scalar buffers cross once; no per-point Kotlin callbacks or retained UITouchs.
         ApplePreviewInput.shared.offer(notebook: note, phase: phase, eventTimeMicros: samples.last?.time ?? 0,
-            xs: scalarData(samples.map { Double($0.point.x) }), ys: scalarData(samples.map { Double($0.point.y) }),
-            pressures: scalarData(samples.map { $0.pressure }), times: scalarData(samples.map { $0.time }))
+            xs: scalarData(samples) { Double($0.point.x) }, ys: scalarData(samples) { Double($0.point.y) },
+            pressures: scalarData(samples) { $0.pressure }, times: scalarData(samples) { $0.time })
     }
     private func rejectInput() {
         cancelInk(); failed("输入数据无效，本笔未提交")

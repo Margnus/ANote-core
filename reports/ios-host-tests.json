@@ -3,81 +3,81 @@
     "closed_drained": true,
     "copies": [
       {
-        "elapsed_ns": 1075791,
+        "elapsed_ns": 1043000,
         "row_storage_upper_bytes": 16384
       },
       {
-        "elapsed_ns": 998583,
+        "elapsed_ns": 992459,
         "row_storage_upper_bytes": 16384
       }
     ],
     "events": [
       {
         "charged": 24576,
-        "elapsed_ns": 44630000,
+        "elapsed_ns": 45419667,
         "event": "first-held",
         "executor": 0,
         "retired": 0
       },
       {
         "charged": 24576,
-        "elapsed_ns": 44644375,
+        "elapsed_ns": 45431583,
         "event": "scroll-old-retired",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 47064500,
+        "elapsed_ns": 47817833,
         "event": "two-jobs-rejected-third",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 47070042,
+        "elapsed_ns": 47822375,
         "event": "queued-cancelled",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 205216,
-        "elapsed_ns": 81620834,
+        "elapsed_ns": 82991958,
         "event": "ready-before-ack",
         "executor": 180640,
         "retired": 24576
       },
       {
         "charged": 24576,
-        "elapsed_ns": 81675584,
+        "elapsed_ns": 83037542,
         "event": "late-and-cancelled-ack",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 49152,
-        "elapsed_ns": 126888625,
+        "elapsed_ns": 128107875,
         "event": "zoom-image-held",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 49152,
-        "elapsed_ns": 137988625,
+        "elapsed_ns": 139161125,
         "event": "closed-two-readers",
         "executor": 0,
         "retired": 49152
       },
       {
         "charged": 24576,
-        "elapsed_ns": 138019000,
+        "elapsed_ns": 139184958,
         "event": "new-reader-released",
         "executor": 0,
         "retired": 24576
       },
       {
         "charged": 0,
-        "elapsed_ns": 138025417,
+        "elapsed_ns": 139190833,
         "event": "old-reader-released",
         "executor": 0,
         "retired": 0
@@ -87,28 +87,28 @@
     "max_jobs": 2,
     "queue_wait_ns": [
       {
-        "queue_handoff_wait_lower_ns": 7541,
-        "queue_handoff_wait_upper_ns": 54375,
-        "request_to_worker_ns": 54375,
-        "submit_elapsed_ns": 46834
+        "queue_handoff_wait_lower_ns": 6375,
+        "queue_handoff_wait_upper_ns": 51208,
+        "request_to_worker_ns": 51208,
+        "submit_elapsed_ns": 44833
       },
       {
-        "queue_handoff_wait_lower_ns": 8333,
-        "queue_handoff_wait_upper_ns": 49708,
-        "request_to_worker_ns": 49708,
-        "submit_elapsed_ns": 41375
+        "queue_handoff_wait_lower_ns": 9083,
+        "queue_handoff_wait_upper_ns": 45833,
+        "request_to_worker_ns": 45833,
+        "submit_elapsed_ns": 36750
       },
       {
-        "queue_handoff_wait_lower_ns": 34077042,
-        "queue_handoff_wait_upper_ns": 34112958,
-        "request_to_worker_ns": 34112958,
-        "submit_elapsed_ns": 35916
+        "queue_handoff_wait_lower_ns": 34306208,
+        "queue_handoff_wait_upper_ns": 34334667,
+        "request_to_worker_ns": 34334667,
+        "submit_elapsed_ns": 28459
       },
       {
-        "queue_handoff_wait_lower_ns": 5167,
-        "queue_handoff_wait_upper_ns": 47459,
-        "request_to_worker_ns": 47459,
-        "submit_elapsed_ns": 42292
+        "queue_handoff_wait_lower_ns": 16916,
+        "queue_handoff_wait_upper_ns": 56958,
+        "request_to_worker_ns": 56958,
+        "submit_elapsed_ns": 40042
       }
     ],
     "resident_budget": 32768,
@@ -141,7 +141,7 @@
     "udid": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
     "state": "Booted"
   },
-  "test_count": 49,
+  "test_count": 50,
   "checks": [
     "testActualAndroidFileImportsFreshIdsAndExportsAllPages()",
     "testAuthorityConstructionFailureIsRecoverableInSwift()",
@@ -164,6 +164,7 @@
     "testLateImportCannotReplaceNewActiveOwner()",
     "testLateOpenCannotReplaceNewActiveOwner()",
     "testLegacyNoEditPreservesBytesThenEditMigratesOriginalExtent()",
+    "testMaximumProducerBatchPreservesAllScalarsAndRejectsOversizeBeforeRecovery()",
     "testMultiTileFrameCopiesEntireNativeImageAndClosesAfterHeldReader()",
     "testNativeRendererChangesPageCacheAndAppliesFullAffineDotWidth()",
     "testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()",
@@ -207,7 +208,7 @@
         },
         "expectedFailures": 0,
         "failedTests": 0,
-        "passedTests": 49,
+        "passedTests": 50,
         "skippedTests": 0,
         "testPlanConfiguration": {
           "configurationId": "1",
@@ -218,8 +219,8 @@
     "environmentDescription": "NoteCorePreview · Built with macOS 27.0.1",
     "expectedFailures": 0,
     "failedTests": 0,
-    "finishTime": 1792895999.327,
-    "passedTests": 49,
+    "finishTime": 1792896501.571,
+    "passedTests": 50,
     "result": "Passed",
     "runtimeWarnings": [
       {
@@ -229,20 +230,20 @@
       }
     ],
     "skippedTests": 0,
-    "startTime": 1792895979.565,
+    "startTime": 1792896494.984,
     "statistics": [],
     "testFailures": [],
     "title": "Test - NoteCorePreview",
     "topInsights": [
       {
         "category": "Longest Test Runs",
-        "impact": "28% of duration",
-        "text": "3 longest test runs with outlier durations exceeding 0.25s (three standard deviations)"
+        "impact": "18% of duration",
+        "text": "2 longest test runs with outlier durations exceeding 0.19s (three standard deviations)"
       }
     ],
-    "totalTestCount": 49
+    "totalTestCount": 50
   },
-  "xcresult": "ios-app/build/host-tests/run-90225ebd4c0e4a94803c46aa1a23eb7c.xcresult",
+  "xcresult": "ios-app/build/host-tests/run-6d69a5ec759746b78144686088810384.xcresult",
   "source_and_framework_sha256": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "canvas-core/build.gradle.kts": "ac4f2148968181b43b165d52d086f7f48e120ff85289e2e544bf3ec974694709",
@@ -275,13 +276,13 @@
     "gradle.properties": "a29e188235a52da45ce914db097aa8f585297256b2fcb469a51048bf88f542b0",
     "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
     "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85",
-    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "257c58bdd0b47e1bcbf724e0733735185258a87d4838e9c1bc05b94fc198cada",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "f8264c4441f75db88b2d6fe44adf25c29012a01ea50a0e225b2f3cedc258fa01",
     "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "e756f38cc19c29aabbe0f8622b65aeaebf3fbab2acf3924229323c4c9411ca40",
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "835222a780d454964a630456ad6e44edfaf8d42cd63714fb2a26c249180b19d9",
     "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "69a65c3ea689a769df1da634c8280a58919359278b06f4a36bf3e5f207cd028b",
     "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
     "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "cf750fe9573d0532e54dffcd4edb77c326ce1c447fd70f56e50834124dfcacd9",
-    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "58e234c83f3054ab035b9ddb8925e90f05127a16d0a70ac72c0fde1fc16874b3",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "dea2f4e745e8d1b6955ad67a4bd6374e2fc90bd97476f62d4298dc4f4ce73006",
     "settings.gradle.kts": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc",
     "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "cdeaf76269fb0c2a74f8de943b874b9e07a42f39507e3dfb6f02abaa8962d667",
     "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
@@ -301,7 +302,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "aec24c968cf154679ac57d5b4fb4df4211410b15a9d10c9b7845b5b6a2dc9ced",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "51d19b7053371506991c9fb0fdfaab00e851184da5ea22234b462a1489228166",
     "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
-    "tools/verify_ios_host.py": "62c744145ee8198d014b5c68f9f51e36a09947dc2b3343d9e4848bdd9ca2fddb"
+    "tools/verify_ios_host.py": "0bf6571a0879035f930a94072f446b1805148a30d368189571f7d181c1e0a716"
   },
   "framework_verified_build_inputs": {
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
@@ -352,8 +353,8 @@
   },
   "test_build_sha256": {
     "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "e0caf29f67c25ace4cc1a5bcc95e269b3ae03684998c9013ad24c25b01be9962",
-    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "be9165ba5763f1041f80b3fd1e55f8f414d5f798dd0d9ef125ec60f4984b57f1"
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "6d7c0d1dcef338ef71c24e0225e95901e58fa3e360f473ca0d9187d2b56d5b5e",
+    "ios-app/build/host-tests/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "a091dac87491714ced62798085f95c5f29778c95020f6a16f2c891528d98dd38"
   },
   "android_fixture_sha256": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
   "android_fixture_provenance": {
@@ -374,7 +375,7 @@
   "brush_render_host_test_count": 18,
   "explicit_owner_retirement_test_count": 7,
   "explicit_owner_retirement_scope": "Original Model self-retains through accepted IO and real provider/worker drain, then stops its original worker and relinquishes that retention. Refuses active/pending input and outstanding transfers; failed writes require explicit retry. No abrupt process/owner-thread loss or cross-thread owner transfer proof.",
-  "synthetic_uikit_input_callback_test_count": 4,
+  "synthetic_uikit_input_callback_test_count": 5,
   "swift_authority_constructor_failure_recoverable": true,
   "typed_edit_model_failure_and_file_reopen_verified": true,
   "native_scalar_input_batch_bridge_verified": true,

@@ -688,6 +688,42 @@ final class PagedHostTests: XCTestCase {
         }
         XCTAssertEqual(event.predictionReads, 0); XCTAssertFalse(view.hasInk)
     }
+    @MainActor func testMaximumProducerBatchPreservesAllScalarsAndRejectsOversizeBeforeRecovery() throws {
+        let view = try inputView(), note = view.note, event = SyntheticInkEvent()
+        let main = SyntheticInkTouch(0, 1)
+        let real = (0..<1024).map { index in
+            let touch = SyntheticInkTouch(index == 0 ? -0.0 : Double(index % 199), Double(index) / 1024)
+            touch.position.y = CGFloat(index % 197)
+            touch.forceValue = CGFloat(index % 9) / 8
+            return touch
+        }
+        event.real = real
+        view.touchesBegan([main], with: event)
+        XCTAssertTrue(note.hasActiveStroke)
+        // Native buffers and the arena must copy scalars before mutable UIKit objects change.
+        real[1].position = CGPoint(x: 199, y: 199); real[1].forceValue = 1; real[1].seconds = 99
+        view.touchesEnded([main], with: nil)
+        XCTAssertEqual(note.totalStrokeCount, 1)
+        let samples = note.stroke(index: 0).samples
+        XCTAssertEqual(samples.size, 1025)
+        for index in 0..<1024 {
+            let i = Int32(index)
+            let x = index == 0 ? -0.0 : Double(index % 199)
+            XCTAssertEqual(samples.x(index: i).bitPattern, x.bitPattern)
+            XCTAssertEqual(samples.y(index: i).bitPattern, Double(index % 197).bitPattern)
+            XCTAssertEqual(samples.pressure(index: i).bitPattern, (Float(index % 9) / 8).bitPattern)
+            XCTAssertEqual(samples.timeMicros(index: i), Int64(Double(index) / 1024 * 1_000_000))
+        }
+        XCTAssertEqual(samples.timeMicros(index: 1024), 1_000_000)
+        let before = try note.capture().encode()
+        event.real = (0..<1025).map { SyntheticInkTouch(Double($0 % 199), 2) }
+        view.touchesBegan([main], with: event)
+        XCTAssertFalse(note.hasActiveStroke); XCTAssertEqual(try note.capture().encode(), before)
+        event.real = nil; main.seconds = 3
+        view.touchesBegan([main], with: event); main.seconds = 4
+        view.touchesEnded([main], with: nil)
+        XCTAssertEqual(note.totalStrokeCount, 2); XCTAssertEqual(event.predictionReads, 0)
+    }
     @MainActor func testNilAndEmptyCoalescedFallbackKeepsEqualTimestampPoints() throws {
         let view = try inputView(), note = view.note
         let main = SyntheticInkTouch(10, 0.001), event = SyntheticInkEvent()
