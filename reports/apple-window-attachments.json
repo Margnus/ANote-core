@@ -1,0 +1,47 @@
+{
+  "schema": "apple-window-attachments-1",
+  "status": "passed",
+  "scope": "Original Apple Model/worker and SwiftUI PreviewRoot in actual UIHostingController/UIWindow hierarchy; API-driven input/export, not separate OS Scenes or ordinary system picker/touch acceptance",
+  "swift_host_tests": 60,
+  "required_tests": [
+    "testExportResultRoutesOnlyToRequestWindowAndCancelsOnDisappearance()",
+    "testHostingWindowsKeepLocalNavigationThroughHierarchyReplacement()",
+    "testLateWindowOpenCannotReplaceEditorOrAttachAfterDisappearance()",
+    "testWindowDeparturePreservesAuthorityAndBoundsPresentationIdentities()",
+    "testWindowPendingRecoveryRequiresOriginalWriteBeforeLastDeparture()"
+  ],
+  "jvm_tests": 414,
+  "decision": "At most eight UUID presentations share the original Model/Notebook. Window state holds navigation/original accepted-input identity and a weak input view. Last departure keeps original pending responsibility until confirmed IO. Export result belongs to one window and one request; disappearance cancels derived delivery, stale request cannot clear a newer backup.",
+  "checks": [
+    "same Notebook and active prefix survive sibling departure/tool cancellation/export refusal; last command saves/reopens",
+    "explicit owner cancellation uses its original operation even after weak View is gone, with no completed content loss",
+    "duplicate/eight/ninth capacity and service retirement refusal",
+    "failed pending recovery write retains last window; repair/retry/confirmed departure/new session/single commit",
+    "real hosting hierarchy removes/replaces one root while another remains in its library",
+    "non-requesting window cannot release export; cancellation before/after result keeps canonical root; stale request cannot release newer export",
+    "late read cannot replace active owner or reattach disappeared window; bad target preserves idle original; valid target joins requester"
+  ],
+  "original_ios_files_preserved": 14,
+  "first_test_iteration": "59 passed/one observation assertion failed after consuming a semaphore signal twice; observer caches its first real signal. Failure log/summary preserved; final complete suite passed.",
+  "limits": [
+    "Single active document remains a preview limit; this does not implement production parallel multi-document windows",
+    "No ordinary system file picker, separate OS Scene activation/dismissal, all-window save status or tool-state acceptance",
+    "No new Android/shared Native run, dead-thread takeover, physical peak heap/M-1/pen or power-loss evidence"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "build/apple-window-attachments/first-host.log": "dcea48186bbe09a0a0fff456216bf8ffbff7c832e6d01ac32a2b8e842d4366a0",
+    "build/apple-window-attachments/first-summary.json": "493ba459a9b0e36c3d426fa2efbc1b2102ea4d17b7f3353daeb66371fde71863",
+    "build/apple-window-attachments/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "docs/owner交接与失败责任矩阵.md": "fdfa6e8c7a2ae1fa39d0f6e3337176aa6e37ee0beca58003792b206f23af87f8",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "3d7e251d3d8c445285f2a1306fede6e2667f16d2091277fae63de6ab31e2bb43",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "a1cd357055c0f5ab38a62510924f4d358b6a8707a4df864ad67dd62e9984083d",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "2b3e4dadf758adaf8fc6c04b534d1e1fd43d570c0e5618b504cc253be1a5b4a0",
+    "reports/ios-host-tests.json": "d8db8994ecd6a13125c0c0d27e520b1b60819edcfff8b174fdb4d6e571f56497",
+    "reports/ios-preview-build.json": "eb50d3b4c0c23eea18dcd050063f63dbcd695f610166fab119a83a5c2438da06",
+    "reports/ios-preview-restored.json": "a30fbc248864fbaf8de502fdc6ace6624e8d2ec398c12236a7cb0ada6344050c",
+    "reports/verification.json": "d1236e90050b52f19dd414896c5556d371e58a63504fe080c2d2dc376c885002",
+    "tools/verify_apple_window_attachments.py": "32094c7b3fe4564ab177fe6c3abe052ef9f35f8fddfd860e3928a2f396753f78"
+  }
+}

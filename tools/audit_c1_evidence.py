@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
               'chunked-brush-costs', 'brush-tile-cache-costs')
 CURRENT = {
+    'apple-window-attachments': ('source_and_artifact_sha256',),
     'editor-attachments': ('source_and_artifact_sha256',),
     'surface-input': ('source_and_artifact_sha256',),
     'owner-reference': ('source_and_artifact_sha256',),

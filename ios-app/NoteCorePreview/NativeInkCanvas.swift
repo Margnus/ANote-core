@@ -13,11 +13,16 @@ struct NativeInkCanvas: UIViewRepresentable {
     let viewportRatio: Double
     let changed: () -> Void
     let failed: (String) -> Void
+    var inputOwner: PreviewWindowState? = nil
     func makeUIView(context: Context) -> InkUIView {
         let view = InkUIView(note: note); view.renderModel = renderModel
+        view.inputWindow = inputOwner
+        inputOwner?.bindInput(view)
         view.lastViewportRequest = viewportRequest; return view
     }
     func updateUIView(_ view: InkUIView, context: Context) {
+        view.inputWindow = inputOwner
+        inputOwner?.bindInput(view)
         if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width { view.cancelInk() }
         view.refreshPage()
         view.penColor = color; view.penWidth = width; view.fingerDrawing = finger
@@ -69,6 +74,7 @@ final class NativeBrushRenderer {
 final class InkUIView: UIView {
     let note: PagedPreviewNotebook
     weak var renderModel: PreviewModel?
+    weak var inputWindow: PreviewWindowState?
     let surfaceIdentity = UUID()
     var changed: () -> Void = { }
     var failed: (String) -> Void = { _ in }
@@ -262,6 +268,7 @@ final class InkUIView: UIView {
         guard note.selectPen(argb: penColor, width: penWidth) else { failed(note.lastError); return }
         guard offerReal(samples, phase: .down).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
         inputOperation = note.activeInputOperationId
+        inputWindow?.acceptedInput(from: self)
         active = touch; path = UIBezierPath(); path?.lineCapStyle = .round; path?.lineJoinStyle = .round
         path?.move(to: p); path?.addLine(to: CGPoint(x: p.x + 0.01, y: p.y)); setNeedsDisplay()
         for sample in samples.dropFirst() {

@@ -8,6 +8,8 @@
 | 同Notebook多个原App View交错输入 | 原双端View用原已受理DOWN的operation身份核对归属 | 空闲兄弟配置/取消不影响原前缀；竞争DOWN在改变共享笔配置前拒绝。App显式取消后旧View的迟到MOVE/UP/CANCEL/拆除不能改变后来输入；仅拥有当前输入的View显示其活动Path |
 | Android多个编辑窗口中一个返回资料库 | 原Store登记最多8个窗口身份，非最后窗口离开只解除自己的登记 | 保持同一Notebook/authority，另一个窗口的活动输入仍可完成；最后显式退出先把完整内容交原ledger，pending必须等真实写入确认后才能retireAfterRecovery |
 | Android编辑Activity销毁/配置重建 | onDestroy仅解除旧呈现端，新onCreate经原get/open/adopt复用同一Notebook | 真实Activity.recreate已验证同对象/root，原服务仍持未保存内容。窗口身份每实例唯一，无Activity强引用；不是进程重启恢复或工具状态完整验收 |
+| Apple窗口返回或hosting根层级移除/重建 | 原Model登记最多8个UUID，窗口仅持导航身份与弱输入View | 非最后退出不改变其他窗口的Notebook；消失保存/forget呈现端而不退休文档，重现只恢复该窗口原来的导航意图。最后退出仍须原pending写入确认；全服务退休拒绝已登记窗口 |
+| Apple多窗口导出 | 结果同时绑定原请求窗口和每次导出的UUID | 非请求窗口与旧请求回调不能清掉当前备份；请求窗口消失明确取消派生结果，已受理计算仍在原worker ACK，不清正文/保存责任。系统选择器/平台副本尚未验收 |
 | 外线程调用可变host | 独立样例在访问Core前返回wrongOwner | 回到原owner操作；Core本身仍以显式ownerCheck作为前置条件，不承诺任意导出调用都可恢复 |
 | immutable checkpoint交外线程只读编码 | Apple独立消费者已验证非空checkpoint | 接收方只持快照与独立编码String；不携带Notebook/reader/owner回调 |
 | Apple原Model外部强引用先消失 | 原服务从初始化自持，尚未请求退休也保留责任 | 既有失败账本、当前authority与native holder留在同一Model。调用者须保留能找回原owner的句柄；weak句柄恢复操作已实测。不创建替代Model处理旧责任 |
@@ -32,7 +34,19 @@ Android原Store现登记最多8个、每个最长64 UTF16单位的窗口身份�
 
 编辑窗口存在时，新建或打开另一文档在UI明确拒绝，不触发内部check，也不替换原authority；这仍是单活动文档预览限制，不能作为生产多文档能力。没有编辑端时，切换前先将旧会话完整内容交原ledger，pending仍等确认；读取损坏/不支持文件本身不退休旧会话，只有有效内容的adoptForEditor才准备切换。并发异文档读取返回时也重新检查原owner，而不是信任发起时的空闲状态。
 
-saveOwned使用原准入/worker/ledger，不创建接管队列；它没有UI receiver，不能用空回调覆盖同一已受理内容的现有UI receiver。对已被新内容替代的旧receiver仍仅解除呈现引用，正文责任归原ledger；所有窗口保存状态的广播尚未实现。实际Activity用例通过测试反射暂时替换原get的单例为独立cache Store，正常onCreate/open/editor、“返回”按钮回调及真实recreate均执行，最后恢复原单例；它不是普通系统触摸或全部多窗口验收。Apple根视图仍共享导航状态，其按窗口离开语义另待接入。来源见[报告](../reports/editor-attachments.json)。
+saveOwned使用原准入/worker/ledger，不创建接管队列；它没有UI receiver，不能用空回调覆盖同一已受理内容的现有UI receiver。对已被新内容替代的旧receiver仍仅解除呈现引用，正文责任归原ledger；所有窗口保存状态的广播尚未实现。实际Activity用例通过测试反射暂时替换原get的单例为独立cache Store，正常onCreate/open/editor、“返回”按钮回调及真实recreate均执行，最后恢复原单例；它不是普通系统触摸或全部多窗口验收。Apple窗口导航接入见下节，完整跨平台多窗口/多文档仍待。来源见[报告](../reports/editor-attachments.json)。
+
+## Apple窗口的候选接入
+
+PreviewWindowState只持固定UUID、受限documentId/请求意图、原已受理input operation身份、原Model引用及弱InkUIView，不持第二Notebook/快照/worker。原Model的Set最多8个编辑身份；重复出现幂等，第9个拒绝，直接全局close/服务退休不能越过仍登记的窗口。PreviewRoot用稳定ZStack承载出现/消失回调，避免把每个条件分支当成窗口生命周期；编辑/资料库导航由本窗口意图决定，原Model发布内容变化仍供所有编辑窗口读取同一Notebook。
+
+本窗口返回只取消自己View已受理的输入（沿原operation归属核对），非最后窗口保存后detach，其他窗口的活动前缀保持。最后窗口要原save成功准入；pending则必须实际savedRoot/savedPending与原ledger确认匹配才retireAfterRecovery，否则保留当前窗口供重试。层级消失只保存/forget，documentId意图保留供同一呈现状态重现；已主动返回的窗口重现仍是资料库。调用者必须配对生命周期；没有以deinit/GC/超时代替文档或native回执。
+
+窗口在原View受理DOWN时只记录原operation身份，弱View若先消失，后续明确cancelInput仍能匹配同一原输入后取消未完成笔；不能取消后来另一View的operation。实际弱View丢失/明确取消保留已完成正文且输入占额归零已验，不将ARC消失当资源回执。颜色/笔宽/标题/删除确认入口只取消本窗口输入；兄弟窗口仍在输入时，本窗口导出明确拒绝，不能为准备备份而全局cancelStroke。
+
+窗口打开通过原worker读完整结果，旧idle文档在读取拒绝/目标预算失败时继续保留；只有原保存责任准备好且目标工厂成功后才退休旧会话，直接保留工厂返回的新Notebook，不重复构造/adopt authority。每次读仍核对原Model导航epoch/current身份及窗口请求意图，迟到读不能替换已有编辑者或重新登记消失窗口。已有编辑端时拒绝另一文档，仍未提供生产并行多文档能力。
+
+导出沿原Model/worker/Data额度，新增的窗口/request身份仅用于呈现路由，不是内容revision。根视图仅请求窗口呈现，完成/取消要匹配该次请求；窗口消失可明确取消派生导出，compute完成后仍原ACK，源root/原文件不变。释放原Model引用不证明Foundation/系统选择器副本被回收。真实UIHostingController/UIWindow层级验证窗口独立导航/移除与替换、同Notebook/root；API用例验证导出请求身份与取消，未运行普通系统文件选择器或独立OS Scene激活/关闭。见[Apple报告](../reports/apple-window-attachments.json)。
 
 新activeInputOperationId只在原input存在时返回原strokeCommand.value，拒绝不变，取消/完成/退休为空，后续DOWN身份不同。View只保留自己DOWN受理后的身份引用，所有校验与续写在原主owner同步进行，没有另建token序列、authority或队列。它不是内容revision、跨线程许可、持久化回执，也不保证平台字符串桥接/活动Path的物理heap额度。App级显式cancelStroke仍可取消当前输入，pending已完成命令的责任不变。
 

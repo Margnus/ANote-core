@@ -1,10 +1,206 @@
 import XCTest
 import UIKit
+import SwiftUI
 import NoteCanvasPrototype
 @testable import NoteCorePreview
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testWindowDeparturePreservesAuthorityAndBoundsPresentationIdentities() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current), id = note.documentId
+        let a = PreviewWindowState(model: model), b = PreviewWindowState(model: model)
+        a.appear(); b.appear()
+        XCTAssertTrue(a.current === note && b.current === note); XCTAssertEqual(model.editorCount, 2)
+        XCTAssertEqual(model.beginOwnerRetirement(), .windowPending)
+        model.close(); XCTAssertTrue(model.current === note)
+        XCTAssertTrue(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
+        let input = note.activeInputOperationId
+        a.cancelInput(); a.prepareExport()
+        XCTAssertEqual(note.activeInputOperationId, input); XCTAssertTrue(note.hasActiveStroke)
+        XCTAssertFalse(model.transferBusy); XCTAssertNil(model.exportDocument)
+        XCTAssertEqual(a.leave(), .detached); XCTAssertTrue(note.hasActiveStroke)
+        XCTAssertNil(a.current); XCTAssertTrue(b.current === note); XCTAssertEqual(a.leave(), .stale)
+        a.create(); XCTAssertNil(a.current); XCTAssertTrue(model.current === note)
+        a.open(id); XCTAssertTrue(a.current === note); XCTAssertEqual(model.editorCount, 2)
+        XCTAssertEqual(a.leave(), .detached)
+        XCTAssertTrue(note.endStroke(x: 3, y: 4, pressure: 0.5, timeMicros: 2)); model.changed()
+        let expected = try note.capture().encode()
+        XCTAssertEqual(b.leave(), .documentClosed); XCTAssertNil(model.current)
+        try await eventually("last window writes through original worker") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(try String(contentsOf: dir.appendingPathComponent(id + ".ncp"), encoding: .utf8), expected)
+        a.open(id); try await eventually("requesting library window rejoins") { a.current != nil }
+        let reopened = try XCTUnwrap(a.current)
+        var inputView: InkUIView? = InkUIView(note: reopened)
+        inputView?.inputWindow = a; a.bindInput(try XCTUnwrap(inputView))
+        inputView?.frame = CGRect(x: 0, y: 0, width: 300, height: 400); inputView?.layoutIfNeeded()
+        inputView?.touchesBegan([SyntheticInkTouch(80, 3)], with: nil)
+        XCTAssertTrue(reopened.hasActiveStroke)
+        weak var goneInput = inputView
+        inputView = nil; XCTAssertNil(goneInput)
+        a.cancelInput() // Explicit cancellation uses its original operation, never ARC as a receipt.
+        XCTAssertFalse(reopened.hasActiveStroke); XCTAssertEqual(reopened.inputReservedByteCharge, 0)
+        XCTAssertEqual(reopened.totalStrokeCount, 1)
+        var windows = [a]
+        for _ in 0..<7 { let next = PreviewWindowState(model: model); next.appear(); windows.append(next) }
+        XCTAssertEqual(model.editorCount, 8)
+        a.appear(); XCTAssertEqual(model.editorCount, 8)
+        let refused = PreviewWindowState(model: model); refused.appear()
+        XCTAssertNil(refused.current); XCTAssertEqual(model.editorCount, 8)
+        for window in windows { window.disappear() }
+        XCTAssertEqual(model.editorCount, 0); XCTAssertTrue(model.current === reopened)
+        b.appear() // B explicitly returned earlier, so appearance must stay in its library.
+        XCTAssertNil(b.current); XCTAssertEqual(model.editorCount, 0)
+        XCTAssertNotNil(model.createForEditor()); XCTAssertFalse(model.current === reopened)
+        a.disappear(); b.disappear(); refused.disappear()
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("window service retires") { model.ownerRetirementStatus.phase == .retired }
+    }
+    @MainActor func testWindowPendingRecoveryRequiresOriginalWriteBeforeLastDeparture() async throws {
+        let dir = directory(); try Data("blocked".utf8).write(to: dir)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let checkpoint = try windowCheckpoint()
+        let limited = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+            journalEntries: 4096, journalBytes: 32*1024*1024, identityBytes: 4*1024*1024,
+            historyEntries: 128, historyBytes: 0, inputBytes: 2*1024*1024)
+        let model = PreviewModel(directory: dir, documentBudget: limited)
+        try model.adopt(checkpoint.root, persisted: false, recovery: checkpoint)
+        let note = try XCTUnwrap(model.current)
+        let a = PreviewWindowState(model: model), b = PreviewWindowState(model: model)
+        a.appear(); b.appear()
+        XCTAssertEqual(a.leave(), .detached); XCTAssertEqual(b.leave(), .retryRequired)
+        XCTAssertTrue(note.hasPendingStroke); XCTAssertTrue(b.current === note); XCTAssertEqual(model.editorCount, 1)
+        XCTAssertTrue(note.captureRecovery().sameContent(other: checkpoint))
+        try await eventually("failed pending remains in original ledger") { model.ownerRetirementStatus.retryRequired == 1 }
+        try FileManager.default.removeItem(at: dir)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        XCTAssertTrue(model.retryRetainedWrites())
+        try await eventually("original pending write confirms") { model.ownerRetirementStatus.pendingWrites == 0 }
+        let file = dir.appendingPathComponent(checkpoint.documentId + ".ncp")
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), try checkpoint.encode())
+        XCTAssertEqual(b.leave(), .documentClosed); XCTAssertNil(model.current)
+        let restored = PreviewModel(directory: dir), window = PreviewWindowState(model: restored)
+        window.appear(); window.open(checkpoint.documentId)
+        try await eventually("new window session reads full checkpoint") { window.current != nil }
+        let resumed = try XCTUnwrap(window.current)
+        XCTAssertTrue(resumed.hasPendingStroke); XCTAssertTrue(resumed.captureRecovery().sameContent(other: checkpoint))
+        XCTAssertTrue(resumed.retryPendingStroke()); XCTAssertTrue(resumed.retryPendingStroke())
+        XCTAssertEqual(resumed.totalStrokeCount, 1); XCTAssertEqual(resumed.pointCount(index: 0), 3)
+        XCTAssertEqual(window.leave(), .documentClosed)
+        try await eventually("committed replacement writes") { restored.ownerRetirementStatus.pendingWrites == 0 }
+        let canonical = try PreviewRecoveryCodec.shared.decode(text: String(contentsOf: file, encoding: .utf8))
+        XCTAssertNil(canonical.pending); XCTAssertEqual(canonical.root.scene.objectCount, 1)
+        a.disappear(); b.disappear(); window.disappear()
+        for owner in [model, restored] {
+            XCTAssertEqual(owner.beginOwnerRetirement(), .started)
+            try await eventually("pending window owner retires") { owner.ownerRetirementStatus.phase == .retired }
+        }
+    }
+    @MainActor func testHostingWindowsKeepLocalNavigationThroughHierarchyReplacement() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current)
+        let a = PreviewWindowState(model: model), b = PreviewWindowState(model: model)
+        let wa = UIWindow(frame: CGRect(x: 0, y: 0, width: 600, height: 800))
+        let wb = UIWindow(frame: CGRect(x: 0, y: 0, width: 600, height: 800))
+        wa.rootViewController = UIHostingController(rootView: PreviewRoot(model: model, window: a))
+        wb.rootViewController = UIHostingController(rootView: PreviewRoot(model: model, window: b))
+        wa.makeKeyAndVisible(); wb.makeKeyAndVisible()
+        defer { wa.isHidden = true; wb.isHidden = true; wa.rootViewController = nil; wb.rootViewController = nil }
+        try await eventually("both actual hosting roots appear") { model.editorCount == 2 }
+        XCTAssertTrue(a.current === note && b.current === note)
+        XCTAssertEqual(a.leave(), .detached)
+        try await eventually("one window stays in library") { a.current == nil && b.current === note && model.editorCount == 1 }
+        draw(note); model.changed(); let root = note.snapshot()
+        wb.isHidden = true; wb.rootViewController = nil
+        try await eventually("removed hosting root forgets presentation only") { model.editorCount == 0 }
+        XCTAssertTrue(model.current === note); XCTAssertTrue(note.snapshot() === root)
+        wb.rootViewController = UIHostingController(rootView: PreviewRoot(model: model, window: b))
+        wb.makeKeyAndVisible()
+        try await eventually("replacement hosting root resumes same session") { b.current === note && model.editorCount == 1 }
+        XCTAssertNil(a.current); XCTAssertTrue(note.snapshot() === root)
+        XCTAssertEqual(b.leave(), .documentClosed)
+        try await eventually("hosting window command saves") { model.ownerRetirementStatus.pendingWrites == 0 }
+        a.disappear(); b.disappear()
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("hosting owner stops") { model.ownerRetirementStatus.phase == .retired }
+    }
+    @MainActor func testExportResultRoutesOnlyToRequestWindowAndCancelsOnDisappearance() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current); draw(note); model.changed()
+        let root = note.snapshot(), expected = try note.capture().encode()
+        let a = PreviewWindowState(model: model), b = PreviewWindowState(model: model)
+        a.appear(); b.appear(); a.prepareExport()
+        try await eventually("request window receives backup") { model.exportDocument != nil }
+        XCTAssertTrue(a.ownsExport); XCTAssertFalse(b.ownsExport)
+        let backup = try XCTUnwrap(model.exportDocument)
+        b.finishExport(); XCTAssertEqual(model.exportDocument?.data, backup.data)
+        XCTAssertEqual(a.leave(), .detached)
+        XCTAssertEqual(b.leave(), .retryRequired)
+        a.disappear() // Explicitly cancels this window's derived result, not content.
+        XCTAssertNil(model.exportDocument); XCTAssertEqual(model.exportRetainedByteCharge, 0)
+        XCTAssertTrue(model.current === note); XCTAssertTrue(note.snapshot() === root)
+        b.prepareExport(); let cancelledRequest = try XCTUnwrap(b.exportRequest)
+        b.disappear() // Cancel while accepted compute is still pending.
+        try await eventually("cancelled export ACKs without publishing orphan data") { !model.transferBusy }
+        XCTAssertNil(model.exportDocument); XCTAssertNil(model.exportEditor)
+        XCTAssertEqual(try note.capture().encode(), expected)
+        b.appear(); b.prepareExport()
+        try await eventually("same surviving window can export again") { model.exportDocument != nil }
+        XCTAssertTrue(b.ownsExport); XCTAssertFalse(a.ownsExport)
+        XCTAssertNotEqual(b.exportRequest, cancelledRequest)
+        b.finishExport(request: cancelledRequest) // A late callback cannot release a newer export.
+        XCTAssertNotNil(model.exportDocument)
+        XCTAssertEqual(String(data: model.exportDocument!.data, encoding: .utf8), expected)
+        b.finishExport(); XCTAssertEqual(b.leave(), .documentClosed); b.disappear()
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("export owner stops") { model.ownerRetirementStatus.phase == .retired }
+    }
+    @MainActor func testLateWindowOpenCannotReplaceEditorOrAttachAfterDisappearance() async throws {
+        let dir = directory(); try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let base = "NCPREVIEW\t2\nD\tlate\tlate\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+        try PreviewFileIO.writeUTF8(base, to: dir.appendingPathComponent("late.ncp"))
+        try Data("broken".utf8).write(to: dir.appendingPathComponent("bad.ncp"))
+        let started = DispatchSemaphore(value: 0), gate = DispatchSemaphore(value: 0)
+        defer { gate.signal() }
+        var calls = 0
+        let model = PreviewModel(directory: dir, beforeOpenRead: {
+            calls += 1
+            if calls == 1 { started.signal(); if gate.wait(timeout: .now()+8) != .success { throw CocoaError(.fileReadUnknown) } }
+        })
+        let a = PreviewWindowState(model: model); a.appear(); a.open("late")
+        var observedStart = false
+        try await eventually("actual read starts") {
+            if !observedStart { observedStart = started.wait(timeout: .now()) == .success }
+            return observedStart
+        }
+        a.disappear()
+        let b = PreviewWindowState(model: model); b.appear(); b.create()
+        let note = try XCTUnwrap(b.current), root = note.snapshot()
+        gate.signal()
+        try await eventually("later original write completes after read ACK") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertNil(a.current); XCTAssertTrue(b.current === note); XCTAssertTrue(note.snapshot() === root)
+        a.appear(); a.open("late"); XCTAssertNil(a.current); XCTAssertTrue(b.current === note)
+        b.disappear()
+        a.open("bad")
+        try await eventually("invalid target read preserves idle original owner") { model.status == LocalReadFailure.invalidFormat.message }
+        XCTAssertTrue(model.current === note); XCTAssertTrue(note.snapshot() === root); XCTAssertNil(a.current)
+        a.open("late")
+        try await eventually("valid target switches idle owner and joins requester") { a.current?.documentId == "late" }
+        XCTAssertEqual(model.editorCount, 1); XCTAssertNil(b.current)
+        XCTAssertEqual(a.leave(), .documentClosed); a.disappear()
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("late-read owner stops") { model.ownerRetirementStatus.phase == .retired }
+    }
+    private func windowCheckpoint() throws -> PagedPreviewSnapshot {
+        let base = "NCPREVIEW\t2\nD\tpending-window\tpending\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+        let ink = "NCPREVIEW\t2\nD\tpending-window\t\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\treused-ink-2\tlayer\t1\tMONOLINE\t1\t-14339513\t2.5\t3\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.25\t2.5\t0.125\t7\nP\t3.0\t4.0\t0.625\t9\nP\t8.0\t6.0\t1.0\t10\nEND\n"
+        let operation = "reused-op-1".utf16.map { String(format: "%04x", $0) }.joined()
+        return try PreviewRecoveryCodec.shared.decode(text: "NCRECOVERY\t1\nD\tpending-window\tpending\t1\t0\t0\n\(base.utf16.count)\t\(ink.utf16.count)\t\(operation)\n" + base + ink + "RECOVERY-END\n")
+    }
     @MainActor func testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen() async throws {
         let dir = directory(), moved = directory()
         defer { try? FileManager.default.removeItem(at: dir); try? FileManager.default.removeItem(at: moved) }

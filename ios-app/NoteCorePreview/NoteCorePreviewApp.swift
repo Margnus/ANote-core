@@ -18,7 +18,8 @@ private enum PreparedCatalog { case complete([LocalNote]), capacity }
 private enum PreparedExport { case ready(PreviewBackup), capacity }
 
 struct LocalNote: Identifiable { let id: String; let title: String; let date: Date }
-enum PreviewOwnerRetirementRequest { case started, alreadyRetiring, retired, inputPending, transferPending, saveRejected }
+enum PreviewOwnerRetirementRequest { case started, alreadyRetiring, retired, inputPending, transferPending, saveRejected, windowPending }
+enum PreviewEditorDeparture { case detached, documentClosed, retryRequired, stale }
 enum PreviewOwnerPhase { case active, retiring, retired }
 struct PreviewOwnerRetirementStatus {
     let phase: PreviewOwnerPhase
@@ -48,7 +49,12 @@ final class PreviewModel: ObservableObject {
     }
     func finishExport() {
         precondition(Thread.isMainThread)
+        exportCancelled = true; exportEditor = nil; exportRequest = nil
         exportDocument = nil
+    }
+    func finishEditorExport(_ identity: UUID, request: UUID?) {
+        precondition(Thread.isMainThread)
+        if let request, exportEditor == identity, exportRequest == request { finishExport() }
     }
     @Published var transferBusy = false
     private let directory: URL
@@ -68,6 +74,11 @@ final class PreviewModel: ObservableObject {
     private var ownerRetiring = false
     private var ownerRetired = false
     private var ownerStopRequested = false
+    private var editors = Set<UUID>()
+    var editorCount: Int { precondition(Thread.isMainThread); return editors.count }
+    private(set) var exportEditor: UUID?
+    private(set) var exportRequest: UUID?
+    private var exportCancelled = false
     // Explicit service lifetime: ARC reference loss is not a close/release receipt.
     // The caller must retain a route to this owner and explicitly retire it.
     private var ownerKeepAlive: PreviewModel?
@@ -85,6 +96,7 @@ final class PreviewModel: ObservableObject {
         precondition(Thread.isMainThread)
         if ownerRetired { return .retired }
         if ownerRetiring { return .alreadyRetiring }
+        if !editors.isEmpty { return .windowPending }
         if current?.hasActiveStroke == true || current?.hasPendingStroke == true { return .inputPending }
         if transferBusy || exportDocument != nil { return .transferPending }
         guard save() else { return .saveRejected }
@@ -307,16 +319,57 @@ final class PreviewModel: ObservableObject {
     }
     func adopt(_ root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot? = nil) throws {
         precondition(Thread.isMainThread && current == nil)
+        let notebook = try prepareNotebook(root, recovery: recovery)
+        installNotebook(notebook, root: root, persisted: persisted, recovery: recovery)
+    }
+    private func prepareNotebook(_ root: DocumentRoot, recovery: PagedPreviewSnapshot?) throws -> PagedPreviewNotebook {
         let budget = previewBudget
         let checkpoint = try recovery ?? PagedPreviewSnapshot.companion.fromRoot(root: root)
         guard checkpoint.root === root else { throw CocoaError(.fileReadCorruptFile) }
         let opening = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: UUID().uuidString, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
         guard let notebook = opening.notebook else { throw CocoaError(.fileReadCorruptFile) }
+        return notebook
+    }
+    private func installNotebook(_ notebook: PagedPreviewNotebook, root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot?) {
+        precondition(current == nil)
         current = notebook
         savedRoot = persisted && ledger.latest(documentId: root.id.value) == nil ? root : nil
         savedPending = savedRoot != nil ? recovery?.pending : nil
         revision = root.revision
+    }
+    func attachEditor(_ identity: UUID, documentId: String) -> Bool {
+        precondition(Thread.isMainThread)
+        guard !ownerRetiring, current?.documentId == documentId,
+              editors.contains(identity) || editors.count < 8 else {
+            status = "编辑窗口已满或会话已切换，请返回后重试"; return false
+        }
+        editors.insert(identity); return true
+    }
+    func hasEditor(_ identity: UUID) -> Bool { precondition(Thread.isMainThread); return editors.contains(identity) }
+    func forgetEditor(_ identity: UUID) { precondition(Thread.isMainThread); editors.remove(identity) }
+    func leaveEditor(_ identity: UUID, documentId: String) -> PreviewEditorDeparture {
+        precondition(Thread.isMainThread)
+        guard current?.documentId == documentId, editors.contains(identity) else { return .stale }
+        if editors.count > 1 {
+            guard save() else { return .retryRequired }
+            editors.remove(identity); return .detached
+        }
+        guard !transferBusy, exportDocument == nil else { status = "请先完成或取消文件操作"; return .retryRequired }
+        editors.remove(identity)
+        guard prepareCurrentClose(cancelInput: false) else {
+            editors.insert(identity); status = "原笔记尚待保存，请保存重试后返回"; return .retryRequired
+        }
+        retireCurrent(); return .documentClosed
+    }
+    func createForEditor() -> PagedPreviewNotebook? {
+        precondition(Thread.isMainThread)
+        guard !ownerRetiring, editors.isEmpty, !transferBusy, exportDocument == nil,
+              prepareCurrentClose(cancelInput: false) else {
+            status = "其他窗口正在编辑，或原笔记尚待保存，请完成后重试"; return nil
+        }
+        if current != nil { retireCurrent() }
+        create(); return current
     }
     private static func readPreview(_ encoded: String) throws -> DocumentRoot {
         let read = PreviewDocumentReader.shared.read(text: encoded)
@@ -388,7 +441,20 @@ final class PreviewModel: ObservableObject {
         }
     }
     func open(_ id: String) {
-        guard !ownerRetiring, current == nil else { return }
+        openDocument(id, replacingIdle: false, opened: nil)
+    }
+    func openForEditor(_ id: String, opened: @escaping (PagedPreviewNotebook) -> Void) {
+        precondition(Thread.isMainThread)
+        guard !ownerRetiring else { return }
+        if let note = current, note.documentId == id { opened(note); return }
+        guard editors.isEmpty, !transferBusy, exportDocument == nil else {
+            status = "其他窗口正在编辑或有文件操作，请完成后重试"; return
+        }
+        openDocument(id, replacingIdle: true, opened: opened)
+    }
+    private func openDocument(_ id: String, replacingIdle: Bool, opened: ((PagedPreviewNotebook) -> Void)?) {
+        guard !ownerRetiring, current == nil || (replacingIdle && editors.isEmpty) else { return }
+        let previous = current
         navigationEpoch += 1
         let navigation = navigationEpoch, epoch = storageEpoch
         let retained = ledger.latest(documentId: id)
@@ -398,10 +464,10 @@ final class PreviewModel: ObservableObject {
             guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
             return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)
         }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
-            guard self.navigationEpoch == navigation && self.current == nil else { return }
+            guard self.navigationEpoch == navigation && self.current === previous else { return }
             if self.storageEpoch != epoch {
                 // Retry the pure read after ACK; no old notebook payload is placed on a callback queue.
-                DispatchQueue.main.async { self.open(id) }; return
+                DispatchQueue.main.async { self.openDocument(id, replacingIdle: replacingIdle, opened: opened) }; return
             }
             switch result {
             case .succeeded(let reading):
@@ -410,19 +476,37 @@ final class PreviewModel: ObservableObject {
                 case .opened(let snapshot): captured = snapshot
                 case .refused(let failure): self.status = failure.message; return
                 }
-                do { try self.adopt(captured.root, persisted: retained == nil, recovery: captured) }
+                // Keep the idle original owner through read/capacity failure. Prepare its exact
+                // save responsibility before constructing one candidate for the different document.
+                guard self.editors.isEmpty, (!replacingIdle || (!self.transferBusy && self.exportDocument == nil)),
+                      self.prepareCurrentClose(cancelInput: false) else {
+                    self.status = "其他窗口正在编辑，或原笔记尚待保存，请完成后重试"; return
+                }
+                do {
+                    let notebook = try self.prepareNotebook(captured.root, recovery: captured)
+                    if self.current != nil { self.retireCurrent() }
+                    self.installNotebook(notebook, root: captured.root, persisted: retained == nil, recovery: captured)
+                }
                 catch { self.status = "打开失败，原文件仍保留"; return }
                 let note = self.current!
                 self.status = note.hasPendingStroke ? "已恢复未提交笔迹，请点击保存重试提交" : (retained == nil ? "已打开 · \(note.totalStrokeCount) 笔" : "有更改尚未保存，请重试保存")
+                opened?(note)
             case .outcomeUnknown: self.status = "读取结果暂无法确认，请稍后重试"
             }
         }
     }
     func changed() { revision = current?.changeVersion ?? 0; save() }
-    func prepareExport() {
+    func prepareExport(editor: UUID? = nil) {
         guard !ownerRetiring, !transferBusy, exportDocument == nil, let note = current else { return }
+        if let editor {
+            guard editors.contains(editor), !note.hasActiveStroke else {
+                status = "其他窗口正在输入，请完成后再导出"; return
+            }
+        }
         note.cancelStroke()
         guard note.retryPendingStroke() else { status = note.lastError; return }
+        let ticket = UUID()
+        exportEditor = editor; exportRequest = ticket; exportCancelled = false
         transferBusy = true; status = "正在准备备份…"
         let snapshot = note.capture(), resultLimit = exportResultByteLimit
         request(input: snapshot, bytes: snapshot.encodingWorkByteCharge, compute: { captured -> PreparedExport in
@@ -431,19 +515,20 @@ final class PreviewModel: ObservableObject {
             guard encoded.utf16.count <= 16_000_000, resultLimit >= 512,
                   encoded.utf8.count <= resultLimit - 512 else { return .capacity }
             return .ready(PreviewBackup(data: Data(encoded.utf8)))
-        }, rejected: { transferBusy = false; status = "后台队列繁忙，请重新导出" }) { result in
+        }, rejected: { transferBusy = false; exportEditor = nil; exportRequest = nil; status = "后台队列繁忙，请重新导出" }) { result in
             self.transferBusy = false
+            if self.exportCancelled || self.exportRequest != ticket { self.exportEditor = nil; self.exportRequest = nil; self.status = "导出已取消，原笔记仍保留"; return }
             switch result {
             case .succeeded(let prepared):
                 switch prepared {
                 case .ready(let document): self.exportDocument = document
-                case .capacity: self.status = "备份超过预览导出容量，原笔记仍保留"
+                case .capacity: self.exportEditor = nil; self.exportRequest = nil; self.status = "备份超过预览导出容量，原笔记仍保留"
                 }
-            case .outcomeUnknown: self.status = "备份生成失败，笔记仍保留，请重试"
+            case .outcomeUnknown: self.exportEditor = nil; self.exportRequest = nil; self.status = "备份生成失败，笔记仍保留，请重试"
             }
         }
     }
-    func importCopy(_ url: URL) {
+    func importCopy(_ url: URL, opened: ((PagedPreviewNotebook) -> Void)? = nil) {
         guard !ownerRetiring, !transferBusy else { return }
         transferBusy = true; status = "正在校验并导入…"
         let scoped = url.startAccessingSecurityScopedResource()
@@ -473,6 +558,7 @@ final class PreviewModel: ObservableObject {
                     catch { self.status = "副本已保存在本机，暂时无法打开，请返回列表重试"; return }
                     let note = self.current!
                     self.status = "已导入为新笔记 · \(note.totalStrokeCount) 笔"
+                    opened?(note)
                 } else { self.status = "备份已导入为新笔记，可返回列表查看" }
                 self.refresh()
             case .outcomeUnknown: self.status = "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖"
@@ -536,12 +622,25 @@ final class PreviewModel: ObservableObject {
         }
     }
     func close() {
-        current?.cancelStroke()
-        guard save(), let note = current else { return }
+        precondition(Thread.isMainThread)
+        guard editors.isEmpty else { status = "其他窗口仍在编辑，请先退出各编辑窗口"; return }
+        guard prepareCurrentClose(cancelInput: true) else { return }
+        if current != nil { retireCurrent() }
+    }
+    private func prepareCurrentClose(cancelInput: Bool) -> Bool {
+        guard let note = current else { return true }
+        if cancelInput { note.cancelStroke() }
+        guard !note.hasActiveStroke, save() else { return false }
         if note.hasPendingStroke {
             guard savedRoot === note.snapshot(), savedPending === note.pendingStroke(), ledger.latest(documentId: note.documentId) == nil,
-                  note.retireAfterRecovery(snapshot: note.captureRecovery()) else { return }
-        } else { guard note.retire() else { return } }
+                  !transferBusy, exportDocument == nil else { return false }
+        }
+        return true
+    }
+    private func retireCurrent() {
+        guard let note = current else { return }
+        precondition(editors.isEmpty && !note.hasActiveStroke)
+        precondition(note.hasPendingStroke ? note.retireAfterRecovery(snapshot: note.captureRecovery()) : note.retire())
         retireInk()
         navigationEpoch += 1; current = nil; savedRoot = nil; savedPending = nil; refresh()
     }
@@ -555,6 +654,91 @@ final class PreviewModel: ObservableObject {
         revision = note.changeVersion // Published even when only the selected PageId changes.
         if content { save() }
     }
+}
+
+/// Per-window presentation only. The original Model remains the single content/storage owner.
+final class PreviewWindowState: ObservableObject {
+    let identity = UUID()
+    let model: PreviewModel
+    @Published private(set) var documentId: String?
+    private var visible = false
+    private var request: UUID?
+    private weak var inputView: InkUIView?
+    private var inputOperation: String?
+    init(model: PreviewModel) {
+        precondition(Thread.isMainThread)
+        self.model = model; documentId = model.current?.documentId
+    }
+    var current: PagedPreviewNotebook? {
+        precondition(Thread.isMainThread)
+        guard visible, model.hasEditor(identity), model.current?.documentId == documentId else { return nil }
+        return model.current
+    }
+    func appear() {
+        precondition(Thread.isMainThread)
+        visible = true
+        if let id = documentId, !model.attachEditor(identity, documentId: id) { documentId = nil }
+        else { objectWillChange.send() }
+    }
+    func disappear() {
+        precondition(Thread.isMainThread)
+        request = nil; cancelInput()
+        if current != nil { model.save() }
+        model.finishEditorExport(identity, request: model.exportRequest); model.forgetEditor(identity)
+        visible = false; inputView = nil
+    }
+    func bindInput(_ view: InkUIView) { precondition(Thread.isMainThread); inputView = view }
+    func acceptedInput(from view: InkUIView) {
+        precondition(Thread.isMainThread)
+        guard inputView === view, current === view.note else { return }
+        inputOperation = view.note.activeInputOperationId
+    }
+    func cancelInput() {
+        precondition(Thread.isMainThread)
+        inputView?.cancelInk()
+        // Explicit window cancellation also works if UIKit has already dropped its View.
+        // A stale window can never cancel a later stroke accepted by another surface.
+        if let operation = inputOperation, let note = current, note.activeInputOperationId == operation { note.cancelStroke() }
+        inputOperation = nil
+    }
+    private func join(_ note: PagedPreviewNotebook) {
+        guard visible, model.attachEditor(identity, documentId: note.documentId) else { return }
+        documentId = note.documentId
+    }
+    func create() {
+        precondition(Thread.isMainThread)
+        request = nil
+        if let note = model.createForEditor() { join(note) }
+    }
+    func open(_ id: String) {
+        precondition(Thread.isMainThread)
+        let token = UUID(); request = token
+        model.openForEditor(id) { [weak self] note in
+            guard let self, self.visible, self.request == token else { return }
+            self.request = nil; self.join(note)
+        }
+    }
+    func importCopy(_ url: URL) {
+        precondition(Thread.isMainThread)
+        let token = UUID(); request = token
+        model.importCopy(url) { [weak self] note in
+            guard let self, self.visible, self.request == token else { return }
+            self.request = nil; self.join(note)
+        }
+    }
+    @discardableResult func leave() -> PreviewEditorDeparture {
+        precondition(Thread.isMainThread)
+        request = nil; cancelInput()
+        guard let id = documentId else { return .stale }
+        let result = model.leaveEditor(identity, documentId: id)
+        if result == .detached || result == .documentClosed || result == .stale { documentId = nil; inputView = nil }
+        return result
+    }
+    func prepareExport() { if current != nil { cancelInput(); model.prepareExport(editor: identity) } }
+    var ownsExport: Bool { model.exportEditor == identity }
+    var exportRequest: UUID? { ownsExport ? model.exportRequest : nil }
+    func isExportRequest(_ request: UUID) -> Bool { ownsExport && model.exportRequest == request }
+    func finishExport(request: UUID? = nil) { model.finishEditorExport(identity, request: request ?? exportRequest) }
 }
 
 @main
@@ -571,6 +755,11 @@ struct NoteCorePreviewApp: App {
 
 struct PreviewRoot: View {
     @ObservedObject var model: PreviewModel
+    @StateObject private var window: PreviewWindowState
+    init(model: PreviewModel, window: PreviewWindowState? = nil) {
+        self.model = model
+        _window = StateObject(wrappedValue: window ?? PreviewWindowState(model: model))
+    }
     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
     @State private var width: Double = 2.5
     @State private var finger = true
@@ -578,19 +767,21 @@ struct PreviewRoot: View {
     @State private var title = ""
     @State private var importing = false
     @State private var exporting = false
+    @State private var exportingRequest: UUID?
     @State private var deletingPage = false
     @State private var viewportRequest = 0
     @State private var viewportRatio = 0.0
     var body: some View {
-        Group {
-            if let note = model.current {
+        let exportAtRender = exportingRequest
+        return ZStack {
+            if let note = window.current {
                 VStack(spacing: 8) {
                     HStack {
-                        Button("返回") { model.close() }
+                        Button("返回") { window.leave() }
                         Spacer()
-                        Button(note.title) { note.cancelStroke(); title = note.title; renaming = true }.font(.headline).lineLimit(1)
+                        Button(note.title) { window.cancelInput(); title = note.title; renaming = true }.font(.headline).lineLimit(1)
                         Spacer(); Button("保存") { model.retryRetainedWrites(); model.save() }
-                        Button("导出") { model.prepareExport() }.disabled(model.transferBusy)
+                        Button("导出") { window.prepareExport() }.disabled(model.transferBusy)
                     }.padding(.horizontal)
                     HStack {
                         Button("撤销") { model.applyEdit(PreviewEditUndo.shared) }.disabled(!note.canUndo)
@@ -600,13 +791,13 @@ struct PreviewRoot: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 20) {
                             ForEach([UInt32(0xff253247), 0xff3568be, 0xffce4d52, 0xff21816b], id: \.self) { raw in
-                                Button { note.cancelStroke(); color = Int32(bitPattern: raw) } label: {
+                                Button { window.cancelInput(); color = Int32(bitPattern: raw) } label: {
                                     Circle().fill(Color(uiColor: inkColor(Int32(bitPattern: raw)))).frame(width: 25, height: 25)
                                         .overlay(Circle().stroke(color == Int32(bitPattern: raw) ? .gray : .clear, lineWidth: 3))
                                 }.accessibilityLabel("笔颜色")
                             }
                             ForEach([2.5, 5.0, 9.0], id: \.self) { value in
-                                Button(value == 2.5 ? "细" : value == 5 ? "中" : "粗") { note.cancelStroke(); width = value }
+                                Button(value == 2.5 ? "细" : value == 5 ? "中" : "粗") { window.cancelInput(); width = value }
                             }
                         }.padding(.horizontal)
                     }.frame(height: 36)
@@ -629,7 +820,7 @@ struct PreviewRoot: View {
                             HStack(spacing: 20) {
                                 Button("加页") { model.applyEdit(PreviewEditInsertPage.shared) }
                                 Button("复制页") { model.applyEdit(PreviewEditCopyPage.shared) }
-                                Button("删页") { note.cancelStroke(); deletingPage = true }
+                                Button("删页") { window.cancelInput(); deletingPage = true }
                                 Button("前移") { model.applyEdit(PreviewEditMovePage(beforePageId: note.page(index: note.currentPageIndex - 1).id.value)) }
                                     .disabled(note.currentPageIndex == 0)
                                 Button("后移") { model.applyEdit(PreviewEditMovePage(beforePageId: note.currentPageIndex + 2 < note.pageCount ? note.page(index: note.currentPageIndex + 2).id.value : nil)) }.disabled(note.currentPageIndex == note.pageCount - 1)
@@ -644,7 +835,7 @@ struct PreviewRoot: View {
                     }.padding(.horizontal).frame(minHeight: 44)
                     Text(model.status).font(.caption).foregroundStyle(.secondary)
                     NativeInkCanvas(note: note, renderModel: model, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
-                        changed: { model.changed() }, failed: { model.status = $0 })
+                        changed: { model.changed() }, failed: { model.status = $0 }, inputOwner: window)
                         .id(note.documentId)
                         .padding(.horizontal, 12).padding(.bottom, 8)
                 }.padding(.top, 8)
@@ -652,12 +843,12 @@ struct PreviewRoot: View {
                 NavigationStack {
                     List {
                         Section {
-                            Button("新建笔记") { model.create() }
+                            Button("新建笔记") { window.create() }
                             Button("导入备份") { importing = true }.disabled(model.transferBusy)
                         }
                         Section("本机笔记") {
                             ForEach(model.notes) { note in
-                                Button { model.open(note.id) } label: {
+                                Button { window.open(note.id) } label: {
                                     VStack(alignment: .leading) { Text(note.title).font(.headline); Text(note.date, style: .date).font(.caption).foregroundStyle(.secondary) }
                                 }
                             }
@@ -677,19 +868,24 @@ struct PreviewRoot: View {
             Button("取消", role: .cancel) { }
             Button("删除", role: .destructive) { model.applyEdit(PreviewEditDeletePage.shared) }
         } message: { Text("最后一页将清空。可以撤销恢复；关闭笔记后不保留撤销记录。") }
-        .onChange(of: model.exportDocument != nil) { _, ready in if ready { exporting = true } }
+        .onAppear { window.appear() }
+        .onDisappear { window.disappear() }
+        .onChange(of: model.exportDocument != nil) { _, ready in
+            if ready && window.ownsExport { exportingRequest = window.exportRequest; exporting = true }
+        }
         .fileExporter(isPresented: $exporting, document: model.exportDocument, contentType: .data,
             defaultFilename: "NoteCore-backup.ncp") { result in
-                model.finishExport()
+                guard let ticket = exportAtRender, window.isExportRequest(ticket) else { return }
+                window.finishExport(request: ticket)
                 switch result {
                 case .success: model.status = "备份已导出"
                 case .failure: model.status = "导出未完成，请重试"
                 }
             }
-        .onChange(of: exporting) { _, showing in if !showing { model.finishExport() } }
+        .onChange(of: exporting) { _, showing in if !showing, let ticket = exportAtRender { window.finishExport(request: ticket) } }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.data]) { result in
             switch result {
-            case .success(let url): model.importCopy(url)
+            case .success(let url): window.importCopy(url)
             case .failure: model.status = "导入未完成，已有笔记未更改"
             }
         }
