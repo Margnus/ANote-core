@@ -1,6 +1,14 @@
 # M-3：密集页面空间索引实验
 
-2026-10-15，DEV-026。这是选择架构的实验，不接入预览渲染、不冻结公共API。实现位于canvas-core的internal prototype；只有页坐标AABB与整数实验ID，不持有文档authority、对象数据或页面选择状态。
+## 2026-10-26 原索引canonical点命中参考出口
+
+同一IncrementalSpatialIndexPoc/STR/overlay增加createCanonical、advanceCanonical与queryPoint。entry仅增加可选ObjectId/objectRevision/LayerId元数据；构建通过原BrushEnvelopePoc验证全部规范对象，未支持版本（包括查询区域外对象）明确拒绝，泛型bbox更新撤销规范绑定资格，压实只保留原资格。更新消费原SceneReducer实际before/after/patch，不构造另一scene/authority；changeCount先拒绝超批次，样本工作/metadata/overlay失败不发布部分状态，压实后原patch可重试。
+
+点查询按scene/revision/session验证，原粗筛再用原版本1浮点oracle几何过滤并限定层；entry/node/candidate/sourceSamples/hits各自受限，拒绝/取消无命中前缀，结果仅ID/stamp/计数且无z序。owner仍负责稳定handle、原worker准入和最终当前stamp核对。完整未改对象引用验证是O(N)，由maxObjectTests前检；绑定元数据与临时oracle数组须计入未来原owner总预算，记录/样本额度不证明物理heap或生产增量性能，当前不冻结grid/STR或稳定SDK。
+
+[当前报告](../reports/canonical-point-query.json)：原类13项（新增4项）、完整427 JVM及API35原ART139通过，包括真实规范移动/删除/恢复patch、压实重试、旧结果/新session、假阳性/三笔/压力/跨层、未知版本/handle/各级预算/取消与伪造after对象拒绝，原1500轮随机bbox/路径/mask/图像/执行器回归保持。只安装独立库测试APK3a0bd2e9…，原普通App82eafb0c…与本机原1份笔记先备份且前后hash/集合保持。无本轮普通App索引接入/重建/UI、Apple Native或真机，Apple入口123（common117）仅准备未运行。审计4匹配/28失效/5历史漂移仍failed；C1/M-1/完整预算/public/owner/IO断电与DEV-041门禁保持，不将几何点过滤写成套索/擦除产品验收。
+
+2026-10-15，DEV-026。这是选择架构的实验，不接入预览渲染、不冻结公共API。实现位于canvas-core的internal prototype；初始实验仅使用页坐标AABB与整数ID；2026-10-26增加上述规范身份绑定元数据，仍不持有文档authority、笔迹对象/采样或页面选择状态。
 
 ## DEV-040A增量（2026-10-17）
 

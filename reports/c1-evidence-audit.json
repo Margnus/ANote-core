@@ -12,7 +12,7 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
           "state": "changed",
           "expected": "189d9a1162bc84b11f32f95d9cf1fbcf7abf01ee5468883476e05c004c29dff0",
-          "actual": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56"
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/build.gradle.kts",
@@ -93,7 +93,7 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
           "state": "changed",
           "expected": "189d9a1162bc84b11f32f95d9cf1fbcf7abf01ee5468883476e05c004c29dff0",
-          "actual": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56"
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
@@ -150,13 +150,13 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
           "state": "changed",
           "expected": "189d9a1162bc84b11f32f95d9cf1fbcf7abf01ee5468883476e05c004c29dff0",
-          "actual": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56"
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
@@ -180,15 +180,15 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086",
+      "report_sha256": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 231,
+      "matched_bindings": 232,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
     "android-brush-common-tests": {
-      "report_sha256": "438c7c930eb2d88b59538c3b3ef99da3522f34af8f1c479c247427a473f7f00e",
+      "report_sha256": "e4171b4b1e59a3b31d1ea24b4619f75d4cf60f269bcb294a2fd70af44b194909",
       "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 63,
@@ -199,7 +199,7 @@
       "report_sha256": "f1dc316ac738a67e5fb198479380b07c2a8c72257c6ee4f2c0674a7fea1a41cf",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 50,
+      "matched_bindings": 47,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
@@ -208,16 +208,34 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePocTest.kt",
           "state": "changed",
           "expected": "a0af32c6a8a36656650053134560bd77f5df827e4b86898ca3f31e592b6eb739",
           "actual": "02da555d7fd409c97d5174976206a70c552cbd319c666e2a205b4f38da66b799"
+        },
+        {
+          "path": "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPocTest.kt",
+          "state": "changed",
+          "expected": "9b3de853ab3db7595fc507c9fc34383c7e92e985bfa74517dd829bb96fefd137",
+          "actual": "060918c1a6e3cb0ed3d9fcf9bf3ae08b6b7d477b86c2514074dd351c91bbf9ef"
         },
         {
           "path": "settings.gradle.kts",
@@ -229,7 +247,7 @@
           "path": "tools/verify_apple_brush_common.py",
           "state": "changed",
           "expected": "3921911089d1f9cbd54ce350d98dc142f7dd9ad8ee91014737ac497864b3c33e",
-          "actual": "a44701e519cb7f7a12dabf6ea1b33a3a572ab9f430e219a24f27a36140aca054"
+          "actual": "df078522d723bf9e6aca64063a6eb87f136d673aff1e42082ba35cd76a2c08c7"
         },
         {
           "path": "canvas-core/build/bin/iosSimulatorArm64/debugTest/test.kexe",
@@ -248,7 +266,7 @@
       "report_sha256": "7d75457262b6f6ff8fb98eed2ce897b8ad05812d098824c99fe0c1c22f7dca61",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 41,
+      "matched_bindings": 39,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
@@ -257,10 +275,22 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "fixtures/transfer/android-paged-v2.json",
@@ -389,7 +419,7 @@
           "path": "reports/android-brush-common-tests.json",
           "state": "changed",
           "expected": "3c3f551a2e62b0c4ee55db0de0cdcb064215dff07a4b8e00f3b1186abc7eb620",
-          "actual": "438c7c930eb2d88b59538c3b3ef99da3522f34af8f1c479c247427a473f7f00e"
+          "actual": "e4171b4b1e59a3b31d1ea24b4619f75d4cf60f269bcb294a2fd70af44b194909"
         },
         {
           "path": "reports/ios-host-tests.json",
@@ -404,7 +434,7 @@
       "report_sha256": "e63bab2c521470d0d71cf82d4b25e4c156553b26a2cbe8f49f431ab268b00c47",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 51,
+      "matched_bindings": 49,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -485,6 +515,12 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt",
           "state": "changed",
           "expected": "0d65a99bb6dfc4fc1cc3fc5f8679724b3ac963f4980ffb94c091e7f4da126397",
@@ -494,7 +530,13 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
@@ -614,7 +656,7 @@
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.CanonicalTitleTest.xml",
           "state": "changed",
           "expected": "bfe5ba58ce38eb35754b4a5315d954357ec843080615d725ed4327ee5a0bf2a3",
-          "actual": "a15aed3e0ba198ee0245f206516f4991b8f801af5b6883654db9eb1df718b8af"
+          "actual": "05679fe56c971a5fadb7b746ad35f53847ce027a7fd48526b14917135ab06187"
         },
         {
           "path": "build/canonical-title/android.log",
@@ -660,7 +702,7 @@
       "report_sha256": "ffeefa44e702bb9d2b866df492075f6baef202a5209346e612f03c11251f70b1",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 55,
+      "matched_bindings": 53,
       "mismatches": [
         {
           "path": "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt",
@@ -717,16 +759,28 @@
           "actual": "2dd49c6902aff3050c38c84ab87d82ec7d9236d9748be1ecde6686d525e53015"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
           "state": "changed",
           "expected": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
         },
         {
           "path": "ios-app/NoteCorePreview/NativeInkCanvas.swift",
@@ -818,7 +872,7 @@
       "report_sha256": "0cf0ea90b6d6d6dad39e15780014d51dfb73172305827dd39f5701ca93db2bfe",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 50,
+      "matched_bindings": 48,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -899,6 +953,12 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt",
           "state": "changed",
           "expected": "0d65a99bb6dfc4fc1cc3fc5f8679724b3ac963f4980ffb94c091e7f4da126397",
@@ -908,7 +968,13 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
@@ -1034,7 +1100,7 @@
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewEditTest.xml",
           "state": "changed",
           "expected": "e27fa1242b9630c4948d6ce09d257c4cea08755c673966e3d233946031691a7b",
-          "actual": "a934863a1dd9ab8fb25df7d96fed81639723b67190c38ede4289ce6e3bcacacf"
+          "actual": "feee853e9b5a2ccc437a1568038b8b401fbed43a00e51784b6cc1d6aafcfdb52"
         },
         {
           "path": "build/preview-edit/android.log",
@@ -1080,7 +1146,7 @@
       "report_sha256": "966c8d3bef060c797a487f520a167331a2fb971363b7a7612cff5402e4201bb0",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 67,
+      "matched_bindings": 65,
       "mismatches": [
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
@@ -1137,16 +1203,28 @@
           "actual": "560a6ad55890003938d9e49271875de434a764cc44e56dc4ea064fd1e2c67b6e"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
           "state": "changed",
           "expected": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
         },
         {
           "path": "android-app/src/main/java/dev/notecore/app/MainActivity.kt",
@@ -1435,25 +1513,25 @@
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputTest.xml",
           "state": "changed",
           "expected": "d7e52fc919e49af1f2e39c7f591c6003ed209cedd29a5d69942131cc66c4927f",
-          "actual": "b304c849f7b14e814ee30e893528f7259a8c874f32833b78f230340fa5f2808f"
+          "actual": "1bb127513d17ee551d4cdd04b83c281579acb52a4e1ea1f657ece94d9cea00d2"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputCapacityTest.xml",
           "state": "changed",
           "expected": "7ef25fb0e8f36f44eb4a36d45be3fa5296a4cc8cb4e82a78a5be90eac80c305a",
-          "actual": "11cf8b7095fa75aaaa246ab799922ba09fd6f220835fea77c77e7125494110b9"
+          "actual": "13787fd3591bb585e1f53f005f744f07488b927b473e8bf76c65cdbb656ff3b3"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputBudgetTest.xml",
           "state": "changed",
           "expected": "b51fe832db5838e46ed91f057a67f1db8ac3be26bf595e662d58436e48a842b2",
-          "actual": "0e8e3183ac095876fc80bb63699fb0b111bc79d00f49f3cee86a75b41b3c3824"
+          "actual": "38a4ae441e6469df20c0de265ed5a8f8acd36413ed43e0a79f5aceadc5799358"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewCommitCapacityTest.xml",
           "state": "changed",
           "expected": "98882fecda2adda2ca3957d3a2b89f58f410ea4cb2904b7057fb56ce714a5f23",
-          "actual": "d0ffea13c67ad6d6c9522710760bc4378b53a2d49b08eb4a363fb4e6342a5d0a"
+          "actual": "79cad4244dff5e4a26d9ab336e6af44d5c13b69c6a29eb2d1d63d320a52fdda7"
         }
       ],
       "scope": "Actual JVM/Kotlin Native raw-batch tests plus source-bound Android original View synthetic MotionEvents and iOS original UIKit callbacks/NSData bridge app-host tests. No ordinary package UI, real OS stylus delivery or physical latency claim. Source byte/count bounds are not measured process heap or a production arena."
@@ -1462,7 +1540,7 @@
       "report_sha256": "c674133f774aceef296f1c68d54814db6dde80989e2ab9f4a6c49b9f2835e33f",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 31,
+      "matched_bindings": 29,
       "mismatches": [
         {
           "path": "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt",
@@ -1531,16 +1609,28 @@
           "actual": "aa205b66e186bac192b19a53f6104065d212de9c24fb8c3edb033ea81b3cb930"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
           "state": "changed",
           "expected": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
@@ -1789,7 +1879,7 @@
       "report_sha256": "78edb6527752c9b3bf2eeabbdf34d6b492bf539efc9e17c4ea70352744a11cb5",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 39,
+      "matched_bindings": 37,
       "mismatches": [
         {
           "path": "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt",
@@ -1846,16 +1936,28 @@
           "actual": "2dd49c6902aff3050c38c84ab87d82ec7d9236d9748be1ecde6686d525e53015"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
           "state": "changed",
           "expected": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
         },
         {
           "path": "ios-app/NoteCorePreview/NativeInkCanvas.swift",
@@ -2222,7 +2324,7 @@
       "report_sha256": "c521a4d96a26c41231d02ddd2aeeff76f803664a9f5a529ac5861f17481895fb",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 47,
+      "matched_bindings": 45,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
@@ -2856,10 +2958,22 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "reports/preview-build.json",
@@ -2928,7 +3042,7 @@
       "report_sha256": "056676482a9588b14d883c838e17bd30bf7af5d4e2d4c017b8456d15dc176ce1",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 43,
+      "matched_bindings": 41,
       "mismatches": [
         {
           "path": "build/sketch-host/build-inputs.sha256",
@@ -2983,10 +3097,22 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "samples/sketch-host/README.md",
@@ -3164,13 +3290,13 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "d2f6904ec62b632944fcc08fc4243620b0d7f66e259bf905b3f164d529f28aa4",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryTest.xml",
           "state": "changed",
           "expected": "36a3af42bf106e0af33ab2b42ef100c966f5ad40c1ba18b6a3e556f5aa42575a",
-          "actual": "653ff7da23c3fbff07365e38dbe7021dae1f976191d837d95108299d49cf3c5e"
+          "actual": "fd1b66f13925fb2bb4062a79d2957848baa23af05c044c5ad546494115eb8929"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt",
@@ -3191,7 +3317,7 @@
       "report_sha256": "6c8fd7465c2d58ac395c80f00dfd1847c273c6fe407dbe903dfc64bfa9f34fc7",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 43,
+      "matched_bindings": 41,
       "mismatches": [
         {
           "path": "build/sketch-host/build-inputs.sha256",
@@ -3236,10 +3362,22 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "reports/android-input-host-tests.json",
@@ -3287,7 +3425,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "32b22cae75129f12e5273c6076405f2a2ac9af96515042a4fb34498e8aaed4d6",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "samples/sketch-host/build/outputs/apk/androidTest/debug/sketch-host-debug-androidTest.apk",
@@ -3317,7 +3455,7 @@
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewNotebookCreationTest.xml",
           "state": "changed",
           "expected": "1002ae0bcbb2679fbdabf49310ddf420110d3aae99611a9be74c77f93a81611d",
-          "actual": "f55610944599b2cba818ef6845c549ec34da106668bf3ef8a15dad71422ba73d"
+          "actual": "53d8ca6201af5867a7b86235e695a8f257935bca080ce2b98f2a5d6cc784375e"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
@@ -3467,13 +3605,13 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "6dd40ba6aa9b38a64b23a346819365df05c8fae82d0ae61c50562e64cac79678",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryReaderTest.xml",
           "state": "changed",
           "expected": "1b8f9b93a164f10ecd384b2a20fbc4c5dc361f17d3a637740b48ba3a7965100a",
-          "actual": "994841ae06956b507bb3c5954fd1d275544de6c54ae2490e035432ba4bc3ccb9"
+          "actual": "bd55f53255225c299a2ae7b1d4dbc209e2c371822555882c850fbeeda9d22ce9"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt",
@@ -3527,7 +3665,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "6020d2b67f2bce0b74276b2f0f0e5e29fb8bc8aa505432e673bbc5fa43a19b61",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         }
       ],
       "scope": "Actual original Android Store/Swift Model worker-to-owner read outcomes and UI message/status consumers, isolated cache fixtures; no ordinary GUI or physical performance/durability claim"
@@ -3542,7 +3680,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "68afac7713a572ee261db9bf74ee6ab1de66de72d04e35f701dc8c15b0eb497a",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
@@ -3593,19 +3731,19 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "571928b375a8674bed6b173600a463e4e3e2fa2cb294ea153902f9e0ba2a380d",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputBudgetTest.xml",
           "state": "changed",
           "expected": "d9060885a86a13797bf147fb3578ccba5a3bdc8390575beb7caa971fd278982f",
-          "actual": "0e8e3183ac095876fc80bb63699fb0b111bc79d00f49f3cee86a75b41b3c3824"
+          "actual": "38a4ae441e6469df20c0de265ed5a8f8acd36413ed43e0a79f5aceadc5799358"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryTest.xml",
           "state": "changed",
           "expected": "d16a2e046325fd57814115eb555a2054fad95231d0f96b013a759735de78965d",
-          "actual": "653ff7da23c3fbff07365e38dbe7021dae1f976191d837d95108299d49cf3c5e"
+          "actual": "fd1b66f13925fb2bb4062a79d2957848baa23af05c044c5ad546494115eb8929"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
@@ -3620,7 +3758,7 @@
       "report_sha256": "24c123efb7ced88285fe1483c4fbe0eb56fa25ee57a5534d33dc36cec3536848",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 58,
+      "matched_bindings": 56,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
@@ -3629,10 +3767,22 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "reports/android-input-host-tests.json",
@@ -3644,7 +3794,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "19e2a1fc886c353cf42b9b97ce39371e44239c977fc9926496bd839b68f40913",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "samples/sketch-host/build/outputs/apk/debug/sketch-host-debug.apk",
@@ -3689,13 +3839,31 @@
       "report_sha256": "b517f95c30cc15d6eb5cde9a94fdd5fe93f9e370ba2bb9c4818dcf16b0c0c918",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 59,
+      "matched_bindings": 56,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
           "state": "changed",
           "expected": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
+          "state": "changed",
+          "expected": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d",
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "reports/android-input-host-tests.json",
@@ -3707,7 +3875,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "samples/sketch-host/build/outputs/apk/debug/sketch-host-debug.apk",
@@ -3719,7 +3887,7 @@
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PageProjectionBudgetTest.xml",
           "state": "changed",
           "expected": "bcc74815a9d53dcf8dad1a54dca00f5e1a227ac612676e79388f4dca4bd36d70",
-          "actual": "e4d16995d4c14395baee2e480db7298d56ff1a883b1a317bb0a15dfe3fc7465b"
+          "actual": "8b95a785aeb14254cf8b08052ca21c474ac6e88876db137f1d64e1c1f465b0e6"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
@@ -3746,7 +3914,7 @@
       "report_sha256": "24a63665132668f5fe8194df2e3327b2f45a5b1e986346fa96e89eafa5c3fc98",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 64,
+      "matched_bindings": 61,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
@@ -3755,16 +3923,34 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
+          "state": "changed",
+          "expected": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d",
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
+        },
+        {
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.RetiredEditingStateTest.xml",
           "state": "changed",
           "expected": "33d856e274b1035e033d1465c171a536ce3878af05902f4167951504bb779ff6",
-          "actual": "dd3890790ad21524e016a17f1538bfe61b3dfb917e23c490552f8c2abe5923c6"
+          "actual": "d309ec861522d6bdf3a934f95e34a3856c984a563069581e5cd25505427bed3d"
         }
       ],
       "scope": "Explicit original notebook retirement only: current JVM and Android original owner/file-worker checks and sample instrumentation. No sudden owner loss, Apple current execution or physical heap claim."
@@ -3772,10 +3958,55 @@
     "brush-oracle-numeric": {
       "report_sha256": "7b6355894bff4564002087ebdd8cdfb477514e4c0d51e2b3590f70d7135d4924",
       "role": "current_regression",
-      "binding_state": "matched",
-      "matched_bindings": 13,
-      "mismatches": [],
+      "binding_state": "failed",
+      "matched_bindings": 7,
+      "mismatches": [
+        {
+          "path": "canvas-core/build/android-brush-tests/run.log",
+          "state": "changed",
+          "expected": "c2d9bdd74f12e706725399bde4801b67a706224df170f285956e837ec31d47fc",
+          "actual": "ba0db0fd863584bdf893fc4fbc7f69c754df1c9cbab9510a6c0c5192da50ba2d"
+        },
+        {
+          "path": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
+          "state": "changed",
+          "expected": "2d3d32e5753b37d792fd01e65406fc0c31a44120f0bfdf186cb213230202b737",
+          "actual": "3a0bd2e9ccc67f9d44a9001ea7c41b3ddd3ff0bf50ca8b31471a1555bb08d9ad"
+        },
+        {
+          "path": "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushEnvelopePocTest.xml",
+          "state": "changed",
+          "expected": "a3fb8db02e0f16946f26941e0f12e079a329d1f94c67e5115103ec28c056c101",
+          "actual": "40f02f1a2408281605084402b8a861e4f51569a1d2ab8fa9c8cb89b67d5848c9"
+        },
+        {
+          "path": "reports/android-brush-common-tests.json",
+          "state": "changed",
+          "expected": "438c7c930eb2d88b59538c3b3ef99da3522f34af8f1c479c247427a473f7f00e",
+          "actual": "e4171b4b1e59a3b31d1ea24b4619f75d4cf60f269bcb294a2fd70af44b194909"
+        },
+        {
+          "path": "reports/verification.json",
+          "state": "changed",
+          "expected": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086",
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
+        },
+        {
+          "path": "tools/verify_apple_brush_common.py",
+          "state": "changed",
+          "expected": "a44701e519cb7f7a12dabf6ea1b33a3a572ab9f430e219a24f27a36140aca054",
+          "actual": "df078522d723bf9e6aca64063a6eb87f136d673aff1e42082ba35cd76a2c08c7"
+        }
+      ],
       "scope": "Original internal version-1 coverage oracle and existing geometry/path/mask consumers on current JVM and Android ART. No new ordinary brush or app rebuild."
+    },
+    "canonical-point-query": {
+      "report_sha256": "9044e1fe7b529154e538bf40850bad9ddeea9deb22edb71d5c18e6021e46b00d",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 10,
+      "mismatches": [],
+      "scope": "Existing internal STR/overlay, original SceneReducer patches and original coverage oracle on current JVM and ART. No ordinary App, editing tool or production-index adoption."
     },
     "input-capture-contract": {
       "report_sha256": "98a205b21134805374cd49506e4c2807b5f12eba358f73510e5ec913ad1015e2",
@@ -3847,7 +4078,7 @@
       "report_sha256": "48956f54fab9680a5a4d190fa4799c1eaa4488103a9bba5bb9e54a3cafc45f3d",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 48,
+      "matched_bindings": 46,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
@@ -3856,10 +4087,22 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
@@ -3979,13 +4222,31 @@
       "report_sha256": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 85,
+      "matched_bindings": 82,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
           "state": "changed",
           "expected": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
+          "state": "changed",
+          "expected": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d",
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         }
       ],
       "scope": "Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, six original NoteStore/worker file/export retention checks and six explicit Store retirement checks in unique cache directories. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence."
@@ -3994,7 +4255,7 @@
       "report_sha256": "30a1fc5963ac51bc77785d3bb9522643124224c1232feb0326315fc0651a6c4a",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 56,
+      "matched_bindings": 54,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -4084,13 +4345,13 @@
           "path": "canvas-core/build/android-brush-tests/run.log",
           "state": "changed",
           "expected": "cf9d836bb51977146051843a1d26130fda90c9e0cd4c732d3f42ad81ab03ce03",
-          "actual": "c2d9bdd74f12e706725399bde4801b67a706224df170f285956e837ec31d47fc"
+          "actual": "ba0db0fd863584bdf893fc4fbc7f69c754df1c9cbab9510a6c0c5192da50ba2d"
         },
         {
           "path": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
           "state": "changed",
           "expected": "0e1a32be08c548bd48468319f18c8e00781ce78add5f055c98951d9ee7c98420",
-          "actual": "2d3d32e5753b37d792fd01e65406fc0c31a44120f0bfdf186cb213230202b737"
+          "actual": "3a0bd2e9ccc67f9d44a9001ea7c41b3ddd3ff0bf50ca8b31471a1555bb08d9ad"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
@@ -4099,10 +4360,22 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "reports/android-brush-build-inputs.sha256",
@@ -4114,7 +4387,7 @@
           "path": "reports/android-brush-common-tests.json",
           "state": "changed",
           "expected": "ea45ed4030465222ccba47a6b87c72abeaa6f5cfaa90f6f040270f06e38a38a0",
-          "actual": "438c7c930eb2d88b59538c3b3ef99da3522f34af8f1c479c247427a473f7f00e"
+          "actual": "e4171b4b1e59a3b31d1ea24b4619f75d4cf60f269bcb294a2fd70af44b194909"
         },
         {
           "path": "reports/preview-build.json",
@@ -4223,7 +4496,7 @@
       "report_sha256": "60eef9fc49db85342d045d4eeaca05f67c4a499e38e4afa74c7a6b617d11514c",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 44,
+      "matched_bindings": 42,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -4329,6 +4602,12 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt",
           "state": "changed",
           "expected": "0d65a99bb6dfc4fc1cc3fc5f8679724b3ac963f4980ffb94c091e7f4da126397",
@@ -4338,7 +4617,13 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
@@ -4428,19 +4713,25 @@
       "report_sha256": "a74abb03cd7d58f90322e68c3e2d78dbc0ce2241ca653672634b5da92bc792c3",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 115,
+      "matched_bindings": 112,
       "mismatches": [
         {
           "path": "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.xml",
           "state": "changed",
           "expected": "d68d2fd1c8063f09fb698dbc59ace1edfb14b8cd62551a144ef656172fdfa822",
-          "actual": "8bbc1037f8e66ad61ef5f35f1dd48d652593776c55eb4aa0e28a89fb7844aabe"
+          "actual": "e0bb2851f1dcfc23a8213716d04dd5bd987d6ff894e4b8430ba414cda60591ce"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt",
           "state": "changed",
           "expected": "1c00b846ffd7b1e3fa42339cbe866413cf6a4c83ce47057e44c31d9c9ebb1d81",
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt",
@@ -4452,7 +4743,13 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
@@ -4518,7 +4815,7 @@
           "path": "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt",
           "state": "changed",
           "expected": "126e03ccd72c7f770969f099e0b4bdcf8e4e75738fd56f3e086ea88f51479f45",
-          "actual": "5f904c0820b06b2db3df1f6fa7a7300585bd01967e36a4e122777819a892ee7a"
+          "actual": "a6fe9d98792639a17306af9a740e20f069501c4438f3f6be1a160d0bd28aa394"
         },
         {
           "path": "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidInkFrameExperiment.kt",
@@ -4531,6 +4828,12 @@
           "state": "changed",
           "expected": "a0af32c6a8a36656650053134560bd77f5df827e4b86898ca3f31e592b6eb739",
           "actual": "02da555d7fd409c97d5174976206a70c552cbd319c666e2a205b4f38da66b799"
+        },
+        {
+          "path": "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPocTest.kt",
+          "state": "changed",
+          "expected": "9b3de853ab3db7595fc507c9fc34383c7e92e985bfa74517dd829bb96fefd137",
+          "actual": "060918c1a6e3cb0ed3d9fcf9bf3ae08b6b7d477b86c2514074dd351c91bbf9ef"
         },
         {
           "path": "canvas-core/src/jvmMain/kotlin/dev/notecore/canvas/prototype/PrototypeDemo.kt",
@@ -4638,7 +4941,7 @@
           "path": "tools/audit_c1_evidence.py",
           "state": "changed",
           "expected": "eb2c3590d12fdffc308a5c817e3312fd7e11aca14d99be9c25061908a978ab2c",
-          "actual": "8be421d005cd6888b131e51e8c1999899f048e1b72f5ec6815c85af9a0d36ad3"
+          "actual": "78374c4eb56803b71b0944f41ff4c7d4e101e9649a7bb1c460b12d4df3568392"
         },
         {
           "path": "tools/audit_public_boundary.py",
@@ -4656,7 +4959,7 @@
           "path": "tools/verify_android_brush_common.py",
           "state": "changed",
           "expected": "dec3778cb12e46b572f24e9e7e84ffc7d7379b26db078296c91fd7fe2aebf542",
-          "actual": "acb255c5b5d16cd004966661df14edf8334a3b6bc7870715a8cd6620327ba04b"
+          "actual": "1c983019315299be3c591339537d0c2799e19e75ba6898dd792ef8bef8a88e1d"
         },
         {
           "path": "tools/verify_android_input_host.py",
@@ -4674,7 +4977,7 @@
           "path": "tools/verify_apple_brush_common.py",
           "state": "changed",
           "expected": "b03e0c32bcf0a5722295b6fa95239642a9a107ae04cca63f18255a42f2bc0d73",
-          "actual": "a44701e519cb7f7a12dabf6ea1b33a3a572ab9f430e219a24f27a36140aca054"
+          "actual": "df078522d723bf9e6aca64063a6eb87f136d673aff1e42082ba35cd76a2c08c7"
         },
         {
           "path": "tools/verify_ios_host.py",
@@ -4716,25 +5019,25 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "5a47d02539250c709738965798f9bb20f3e7520939a349f77b1b657b8533142d",
-          "actual": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086"
+          "actual": "b5309525e33ead49c9be14bbc0ccf0d58d5745d2266426bcfbf586bba43bf87d"
         },
         {
           "path": "reports/android-brush-common-tests.json",
           "state": "changed",
           "expected": "3c3f551a2e62b0c4ee55db0de0cdcb064215dff07a4b8e00f3b1186abc7eb620",
-          "actual": "438c7c930eb2d88b59538c3b3ef99da3522f34af8f1c479c247427a473f7f00e"
+          "actual": "e4171b4b1e59a3b31d1ea24b4619f75d4cf60f269bcb294a2fd70af44b194909"
         },
         {
           "path": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
           "state": "changed",
           "expected": "6219fed346eedf271e310756b632fc80e393e89f602d60cc1c30ccc88a670935",
-          "actual": "2d3d32e5753b37d792fd01e65406fc0c31a44120f0bfdf186cb213230202b737"
+          "actual": "3a0bd2e9ccc67f9d44a9001ea7c41b3ddd3ff0bf50ca8b31471a1555bb08d9ad"
         },
         {
           "path": "canvas-core/build/android-brush-tests/run.log",
           "state": "changed",
           "expected": "083dc9e3cb07cb3866c53b055589e60d546c740e2aed749543cba766e1705ec4",
-          "actual": "c2d9bdd74f12e706725399bde4801b67a706224df170f285956e837ec31d47fc"
+          "actual": "ba0db0fd863584bdf893fc4fbc7f69c754df1c9cbab9510a6c0c5192da50ba2d"
         },
         {
           "path": "reports/apple-brush-common-tests.json",
@@ -4759,7 +5062,7 @@
       "report_sha256": "6342d7b59815a72748e7c5a28233e01e1c3d7b746b420c060b2e3f40b479fec0",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 47,
+      "matched_bindings": 45,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
@@ -4960,6 +5263,12 @@
           "actual": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889"
         },
         {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "2092f4add6eee26e90aa431b798c72bb0d39942c92debb6841e96ca1a81423d9",
+          "actual": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3"
+        },
+        {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt",
           "state": "changed",
           "expected": "0d65a99bb6dfc4fc1cc3fc5f8679724b3ac963f4980ffb94c091e7f4da126397",
@@ -4969,7 +5278,13 @@
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
-          "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+          "actual": "49edb8f420d9c82eec79cd86bd10eeebcf12ca0fd6c0cd019a0eb880373e1a9f"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed",
+          "expected": "59f2b850fcf982f8df5bbad586489809ac5b2c6b6605d80c78135979cb559b56",
+          "actual": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b"
         },
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
@@ -5122,6 +5437,7 @@
     "producer-input-budget: current evidence binding failed",
     "live-projection-budget: current evidence binding failed",
     "retired-editing-state: current evidence binding failed",
+    "brush-oracle-numeric: current evidence binding failed",
     "apple-current-revalidation: current evidence binding failed",
     "shared-native-contracts: current evidence binding failed",
     "android-input-host-tests: current evidence binding failed",
@@ -5134,5 +5450,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "8be421d005cd6888b131e51e8c1999899f048e1b72f5ec6815c85af9a0d36ad3"
+  "audit_tool_sha256": "78374c4eb56803b71b0944f41ff4c7d4e101e9649a7bb1c460b12d4df3568392"
 }

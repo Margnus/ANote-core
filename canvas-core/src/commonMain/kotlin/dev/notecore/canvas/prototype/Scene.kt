@@ -66,6 +66,7 @@ class ScenePatch internal constructor(
     changes: List<ObjectChange>, val dirtyBounds: BoundsD,
 ) {
     private val items = changes.toList()
+    internal val changeCount: Int get() = items.size
     fun changes(): List<ObjectChange> = items.toList()
     fun sameContent(other: ScenePatch): Boolean = sceneId == other.sceneId &&
         baseRevision == other.baseRevision && dirtyBounds == other.dirtyBounds && items == other.items

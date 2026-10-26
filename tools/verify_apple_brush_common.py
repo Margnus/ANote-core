@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_NATIVE_TEST_COUNT = 119
+EXPECTED_NATIVE_TEST_COUNT = 123
 
 
 def digest(path):
@@ -60,7 +60,7 @@ def main():
         if line.startswith('NOTECORE_NATIVE_RENDER ')]
     assert len(render_observations) == 1
     report = {'native_render_observations': render_observations, 'native_image_observations': observations, 'status': 'passed', 'platform': 'Kotlin/Native ARM64 tests executed via iOS Simulator spawn',
-        'device': {'name': device['name'], 'udid': args.device}, 'test_count': len(passed), 'common_test_count': 113, 'native_render_thread_test_count': 3, 'core_graphics_test_count': 3, 'checks': sorted(passed),
+        'device': {'name': device['name'], 'udid': args.device}, 'test_count': len(passed), 'common_test_count': 117, 'native_render_thread_test_count': 3, 'core_graphics_test_count': 3, 'checks': sorted(passed),
         'source_and_build_sha256': before, 'test_binary_sha256': binary_sha,
         'test_output_sha256': digest(build/'run.log'), 'desktop_unlock_required': False,
         'native_image_lease_handoff_verified': True, 'native_render_thread_handoff_verified': True, 'app_swift_executor_render_integration_verified': False, 'shared_geometry_generation_on_kotlin_native_verified': True, 'native_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,

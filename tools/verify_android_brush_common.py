@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_ART_TEST_COUNT = 135
+EXPECTED_ART_TEST_COUNT = 139
 INPUT_ARENA_TEST_COUNT = 22
 
 
@@ -55,7 +55,7 @@ def main():
     assert trace['trace_id'] == 'dev034-fixed-viewport-v1' and trace['closed_drained']
     report = {'render_viewport_trace': trace, 'native_image_observations': observations, 'status': 'passed', 'platform': 'Android emulator ART standalone canvas-core test APK',
         'serial': args.serial, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
-        'test_count': EXPECTED_ART_TEST_COUNT, 'viewport_trace_test_count': 1, 'android_image_holder_test_count': 9, 'hardware_recording_rejection_test_count': 1, 'common_test_count': 91 + INPUT_ARENA_TEST_COUNT, 'real_render_executor_test_count': 7, 'android_bitmap_test_count': 5, 'test_groups': ['SpatialIndexPocTest', 'IncrementalSpatialIndexPocTest', 'BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileBitmapTest', 'BrushRenderOwnerPocTest', 'BrushRenderExecutorPocTest', 'AndroidBrushImagePocTest', 'RenderViewportTraceTest', 'InputReplayContractTest', 'InputArenaContractTest', 'InputScalarReplayTest'],
+        'test_count': EXPECTED_ART_TEST_COUNT, 'viewport_trace_test_count': 1, 'android_image_holder_test_count': 9, 'hardware_recording_rejection_test_count': 1, 'common_test_count': 95 + INPUT_ARENA_TEST_COUNT, 'real_render_executor_test_count': 7, 'android_bitmap_test_count': 5, 'test_groups': ['SpatialIndexPocTest', 'IncrementalSpatialIndexPocTest', 'BrushEnvelopePocTest', 'BrushPathPocTest', 'BrushReductionPocTest', 'ChunkedBrushPocTest', 'BrushTileCachePocTest', 'ResourceLeaseContractTest', 'WeightedLruContractTest', 'BrushTilePixelsPocTest', 'BrushTileBitmapTest', 'BrushRenderOwnerPocTest', 'BrushRenderExecutorPocTest', 'AndroidBrushImagePocTest', 'RenderViewportTraceTest', 'InputReplayContractTest', 'InputArenaContractTest', 'InputScalarReplayTest'],
         'source_and_build_sha256': before, 'test_apk': apk.relative_to(ROOT).as_posix(), 'test_apk_sha256': apk_sha,
         'test_output_sha256': digest(build/'run.log'), 'desktop_unlock_required': False,
         'native_image_lease_handoff_verified': True, 'android_image_holder_verified': True, 'real_bounded_executor_render_handoff_verified': True, 'shared_geometry_and_chunk_mask_on_art_verified': True, 'native_canvas_mask_image_consumption_verified': True, 'native_brush_path_rasterizer_verified': False,

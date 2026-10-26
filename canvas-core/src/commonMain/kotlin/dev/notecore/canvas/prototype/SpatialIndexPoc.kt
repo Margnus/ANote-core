@@ -8,7 +8,8 @@ import kotlin.math.sqrt
  * Callers must supply conservative painted bounds, including brush coverage and transforms.
  * These indexes neither own scene objects nor perform exact geometry hit testing.
  */
-internal data class SpatialEntry(val id: Int, val bounds: BoundsD)
+internal data class SpatialObjectBindingPoc(val objectId: ObjectId, val revision: Long, val layerId: LayerId)
+internal data class SpatialEntry(val id: Int, val bounds: BoundsD, val binding: SpatialObjectBindingPoc? = null)
 internal data class SpatialQuery(val ids: Set<Int>, val entryTests: Int, val nodeTests: Int)
 internal fun BoundsD.overlaps(other: BoundsD) =
     left <= other.right && right >= other.left && top <= other.bottom && bottom >= other.top

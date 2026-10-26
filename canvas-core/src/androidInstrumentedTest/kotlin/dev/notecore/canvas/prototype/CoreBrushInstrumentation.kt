@@ -19,7 +19,7 @@ class CoreBrushInstrumentation : Instrumentation() {
                 WeightedLruContractTest::class.java, BrushTilePixelsPocTest::class.java, BrushTileBitmapTest::class.java,
                 BrushRenderOwnerPocTest::class.java, BrushRenderExecutorPocTest::class.java, AndroidBrushImagePocTest::class.java, RenderViewportTraceTest::class.java,
                 InputReplayContractTest::class.java, InputArenaContractTest::class.java, InputScalarReplayTest::class.java)
-            check(result.wasSuccessful() && result.runCount == 135 && result.ignoreCount == 0) {
+            check(result.wasSuccessful() && result.runCount == 139 && result.ignoreCount == 0) {
                 "run=${result.runCount} ignored=${result.ignoreCount} failures=${result.failures.joinToString { it.trace }}"
             }
             output.putString("render_viewport_trace", checkNotNull(RenderViewportTraceTest.observation))
