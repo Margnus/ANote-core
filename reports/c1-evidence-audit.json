@@ -156,10 +156,10 @@
       "scope": "JVM synthetic viewport trace; logical packed CPU-mask accounting only"
     },
     "verification": {
-      "report_sha256": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d",
+      "report_sha256": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f",
       "role": "current_regression",
       "binding_state": "matched",
-      "matched_bindings": 228,
+      "matched_bindings": 230,
       "mismatches": [],
       "scope": "C0/C1 reference prototype"
     },
@@ -231,7 +231,7 @@
       "report_sha256": "7d75457262b6f6ff8fb98eed2ce897b8ad05812d098824c99fe0c1c22f7dca61",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 43,
+      "matched_bindings": 42,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
@@ -275,6 +275,12 @@
           "expected": "acb90f7aff1113aa5786bff9545554c1f0ecc54df0111245053451aea503e463"
         },
         {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
+        },
+        {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
           "state": "changed",
           "expected": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
@@ -284,7 +290,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -296,7 +302,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "5ab9075832a0d1bcb0fca8c074b2f14bacdb3fdd2cecc63b5c917cb698e22833",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -381,13 +387,13 @@
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
           "state": "changed",
           "expected": "892041c20048ace708a97fed85c7a281cf1b6506e89044a6d919e852aad90723",
-          "actual": "f560d99d417c914328c716550a4049367194d33ec957b75aae36533f70d1c61e"
+          "actual": "ef633bbe507d5d5883d39af285b7b9c3e04a1cd8871998696b1f6f7f94106cf1"
         },
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "d6e170f013e27e812a7dc794ad18e6e310cb148c85c1232c55a8058c0a95e365",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
@@ -483,7 +489,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
           "state": "changed",
           "expected": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
-          "actual": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0"
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt",
@@ -501,7 +507,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -513,7 +519,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "814f336565f5973316a638eac32beb44e3d685f0ea9dab9ffb20441e68d1135a",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -573,13 +579,13 @@
           "path": "dist/NoteCore-0.1.0-preview.apk",
           "state": "changed",
           "expected": "d6e170f013e27e812a7dc794ad18e6e310cb148c85c1232c55a8058c0a95e365",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.CanonicalTitleTest.xml",
           "state": "changed",
           "expected": "bfe5ba58ce38eb35754b4a5315d954357ec843080615d725ed4327ee5a0bf2a3",
-          "actual": "f95819ef5ba7abd0690f66c49f6c5bd0eaeb3dd3b871c975ef2c748461594de4"
+          "actual": "2927bffb0296e52102bd504260a85db6557c8f6fc9837db84a915a984d0fcbc2"
         },
         {
           "path": "build/canonical-title/android.log",
@@ -610,13 +616,13 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "f09fac143adf1966866bca490399c9bdd55b13bf055f985398917727731b75b7",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "reports/android-brush-build-inputs.sha256",
           "state": "changed",
           "expected": "3b75f207f4617ead4371e290aa1e1057dc51313176868351e2f28634195c544a",
-          "actual": "1b8b1f6d047e3aae1cfbee0d3d34c22ce555138ac06cecd5f682c034b1879998"
+          "actual": "0ba7a546f586d10f5d4f9375f0c62e3667aeea97292227f3a625fbe6e553037a"
         }
       ],
       "scope": "Direct document authority commands on JVM/ART/Kotlin Native, plus Android isolated real file-port UTF-8 write/reopen and old-file preservation. Native test uses malformed UTF-16 literals before Objective-C bridging. No new schema, persistence backend, production storage or full App UI acceptance."
@@ -625,13 +631,19 @@
       "report_sha256": "ffeefa44e702bb9d2b866df492075f6baef202a5209346e612f03c11251f70b1",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 57,
+      "matched_bindings": 56,
       "mismatches": [
         {
           "path": "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt",
           "state": "changed",
           "expected": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
           "actual": "7e8f11b251184200402958e10149d502d21994202c6fb675c7ea5252d50be5d6"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -649,7 +661,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "5ab9075832a0d1bcb0fca8c074b2f14bacdb3fdd2cecc63b5c917cb698e22833",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt",
@@ -661,7 +673,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -739,7 +751,7 @@
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "c48aa51f06c9b6bda6316403d436f92518d5a702f083a54e1fdd4e43f0b91e59",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/build/reports/lint-results-debug.xml",
@@ -751,7 +763,7 @@
           "path": "dist/NoteCore-0.1.0-preview.apk",
           "state": "changed",
           "expected": "c48aa51f06c9b6bda6316403d436f92518d5a702f083a54e1fdd4e43f0b91e59",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h",
@@ -762,7 +774,7 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "b423400a0b382f4ac2ad5b985eb91e4b86378cde377257ec5929246a5cc6a3e8",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         }
       ],
       "scope": "Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count."
@@ -777,13 +789,13 @@
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
           "state": "changed",
           "expected": "892041c20048ace708a97fed85c7a281cf1b6506e89044a6d919e852aad90723",
-          "actual": "f560d99d417c914328c716550a4049367194d33ec957b75aae36533f70d1c61e"
+          "actual": "ef633bbe507d5d5883d39af285b7b9c3e04a1cd8871998696b1f6f7f94106cf1"
         },
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "d6e170f013e27e812a7dc794ad18e6e310cb148c85c1232c55a8058c0a95e365",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
@@ -879,7 +891,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
           "state": "changed",
           "expected": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
-          "actual": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0"
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt",
@@ -897,7 +909,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -909,7 +921,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "814f336565f5973316a638eac32beb44e3d685f0ea9dab9ffb20441e68d1135a",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -975,13 +987,13 @@
           "path": "dist/NoteCore-0.1.0-preview.apk",
           "state": "changed",
           "expected": "d6e170f013e27e812a7dc794ad18e6e310cb148c85c1232c55a8058c0a95e365",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewEditTest.xml",
           "state": "changed",
           "expected": "e27fa1242b9630c4948d6ce09d257c4cea08755c673966e3d233946031691a7b",
-          "actual": "d9c5564c13e0b1f52c31705def2512d04cc9b797a5cf872bbc5b238c8b5096d6"
+          "actual": "d74d4490ce8d39fc11620a234bc57c28052b9961d49cae3588e48609bf41c109"
         },
         {
           "path": "build/preview-edit/android.log",
@@ -1012,13 +1024,13 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "f09fac143adf1966866bca490399c9bdd55b13bf055f985398917727731b75b7",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "reports/android-brush-build-inputs.sha256",
           "state": "changed",
           "expected": "3b75f207f4617ead4371e290aa1e1057dc51313176868351e2f28634195c544a",
-          "actual": "1b8b1f6d047e3aae1cfbee0d3d34c22ce555138ac06cecd5f682c034b1879998"
+          "actual": "0ba7a546f586d10f5d4f9375f0c62e3667aeea97292227f3a625fbe6e553037a"
         }
       ],
       "scope": "Original preview edit requests on JVM/ART/Kotlin Native. Android checks use synthetic in-memory roots and preserve old files; real model/file-port integration is separately verified by iOS app-host. No new authority, format, production store or ordinary UI acceptance."
@@ -1027,8 +1039,14 @@
       "report_sha256": "966c8d3bef060c797a487f520a167331a2fb971363b7a7612cff5402e4201bb0",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 70,
+      "matched_bindings": 68,
       "mismatches": [
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
+        },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
           "state": "changed",
@@ -1045,7 +1063,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "11f09611f2724f5511337de35b90f173a2559aced7061477db9e7071b955eb84",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt",
@@ -1057,7 +1075,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -1117,7 +1135,7 @@
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "b079a84b29ed4ce994d5a519c828fcf88e666f7872c0a0ff7c8234f4c58749f9",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/build/reports/lint-results-debug.xml",
@@ -1129,13 +1147,19 @@
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
           "state": "changed",
           "expected": "13d414d75f49409f9ebd358e8d911465c3883423d9edd5f741a6d1b661efb84f",
-          "actual": "f560d99d417c914328c716550a4049367194d33ec957b75aae36533f70d1c61e"
+          "actual": "ef633bbe507d5d5883d39af285b7b9c3e04a1cd8871998696b1f6f7f94106cf1"
         },
         {
           "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
           "state": "changed",
           "expected": "1eef149d107194b5a522a2d6a353d1535826a239b87f42442c53c3caa7ac0bc7",
           "actual": "3d8b60e3fd9dab08a37754dc578f1134a7b613b583b14b6f18fba1a4c610f411"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/OwnerRetirementHostChecks.kt",
+          "state": "changed",
+          "expected": "c844c7caa004e1adde480e5ad6ff28eb4ccb9b555702a95a4124af70dcd56712",
+          "actual": "186cc86092cf8047c2531c76031e721044aaf06995e14cdedf562307dbf406aa"
         },
         {
           "path": "android-app/src/androidTest/java/dev/notecore/app/StorageRetentionHostChecks.kt",
@@ -1147,7 +1171,7 @@
           "path": "dist/NoteCore-0.1.0-preview.apk",
           "state": "changed",
           "expected": "b079a84b29ed4ce994d5a519c828fcf88e666f7872c0a0ff7c8234f4c58749f9",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "build/android-input-host/run.log",
@@ -1183,13 +1207,13 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "73c84e4c8df044f9e011f62f915ce7b5c9ae205adc61b974ace05e0e5357a57f",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "reports/android-brush-build-inputs.sha256",
           "state": "changed",
           "expected": "39625caaac0582e715d2c598b2526e756f130c0b60030ac4071e8ee2d2cf24b2",
-          "actual": "1b8b1f6d047e3aae1cfbee0d3d34c22ce555138ac06cecd5f682c034b1879998"
+          "actual": "0ba7a546f586d10f5d4f9375f0c62e3667aeea97292227f3a625fbe6e553037a"
         },
         {
           "path": "/Users/lixiaofan/Library/Android/sdk/sources/android-36/android/view/MotionEvent.java",
@@ -1205,7 +1229,7 @@
           "path": "reports/android-input-host-tests.json",
           "state": "changed",
           "expected": "94a99b6aefc49c7561cf73a5c5b4b6a1f408313a577799159991a383b9279779",
-          "actual": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4"
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
         },
         {
           "path": "fixtures/transfer/android-paged-v2.json",
@@ -1364,25 +1388,25 @@
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputTest.xml",
           "state": "changed",
           "expected": "d7e52fc919e49af1f2e39c7f591c6003ed209cedd29a5d69942131cc66c4927f",
-          "actual": "bdb5b2ea6aaef89845f91652ce217c043f442b0aefed76d9d52bc15afaff0f04"
+          "actual": "dfec76e11d4fa277ef7e0f30877386f76fe30627fdbfa35252ebac78fbb46d45"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputCapacityTest.xml",
           "state": "changed",
           "expected": "7ef25fb0e8f36f44eb4a36d45be3fa5296a4cc8cb4e82a78a5be90eac80c305a",
-          "actual": "48443e5da823f0a9309f769a0197009c7cc687eada6794294069689aa77db12a"
+          "actual": "8f75ac52f7c4a65dac23764442ea28f8fe4ec16941c913134b986a1d88a54eb8"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputBudgetTest.xml",
           "state": "changed",
           "expected": "b51fe832db5838e46ed91f057a67f1db8ac3be26bf595e662d58436e48a842b2",
-          "actual": "e95372198a0b367da82a7a1f80539d4fea0f0d481f5318153b9c0365ca881c52"
+          "actual": "59954ca3e1705c9b7131557c798f3856e48e81a26985a32acc52560fe608d2dd"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewCommitCapacityTest.xml",
           "state": "changed",
           "expected": "98882fecda2adda2ca3957d3a2b89f58f410ea4cb2904b7057fb56ce714a5f23",
-          "actual": "a687744b897fa053014e9b5129ac4dd9e4306c72c5985da4e79c19922825930c"
+          "actual": "264106aa34126403d4bb0f38f0a5d9dcb2270b2576cf7703e5079565ac61ad6b"
         }
       ],
       "scope": "Actual JVM/Kotlin Native raw-batch tests plus source-bound Android original View synthetic MotionEvents and iOS original UIKit callbacks/NSData bridge app-host tests. No ordinary package UI, real OS stylus delivery or physical latency claim. Source byte/count bounds are not measured process heap or a production arena."
@@ -1403,7 +1427,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
           "state": "changed",
           "expected": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
-          "actual": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0"
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -1421,7 +1445,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "814f336565f5973316a638eac32beb44e3d685f0ea9dab9ffb20441e68d1135a",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt",
@@ -1439,7 +1463,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -1712,13 +1736,19 @@
       "report_sha256": "78edb6527752c9b3bf2eeabbdf34d6b492bf539efc9e17c4ea70352744a11cb5",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 41,
+      "matched_bindings": 40,
       "mismatches": [
         {
           "path": "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt",
           "state": "changed",
           "expected": "9bec5b2d9a7a4a23685b6a6fe4c47ec42c93d14d511a4c6bc95ea4e43ebc25b8",
           "actual": "7e8f11b251184200402958e10149d502d21994202c6fb675c7ea5252d50be5d6"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -1736,7 +1766,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "9798e42c7d07240f2fc5574611ac0c4ff98670eb956093b2fcd704e582a2e285",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt",
@@ -1748,7 +1778,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -2133,13 +2163,13 @@
       "report_sha256": "c521a4d96a26c41231d02ddd2aeeff76f803664a9f5a529ac5861f17481895fb",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 49,
+      "matched_bindings": 48,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "ce08c7d5b4e45a69266daad314db4a18c938c4c46ffa889e49f4aed246dec4a1",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/build/reports/lint-results-debug.xml",
@@ -2770,13 +2800,19 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "b2e0bddc2102a8612f9068a3e83f3a7aef9a71b149b255609a48dac77991a5ff",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "settings.gradle.kts",
           "state": "changed",
           "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
           "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -2788,7 +2824,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -2800,7 +2836,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "9798e42c7d07240f2fc5574611ac0c4ff98670eb956093b2fcd704e582a2e285",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -2827,13 +2863,13 @@
       "report_sha256": "056676482a9588b14d883c838e17bd30bf7af5d4e2d4c017b8456d15dc176ce1",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 45,
+      "matched_bindings": 44,
       "mismatches": [
         {
           "path": "build/sketch-host/build-inputs.sha256",
           "state": "changed",
           "expected": "11572d3fde4932ffb1ffefb7292cf2738a9c6d701e04bff24b93cbbb738eb9a4",
-          "actual": "027f20dabf63183f150be7012c3536a0994e656d31eece869b5e589959cb9bd8"
+          "actual": "81cae6a322fdda3b1e9cde8015bf4f16797feced4fcba03023d41f62cc397bb3"
         },
         {
           "path": "build/sketch-host/cua-observations.json",
@@ -2897,7 +2933,7 @@
           "path": "samples/sketch-host/build/outputs/apk/debug/sketch-host-debug.apk",
           "state": "changed",
           "expected": "229612040ac8cac1cd1be80fabc27c75f0f29abb0982eec9e1544fdaa6a7ad01",
-          "actual": "680339793ddd6c8f8b5611ea1c8aa89cfd957c734400e54e2cd4dbc1cb657455"
+          "actual": "a5e70e43362c7511247117390cebc69efaa0828b87bc54e8badc0fd1c0fdb04b"
         },
         {
           "path": "samples/sketch-host/build/reports/lint-results-debug.xml",
@@ -2918,6 +2954,12 @@
           "actual": "877eb76276c24cbe04a44c96dc8e692531a7555b242707764c841c46f9d775d2"
         },
         {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
+        },
+        {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
           "state": "changed",
           "expected": "c747e8a31dcda1ae45b07b6ac66625fc42737d93c88124f6761d4e510a6aa261",
@@ -2927,7 +2969,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -2939,7 +2981,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "9798e42c7d07240f2fc5574611ac0c4ff98670eb956093b2fcd704e582a2e285",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -2978,7 +3020,7 @@
           "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
           "state": "changed",
           "expected": "773c10469a3e74614be06a2d5985a2a817f564ac4cd1d5bd8f64d6a3c2448151",
-          "actual": "416dd6c56abb50902904ea93fb51de62883d113f02342e13150f158ab4943586"
+          "actual": "c00d6531b4dbcee6360a2726d79962e677ce413a202e452061cd7a3944d3f808"
         },
         {
           "path": "build/recovery-framing/android-package.json",
@@ -3015,7 +3057,7 @@
           "path": "reports/android-input-host-tests.json",
           "state": "changed",
           "expected": "0232235da10c4095ac229eeec094fee728a199ecd6383ffbfad8ba883bc98bd7",
-          "actual": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4"
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
         },
         {
           "path": "reports/ios-host-tests.json",
@@ -3039,7 +3081,7 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "03293470a3e6319d36a1465d1bb60ca861e8895e1b65fd748d4c22e7ef828296",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "reports/shared-native-contracts.json",
@@ -3051,13 +3093,13 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "d2f6904ec62b632944fcc08fc4243620b0d7f66e259bf905b3f164d529f28aa4",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryTest.xml",
           "state": "changed",
           "expected": "36a3af42bf106e0af33ab2b42ef100c966f5ad40c1ba18b6a3e556f5aa42575a",
-          "actual": "6c1f77c7a3ee862d174ee43e31cac8ea7bb660d5ff01c2e0891c3ab9d45637be"
+          "actual": "109da0c02d93ccfa86bba46537b2f3360e84b4011daae1389d33df9e25a1c7de"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt",
@@ -3078,13 +3120,13 @@
       "report_sha256": "6c8fd7465c2d58ac395c80f00dfd1847c273c6fe407dbe903dfc64bfa9f34fc7",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 45,
+      "matched_bindings": 44,
       "mismatches": [
         {
           "path": "build/sketch-host/build-inputs.sha256",
           "state": "changed",
           "expected": "883412ff8951f1271d782fb72bcdc1b5e9302d8b8dffe429042a990f676b5cc8",
-          "actual": "027f20dabf63183f150be7012c3536a0994e656d31eece869b5e589959cb9bd8"
+          "actual": "81cae6a322fdda3b1e9cde8015bf4f16797feced4fcba03023d41f62cc397bb3"
         },
         {
           "path": "build/validated-creation/android-package.json",
@@ -3126,7 +3168,7 @@
           "path": "reports/android-input-host-tests.json",
           "state": "changed",
           "expected": "62fcaf0c45843a78ddc24e34fc84b3c3d6cec71291fc66e38df6164afb072de3",
-          "actual": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4"
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
         },
         {
           "path": "reports/ios-host-tests.json",
@@ -3150,7 +3192,7 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "55a972b572489759e66235ee7826c9cdb9f1db775c847fcb2d972c071ff25b17",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "reports/public-boundary-inventory.json",
@@ -3168,7 +3210,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "32b22cae75129f12e5273c6076405f2a2ac9af96515042a4fb34498e8aaed4d6",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         },
         {
           "path": "samples/sketch-host/build/outputs/apk/androidTest/debug/sketch-host-debug-androidTest.apk",
@@ -3180,7 +3222,7 @@
           "path": "samples/sketch-host/build/outputs/apk/debug/sketch-host-debug.apk",
           "state": "changed",
           "expected": "b51620bd7915dba8bc8ae2b517a8373cc13bfde2a4031ddbb9c02aecd54caa45",
-          "actual": "680339793ddd6c8f8b5611ea1c8aa89cfd957c734400e54e2cd4dbc1cb657455"
+          "actual": "a5e70e43362c7511247117390cebc69efaa0828b87bc54e8badc0fd1c0fdb04b"
         },
         {
           "path": "samples/sketch-host/build/reports/lint-results-debug.xml",
@@ -3198,7 +3240,13 @@
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewNotebookCreationTest.xml",
           "state": "changed",
           "expected": "1002ae0bcbb2679fbdabf49310ddf420110d3aae99611a9be74c77f93a81611d",
-          "actual": "5553284cb60b040e3690040fdcec000d3a8a0838786313c086b8f6ecc6226c0f"
+          "actual": "30fee7cd2008c3af5f6fa9167078a9f6f8a18cc15c993c1d19a0f5adb7bfb09b"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -3210,7 +3258,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -3222,7 +3270,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "5ab9075832a0d1bcb0fca8c074b2f14bacdb3fdd2cecc63b5c917cb698e22833",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -3261,7 +3309,7 @@
           "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
           "state": "changed",
           "expected": "007c130e77e07b9883c7dd5c322c69e45cf24ad2696c85d2af360343219f2f61",
-          "actual": "416dd6c56abb50902904ea93fb51de62883d113f02342e13150f158ab4943586"
+          "actual": "c00d6531b4dbcee6360a2726d79962e677ce413a202e452061cd7a3944d3f808"
         },
         {
           "path": "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt",
@@ -3300,7 +3348,7 @@
           "path": "reports/android-input-host-tests.json",
           "state": "changed",
           "expected": "483a3e83338c2208a0d447f9da909d8b1cc09b274132d3fe0aa7eba9327c5afa",
-          "actual": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4"
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
         },
         {
           "path": "reports/ios-host-tests.json",
@@ -3324,7 +3372,7 @@
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "2cd9952ca7a761360d8eefa6ab86aff4067508070c846bb8da1325b7313c9f31",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "reports/public-boundary-inventory.json",
@@ -3342,13 +3390,13 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "6dd40ba6aa9b38a64b23a346819365df05c8fae82d0ae61c50562e64cac79678",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryReaderTest.xml",
           "state": "changed",
           "expected": "1b8f9b93a164f10ecd384b2a20fbc4c5dc361f17d3a637740b48ba3a7965100a",
-          "actual": "f4258d3e49efdb5ec6845f6e237a33286a8edabba3c706dcae5daf284cb3b2b6"
+          "actual": "0cb9a279134dfa3dff4aa4b6e7dfd6db8a5a1c096639c28cd98de0be4471af6b"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt",
@@ -3369,7 +3417,7 @@
           "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
           "state": "changed",
           "expected": "16bc402e480c0edf2cdad0dd95772bc6aef8cb71347c44687bf8fe94cc607113",
-          "actual": "416dd6c56abb50902904ea93fb51de62883d113f02342e13150f158ab4943586"
+          "actual": "c00d6531b4dbcee6360a2726d79962e677ce413a202e452061cd7a3944d3f808"
         },
         {
           "path": "build/read-owner/android-package.json",
@@ -3390,19 +3438,19 @@
           "path": "reports/android-input-host-tests.json",
           "state": "changed",
           "expected": "e25b0c74c5bc81cf5096b590eb916bb5f0936f9ae94f277d2707bf4a693798c3",
-          "actual": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4"
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
         },
         {
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "b423400a0b382f4ac2ad5b985eb91e4b86378cde377257ec5929246a5cc6a3e8",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "6020d2b67f2bce0b74276b2f0f0e5e29fb8bc8aa505432e673bbc5fa43a19b61",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         }
       ],
       "scope": "Actual original Android Store/Swift Model worker-to-owner read outcomes and UI message/status consumers, isolated cache fixtures; no ordinary GUI or physical performance/durability claim"
@@ -3417,19 +3465,19 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "68afac7713a572ee261db9bf74ee6ab1de66de72d04e35f701dc8c15b0eb497a",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "e9fa06c7da77c4af259220620c08d4b4dd974fe52f5195ebc97ec9c2015e3d83",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "d364bf47df50a1da77cb8b186d22729968f18c3eb948ec12eadab41b559aab66",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedPreviewNotebookTest.kt",
@@ -3450,37 +3498,43 @@
       "report_sha256": "0414c7ab16b90ecac3bb64ce9571dd0d144ac3c8c57ca3e5bfce7c2bfe7053e6",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 6,
+      "matched_bindings": 5,
       "mismatches": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
+          "state": "changed",
+          "expected": "416dd6c56abb50902904ea93fb51de62883d113f02342e13150f158ab4943586",
+          "actual": "c00d6531b4dbcee6360a2726d79962e677ce413a202e452061cd7a3944d3f808"
+        },
         {
           "path": "reports/android-input-host-tests.json",
           "state": "changed",
           "expected": "e1192cfe0ae6f5cbb019978598d323115a870bf9efbb5bf5ad2a0ad41f42f1c7",
-          "actual": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4"
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
         },
         {
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "571928b375a8674bed6b173600a463e4e3e2fa2cb294ea153902f9e0ba2a380d",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputBudgetTest.xml",
           "state": "changed",
           "expected": "d9060885a86a13797bf147fb3578ccba5a3bdc8390575beb7caa971fd278982f",
-          "actual": "e95372198a0b367da82a7a1f80539d4fea0f0d481f5318153b9c0365ca881c52"
+          "actual": "59954ca3e1705c9b7131557c798f3856e48e81a26985a32acc52560fe608d2dd"
         },
         {
           "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryTest.xml",
           "state": "changed",
           "expected": "d16a2e046325fd57814115eb555a2054fad95231d0f96b013a759735de78965d",
-          "actual": "6c1f77c7a3ee862d174ee43e31cac8ea7bb660d5ff01c2e0891c3ab9d45637be"
+          "actual": "109da0c02d93ccfa86bba46537b2f3360e84b4011daae1389d33df9e25a1c7de"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "8eafb1b2552a510c2fdb07fececdc794ec174238ce06cc723ab872943accd37b",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         }
       ],
       "scope": "Current JVM and Android original View/Store worker consumer tests; no current Apple or ordinary UI claim"
@@ -3489,7 +3543,7 @@
       "report_sha256": "24c123efb7ced88285fe1483c4fbe0eb56fa25ee57a5534d33dc36cec3536848",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 60,
+      "matched_bindings": 59,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
@@ -3501,19 +3555,25 @@
           "path": "reports/android-input-host-tests.json",
           "state": "changed",
           "expected": "6e8081fe06eb8544af1a9c6314b741def4ba3f14b7237e5d26ef6d2e1f21508b",
-          "actual": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4"
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
         },
         {
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "19e2a1fc886c353cf42b9b97ce39371e44239c977fc9926496bd839b68f40913",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         },
         {
           "path": "samples/sketch-host/build/outputs/apk/debug/sketch-host-debug.apk",
           "state": "changed",
           "expected": "c6426b459dbb96c5eb1f0313c0048351ddb55c68e8532d0d498fb30a256d5c8b",
-          "actual": "680339793ddd6c8f8b5611ea1c8aa89cfd957c734400e54e2cd4dbc1cb657455"
+          "actual": "a5e70e43362c7511247117390cebc69efaa0828b87bc54e8badc0fd1c0fdb04b"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -3525,7 +3585,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "e9fa06c7da77c4af259220620c08d4b4dd974fe52f5195ebc97ec9c2015e3d83",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -3537,7 +3597,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "d57177cac5d015517d3c9aa19fec4315c706c5713c24f18b000cb71c6a25f8c0",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         }
       ],
       "scope": "Current JVM and Android original View/worker and independent sample instrumentation. Apple source changes are not current native execution evidence."
@@ -3545,10 +3605,61 @@
     "live-projection-budget": {
       "report_sha256": "b517f95c30cc15d6eb5cde9a94fdd5fe93f9e370ba2bb9c4818dcf16b0c0c918",
       "role": "current_regression",
+      "binding_state": "failed",
+      "matched_bindings": 60,
+      "mismatches": [
+        {
+          "path": "reports/android-input-host-tests.json",
+          "state": "changed",
+          "expected": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4",
+          "actual": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0"
+        },
+        {
+          "path": "reports/verification.json",
+          "state": "changed",
+          "expected": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d",
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
+        },
+        {
+          "path": "samples/sketch-host/build/outputs/apk/debug/sketch-host-debug.apk",
+          "state": "changed",
+          "expected": "680339793ddd6c8f8b5611ea1c8aa89cfd957c734400e54e2cd4dbc1cb657455",
+          "actual": "a5e70e43362c7511247117390cebc69efaa0828b87bc54e8badc0fd1c0fdb04b"
+        },
+        {
+          "path": "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PageProjectionBudgetTest.xml",
+          "state": "changed",
+          "expected": "bcc74815a9d53dcf8dad1a54dca00f5e1a227ac612676e79388f4dca4bd36d70",
+          "actual": "178c8147ac536c06148bb4177b19da5c3fdacfe1641041c4c42a54b286b0e15e"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
+          "state": "changed",
+          "expected": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023",
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
+          "state": "changed",
+          "expected": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a",
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
+        }
+      ],
+      "scope": "Current JVM projection/live admission semantics, Android original View/worker and separate sample instrumentation. No current Apple, ordinary UI or physical heap evidence."
+    },
+    "retired-editing-state": {
+      "report_sha256": "24a63665132668f5fe8194df2e3327b2f45a5b1e986346fa96e89eafa5c3fc98",
+      "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 67,
       "mismatches": [],
-      "scope": "Current JVM projection/live admission semantics, Android original View/worker and separate sample instrumentation. No current Apple, ordinary UI or physical heap evidence."
+      "scope": "Explicit original notebook retirement only: current JVM and Android original owner/file-worker checks and sample instrumentation. No sudden owner loss, Apple current execution or physical heap claim."
     },
     "input-capture-contract": {
       "report_sha256": "98a205b21134805374cd49506e4c2807b5f12eba358f73510e5ec913ad1015e2",
@@ -3620,13 +3731,19 @@
       "report_sha256": "48956f54fab9680a5a4d190fa4799c1eaa4488103a9bba5bb9e54a3cafc45f3d",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 50,
+      "matched_bindings": 49,
       "mismatches": [
         {
           "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt",
           "state": "changed",
           "expected": "efe15c59599957622bd5b079562b0ccd8e84c3601816302e42818d4a930c46e3",
           "actual": "439182af4e648929d520cff5925c0e8f756006ab735383219b1df7d81d09ee7d"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -3638,7 +3755,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "e9fa06c7da77c4af259220620c08d4b4dd974fe52f5195ebc97ec9c2015e3d83",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -3650,7 +3767,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "d364bf47df50a1da77cb8b186d22729968f18c3eb948ec12eadab41b559aab66",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -3737,7 +3854,7 @@
       "scope": "All current shared-core common tests compiled and executed on Kotlin/Native, including save dispatch, title, history, capacity, edit, input and codecs. No JVM-only worker tests, native file IO, UIKit delivery, current ordinary UI, physical performance or durability claim."
     },
     "android-input-host-tests": {
-      "report_sha256": "7b0e848734b29aa9f5b7e17a8ff684f8b4bb00c652be3f9d1f63df62072969d4",
+      "report_sha256": "86370c84f9aeaaac342c5836c000fa0e1f2a247a06a3ee3e5f4e6dda08aaf2d0",
       "role": "current_regression",
       "binding_state": "matched",
       "matched_bindings": 86,
@@ -3748,19 +3865,19 @@
       "report_sha256": "30a1fc5963ac51bc77785d3bb9522643124224c1232feb0326315fc0651a6c4a",
       "role": "current_regression",
       "binding_state": "failed",
-      "matched_bindings": 60,
+      "matched_bindings": 58,
       "mismatches": [
         {
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
           "state": "changed",
           "expected": "600a78e90ec1fa2db76c0cfad7e6fb5d96f22f2ad6b1902cb7e133f943a78505",
-          "actual": "f560d99d417c914328c716550a4049367194d33ec957b75aae36533f70d1c61e"
+          "actual": "ef633bbe507d5d5883d39af285b7b9c3e04a1cd8871998696b1f6f7f94106cf1"
         },
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "ce08c7d5b4e45a69266daad314db4a18c938c4c46ffa889e49f4aed246dec4a1",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/build/reports/lint-results-debug.xml",
@@ -3775,10 +3892,16 @@
           "actual": "3d8b60e3fd9dab08a37754dc578f1134a7b613b583b14b6f18fba1a4c610f411"
         },
         {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/OwnerRetirementHostChecks.kt",
+          "state": "changed",
+          "expected": "c844c7caa004e1adde480e5ad6ff28eb4ccb9b555702a95a4124af70dcd56712",
+          "actual": "186cc86092cf8047c2531c76031e721044aaf06995e14cdedf562307dbf406aa"
+        },
+        {
           "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
           "state": "changed",
           "expected": "fb90ba453894e9b859478bfe4663c2cadf6f83332aa2e87ad44c58910e7b8d85",
-          "actual": "416dd6c56abb50902904ea93fb51de62883d113f02342e13150f158ab4943586"
+          "actual": "c00d6531b4dbcee6360a2726d79962e677ce413a202e452061cd7a3944d3f808"
         },
         {
           "path": "android-app/src/androidTest/java/dev/notecore/app/StorageRetentionHostChecks.kt",
@@ -3850,19 +3973,25 @@
           "path": "reports/android-brush-build-inputs.sha256",
           "state": "changed",
           "expected": "e4192e65f819e54aea05fdfea4d0aee29290acd12bfa09fd70e04432a9023a78",
-          "actual": "1b8b1f6d047e3aae1cfbee0d3d34c22ce555138ac06cecd5f682c034b1879998"
+          "actual": "0ba7a546f586d10f5d4f9375f0c62e3667aeea97292227f3a625fbe6e553037a"
         },
         {
           "path": "reports/preview-build.json",
           "state": "changed",
           "expected": "b2e0bddc2102a8612f9068a3e83f3a7aef9a71b149b255609a48dac77991a5ff",
-          "actual": "66b429acd8e5bef0a78609a46e3d22fb8045e57ff915ce3c453975ee86ea3657"
+          "actual": "a850d0e9955b51dbe14936db671c58521023bee7de1a209edf0114e60b1ed35a"
         },
         {
           "path": "settings.gradle.kts",
           "state": "changed",
           "expected": "d9a32859af8e43b9486851e7bd39a047525a8c18ed7f41edc8e908c296988118",
           "actual": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
+          "state": "changed",
+          "expected": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0",
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt",
@@ -3874,7 +4003,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "917b61db55c20d578badea8b1bbf208daff58b140442d781ffef97bb0daf30bf",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -3886,7 +4015,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "9798e42c7d07240f2fc5574611ac0c4ff98670eb956093b2fcd704e582a2e285",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -3959,13 +4088,13 @@
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
           "state": "changed",
           "expected": "892041c20048ace708a97fed85c7a281cf1b6506e89044a6d919e852aad90723",
-          "actual": "f560d99d417c914328c716550a4049367194d33ec957b75aae36533f70d1c61e"
+          "actual": "ef633bbe507d5d5883d39af285b7b9c3e04a1cd8871998696b1f6f7f94106cf1"
         },
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "d6e170f013e27e812a7dc794ad18e6e310cb148c85c1232c55a8058c0a95e365",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
@@ -4086,7 +4215,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
           "state": "changed",
           "expected": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
-          "actual": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0"
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt",
@@ -4104,7 +4233,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -4116,7 +4245,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "814f336565f5973316a638eac32beb44e3d685f0ea9dab9ffb20441e68d1135a",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -4188,7 +4317,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
           "state": "changed",
           "expected": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
-          "actual": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0"
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt",
@@ -4206,7 +4335,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -4218,7 +4347,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "814f336565f5973316a638eac32beb44e3d685f0ea9dab9ffb20441e68d1135a",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -4350,7 +4479,7 @@
           "path": "tools/audit_c1_evidence.py",
           "state": "changed",
           "expected": "eb2c3590d12fdffc308a5c817e3312fd7e11aca14d99be9c25061908a978ab2c",
-          "actual": "c4d9b25b0fd9dd35aa72b741b7cbaaba51ad034f413153146fed3515d8fb6cd3"
+          "actual": "0f329e9fcc97dcfe09aee5b4791a804c6062df4080a669ae1595e38dd2f9cb5f"
         },
         {
           "path": "tools/audit_public_boundary.py",
@@ -4428,7 +4557,7 @@
           "path": "reports/verification.json",
           "state": "changed",
           "expected": "5a47d02539250c709738965798f9bb20f3e7520939a349f77b1b657b8533142d",
-          "actual": "f57f0118ce3bec971d6522e4efaaf7d7da6613c1e021782f24e75b803e0cc49d"
+          "actual": "1009be0c574d257584b361b0b36ae74a5488c0ec2d84350628d982e981f15d5f"
         },
         {
           "path": "reports/android-brush-common-tests.json",
@@ -4477,13 +4606,13 @@
           "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
           "state": "changed",
           "expected": "892041c20048ace708a97fed85c7a281cf1b6506e89044a6d919e852aad90723",
-          "actual": "f560d99d417c914328c716550a4049367194d33ec957b75aae36533f70d1c61e"
+          "actual": "ef633bbe507d5d5883d39af285b7b9c3e04a1cd8871998696b1f6f7f94106cf1"
         },
         {
           "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
           "state": "changed",
           "expected": "d6e170f013e27e812a7dc794ad18e6e310cb148c85c1232c55a8058c0a95e365",
-          "actual": "4609652fedd182fb0766c1b2e7c3d43048790ee7210f77214110409d35be1eac"
+          "actual": "82eafb0cb1ecf5ad4357c56d5b76b770bdc5395c37111b6d72edd5c49790e61f"
         },
         {
           "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
@@ -4729,7 +4858,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt",
           "state": "changed",
           "expected": "c18ecbacac3512beaec1d639cd8ebcb61664b2e4f521ce8662b355927ae5752d",
-          "actual": "0f5219a64d7cc2728bbbd1d8b229e3bc7bf0401bda99f7d9ced2ff7929f3adb0"
+          "actual": "30966be85c03115d3f4e20d084dc7e5a2069e82a36b94f5eab0dd3d578a8e68a"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt",
@@ -4747,7 +4876,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt",
           "state": "changed",
           "expected": "b81f0f7aab7a9a469309a30bf1eacbed8cf17787e50b3a7196072fb09653a1fe",
-          "actual": "ae7e55260a04ed05bbd5884eb45d7441fd558a41c06f04e199cb7189abd19023"
+          "actual": "cf06571c1381f681babef1467e4523421fe5a6c6ff9d8d8ca22f22f82e6c5cea"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt",
@@ -4759,7 +4888,7 @@
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
           "state": "changed",
           "expected": "814f336565f5973316a638eac32beb44e3d685f0ea9dab9ffb20441e68d1135a",
-          "actual": "b65443da9d980ceebb2b1a52675e175ae3f8eb81b9e3ee56efacaad3832be57a"
+          "actual": "64a1ff61f3c537cf81b2c02c59c0a4251776bd94d71ba84770e120deba6569a7"
         },
         {
           "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt",
@@ -4827,6 +4956,7 @@
     "identity-retention: current evidence binding failed",
     "pending-input-budget: current evidence binding failed",
     "producer-input-budget: current evidence binding failed",
+    "live-projection-budget: current evidence binding failed",
     "apple-current-revalidation: current evidence binding failed",
     "shared-native-contracts: current evidence binding failed",
     "android-render-integration: current evidence binding failed",
@@ -4838,5 +4968,5 @@
   "ordinary_app_backend_integration_verified_by_this_audit": false,
   "c1_gate_complete": false,
   "physical_device_or_heap_measured": false,
-  "audit_tool_sha256": "c4d9b25b0fd9dd35aa72b741b7cbaaba51ad034f413153146fed3515d8fb6cd3"
+  "audit_tool_sha256": "0f329e9fcc97dcfe09aee5b4791a804c6062df4080a669ae1595e38dd2f9cb5f"
 }

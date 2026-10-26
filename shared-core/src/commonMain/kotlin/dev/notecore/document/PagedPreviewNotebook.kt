@@ -380,7 +380,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun retire(): Boolean {
         ownerCheck()
         if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试", PreviewFailureKind.PENDING_STROKE)
-        cancelStroke(); clearProjection(); retired = true; return true
+        cancelStroke(); clearProjection(); memory.retireEditingState(); retired = true; return true
     }
     /** Host may transfer responsibility only after this exact checkpoint's atomic IO receipt.
      * Retain the immutable command here too; the retired session can never submit it again.
@@ -388,7 +388,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun retireAfterRecovery(snapshot: PagedPreviewSnapshot): Boolean {
         ownerCheck()
         if (pending == null || snapshot.root !== root() || snapshot.pending !== pending) return false
-        cancelStroke(); clearProjection(); retired = true; return true
+        cancelStroke(); clearProjection(); memory.retireEditingState(); retired = true; return true
     }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())

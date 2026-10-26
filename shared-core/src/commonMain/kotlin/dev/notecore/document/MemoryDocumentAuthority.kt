@@ -38,6 +38,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                              val redo: List<DocumentDelta> = emptyList(), val evictedHistoryCount: Long = 0)
     private var state = State(initial, emptyMap(), initial.pages().map { it.id }.toSet(), initial.pages().map { it.layerId }.toSet(),
         initial.scene.objects().map { it.id }.toSet(), initial.scene.objects().associate { it.id to it.objectRevision })
+    private var editingRetired = false
     init {
         ownerCheck()
         require(initial.title.hasValidUnicode()) { "Invalid Unicode title" }
@@ -47,14 +48,27 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
      * Caller supplies an already validated generated identity. Deleted/undone identities stay reserved.
      */
     internal fun identityWasUsed(value: String): Boolean {
-        ownerCheck(); val current = state
+        ownerCheck(); check(!editingRetired) { "Authority editing is retired" }; val current = state
         return PageId(value) in current.pages || LayerId(value) in current.layers ||
             ObjectId(value) in current.objects || CommandId(value) in current.journal
     }
     fun snapshot(): DocumentRoot { ownerCheck(); return state.root }
+    /** Original notebook calls only after its retirement/handoff guards. Keep the exact immutable
+     * root for readers, but release session-only editing references before another owner is admitted.
+     * This is neither a storage/GPU receipt nor a claim that GC has reclaimed physical bytes.
+     */
+    internal fun retireEditingState() {
+        ownerCheck()
+        if (editingRetired) return
+        val current = state
+        state = State(current.root, emptyMap(), emptySet(), emptySet(), emptySet(), emptyMap(),
+            evictedHistoryCount = current.evictedHistoryCount)
+        editingRetired = true
+    }
     fun status(): DocumentAuthorityStatus {
         ownerCheck(); val current = state
-        return DocumentAuthorityStatus(liveCharge(current.root), current.journal.values.sumOf { it.charge }, identityCharge(current),
+        val live = liveCharge(current.root) - if (editingRetired) projectionCapacityCharge(current.root.scene.objectCount) else 0L
+        return DocumentAuthorityStatus(live, current.journal.values.sumOf { it.charge }, identityCharge(current),
             current.journal.size, current.root.pageCount, current.root.scene.objectCount,
             current.undo.size, current.redo.size, (current.undo + current.redo).sumOf { it.charge },
             current.undo.lastOrNull()?.operationId, current.redo.lastOrNull()?.operationId, current.evictedHistoryCount)
@@ -62,6 +76,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     /** Existing authority's live-payload gate, not a reservation of history, journal or system heap. */
     internal fun additionalStrokeSampleCapacity(objectId: ObjectId, layerId: LayerId): Int {
         ownerCheck()
+        if (editingRetired) return 0
         if (state.root.scene.objectCount >= budget.maxObjects) return 0
         val header = 256L + (objectId.value.length + layerId.value.length) * 2L +
             projectionCapacityCharge(state.root.scene.objectCount + 1) - projectionCapacityCharge(state.root.scene.objectCount)
@@ -73,6 +88,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     internal fun strokeInputCapacity(objectId: ObjectId, pageId: PageId): StrokeInputCapacity {
         ownerCheck(); val current = state; val root = current.root
         fun refused(reason: DocumentRejection) = StrokeInputCapacity(0, reason)
+        if (editingRetired) return refused(DocumentRejection.CLOSED)
         if (root.revision == Long.MAX_VALUE) return refused(DocumentRejection.REVISION_EXHAUSTED)
         if (current.journal.size >= budget.journalEntries) return refused(DocumentRejection.JOURNAL_CAPACITY)
         val journal = ((budget.journalBytes - current.journal.values.sumOf { it.charge } - COMMAND_HEADER_BYTES).coerceAtLeast(0L) / POINT_BYTES).coerceAtMost(1_000_000L).toInt()
@@ -110,6 +126,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
 
     fun commit(command: DocumentCommand): DocumentCommit {
         ownerCheck()
+        if (editingRetired) return reject(DocumentRejection.CLOSED)
         val old = state; val root = old.root
         old.journal[command.id]?.let { return if (it.command == command) DocumentCommit.Accepted(it.receipt) else reject(DocumentRejection.REUSED_OPERATION_ID) }
         if (command is DocumentCommand.Rename && (command.title.length > 120 || !command.title.hasValidUnicode())) return reject(DocumentRejection.INVALID_TITLE)
