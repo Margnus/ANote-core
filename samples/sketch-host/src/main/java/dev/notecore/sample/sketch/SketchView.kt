@@ -82,6 +82,7 @@ class SketchView(context: Context, private val session: SketchSession, private v
         if (event.getToolType(index) == MotionEvent.TOOL_TYPE_ERASER) return false
         val count = event.historySize + 1
         if (count > note.inputBatchLimit) { blockInput(); return true }
+        if (note.prepareRealBatch(phase, count) != null) { blockInput(); return true }
         val xs = DoubleArray(count); val ys = DoubleArray(count); val pressures = FloatArray(count); val times = LongArray(count)
         for (i in 0 until count) {
             val current = i == count - 1

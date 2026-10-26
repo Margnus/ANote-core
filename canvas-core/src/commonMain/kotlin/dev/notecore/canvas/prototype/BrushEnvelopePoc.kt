@@ -30,22 +30,27 @@ internal class BrushEnvelopePoc private constructor(
         val x = inverse.a * point.x + inverse.c * point.y + inverse.tx
         val y = inverse.b * point.x + inverse.d * point.y + inverse.ty
         if (!x.isFinite() || !y.isFinite()) return false
-        if (samples.size == 1) return squared(x - samples.x(0), y - samples.y(0)) <= radii[0] * radii[0]
+        if (samples.size == 1) return withinRadius(x - samples.x(0), y - samples.y(0), radii[0])
         for (i in 1 until samples.size) {
             val dx = samples.x(i) - samples.x(i - 1); val dy = samples.y(i) - samples.y(i - 1)
             val px = x - samples.x(i - 1); val py = y - samples.y(i - 1)
             val r = radii[i - 1]; val dr = radii[i] - r
+            if (withinRadius(px, py, r) || withinRadius(x - samples.x(i), y - samples.y(i), radii[i])) return true
             // Minimize |p - (a+t*d)|^2 - (r+t*dr)^2 over closed t=[0,1].
             // Concave/linear cases attain their minimum at an endpoint (including containment).
-            val a = squared(dx, dy) - dr * dr
-            val b = -2 * (px * dx + py * dy + r * dr)
-            val c = squared(px, py) - r * r
-            if (c <= 0 || squared(px - dx, py - dy) <= radii[i] * radii[i]) return true
+            // A common positive scale preserves the minimizer while preventing tiny scene units
+            // from turning every squared coefficient into zero. Source samples/radii stay unchanged.
+            val scale = maxOf(maxOf(kotlin.math.abs(dx), kotlin.math.abs(dy)),
+                maxOf(kotlin.math.abs(px), kotlin.math.abs(py)), maxOf(r, radii[i]))
+            val sx = dx / scale; val sy = dy / scale; val spx = px / scale; val spy = py / scale
+            val sr = r / scale; val sdr = dr / scale
+            val a = squared(sx, sy) - sdr * sdr
+            val b = -2 * (spx * sx + spy * sy + sr * sdr)
             if (a > 0) {
                 val t = (-b / (2 * a)).coerceIn(0.0, 1.0)
                 // Evaluate geometrically rather than subtracting large quadratic coefficients.
                 val radius = r + t * dr
-                if (squared(px - t * dx, py - t * dy) <= radius * radius) return true
+                if (withinRadius(px - t * dx, py - t * dy, radius)) return true
             }
         }
         return false
@@ -53,15 +58,24 @@ internal class BrushEnvelopePoc private constructor(
 
     companion object {
         private fun squared(x: Double, y: Double) = x * x + y * y
+        private fun withinRadius(x: Double, y: Double, radius: Double): Boolean {
+            val scale = maxOf(kotlin.math.abs(x), kotlin.math.abs(y), radius)
+            if (scale == 0.0) return true
+            val r = radius / scale
+            return squared(x / scale, y / scale) <= r * r
+        }
         fun build(samples: StrokeSamples, brush: BrushSpec, transform: Affine2D = Affine2D(), maxSamples: Int = 200000): BrushEnvelopeBuild {
             require(maxSamples in 1..1_000_000)
             if (samples.size > maxSamples) return BrushEnvelopeBuild.Rejected("sample-budget")
             if (brush.algorithmVersion != 1) return BrushEnvelopeBuild.Rejected("unsupported-brush-version")
             val inverse = transform.inverseOrNull() ?: return BrushEnvelopeBuild.Rejected("noninvertible-transform")
             // Radius=width/2 for monoline/highlighter; pressure draft has 25% minimum width.
-            val radii = DoubleArray(samples.size) { i ->
+            fun radius(i: Int) =
                 brush.width / 2 * if (brush.kind == BrushKind.PRESSURE) 0.25 + 0.75 * samples.pressure(i) else 1.0
-            }
+            // A positive canonical width may round to a zero effective radius. Refuse explicitly
+            // before allocating the derived array rather than claiming a zero-width Ready envelope.
+            for (i in 0 until samples.size) if (radius(i) == 0.0) return BrushEnvelopeBuild.Rejected("radius-underflow")
+            val radii = DoubleArray(samples.size, ::radius)
             // A transformed disc has x/y extents r*norm(row). The swept envelope's
             // extrema occur at sample endpoints because both center and radius vary linearly.
             fun norm(a: Double, b: Double): Double {

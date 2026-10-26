@@ -33,6 +33,7 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
                 }
             })
             store.attachActive(note)
+            check(note.rename("pending title")) // Editing history must survive refusal, then retire after confirmed recovery IO.
             check(store.save(note.capture()) { _, _ -> oldCallbacks++ })
             check(note.beginStroke(1.25, 2.5, .125f, 7)); check(note.appendStroke(3.0, 4.0, .625f, 9))
             armed = true
@@ -55,12 +56,16 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
                 }
                 check(recovery.encode() == checkpoint && note.hasPendingStroke)
             }
+            check(note.authorityStatus().journalByteCharge > 0L && note.authorityStatus().historyByteCharge > 0L)
             check(store.save(recovery) { _, error -> check(error != null); failed++ })
             check(!store.releaseActive(note)) // Admission is never an atomic-write receipt.
         }
         try {
             eventually("Recovery failure was not retained") { failed == 1 && store.saveStates().single().retryRequired }
-            main { check(oldCallbacks == 0 && note.hasPendingStroke); check(store.saveStates().single().snapshot.sameContent(recovery)) }
+            main {
+                check(oldCallbacks == 0 && note.hasPendingStroke); check(store.saveStates().single().snapshot.sameContent(recovery))
+                check(note.authorityStatus().journalByteCharge > 0L && note.authorityStatus().historyByteCharge > 0L)
+            }
             check(dir.delete()); check(dir.mkdir())
             main { check(store.save(note.captureRecovery()) { _, error -> check(error == null); completed = true }) }
             eventually("Recovery retry did not complete") { completed && store.saveStates().isEmpty() }
@@ -69,13 +74,34 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             val reading = PreviewRecoveryCodec.read(file.readText(Charsets.UTF_8))
             check(reading.failure == null && checkNotNull(reading.snapshot).sameContent(recovery) && reading.snapshot?.pending != null)
             main {
+                val checkpoint = checkNotNull(reading.snapshot)
+                val pending = checkNotNull(checkpoint.pending)
+                val stroke = pending.command as CanvasCommand.AddStroke
+                val charge = 2048L + (pending.id.value.length + pending.pageId.value.length + stroke.objectId.value.length +
+                    stroke.target.layerId.value.length) * 2L + stroke.samples.size.toLong() * 28L
+                val owner = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) }
+                val refusedBudget = PagedPreviewNotebook.openRecovery(checkpoint, "budget", DocumentBudget(inputBytes = charge - 1), owner)
+                check(refusedBudget.notebook == null && refusedBudget.failure == PreviewOpenFailure.INPUT_CAPACITY)
+                check(store.activeDocumentId == note.documentId && note.hasPendingStroke)
+                val exact = checkNotNull(PagedPreviewNotebook.openRecovery(checkpoint, "budget", DocumentBudget(inputBytes = charge), owner).notebook)
+                check(exact.inputReservedByteCharge == charge && exact.pendingStroke() === pending)
+                exact.cancelStroke(); check(exact.inputReservedByteCharge == charge)
+                check(exact.retryPendingStroke() && exact.retryPendingStroke() && exact.totalStrokeCount == 1)
+                check(exact.stroke(0).samples == stroke.samples && exact.inputReservedByteCharge == 0L && exact.retire())
                 var refused = false
                 check(!store.save(note.capture()) { _, error -> check(error != null); refused = true })
                 check(refused && store.saveStates().isEmpty() && note.hasPendingStroke)
                 check(store.beginExportPicker(note.captureRecovery()).disposition == ExportPickerDisposition.PENDING_RECOVERY)
             }
             check(file.readText() == recovery.encode())
-            main { check(store.releaseActive(note)); check(!note.retryPendingStroke()); store.stopTestBackend(); store = NoteStore.isolated(host, dir) }
+            main {
+                check(store.releaseActive(note)); check(!note.retryPendingStroke())
+                val retired = note.authorityStatus()
+                check(retired.journalByteCharge == 0L && retired.historyByteCharge == 0L && retired.identityByteCharge == 0L)
+                check(note.snapshot() === recovery.root && note.pendingStroke() === recovery.pending && note.inputReservedByteCharge > 0L)
+                check(note.captureRecovery().encode() == recovery.encode())
+                store.stopTestBackend(); store = NoteStore.isolated(host, dir)
+            }
             var opened = false
             main { store.open(recovery.documentId) { value, error ->
                 check(error == null); note = store.adopt(checkNotNull(value)); check(note.hasPendingStroke)
@@ -84,7 +110,7 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             eventually("New owner did not restore exact pending") { opened }
             completed = false
             main {
-                check(note.retryPendingStroke()); check(note.retryPendingStroke()); check(note.totalStrokeCount == 1 && note.changeVersion == 1L)
+                check(note.retryPendingStroke()); check(note.retryPendingStroke()); check(note.totalStrokeCount == 1 && note.changeVersion == 2L)
                 check(store.save(note.captureRecovery()) { _, error -> check(error == null); completed = true })
             }
             eventually("Committed replacement did not finish") { completed && store.saveStates().isEmpty() }

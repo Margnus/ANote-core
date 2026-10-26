@@ -47,6 +47,10 @@ internal class OwnerRetirementHostChecks(private val test: Instrumentation, priv
                     } == StoreRetirementRequest.STARTED)
                     check(owner.beginOwnerRetirement() == StoreRetirementRequest.ALREADY_RETIRING)
                     check(owner.activeDocumentId == null)
+                    val retired = note.authorityStatus()
+                    check(retired.journalByteCharge == 0L && retired.historyByteCharge == 0L && retired.identityByteCharge == 0L)
+                    check(retired.operationCount == 0 && retired.undoCount == 0 && retired.redoCount == 0)
+                    check(note.snapshot() === snapshot.root && retired.liveByteCharge == snapshot.retainedByteCharge)
                     var refused = 0
                     check(!owner.save(snapshot) { _, error -> check(error != null); refused++ })
                     check(refused == 1)
@@ -68,6 +72,9 @@ internal class OwnerRetirementHostChecks(private val test: Instrumentation, priv
                 main {
                     owner = store(directory); val note = owner.create(); draw(note); snapshot = note.capture()
                     check(owner.beginOwnerRetirement { completed = true } == StoreRetirementRequest.STARTED)
+                    val retired = note.authorityStatus()
+                    check(retired.journalByteCharge == 0L && retired.historyByteCharge == 0L && retired.identityByteCharge == 0L)
+                    check(note.snapshot() === snapshot.root && note.capture().encode() == snapshot.encode())
                 }
                 eventually("Failed root was not retained by original ledger") { owner.ownerRetirementStatus().retryRequired == 1 }
                 main { check(!completed && !owner.ownerRetirementStatus().workerStopped && owner.ownerRetirementStatus().pendingWrites == 1) }

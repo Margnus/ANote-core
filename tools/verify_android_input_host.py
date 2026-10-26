@@ -31,6 +31,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--serial', required=True)
     parser.add_argument('--adb', required=True)
+    parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows'), default='NoteCorePreview')
     args = parser.parse_args()
     assert args.serial in ('emulator-5580', 'emulator-5554'), 'Only the existing dedicated emulator is authorized'
     folder = ROOT/'build/android-input-host'; folder.mkdir(parents=True, exist_ok=True)
@@ -39,7 +40,7 @@ def main():
         return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT,
                               check=True, capture_output=True, timeout=120).stdout
 
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode('utf-8').strip() == 'NoteCorePreview'
+    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode('utf-8').strip() == args.avd
 
     def files():
         output = adb('shell', 'run-as', BUNDLE, 'ls', 'files/preview-notes').decode('utf-8')
@@ -79,7 +80,7 @@ def main():
     assert observed['callback_real_batch_limit'] == 1024 and observed['down_history_included'] is True
     assert observed['canonical_max_error'] <= 1e-9 and observed['old_float_witness_error'] > 1e-5
     assert observed['batch_sample_count'] == 7 and observed['all_test_notes_in_memory']
-    assert observed['active_input_reservation_bytes'] == 1_133_696 and observed['input_reservation_released_after_completion']
+    assert observed['active_input_reservation_bytes'] == 1_329_280 and observed['input_reservation_released_after_completion']
     storage_output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'storage_retention',
                          BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
     storage_log = folder/'storage-retention.log'; storage_log.write_text(storage_output, encoding='utf-8', newline='\n')

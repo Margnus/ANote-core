@@ -11,6 +11,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var selected = initial.page(0).id
     private var sequence = 0L
     private var input: InputReplaySession? = null
+    private var inputReservation = 0L
+    private var inputPointLimit = 0
     private var inputSequence = 0L
     private var strokePage: PageId? = null
     private var strokeCommand: CommandId? = null
@@ -24,6 +26,10 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var projectionRevision = -1L
     private var projectionPage: PageId? = null
     private var projection: List<StrokeObject> = emptyList()
+    /** Retained references only; the authority prepays a maximum list in its live envelope. */
+    internal val retainedProjectionByteCharge: Long get() {
+        ownerCheck(); return MemoryDocumentAuthority.projectionCapacityCharge(projection.size)
+    }
     init {
         ownerCheck()
         require(validSessionNonce(sessionNonce))
@@ -51,7 +57,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     /** Input ownership only; document/history/save/render budgets remain separate. */
     val inputReservedByteCharge: Long get() {
         ownerCheck()
-        return input?.let { it.reservedByteCharge + PreviewRecoveryCodec.PENDING_METADATA_RESERVATION } ?: pending?.let(PreviewRecoveryCodec::pendingCharge) ?: 0L
+        return if (input != null) inputReservation else pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L
     }
     val canUndo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextUndoOperationId != null }
     val canRedo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextRedoOperationId != null }
@@ -131,13 +137,18 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (pending != null) return fail("上一笔尚未提交，请先重试保存", PreviewFailureKind.PENDING_STROKE)
         clearError(); return true
     }
-    private fun commit(command: DocumentCommand): Boolean = when (val result = memory.commit(command)) {
-        is DocumentCommit.Accepted -> { clearProjection(); cancelStroke(); clearError(); true }
-        is DocumentCommit.Rejected -> fail(when (result.reason) {
-            DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
-            DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
-            else -> "操作未完成，原内容仍保留，请重试"
-        }, PreviewFailureKind.DOCUMENT_REJECTED, result.reason)
+    private fun commit(command: DocumentCommand): Boolean {
+        ownerCheck()
+        // Retire old derived references before any replacement root is published, including refusal.
+        clearProjection()
+        return when (val result = memory.commit(command)) {
+            is DocumentCommit.Accepted -> { cancelStroke(); clearError(); true }
+            is DocumentCommit.Rejected -> fail(when (result.reason) {
+                DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
+                DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
+                else -> "操作未完成，原内容仍保留，请重试"
+            }, PreviewFailureKind.DOCUMENT_REJECTED, result.reason)
+        }
     }
     fun selectPage(id: PageId): Boolean {
         ownerCheck()
@@ -163,8 +174,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
     fun copyCurrentPage(): Boolean {
         if (!prepareEdit()) return false
-        val root = root(); val source = currentPage; val objects = root.pageObjects(selected)
-        val currentPoints = root.scene.objects().sumOf { it.samples.size }
+        val root = root(); val source = currentPage; val objects = visible()
+        val currentPoints = totalPoints(root)
         if (objects.sumOf { it.samples.size } > PagedPreviewCodec.MAX_POINTS - currentPoints) return fail("复制后将超过预览容量，原页面仍保留", PreviewFailureKind.CAPACITY)
         val page = PageId(identity("page") ?: return false); val layer = LayerId(identity("layer") ?: return false)
         val mapping = linkedMapOf<ObjectId, ObjectId>()
@@ -218,15 +229,38 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         color = argb; this.width = width; clearError(); return true
     }
     val inputBatchLimit: Int get() = PREVIEW_INPUT_BATCH_LIMIT
+    private fun totalPoints(root: DocumentRoot): Int {
+        var count = 0
+        root.scene.forEachObject { count += it.samples.size }
+        return count
+    }
+    /** Copy-before-admission guard for synchronous platform producers. Null permits preparation only:
+     * no samples or identities are accepted, and offerRealBatch repeats the checks after copying.
+     * Stay on the same owner; this is not a reservation token or a content receipt.
+     * No platform event is retained, and intervening edits can invalidate this observation.
+     */
+    fun prepareRealBatch(phase: PointerPhase, count: Int): PreviewInputResult? {
+        realBatchGate(phase)?.let { return it }
+        if (count > PREVIEW_INPUT_BATCH_LIMIT) return rejectRealBatch(PreviewFailureKind.INPUT_BATCH_CAPACITY)
+        if (count < 0 || (phase == PointerPhase.CANCEL && count != 0) ||
+            ((phase == PointerPhase.DOWN || phase == PointerPhase.MOVE) && count == 0))
+            return rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
+        if (phase == PointerPhase.DOWN) {
+            val operation = nextIdentity("op") ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
+            val objectId = nextIdentity("ink", operation.second) ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
+            if (inputReservation(count, operation.first, objectId.first, currentPage) > inputByteLimit)
+                return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+        } else if (phase != PointerPhase.CANCEL && count > inputPointLimit - input!!.activeRealSamples) {
+            return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+        }
+        return null
+    }
     /** Raw buffers are read synchronously and never retained; callers must not mutate during this call. */
     fun offerRealBatch(phase: PointerPhase, eventTimeMicros: Long, xs: DoubleArray, ys: DoubleArray,
                        pressures: FloatArray, times: LongArray): PreviewInputResult {
-        realBatchGate(phase)?.let { return it }
+        prepareRealBatch(phase, xs.size)?.let { return it }
         val count = xs.size
-        if (count > PREVIEW_INPUT_BATCH_LIMIT) return rejectRealBatch(PreviewFailureKind.INPUT_BATCH_CAPACITY)
-        if (count != ys.size || count != pressures.size || count != times.size || eventTimeMicros < 0 ||
-            (phase == PointerPhase.CANCEL && count != 0) ||
-            ((phase == PointerPhase.DOWN || phase == PointerPhase.MOVE) && count == 0))
+        if (count != ys.size || count != pressures.size || count != times.size || eventTimeMicros < 0)
             return rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
         var time = -1L
         for (i in 0 until count) {
@@ -240,7 +274,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val sequence: Long
         var command = strokeCommand; var objectId = strokeObject; var page = strokePage
         if (phase == PointerPhase.DOWN) {
-            val remaining = PagedPreviewCodec.MAX_POINTS - current.scene.objects().sumOf { it.samples.size }
+            val remaining = PagedPreviewCodec.MAX_POINTS - totalPoints(current)
             if (remaining <= 0 || current.scene.objectCount >= inputObjectLimit ||
                 count > minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining))
                 return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
@@ -250,7 +284,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             val nextObject = nextIdentity("ink", nextOperation.second)
                 ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
             val capacity = memory.strokeInputCapacity(ObjectId(nextObject.first), selected)
-            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, capacity.points))
+            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, capacity.points),
+                nextOperation.first, nextObject.first, current.findPage(selected)!!)
             if (count > pointCapacity) {
                 if (count > capacity.points && capacity.limitingReason != DocumentRejection.LIVE_BYTE_CAPACITY) {
                     fail("当前预览编辑容量不足，本批未接收，请先保存或导出现有内容", PreviewFailureKind.DOCUMENT_REJECTED, capacity.limitingReason)
@@ -261,6 +296,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
             objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
             page = selected; session = InputReplaySession(pointCapacity); sequence = 0
+            inputPointLimit = pointCapacity
+            inputReservation = inputReservation(pointCapacity, command.value, objectId.value, current.findPage(page)!!)
         } else {
             session = input!!; sequence = inputSequence
             if (sequence == Long.MAX_VALUE) return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
@@ -287,11 +324,14 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     /** Reserve the entire admitted stroke, including completion overlap, before allocating identities.
      * Rejection never lowers an active session's capacity or drops its accepted prefix.
      */
-    private fun affordableInputPoints(maximum: Int): Int {
+    private fun inputReservation(points: Int, operation: String, objectId: String, page: PageDescriptor): Long =
+        PREVIEW_INPUT_PRODUCER_BYTES + maxOf(InputReplaySession.reservationBytes(points),
+            PreviewRecoveryCodec.pendingCharge(operation, page.id.value, objectId, page.layerId.value, points))
+    private fun affordableInputPoints(maximum: Int, operation: String, objectId: String, page: PageDescriptor): Int {
         var low = 0; var high = maximum
         while (low < high) {
             val mid = low + (high - low + 1) / 2
-            if (InputReplaySession.reservationBytes(mid) + PreviewRecoveryCodec.PENDING_METADATA_RESERVATION <= inputByteLimit) low = mid else high = mid - 1
+            if (inputReservation(mid, operation, objectId, page) <= inputByteLimit) low = mid else high = mid - 1
         }
         return low
     }
@@ -322,7 +362,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
 
     /** Legacy Boolean adapters preserve their explicit unfinished-stroke cancellation on invalid input. */
     private fun legacyInput(phase: PointerPhase, x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
-        val result = offerRealBatch(phase, timeMicros, doubleArrayOf(x), doubleArrayOf(y), floatArrayOf(pressure), longArrayOf(timeMicros))
+        val result = prepareRealBatch(phase, 1) ?:
+            offerRealBatch(phase, timeMicros, doubleArrayOf(x), doubleArrayOf(y), floatArrayOf(pressure), longArrayOf(timeMicros))
         if (result.disposition == PreviewInputDisposition.REJECTED && phase != PointerPhase.DOWN) cancelStroke()
         return result.disposition == PreviewInputDisposition.ACCEPTED || result.disposition == PreviewInputDisposition.COMMITTED
     }
@@ -343,7 +384,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun retire(): Boolean {
         ownerCheck()
         if (pending != null) return fail("仍有笔迹未提交，请保留当前页面并重试", PreviewFailureKind.PENDING_STROKE)
-        cancelStroke(); clearProjection(); retired = true; return true
+        cancelStroke(); clearProjection(); memory.retireEditingState(); retired = true; return true
     }
     /** Host may transfer responsibility only after this exact checkpoint's atomic IO receipt.
      * Retain the immutable command here too; the retired session can never submit it again.
@@ -351,7 +392,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun retireAfterRecovery(snapshot: PagedPreviewSnapshot): Boolean {
         ownerCheck()
         if (pending == null || snapshot.root !== root() || snapshot.pending !== pending) return false
-        cancelStroke(); clearProjection(); retired = true; return true
+        cancelStroke(); clearProjection(); memory.retireEditingState(); retired = true; return true
     }
     /** Committed content only. Capturing does not transfer responsibility for any pending completed stroke. */
     fun capture(): PagedPreviewSnapshot = PagedPreviewSnapshot(root())
@@ -364,7 +405,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         fun openRecovery(snapshot: PagedPreviewSnapshot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
                          ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
             ownerCheck()
-            if (snapshot.pending?.let(PreviewRecoveryCodec::pendingCharge)?.let { it > budget.inputBytes } == true)
+            if (snapshot.pending?.let { PreviewRecoveryCodec.pendingCharge(it) > budget.inputBytes } == true)
                 return PreviewNotebookOpen(null, PreviewOpenFailure.INPUT_CAPACITY)
             val opened = open(snapshot.root, sessionNonce, budget, ownerCheck)
             val note = opened.notebook ?: return opened

@@ -112,7 +112,7 @@ class PagedPreviewNotebookTest {
         val note = note(); draw(note); val old = note.capture(); val encoded = old.encode()
         assertTrue(note.insertPage()); draw(note, 10.0); val all = note.capture()
         assertEquals(2, all.root.pageCount); assertEquals(2, all.root.scene.objectCount)
-        assertEquals(all.retainedByteCharge, note.authorityStatus().liveByteCharge)
+        assertEquals(all.retainedByteCharge + 128L + 2 * 8L, note.authorityStatus().liveByteCharge)
         assertEquals(encoded, old.encode()); assertEquals(1, old.root.pageCount)
         val reopened = PagedPreviewNotebook(PagedPreviewCodec.decode(all.encode()), "fresh-session")
         assertEquals(2, reopened.totalStrokeCount); assertEquals(2, reopened.pageCount); assertFalse(reopened.canUndo)

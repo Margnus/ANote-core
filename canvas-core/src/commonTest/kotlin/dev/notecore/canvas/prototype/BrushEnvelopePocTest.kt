@@ -8,6 +8,46 @@ class BrushEnvelopePocTest {
     private fun envelope(samples: StrokeSamples, kind: BrushKind = BrushKind.MONOLINE, transform: Affine2D = Affine2D(), argb: Int = -1) =
         assertIs<BrushEnvelopeBuild.Ready>(BrushEnvelopePoc.build(samples, BrushSpec(kind, 1, 8.0, argb), transform)).envelope
 
+    @Test fun tinyDiscsDoNotTreatTheirBoundingBoxAsExactCoverage() {
+        for (kind in BrushKind.entries) for (scale in listOf(1.0, 1e-170)) {
+            val e = assertIs<BrushEnvelopeBuild.Ready>(BrushEnvelopePoc.build(samples(0.0 to 0.0),
+                BrushSpec(kind, 1, 8 * scale, -1))).envelope
+            assertTrue(e.containsScene(PointD(2 * scale, 2 * scale)))
+            assertFalse(e.containsScene(PointD(3.6 * scale, 3.6 * scale)), "$kind scale=$scale outside circle, inside bbox")
+            assertEquals(0.0, e.alphaAtScene(PointD(3.6 * scale, 3.6 * scale)))
+        }
+    }
+    @Test fun tinyPressureSweepsAndReflectedShearedCornersKeepNormalScaleClassification() {
+        for (scale in listOf(1.0, 1e-170)) {
+            val pressure = assertIs<BrushEnvelopeBuild.Ready>(BrushEnvelopePoc.build(
+                samples(0.0 to 0.0, 10 * scale to 0.0, pressure = floatArrayOf(0f, 1f)),
+                BrushSpec(BrushKind.PRESSURE, 1, 8 * scale, -1))).envelope
+            assertTrue(pressure.containsScene(PointD(5 * scale, 2.6 * scale)))
+            assertFalse(pressure.containsScene(PointD(5 * scale, 2.7 * scale)))
+            val transform = Affine2D(a = -2.0, b = .5, c = 1.0, d = .75, tx = 10 * scale, ty = -3 * scale)
+            for (kind in BrushKind.entries) {
+                val e = assertIs<BrushEnvelopeBuild.Ready>(BrushEnvelopePoc.build(
+                    samples(0.0 to 0.0, 10 * scale to 0.0, 10 * scale to 10 * scale),
+                    BrushSpec(kind, 1, 8 * scale, -1), transform)).envelope
+                for ((point, hit) in listOf(PointD(5.0, 0.0) to true, PointD(12.0, -2.0) to true,
+                    PointD(13.0, -3.0) to false, PointD(5.0, 5.0) to false)) {
+                    assertEquals(hit, e.containsScene(transform.map(PointD(point.x * scale, point.y * scale))), "$kind scale=$scale $point")
+                }
+            }
+        }
+    }
+    @Test fun radiusUnderflowRefusesButRepresentableSubnormalDiscsStayGeometric() {
+        for ((width, kind, pressure) in listOf(Triple(Double.MIN_VALUE, BrushKind.MONOLINE, 1f),
+            Triple(1e-323, BrushKind.PRESSURE, 0f))) {
+            assertEquals("radius-underflow", assertIs<BrushEnvelopeBuild.Rejected>(BrushEnvelopePoc.build(
+                samples(0.0 to 0.0, pressure = floatArrayOf(pressure)), BrushSpec(kind, 1, width, -1))).reason)
+        }
+        val e = assertIs<BrushEnvelopeBuild.Ready>(BrushEnvelopePoc.build(samples(0.0 to 0.0),
+            BrushSpec(BrushKind.MONOLINE, 1, 1e-323, -1))).envelope
+        assertTrue(e.containsScene(PointD(0.0, 0.0)))
+        assertFalse(e.containsScene(PointD(Double.MIN_VALUE, Double.MIN_VALUE)))
+    }
+
     @Test fun roundCapsJoinsAndOpenOutsideCorner() {
         val e = envelope(samples(0.0 to 0.0, 10.0 to 0.0, 10.0 to 10.0))
         assertEquals(BoundsD(-4.0, -4.0, 14.0, 14.0), e.paintedBounds)

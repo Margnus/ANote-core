@@ -21,6 +21,7 @@ object ApplePreviewInput {
         if (xs.length % 8uL != 0uL || ys.length != count.toULong() * 8uL ||
             pressures.length != count.toULong() * 4uL || times.length != count.toULong() * 8uL)
             return notebook.rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
+        notebook.prepareRealBatch(phase, count)?.let { return it }
         val x = DoubleArray(count); val y = DoubleArray(count); val pressure = FloatArray(count); val time = LongArray(count)
         if (count > 0) {
             x.usePinned { memcpy(it.addressOf(0), xs.bytes, xs.length) }

@@ -11,8 +11,15 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
         const val COMMAND_HEADER_BYTES = 4096L
         const val POINT_BYTES = 28L
         private fun objectCharge(value: StrokeObject): Long = 256L + value.id.value.length * 2 + value.layerId.value.length * 2 + value.samples.size.toLong() * 28
-        private fun liveCharge(root: DocumentRoot): Long = 512L + (root.id.value.length + root.title.length) * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
-            root.scene.objects().sumOf(::objectCharge)
+        /** Prepaid capacity for the owner's sole selected-page reference list; no duplicate sample charge.
+         * Exact-size page lists fit this all-object upper bound. Logical containers, not measured heap.
+         */
+        fun projectionCapacityCharge(objects: Int): Long = if (objects <= 0) 0L else 128L + objects * 8L
+        private fun liveCharge(root: DocumentRoot): Long {
+            var charge = 512L + (root.id.value.length + root.title.length) * 2 + root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 }
+            root.scene.forEachObject { charge += objectCharge(it) }
+            return charge + projectionCapacityCharge(root.scene.objectCount)
+        }
         /** Same initial-state formulas as the authority, without constructing a mutable owner. */
         fun initialCapacityFailure(root: DocumentRoot, budget: DocumentBudget): DocumentRejection? = when {
             root.pageCount > budget.maxPages -> DocumentRejection.PAGE_CAPACITY
@@ -31,6 +38,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                              val redo: List<DocumentDelta> = emptyList(), val evictedHistoryCount: Long = 0)
     private var state = State(initial, emptyMap(), initial.pages().map { it.id }.toSet(), initial.pages().map { it.layerId }.toSet(),
         initial.scene.objects().map { it.id }.toSet(), initial.scene.objects().associate { it.id to it.objectRevision })
+    private var editingRetired = false
     init {
         ownerCheck()
         require(initial.title.hasValidUnicode()) { "Invalid Unicode title" }
@@ -40,14 +48,27 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
      * Caller supplies an already validated generated identity. Deleted/undone identities stay reserved.
      */
     internal fun identityWasUsed(value: String): Boolean {
-        ownerCheck(); val current = state
+        ownerCheck(); check(!editingRetired) { "Authority editing is retired" }; val current = state
         return PageId(value) in current.pages || LayerId(value) in current.layers ||
             ObjectId(value) in current.objects || CommandId(value) in current.journal
     }
     fun snapshot(): DocumentRoot { ownerCheck(); return state.root }
+    /** Original notebook calls only after its retirement/handoff guards. Keep the exact immutable
+     * root for readers, but release session-only editing references before another owner is admitted.
+     * This is neither a storage/GPU receipt nor a claim that GC has reclaimed physical bytes.
+     */
+    internal fun retireEditingState() {
+        ownerCheck()
+        if (editingRetired) return
+        val current = state
+        state = State(current.root, emptyMap(), emptySet(), emptySet(), emptySet(), emptyMap(),
+            evictedHistoryCount = current.evictedHistoryCount)
+        editingRetired = true
+    }
     fun status(): DocumentAuthorityStatus {
         ownerCheck(); val current = state
-        return DocumentAuthorityStatus(liveCharge(current.root), current.journal.values.sumOf { it.charge }, identityCharge(current),
+        val live = liveCharge(current.root) - if (editingRetired) projectionCapacityCharge(current.root.scene.objectCount) else 0L
+        return DocumentAuthorityStatus(live, current.journal.values.sumOf { it.charge }, identityCharge(current),
             current.journal.size, current.root.pageCount, current.root.scene.objectCount,
             current.undo.size, current.redo.size, (current.undo + current.redo).sumOf { it.charge },
             current.undo.lastOrNull()?.operationId, current.redo.lastOrNull()?.operationId, current.evictedHistoryCount)
@@ -55,8 +76,10 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     /** Existing authority's live-payload gate, not a reservation of history, journal or system heap. */
     internal fun additionalStrokeSampleCapacity(objectId: ObjectId, layerId: LayerId): Int {
         ownerCheck()
+        if (editingRetired) return 0
         if (state.root.scene.objectCount >= budget.maxObjects) return 0
-        val header = 256L + (objectId.value.length + layerId.value.length) * 2L
+        val header = 256L + (objectId.value.length + layerId.value.length) * 2L +
+            projectionCapacityCharge(state.root.scene.objectCount + 1) - projectionCapacityCharge(state.root.scene.objectCount)
         val remaining = (budget.liveBytes - liveCharge(state.root) - header).coerceAtLeast(0L)
         return (remaining / POINT_BYTES).coerceAtMost(1_000_000L).toInt()
     }
@@ -65,6 +88,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     internal fun strokeInputCapacity(objectId: ObjectId, pageId: PageId): StrokeInputCapacity {
         ownerCheck(); val current = state; val root = current.root
         fun refused(reason: DocumentRejection) = StrokeInputCapacity(0, reason)
+        if (editingRetired) return refused(DocumentRejection.CLOSED)
         if (root.revision == Long.MAX_VALUE) return refused(DocumentRejection.REVISION_EXHAUSTED)
         if (current.journal.size >= budget.journalEntries) return refused(DocumentRejection.JOURNAL_CAPACITY)
         val journal = ((budget.journalBytes - current.journal.values.sumOf { it.charge } - COMMAND_HEADER_BYTES).coerceAtLeast(0L) / POINT_BYTES).coerceAtMost(1_000_000L).toInt()
@@ -102,6 +126,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
 
     fun commit(command: DocumentCommand): DocumentCommit {
         ownerCheck()
+        if (editingRetired) return reject(DocumentRejection.CLOSED)
         val old = state; val root = old.root
         old.journal[command.id]?.let { return if (it.command == command) DocumentCommit.Accepted(it.receipt) else reject(DocumentRejection.REUSED_OPERATION_ID) }
         if (command is DocumentCommand.Rename && (command.title.length > 120 || !command.title.hasValidUnicode())) return reject(DocumentRejection.INVALID_TITLE)
@@ -205,7 +230,8 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                 if (mapping.values.any { it in old.objects }) return reject(DocumentRejection.REUSED_IDENTITY)
                 if (objects.size > budget.maxObjects - root.scene.objectCount) return reject(DocumentRejection.OBJECT_CAPACITY)
                 // Reject projected payload before constructing copied object headers or scene maps.
-                val extra = objects.sumOf { 256L + mapping.getValue(it.id).value.length * 2 + command.newLayerId.value.length * 2 + it.samples.size.toLong() * 28 }
+                val extra = objects.sumOf { 256L + mapping.getValue(it.id).value.length * 2 + command.newLayerId.value.length * 2 + it.samples.size.toLong() * 28 } +
+                    projectionCapacityCharge(root.scene.objectCount + objects.size) - projectionCapacityCharge(root.scene.objectCount)
                 if (extra > budget.liveBytes - liveCharge(root)) return reject(DocumentRejection.LIVE_BYTE_CAPACITY)
                 addPage(source.copy(id = command.newPageId, layerId = command.newLayerId, contentRevision = 0), command.before)?.let { return reject(it) }
                 for (obj in objects) {
@@ -237,7 +263,8 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                         if (action.target.layerId != page.layerId) return reject(DocumentRejection.WRONG_LAYER)
                         if (action.objectId in old.objects) return reject(DocumentRejection.REUSED_IDENTITY)
                         if (root.scene.objectCount >= budget.maxObjects) return reject(DocumentRejection.OBJECT_CAPACITY)
-                        val extra = 256L + action.objectId.value.length * 2 + action.target.layerId.value.length * 2 + action.samples.size.toLong() * 28
+                        val extra = 256L + action.objectId.value.length * 2 + action.target.layerId.value.length * 2 + action.samples.size.toLong() * 28 +
+                            projectionCapacityCharge(root.scene.objectCount + 1) - projectionCapacityCharge(root.scene.objectCount)
                         if (extra > budget.liveBytes - liveCharge(root)) return reject(DocumentRejection.LIVE_BYTE_CAPACITY)
                         newObjects.add(action.objectId)
                     }
@@ -255,7 +282,8 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
         val prospectiveObjects = root.scene.objectCount + changes.count { it.before == null } - changes.count { it.after == null }
         if (prospectiveObjects > budget.maxObjects) return reject(DocumentRejection.OBJECT_CAPACITY)
         val prospectiveLive = liveCharge(root) + (title.length - root.title.length) * 2 + changes.sumOf { (it.after?.let(::objectCharge) ?: 0L) - (it.before?.let(::objectCharge) ?: 0L) } +
-            pages.sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } - root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 }
+            pages.sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } - root.pages().sumOf { 192L + it.id.value.length * 2 + it.layerId.value.length * 2 } +
+            projectionCapacityCharge(prospectiveObjects) - projectionCapacityCharge(root.scene.objectCount)
         if (prospectiveLive > budget.liveBytes) return reject(DocumentRejection.LIVE_BYTE_CAPACITY)
         if (pages.size > budget.maxPages) return reject(DocumentRejection.PAGE_CAPACITY)
         val epochs = if (changes.isEmpty()) null else old.epochs.toMutableMap()

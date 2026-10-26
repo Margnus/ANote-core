@@ -20,14 +20,20 @@ class DocumentRoot private constructor(val title: String, val scene: SceneSnapsh
         require(directory.map { it.id }.toSet().size == directory.size && directory.map { it.layerId }.toSet().size == directory.size)
         require(directory.all { it.contentRevision <= revision })
         val layers = directory.map { it.layerId }.toSet()
-        require(scene.objects().all { it.layerId in layers }) { "Orphan canvas object" }
+        scene.forEachObject { require(it.layerId in layers) { "Orphan canvas object" } }
     }
     fun pages(): List<PageDescriptor> = directory.toList()
     fun page(index: Int): PageDescriptor = directory[index]
     fun findPage(id: PageId): PageDescriptor? = directory.firstOrNull { it.id == id }
     fun pageObjects(id: PageId): List<StrokeObject> {
         val page = findPage(id) ?: return emptyList()
-        return scene.objects().filter { it.layerId == page.layerId }
+        var count = 0
+        scene.forEachObject { if (it.layerId == page.layerId) count++ }
+        if (count == 0) return emptyList()
+        // Allocate only the selected page's exact reference capacity, never an intermediate all-scene list.
+        val objects = ArrayList<StrokeObject>(count)
+        scene.forEachObject { if (it.layerId == page.layerId) objects.add(it) }
+        return objects
     }
     companion object {
         fun empty(id: SceneId, title: String, firstPage: PageDescriptor): DocumentRoot = DocumentRoot(title, SceneSnapshot.empty(id), listOf(firstPage))
