@@ -66,8 +66,8 @@ class PreviewInputTest {
         assertEquals(0, n.totalStrokeCount)
         val pending = n.pendingStroke(); val samples = (pending!!.command as CanvasCommand.AddStroke).samples
         assertEquals(4, samples.size)
-        assertEquals(samples.logicalByteCharge, n.inputReservedByteCharge)
-        n.cancelStroke(); assertEquals(samples.logicalByteCharge, n.inputReservedByteCharge)
+        assertEquals(PreviewRecoveryCodec.pendingCharge(pending), n.inputReservedByteCharge)
+        n.cancelStroke(); assertEquals(PreviewRecoveryCodec.pendingCharge(pending), n.inputReservedByteCharge)
         val resent = offer(n, PointerPhase.UP, 3, 4)
         assertFalse(resent.admitted); assertEquals(PreviewFailureKind.PENDING_STROKE, resent.failure?.kind)
         assertSame(pending, n.pendingStroke()); n.cancelStroke(); assertFalse(n.retire()); assertSame(pending, n.pendingStroke())

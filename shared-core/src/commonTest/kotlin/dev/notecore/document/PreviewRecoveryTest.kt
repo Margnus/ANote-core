@@ -107,4 +107,26 @@ class PreviewRecoveryTest {
         assertTrue(note.captureRecovery().sameContent(recovery))
         assertFailsWith<IllegalStateException> { PagedPreviewNotebook.openRecovery(recovery, "consumer", ownerCheck = { error("wrong owner") }) }
     }
+    @Test fun pendingMetadataBudgetRefusalPreservesCheckpointAndExactBudgetRestoresOnce() {
+        val source = recovery(); val encoded = source.encode()
+        val pending = source.pending!!
+        val stroke = pending.command as CanvasCommand.AddStroke
+        val charge = 2048L + (pending.id.value.length + pending.pageId.value.length + stroke.objectId.value.length +
+            stroke.target.layerId.value.length) * 2L + 3 * 28L
+        assertEquals(charge, PreviewRecoveryCodec.pendingCharge(pending))
+        for (bytes in listOf(0L, stroke.samples.logicalByteCharge, charge - 1)) {
+            val refused = PagedPreviewNotebook.openRecovery(source, "restore", DocumentBudget(inputBytes = bytes))
+            assertNull(refused.notebook); assertEquals(PreviewOpenFailure.INPUT_CAPACITY, refused.failure)
+            assertEquals(encoded, source.encode()); assertSame(pending, source.pending)
+        }
+        val note = assertNotNull(PagedPreviewNotebook.openRecovery(source, "restore", DocumentBudget(inputBytes = charge)).notebook)
+        assertEquals(charge, note.inputReservedByteCharge); note.cancelStroke()
+        assertEquals(charge, note.inputReservedByteCharge); assertTrue(note.retryPendingStroke())
+        assertTrue(note.retryPendingStroke()); assertEquals(1, note.totalStrokeCount)
+        assertEquals(stroke.samples, note.stroke(0).samples); assertEquals(0L, note.inputReservedByteCharge)
+        assertEquals(encoded, source.encode())
+        // An ordinary checkpoint needs no pending reservation, even with input disabled.
+        assertNotNull(PagedPreviewNotebook.openRecovery(PagedPreviewSnapshot.fromRoot(source.root), "restore",
+            DocumentBudget(inputBytes = 0)).notebook)
+    }
 }

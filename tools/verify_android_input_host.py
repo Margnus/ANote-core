@@ -30,6 +30,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--serial', required=True)
     parser.add_argument('--adb', required=True)
+    parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows'), default='NoteCorePreview')
     args = parser.parse_args()
     assert args.serial in ('emulator-5580', 'emulator-5554'), 'Only the existing dedicated emulator is authorized'
     folder = ROOT/'build/android-input-host'; folder.mkdir(parents=True, exist_ok=True)
@@ -38,7 +39,7 @@ def main():
         return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT,
                               check=True, capture_output=True, timeout=120).stdout
 
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode('utf-8').strip() == 'NoteCorePreview'
+    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode('utf-8').strip() == args.avd
 
     def files():
         output = adb('shell', 'run-as', BUNDLE, 'ls', 'files/preview-notes').decode('utf-8')

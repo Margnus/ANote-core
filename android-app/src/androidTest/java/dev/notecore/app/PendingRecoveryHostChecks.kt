@@ -52,6 +52,20 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             val reading = PreviewRecoveryCodec.read(file.readText(Charsets.UTF_8))
             check(reading.failure == null && checkNotNull(reading.snapshot).sameContent(recovery) && reading.snapshot?.pending != null)
             main {
+                val checkpoint = checkNotNull(reading.snapshot)
+                val pending = checkNotNull(checkpoint.pending)
+                val stroke = pending.command as CanvasCommand.AddStroke
+                val charge = 2048L + (pending.id.value.length + pending.pageId.value.length + stroke.objectId.value.length +
+                    stroke.target.layerId.value.length) * 2L + stroke.samples.size.toLong() * 28L
+                val owner = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) }
+                val refusedBudget = PagedPreviewNotebook.openRecovery(checkpoint, "budget", DocumentBudget(inputBytes = charge - 1), owner)
+                check(refusedBudget.notebook == null && refusedBudget.failure == PreviewOpenFailure.INPUT_CAPACITY)
+                check(store.activeDocumentId == note.documentId && note.hasPendingStroke)
+                val exact = checkNotNull(PagedPreviewNotebook.openRecovery(checkpoint, "budget", DocumentBudget(inputBytes = charge), owner).notebook)
+                check(exact.inputReservedByteCharge == charge && exact.pendingStroke() === pending)
+                exact.cancelStroke(); check(exact.inputReservedByteCharge == charge)
+                check(exact.retryPendingStroke() && exact.retryPendingStroke() && exact.totalStrokeCount == 1)
+                check(exact.stroke(0).samples == stroke.samples && exact.inputReservedByteCharge == 0L && exact.retire())
                 var refused = false
                 check(!store.save(note.capture()) { _, error -> check(error != null); refused = true })
                 check(refused && store.saveStates().isEmpty() && note.hasPendingStroke)

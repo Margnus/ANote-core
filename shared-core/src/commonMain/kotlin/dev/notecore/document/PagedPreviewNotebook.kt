@@ -11,6 +11,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var selected = initial.page(0).id
     private var sequence = 0L
     private var input: InputReplaySession? = null
+    private var inputReservation = 0L
     private var inputSequence = 0L
     private var strokePage: PageId? = null
     private var strokeCommand: CommandId? = null
@@ -47,7 +48,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     /** Input ownership only; document/history/save/render budgets remain separate. */
     val inputReservedByteCharge: Long get() {
         ownerCheck()
-        return input?.reservedByteCharge ?: (pending?.command as? CanvasCommand.AddStroke)?.samples?.logicalByteCharge ?: 0L
+        return if (input != null) inputReservation else pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L
     }
     val canUndo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextUndoOperationId != null }
     val canRedo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextRedoOperationId != null }
@@ -246,7 +247,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             val nextObject = nextIdentity("ink", nextOperation.second)
                 ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
             val capacity = memory.strokeInputCapacity(ObjectId(nextObject.first), selected)
-            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, capacity.points))
+            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, capacity.points),
+                nextOperation.first, nextObject.first, current.findPage(selected)!!)
             if (count > pointCapacity) {
                 if (count > capacity.points && capacity.limitingReason != DocumentRejection.LIVE_BYTE_CAPACITY) {
                     fail("当前预览编辑容量不足，本批未接收，请先保存或导出现有内容", PreviewFailureKind.DOCUMENT_REJECTED, capacity.limitingReason)
@@ -257,6 +259,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
             objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
             page = selected; session = InputReplaySession(pointCapacity); sequence = 0
+            inputReservation = inputReservation(pointCapacity, command.value, objectId.value, current.findPage(page)!!)
         } else {
             session = input!!; sequence = inputSequence
             if (sequence == Long.MAX_VALUE) return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
@@ -283,11 +286,14 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     /** Reserve the entire admitted stroke, including completion overlap, before allocating identities.
      * Rejection never lowers an active session's capacity or drops its accepted prefix.
      */
-    private fun affordableInputPoints(maximum: Int): Int {
+    private fun inputReservation(points: Int, operation: String, objectId: String, page: PageDescriptor): Long =
+        maxOf(InputReplaySession.reservationBytes(points),
+            PreviewRecoveryCodec.pendingCharge(operation, page.id.value, objectId, page.layerId.value, points))
+    private fun affordableInputPoints(maximum: Int, operation: String, objectId: String, page: PageDescriptor): Int {
         var low = 0; var high = maximum
         while (low < high) {
             val mid = low + (high - low + 1) / 2
-            if (InputReplaySession.reservationBytes(mid) <= inputByteLimit) low = mid else high = mid - 1
+            if (inputReservation(mid, operation, objectId, page) <= inputByteLimit) low = mid else high = mid - 1
         }
         return low
     }
@@ -360,6 +366,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         fun openRecovery(snapshot: PagedPreviewSnapshot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
                          ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
             ownerCheck()
+            if (snapshot.pending?.let { PreviewRecoveryCodec.pendingCharge(it) > budget.inputBytes } == true)
+                return PreviewNotebookOpen(null, PreviewOpenFailure.INPUT_CAPACITY)
             val opened = open(snapshot.root, sessionNonce, budget, ownerCheck)
             val note = opened.notebook ?: return opened
             snapshot.pending?.let { command ->

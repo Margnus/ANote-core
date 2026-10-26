@@ -42,9 +42,12 @@ object PreviewRecoveryCodec {
     }
     internal fun pendingCharge(pending: DocumentCommand.Canvas): Long {
         val stroke = pending.command as CanvasCommand.AddStroke
-        return 2048L + (pending.id.value.length + pending.pageId.value.length + stroke.objectId.value.length +
-            stroke.target.layerId.value.length) * 2L + stroke.samples.size.toLong() * 28L
+        return pendingCharge(pending.id.value, pending.pageId.value, stroke.objectId.value,
+            stroke.target.layerId.value, stroke.samples.size)
     }
+    /** Same retained-command formula before DOWN, without placeholder samples or a second command. */
+    internal fun pendingCharge(operation: String, page: String, objectId: String, layer: String, points: Int): Long =
+        2048L + (operation.length.toLong() + page.length + objectId.length + layer.length) * 2L + points.toLong() * 28L
     internal fun pendingWorkCharge(pending: DocumentCommand.Canvas): Long = pendingCharge(pending) +
         (4096L + (pending.command as CanvasCommand.AddStroke).samples.size.toLong() * 144L) * 8L
 

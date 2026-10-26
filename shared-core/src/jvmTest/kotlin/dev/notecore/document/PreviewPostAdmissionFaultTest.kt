@@ -23,7 +23,7 @@ class PreviewPostAdmissionFaultTest {
             assertTrue(result.admitted); assertEquals(2, result.acceptedSamples)
             assertEquals(DocumentRejection.JOURNAL_CAPACITY, result.failure?.documentReason)
             val pending = assertNotNull(n.pendingStroke()); val samples = (pending.command as CanvasCommand.AddStroke).samples
-            assertEquals(4, samples.size); assertEquals(240L, n.inputReservedByteCharge)
+            assertEquals(4, samples.size); assertEquals(PreviewRecoveryCodec.pendingCharge(pending), n.inputReservedByteCharge)
             n.cancelStroke(); assertFalse(n.retire()); assertFalse(n.retryPendingStroke())
             assertSame(before, n.snapshot()); assertSame(pending, n.pendingStroke())
             assertFalse(offer(PointerPhase.UP, 3, 4).admitted)
