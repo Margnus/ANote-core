@@ -313,9 +313,9 @@ final class PreviewModel: ObservableObject {
         if case .rejected = admission { rejected() }
     }
     private var previewBudget: DocumentBudget {
-        documentBudget ?? DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+        documentBudget ?? DocumentBudget.companion.validated(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
-            historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
+            historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024).budget! // Trusted fixed policy; raw callers inspect failure.
     }
     func adopt(_ root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot? = nil) throws {
         precondition(Thread.isMainThread && current == nil)

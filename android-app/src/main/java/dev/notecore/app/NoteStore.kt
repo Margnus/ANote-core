@@ -118,13 +118,15 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     // An identity-only optimization must not retain an obsolete canonical root.
     private var activeSavedRoot = java.lang.ref.WeakReference<DocumentRoot>(null)
     private var activeSavedPending = java.lang.ref.WeakReference<DocumentCommand.Canvas>(null)
+    private fun previewBudget(): DocumentBudget = checkNotNull(DocumentBudget.validated(
+        journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024).budget)
     internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
         executor.checkOwnerThread()
         check(!ownerRetiring) { "Store owner is retiring" }
         require(opened.root === opened.recovery.root) { "Checkpoint/root mismatch" }
         activeNotebook?.let { check(it.documentId == opened.root.id.value); return it }
         val result = PagedPreviewNotebook.openRecovery(opened.recovery, UUID.randomUUID().toString(),
-            DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
+            previewBudget(),
             executor::checkOwnerThread)
         // This internal entry receives only the reader-validated root and fixed supported budget.
         val note = checkNotNull(result.notebook) { "Unsupported preview adoption: ${result.failure}/${result.documentReason}" }
@@ -138,7 +140,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         check(!ownerRetiring) { "Store owner is retiring" }
         check(activeNotebook == null) { "Release the previous owner only after snapshot admission" }
         val result = PagedPreviewNotebook.createValidated(UUID.randomUUID().toString(), "未命名笔记", UUID.randomUUID().toString(),
-            budget = DocumentBudget(journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024),
+            budget = previewBudget(),
             ownerCheck = executor::checkOwnerThread)
         val note = checkNotNull(result.notebook) { "Unsupported preview creation: ${result.failure}/${result.documentReason}" }
         activeNotebook = note

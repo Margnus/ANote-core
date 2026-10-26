@@ -1,0 +1,50 @@
+{
+  "schema": "budget-creation-1",
+  "status": "passed",
+  "decision": "Use DocumentBudget.validated for raw numeric values before notebook creation. The original constructor shares the same range predicate and retains its trusted precondition. Original Android/Apple preview policies consume the result. No second authority, implicit owner transfer, clamping, allocator recovery or budget reservation.",
+  "checks": [
+    "nine field-specific failures without constructing a budget",
+    "count min/max and negative byte extremes",
+    "zero bytes, Long.MAX_VALUE and defaults preserved exactly",
+    "general validity remains distinct from preview support/capacity",
+    "valid budget opens the original owner; wrong-owner still rejects",
+    "actual Swift invalid raw values return typed failures without trapping"
+  ],
+  "jvm_tests": 437,
+  "shared_native_tests": 193,
+  "swift_host_tests": 61,
+  "android_host_checks": [
+    11,
+    11,
+    12
+  ],
+  "original_files_preserved": {
+    "android": 66,
+    "apple": 14
+  },
+  "public_declaration_scope": "The compiler header includes the new no-NSError typed factory; declaration inventory is not exhaustive exception conformance.",
+  "limits": [
+    "Raw constructor/copy, enum/null, indexes and owner callbacks still have programmer preconditions",
+    "Long.MAX_VALUE is an unchanged accepted value, not prepaid physical memory or an admission guarantee",
+    "No ordinary OS multiwindow/picker, physical M-1/heap/stylus, power-loss durability or stable ABI claim"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "build/android-input-host/original-files.json": "eeeb9b671f424be4453c58c9fd356c1866d92d7628d6913c34aac93025e8619c",
+    "build/budget-creation/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/budget-creation/ios-before.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "docs/最小预览消费者契约.md": "499773f01bbb7e8a1c8e121f28246301a2b5c85a9a04c0ad94ea83cc175fae23",
+    "reports/android-input-host-tests.json": "c2ab5ed704552ce9cd85d8353e8c63153cea4371886dad16f7eae9f8062f3bc2",
+    "reports/ios-host-tests.json": "f68aedd0b25205fd22ab6a84c90139c8d570898596d9a7627970d7131cc66888",
+    "reports/ios-preview-build.json": "7bf455102013f42d98502cb3a8c7e8d44a460ab69ab92f29ab36d99a1f2c78f1",
+    "reports/ios-preview-restored.json": "c0b632146d0c9b9346e1dd9b86ea87f13ad2efde6befa30d9355a47a4fd064f9",
+    "reports/preview-build.json": "e4fe7b318326c5ab7167407edd7671ebfa66db0042c8c80ce6258039aad4ac80",
+    "reports/public-boundary-inventory.json": "8bfd10c9e6b804a946f77e010facfa824b1b99b36e9b67764b0f6ae4575dd09d",
+    "reports/shared-native-contracts.json": "86b3aca8486d8c8cc42638b1cdc8da3909d9912e825c88169c4d20cb51e99f21",
+    "reports/verification.json": "7cdad70b5e2ef1d55e0f5155933b84e631656af11d7972ad7b9e825b061e7958",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "513e55905e14a020b181400ac6cbc229e9196d4f6a7f4e970f13615b4b1e58f6",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentBudgetCreationTest.kt": "97b66767aa7f18503ebdca8b3c86f5922074d868456fd9ce7f8a29ff5b5d7d1d",
+    "tools/verify_budget_creation.py": "aaeb2bb794403be5a2683e6e6d17574bf8daffed56e16172a914eafd6f07fd36"
+  }
+}

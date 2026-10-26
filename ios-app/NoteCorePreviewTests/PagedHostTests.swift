@@ -6,6 +6,34 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testRawBudgetFailuresDoNotTrapAndPreviewStillChecksPolicy() async throws {
+        func validate(pages: Int32 = 128, objects: Int32 = 5000, live: Int64 = 8*1024*1024,
+                      journal: Int32 = 128, journalBytes: Int64 = 8*1024*1024, identity: Int64 = 2*1024*1024,
+                      history: Int32 = 128, historyBytes: Int64 = 8*1024*1024, input: Int64 = 2*1024*1024) -> DocumentBudgetCreation {
+            DocumentBudget.companion.validated(maxPages: pages, maxObjects: objects, liveBytes: live,
+                journalEntries: journal, journalBytes: journalBytes, identityBytes: identity,
+                historyEntries: history, historyBytes: historyBytes, inputBytes: input)
+        }
+        let failures: [(DocumentBudgetCreation, DocumentBudgetFailure)] = [
+            (validate(pages: 0), .maxPages), (validate(pages: 4097), .maxPages),
+            (validate(objects: Int32.max), .maxObjects), (validate(live: Int64.min), .liveBytes),
+            (validate(journal: 0), .journalEntries), (validate(journalBytes: -1), .journalBytes),
+            (validate(identity: -1), .identityBytes), (validate(history: 16385), .historyEntries),
+            (validate(historyBytes: -1), .historyBytes), (validate(input: -1), .inputBytes)]
+        for (result, reason) in failures { XCTAssertNil(result.budget); XCTAssertEqual(result.failure, reason) }
+        let zero = try XCTUnwrap(validate(live: 0, journalBytes: 0, identity: 0, historyBytes: 0, input: 0).budget)
+        XCTAssertEqual(zero.inputBytes, 0); XCTAssertEqual(zero.liveBytes, 0)
+        let huge = try XCTUnwrap(validate(live: Int64.max, input: Int64.max).budget)
+        XCTAssertEqual(huge.liveBytes, Int64.max); XCTAssertEqual(huge.inputBytes, Int64.max)
+        let unsupported = PagedPreviewNotebook.companion.createValidated(documentId: "budget", title: "budget", sessionNonce: "budget",
+            width: 595, height: 842, paper: .blank, budget: huge, ownerCheck: { precondition(Thread.isMainThread) })
+        XCTAssertNil(unsupported.notebook); XCTAssertEqual(unsupported.failure, .unsupportedBudget)
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        XCTAssertNotNil(model.current); model.close()
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("budget consumer drains original writes and owner") { model.ownerRetirementStatus.phase == .retired }
+    }
     @MainActor func testWindowDeparturePreservesAuthorityAndBoundsPresentationIdentities() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         let model = PreviewModel(directory: dir); model.create()
