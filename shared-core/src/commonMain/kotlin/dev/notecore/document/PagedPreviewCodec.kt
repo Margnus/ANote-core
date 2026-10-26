@@ -82,7 +82,7 @@ object PagedPreviewCodec {
         var charge = 512L + (root.id.value.length + root.title.length) * 2L
         for (page in root.pages()) { validText(page.id.value); validText(page.layerId.value); charge += pageCharge(page) }
         var total = 0
-        for (obj in root.scene.objects()) {
+        root.scene.forEachObject { obj ->
             validText(obj.id.value); validText(obj.layerId.value)
             require(obj.brush.algorithmVersion == 1 && obj.transform.inverseOrNull() != null)
             require(obj.samples.size in 1..MAX_STROKE_POINTS && obj.samples.size <= MAX_POINTS - total)

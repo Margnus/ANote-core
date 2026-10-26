@@ -26,6 +26,10 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var projectionRevision = -1L
     private var projectionPage: PageId? = null
     private var projection: List<StrokeObject> = emptyList()
+    /** Retained references only; the authority prepays a maximum list in its live envelope. */
+    internal val retainedProjectionByteCharge: Long get() {
+        ownerCheck(); return MemoryDocumentAuthority.projectionCapacityCharge(projection.size)
+    }
     init {
         ownerCheck()
         require(validSessionNonce(sessionNonce))
@@ -129,13 +133,18 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (pending != null) return fail("上一笔尚未提交，请先重试保存", PreviewFailureKind.PENDING_STROKE)
         clearError(); return true
     }
-    private fun commit(command: DocumentCommand): Boolean = when (val result = memory.commit(command)) {
-        is DocumentCommit.Accepted -> { clearProjection(); cancelStroke(); clearError(); true }
-        is DocumentCommit.Rejected -> fail(when (result.reason) {
-            DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
-            DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
-            else -> "操作未完成，原内容仍保留，请重试"
-        }, PreviewFailureKind.DOCUMENT_REJECTED, result.reason)
+    private fun commit(command: DocumentCommand): Boolean {
+        ownerCheck()
+        // Retire old derived references before any replacement root is published, including refusal.
+        clearProjection()
+        return when (val result = memory.commit(command)) {
+            is DocumentCommit.Accepted -> { cancelStroke(); clearError(); true }
+            is DocumentCommit.Rejected -> fail(when (result.reason) {
+                DocumentRejection.JOURNAL_CAPACITY, DocumentRejection.HISTORY_CAPACITY, DocumentRejection.LIVE_BYTE_CAPACITY,
+                DocumentRejection.IDENTITY_CAPACITY, DocumentRejection.OBJECT_CAPACITY, DocumentRejection.PAGE_CAPACITY -> "当前预览已达到编辑容量，请保留笔记并导出备份"
+                else -> "操作未完成，原内容仍保留，请重试"
+            }, PreviewFailureKind.DOCUMENT_REJECTED, result.reason)
+        }
     }
     fun selectPage(id: PageId): Boolean {
         ownerCheck()
@@ -161,8 +170,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     }
     fun copyCurrentPage(): Boolean {
         if (!prepareEdit()) return false
-        val root = root(); val source = currentPage; val objects = root.pageObjects(selected)
-        val currentPoints = root.scene.objects().sumOf { it.samples.size }
+        val root = root(); val source = currentPage; val objects = visible()
+        val currentPoints = totalPoints(root)
         if (objects.sumOf { it.samples.size } > PagedPreviewCodec.MAX_POINTS - currentPoints) return fail("复制后将超过预览容量，原页面仍保留", PreviewFailureKind.CAPACITY)
         val page = PageId(identity("page") ?: return false); val layer = LayerId(identity("layer") ?: return false)
         val mapping = linkedMapOf<ObjectId, ObjectId>()
@@ -216,6 +225,11 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         color = argb; this.width = width; clearError(); return true
     }
     val inputBatchLimit: Int get() = PREVIEW_INPUT_BATCH_LIMIT
+    private fun totalPoints(root: DocumentRoot): Int {
+        var count = 0
+        root.scene.forEachObject { count += it.samples.size }
+        return count
+    }
     /** Copy-before-admission guard for synchronous platform producers. Null permits preparation only:
      * no samples or identities are accepted, and offerRealBatch repeats the checks after copying.
      * Stay on the same owner; this is not a reservation token or a content receipt.
@@ -256,7 +270,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val sequence: Long
         var command = strokeCommand; var objectId = strokeObject; var page = strokePage
         if (phase == PointerPhase.DOWN) {
-            val remaining = PagedPreviewCodec.MAX_POINTS - current.scene.objects().sumOf { it.samples.size }
+            val remaining = PagedPreviewCodec.MAX_POINTS - totalPoints(current)
             if (remaining <= 0 || current.scene.objectCount >= inputObjectLimit ||
                 count > minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining))
                 return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
