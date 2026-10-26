@@ -83,11 +83,11 @@
     "reports/ios-preview-build.json": "7bf455102013f42d98502cb3a8c7e8d44a460ab69ab92f29ab36d99a1f2c78f1",
     "reports/preview-build.json": "e4fe7b318326c5ab7167407edd7671ebfa66db0042c8c80ce6258039aad4ac80",
     "tools/check_architecture.py": "abcc309a6e5820e8fea5845a4a6867e93f0e903d8301a749b92150d85deae8a3",
-    "tools/audit_public_boundary.py": "4e55ca58253d755de3cccd37981fc879725533eb84c211111608f687c432b6b2"
+    "tools/audit_public_boundary.py": "2ec8c13ba4010dd8b5dcab439d0059fa0729c0eddb686a4a0eec79eb09e224a0"
   },
   "objc_declaration_count": 260,
   "objc_method_count": 874,
-  "reviewed_method_count": 25,
+  "reviewed_method_count": 32,
   "reviewed_declaration_channels": [
     {
       "objc_name": "NCPDocumentBudgetCompanion",
@@ -131,7 +131,42 @@
     },
     {
       "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "stroke(index:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "page(index:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointCount(index:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
       "swift_name": "pointX(index:point:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPStrokeSamples",
+      "swift_name": "x(index:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPStrokeSamples",
+      "swift_name": "y(index:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPStrokeSamples",
+      "swift_name": "pressure(index:)",
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPStrokeSamples",
+      "swift_name": "timeMicros(index:)",
       "declares_nserror": false
     },
     {

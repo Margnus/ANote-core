@@ -1,0 +1,75 @@
+{
+  "schema": "read-traversal-1",
+  "status": "passed",
+  "reviewed_consumers": [
+    {
+      "path": "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt",
+      "reviewed_loop_anchors": [
+        "for (s in 0 until notebook.strokeCount)",
+        "val stroke = notebook.stroke(s); val samples = stroke.samples; val n = samples.size",
+        "for (p in 1 until n)"
+      ],
+      "scope": "Manual review of current synchronous draw/count/object/sample traversal; anchors detect drift, not a control-flow proof or fresh independent-host execution."
+    },
+    {
+      "path": "ios-app/NoteCorePreview/NativeInkCanvas.swift",
+      "reviewed_loop_anchors": [
+        "cached = (0..<note.strokeCount).map",
+        "let stroke = note.stroke(index: index), samples = stroke.samples",
+        "for point in 1..<samples.size"
+      ],
+      "scope": "Manual review of current synchronous draw/count/object/sample traversal; anchors detect drift, not a control-flow proof or fresh independent-host execution."
+    },
+    {
+      "path": "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt",
+      "reviewed_loop_anchors": [
+        "for (i in 0 until note.strokeCount)",
+        "val stroke = note.stroke(i); val samples = stroke.samples",
+        "for (p in 1 until samples.size)"
+      ],
+      "scope": "Manual review of current synchronous draw/count/object/sample traversal; anchors detect drift, not a control-flow proof or fresh independent-host execution."
+    },
+    {
+      "path": "samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "reviewed_loop_anchors": [
+        "cached = (0..<Int(note.strokeCount)).map",
+        "let stroke = note.stroke(index: Int32(i))",
+        "for i in 1..<Int(samples.size)"
+      ],
+      "scope": "Manual review of current synchronous draw/count/object/sample traversal; anchors detect drift, not a control-flow proof or fresh independent-host execution."
+    }
+  ],
+  "decision": "Retain trusted count-bounded synchronous owner traversal for the four current consumers. Immutable captured stroke/sample references remain readable after page/undo/retirement. Raw indexes and wrong-owner Notebook calls retain programmer preconditions; do not add per-point wrappers or another content authority without a real external-index consumer.",
+  "jvm_tests": 440,
+  "shared_native_tests": 196,
+  "swift_host_tests": 62,
+  "apple_original_files_preserved": 14,
+  "runtime_scope": "Three new public common tests and one actual Swift host test. JVM/Native catch index precondition exceptions and verify original root/input retention; Swift uses valid count-bounded indexes only. No arbitrary invalid-index Swift recovery claim.",
+  "limits": [
+    "Static loop anchors are not exhaustive control-flow or future consumer safety proof",
+    "No new ordinary Android/Apple package build, independent sample-host run or OS UI interaction",
+    "Immutable-reference lifetime is caller retention responsibility, not a GC/native memory release receipt",
+    "No mutable owner transfer, stable ABI, physical M-1/heap/stylus or production durability claim"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "f7a93321b9f80a527c5e07beb0d8be932f2986ca96f9f8641c1f08e1d9f9bf86",
+    "build/read-traversal/ios-after.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "build/read-traversal/ios-before.json": "a0edbdbb90fe029d7998cd4e0cd52612b693ee44081c351eec5bd26ec59a4d37",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea",
+    "docs/只读遍历支持边界.md": "cb639bc20d021e4b491d3e059543de2df031286fe275a166e63e2a92ad0d9f7a",
+    "docs/最小预览消费者契约.md": "f0f9581ada1afa490cede183c8fd47f4918c526f8bd0430452a066a85613eba0",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "2a02be1d62e3d4cf61923340d55a439be93603b075b087bdb37044872e26c7be",
+    "reports/ios-host-tests.json": "8996cf4f279896f0be6ecd7af640aa24595d5fab79c7cdd752b587185cd4214d",
+    "reports/ios-preview-restored.json": "a9f6ab81a7bc260275c8f7c9606d70753a2e794992b51c879331c1ca20701a0f",
+    "reports/public-boundary-inventory.json": "345a64edcf6f4d7065f1124fb8b19c215d9da3d109b884a2f335482fed6b6ab5",
+    "reports/shared-native-contracts.json": "10069167ec06ad189154017746c72746f02c307d936443a2c09b0428ddba7887",
+    "reports/verification.json": "78965134a23f46538279025525634f4b2f6ff291f7b43b8731136df8cadc579d",
+    "samples/sketch-host-ios/Sources/SketchCanvas.swift": "e0ffa35526ec154ae73a962b0befd60ae7585dac55cddd3f669115d12cc1d051",
+    "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt": "877eb76276c24cbe04a44c96dc8e692531a7555b242707764c841c46f9d775d2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "9fa63e5dc9f661531837706802406b5e58ceb79eead598fd6caa6dc5871f65d3",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewReadTraversalTest.kt": "ec6ae885851861fcda733558b1306a7b22a3e641ee35b9ed88a58162ca3730ad",
+    "tools/audit_read_traversal.py": "003ada835a25290ad8adc915dd6de97bfe04a73d84407ad10c3d9f8dc852999b"
+  }
+}

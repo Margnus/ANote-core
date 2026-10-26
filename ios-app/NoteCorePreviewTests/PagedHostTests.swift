@@ -6,6 +6,28 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testCapturedStrokeTraversalRemainsImmutableAfterPageUndoAndRetirement() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current)
+        XCTAssertTrue(note.beginStroke(x: 10, y: 20, pressure: 0.25, timeMicros: 1))
+        XCTAssertTrue(note.endStroke(x: 30, y: 40, pressure: 0.75, timeMicros: 2))
+        let page = note.currentPageId, stroke = note.stroke(index: 0), samples = stroke.samples
+        let snapshot = note.capture(), encoded = try snapshot.encode()
+        XCTAssertTrue(note.insertPage()); XCTAssertEqual(note.strokeCount, 0)
+        XCTAssertTrue(note.selectPage(id: page)); XCTAssertTrue(note.stroke(index: 0) === stroke)
+        XCTAssertTrue(note.undo()); XCTAssertEqual(note.strokeCount, 1)
+        XCTAssertTrue(note.undo()); XCTAssertEqual(note.strokeCount, 0)
+        model.close(); XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("read traversal owner retires through original writes") { model.ownerRetirementStatus.phase == .retired }
+        XCTAssertEqual(try snapshot.encode(), encoded)
+        var points = [(Double, Double, Float, Int64)]()
+        for index in 0..<samples.size {
+            points.append((samples.x(index: index), samples.y(index: index), samples.pressure(index: index), samples.timeMicros(index: index)))
+        }
+        XCTAssertEqual(points.count, 2); XCTAssertEqual(points[0].0, 10); XCTAssertEqual(points[1].1, 40)
+        XCTAssertEqual(points[0].2, 0.25); XCTAssertEqual(points[1].3, 2)
+    }
     @MainActor func testRawBudgetFailuresDoNotTrapAndPreviewStillChecksPolicy() async throws {
         func validate(pages: Int32 = 128, objects: Int32 = 5000, live: Int64 = 8*1024*1024,
                       journal: Int32 = 128, journalBytes: Int64 = 8*1024*1024, identity: Int64 = 2*1024*1024,
