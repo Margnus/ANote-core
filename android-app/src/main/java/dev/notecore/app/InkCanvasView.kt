@@ -50,6 +50,14 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         contentDescription = context.getString(R.string.canvas_description, notebook.strokeCount)
         invalidate()
     }
+    fun syncPresentation() {
+        val page = notebook.currentPage
+        if (configuredPage != page.id || viewport.pageWidth != page.width || viewport.pageHeight != page.height) refreshPage()
+        else {
+            contentDescription = context.getString(R.string.canvas_description, notebook.strokeCount)
+            invalidate() // A save ACK on the same page must not cancel this View's accepted input.
+        }
+    }
     fun resetViewport() { cancelInk(); viewport.reset(); invalidate() }
     fun zoomViewport(ratio: Double) {
         cancelInk(); viewport.gesture(width / 2.0, height / 2.0, width / 2.0, height / 2.0, ratio); invalidate()

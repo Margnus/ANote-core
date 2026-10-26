@@ -104,14 +104,17 @@ internal class EditorAttachmentHostChecks(private val test: Instrumentation, pri
             check(note.hasPendingStroke && store.editorCount == 1 && note.captureRecovery().sameContent(checkpoint))
         }
         eventually("Failed recovery was not held by original ledger") { store.saveStates().single().retryRequired }
+        main { check(store.editorPresentation(note).phase == EditorSavePhase.RETRY_REQUIRED) }
         check(directory.delete()); check(directory.mkdir())
         main { check(store.retryRetainedWrites()) }
         eventually("Repaired recovery did not complete original write") { store.saveStates().isEmpty() }
+        main { check(store.editorPresentation(note).phase == EditorSavePhase.RECOVERY_SAVED) }
         val file = File(directory, "pending-editor.ncp")
         check(file.readText(Charsets.UTF_8) == checkpoint.encode())
         main {
             check(store.leaveEditor(note, "pending-B") == EditorDeparture.DOCUMENT_CLOSED)
             check(store.editorCount == 0 && store.activeDocumentId == null)
+            check(store.editorPresentation(note).phase == EditorSavePhase.CLOSED)
         }
         var read = false
         main { store.open("pending-editor") { opened, error ->

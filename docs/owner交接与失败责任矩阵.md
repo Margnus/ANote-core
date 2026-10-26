@@ -34,7 +34,9 @@ Android原Store现登记最多8个、每个最长64 UTF16单位的窗口身份�
 
 编辑窗口存在时，新建或打开另一文档在UI明确拒绝，不触发内部check，也不替换原authority；这仍是单活动文档预览限制，不能作为生产多文档能力。没有编辑端时，切换前先将旧会话完整内容交原ledger，pending仍等确认；读取损坏/不支持文件本身不退休旧会话，只有有效内容的adoptForEditor才准备切换。并发异文档读取返回时也重新检查原owner，而不是信任发起时的空闲状态。
 
-saveOwned使用原准入/worker/ledger，不创建接管队列；它没有UI receiver，不能用空回调覆盖同一已受理内容的现有UI receiver。对已被新内容替代的旧receiver仍仅解除呈现引用，正文责任归原ledger；所有窗口保存状态的广播尚未实现。实际Activity用例通过测试反射暂时替换原get的单例为独立cache Store，正常onCreate/open/editor、“返回”按钮回调及真实recreate均执行，最后恢复原单例；它不是普通系统触摸或全部多窗口验收。Apple窗口导航接入见下节，完整跨平台多窗口/多文档仍待。来源见[报告](../reports/editor-attachments.json)。
+saveOwned使用原准入/worker/ledger，不创建接管队列；它没有UI receiver，不能用空回调覆盖同一已受理内容的现有UI receiver。对已被新内容替代的旧receiver仍仅解除呈现引用，正文责任归原ledger。原最多8个登记现存弱只读observer，主owner有限同步遍历；Activity仅缓存标量呈现值，原root/pending/ledger与实际文件ACK派生保存阶段。旧ACK不将新root标Saved，未准入新内容标UNSAVED；pending确认只标恢复记录已保存，不称普通笔提交或生产DURABLE。失效/抛错observer不消费内容，通知无正文副本/异步重试队列/第二状态权威。
+
+实际Activity用例通过测试反射暂时替换原get的单例为独立cache Store，正常onCreate/open/editor、“返回”按钮回调及真实recreate均执行，最后恢复原单例。新增真实兄弟Activity保存/页选择更新标题、页码、撤销与保存提示；相同页仅invalidate，提示区预留两行，真实pre-draw后原画布尺寸和另一窗口受理的input operation保持，UP继续提交。页/尺寸变化仍沿原取消输入与坐标重设责任。原worker旧ACK/失败修复重试、停后端留责及pending恢复阶段已验；停后端用例不证明后端重启/接管。输入11/保存11/owner窗口12、66份原件和普通进程还原来源见[当前反馈报告](../reports/editor-presentation.json)；旧退出专题见[原报告](../reports/editor-attachments.json)，不机械继承旧包范围。这不是普通系统触摸、所有字体/窗口布局、完整OS多窗口或多文档验收。Apple窗口导航接入见下节。
 
 ## Apple窗口的候选接入
 

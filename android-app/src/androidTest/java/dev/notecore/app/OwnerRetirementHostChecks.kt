@@ -146,6 +146,7 @@ internal class OwnerRetirementHostChecks(private val test: Instrumentation, priv
                 checks.add("full_ledger_retry_frees_slot_before_retirement")
             }
             checks.addAll(EditorAttachmentHostChecks(test, host).verify())
+            checks.addAll(EditorPresentationHostChecks(test, host).verify())
             return JSONObject().put("checks", JSONArray(checks)).put("original_note_files_used", false)
                 .put("abrupt_owner_or_thread_loss_verified", false).put("gc_timing_verified", false).toString()
         } finally {

@@ -1,0 +1,47 @@
+{
+  "schema": "editor-presentation-1",
+  "status": "passed",
+  "scope": "Original Android Store/ledger/file worker; synchronous weak read-only observers and actual MainActivity callbacks with isolated test-injected Store. No ordinary OS multiwindow input or physical heap claim.",
+  "decision": "Reuse the original eight editor registrations as weak observers. Derive phase from original ledger/current root+pending identities and real file ACK. Notify at most eight synchronously; no document payload queue or second state authority. Activity caches only its last scalar presentation and preserves same-page active input.",
+  "checks": [
+    "actual_activity_shared_presentation_update",
+    "editor_original_ledger_old_ack_failure_and_retry",
+    "editor_stopped_backend_feedback"
+  ],
+  "input_checks": 11,
+  "storage_checks": 11,
+  "owner_window_checks": 12,
+  "jvm_tests": 433,
+  "original_files_preserved": 66,
+  "verified_details": [
+    "old root ACK keeps latest current root SAVING; unoffered current root remains UNSAVED",
+    "both observers see latest file ACK, IO failure/retry and repaired write from original ledger",
+    "throwing/detached observer does not consume content or prevent another observer",
+    "stopped backend remains unavailable with original ledger content and old file intact",
+    "confirmed pending recovery is RECOVERY_SAVED, not committed ordinary ink",
+    "real sibling Activity updates title/save/undo/page from the shared owner",
+    "real pre-draw after save feedback keeps canvas bounds and original accepted input operation",
+    "page-only notification preserves content revision and file bytes"
+  ],
+  "limits": [
+    "Callbacks are advisory/read-only; finite synchronous traversal coalesces recursive notification, with no asynchronous retry queue",
+    "Stopped-backend test proves refusal/retention only; no backend restart or dead-owner takeover",
+    "Weak references are not GC timing, resource release receipts or physical memory measurement",
+    "No new shared Native/Apple run, complete OS window/toolbar/picker acceptance, production DURABLE or C1/M-1 approval"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/EditorAttachmentHostChecks.kt": "56a8efed503a83cd1d81c16bb6a161580e382bc714d6b3f6206722f15ad2a563",
+    "android-app/src/androidTest/java/dev/notecore/app/EditorPresentationHostChecks.kt": "39edee586d40422c370b7fd295f1d6c396556f516af8083f24c18a53f12d3509",
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "f7a93321b9f80a527c5e07beb0d8be932f2986ca96f9f8641c1f08e1d9f9bf86",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "970eefe588635cf255474863511d4437403721515281fc716f9bfa1d1fd62085",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "626d6e67fd76b14633e9666f954bbc4b7ed9944f48a7ad38b084b0724310d5bb",
+    "build/android-input-host/original-files.json": "eeeb9b671f424be4453c58c9fd356c1866d92d7628d6913c34aac93025e8619c",
+    "docs/owner交接与失败责任矩阵.md": "d7f65b2d3be56a474d295e21b943835adb74fd136248d5b97fcc2265ccb7959f",
+    "reports/android-input-host-tests.json": "0db07d41f7da2d7b04b72eaea53ed779397d3de887ee31871f7fdaeddc28a162",
+    "reports/preview-build.json": "6f1f487ca76cec4bd88974b08d6e3bb789de389e72d2ba2a911569c19e886cf8",
+    "reports/verification.json": "8cf00d0f7c6c676e55ba1f28d8163a97a6e3a8a53091961194c18b9201083833",
+    "tools/verify_editor_presentation.py": "3af8dab098933bbdb26ddd649690c9fe86ff9ed9330e0ff8a098e351dc1e3960"
+  }
+}

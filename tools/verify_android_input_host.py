@@ -18,6 +18,7 @@ STORAGE_CHECKS = {'catalog_capacity_failure_preserves_owner_snapshot', 'read_fai
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
 OWNER_CHECKS = {'shared_editor_detach_capacity_and_reopen', 'pending_editor_failure_retry_original_recovery',
+                'editor_original_ledger_old_ack_failure_and_retry', 'editor_stopped_backend_feedback', 'actual_activity_shared_presentation_update',
                 'actual_activity_shared_editor_departure', 'wrong_thread_retirement_rejected', 'accepted_root_saved_before_terminal_worker_stop',
                 'failed_root_retained_until_explicit_retry', 'active_input_and_picker_refuse_without_loss',
                 'pending_read_and_delivery_refuse_retirement', 'full_ledger_retry_frees_slot_before_retirement'}
@@ -121,7 +122,7 @@ def main():
         'all_original_files_unchanged': True, 'ordinary_process_restored': True,
         'source_and_artifact_sha256': bindings,
         'sdk_contract_sha256': {str(path): digest(path) for path in contracts},
-        'scope': 'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, six original NoteStore/worker file/export retention checks and six explicit Store retirement checks in unique cache directories. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence.',
+        'scope': 'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, eleven original NoteStore/worker file/export retention checks and twelve Store retirement/editor checks in unique cache directories. Real MainActivity callbacks/layout use an isolated test-injected Store. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence.',
         'decision': 'Use double viewport scale/offset for canonical input; float conversion is reserved for derived Path coordinates. Keep current owner, immutable real samples, explicit invalid/cancel behavior and MONOLINE scope.',
         'ordinary_ui_interaction_verified': False, 'real_stylus_verified': False,
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,

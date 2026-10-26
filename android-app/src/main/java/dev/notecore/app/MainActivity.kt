@@ -18,6 +18,8 @@ class MainActivity : Activity() {
     private lateinit var root: LinearLayout
     private lateinit var store: NoteStore
     private val editorIdentity = java.util.UUID.randomUUID().toString()
+    private val editorObserver = EditorObserver { refreshPresentation() }
+    private var lastPresentation: EditorPresentation? = null
     private var exportRequestCode: Int? = null
     private var exportPickerSession: String? = null
     private var notebook: PagedPreviewNotebook? = null
@@ -73,6 +75,7 @@ class MainActivity : Activity() {
     private fun row() = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(12), dp(4), dp(12), dp(4)) }
     private fun library() {
         notebook?.let { store.forgetEditor(it, editorIdentity) }
+        lastPresentation = null
         viewGeneration++; val generation = viewGeneration
         notebook = null; canvas = null; status = null; root.removeAllViews()
         root.addView(text("NoteCore", 30f).apply { setPadding(dp(24), dp(20), dp(24), dp(4)) })
@@ -124,7 +127,8 @@ class MainActivity : Activity() {
         }
     }
     private fun editor(note: PagedPreviewNotebook) {
-        if (!store.attachEditor(note, editorIdentity)) { library(); showError("编辑窗口已满或会话已切换，请返回后重试"); return }
+        if (!store.attachEditor(note, editorIdentity, editorObserver)) { library(); showError("编辑窗口已满或会话已切换，请返回后重试"); return }
+        lastPresentation = null
         viewGeneration++; notebook = note; root.removeAllViews()
         val header = row()
         header.addView(button("返回") { leaveEditor() })
@@ -150,16 +154,19 @@ class MainActivity : Activity() {
         viewportTools.addView(text("双指缩放", 12f))
         root.addView(viewportTools)
         addPageTools(note)
-        status = text(if (note.hasPendingStroke) "已恢复未提交笔迹，请点击保存重试提交" else getString(R.string.opened, note.totalStrokeCount), 13f).apply { setPadding(dp(20), dp(4), dp(20), dp(8)) }
+        status = text(if (note.hasPendingStroke) "已恢复未提交笔迹，请点击保存重试提交" else getString(R.string.opened, note.totalStrokeCount), 13f).apply {
+            minLines = 2; maxLines = 2; ellipsize = TextUtils.TruncateAt.END
+            setPadding(dp(20), dp(4), dp(20), dp(8))
+        }
         root.addView(status)
         canvas = InkCanvasView(this, note, { save(); updateControls() }, ::showError)
         root.addView(if (android.os.Build.VERSION.SDK_INT >= 33) InkSurfaceHost(checkNotNull(canvas),store) else checkNotNull(canvas), LinearLayout.LayoutParams(-1, 0, 1f).apply { setMargins(dp(12), 0, dp(12), dp(12)) })
-        updateControls()
+        refreshPresentation()
     }
     private fun addPageTools(note: PagedPreviewNotebook) {
         val pages = row()
         fun action(content: Boolean = true, edit: () -> PreviewEditResult) {
-            if (edit().accepted) { canvas?.refreshPage(); updateControls(); if (content) save() }
+            if (edit().accepted) { canvas?.refreshPage(); updateControls(); if (content) save() else store.presentationChanged(note) }
             else showError(note.lastError)
         }
         previousPage = button("上一页") { action(false) { note.edit(PreviewEdit.SelectPage(note.page(note.currentPageIndex - 1).id.value)) } }
@@ -194,6 +201,25 @@ class MainActivity : Activity() {
         previousPage?.isEnabled = note.currentPageIndex > 0
         nextPage?.isEnabled = note.currentPageIndex < note.pageCount - 1
     }
+    private fun refreshPresentation() {
+        val note = notebook ?: return
+        if (isFinishing || isDestroyed) return
+        val presentation = store.editorPresentation(note)
+        if (presentation == lastPresentation) return
+        lastPresentation = presentation
+        canvas?.syncPresentation(); updateControls()
+        val message = when (presentation.phase) {
+            EditorSavePhase.UNSAVED -> "有更改尚未保存，请保存重试"
+            EditorSavePhase.SAVING -> getString(R.string.saving, presentation.strokeCount)
+            EditorSavePhase.RETRY_REQUIRED -> "保存失败，更改仍在本机会话中，请重试保存"
+            EditorSavePhase.BACKEND_UNAVAILABLE -> "保存后端暂不可用，更改仍保留，请重试"
+            EditorSavePhase.WORK_CAPACITY -> getString(R.string.save_task_too_large)
+            EditorSavePhase.SAVED -> getString(R.string.saved, presentation.strokeCount)
+            EditorSavePhase.RECOVERY_SAVED -> "未提交笔迹已保存为恢复记录，请重试提交"
+            EditorSavePhase.CLOSED -> "此会话已结束，请重新打开笔记"
+        }
+        status?.text = message + if (presentation.activeInput) " · 当前笔未提交" else ""
+    }
     private fun rename() {
         canvas?.cancelInk()
         val note = notebook ?: return
@@ -212,8 +238,9 @@ class MainActivity : Activity() {
         return store.save(snapshot) { version, failure ->
             if (generation != viewGeneration || notebook !== note || isFinishing) return@save
             if (failure != null) showError(failure)
-            if (failure == null && snapshot.sameContent(note.captureRecovery())) status?.text =
-                if (note.hasPendingStroke) "未提交笔迹已保存为恢复记录，请重试提交" else getString(R.string.saved, note.totalStrokeCount)
+            if (failure == null && snapshot.sameContent(note.captureRecovery())) {
+                lastPresentation = null; refreshPresentation()
+            }
         }
     }
     private fun leaveEditor() {
