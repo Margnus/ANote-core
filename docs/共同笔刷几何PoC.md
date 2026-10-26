@@ -1,5 +1,13 @@
 # M-2A：共同笔刷覆盖规则与解析oracle
 
+## 2026-10-26 原解析oracle数值修复
+
+原BrushEnvelopePoc新增3项失败反例真实复现：1e-170场景单位的单盘/连续压力扫掠直接平方下溢，bbox内几何外点误命中；正width经除2/压力系数归零仍返回Ready。保留原oracle，在距离和线段二次系数计算前作正比例归一化；端点直接相对原样本，内部极值仍几何复核。半径归零在派生radii分配前明确radius-underflow；可表示subnormal单盘正常分类。无每段vararg数组，不改变规范采样、草案扫掠规则/ruleId/版本或alpha，不改黄金文件，不推广算法2或普通App新笔刷。
+
+[当前证据](../reports/brush-oracle-numeric.json)：修复前原类10项3失败的日志/XML/源码hash保留；修复后10项、完整423 JVM与API35原库ART135通过，覆盖原oracle/路径/简化/分段/索引/mask及原图像/lease/真实执行器trace消费者。只安装独立库测试APK，原普通包82eafb0c…与本机原1份笔记先备份且前后hash/集合保持；没有本轮App重建/UI、Apple Native/离屏或物理heap/触笔/延迟证据。Apple入口期望119（common113）仅源码准备，旧运行报告不改hash继承。
+
+采用为C1第2项原参考数值缺陷修复，浮点reference不宣称任意近边界精确谓词/生产命中或算法迁移已经批准；源与产物审计4匹配/27失效/5历史漂移仍failed。继续原canonical patch/索引候选的精确命中/能力失败边界，保留预算/owner/物理M-1/未确认IO断电/完整C1与DEV-041门禁。
+
 2026-10-15，DEV-027。接续M-3桌面实验，先定义可被两端消费的覆盖语义。代码为internal BrushEnvelopePoc，ruleId为swept-discs-draft-1；未接入App、未公开SDK，也不把候选规则写入现有备份的algorithmVersion承诺。已有MONOLINE/PRESSURE/HIGHLIGHTER数据字段不表示已实现三笔刷生产渲染。
 
 ## 候选规则

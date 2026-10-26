@@ -1,0 +1,35 @@
+{
+  "schema": "brush-oracle-numeric-1",
+  "status": "passed",
+  "scope": "Original internal version-1 coverage oracle and existing geometry/path/mask consumers on current JVM and Android ART. No new ordinary brush or app rebuild.",
+  "before_fix_failures": 3,
+  "oracle_jvm_tests": 10,
+  "jvm_tests": 423,
+  "art_tests": 135,
+  "android_api": "35",
+  "original_notes": 1,
+  "ordinary_app_apk_and_files_unchanged": true,
+  "decision": "Normalize original distance and segment coefficients before squaring; reject effective zero radius before derived allocation. Preserve sampled data, swept-disc rule/version, alpha and existing goldens. Adopt as oracle numeric correction only.",
+  "limits": [
+    "Floating reference is not an arbitrary near-boundary exact predicate or production geometry/hit-test approval",
+    "No current Apple Native/offscreen, ordinary UI, physical stylus or heap/latency validation",
+    "M-1, complete C1/public/owner/budget and unconfirmed IO/power-loss gates remain open"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "build/brush-oracle-numeric/before-fix-bindings.json": "0b02540664e5dfd6a227ff54b7c25f6ba9d8d20d33bce2c7897fa53e7993501d",
+    "build/brush-oracle-numeric/before-fix.log": "aaa2f3cb2f8efbe86ce56ed97a03cf56e59051702ac0731d0392047c2fbe8854",
+    "build/brush-oracle-numeric/before-fix.xml": "77decb03bccb861f9206a511b0c5720517d558c859ec16ef9ffe1378cfe4c904",
+    "build/brush-oracle-numeric/build.log": "8e97e582ba0dda1604c9e17e24276ffc86bb8e98f43160ff744b2384a72c0203",
+    "build/brush-oracle-numeric/original-after.json": "856c618e32ab6a42df09ae91a7ec18493b6f7c5ac445f035873c0a63cd3e2a1d",
+    "build/brush-oracle-numeric/original-before.json": "856c618e32ab6a42df09ae91a7ec18493b6f7c5ac445f035873c0a63cd3e2a1d",
+    "canvas-core/build/android-brush-tests/run.log": "c2d9bdd74f12e706725399bde4801b67a706224df170f285956e837ec31d47fc",
+    "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk": "2d3d32e5753b37d792fd01e65406fc0c31a44120f0bfdf186cb213230202b737",
+    "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushEnvelopePocTest.xml": "a3fb8db02e0f16946f26941e0f12e079a329d1f94c67e5115103ec28c056c101",
+    "reports/android-brush-common-tests.json": "438c7c930eb2d88b59538c3b3ef99da3522f34af8f1c479c247427a473f7f00e",
+    "reports/verification.json": "6f8018318203ed336ea9d1834753f430a1a3f280800aca4dd4ce755823e8e086",
+    "tools/verify_apple_brush_common.py": "a44701e519cb7f7a12dabf6ea1b33a3a572ab9f430e219a24f27a36140aca054",
+    "tools/verify_brush_oracle_numeric.py": "f7a5b28a9862f6925849f519e8f2df490bb0d65fd21d24bd74e59347383a09e3"
+  }
+}
