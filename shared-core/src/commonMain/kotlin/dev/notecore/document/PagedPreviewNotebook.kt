@@ -12,6 +12,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var sequence = 0L
     private var input: InputReplaySession? = null
     private var inputReservation = 0L
+    private var inputPointLimit = 0
     private var inputSequence = 0L
     private var strokePage: PageId? = null
     private var strokeCommand: CommandId? = null
@@ -215,15 +216,33 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         color = argb; this.width = width; clearError(); return true
     }
     val inputBatchLimit: Int get() = PREVIEW_INPUT_BATCH_LIMIT
+    /** Copy-before-admission guard for synchronous platform producers. Null permits preparation only:
+     * no samples or identities are accepted, and offerRealBatch repeats the checks after copying.
+     * Stay on the same owner; this is not a reservation token or a content receipt.
+     * No platform event is retained, and intervening edits can invalidate this observation.
+     */
+    fun prepareRealBatch(phase: PointerPhase, count: Int): PreviewInputResult? {
+        realBatchGate(phase)?.let { return it }
+        if (count > PREVIEW_INPUT_BATCH_LIMIT) return rejectRealBatch(PreviewFailureKind.INPUT_BATCH_CAPACITY)
+        if (count < 0 || (phase == PointerPhase.CANCEL && count != 0) ||
+            ((phase == PointerPhase.DOWN || phase == PointerPhase.MOVE) && count == 0))
+            return rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
+        if (phase == PointerPhase.DOWN) {
+            val operation = nextIdentity("op") ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
+            val objectId = nextIdentity("ink", operation.second) ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
+            if (inputReservation(count, operation.first, objectId.first, currentPage) > inputByteLimit)
+                return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+        } else if (phase != PointerPhase.CANCEL && count > inputPointLimit - input!!.activeRealSamples) {
+            return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+        }
+        return null
+    }
     /** Raw buffers are read synchronously and never retained; callers must not mutate during this call. */
     fun offerRealBatch(phase: PointerPhase, eventTimeMicros: Long, xs: DoubleArray, ys: DoubleArray,
                        pressures: FloatArray, times: LongArray): PreviewInputResult {
-        realBatchGate(phase)?.let { return it }
+        prepareRealBatch(phase, xs.size)?.let { return it }
         val count = xs.size
-        if (count > PREVIEW_INPUT_BATCH_LIMIT) return rejectRealBatch(PreviewFailureKind.INPUT_BATCH_CAPACITY)
-        if (count != ys.size || count != pressures.size || count != times.size || eventTimeMicros < 0 ||
-            (phase == PointerPhase.CANCEL && count != 0) ||
-            ((phase == PointerPhase.DOWN || phase == PointerPhase.MOVE) && count == 0))
+        if (count != ys.size || count != pressures.size || count != times.size || eventTimeMicros < 0)
             return rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
         var time = -1L
         for (i in 0 until count) {
@@ -259,6 +278,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
             objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
             page = selected; session = InputReplaySession(pointCapacity); sequence = 0
+            inputPointLimit = pointCapacity
             inputReservation = inputReservation(pointCapacity, command.value, objectId.value, current.findPage(page)!!)
         } else {
             session = input!!; sequence = inputSequence
@@ -287,7 +307,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
      * Rejection never lowers an active session's capacity or drops its accepted prefix.
      */
     private fun inputReservation(points: Int, operation: String, objectId: String, page: PageDescriptor): Long =
-        maxOf(InputReplaySession.reservationBytes(points),
+        PREVIEW_INPUT_PRODUCER_BYTES + maxOf(InputReplaySession.reservationBytes(points),
             PreviewRecoveryCodec.pendingCharge(operation, page.id.value, objectId, page.layerId.value, points))
     private fun affordableInputPoints(maximum: Int, operation: String, objectId: String, page: PageDescriptor): Int {
         var low = 0; var high = maximum
@@ -324,7 +344,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
 
     /** Legacy Boolean adapters preserve their explicit unfinished-stroke cancellation on invalid input. */
     private fun legacyInput(phase: PointerPhase, x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
-        val result = offerRealBatch(phase, timeMicros, doubleArrayOf(x), doubleArrayOf(y), floatArrayOf(pressure), longArrayOf(timeMicros))
+        val result = prepareRealBatch(phase, 1) ?:
+            offerRealBatch(phase, timeMicros, doubleArrayOf(x), doubleArrayOf(y), floatArrayOf(pressure), longArrayOf(timeMicros))
         if (result.disposition == PreviewInputDisposition.REJECTED && phase != PointerPhase.DOWN) cancelStroke()
         return result.disposition == PreviewInputDisposition.ACCEPTED || result.disposition == PreviewInputDisposition.COMMITTED
     }

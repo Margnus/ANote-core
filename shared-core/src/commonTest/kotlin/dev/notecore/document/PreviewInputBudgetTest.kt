@@ -11,8 +11,58 @@ class PreviewInputBudgetTest {
         note.offerRealBatch(phase, times.lastOrNull() ?: 0, DoubleArray(times.size) { times[it].toDouble() },
             DoubleArray(times.size) { 2.0 }, FloatArray(times.size) { .5f }, times)
 
-    private fun reservation(points: Int, nonce: String = "bounded") = maxOf(InputReplaySession.reservationBytes(points),
+    private fun reservation(points: Int, nonce: String = "bounded") = PREVIEW_INPUT_PRODUCER_BYTES + maxOf(InputReplaySession.reservationBytes(points),
         PreviewRecoveryCodec.pendingCharge("$nonce-op-1", "page", "$nonce-ink-2", "layer", points))
+
+    @Test fun producerOverlapIsReservedBeforePreparationWithoutAcceptingSamplesOrIdentities() {
+        // Independent worst-case producer declaration plus exact one-point pending command.
+        val bytes = 2048L + 1024 * 192L + 2048L + (12 + 4 + 13 + 5) * 2L + 28L
+        assertEquals(bytes, reservation(1))
+        val short = note(bytes - 1); val root = short.snapshot(); val status = short.authorityStatus()
+        repeat(3) {
+            val refused = assertNotNull(short.prepareRealBatch(PointerPhase.DOWN, 1))
+            assertEquals(0, refused.acceptedSamples); assertEquals(PreviewFailureKind.CAPACITY, refused.failure?.kind)
+            assertFalse(short.hasActiveStroke); assertEquals(0L, short.inputReservedByteCharge)
+            assertSame(root, short.snapshot()); assertEquals(status, short.authorityStatus())
+        }
+        assertTrue(short.rename("still usable")); assertEquals(CommandId("bounded-op-1"), short.authorityStatus().nextUndoOperationId)
+        val exact = note(bytes); val before = exact.snapshot()
+        repeat(3) { assertNull(exact.prepareRealBatch(PointerPhase.DOWN, 1)) }
+        assertSame(before, exact.snapshot()); assertFalse(exact.hasActiveStroke); assertEquals(0L, exact.inputReservedByteCharge)
+        assertTrue(offer(exact, PointerPhase.DOWN, 1).admitted); assertEquals(bytes, exact.inputReservedByteCharge)
+        assertEquals(PreviewInputDisposition.COMMITTED, exact.offerRealBatch(PointerPhase.UP, 1,
+            doubleArrayOf(), doubleArrayOf(), floatArrayOf(), longArrayOf()).disposition)
+        assertEquals("bounded-ink-2", exact.strokeId(0)); assertEquals(0L, exact.inputReservedByteCharge)
+    }
+    @Test fun preparationRefusalKeepsPrefixAndSuccessMustBeRecheckedAfterRetirement() {
+        val n = note(reservation(3)); assertTrue(offer(n, PointerPhase.DOWN, 1).admitted)
+        val root = n.snapshot(); val charge = n.inputReservedByteCharge
+        val refused = assertNotNull(n.prepareRealBatch(PointerPhase.MOVE, 3))
+        assertEquals(InputRejection.CAPACITY, refused.inputReason); assertEquals(1, refused.activeSamples)
+        assertSame(root, n.snapshot()); assertEquals(charge, n.inputReservedByteCharge)
+        assertNull(n.prepareRealBatch(PointerPhase.MOVE, 2)); assertTrue(offer(n, PointerPhase.MOVE, 2, 3).admitted)
+        assertNull(n.prepareRealBatch(PointerPhase.UP, 0))
+        assertEquals(PreviewInputDisposition.COMMITTED, n.offerRealBatch(PointerPhase.UP, 3,
+            doubleArrayOf(), doubleArrayOf(), floatArrayOf(), longArrayOf()).disposition)
+        assertEquals(listOf(1.0, 2.0, 3.0), List(n.pointCount(0)) { n.pointX(0, it) })
+        val other = note(reservation(3)); assertNull(other.prepareRealBatch(PointerPhase.DOWN, 1)); assertTrue(other.retire())
+        assertEquals(PreviewFailureKind.CLOSED, offer(other, PointerPhase.DOWN, 1).failure?.kind)
+        assertEquals(0L, other.inputReservedByteCharge)
+    }
+    @Test fun preparationValidatesRawCountsAndRequiresOriginalOwner() {
+        var owner = true
+        val root = DocumentRoot.empty(SceneId("owner"), "title", PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0))
+        val n = PagedPreviewNotebook(root, "owner", ownerCheck = { check(owner) })
+        for (count in listOf(-1, 0))
+            assertEquals(PreviewFailureKind.INVALID_INPUT, n.prepareRealBatch(PointerPhase.DOWN, count)?.failure?.kind)
+        for (count in listOf(1025, Int.MAX_VALUE))
+            assertEquals(PreviewFailureKind.INPUT_BATCH_CAPACITY, n.prepareRealBatch(PointerPhase.DOWN, count)?.failure?.kind)
+        assertSame(root, n.snapshot()); assertFalse(n.hasActiveStroke); assertEquals(0L, n.inputReservedByteCharge)
+        owner = false
+        assertFailsWith<IllegalStateException> { n.prepareRealBatch(PointerPhase.DOWN, 1) }
+        owner = true
+        assertNull(n.prepareRealBatch(PointerPhase.DOWN, 1)); assertSame(root, n.snapshot())
+    }
 
     @Test fun insufficientBudgetRejectsBeforeIdentityAndEmptyUpCanFinishExactBudget() {
         for (bytes in listOf(0L, reservation(1) - 1)) {

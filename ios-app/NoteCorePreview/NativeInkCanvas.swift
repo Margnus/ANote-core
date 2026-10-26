@@ -197,12 +197,18 @@ final class InkUIView: UIView {
         c.restoreGState()
     }
     private struct RealSample { let point: CGPoint; let pressure: Float; let time: Int64 }
+    private var inputPreparationError: String?
     /// UIKit's coalesced array includes a copy of the main touch. Copy values immediately;
     /// never append the main touch again, retain auxiliary UITouchs or ingest predictions.
-    private func realSamples(_ touch: UITouch, event: UIEvent?) -> [RealSample]? {
+    private func realSamples(_ touch: UITouch, event: UIEvent?, phase: PointerPhase) -> [RealSample]? {
+        inputPreparationError = nil
         let auxiliary = event?.coalescedTouches(for: touch)
         let touches = auxiliary?.isEmpty == false ? auxiliary! : [touch]
         guard touches.count <= Int(note.inputBatchLimit) else { return nil }
+        if note.prepareRealBatch(phase: phase, count: Int32(touches.count)) != nil {
+            inputPreparationError = note.lastError
+            return nil
+        }
         let transform = (scale: scale, x: offsetX, y: offsetY)
         guard transform.scale.isFinite, transform.scale > 0 else { return nil }
         var samples: [RealSample] = []; samples.reserveCapacity(touches.count)
@@ -231,7 +237,9 @@ final class InkUIView: UIView {
             pressures: scalarData(samples.map { $0.pressure }), times: scalarData(samples.map { $0.time }))
     }
     private func rejectInput() {
-        cancelInk(); failed("输入数据无效，本笔未提交")
+        let message = inputPreparationError ?? "输入数据无效"
+        inputPreparationError = nil
+        cancelInk(); failed(message + "；本笔未提交")
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard scale > 0, !suppressSequence else { return }
@@ -242,7 +250,7 @@ final class InkUIView: UIView {
             navigate(direct, moving: false); return
         }
         guard active == nil, let touch = touches.first(where: { $0.type == .pencil || ($0.type == .direct && fingerDrawing) }) else { return }
-        guard let samples = realSamples(touch, event: event), let first = samples.first else { rejectInput(); return }
+        guard let samples = realSamples(touch, event: event, phase: .down), let first = samples.first else { rejectInput(); return }
         let p = first.point
         guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
         guard note.selectPen(argb: penColor, width: penWidth) else { failed(note.lastError); return }
@@ -256,7 +264,7 @@ final class InkUIView: UIView {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if navigating { navigate(fingers(event), moving: true); return }
         guard !suppressSequence, let active = active, touches.contains(active), note.hasActiveStroke else { return }
-        guard let samples = realSamples(active, event: event) else { rejectInput(); return }
+        guard let samples = realSamples(active, event: event, phase: .move) else { rejectInput(); return }
         guard offerReal(samples, phase: .move).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
         for sample in samples {
             path?.addLine(to: sample.point)
@@ -271,7 +279,7 @@ final class InkUIView: UIView {
         }
         if suppressSequence { if remaining.isEmpty { suppressSequence = false }; return }
         guard let active = active, touches.contains(active), note.hasActiveStroke else { return }
-        guard let samples = realSamples(active, event: event), !samples.isEmpty else { rejectInput(); return }
+        guard let samples = realSamples(active, event: event, phase: .up), !samples.isEmpty else { rejectInput(); return }
         let result = offerReal(samples, phase: .up)
         guard result.admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
         self.active = nil; path = nil; suppressSequence = !remaining.isEmpty

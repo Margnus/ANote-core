@@ -148,12 +148,15 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         fun offer(note: PagedPreviewNotebook, phase: PointerPhase) = note.offerRealBatch(phase, times.last(), xs, ys, pressures, times)
     }
     /** Copy every real history/main scalar before one atomic admission; no MotionEvent survives this call. */
-    private fun realBatch(event: MotionEvent, index: Int, input: InputTransform): RealBatch? {
+    private fun realBatch(event: MotionEvent, index: Int, input: InputTransform, phase: PointerPhase): RealBatch? {
         val history = event.historySize
         if (history < 0 || history >= notebook.inputBatchLimit) {
             cancelInk(); error("输入批次超限，本笔未提交"); return null
         }
         val count = history + 1
+        notebook.prepareRealBatch(phase, count)?.let {
+            cancelInk(); error(notebook.lastError + "；本笔未提交"); return null
+        }
         val xs = DoubleArray(count); val ys = DoubleArray(count); val pressures = FloatArray(count); val times = LongArray(count)
         for (i in 0 until count) {
             val current = i == history
@@ -198,7 +201,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 if (event.getToolType(0) == MotionEvent.TOOL_TYPE_ERASER) { error("预览版暂不支持橡皮尾端，请使用撤销"); return true }
                 val stylus = event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                 if (!stylus && !fingerDrawing) return true
-                val batch = realBatch(event, 0, input) ?: return true
+                val batch = realBatch(event, 0, input, PointerPhase.DOWN) ?: return true
                 val x = batch.xs.first(); val y = batch.ys.first()
                 if (!x.isFinite() || !y.isFinite()) { cancelInk(); error("输入数据无效，本笔未提交"); return true }
                 if (x !in 0.0..notebook.currentPage.width || y !in 0.0..notebook.currentPage.height) return true
@@ -211,7 +214,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             MotionEvent.ACTION_MOVE -> {
                 val index = event.findPointerIndex(activePointer)
                 if (index >= 0 && active != null) {
-                    val batch = realBatch(event, index, input) ?: return true
+                    val batch = realBatch(event, index, input, PointerPhase.MOVE) ?: return true
                     admit(batch, PointerPhase.MOVE) ?: return true
                     appendPath(batch)
                 }
@@ -219,7 +222,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                 val index = event.actionIndex
                 if (event.getPointerId(index) == activePointer && active != null) {
-                    val batch = realBatch(event, index, input) ?: return true
+                    val batch = realBatch(event, index, input, PointerPhase.UP) ?: return true
                     val result = admit(batch, PointerPhase.UP) ?: return true
                     active = null; activePointer = -1; activeStylus = false
                     suppressSequence = event.pointerCount > 1

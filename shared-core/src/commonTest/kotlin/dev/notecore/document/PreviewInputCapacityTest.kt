@@ -16,7 +16,7 @@ class PreviewInputCapacityTest {
     @Test fun fullDocumentRefusesDownBeforeAcceptingInkAndUndoCanRestoreWriting() {
         val note = note()
         assertTrue(offer(note, PointerPhase.DOWN, 1).admitted)
-        assertEquals(1_130_624L, note.inputReservedByteCharge)
+        assertEquals(1_329_280L, note.inputReservedByteCharge)
         assertEquals(PreviewInputDisposition.COMMITTED, offer(note, PointerPhase.UP, 2).disposition)
         assertEquals(0L, note.inputReservedByteCharge)
         val full = note.snapshot()

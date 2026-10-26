@@ -28,7 +28,7 @@ class PreviewCommitCapacityTest {
     @Test fun journalByteBoundaryAdmitsOnlyWholeAffordableStrokeWithoutConsumingRejectedIds() {
         val n = note(DocumentBudget(journalBytes = 4096 + 2 * 28))
         rejected(n, DocumentRejection.JOURNAL_CAPACITY, 1, 2, 3)
-        assertTrue(offer(n, PointerPhase.DOWN, 1).admitted); assertEquals(2164L, n.inputReservedByteCharge)
+        assertTrue(offer(n, PointerPhase.DOWN, 1).admitted); assertEquals(200820L, n.inputReservedByteCharge)
         assertEquals(PreviewInputDisposition.COMMITTED, offer(n, PointerPhase.UP, 2).disposition)
         assertEquals(CommandId("admit-op-1"), n.authorityStatus().nextUndoOperationId)
         assertEquals("admit-ink-2", n.strokeId(0)); rejected(n, DocumentRejection.JOURNAL_CAPACITY, 3)
@@ -78,8 +78,8 @@ class PreviewCommitCapacityTest {
         }
     }
     @Test fun arenaAndJournalLimitsIntersectAndNoopToolChangeCannotInvalidateCommitPlan() {
-        val n = note(DocumentBudget(journalBytes = 4096 + 3 * 28, inputBytes = 2164L))
-        assertTrue(offer(n, PointerPhase.DOWN, 1).admitted); assertEquals(2164L, n.inputReservedByteCharge)
+        val n = note(DocumentBudget(journalBytes = 4096 + 3 * 28, inputBytes = 200820L))
+        assertTrue(offer(n, PointerPhase.DOWN, 1).admitted); assertEquals(200820L, n.inputReservedByteCharge)
         assertTrue(n.rename("title")); assertTrue(n.selectPen(123, 3.0)); assertTrue(n.hasActiveStroke)
         assertFalse(offer(n, PointerPhase.MOVE, 2, 3).admitted)
         assertEquals(PreviewInputDisposition.COMMITTED, offer(n, PointerPhase.UP, 2).disposition)

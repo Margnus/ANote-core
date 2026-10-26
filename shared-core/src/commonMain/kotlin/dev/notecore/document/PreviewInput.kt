@@ -19,3 +19,8 @@ class PreviewInputResult internal constructor(
 }
 
 internal const val PREVIEW_INPUT_BATCH_LIMIT = 1024
+/** Declared worst producer overlap: scalar arrays, Swift values/maps, Data/NSData bridge and native
+ * copies, plus container allowance. OS event objects and runtime heap behaviour are not measured here.
+ * One owner callback at a time; no producer buffers survive that synchronous callback.
+ */
+internal const val PREVIEW_INPUT_PRODUCER_BYTES = 2048L + PREVIEW_INPUT_BATCH_LIMIT * 192L

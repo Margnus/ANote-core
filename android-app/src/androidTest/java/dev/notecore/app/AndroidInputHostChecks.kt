@@ -55,7 +55,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             val p = Sample(400f, 300f, 1000)
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
             inputReservation = f.note.inputReservedByteCharge
-            check(inputReservation == 1_130_624L)
+            check(inputReservation == 1_329_280L)
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
             check(f.note.inputReservedByteCharge == 0L)
             val full = f.note.snapshot()
@@ -103,9 +103,9 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             check(refused.note.snapshot() === before && refused.errors.size == 1)
             check(!refused.note.hasActiveStroke && !refused.note.hasPendingStroke)
             check(refused.note.inputReservedByteCharge == 0L)
-            val f = fixture(DocumentBudget(inputBytes = 2260)) // exact two-point reservation
+            val f = fixture(DocumentBudget(inputBytes = 200916)) // exact two-point reservation
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
-            check(f.note.inputReservedByteCharge == 2260L)
+            check(f.note.inputReservedByteCharge == 200916L)
             send(f.view, MotionEvent.ACTION_MOVE, listOf(p.copy(time = 1001), p.copy(time = 1002)))
             check(f.errors.size == 1 && !f.note.hasActiveStroke && f.note.strokeCount == 0)
             check(f.note.inputReservedByteCharge == 0L) // native adapter explicitly cancels rejected stroke
