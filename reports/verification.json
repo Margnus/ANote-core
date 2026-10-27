@@ -2,7 +2,7 @@
   "phase": "C0/C1 reference prototype",
   "status": "passed",
   "jvm_contract_tests": {
-    "tests": 436,
+    "tests": 437,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -161,7 +161,7 @@
     {
       "suite": "dev.notecore.canvas.prototype.PreviewSaveLedgerTest",
       "tests": 12,
-      "time_seconds": 0.102
+      "time_seconds": 0.094
     },
     {
       "suite": "dev.notecore.document.CanonicalTitleTest",
@@ -171,7 +171,7 @@
     {
       "suite": "dev.notecore.document.DocumentAuthorityTest",
       "tests": 19,
-      "time_seconds": 0.02
+      "time_seconds": 0.018
     },
     {
       "suite": "dev.notecore.document.DocumentHistoryPreflightTest",
@@ -186,12 +186,12 @@
     {
       "suite": "dev.notecore.document.DocumentOwnerThreadTest",
       "tests": 5,
-      "time_seconds": 0.035
+      "time_seconds": 0.036
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReaderTest",
       "tests": 13,
-      "time_seconds": 0.26
+      "time_seconds": 0.232
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReadTest",
@@ -201,22 +201,22 @@
     {
       "suite": "dev.notecore.document.PagedPreviewCodecTest",
       "tests": 16,
-      "time_seconds": 0.411
+      "time_seconds": 0.354
     },
     {
       "suite": "dev.notecore.document.PagedPreviewNotebookTest",
       "tests": 13,
-      "time_seconds": 0.014
+      "time_seconds": 0.013
     },
     {
       "suite": "dev.notecore.document.PagedSaveLedgerTest",
       "tests": 11,
-      "time_seconds": 0.076
+      "time_seconds": 0.063
     },
     {
       "suite": "dev.notecore.document.PageProjectionBudgetTest",
       "tests": 4,
-      "time_seconds": 0.007
+      "time_seconds": 0.006
     },
     {
       "suite": "dev.notecore.document.PreviewCommitCapacityTest",
@@ -226,77 +226,77 @@
     {
       "suite": "dev.notecore.document.PreviewDocumentReaderTest",
       "tests": 7,
-      "time_seconds": 0.028
+      "time_seconds": 0.024
     },
     {
       "suite": "dev.notecore.document.PreviewEditTest",
       "tests": 7,
-      "time_seconds": 0.008
+      "time_seconds": 0.006
     },
     {
       "suite": "dev.notecore.document.PreviewInputBudgetTest",
       "tests": 8,
-      "time_seconds": 0.005
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PreviewInputCapacityTest",
       "tests": 5,
-      "time_seconds": 0.004
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewInputTest",
       "tests": 8,
-      "time_seconds": 0.013
+      "time_seconds": 0.01
     },
     {
       "suite": "dev.notecore.document.PreviewNotebookCreationTest",
       "tests": 4,
-      "time_seconds": 0.004
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewNotebookOpenTest",
       "tests": 8,
-      "time_seconds": 0.014
+      "time_seconds": 0.009
     },
     {
       "suite": "dev.notecore.document.PreviewPostAdmissionFaultTest",
       "tests": 1,
-      "time_seconds": 0.002
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.document.PreviewProjectionRetentionTest",
       "tests": 5,
-      "time_seconds": 0.003
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryReaderTest",
       "tests": 5,
-      "time_seconds": 0.04
+      "time_seconds": 0.028
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryTest",
       "tests": 8,
-      "time_seconds": 0.01
+      "time_seconds": 0.007
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchExecutorTest",
-      "tests": 5,
-      "time_seconds": 0.024
+      "tests": 6,
+      "time_seconds": 0.032
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchTest",
       "tests": 6,
-      "time_seconds": 0.006
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.RetiredEditingStateTest",
       "tests": 4,
-      "time_seconds": 0.005
+      "time_seconds": 0.004
     }
   ],
   "module_jvm_tests": {
     "canvas-core": 230,
-    "shared-core": 206
+    "shared-core": 207
   },
   "architecture": {
     "status": "passed",
@@ -492,7 +492,7 @@
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt": "9e07eadf567a757d6ac991e6d8be271bb280a964091a36d11c9a4897a738f4ed",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewPostAdmissionFaultTest.kt": "9c079a9e6a7007ae70d435600eb0d46c751e242fc614cfe6d19b19fde267aa34",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewProjectionRetentionTest.kt": "0ce76cc8f1e45946a18aca71449a36a4df3e11447bef9fd7f04aee1e17bdb9e9",
-    "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewSaveDispatchExecutorTest.kt": "485cfb07e087481386f744eafde677527c45d4988037881737ad7e796e663671",
+    "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewSaveDispatchExecutorTest.kt": "d4150ef52f5a24e45d7ff86b409e1f8264bce46957e006cb038e2a58ee4074e7",
     "fixtures/brush/brush-golden.json": "ad1aadfbb8c9c85736660a25f708196fb1b33c56b53c5171da1c046165d80679",
     "fixtures/brush/brush-manifest.json": "e8e79de0926a62d7b28f43bbb8c1d166f95f930e3285b0bc47deb5bd419aec17",
     "fixtures/geometry/brush-golden.json": "a6f6f1dabf01bf1ce7938d2d6ae2dd231ca20678d776208c8a090dc9c54788ee",
