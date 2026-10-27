@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Verify original release admission guard; not abrupt owner loss or physical GPU support."""
 import json,hashlib
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from verification_hash import verification_digest
 ROOT=Path(__file__).resolve().parents[1]
@@ -15,6 +16,14 @@ def main():
     for name,api in [('android-input-host-tests','35'),('android-min-api-host-tests','26')]:
         r=reports[name];assert r['api']==api and r['owner_retirement_check_count']==7
         assert 'unadmitted_release_refuses_before_retiring_authority' in r['owner_retirement_checks']['checks']
+    xml=ROOT/'shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentOwnerThreadTest.xml'
+    suite=ET.parse(xml).getroot()
+    assert int(suite.attrib['tests'])==5 and int(suite.attrib['failures'])==0 and int(suite.attrib['errors'])==0
+    for method in ('retiredOwnerThreadTransfersOnlyImmutableRootAndNewOwnerContinuesCanonicalContent','pendingOwnerThreadHandsOffOnlyAfterExactHostFileWriteAndNewOwnerCommitsOnce'):
+        assert any(t.attrib['name'].startswith(method) for t in suite.findall('testcase'))
+    bindings[xml.relative_to(ROOT).as_posix()]=sha(xml)
+    for relative in ('build/explicit-owner-transfer/targeted.log','build/explicit-owner-transfer/verify.log'):
+        bindings[relative]=sha(ROOT/relative)
     folder=ROOT/'build/release-handoff'
     assert 'Unadmitted content was retired' in (folder/'before-fix-crash.log').read_text(encoding='utf-8')
     surface=(folder/'surface.log').read_text(encoding='utf-8');assert 'surface_status=passed' in surface and 'INSTRUMENTATION_CODE: -1' in surface
@@ -23,7 +32,7 @@ def main():
     assert before['files']==after['files'] and after['apk_sha256']==reports['android-input-host-tests']['apk_sha256']
     for relative in ['tools/verify_release_handoff.py','build/release-handoff/before-fix.log','build/release-handoff/before-fix-crash.log','build/release-handoff/before-fix-store.kt','build/release-handoff/surface.log','build/release-handoff/original-before.json','build/release-handoff/original-after.json']:
         bindings[relative]=sha(ROOT/relative)
-    r={'status':'passed','scope':'Original Android Store release guard and original worker/renderer consumers on API26 and API35. Ordinary UI, current Apple, abrupt owner/thread disappearance and physical GPU remain unverified.',
+    r={'status':'passed','explicit_jvm_owner_thread_cases':2,'jvm_host_file_force_and_readback':True,'scope':'Explicit immutable checkpoint transfer after cooperative owner-thread retirement on JVM, with host file force/readback for pending ink. Original Android Store release guard and original worker/renderer consumers on API26 and API35. Ordinary UI, current Apple, abrupt owner/thread disappearance and physical GPU remain unverified.',
        'decision':'Refuse active input and ordinary roots without exact durable or original ledger handoff before retiring the existing authority. Recovery still requires its exact completed IO receipt; admitted failed writes remain in the original ledger.',
        'jvm_tests':reports['verification']['jvm_contract_tests']['tests'],'android_apis':[26,35],'owner_checks_each':7,'input_checks_each':10,'storage_checks_each':10,
        'surface_host_passed':True,'original_notes_unchanged':len(before['files']),'c1_gate_complete':False,'production_sqlite_authorized':False,

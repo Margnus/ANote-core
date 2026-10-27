@@ -1,8 +1,10 @@
 {
   "status": "passed",
-  "scope": "Original Android Store release guard and original worker/renderer consumers on API26 and API35. Ordinary UI, current Apple, abrupt owner/thread disappearance and physical GPU remain unverified.",
+  "explicit_jvm_owner_thread_cases": 2,
+  "jvm_host_file_force_and_readback": true,
+  "scope": "Explicit immutable checkpoint transfer after cooperative owner-thread retirement on JVM, with host file force/readback for pending ink. Original Android Store release guard and original worker/renderer consumers on API26 and API35. Ordinary UI, current Apple, abrupt owner/thread disappearance and physical GPU remain unverified.",
   "decision": "Refuse active input and ordinary roots without exact durable or original ledger handoff before retiring the existing authority. Recovery still requires its exact completed IO receipt; admitted failed writes remain in the original ledger.",
-  "jvm_tests": 432,
+  "jvm_tests": 434,
   "android_apis": [
     26,
     35
@@ -15,6 +17,8 @@
   "c1_gate_complete": false,
   "production_sqlite_authorized": false,
   "source_and_artifact_sha256": {
+    "build/explicit-owner-transfer/targeted.log": "0a86d9fe46cec4abad0444c6bba054729bd18eca0f343d3b596d1ef2ec67894f",
+    "build/explicit-owner-transfer/verify.log": "d40a63f3fd6e53ffdb7934da4c5ac58d00abe95b9551a71707676c76071e2198",
     "build/release-handoff/before-fix-crash.log": "4f2b8f1891909099cae1f5fa616774829e2f8d3a0a5d9e4f4b81927e31c392c6",
     "build/release-handoff/before-fix-store.kt": "388d9a5337a1949c11c1e3e7b510f14c85c50859a876dce1819872067d0466d4",
     "build/release-handoff/before-fix.log": "f3ca40e0a3bf20eaf9ab861db129a85ecafc52160588fc2089c7bb0239bc1d94",
@@ -23,7 +27,8 @@
     "build/release-handoff/surface.log": "97946ba55103af940a47b0938c123e77ce6e31080a11f874781b1c0a32721ef8",
     "reports/android-input-host-tests.json": "55ff4d4cff62f12d2a077b719387445bacc3acf3a2ee29c9aba9ba363a67544d",
     "reports/android-min-api-host-tests.json": "32d6ebf8e7f973a7e809a7010f6057d36dc2ab2d36acfab7ddddb1c2dea06943",
-    "reports/verification.json": "7765730f4244c2513c9b29484b9d99cf3ae123a62b61f43d8ef589a4456ea69c",
-    "tools/verify_release_handoff.py": "9753f819f8ae4eca7aca865d0f0aefaff5ecdfd7d0370e2ed0f2b137c9163534"
+    "reports/verification.json": "0794cf3bb4e394403be8f9d91d47b16451de024952c4e81c364f6964e6a18d73",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentOwnerThreadTest.xml": "a924981aa3027c16411e23b328c91979dc20baf8f7e6436678f76c9be3c7b4f5",
+    "tools/verify_release_handoff.py": "48b744295b7e240ee75f442316392228c702be772e284df43bc4cc1cede48bd5"
   }
 }

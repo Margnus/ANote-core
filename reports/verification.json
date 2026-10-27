@@ -2,7 +2,7 @@
   "phase": "C0/C1 reference prototype",
   "status": "passed",
   "jvm_contract_tests": {
-    "tests": 432,
+    "tests": 434,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -161,17 +161,17 @@
     {
       "suite": "dev.notecore.canvas.prototype.PreviewSaveLedgerTest",
       "tests": 12,
-      "time_seconds": 0.118
+      "time_seconds": 0.096
     },
     {
       "suite": "dev.notecore.document.CanonicalTitleTest",
       "tests": 4,
-      "time_seconds": 0.011
+      "time_seconds": 0.006
     },
     {
       "suite": "dev.notecore.document.DocumentAuthorityTest",
       "tests": 19,
-      "time_seconds": 0.026
+      "time_seconds": 0.018
     },
     {
       "suite": "dev.notecore.document.DocumentHistoryPreflightTest",
@@ -181,62 +181,62 @@
     {
       "suite": "dev.notecore.document.DocumentHistoryTest",
       "tests": 14,
-      "time_seconds": 0.017
+      "time_seconds": 0.013
     },
     {
       "suite": "dev.notecore.document.DocumentOwnerThreadTest",
-      "tests": 3,
-      "time_seconds": 0.011
+      "tests": 5,
+      "time_seconds": 0.034
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReaderTest",
       "tests": 13,
-      "time_seconds": 0.311
+      "time_seconds": 0.217
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReadTest",
       "tests": 3,
-      "time_seconds": 0.006
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PagedPreviewCodecTest",
       "tests": 16,
-      "time_seconds": 0.437
+      "time_seconds": 0.378
     },
     {
       "suite": "dev.notecore.document.PagedPreviewNotebookTest",
       "tests": 13,
-      "time_seconds": 0.014
+      "time_seconds": 0.012
     },
     {
       "suite": "dev.notecore.document.PagedSaveLedgerTest",
       "tests": 9,
-      "time_seconds": 0.006
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PageProjectionBudgetTest",
       "tests": 4,
-      "time_seconds": 0.009
+      "time_seconds": 0.006
     },
     {
       "suite": "dev.notecore.document.PreviewCommitCapacityTest",
       "tests": 7,
-      "time_seconds": 0.005
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PreviewDocumentReaderTest",
       "tests": 7,
-      "time_seconds": 0.025
+      "time_seconds": 0.022
     },
     {
       "suite": "dev.notecore.document.PreviewEditTest",
       "tests": 7,
-      "time_seconds": 0.007
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PreviewInputBudgetTest",
       "tests": 8,
-      "time_seconds": 0.004
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewInputCapacityTest",
@@ -246,7 +246,7 @@
     {
       "suite": "dev.notecore.document.PreviewInputTest",
       "tests": 8,
-      "time_seconds": 0.011
+      "time_seconds": 0.01
     },
     {
       "suite": "dev.notecore.document.PreviewNotebookCreationTest",
@@ -266,12 +266,12 @@
     {
       "suite": "dev.notecore.document.PreviewProjectionRetentionTest",
       "tests": 5,
-      "time_seconds": 0.003
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryReaderTest",
       "tests": 5,
-      "time_seconds": 0.038
+      "time_seconds": 0.026
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryTest",
@@ -281,7 +281,7 @@
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchExecutorTest",
       "tests": 5,
-      "time_seconds": 0.021
+      "time_seconds": 0.016
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchTest",
@@ -291,12 +291,12 @@
     {
       "suite": "dev.notecore.document.RetiredEditingStateTest",
       "tests": 4,
-      "time_seconds": 0.005
+      "time_seconds": 0.003
     }
   ],
   "module_jvm_tests": {
     "canvas-core": 230,
-    "shared-core": 202
+    "shared-core": 204
   },
   "architecture": {
     "status": "passed",
@@ -489,7 +489,7 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewSaveDispatchTest.kt": "22c8f725f997d12d2dd74216bff2e13af8ed5213b3d68d928f08e2b13d4a6629",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/RetiredEditingStateTest.kt": "0209fe54c87e680863d2465fb5481a78cbc83db6f8e621b34d9413aa6dfb4318",
     "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "7e8f11b251184200402958e10149d502d21994202c6fb675c7ea5252d50be5d6",
-    "shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt": "f7eb1a0780a127267857972c5c410821d31628a1e6628a98e312870b64e135f7",
+    "shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt": "9e07eadf567a757d6ac991e6d8be271bb280a964091a36d11c9a4897a738f4ed",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewPostAdmissionFaultTest.kt": "9c079a9e6a7007ae70d435600eb0d46c751e242fc614cfe6d19b19fde267aa34",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewProjectionRetentionTest.kt": "0ce76cc8f1e45946a18aca71449a36a4df3e11447bef9fd7f04aee1e17bdb9e9",
     "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewSaveDispatchExecutorTest.kt": "485cfb07e087481386f744eafde677527c45d4988037881737ad7e796e663671",
@@ -558,7 +558,7 @@
     "tools/verify_producer_input_budget.py": "49d0c834c14d523c51527787ccf6e9e8248f5145bb5a55e7e05b84ad69b8b4fd",
     "tools/verify_read_owner_outcomes.py": "cf4536cdb3d1a38cbb619cce86af6f24e60ab4fc9be666011f941bb671207c68",
     "tools/verify_recovery_framing.py": "ce80f9774d6e1b9cb2dfab46a160e67151b04b0cb8aa0cc201658a863994eda7",
-    "tools/verify_release_handoff.py": "9753f819f8ae4eca7aca865d0f0aefaff5ecdfd7d0370e2ed0f2b137c9163534",
+    "tools/verify_release_handoff.py": "48b744295b7e240ee75f442316392228c702be772e284df43bc4cc1cede48bd5",
     "tools/verify_render_viewport_trace.py": "d4b8a9e66fdf1e5a06800b0c72f737ae3ac1ae94d58a02d071799e77c3f93e81",
     "tools/verify_retired_editing_state.py": "27d1c8bdc5bdd844ae381a40fb08f803fa1d19882ab51000de7806ccdbc64483",
     "tools/verify_shared_native.py": "5871ec752495653e533c55392fb982a1ad26cd602688a8fbf048a28f0e837898",
