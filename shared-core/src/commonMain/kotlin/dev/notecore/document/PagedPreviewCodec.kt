@@ -84,7 +84,7 @@ object PagedPreviewCodec {
         var total = 0
         root.scene.forEachObject { obj ->
             validText(obj.id.value); validText(obj.layerId.value)
-            require(obj.brush.algorithmVersion == 1 && obj.transform.inverseOrNull() != null)
+            require(obj.brush.algorithmVersion == 1 && obj.transform.hasInverse())
             require(obj.samples.size in 1..MAX_STROKE_POINTS && obj.samples.size <= MAX_POINTS - total)
             // Public canonical snapshots already validate geometry at restore/prepare boundaries.
             // Charging a UI capture must not rescan every immutable real sample.
@@ -97,9 +97,15 @@ object PagedPreviewCodec {
 
     @Throws(IllegalArgumentException::class)
     fun encodingWorkByteCharge(root: DocumentRoot): Long {
-        val retained = retainedByteCharge(root)
-        val characters = minOf(MAX_CHARACTERS.toLong(), 2048L + root.pageCount * 1024L + root.scene.objectCount * 1024L + root.scene.objects().sumOf { it.samples.size.toLong() } * 144L)
-        return retained + characters * 8L
+        return retainedByteCharge(root) + encodingTextWorkByteCharge(root)
+    }
+
+    /** Internal caller must already have validated the same immutable root's retained charge. */
+    internal fun encodingTextWorkByteCharge(root: DocumentRoot): Long {
+        var points = 0L
+        root.scene.forEachObject { points += it.samples.size }
+        val characters = minOf(MAX_CHARACTERS.toLong(), 2048L + root.pageCount * 1024L + root.scene.objectCount * 1024L + points * 144L)
+        return characters * 8L
     }
 
     /** Reserve input text / UTF conversion plus worst-case owned sample arrays before worker decoding. */
@@ -116,7 +122,7 @@ object PagedPreviewCodec {
         out.row("NCPREVIEW", 2)
         out.row("D", escape(root.id.value), escape(root.title), root.pageCount, root.scene.objectCount, root.revision)
         for (page in root.pages()) out.row("G", escape(page.id.value), escape(page.layerId.value), page.width, page.height, page.paper.name, page.contentRevision)
-        for (obj in root.scene.objects()) {
+        root.scene.forEachObject { obj ->
             val m = obj.transform
             out.row("S", escape(obj.id.value), escape(obj.layerId.value), obj.objectRevision, obj.brush.kind.name, obj.brush.algorithmVersion,
                 obj.brush.argb, obj.brush.width, obj.samples.size, m.a, m.b, m.c, m.d, m.tx, m.ty)

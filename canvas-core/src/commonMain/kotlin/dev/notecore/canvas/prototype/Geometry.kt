@@ -35,7 +35,12 @@ data class Affine2D(
         next.a * tx + next.c * ty + next.tx, next.b * tx + next.d * ty + next.ty,
     )
 
-    fun inverseOrNull(): Affine2D? {
+    fun inverseOrNull(): Affine2D? = withInverse { ia, ib, ic, id, itx, ity -> Affine2D(ia, ib, ic, id, itx, ity) }
+
+    /** Same supported inverse as inverseOrNull, without allocating a derived matrix. Unfrozen. */
+    fun hasInverse(): Boolean = withInverse { _, _, _, _, _, _ -> true } == true
+
+    private inline fun <T> withInverse(result: (Double, Double, Double, Double, Double, Double) -> T): T? {
         val scale = max(max(abs(a), abs(b)), max(abs(c), abs(d)))
         if (scale == 0.0) return null
         val determinant = (a / scale) * (d / scale) - (b / scale) * (c / scale)
@@ -46,8 +51,8 @@ data class Affine2D(
         val id = (a / scale) / determinant / scale
         val itx = -(ia * tx + ic * ty)
         val ity = -(ib * tx + id * ty)
-        if (!listOf(ia, ib, ic, id, itx, ity).all { it.isFinite() }) return null
-        return Affine2D(ia, ib, ic, id, itx, ity)
+        if (!ia.isFinite() || !ib.isFinite() || !ic.isFinite() || !id.isFinite() || !itx.isFinite() || !ity.isFinite()) return null
+        return result(ia, ib, ic, id, itx, ity)
     }
 
     fun mapBounds(bounds: BoundsD): BoundsD {

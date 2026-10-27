@@ -14,6 +14,39 @@ class PreviewProjectionRetentionTest {
     private fun cached(n: PagedPreviewNotebook): List<*> =
         PagedPreviewNotebook::class.java.getDeclaredField("projection").apply { isAccessible = true }.get(n) as List<*>
 
+    @Test fun pendingCheckpointValidationDoesNotCopyDenseSceneReferences() {
+        // Current JVM allocation regression, not a device heap or production memory threshold.
+        val meter = assertIs<com.sun.management.ThreadMXBean>(java.lang.management.ManagementFactory.getThreadMXBean())
+        assertTrue(meter.isThreadAllocatedMemorySupported); meter.isThreadAllocatedMemoryEnabled = true
+        val page = PageDescriptor(PageId("page"), LayerId("ink"), 595.0, 842.0, contentRevision = 1)
+        val id = SceneId("checkpoint-allocation")
+        val samples = StrokeSamples.copyOf(doubleArrayOf(1.0), doubleArrayOf(2.0), floatArrayOf(.5f), longArrayOf(1))
+        val brush = BrushSpec(BrushKind.MONOLINE, 1, 2.0, -1)
+        val objects = (1..4999).map { StrokeObject(ObjectId("old-$it"), 1, page.layerId, brush, samples) }
+        val dense = DocumentRoot.compose("title", SceneSnapshot.restored(id, 1, objects), listOf(page))
+        val small = DocumentRoot.compose("title", SceneSnapshot.restored(id, 1, emptyList()), listOf(page))
+        val pending = DocumentCommand.Canvas(page.id, CanvasCommand.AddStroke(CommandId("completion"), 1,
+            StrokeTarget(id, page.layerId, brush), ObjectId("pending"), samples))
+        fun measured(root: DocumentRoot): Long {
+            repeat(8) { PagedPreviewSnapshot(root, pending) }
+            return (1..3).minOf {
+                val before = meter.getThreadAllocatedBytes(Thread.currentThread().id)
+                val snapshot = PagedPreviewSnapshot(root, pending)
+                val count = meter.getThreadAllocatedBytes(Thread.currentThread().id) - before
+                assertSame(root, snapshot.root); assertSame(pending, snapshot.pending)
+                count
+            }
+        }
+        val smallBytes = measured(small); val denseBytes = measured(dense)
+        println("pending-checkpoint-validation smallBytes=$smallBytes denseBytes=$denseBytes")
+        fun digest(text: String) = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(text.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+        assertEquals("c6ca5c0e00e4b51094b20454ab536e51b580ce19c3eed65a543ddd325ae0e14d", digest(PagedPreviewCodec.encode(dense)))
+        assertEquals("c6209d9fad42a8312fc1ae334002db030ab8a314e8f69a8d557a9b81ba687ff6", digest(PagedPreviewSnapshot(dense, pending).encode()))
+        assertTrue(denseBytes - smallBytes < 8192, "Validation copied full-scene references: $smallBytes -> $denseBytes")
+        assertEquals(4999, dense.scene.objectCount); assertSame(objects.last(), dense.scene.find(objects.last().id))
+    }
+
     @Test fun deletedPagePayloadLeavesProjectionBeforeAnyLaterDrawingRead() {
         val n = note(); draw(n)
         val oldStroke = n.stroke(0)

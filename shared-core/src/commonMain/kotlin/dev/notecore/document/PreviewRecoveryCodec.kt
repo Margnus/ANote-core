@@ -34,7 +34,7 @@ object PreviewRecoveryCodec {
         val stroke = pending.command as? CanvasCommand.AddStroke ?: throw IllegalArgumentException("Not a stroke completion")
         require(pending.documentId == root.id && pending.baseRevision == root.revision)
         require(root.findPage(pending.pageId)?.layerId == stroke.target.layerId)
-        require(root.scene.objects().none { it.id == stroke.objectId })
+        require(root.scene.find(stroke.objectId) == null)
         require(stroke.samples.size in 1..PagedPreviewCodec.MAX_STROKE_POINTS)
         require(stroke.target.brush.kind == BrushKind.MONOLINE && stroke.target.brush.algorithmVersion == 1)
         require(pending.id.value.hasValidUnicode() && pending.pageId.value.hasValidUnicode())

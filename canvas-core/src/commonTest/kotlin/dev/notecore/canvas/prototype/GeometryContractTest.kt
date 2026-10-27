@@ -10,6 +10,19 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class GeometryContractTest {
+    @Test fun inversePredicatePreservesConstructedInverseSupportAtNumericEdges() {
+        val cases = listOf(Affine2D(), Affine2D(a = -1.0, d = 2.0, tx = 17.0),
+            Affine2D(a = 1.0, b = .25, c = .5, d = 1.0), Affine2D(a = 0.0, d = 0.0),
+            Affine2D(a = 1.0, b = 1.0, c = 1.0, d = 1.0 + 1e-13),
+            Affine2D(a = 1e-300, d = 1e-300), Affine2D(a = 1e-300, d = 1e-300, tx = 1e100),
+            Affine2D(a = 1e300, d = 1e300), Affine2D(a = Double.MIN_VALUE, d = Double.MIN_VALUE))
+        val expected = listOf(true, true, true, false, false, true, false, true, false)
+        for ((index, value) in cases.withIndex()) {
+            assertEquals(expected[index], value.hasInverse(), "predicate $index")
+            assertEquals(expected[index], value.inverseOrNull() != null, "constructed inverse $index")
+        }
+    }
+
     @Test fun inverseRoundTripsSeededTransforms() {
         val random = Random(20261014)
         repeat(500) {

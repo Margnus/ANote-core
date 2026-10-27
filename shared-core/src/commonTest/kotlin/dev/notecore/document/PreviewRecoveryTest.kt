@@ -13,6 +13,34 @@ class PreviewRecoveryTest {
         fault.arm(); assertFailsWith<IllegalStateException> { note.endStroke(8.0, 6.0, 1f, 10) }
         return note.captureRecovery()
     }
+    @Test fun denseCheckpointKeepsOrderChargesAndDuplicateIdentityRefusalThroughOneRetry() {
+        val id = SceneId("dense-recovery")
+        val page = PageDescriptor(PageId("page"), LayerId("ink"), 595.0, 842.0, contentRevision = 1)
+        val samples = StrokeSamples.copyOf(doubleArrayOf(1.0), doubleArrayOf(2.0), floatArrayOf(.5f), longArrayOf(1))
+        val brush = BrushSpec(BrushKind.MONOLINE, 1, 2.0, -1)
+        val objects = (1..4999).map { StrokeObject(ObjectId("old-$it"), 1, page.layerId, brush, samples) }
+        val root = DocumentRoot.compose("dense", SceneSnapshot.restored(id, 1, objects), listOf(page))
+        val command = CanvasCommand.AddStroke(CommandId("completion"), 1, StrokeTarget(id, page.layerId, brush), ObjectId("pending"), samples)
+        val pending = DocumentCommand.Canvas(page.id, command)
+        val checkpoint = PagedPreviewSnapshot(root, pending); val encoded = checkpoint.encode()
+        assertEquals(PagedPreviewCodec.retainedByteCharge(root) + PreviewRecoveryCodec.pendingCharge(pending), checkpoint.retainedByteCharge)
+        assertEquals(PagedPreviewCodec.encodingWorkByteCharge(root) + PreviewRecoveryCodec.pendingWorkCharge(pending), checkpoint.encodingWorkByteCharge)
+        for (existing in listOf(objects.first(), objects.last())) assertFailsWith<IllegalArgumentException> {
+            PagedPreviewSnapshot(root, pending.copy(command = command.copy(objectId = existing.id)))
+        }
+        val decoded = PreviewRecoveryCodec.decode(encoded)
+        assertEquals(encoded, decoded.encode()); assertTrue(checkpoint.sameContent(decoded))
+        assertEquals(objects.map { it.id }, decoded.root.scene.objects().map { it.id })
+        val note = assertNotNull(PagedPreviewNotebook.openRecovery(decoded, "resume").notebook)
+        assertTrue(note.retryPendingStroke()); val committed = note.snapshot()
+        assertTrue(note.retryPendingStroke()); assertSame(committed, note.snapshot())
+        assertEquals(5000, committed.scene.objectCount)
+        assertEquals(objects.map { it.id } + command.objectId, committed.scene.objects().map { it.id })
+        assertEquals(samples, committed.scene.find(command.objectId)!!.samples)
+        assertSame(root, checkpoint.root); assertSame(pending, checkpoint.pending)
+        assertEquals(encoded, checkpoint.encode())
+    }
+
     @Test fun exactPendingRoundtripAndOriginalOwnerExplicitRetryOnce() {
         val source = recovery(); val text = source.encode()
         assertFailsWith<IllegalArgumentException> { PagedPreviewCodec.decode(text) }

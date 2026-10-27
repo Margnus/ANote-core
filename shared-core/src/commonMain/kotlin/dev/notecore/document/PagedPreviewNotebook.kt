@@ -460,14 +460,18 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
 
 /** Immutable original save input. Recovery does not advance the committed document revision. */
 class PagedPreviewSnapshot internal constructor(val root: DocumentRoot, val pending: DocumentCommand.Canvas? = null) : PreviewSaveSnapshot {
-    init { if (pending != null) PreviewRecoveryCodec.validate(root, pending) }
+    override val retainedByteCharge: Long
+    override val encodingWorkByteCharge: Long
+    init {
+        if (pending != null) PreviewRecoveryCodec.validate(root, pending)
+        val baseRetained = PagedPreviewCodec.retainedByteCharge(root)
+        retainedByteCharge = baseRetained + (pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L)
+        encodingWorkByteCharge = baseRetained + PagedPreviewCodec.encodingTextWorkByteCharge(root) +
+            (pending?.let { PreviewRecoveryCodec.pendingWorkCharge(it) } ?: 0L)
+    }
     override val documentId: String get() = root.id.value
     override val title: String get() = root.title
     override val version: Long get() = root.revision
-    override val retainedByteCharge: Long = PagedPreviewCodec.retainedByteCharge(root) +
-        (pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L)
-    override val encodingWorkByteCharge: Long = PagedPreviewCodec.encodingWorkByteCharge(root) +
-        (pending?.let { PreviewRecoveryCodec.pendingWorkCharge(it) } ?: 0L)
     override fun encode(): String = if (pending == null) PagedPreviewCodec.encode(root) else PreviewRecoveryCodec.encode(this)
     override fun sameContent(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot && pending == other.pending &&
         (root === other.root || documentId == other.documentId && version == other.version && title == other.title &&
