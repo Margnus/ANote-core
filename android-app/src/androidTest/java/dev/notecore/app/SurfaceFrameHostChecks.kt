@@ -68,8 +68,15 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         val shot = checkNotNull(test.uiAutomation.takeScreenshot())
         return try { shot.getPixel(p.first,p.second) } finally { shot.recycle() }
     }
+    private fun releaseAdmitted() {
+        // Keep an existing admitted write/callback; only memory-only fixtures need a first handoff.
+        if (!store.releaseActive(note)) {
+            check(store.save(note.capture()) { _, _ -> })
+            check(store.releaseActive(note))
+        }
+    }
     private fun close() {
-        main { store.detachInk(view); store.releaseActive(note); host.setContentView(View(host)) }
+        main { store.detachInk(view); releaseAdmitted(); host.setContentView(View(host)) }
         eventually("Detached compositor reader did not return") { !store.inkOwnerRetained && store.inkChargedBytes == 0L }
         main { store.stopTestBackend() }
     }
@@ -230,7 +237,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
             }
         }
         eventually("Fresh NoteStore did not reopen saved complete document") { reopened }
-        main { store.releaseActive(note); store.stopTestBackend() }
+        main { releaseAdmitted(); store.stopTestBackend() }
 
         var allowLostViewSettlement = false
         setup(maySettleRelease = { allowLostViewSettlement })
@@ -340,7 +347,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         }
         check(fallbackMatches()) { "Pending shared frame lost complete canonical fallback: first=${Integer.toHexString(pendingFallbackFirstPixel)} last=${Integer.toHexString(waiting)} observations=$pendingFallbackObservations" }
         main { check(store.inkFramePublications == 0 && release.count == 1L) }
-        main { store.detachInk(view); store.releaseActive(note); host.setContentView(View(host)); check(store.inkOwnerRetained); check(store.inkChargedBytes>0) }
+        main { store.detachInk(view); releaseAdmitted(); host.setContentView(View(host)); check(store.inkOwnerRetained); check(store.inkChargedBytes>0) }
         release.countDown()
         eventually("Late shared-executor result was not ACKed after View removal") { !store.inkOwnerRetained && store.inkChargedBytes==0L }
         var saved = false
@@ -373,7 +380,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         check(kotlin.math.abs(Color.blue(ambiguousFallback)-191)<=4) { "Ambiguous handoff lost complete Path fallback" }
         var savedWhileDeferred = false
         main {
-            store.releaseActive(note)
+            releaseAdmitted()
             note = store.create()
             view = InkCanvasView(host,note,{}, { error(it) })
             host.setContentView(InkSurfaceHost(view,store))
@@ -400,7 +407,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         setup(afterRelease = { releaseCalls++; error("injected post-recycle confirmation loss") })
         eventually("Unknown cleanup fixture did not reach original ViewRoot handoff") { store.inkFramePublications>0 && store.inkFrameDraws>0 }
         check(kotlin.math.abs(Color.blue(screenPixel())-191)<=4)
-        main { store.detachInk(view); store.releaseActive(note); host.setContentView(View(host)) }
+        main { store.detachInk(view); releaseAdmitted(); host.setContentView(View(host)) }
         eventually("No release callback for unknown cleanup fixture") { store.inkReleaseCallbacks>0 && releaseCalls>0 }
         var held = 0L
         main { held = store.inkChargedBytes; check(held>0 && store.inkOwnerRetained); store.detachInk(view); check(releaseCalls==1) }
@@ -433,7 +440,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
                 })
                 check(throwingReceiverCalled == 1 && pendingId !in callbacks)
                 check(store.saveStates().single { it.snapshot.documentId == pendingId }.snapshot.sameContent(pending.capture()))
-                store.detachInk(view); store.releaseActive(note); host.setContentView(View(host))
+                store.detachInk(view); releaseAdmitted(); host.setContentView(View(host))
             }
         } finally { storageRelease.countDown() }
         eventually("Stopping admission cancelled an already accepted storage write") {

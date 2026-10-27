@@ -1,0 +1,193 @@
+{
+  "status": "passed",
+  "host_sqlite_version": "3.50.4",
+  "abrupt_process_exit_cases": 5,
+  "integrity_identity_cases": 3,
+  "cancellation_cases": 5,
+  "live_producer_cases": 2,
+  "observations": [
+    {
+      "fault": "partial-stage",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          null
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": false,
+      "source_preserved": true
+    },
+    {
+      "fault": "stage-closed",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": false,
+      "source_preserved": true
+    },
+    {
+      "fault": "promoted",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": true,
+      "source_preserved": true
+    },
+    {
+      "fault": "db-uncommitted",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": true,
+      "source_preserved": true
+    },
+    {
+      "fault": "db-committed",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "ALREADY_COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": false,
+      "source_preserved": true
+    },
+    {
+      "case": "preexisting_corrupt_resource_is_not_overwritten",
+      "status": "REPAIR_REQUIRED",
+      "visible_documents": 0
+    },
+    {
+      "case": "operation_identity_conflict_does_not_stage_or_commit",
+      "status": "IDENTITY_CONFLICT"
+    },
+    {
+      "case": "committed_metadata_is_not_success_when_resource_damaged",
+      "status": "REPAIR_REQUIRED"
+    },
+    {
+      "case": "cancel-partial-stage",
+      "status": "CANCELLED",
+      "files_preserved": true
+    },
+    {
+      "case": "cancel-promoted",
+      "status": "CANCELLED",
+      "files_preserved": true
+    },
+    {
+      "case": "cancel-committed",
+      "status": "ALREADY_COMMITTED"
+    },
+    {
+      "case": "live-producer",
+      "status": "CANCELLED",
+      "live_confirmation_refused": true
+    },
+    {
+      "case": "stale-attempt",
+      "status": "CANCELLED",
+      "live_confirmation_refused": true
+    }
+  ],
+  "source_payloads_preserved": true,
+  "scope": "Host child-process exit, no-clobber file link and temporary SQLite transaction design probes; not a production importer or mobile durability implementation.",
+  "directory_fsync_verified": false,
+  "power_loss_verified": false,
+  "resource_gc_deletion_implemented": false,
+  "production_schema_frozen": false,
+  "production_sqlite_authorized": false,
+  "c1_gate_complete": false,
+  "limits": [
+    "Temporary host SQLite and synthetic opaque resources only; no App or production metadata schema",
+    "No directory fsync or Android/Apple durability claim; abrupt child exit is not power loss",
+    "No GC deletion, reader pin, cross-process resource retirement protocol or user cancellation implementation",
+    "Pending import task protects ownership; safe task expiry and final collection remain undefined",
+    "Cancellation is host-only: conservative PID observation and cooperative attempt fencing; no production cancellation UI, expiry policy or GC release authorization"
+  ],
+  "source_and_artifact_sha256": {
+    "tools/resource_commit_probe.py": "592dd3ea0ca3970e15fc2855cebecad35e871ae776016d28fd097e447fd87ece",
+    "fixtures/storage/resource-commit-cases.json": "077c9e8e8a03b2229f262ba1ca8930850a1f2e0b6713ad0dd473e8bf11b1bec4",
+    "fixtures/storage/resource-gc-cases.json": "3ed05a51f754315e833ef81d6c1c69bc735d1269297a55795d69c4e6ce067938",
+    "tools/verify_resource_commit_rules.py": "c5f998e1486e6f25b98f1652f0c59423912e10b9c0b3c4ece4c028413762c03a"
+  }
+}

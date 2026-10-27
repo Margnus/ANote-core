@@ -12,14 +12,14 @@ class CoreBrushInstrumentation : Instrumentation() {
         val output = Bundle()
         try {
             BrushTileBitmapTest.observations.clear()
-            val result = JUnitCore.runClasses(BrushEnvelopePocTest::class.java, BrushPathPocTest::class.java,
+            val result = JUnitCore.runClasses(GeometryContractTest::class.java, BrushEnvelopePocTest::class.java, BrushPathPocTest::class.java,
                 BrushReductionPocTest::class.java, ChunkedBrushPocTest::class.java,
                 SpatialIndexPocTest::class.java, IncrementalSpatialIndexPocTest::class.java,
                 BrushTileCachePocTest::class.java, ResourceLeaseContractTest::class.java,
                 WeightedLruContractTest::class.java, BrushTilePixelsPocTest::class.java, BrushTileBitmapTest::class.java,
                 BrushRenderOwnerPocTest::class.java, BrushRenderExecutorPocTest::class.java, AndroidBrushImagePocTest::class.java, RenderViewportTraceTest::class.java,
                 InputReplayContractTest::class.java, InputArenaContractTest::class.java, InputScalarReplayTest::class.java)
-            check(result.wasSuccessful() && result.runCount == 139 && result.ignoreCount == 0) {
+            check(result.wasSuccessful() && result.runCount == 145 && result.ignoreCount == 0) {
                 "run=${result.runCount} ignored=${result.ignoreCount} failures=${result.failures.joinToString { it.trace }}"
             }
             output.putString("render_viewport_trace", checkNotNull(RenderViewportTraceTest.observation))

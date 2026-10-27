@@ -5,7 +5,7 @@ import dev.notecore.canvas.prototype.*
 /** UI-owner preview session. Exactly one authority; selected-page projection is a read-only cache. */
 class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(initial: DocumentRoot, private val sessionNonce: String,
                            budget: DocumentBudget = DocumentBudget(), private val ownerCheck: () -> Unit = {}) {
-    private val memory = MemoryDocumentAuthority(initial, budget, ownerCheck)
+    private val memory: MemoryDocumentAuthority
     private val inputObjectLimit = budget.maxObjects
     private val inputByteLimit = budget.inputBytes
     private var selected = initial.page(0).id
@@ -34,7 +34,10 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         ownerCheck()
         require(validSessionNonce(sessionNonce))
         require(budget.maxPages <= PagedPreviewCodec.MAX_PAGES && budget.maxObjects <= PagedPreviewCodec.MAX_OBJECTS && budget.liveBytes <= 8L * 1024 * 1024)
-        PagedPreviewCodec.retainedByteCharge(initial)
+        // The throwing constructor is still exported: it must not bypass validated adoption.
+        // Refuse before allocating the sole mutable authority or its identity/history state.
+        require(PreviewDocumentReader.accept(initial).failure == null) { "Unsupported preview content" }
+        memory = MemoryDocumentAuthority(initial, budget, ownerCheck)
     }
     private fun root(): DocumentRoot { ownerCheck(); return memory.snapshot() }
     val documentId: String get() = root().id.value
@@ -461,18 +464,22 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
 
 /** Immutable original save input. Recovery does not advance the committed document revision. */
 class PagedPreviewSnapshot internal constructor(val root: DocumentRoot, val pending: DocumentCommand.Canvas? = null) : PreviewSaveSnapshot {
-    init { if (pending != null) PreviewRecoveryCodec.validate(root, pending) }
+    override val retainedByteCharge: Long
+    override val encodingWorkByteCharge: Long
+    init {
+        if (pending != null) PreviewRecoveryCodec.validate(root, pending)
+        val baseRetained = PagedPreviewCodec.retainedByteCharge(root)
+        retainedByteCharge = baseRetained + (pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L)
+        encodingWorkByteCharge = baseRetained + PagedPreviewCodec.encodingTextWorkByteCharge(root) +
+            (pending?.let { PreviewRecoveryCodec.pendingWorkCharge(it) } ?: 0L)
+    }
     override val documentId: String get() = root.id.value
     override val title: String get() = root.title
     override val version: Long get() = root.revision
-    override val retainedByteCharge: Long = PagedPreviewCodec.retainedByteCharge(root) +
-        (pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L)
-    override val encodingWorkByteCharge: Long = PagedPreviewCodec.encodingWorkByteCharge(root) +
-        (pending?.let { PreviewRecoveryCodec.pendingWorkCharge(it) } ?: 0L)
     override fun encode(): String = if (pending == null) PagedPreviewCodec.encode(root) else PreviewRecoveryCodec.encode(this)
     override fun sameContent(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot && pending == other.pending &&
         (root === other.root || documentId == other.documentId && version == other.version && title == other.title &&
-            root.pages() == other.root.pages() && root.scene.objects() == other.root.scene.objects())
+            root.pages() == other.root.pages() && root.scene.sameContent(other.root.scene))
     override fun strictlyExtends(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot &&
         root === other.root && other.pending == null && pending != null
     companion object {

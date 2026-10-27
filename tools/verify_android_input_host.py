@@ -14,10 +14,10 @@ CHECKS = {'sibling_surface_preserves_original_input_and_rejects_stale_events', '
           'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery',
           'live_byte_refusal_and_undo_recovery', 'input_byte_budget_refusal_cancel_and_recovery',
           'history_capacity_refuses_down_without_owning_samples', 'journal_identity_capacity_refuses_before_real_view_ownership'}
-STORAGE_CHECKS = {'catalog_capacity_failure_preserves_owner_snapshot', 'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
+STORAGE_CHECKS = {'derived_text_capacity_checkpoint_save_and_reopen', 'catalog_capacity_failure_preserves_owner_snapshot', 'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
-OWNER_CHECKS = {'shared_editor_detach_capacity_and_reopen', 'pending_editor_failure_retry_original_recovery',
+OWNER_CHECKS = {'unadmitted_release_refuses_before_retiring_authority', 'shared_editor_detach_capacity_and_reopen', 'pending_editor_failure_retry_original_recovery',
                 'editor_original_ledger_old_ack_failure_and_retry', 'editor_stopped_backend_feedback', 'actual_activity_shared_presentation_update',
                 'actual_activity_shared_editor_departure', 'wrong_thread_retirement_rejected', 'accepted_root_saved_before_terminal_worker_stop',
                 'failed_root_retained_until_explicit_retry', 'active_input_and_picker_refuse_without_loss',
@@ -32,16 +32,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--serial', required=True)
     parser.add_argument('--adb', required=True)
-    parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows'), default='NoteCorePreview')
+    parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows', 'NoteCoreMin26'), default='NoteCorePreview')
+    parser.add_argument('--minimum-api', action='store_true')
     args = parser.parse_args()
-    assert args.serial in ('emulator-5580', 'emulator-5554'), 'Only the existing dedicated emulator is authorized'
-    folder = ROOT/'build/android-input-host'; folder.mkdir(parents=True, exist_ok=True)
+    assert (args.minimum_api and args.serial == 'emulator-5582' and args.avd == 'NoteCoreMin26') or (not args.minimum_api and args.serial in ('emulator-5580', 'emulator-5554') and args.avd != 'NoteCoreMin26'), 'Only the existing dedicated emulator is authorized'
+    folder = ROOT/('build/android-min-api-host' if args.minimum_api else 'build/android-input-host'); folder.mkdir(parents=True, exist_ok=True)
 
     def adb(*command):
         return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT,
                               check=True, capture_output=True, timeout=120).stdout
 
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode('utf-8').strip() == args.avd
+    assert adb('shell', 'getprop', 'ro.kernel.qemu.avd_name' if args.minimum_api else 'ro.boot.qemu.avd_name').decode('utf-8').strip() == args.avd
 
     def files():
         output = adb('shell', 'run-as', BUNDLE, 'ls', 'files/preview-notes').decode('utf-8')
@@ -55,6 +56,8 @@ def main():
         return result
 
     before = files()
+    if args.minimum_api:
+        assert adb('shell','getprop','ro.build.version.sdk').decode().strip() == '26'
     build = json.loads((ROOT/'reports/preview-build.json').read_text(encoding='utf-8'))
     assert build['status'] == 'passed'
     apk = ROOT/build['android']['artifact']
@@ -62,6 +65,7 @@ def main():
     stamp = dict(line.split('  ', 1)[::-1] for line in
                  (ROOT/'reports/android-brush-build-inputs.sha256').read_text(encoding='utf-8').splitlines())
     bindings = {**build['source_and_build_input_sha256'], **stamp}
+    bindings[Path(__file__).relative_to(ROOT).as_posix()] = digest(Path(__file__))
     assert 'android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt' in stamp
     for path, sha in bindings.items():
         assert digest(ROOT/path) == sha, ('stale input host build', path)
@@ -109,10 +113,34 @@ def main():
     for path in (apk, test, log, storage_log, owner_log, baseline, Path(__file__), ROOT/'reports/preview-build.json',
                  ROOT/'reports/android-brush-build-inputs.sha256'):
         bindings[path.relative_to(ROOT).as_posix()] = digest(path)
+    minimum = None
+    minimum_environment = None
+    if args.minimum_api:
+        archive=ROOT.parent/'.codex/android-host/api26/x86_64-26_r01.zip'
+        assert archive.stat().st_size==474178332
+        with archive.open('rb') as stream:
+            assert hashlib.file_digest(stream,'sha1').hexdigest()=='432f149c048bffce7f9de526ec65b336daf7a0a3'
+        metadata=ROOT/'build/api26-support/repository.xml'
+        bindings[metadata.relative_to(ROOT).as_posix()] = digest(metadata)
+        minimum_environment={'image_package':'system-images;android-26;default;x86_64','image_revision':1,
+            'official_image_bytes':474178332,'official_image_sha1':'432f149c048bffce7f9de526ec65b336daf7a0a3',
+            'image_archive_sha256':digest(archive),'repository_url':'https://dl.google.com/android/repository/sys-img/android/sys-img2-3.xml',
+            'build_fingerprint':adb('shell','getprop','ro.build.fingerprint').decode().strip(),'isolated_avd':args.avd}
+        raw = adb('shell','am','instrument','-w','-r','-e','notecore_case','minimum_api',BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
+        path = folder/'minimum-api.log'; path.write_text(raw,encoding='utf-8',newline='\n')
+        assert 'minimum_api_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
+        minimum = json.loads(re.search(r'minimum_api_observations=(\{.*\})',raw).group(1))
+        assert minimum['line_dot_undo_redo_page_pixels'] and minimum['surface_render_bytes']==0
+        bindings[path.relative_to(ROOT).as_posix()] = digest(path)
+        assert files() == before
+        adb('shell','am','force-stop',BUNDLE)
+        assert 'Status: ok' in adb('shell','am','start','-W','-n',BUNDLE+'/dev.notecore.app.MainActivity').decode('utf-8')
+        pid = adb('shell','pidof',BUNDLE).decode().strip()
+        assert re.fullmatch(r'\d+',pid) and files()==before
     sdk = Path(args.adb).resolve().parent.parent
     contracts = [sdk/'sources/android-36/android/view'/name for name in ('MotionEvent.java', 'View.java')]
     report = {
-        'schema': 'android-input-host-1', 'status': 'passed', 'serial': args.serial,
+        'minimum_api_environment':minimum_environment, 'minimum_api_fallback': minimum, 'schema': 'android-input-host-1', 'status': 'passed', 'serial': args.serial,
         'api': adb('shell', 'getprop', 'ro.build.version.sdk').decode('utf-8').strip(),
         'checks': sorted(CHECKS), 'check_count': len(CHECKS), 'observations': observed,
         'storage_retention_checks': storage, 'storage_retention_check_count': len(STORAGE_CHECKS),
@@ -122,13 +150,13 @@ def main():
         'all_original_files_unchanged': True, 'ordinary_process_restored': True,
         'source_and_artifact_sha256': bindings,
         'sdk_contract_sha256': {str(path): digest(path) for path in contracts},
-        'scope': 'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, eleven original NoteStore/worker file/export retention checks and twelve Store retirement/editor checks in unique cache directories. Real MainActivity callbacks/layout use an isolated test-injected Store. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence.',
+        'scope': f'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, {len(STORAGE_CHECKS)} original NoteStore/worker file/export retention checks including long-numeric recovery and full canonical reopen, and {len(OWNER_CHECKS)} Store retirement/editor checks with actual MainActivity callbacks/layout using isolated test-injected Store in unique cache directories. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence.',
         'decision': 'Use double viewport scale/offset for canonical input; float conversion is reserved for derived Path coordinates. Keep current owner, immutable real samples, explicit invalid/cancel behavior and MONOLINE scope.',
         'ordinary_ui_interaction_verified': False, 'real_stylus_verified': False,
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,
         'c1_gate_complete': False,
     }
-    (ROOT/'reports/android-input-host-tests.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+    (ROOT/('reports/android-min-api-host-tests.json' if args.minimum_api else 'reports/android-input-host-tests.json')).write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'storage_retention_check_count', 'owner_retirement_check_count', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
 
 

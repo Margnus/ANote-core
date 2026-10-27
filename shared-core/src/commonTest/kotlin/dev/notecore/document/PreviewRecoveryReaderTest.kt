@@ -58,4 +58,22 @@ class PreviewRecoveryReaderTest {
             refused(checkpoint.replace("MONOLINE", "PRESSURE"), PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)
         }
     }
+    @Test fun floatDegeneratePendingOrBaseRefusesTheWholeCheckpoint() {
+        val original = checkpoint(true).encode()
+        val rows = original.split('\n', limit=4)
+        val frame = rows[2].split('\t')
+        val size = frame[0].toInt()
+        val base = rows[3].take(size)
+        val ink = rows[3].drop(size).take(frame[1].toInt())
+        for (pending in listOf(false, true)) {
+            val changedBase = if (pending) base else base.replace("\t2.5\t", "\t1.0E-50\t")
+            val changedInk = if (pending) ink.replace("\t2.5\t", "\t1.0E-50\t") else ink
+            assertTrue(changedBase != base || changedInk != ink)
+            val changed = rows[0]+"\n"+rows[1]+"\n"+changedBase.length+"\t"+changedInk.length+"\t"+frame[2]+"\n"+
+                changedBase+changedInk+"RECOVERY-END\n"
+            refused(changed, PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)
+        }
+        assertNotNull(PreviewRecoveryCodec.read(original).snapshot)
+    }
+
 }

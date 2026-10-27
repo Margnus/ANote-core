@@ -1,0 +1,190 @@
+{
+  "status": "passed",
+  "retirement_reservation_cases": 6,
+  "retirement_observations": [
+    {
+      "id": "pin-before-reserve",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "reference-before-reserve",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "reserve-before-pin",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "reserve-rollback",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "stale-pin-release",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "writer-serialization",
+      "passed": true,
+      "source_preserved": true
+    }
+  ],
+  "case_count": 18,
+  "observations": [
+    {
+      "id": "old-verified-unreferenced-only",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "unset-policy-blocks-all",
+      "eligible": [],
+      "refusal": "POLICY_UNSET",
+      "after_mutation": null
+    },
+    {
+      "id": "unknown-schema-blocks-all",
+      "eligible": [],
+      "refusal": "UNKNOWN_SCHEMA",
+      "after_mutation": null
+    },
+    {
+      "id": "incomplete-reference-enumeration-blocks-all",
+      "eligible": [],
+      "refusal": "REFERENCES_INCOMPLETE",
+      "after_mutation": null
+    },
+    {
+      "id": "exact-cutoff-is-protected",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "workspace-selection-is-explicit",
+      "eligible": [
+        "other-space",
+        "shared-bytes-other-space"
+      ],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-document",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-trash",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-history",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-conflict",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-running-task",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-backup",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-outbox",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-unknown-future-owner",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "reference-in-other-space-does-not-authorize-cross-space-gc",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "late-task-invalidates-old-selection",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": []
+    },
+    {
+      "id": "rolled-back-reference-does-not-become-visible",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": [
+        "old-orphan"
+      ]
+    },
+    {
+      "id": "same-hash-other-space-reference-does-not-own-this-space",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": null
+    }
+  ],
+  "unsafe_query_mutations_rejected": [
+    "ignore_references",
+    "ignore_age",
+    "ignore_verification",
+    "ignore_reference_workspace",
+    "ignore_workspace",
+    "ignore_state"
+  ],
+  "host_sqlite_version": "3.50.4",
+  "source_payloads_unchanged_during_checks": true,
+  "collector_deleted_resource_files": false,
+  "temporary_fixture_cleanup": true,
+  "scope": "Draft eligibility query on synthetic opaque bytes and temporary host SQLite; not a production GC implementation, import transaction, final deletion authorization or platform durability test.",
+  "candidate_is_deletion_authorization": false,
+  "production_schema_frozen": false,
+  "production_sqlite_authorized": false,
+  "c1_gate_complete": false,
+  "limits": [
+    "Only an eligibility design query on temporary host SQLite; not a collector or production metadata schema",
+    "Eligibility is not deletion authority. Final transaction/owner serialization, file retirement and crash recovery remain required",
+    "No production grace period chosen; cutoff is explicit synthetic policy input",
+    "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified",
+    "Retirement checks reserve metadata on two host SQLite connections only; no file rename/unlink, dead reader reclamation, directory durability or production pin protocol"
+  ],
+  "source_and_artifact_sha256": {
+    "fixtures/storage/resource-gc-cases.json": "3ed05a51f754315e833ef81d6c1c69bc735d1269297a55795d69c4e6ce067938",
+    "tools/verify_resource_gc_rules.py": "24ce08006d4575ec2a8ffe188bd8d6f284ad0508532692cc0fdebdd53add4841"
+  }
+}

@@ -21,6 +21,30 @@ class DocumentAuthorityTest {
         return DocumentCommand.Canvas(page.id, CanvasCommand.AddStroke(CommandId("add-$key"), authority.snapshot().revision,
             StrokeTarget(doc, page.layerId, BrushSpec(BrushKind.MONOLINE, 1, 2.0, 0xff000000.toInt())), ObjectId(key), samples))
     }
+    @Test fun denseInitialAdmissionPreservesIdentityBudgetAndObjectEpochs() {
+        val samples = StrokeSamples.copyOf(doubleArrayOf(1.0), doubleArrayOf(2.0), floatArrayOf(.5f), longArrayOf(1))
+        val objects = (1..5000).map { StrokeObject(ObjectId("dense-$it"), (it % 3 + 1).toLong(), a.layerId,
+            BrushSpec(BrushKind.MONOLINE, 1, 2.0, -1), samples) }
+        val initial = DocumentRoot.compose("dense", SceneSnapshot.restored(doc, 7, objects), listOf(a.copy(contentRevision = 7)))
+        val baseline = MemoryDocumentAuthority(initial).status()
+        val exact = DocumentBudget(maxPages = 1, maxObjects = 5000, liveBytes = baseline.liveByteCharge,
+            identityBytes = baseline.identityByteCharge)
+        for ((budget, reason) in listOf(exact.copy(maxObjects = 4999) to DocumentRejection.OBJECT_CAPACITY,
+            exact.copy(liveBytes = exact.liveBytes - 1) to DocumentRejection.LIVE_BYTE_CAPACITY,
+            exact.copy(identityBytes = exact.identityBytes - 1) to DocumentRejection.IDENTITY_CAPACITY)) {
+            assertEquals(reason, MemoryDocumentAuthority.initialCapacityFailure(initial, budget))
+            assertFailsWith<IllegalArgumentException> { MemoryDocumentAuthority(initial, budget) }
+        }
+        val owner = MemoryDocumentAuthority(initial, exact)
+        assertSame(initial, owner.snapshot()); assertEquals(baseline, owner.status())
+        for (obj in objects) assertTrue(owner.identityWasUsed(obj.id.value))
+        assertTrue(owner.identityWasUsed(a.id.value)); assertTrue(owner.identityWasUsed(a.layerId.value))
+        val last = objects.last()
+        reject(owner, DocumentCommand.Canvas(a.id, CanvasCommand.TransformStroke(CommandId("stale-dense"), doc, 7,
+            last.id, last.objectRevision + 1, Affine2D())), DocumentRejection.SCENE_REJECTED)
+        assertSame(last, initial.scene.find(last.id)); assertEquals(baseline, owner.status())
+    }
+
     @Test fun allocationProbeUsesOriginalTombstonesAndJournalWithoutMutation() {
         var owned = true
         val authority = MemoryDocumentAuthority(root(), ownerCheck = { check(owned) })

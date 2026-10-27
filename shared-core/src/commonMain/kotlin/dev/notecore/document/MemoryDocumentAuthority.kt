@@ -20,13 +20,17 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
             root.scene.forEachObject { charge += objectCharge(it) }
             return charge + projectionCapacityCharge(root.scene.objectCount)
         }
+        private fun initialIdentityCharge(root: DocumentRoot): Long {
+            var charge = root.pages().sumOf { 48L + it.id.value.length * 2 + 48L + it.layerId.value.length * 2 }
+            root.scene.forEachObject { charge += 80L + it.id.value.length * 2L }
+            return charge
+        }
         /** Same initial-state formulas as the authority, without constructing a mutable owner. */
         fun initialCapacityFailure(root: DocumentRoot, budget: DocumentBudget): DocumentRejection? = when {
             root.pageCount > budget.maxPages -> DocumentRejection.PAGE_CAPACITY
             root.scene.objectCount > budget.maxObjects -> DocumentRejection.OBJECT_CAPACITY
             liveCharge(root) > budget.liveBytes -> DocumentRejection.LIVE_BYTE_CAPACITY
-            root.pages().sumOf { 48L + it.id.value.length * 2 + 48L + it.layerId.value.length * 2 } +
-                root.scene.objects().sumOf { 80L + it.id.value.length * 2L } > budget.identityBytes -> DocumentRejection.IDENTITY_CAPACITY
+            initialIdentityCharge(root) > budget.identityBytes -> DocumentRejection.IDENTITY_CAPACITY
             else -> null
         }
     }
@@ -36,13 +40,18 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                              val pages: Set<PageId>, val layers: Set<LayerId>, val objects: Set<ObjectId>,
                              val epochs: Map<ObjectId, Long>, val undo: List<DocumentDelta> = emptyList(),
                              val redo: List<DocumentDelta> = emptyList(), val evictedHistoryCount: Long = 0)
-    private var state = State(initial, emptyMap(), initial.pages().map { it.id }.toSet(), initial.pages().map { it.layerId }.toSet(),
-        initial.scene.objects().map { it.id }.toSet(), initial.scene.objects().associate { it.id to it.objectRevision })
+    private var state: State
     private var editingRetired = false
     init {
         ownerCheck()
         require(initial.title.hasValidUnicode()) { "Invalid Unicode title" }
         require(initialCapacityFailure(initial, budget) == null)
+        // Do not build dense editing identity collections until owner and capacity admission pass.
+        // Keep only the original tombstones/epochs, populated without temporary all-scene lists.
+        val pages = initial.pages()
+        val objects = mutableSetOf<ObjectId>(); val epochs = mutableMapOf<ObjectId, Long>()
+        initial.scene.forEachObject { objects.add(it.id); epochs[it.id] = it.objectRevision }
+        state = State(initial, emptyMap(), pages.map { it.id }.toSet(), pages.map { it.layerId }.toSet(), objects, epochs)
     }
     /** Allocation probe over the original budgeted tombstones/journal; no secondary identity index.
      * Caller supplies an already validated generated identity. Deleted/undone identities stay reserved.

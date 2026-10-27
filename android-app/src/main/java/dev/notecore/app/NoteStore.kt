@@ -234,11 +234,18 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     internal fun releaseActive(note: PagedPreviewNotebook, lostEndpoint: Boolean = false): Boolean {
         executor.checkOwnerThread(); check(activeNotebook === note)
-        if (editors.isNotEmpty()) return false
+        if (editors.isNotEmpty() || note.hasActiveStroke) return false
         if (note.hasPendingStroke) {
             if (activeSavedRoot.get() !== note.snapshot() || activeSavedPending.get() !== note.pendingStroke() || ledger.latest(note.documentId) != null) return false
             check(note.retireAfterRecovery(note.captureRecovery()))
-        } else check(note.retire())
+        } else {
+            val root = note.snapshot()
+            val retained = ledger.latest(note.documentId) as? PagedPreviewSnapshot
+            val durable = retained == null && activeSavedRoot.get() === root && activeSavedPending.get() == null
+            val admitted = retained?.root === root && retained?.pending == null
+            if (!durable && !admitted) return false
+            check(note.retire())
+        }
         retireInk(lostEndpoint); activeNotebook = null; activeSavedRoot.clear(); activeSavedPending.clear()
         return true
     }
@@ -589,7 +596,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal fun stopTestBackend() { executor.stopAccepting() }
     companion object {
         private const val STORAGE_WORK_BYTES = 256L * 1024 * 1024
-        private const val READ_WORK_BYTES = 160L * 1024 * 1024 // Declared parsing/UTF/buffer reservation, not measured heap.
+        private val READ_WORK_BYTES = PagedPreviewCodec.maximumDecodingWorkByteCharge() // Declared parsing/UTF/buffer reservation, not measured heap.
         @Volatile private var instance: NoteStore? = null
         fun get(context: Context): NoteStore = instance ?: synchronized(this) {
             instance ?: NoteStore(context.applicationContext).also { instance = it }

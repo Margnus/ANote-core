@@ -6,6 +6,16 @@ class SceneSnapshot private constructor(val id: SceneId, val revision: Long, pri
     val objectCount: Int get() = entries.size
     fun find(id: ObjectId): StrokeObject? = entries[id]
     fun objects(): List<StrokeObject> = entries.values.toList()
+    /** Immutable content comparison preserves draw order without two full-scene reference lists.
+     * This is a read operation, not an authority or an unversioned cache identity.
+     */
+    fun sameContent(other: SceneSnapshot): Boolean {
+        if (this === other) return true
+        if (id != other.id || revision != other.revision || objectCount != other.objectCount) return false
+        val left = entries.values.iterator(); val right = other.entries.values.iterator()
+        while (left.hasNext()) if (left.next() != right.next()) return false
+        return true
+    }
     /** Synchronous immutable inspection without a full-scene list copy; never exposes the map.
      * Unfrozen snapshot read surface. Callers own any references retained by their visitor.
      */

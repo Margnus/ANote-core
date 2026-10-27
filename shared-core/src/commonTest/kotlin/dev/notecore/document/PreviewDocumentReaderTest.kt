@@ -50,4 +50,39 @@ class PreviewDocumentReaderTest {
         refused("x".repeat(PagedPreviewCodec.MAX_CHARACTERS + 1), PreviewReadFailure.CHARACTER_CAPACITY)
         assertNotNull(PreviewDocumentReader.read(text()).root)
     }
+    @Test fun canonicalWidthsAndTransformsThatDegenerateInFloatAreRefusedBeforeAdoption() {
+        val original = text()
+        val root = assertNotNull(PreviewDocumentReader.read(original).root)
+        val obj = root.scene.objects().single()
+        val transforms = listOf(
+            dev.notecore.canvas.prototype.Affine2D(a=1e-50, d=1e-50),
+            dev.notecore.canvas.prototype.Affine2D(a=1.0, b=1.0, c=1.0, d=1.00000001))
+        val unsupported = listOf(1e-50, Float.MIN_VALUE.toDouble()).map { obj.copy(brush=obj.brush.copy(width=it)) } +
+            transforms.map { obj.copy(transform=it) }
+        for (stroke in unsupported) {
+            val canonical = DocumentRoot.compose(root.title, dev.notecore.canvas.prototype.SceneSnapshot.restored(
+                root.id, root.revision, listOf(stroke)), root.pages())
+            val encoded = PagedPreviewCodec.encode(canonical)
+            assertEquals(encoded, PagedPreviewCodec.encode(PagedPreviewCodec.decode(encoded)))
+            refused(encoded, PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)
+            assertEquals(PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT, PreviewDocumentReader.accept(canonical).failure)
+            val opened = PagedPreviewNotebook.open(canonical, "refused")
+            assertNull(opened.notebook); assertEquals(PreviewOpenFailure.UNSUPPORTED_CONTENT, opened.failure)
+            assertEquals(encoded, PagedPreviewCodec.encode(canonical))
+        }
+        assertEquals(original, PagedPreviewCodec.encode(root))
+    }
+    @Test fun supportedFloatWidthsAndReflectedShearRemainCanonicalAndUnchanged() {
+        val root = assertNotNull(PreviewDocumentReader.read(text()).root)
+        val obj = root.scene.objects().single()
+        for (width in listOf(.5, 2.5, 128.0)) {
+            val stroke = obj.copy(brush=obj.brush.copy(width=width), transform=
+                dev.notecore.canvas.prototype.Affine2D(a=-1.0, b=.25, c=.5, d=1.0, tx=100.0, ty=-50.0))
+            val canonical = DocumentRoot.compose(root.title, dev.notecore.canvas.prototype.SceneSnapshot.restored(
+                root.id, root.revision, listOf(stroke)), root.pages())
+            assertSame(canonical, PreviewDocumentReader.accept(canonical).root)
+            assertEquals(PagedPreviewCodec.encode(canonical), PagedPreviewCodec.encode(PreviewDocumentReader.read(PagedPreviewCodec.encode(canonical)).root!!))
+        }
+    }
+
 }
