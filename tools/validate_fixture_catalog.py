@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from verification_hash import verification_bytes
 from verify_input_capture import checks as capture_checks
+from verify_legacy_container import checks as legacy_container_checks
 from verify_resource_gc_rules import checks as resource_gc_checks
 from verify_resource_commit_rules import checks as resource_commit_checks
 
@@ -16,6 +17,7 @@ def load(relative):
 
 def main():
     capture_results, capture_summary = capture_checks()
+    legacy_container = legacy_container_checks()
     resource_gc = resource_gc_checks()
     resource_commit = resource_commit_checks()
     trace = load('fixtures/input/manifest.json')
@@ -61,7 +63,7 @@ def main():
     print(json.dumps({'status': 'passed', 'scale_profiles': 3, 'synthetic_scale_points': 1200000,
                       'resource_commit_abrupt_cases':resource_commit['abrupt_process_exit_cases'], 'resource_commit_integrity_cases':resource_commit['integrity_identity_cases'],
                       'resource_commit_cancellation_cases':resource_commit['cancellation_cases'],
-                      'resource_gc_rule_cases': resource_gc['case_count'], 'resource_gc_reservation_cases':resource_gc['retirement_reservation_cases'], 'resource_gc_query_mutations_rejected':len(resource_gc['unsafe_query_mutations_rejected']),
+                      'legacy_framing_refusals':len(legacy_container['framing_refusals']), 'resource_gc_rule_cases': resource_gc['case_count'], 'resource_gc_reservation_cases':resource_gc['retirement_reservation_cases'], 'resource_gc_query_mutations_rejected':len(resource_gc['unsafe_query_mutations_rejected']),
                       'capture_contract_checks': len(capture_results), 'capture_origin': capture_summary['origin'],
                       'legacy_source_files': len(paths), 'legacy_anchors': len(source['anchors']),
                       'scope': 'catalog hashes and selected cross-schema facts; no migration/legacy runtime/device validation'}))

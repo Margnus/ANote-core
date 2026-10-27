@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "valid_java_oracles": 1,
+  "framing_refusals": [
+    "bad_link",
+    "premature_end",
+    "negative_length",
+    "truncated_payload",
+    "trailing_data",
+    "wrong_tail_length",
+    "unknown_version",
+    "not_modified_utf"
+  ],
+  "unsupported_archive_layout_refused": true,
+  "unknown_records_retained": true,
+  "payload_migration_implemented": false,
+  "real_sample_archive_verified": false,
+  "scope": "Synthetic Java DataOutputStream framing and read-only ZIP layout checks; not real JNotes migration or platform execution.",
+  "source_and_artifact_sha256": {
+    "fixtures/legacy/container-framing.json": "55adb661ff6d4feb0808650c527085aece77a7df1716124a28cd4f38aeb81cde",
+    "fixtures/legacy/LegacyContainerFixture.java": "98f61907e3b9d3f40eb98e29df9b9db52a39e5a2302a829840679d8914d91f70",
+    "tools/inspect_legacy_container.py": "b9d23447c50d241e4753e879fc3d010ddc4fbc9fe21557f06d9e6b4415bb0af2",
+    "tools/verify_legacy_container.py": "454c4fc3c5b93818b8090c87b54ff1d8cce71c68c452d547fcc4cb1a92bce5a4"
+  }
+}
