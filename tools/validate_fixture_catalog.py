@@ -61,7 +61,7 @@ def main():
     print(json.dumps({'status': 'passed', 'scale_profiles': 3, 'synthetic_scale_points': 1200000,
                       'resource_commit_abrupt_cases':resource_commit['abrupt_process_exit_cases'], 'resource_commit_integrity_cases':resource_commit['integrity_identity_cases'],
                       'resource_commit_cancellation_cases':resource_commit['cancellation_cases'],
-                      'resource_gc_rule_cases': resource_gc['case_count'], 'resource_gc_query_mutations_rejected':len(resource_gc['unsafe_query_mutations_rejected']),
+                      'resource_gc_rule_cases': resource_gc['case_count'], 'resource_gc_reservation_cases':resource_gc['retirement_reservation_cases'], 'resource_gc_query_mutations_rejected':len(resource_gc['unsafe_query_mutations_rejected']),
                       'capture_contract_checks': len(capture_results), 'capture_origin': capture_summary['origin'],
                       'legacy_source_files': len(paths), 'legacy_anchors': len(source['anchors']),
                       'scope': 'catalog hashes and selected cross-schema facts; no migration/legacy runtime/device validation'}))

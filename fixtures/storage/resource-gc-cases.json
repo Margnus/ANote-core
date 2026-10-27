@@ -255,6 +255,15 @@
     "Only an eligibility design query on temporary host SQLite; not a collector or production metadata schema",
     "Eligibility is not deletion authority. Final transaction/owner serialization, file retirement and crash recovery remain required",
     "No production grace period chosen; cutoff is explicit synthetic policy input",
-    "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified"
+    "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified",
+    "Retirement checks reserve metadata on two host SQLite connections only; no file rename/unlink, dead reader reclamation, directory durability or production pin protocol"
+  ],
+  "retirement_cases": [
+    "pin-before-reserve",
+    "reference-before-reserve",
+    "reserve-before-pin",
+    "reserve-rollback",
+    "stale-pin-release",
+    "writer-serialization"
   ]
 }

@@ -1,5 +1,38 @@
 {
   "status": "passed",
+  "retirement_reservation_cases": 6,
+  "retirement_observations": [
+    {
+      "id": "pin-before-reserve",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "reference-before-reserve",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "reserve-before-pin",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "reserve-rollback",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "stale-pin-release",
+      "passed": true,
+      "source_preserved": true
+    },
+    {
+      "id": "writer-serialization",
+      "passed": true,
+      "source_preserved": true
+    }
+  ],
   "case_count": 18,
   "observations": [
     {
@@ -147,10 +180,11 @@
     "Only an eligibility design query on temporary host SQLite; not a collector or production metadata schema",
     "Eligibility is not deletion authority. Final transaction/owner serialization, file retirement and crash recovery remain required",
     "No production grace period chosen; cutoff is explicit synthetic policy input",
-    "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified"
+    "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified",
+    "Retirement checks reserve metadata on two host SQLite connections only; no file rename/unlink, dead reader reclamation, directory durability or production pin protocol"
   ],
   "source_and_artifact_sha256": {
-    "fixtures/storage/resource-gc-cases.json": "e8af44013830e1ac43841c4fcf915114895dd7fed423348bbc2e1651fd84f4b5",
-    "tools/verify_resource_gc_rules.py": "d86c073b77d2cbf8c185c0739648b800be71f7093ae2726c2fc3df12b72cba85"
+    "fixtures/storage/resource-gc-cases.json": "3ed05a51f754315e833ef81d6c1c69bc735d1269297a55795d69c4e6ce067938",
+    "tools/verify_resource_gc_rules.py": "24ce08006d4575ec2a8ffe188bd8d6f284ad0508532692cc0fdebdd53add4841"
   }
 }
