@@ -1,0 +1,239 @@
+{
+  "schema": "resource-gc-rules-1-draft",
+  "origin": "synthetic",
+  "production_schema_frozen": false,
+  "sources": [
+    "AI-Note/05-数据与同步.md#文件与数据库联合提交",
+    "AI-Note/06-性能与验收.md#资源提交",
+    "DATA-08"
+  ],
+  "resources": [
+    {
+      "id": "old-orphan",
+      "space": "local-a",
+      "hex": "0001020304",
+      "promoted_at": 50,
+      "state": "promoted"
+    },
+    {
+      "id": "recent-orphan",
+      "space": "local-a",
+      "hex": "101112",
+      "promoted_at": 101,
+      "state": "promoted"
+    },
+    {
+      "id": "corrupt-source",
+      "space": "local-a",
+      "hex": "202122",
+      "promoted_at": 50,
+      "state": "promoted",
+      "corrupt": true
+    },
+    {
+      "id": "missing-source",
+      "space": "local-a",
+      "hex": "303132",
+      "promoted_at": 50,
+      "state": "promoted",
+      "missing": true
+    },
+    {
+      "id": "unfinished-stage",
+      "space": "local-a",
+      "hex": "404142",
+      "promoted_at": 50,
+      "state": "staging"
+    },
+    {
+      "id": "unknown-state",
+      "space": "local-a",
+      "hex": "505152",
+      "promoted_at": 50,
+      "state": "future"
+    },
+    {
+      "id": "other-space",
+      "space": "local-b",
+      "hex": "606162",
+      "promoted_at": 50,
+      "state": "promoted"
+    },
+    {
+      "id": "no-promotion-time",
+      "space": "local-a",
+      "hex": "707172",
+      "promoted_at": null,
+      "state": "promoted"
+    }
+  ],
+  "cases": [
+    {
+      "id": "old-verified-unreferenced-only",
+      "cutoff": 100,
+      "expected": [
+        "old-orphan"
+      ]
+    },
+    {
+      "id": "unset-policy-blocks-all",
+      "cutoff": null,
+      "expected": [],
+      "refusal": "POLICY_UNSET"
+    },
+    {
+      "id": "unknown-schema-blocks-all",
+      "cutoff": 100,
+      "schema_known": false,
+      "expected": [],
+      "refusal": "UNKNOWN_SCHEMA"
+    },
+    {
+      "id": "incomplete-reference-enumeration-blocks-all",
+      "cutoff": 100,
+      "references_complete": false,
+      "expected": [],
+      "refusal": "REFERENCES_INCOMPLETE"
+    },
+    {
+      "id": "exact-cutoff-is-protected",
+      "cutoff": 50,
+      "expected": []
+    },
+    {
+      "id": "workspace-selection-is-explicit",
+      "space": "local-b",
+      "cutoff": 100,
+      "expected": [
+        "other-space"
+      ]
+    },
+    {
+      "id": "retain-document",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "document"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "retain-trash",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "trash"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "retain-history",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "history"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "retain-conflict",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "conflict"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "retain-running-task",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "running-task"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "retain-backup",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "backup"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "retain-outbox",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "outbox"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "retain-unknown-future-owner",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "old-orphan",
+          "kind": "unknown-future-owner"
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "reference-in-other-space-does-not-authorize-cross-space-gc",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "other-space",
+          "kind": "document"
+        }
+      ],
+      "expected": [
+        "old-orphan"
+      ]
+    },
+    {
+      "id": "late-task-invalidates-old-selection",
+      "cutoff": 100,
+      "expected": [
+        "old-orphan"
+      ],
+      "late_reference": "old-orphan",
+      "expected_after": []
+    },
+    {
+      "id": "rolled-back-reference-does-not-become-visible",
+      "cutoff": 100,
+      "expected": [
+        "old-orphan"
+      ],
+      "rollback_reference": "old-orphan",
+      "expected_after": [
+        "old-orphan"
+      ]
+    }
+  ],
+  "limits": [
+    "Only an eligibility design query on temporary host SQLite; not a collector or production metadata schema",
+    "Eligibility is not deletion authority. Final transaction/owner serialization, file retirement and crash recovery remain required",
+    "No production grace period chosen; cutoff is explicit synthetic policy input",
+    "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified"
+  ]
+}

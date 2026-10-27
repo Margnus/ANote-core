@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
               'chunked-brush-costs', 'brush-tile-cache-costs')
 CURRENT = {
+    'resource-gc-rules': ('source_and_artifact_sha256',),
     'verification': ('source_sha256', 'verification_input_sha256'),
     'android-brush-common-tests': ('source_and_build_sha256',),
     'apple-brush-common-tests': ('source_and_build_sha256',),

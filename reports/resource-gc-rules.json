@@ -1,0 +1,146 @@
+{
+  "status": "passed",
+  "case_count": 17,
+  "observations": [
+    {
+      "id": "old-verified-unreferenced-only",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "unset-policy-blocks-all",
+      "eligible": [],
+      "refusal": "POLICY_UNSET",
+      "after_mutation": null
+    },
+    {
+      "id": "unknown-schema-blocks-all",
+      "eligible": [],
+      "refusal": "UNKNOWN_SCHEMA",
+      "after_mutation": null
+    },
+    {
+      "id": "incomplete-reference-enumeration-blocks-all",
+      "eligible": [],
+      "refusal": "REFERENCES_INCOMPLETE",
+      "after_mutation": null
+    },
+    {
+      "id": "exact-cutoff-is-protected",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "workspace-selection-is-explicit",
+      "eligible": [
+        "other-space"
+      ],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-document",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-trash",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-history",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-conflict",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-running-task",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-backup",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-outbox",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "retain-unknown-future-owner",
+      "eligible": [],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "reference-in-other-space-does-not-authorize-cross-space-gc",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": null
+    },
+    {
+      "id": "late-task-invalidates-old-selection",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": []
+    },
+    {
+      "id": "rolled-back-reference-does-not-become-visible",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": [
+        "old-orphan"
+      ]
+    }
+  ],
+  "unsafe_query_mutations_rejected": [
+    "ignore_references",
+    "ignore_age",
+    "ignore_verification",
+    "ignore_workspace",
+    "ignore_state"
+  ],
+  "host_sqlite_version": "3.50.4",
+  "source_payloads_unchanged_during_checks": true,
+  "collector_deleted_resource_files": false,
+  "temporary_fixture_cleanup": true,
+  "scope": "Draft eligibility query on synthetic opaque bytes and temporary host SQLite; not a production GC implementation, import transaction, final deletion authorization or platform durability test.",
+  "candidate_is_deletion_authorization": false,
+  "production_schema_frozen": false,
+  "production_sqlite_authorized": false,
+  "c1_gate_complete": false,
+  "limits": [
+    "Only an eligibility design query on temporary host SQLite; not a collector or production metadata schema",
+    "Eligibility is not deletion authority. Final transaction/owner serialization, file retirement and crash recovery remain required",
+    "No production grace period chosen; cutoff is explicit synthetic policy input",
+    "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified"
+  ],
+  "source_and_artifact_sha256": {
+    "fixtures/storage/resource-gc-cases.json": "a44897d7c7ea6d3605bdbbfb70abe8d09474517181efdd62eaf547b4a3a28ce0",
+    "tools/verify_resource_gc_rules.py": "da821a1ef6e5ccaab3a56d66d566bb2d88377244a316b071e7258c130364850e"
+  }
+}
