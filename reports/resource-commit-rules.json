@@ -3,6 +3,8 @@
   "host_sqlite_version": "3.50.4",
   "abrupt_process_exit_cases": 5,
   "integrity_identity_cases": 3,
+  "cancellation_cases": 5,
+  "live_producer_cases": 2,
   "observations": [
     {
       "fault": "partial-stage",
@@ -141,6 +143,30 @@
     {
       "case": "committed_metadata_is_not_success_when_resource_damaged",
       "status": "REPAIR_REQUIRED"
+    },
+    {
+      "case": "cancel-partial-stage",
+      "status": "CANCELLED",
+      "files_preserved": true
+    },
+    {
+      "case": "cancel-promoted",
+      "status": "CANCELLED",
+      "files_preserved": true
+    },
+    {
+      "case": "cancel-committed",
+      "status": "ALREADY_COMMITTED"
+    },
+    {
+      "case": "live-producer",
+      "status": "CANCELLED",
+      "live_confirmation_refused": true
+    },
+    {
+      "case": "stale-attempt",
+      "status": "CANCELLED",
+      "live_confirmation_refused": true
     }
   ],
   "source_payloads_preserved": true,
@@ -155,12 +181,13 @@
     "Temporary host SQLite and synthetic opaque resources only; no App or production metadata schema",
     "No directory fsync or Android/Apple durability claim; abrupt child exit is not power loss",
     "No GC deletion, reader pin, cross-process resource retirement protocol or user cancellation implementation",
-    "Pending import task protects ownership; safe task expiry and final collection remain undefined"
+    "Pending import task protects ownership; safe task expiry and final collection remain undefined",
+    "Cancellation is host-only: conservative PID observation and cooperative attempt fencing; no production cancellation UI, expiry policy or GC release authorization"
   ],
   "source_and_artifact_sha256": {
-    "tools/resource_commit_probe.py": "7b89f614474ee94a8da58405711b384542ee68edc87d2eb2bbc3a44a6ceef62b",
-    "fixtures/storage/resource-commit-cases.json": "b7dc2953c8b189a152139b52ea6ea0c5dfe7bd74f1701dc11957319ea259efb1",
+    "tools/resource_commit_probe.py": "592dd3ea0ca3970e15fc2855cebecad35e871ae776016d28fd097e447fd87ece",
+    "fixtures/storage/resource-commit-cases.json": "077c9e8e8a03b2229f262ba1ca8930850a1f2e0b6713ad0dd473e8bf11b1bec4",
     "fixtures/storage/resource-gc-cases.json": "e8af44013830e1ac43841c4fcf915114895dd7fed423348bbc2e1651fd84f4b5",
-    "tools/verify_resource_commit_rules.py": "6f8c6e0aac9f35573c9749dac04e9e9ef39abefac12fceba1db8ad8fa5cdc199"
+    "tools/verify_resource_commit_rules.py": "c5f998e1486e6f25b98f1652f0c59423912e10b9c0b3c4ece4c028413762c03a"
   }
 }

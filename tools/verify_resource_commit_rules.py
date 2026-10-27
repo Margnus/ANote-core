@@ -7,6 +7,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import time
 from contextlib import closing
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -22,8 +23,9 @@ def snapshot(folder):
             'operations':db.execute('SELECT count(*) FROM operation').fetchone()[0],
             'resources':db.execute('SELECT count(*) FROM resource').fetchone()[0],
             'task':db.execute('SELECT state,hash FROM import_task').fetchone()}
-def invoke(folder,attempt,fault=None,document='fixture-doc'):
+def invoke(folder,attempt,fault=None,document='fixture-doc',action='commit'):
     command=[sys.executable,str(PROBE),'--root',str(folder),'--attempt',attempt,'--document',document]
+    command+=['--action',action]
     if fault:command+=['--fault',fault]
     p=subprocess.run(command,capture_output=True,text=True,encoding='utf-8',timeout=15,env={**os.environ,'PYTHONUTF8':'1'})
     if fault:
@@ -31,6 +33,44 @@ def invoke(folder,attempt,fault=None,document='fixture-doc'):
         return None
     assert p.returncode==0,(p.returncode,p.stdout,p.stderr)
     return json.loads(p.stdout)['status']
+def task_identity(folder):
+    with closing(sqlite3.connect(folder/'catalog.sqlite')) as db:
+        return db.execute('SELECT state,cancel_requested,active_attempt,producer_pid FROM import_task').fetchone()
+
+def live_cancel(folder,stale=False):
+    if stale:invoke(folder,'old','stage-closed')
+    child=subprocess.Popen([sys.executable,str(PROBE),'--root',str(folder),'--attempt','live','--hold-after-stage'],
+        stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,encoding='utf-8',env={**os.environ,'PYTHONUTF8':'1'})
+    try:
+        deadline=time.monotonic()+5
+        while not (folder/'live.ready').exists():
+            assert child.poll() is None,'Producer exited before ready'
+            assert time.monotonic()<deadline,'Producer readiness timed out'
+            time.sleep(0.01)
+        before=task_identity(folder);assert before==('running',0,'live',child.pid)
+        assert invoke(folder,'live',action='cancel-confirm')=='NO_CANCEL_REQUEST'
+        assert invoke(folder,'duplicate')=='PRODUCER_ACTIVE'
+        if stale:
+            for action in ('cancel-request','cancel-confirm'):
+                assert invoke(folder,'old',action=action)=='STALE_ATTEMPT'
+                assert task_identity(folder)==before
+        assert invoke(folder,'live',action='cancel-request')=='CANCEL_REQUESTED'
+        assert invoke(folder,'live',action='cancel-confirm')=='PRODUCER_ACTIVE'
+        assert child.poll() is None and task_identity(folder)==('running',1,'live',child.pid)
+        stage=folder/'staging/live.bin';original=signature(stage)
+        assert snapshot(folder)['documents']==0 and not (folder/'resources').exists()
+        (folder/'live.release').write_text('release',encoding='utf-8',newline='\n')
+        stdout,stderr=child.communicate(timeout=5)
+        assert child.returncode==0 and not stderr and json.loads(stdout)['status']=='CANCELLED'
+        assert task_identity(folder)==('cancelled',1,'live',child.pid) and signature(stage)==original
+        assert snapshot(folder)['documents']==snapshot(folder)['operations']==snapshot(folder)['resources']==0
+        assert invoke(folder,'retry')=='CANCELLED' and not (folder/'staging/retry.bin').exists()
+    finally:
+        if child.poll() is None:
+            (folder/'live.release').write_text('release',encoding='utf-8',newline='\n')
+            try:child.communicate(timeout=5)
+            except subprocess.TimeoutExpired:child.kill();child.communicate();raise
+
 def signature(path):return (path.stat().st_ino,path.stat().st_mtime_ns,path.stat().st_size,sha(path))
 def checks():
     build=(ROOT/'build').resolve();assert build.is_relative_to(ROOT);build.mkdir(exist_ok=True)
@@ -78,8 +118,33 @@ def checks():
         assert invoke(folder,'damaged-replay')=='REPAIR_REQUIRED' and signature(target)==damaged
         assert snapshot(folder)==state and (folder/'source.bin').read_bytes()==payload
         observations.append({'case':'committed_metadata_is_not_success_when_resource_damaged','status':'REPAIR_REQUIRED'})
+        assert recipe['cancellation_cases']==['partial-stage','promoted','committed','live-producer','stale-attempt']
+        for fault in ('partial-stage','promoted'):
+            folder=prepare('cancel-'+fault);invoke(folder,'first',fault)
+            stage=folder/'staging/first.bin';original=signature(stage)
+            target=folder/'resources'/digest;promoted=signature(target) if target.exists() else None
+            assert invoke(folder,'first',action='cancel-request')=='CANCEL_REQUESTED'
+            assert task_identity(folder)[:3]==('running',1,'first')
+            assert invoke(folder,'wrong',action='cancel-confirm')=='STALE_ATTEMPT'
+            assert invoke(folder,'first',action='cancel-confirm')=='CANCELLED'
+            assert invoke(folder,'retry')=='CANCELLED' and not (folder/'staging/retry.bin').exists()
+            assert snapshot(folder)['documents']==snapshot(folder)['operations']==snapshot(folder)['resources']==0
+            assert signature(stage)==original and (folder/'source.bin').read_bytes()==payload
+            if promoted:assert signature(target)==promoted
+            observations.append({'case':'cancel-'+fault,'status':'CANCELLED','files_preserved':True})
+        folder=prepare('cancel-committed');assert invoke(folder,'first')=='COMMITTED'
+        original=signature(folder/'resources'/digest);state=snapshot(folder);identity=task_identity(folder)
+        for action in ('cancel-request','cancel-confirm'):
+            assert invoke(folder,'first',action=action)=='ALREADY_COMMITTED'
+            assert snapshot(folder)==state and task_identity(folder)==identity
+            assert signature(folder/'resources'/digest)==original
+        observations.append({'case':'cancel-committed','status':'ALREADY_COMMITTED'})
+        for stale in (False,True):
+            folder=prepare('stale-attempt' if stale else 'live-producer');live_cancel(folder,stale)
+            assert (folder/'source.bin').read_bytes()==payload
+            observations.append({'case':folder.name,'status':'CANCELLED','live_confirmation_refused':True})
     return {'status':'passed','host_sqlite_version':sqlite3.sqlite_version,'abrupt_process_exit_cases':len(recipe['crash_cases']),
-        'integrity_identity_cases':3,'observations':observations,'source_payloads_preserved':True,
+        'integrity_identity_cases':3,'cancellation_cases':5,'live_producer_cases':2,'observations':observations,'source_payloads_preserved':True,
         'scope':'Host child-process exit, no-clobber file link and temporary SQLite transaction design probes; not a production importer or mobile durability implementation.',
         'directory_fsync_verified':False,'power_loss_verified':False,'resource_gc_deletion_implemented':False,
         'production_schema_frozen':False,'production_sqlite_authorized':False,'c1_gate_complete':False,'limits':recipe['limits']}

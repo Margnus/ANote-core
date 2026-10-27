@@ -50,6 +50,14 @@
     "Temporary host SQLite and synthetic opaque resources only; no App or production metadata schema",
     "No directory fsync or Android/Apple durability claim; abrupt child exit is not power loss",
     "No GC deletion, reader pin, cross-process resource retirement protocol or user cancellation implementation",
-    "Pending import task protects ownership; safe task expiry and final collection remain undefined"
+    "Pending import task protects ownership; safe task expiry and final collection remain undefined",
+    "Cancellation is host-only: conservative PID observation and cooperative attempt fencing; no production cancellation UI, expiry policy or GC release authorization"
+  ],
+  "cancellation_cases": [
+    "partial-stage",
+    "promoted",
+    "committed",
+    "live-producer",
+    "stale-attempt"
   ]
 }
