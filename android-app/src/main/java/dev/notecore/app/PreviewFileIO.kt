@@ -38,8 +38,8 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
-        val encoded = snapshot.encode(); require(encoded.length <= 16_000_000)
-        val bytes = encoded.toByteArray(Charsets.UTF_8)
+        val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
+        val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
         val atomic = AtomicFile(file(snapshot.documentId)); val stream = atomic.startWrite()
         try { stream.write(bytes); stream.fd.sync(); atomic.finishWrite(stream) }
         catch (error: Throwable) { atomic.failWrite(stream); throw error }
@@ -58,8 +58,9 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {
         require(snapshot.pending == null) { "Recovery checkpoint is not an interchange export" }
-        val encoded = snapshot.encode(); require(encoded.length <= 16_000_000)
-        checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(encoded.toByteArray(Charsets.UTF_8)); it.flush() }
+        val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
+        val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
+        checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(bytes); it.flush() }
     }
     fun importCopy(uri: Uri): DocumentRoot {
         val bytes = checkNotNull(resolver.openInputStream(uri)).use(::readBounded)
@@ -98,7 +99,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
         while (true) {
             val count = input.read(buffer); if (count < 0) break
-            if (output.size().toLong() + count > 32L * 1024 * 1024) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+            if (output.size().toLong() + count > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
             output.write(buffer, 0, count)
         }
         return output.toByteArray()
@@ -109,7 +110,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         require(it.pending == null) { "Pending recovery requires the original owner" }; it.root
     }
     fun readRecovery(id: String): PagedPreviewSnapshot = AtomicFile(file(id)).openRead().use { stream ->
-        if (stream.channel.size() > 32L * 1024 * 1024) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+        if (stream.channel.size() > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
         val text = try { decode(readBounded(stream)) } catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
         val result = PreviewRecoveryCodec.read(text)
         val snapshot = result.snapshot ?: throw ReadRefused(when (checkNotNull(result.failure)) {

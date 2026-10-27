@@ -4,6 +4,34 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedPreviewNotebookTest {
+    @Test fun fullLongNumericInputUndoRedoAndRenameRemainSaveableWithoutPointLoss() {
+        val note = PagedPreviewNotebook.create("long-input", "title", "session")
+        val size = 1000
+        val xs = DoubleArray(size) { -1.2345678901234567e-100 }; val ys = xs.copyOf()
+        val pressures = FloatArray(size) { 1.2345679e-20f }; val times = LongArray(size) { Long.MAX_VALUE }
+        repeat(10) { stroke ->
+            repeat(20) { batch ->
+                val phase = when (batch) { 0 -> PointerPhase.DOWN; 19 -> PointerPhase.UP; else -> PointerPhase.MOVE }
+                val result = note.offerRealBatch(phase, Long.MAX_VALUE, xs, ys, pressures, times)
+                assertEquals(size, result.acceptedSamples)
+                assertEquals(if (batch == 19) PreviewInputDisposition.COMMITTED else PreviewInputDisposition.ACCEPTED, result.disposition)
+            }
+            assertEquals(stroke + 1, note.totalStrokeCount)
+        }
+        val full = note.snapshot()
+        assertEquals(PreviewInputDisposition.REJECTED, note.offerRealBatch(PointerPhase.DOWN, Long.MAX_VALUE, xs, ys, pressures, times).disposition)
+        assertSame(full, note.snapshot()); assertTrue(note.undo()); assertTrue(note.redo())
+        assertTrue(note.rename("long digits preserved")); assertFalse(note.copyCurrentPage())
+        val snapshot = note.capture(); val text = snapshot.encode(); assertTrue(text.length > 16_000_000)
+        val decoded = PagedPreviewCodec.decode(text)
+        assertTrue(snapshot.root.scene.sameContent(decoded.scene))
+        assertEquals(200_000, decoded.scene.objects().sumOf { it.samples.size })
+        for (stroke in decoded.scene.objects()) {
+            assertEquals(xs[0], stroke.samples.x(0)); assertEquals(pressures[0], stroke.samples.pressure(stroke.samples.size - 1))
+            assertEquals(Long.MAX_VALUE, stroke.samples.timeMicros(stroke.samples.size - 1))
+        }
+    }
+
     @Test fun reusedNonceSkipsInitialIdentitiesAcrossKindsWithoutDuplicatingIndex() {
         val root = DocumentRoot.empty(SceneId("collision"), "title",
             PageDescriptor(PageId("reuse-op-1"), LayerId("reuse-ink-3"), 595.0, 842.0))

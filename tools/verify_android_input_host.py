@@ -14,7 +14,7 @@ CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equa
           'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery',
           'live_byte_refusal_and_undo_recovery', 'input_byte_budget_refusal_cancel_and_recovery',
           'history_capacity_refuses_down_without_owning_samples', 'journal_identity_capacity_refuses_before_real_view_ownership'}
-STORAGE_CHECKS = {'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
+STORAGE_CHECKS = {'derived_text_capacity_checkpoint_save_and_reopen', 'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
 OWNER_CHECKS = {'unadmitted_release_refuses_before_retiring_authority', 'wrong_thread_retirement_rejected', 'accepted_root_saved_before_terminal_worker_stop',
@@ -63,6 +63,7 @@ def main():
     stamp = dict(line.split('  ', 1)[::-1] for line in
                  (ROOT/'reports/android-brush-build-inputs.sha256').read_text(encoding='utf-8').splitlines())
     bindings = {**build['source_and_build_input_sha256'], **stamp}
+    bindings[Path(__file__).relative_to(ROOT).as_posix()] = digest(Path(__file__))
     assert 'android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt' in stamp
     for path, sha in bindings.items():
         assert digest(ROOT/path) == sha, ('stale input host build', path)
@@ -147,7 +148,7 @@ def main():
         'all_original_files_unchanged': True, 'ordinary_process_restored': True,
         'source_and_artifact_sha256': bindings,
         'sdk_contract_sha256': {str(path): digest(path) for path in contracts},
-        'scope': 'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, six original NoteStore/worker file/export retention checks and six explicit Store retirement checks in unique cache directories. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence.',
+        'scope': f'Synthetic native MotionEvent history/terminal batches on the original InkCanvasView, {len(STORAGE_CHECKS)} original NoteStore/worker file/export retention checks including long-numeric recovery and full canonical reopen, and {len(OWNER_CHECKS)} explicit Store retirement checks in unique cache directories. Input oracle uses SDK event scalars and double scene mapping. No injected OS events, ordinary UI, system file picker, GC timing, abrupt owner loss, physical stylus or power-loss evidence.',
         'decision': 'Use double viewport scale/offset for canonical input; float conversion is reserved for derived Path coordinates. Keep current owner, immutable real samples, explicit invalid/cancel behavior and MONOLINE scope.',
         'ordinary_ui_interaction_verified': False, 'real_stylus_verified': False,
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,

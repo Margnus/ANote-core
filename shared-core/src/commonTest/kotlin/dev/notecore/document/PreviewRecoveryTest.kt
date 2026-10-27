@@ -13,6 +13,54 @@ class PreviewRecoveryTest {
         fault.arm(); assertFailsWith<IllegalStateException> { note.endStroke(8.0, 6.0, 1f, 10) }
         return note.captureRecovery()
     }
+    @Test fun completionCannotCrossRetainedCodecBytesOrObjectCapacity() {
+        val layer = LayerId("l".repeat(128)); val id = SceneId("retained-completion")
+        val brush = BrushSpec(BrushKind.MONOLINE, 1, 2.0, -1)
+        val small = StrokeSamples.copyOf(DoubleArray(45) { 1.0 }, DoubleArray(45) { 2.0 }, FloatArray(45) { .5f }, LongArray(45) { 1 })
+        val objects = (0 until 4000).map { StrokeObject(ObjectId("$it".padEnd(128,'x')), 1, layer, brush, small) }
+        val page = PageDescriptor(PageId("page"), layer, 595.0, 842.0, contentRevision = 1)
+        val root = DocumentRoot.compose("title", SceneSnapshot.restored(id, 1, objects), listOf(page))
+        assertSame(root, PreviewDocumentReader.accept(root).root)
+        val large = StrokeSamples.copyOf(DoubleArray(20000) { 1.0 },DoubleArray(20000) { 2.0 },FloatArray(20000) { .5f },LongArray(20000) { 1 })
+        val pending = DocumentCommand.Canvas(page.id,CanvasCommand.AddStroke(CommandId("completion"),1,
+            StrokeTarget(id,layer,brush),ObjectId("new"),large))
+        assertEquals(180000,root.scene.objects().sumOf { it.samples.size })
+        assertFailsWith<IllegalArgumentException> { PagedPreviewSnapshot(root,pending) }
+        val countRoot=DocumentRoot.compose("title",SceneSnapshot.restored(id,1,(0 until 5000).map {
+            StrokeObject(ObjectId("count-$it"),1,layer,brush,small) }),listOf(page))
+        // Keep this fixture below the point limit so this is specifically the object-count guard.
+        val one=StrokeSamples.copyOf(doubleArrayOf(1.0),doubleArrayOf(2.0),floatArrayOf(.5f),longArrayOf(1))
+        val bounded=DocumentRoot.compose("title",SceneSnapshot.restored(id,1,countRoot.scene.objects().map { it.copy(samples=one) }),listOf(page))
+        assertSame(bounded,PreviewDocumentReader.accept(bounded).root)
+        assertFailsWith<IllegalArgumentException> { PagedPreviewSnapshot(bounded,pending.copy(command=(pending.command as CanvasCommand.AddStroke).copy(samples=one))) }
+        assertEquals(4000,root.scene.objectCount);assertSame(objects.last(),root.scene.find(objects.last().id))
+    }
+
+    @Test fun longNumericRecoveryFitsAndImpossibleCompletionIsRefusedBeforeAdoption() {
+        val id=SceneId("long-recovery"); val layer=LayerId("ink")
+        val samples=StrokeSamples.copyOf(DoubleArray(20000) { -1.2345678901234567e-100 },
+            DoubleArray(20000) { -1.2345678901234567e-100 },FloatArray(20000) { 1.2345679e-20f },LongArray(20000) { Long.MAX_VALUE })
+        val brush=BrushSpec(BrushKind.MONOLINE,1,2.0,-1)
+        val objects=(0 until 9).map { StrokeObject(ObjectId("old-$it"),1,layer,brush,samples) }
+        val page=PageDescriptor(PageId("page"),layer,595.0,842.0,contentRevision=1)
+        val root=DocumentRoot.compose("title",SceneSnapshot.restored(id,1,objects),listOf(page))
+        val pending=DocumentCommand.Canvas(page.id,CanvasCommand.AddStroke(CommandId("pending-op"),1,StrokeTarget(id,layer,brush),ObjectId("pending"),samples))
+        val checkpoint=PagedPreviewSnapshot(root,pending);val text=checkpoint.encode()
+        assertTrue(text.length>16_000_000);assertTrue(text.length<=PagedPreviewCodec.MAX_CHARACTERS)
+        assertTrue(text.encodeToByteArray().size<=PagedPreviewCodec.MAX_UTF8_BYTES)
+        assertTrue(checkpoint.encodingWorkByteCharge<=256L*1024*1024)
+        val decoded=PreviewRecoveryCodec.decode(text)
+        val note=assertNotNull(PagedPreviewNotebook.openRecovery(decoded,"resume").notebook)
+        assertTrue(note.retryPendingStroke());val completed=note.snapshot()
+        assertTrue(note.retryPendingStroke());assertSame(completed,note.snapshot())
+        assertEquals(200_000,completed.scene.objects().sumOf { it.samples.size })
+        assertTrue(note.capture().encode().length>16_000_000)
+        val excess=DocumentCommand.Canvas(page.id,CanvasCommand.AddStroke(CommandId("extra-op"),completed.revision,
+            StrokeTarget(id,layer,brush),ObjectId("extra"),samples))
+        assertFailsWith<IllegalArgumentException> { PagedPreviewSnapshot(completed,excess) }
+        assertSame(root,checkpoint.root);assertSame(pending,checkpoint.pending)
+    }
+
     @Test fun denseCheckpointKeepsOrderChargesAndDuplicateIdentityRefusalThroughOneRetry() {
         val id = SceneId("dense-recovery")
         val page = PageDescriptor(PageId("page"), LayerId("ink"), 595.0, 842.0, contentRevision = 1)

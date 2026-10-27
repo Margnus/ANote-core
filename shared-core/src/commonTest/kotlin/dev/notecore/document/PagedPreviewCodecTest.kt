@@ -4,6 +4,49 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class PagedPreviewCodecTest {
+    @Test fun utf8MetadataAndFiniteNumberWidthsFitTheDeclaredEnvelope() {
+        val numbers = listOf(-Double.MAX_VALUE, Double.MIN_VALUE, -1.2345678901234567e-300,
+            -0.0009999999999999999, 999999999.9999999, 1.2345678901234567e100)
+        assertTrue(numbers.all { it.toString().length <= 25 })
+        assertTrue(listOf(Float.MIN_VALUE, 1.2345679e-20f, .99999994f).all { it.toString().length <= 16 })
+        val layer = LayerId("层".repeat(128)); val page = PageDescriptor(PageId("页".repeat(128)), layer,
+            1234.5678901234567, 1234.5678901234567, contentRevision = Long.MAX_VALUE)
+        val samples = StrokeSamples.copyOf(doubleArrayOf(-1.2345678901234567e-100),
+            doubleArrayOf(-1.2345678901234567e-100), floatArrayOf(1.2345679e-20f), longArrayOf(Long.MAX_VALUE))
+        val stroke = StrokeObject(ObjectId("笔".repeat(128)), Long.MAX_VALUE, layer,
+            BrushSpec(BrushKind.MONOLINE, 1, 1.2345678901234567, Int.MIN_VALUE), samples,
+            Affine2D(a=1.2345678901234567, b=.2345678901234567, c=.3456789012345678,
+                d=1.3456789012345678, tx=1.2345678901234567e100, ty=1.2345678901234567e100))
+        val root = DocumentRoot.compose("题".repeat(120), SceneSnapshot.restored(SceneId("文".repeat(128)), Long.MAX_VALUE, listOf(stroke)), listOf(page))
+        val text = PagedPreviewCodec.encode(root)
+        assertTrue(text.lineSequence().filter { it.isNotEmpty() }.all { it.encodeToByteArray().size + 1 <= 1024 })
+        assertEquals(text, PagedPreviewCodec.encode(PagedPreviewCodec.decode(text)))
+        assertEquals(26_381_312, PagedPreviewCodec.MAX_CHARACTERS)
+        assertEquals(32 * 1024 * 1024, PagedPreviewCodec.MAX_UTF8_BYTES)
+    }
+
+    @Test fun declaredPointCapacityKeepsLongNumericSamplesSerializableAfterAdoption() {
+        val count = PagedPreviewCodec.MAX_STROKE_POINTS
+        val samples = StrokeSamples.copyOf(DoubleArray(count) { -1.2345678901234567e-100 },
+            DoubleArray(count) { -1.2345678901234567e-100 }, FloatArray(count) { 1.2345679e-20f }, LongArray(count) { Long.MAX_VALUE })
+        val id = SceneId("long-numeric-capacity"); val layer = LayerId("ink")
+        val objects = (0 until 10).map { StrokeObject(ObjectId("stroke-$it"), 1, layer,
+            BrushSpec(BrushKind.MONOLINE, 1, 2.0, -1), samples) }
+        val root = DocumentRoot.compose("title", SceneSnapshot.restored(id, 1, objects),
+            listOf(PageDescriptor(PageId("page"), layer, 595.0, 842.0, contentRevision = 1)))
+        assertSame(root, PreviewDocumentReader.accept(root).root)
+        val note = assertNotNull(PagedPreviewNotebook.open(root, "adopt").notebook)
+        val text = note.capture().encode()
+        assertTrue(text.length > 16_000_000)
+        assertTrue(text.length <= PagedPreviewCodec.MAX_CHARACTERS)
+        assertTrue(text.encodeToByteArray().size <= PagedPreviewCodec.MAX_UTF8_BYTES)
+        assertTrue(note.capture().encodingWorkByteCharge <= 256L * 1024 * 1024)
+        assertTrue(PagedPreviewCodec.maximumDecodingWorkByteCharge() <= 256L * 1024 * 1024)
+        val decoded = PagedPreviewCodec.decode(text)
+        assertTrue(root.scene.sameContent(decoded.scene)); assertEquals(text, PagedPreviewCodec.encode(decoded))
+        assertSame(root, note.snapshot()); assertEquals(200_000, decoded.scene.objects().sumOf { it.samples.size })
+    }
+
     @Test fun legacyBottomRightInkKeepsOriginalPaperExtentAndDecodedCopySharesSamples() {
         val input = "NCPREVIEW\t1\nD\tcorner\tcorner\t2\t1\t1\nS\tink-1\t-1\t2.5\t2\nP\t900\t1300\t0.5\t1\nP\t999\t1399\t0.5\t2\nEND\n"
         val root = PagedPreviewCodec.decode(input)

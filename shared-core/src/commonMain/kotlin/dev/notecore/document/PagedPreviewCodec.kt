@@ -7,12 +7,21 @@ data class PagedPreviewHeader(val documentId: String, val title: String, val pag
 
 /** Unfrozen bounded preview interchange. No filesystem, mutable authority, history or durable receipts. */
 object PagedPreviewCodec {
-    const val MAX_CHARACTERS = 16_000_000
     const val MAX_PAGES = 128
     const val MAX_OBJECTS = 5000
     const val MAX_POINTS = 200_000
     const val MAX_STROKE_POINTS = 20_000
     private const val MAX_LINE = 1024
+    // Shortest finite Double/Float and nonnegative Long point fields fit 96 ASCII bytes.
+    // Metadata UTF-8 is bounded separately per row. Include one full recovery completion.
+    private const val MAX_POINT_LINE = 96
+    private const val MAX_BASE_TEXT = 2048 + MAX_PAGES * MAX_LINE + MAX_OBJECTS * MAX_LINE + MAX_POINTS * MAX_POINT_LINE
+    const val MAX_CHARACTERS = MAX_BASE_TEXT + 8 * MAX_LINE + MAX_STROKE_POINTS * MAX_POINT_LINE
+    const val MAX_UTF8_BYTES = 32 * 1024 * 1024
+    /** Unfrozen primitive accessors for native hosts; one shared limit, no mirrored magic numbers. */
+    fun maximumCharacterCount(): Int = MAX_CHARACTERS
+    fun maximumUtf8ByteCount(): Int = MAX_UTF8_BYTES
+    fun maximumDecodingWorkByteCharge(): Long = decodingWorkByteCharge(MAX_CHARACTERS)
     private const val MAX_RETAINED_BYTES = 8L * 1024 * 1024
 
     /** Bounded metadata only. Callers must decode the whole document before trusting its body. */
@@ -95,6 +104,16 @@ object PagedPreviewCodec {
         return charge
     }
 
+    /** Pending accepted ink must still fit the same future canonical codec, before any retry. */
+    internal fun validateCompletedStrokeCapacity(root: DocumentRoot, objectId: ObjectId, layerId: LayerId, points: Int) {
+        require(root.scene.objectCount < MAX_OBJECTS && points in 1..MAX_STROKE_POINTS)
+        var existingPoints = 0L
+        root.scene.forEachObject { existingPoints += it.samples.size }
+        require(points.toLong() <= MAX_POINTS - existingPoints)
+        val futureCharge = retainedByteCharge(root) + 256L + (objectId.value.length + layerId.value.length) * 2L + points.toLong() * 28L
+        require(futureCharge <= MAX_RETAINED_BYTES)
+    }
+
     @Throws(IllegalArgumentException::class)
     fun encodingWorkByteCharge(root: DocumentRoot): Long {
         return retainedByteCharge(root) + encodingTextWorkByteCharge(root)
@@ -126,7 +145,7 @@ object PagedPreviewCodec {
             val m = obj.transform
             out.row("S", escape(obj.id.value), escape(obj.layerId.value), obj.objectRevision, obj.brush.kind.name, obj.brush.algorithmVersion,
                 obj.brush.argb, obj.brush.width, obj.samples.size, m.a, m.b, m.c, m.d, m.tx, m.ty)
-            for (p in 0 until obj.samples.size) out.line("P\t${obj.samples.x(p)}\t${obj.samples.y(p)}\t${obj.samples.pressure(p)}\t${obj.samples.timeMicros(p)}\n")
+            for (p in 0 until obj.samples.size) out.point("P\t${obj.samples.x(p)}\t${obj.samples.y(p)}\t${obj.samples.pressure(p)}\t${obj.samples.timeMicros(p)}\n")
         }
         out.row("END")
         return out.toString()
@@ -182,12 +201,29 @@ object PagedPreviewCodec {
     }
     private class BoundedText {
         private val value = StringBuilder()
+        private var utf8Bytes = 0
         fun row(vararg fields: Any) {
-            line(fields.joinToString("\t") + "\n")
+            val line = fields.joinToString("\t") + "\n"
+            var size = 0; var index = 0
+            while (index < line.length) {
+                val c = line[index++]
+                size += when {
+                    c.code <= 0x7f -> 1
+                    c.code <= 0x7ff -> 2
+                    c.isHighSurrogate() -> { index++; 4 } // Stored strings were validated before encoding.
+                    else -> 3
+                }
+            }
+            require(size <= MAX_LINE) { "Preview metadata row too large" }
+            append(line, size)
         }
-        fun line(line: String) {
-            require(line.length <= MAX_LINE && line.length <= MAX_CHARACTERS - value.length) { "Preview document too large" }
-            value.append(line)
+        fun point(line: String) {
+            require(line.length <= MAX_POINT_LINE) { "Preview point row too large" }
+            append(line, line.length) // Numeric fields and separators are ASCII.
+        }
+        private fun append(line: String, bytes: Int) {
+            require(line.length <= MAX_LINE && line.length <= MAX_CHARACTERS - value.length && bytes <= MAX_UTF8_BYTES - utf8Bytes) { "Preview document too large" }
+            value.append(line); utf8Bytes += bytes
         }
         override fun toString(): String = value.toString()
     }

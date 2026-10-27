@@ -5,20 +5,87 @@ import android.app.Instrumentation
 import android.os.Looper
 import android.os.SystemClock
 import dev.notecore.document.*
+import dev.notecore.canvas.prototype.*
 import java.io.File
 import java.io.RandomAccessFile
 
 /** Real original Store/worker; unique cache fixtures only. Unknown failure is explicitly injected. */
 internal class ReadFailureHostChecks(private val test: Instrumentation, private val host: Activity) {
     private fun main(action: () -> Unit) = test.runOnMainSync(action)
-    private fun await(predicate: () -> Boolean) {
-        val end = SystemClock.uptimeMillis()+12000
+    private fun await(timeoutMillis: Long = 12000, predicate: () -> Boolean) {
+        val end = SystemClock.uptimeMillis()+timeoutMillis
         var done = false
         while (!done && SystemClock.uptimeMillis()<end) { main { done=predicate() }; if (!done) SystemClock.sleep(20) }
         check(done) { "Read callback did not arrive" }
     }
+    private fun longNumericCheckpoint(directory: File) {
+        val id = "long-capacity"; val layer = LayerId("ink")
+        val samples = StrokeSamples.copyOf(DoubleArray(20000) { -1.2345678901234567e-100 },
+            DoubleArray(20000) { -1.2345678901234567e-100 }, FloatArray(20000) { 1.2345679e-20f }, LongArray(20000) { Long.MAX_VALUE })
+        val brush = BrushSpec(BrushKind.MONOLINE, 1, 2.0, -1)
+        val objects = (0 until 9).map { StrokeObject(ObjectId("old-$it"), 1, layer, brush, samples) }
+        val page = PageDescriptor(PageId("page"), layer, 595.0, 842.0, contentRevision = 1)
+        val root = DocumentRoot.compose("long digits", SceneSnapshot.restored(SceneId(id), 1, objects), listOf(page))
+        lateinit var checkpoint: PagedPreviewSnapshot
+        lateinit var pending: DocumentCommand.Canvas
+        lateinit var producer: PagedPreviewNotebook
+        lateinit var store: NoteStore
+        var saved = false; var armed = false; var probing = false
+        main {
+            store = NoteStore.isolated(host, directory)
+            producer = PagedPreviewNotebook(root, "producer", ownerCheck = {
+                check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
+                if (armed && !probing) {
+                    probing = true; val completed = try { producer.hasPendingStroke } finally { probing = false }
+                    if (completed) { armed = false; error("Synthetic commit owner unavailable") }
+                }
+            })
+            store.attachActive(producer)
+            val xs=DoubleArray(1000) { -1.2345678901234567e-100 }; val ys=xs.copyOf()
+            val pressures=FloatArray(1000) { 1.2345679e-20f }; val times=LongArray(1000) { Long.MAX_VALUE }
+            repeat(19) { index ->
+                val result=producer.offerRealBatch(if(index==0) PointerPhase.DOWN else PointerPhase.MOVE, Long.MAX_VALUE, xs, ys, pressures, times)
+                check(result.acceptedSamples==1000 && result.disposition==PreviewInputDisposition.ACCEPTED)
+            }
+            armed=true
+            try { producer.offerRealBatch(PointerPhase.UP,Long.MAX_VALUE,xs,ys,pressures,times); error("Expected owner fault") }
+            catch (failure: IllegalStateException) { check(!armed) }
+            checkpoint=producer.captureRecovery(); pending=checkNotNull(checkpoint.pending)
+        }
+        try {
+            main { check(store.save(checkpoint) { _, error -> check(error == null); saved = true }) }
+            await(60000) { saved && store.saveStates().isEmpty() }
+            val file = File(directory, "$id.ncp")
+            check(file.length() > 16_000_000 && file.length() <= PagedPreviewCodec.MAX_UTF8_BYTES)
+            main { check(store.releaseActive(producer)); store.stopTestBackend(); store = NoteStore.isolated(host, directory) }
+            saved = false
+            lateinit var owner: PagedPreviewNotebook
+            main { store.open(id) { value, error ->
+                check(error == null); owner = store.adopt(checkNotNull(value))
+                check(owner.hasPendingStroke && owner.totalStrokeCount == 9)
+                check(owner.retryPendingStroke()); val completed = owner.snapshot()
+                check(owner.retryPendingStroke() && owner.snapshot() === completed && owner.totalStrokeCount == 10)
+                check(owner.rename("saved long digits"))
+                check(store.save(owner.capture()) { _, failure -> check(failure == null); saved = true })
+            } }
+            await(60000) { saved && store.saveStates().isEmpty() }
+            main { check(store.releaseActive(owner)); store.stopTestBackend(); store = NoteStore.isolated(host, directory) }
+            var opened = false
+            main { store.open(id) { value, error ->
+                check(error == null); val note = store.adopt(checkNotNull(value))
+                check(!note.hasPendingStroke && note.totalStrokeCount == 10 && note.title == "saved long digits")
+                check(note.snapshot().scene.objects().sumOf { it.samples.size } == 200000)
+                check(note.snapshot().scene.objects().all { it.samples == samples })
+                check(store.releaseActive(note)); opened = true
+            } }
+            await(60000) { opened }
+            check(file.length() > 16_000_000 && file.length() <= PagedPreviewCodec.MAX_UTF8_BYTES)
+            check(root.scene.objectCount == 9 && checkpoint.pending === pending)
+        } finally { main { store.stopTestBackend() } }
+    }
     fun verify() {
         val directory=File(host.cacheDir,"read-failure-${java.util.UUID.randomUUID()}").apply { mkdirs() }
+        longNumericCheckpoint(File(directory, "long-numeric"))
         val id="read-failures"; val file=File(directory,"$id.ncp")
         val valid="NCPREVIEW\t2\nD\t$id\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         lateinit var store: NoteStore

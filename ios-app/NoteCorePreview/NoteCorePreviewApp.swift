@@ -344,7 +344,7 @@ final class PreviewModel: ObservableObject {
         let navigation = navigationEpoch, epoch = storageEpoch
         let retained = ledger.latest(documentId: id)
         status = "正在打开…"
-        request(input: (Self.file(id, directory: directory), id, retained, beforeOpenRead), bytes: 160 * 1024 * 1024, compute: { input in
+        request(input: (Self.file(id, directory: directory), id, retained, beforeOpenRead), bytes: PagedPreviewCodec.shared.maximumDecodingWorkByteCharge(), compute: { input in
             if let retained = input.2 as? PagedPreviewSnapshot { return PreviewFileIO.acceptRecovery(retained, documentId: input.1) }
             guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
             return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)
@@ -378,7 +378,8 @@ final class PreviewModel: ObservableObject {
         let snapshot = note.capture()
         request(input: snapshot, bytes: snapshot.encodingWorkByteCharge, compute: { captured in
             let encoded = try captured.encode()
-            guard encoded.utf16.count <= 16_000_000 else { throw CocoaError(.fileWriteOutOfSpace) }
+            guard encoded.utf16.count <= Int(PagedPreviewCodec.shared.maximumCharacterCount()),
+                  encoded.utf8.count <= PreviewFileIO.maxReadBytes else { throw CocoaError(.fileWriteOutOfSpace) }
             return PreviewBackup(data: Data(encoded.utf8))
         }, rejected: { transferBusy = false; status = "后台队列繁忙，请重新导出" }) { result in
             self.transferBusy = false
@@ -393,7 +394,7 @@ final class PreviewModel: ObservableObject {
         transferBusy = true; status = "正在校验并导入…"
         let scoped = url.startAccessingSecurityScopedResource()
         let id = UUID().uuidString, navigation = navigationEpoch
-        request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: 160 * 1024 * 1024, compute: { input in
+        request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: PagedPreviewCodec.shared.maximumDecodingWorkByteCharge(), compute: { input in
             defer { if input.1 { input.0.stopAccessingSecurityScopedResource() } }
             let encoded = try PreviewFileIO.readUTF8(input.0)
             let source = try Self.readPreview(encoded)

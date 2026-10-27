@@ -89,7 +89,7 @@ final class PagedHostTests: XCTestCase {
         let model = PreviewModel(directory: dir)
         for (bytes, reason) in [(Data("bad format".utf8), LocalReadFailure.invalidFormat),
             (Data(valid.replacingOccurrences(of: id, with: "other-note").utf8), .wrongDocument),
-            (Data([0xc3, 0x28]), .invalidUTF8), (Data(repeating: 120, count: 16_000_001), .characterCapacity)] {
+            (Data([0xc3, 0x28]), .invalidUTF8), (Data(repeating: 120, count: Int(PagedPreviewCodec.shared.maximumCharacterCount()) + 1), .characterCapacity)] {
             try bytes.write(to: file); model.open(id)
             try await eventually("known read refusal reaches owner") { model.status == reason.message }
             XCTAssertNil(model.current); XCTAssertEqual(try Data(contentsOf: file), bytes)
