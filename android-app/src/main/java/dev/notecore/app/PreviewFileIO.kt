@@ -14,6 +14,7 @@ import java.nio.file.Files
 import java.util.UUID
 
 internal class CatalogCapacityRefusal : RuntimeException()
+internal enum class PreviewWriteBoundary { SYNCED_BEFORE_REPLACE, VERIFIED_BEFORE_RETURN }
 
 /** Platform-local read result; no mutable document or secondary storage ownership. */
 internal enum class LocalReadFailure(val message: String) {
@@ -32,7 +33,8 @@ internal sealed interface LocalRecoveryRead {
 private class ReadRefused(val reason: LocalReadFailure) : IllegalArgumentException(reason.name)
 
 /** Serial worker capability. Contains immutable filesystem/resolver handles, no UI or owner ledger. */
-internal class PreviewFileIO(private val directory: File, private val resolver: ContentResolver, private val beforeRead: () -> Unit = {}) {
+internal class PreviewFileIO(private val directory: File, private val resolver: ContentResolver, private val beforeRead: () -> Unit = {},
+    private val observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}) {
     private fun ensureDirectory() { check(directory.isDirectory || directory.mkdirs()) { "Storage directory unavailable" } }
     private fun file(id: String): File {
         require(id.matches(Regex("[a-zA-Z0-9-]{1,128}")))
@@ -43,7 +45,11 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
         val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
         val atomic = AtomicFile(file(snapshot.documentId)); val stream = atomic.startWrite()
-        try { stream.write(bytes); stream.fd.sync(); atomic.finishWrite(stream) }
+        try {
+            stream.write(bytes); stream.fd.sync()
+            observeWriteBoundary(PreviewWriteBoundary.SYNCED_BEFORE_REPLACE)
+            atomic.finishWrite(stream)
+        }
         catch (error: Throwable) { atomic.failWrite(stream); throw error }
         // AtomicFile.finishWrite can only log a failed rename. Verify through its serialized read path.
         atomic.openRead().use { input ->
@@ -57,6 +63,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             }
             require(input.read() == -1)
         }
+        observeWriteBoundary(PreviewWriteBoundary.VERIFIED_BEFORE_RETURN)
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {
         require(snapshot.pending == null) { "Recovery checkpoint is not an interchange export" }

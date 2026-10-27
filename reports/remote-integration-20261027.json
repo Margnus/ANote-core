@@ -40,7 +40,8 @@
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "e146c258104dcea019d58372826916968588840a5425b1876c75ef3f0e1cc936",
     "tools/verify_android_input_host.py": "e0c3c47e8434f2643f552875c52c1f275713f49b133ba30a1b2dc7079c08f5a6"
   },
-  "scope": "Actual local integration of both diverged histories. Android API36 emulator and Apple Simulator only; remote Windows/API26/API35 and old topic reports retain their original scope. No ordinary GUI or physical device run. Complete C1 evidence audit remains failed (9 matched,35 failed,5 historical drift); no old receipt promoted by rehash.",
+  "scope": "Actual local integration of both diverged histories. Android API36 emulator and Apple Simulator only; remote Windows/API26/API35 and old topic reports retain their original scope. No ordinary GUI or physical device run. The retained C1 audit remained failed; its 9/35/5 counts were not refreshed by the failed Python3.9 command; see audit_correction; no old receipt promoted by rehash.",
   "c1_gate_complete": false,
-  "production_sqlite_authorized": false
+  "production_sqlite_authorized": false,
+  "audit_correction": "The merge audit command used system Python3.9 and failed at write_text(newline=...), so 9 matched/35 failed/5 historical drift was the previously retained audit, not a fresh merged-source audit. The later Python3.12 audit after the Android atomic-cut milestone is recorded in reports/c1-evidence-audit.json. Integration suites listed here did execute; complete C1 remains unapproved."
 }

@@ -28,7 +28,13 @@ class ViewportInstrumentation : Instrumentation() {
     private var storageRetentionOnly = false
     private var minimumApiOnly = false
     private var ownerRetirementOnly = false
+    private var atomicCutAction: String? = null
+    private var atomicCutIdentity: String? = null
+    private var atomicCutBoundary: String? = null
     override fun onCreate(arguments: Bundle?) {
+        atomicCutAction = arguments?.getString("notecore_atomic_cut")
+        atomicCutIdentity = arguments?.getString("notecore_atomic_identity")
+        atomicCutBoundary = arguments?.getString("notecore_atomic_boundary")
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
@@ -50,6 +56,19 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            atomicCutAction?.let { action ->
+                val checks = AtomicCutHostChecks(this, host, checkNotNull(atomicCutIdentity), checkNotNull(atomicCutBoundary))
+                when (action) {
+                    "prepare" -> checks.prepare() // Deliberately never returns; external verified-PID termination.
+                    "reopen" -> {
+                        result.putString("atomic_cut_observations", checks.reopen())
+                        result.putString("atomic_cut_status", "passed")
+                        finish(Activity.RESULT_OK, result)
+                    }
+                    else -> error("Unsupported atomic cut action")
+                }
+                return
+            }
             if (minimumApiOnly) {
                 var failure: Throwable? = null
                 runOnMainSync { try { result.putString("minimum_api_observations",MinimumApiHostChecks.verify(host)) } catch (error: Throwable) { failure=error } }

@@ -41,8 +41,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {},
     private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
     private val exportPickerByteLimit: Long = 8L * 1024 * 1024, private val beforeOpenRead: () -> Unit = {},
-    private val catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit) {
-    private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead)
+    private val catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit,
+    observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}) {
+    private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead, observeWriteBoundary)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
     private val executor = BoundedOwnerExecutor(16, STORAGE_WORK_BYTES, "NoteCore-preview-storage", ::requestPump)
@@ -604,7 +605,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
             maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024, beforeOpenRead: () -> Unit = {},
-            catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit): NoteStore =
-            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead,catalogResultByteLimit)
+            catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit,
+            observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}): NoteStore =
+            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead,catalogResultByteLimit,observeWriteBoundary)
     }
 }

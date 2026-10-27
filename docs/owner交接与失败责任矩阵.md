@@ -17,7 +17,7 @@
 | 已受理写入真实IO失败 | 原ledger保留完整快照及retryRequired | 修复目录后调用同一owner的retryRetainedWrites；真实写入完成才结算，随后原worker停止并解除自持 |
 | 外部CGDataProvider跨退休继续持有 | 同一Model/native holder继续计费 | 真实releaseData回调后由原主owner结算；unknown需既有只读reconcile，不重复破坏性释放，不另开pool |
 | 所有外部句柄丢失但主线程仍活 | 不提供自动查找/接管 | 自持保留责任，也会持续占用内存与worker；这是未完成退休的服务，不是可恢复完成。App必须保留服务入口；当前单App级StateObject满足正常生命周期 |
-| owner线程退出、主线程停摆、进程终止 | 不支持内存owner接管 | 自持不能提供进程耐久；未经确认IO、替换中断/断电和生产回执协议仍待 |
+| owner线程退出、主线程停摆、进程终止 | 不支持内存owner接管 | 自持不能提供进程耐久；Android原文件替换前后两处实际终止/新进程重读见[报告](../reports/android-atomic-cut.json)，不接管原内存owner；任意中断/断电和生产回执协议仍待 |
 | mutable Notebook/worker/reader迁移线程或重复Model打开同一目录 | 未定义为受支持交接 | 不通过忽略ownerCheck、复制authority、旁路队列或第二pool实现接管；多窗口/跨线程交接仍属C1未决 |
 
 Apple原Model的服务生命周期以init开始、beginOwnerRetirement受理后实际drain结束。关闭当前文档或失去外部引用均不等于服务退休。长生命周期服务的自持是明确保留责任，会增加未正确退休调用者的保留时间；不承诺自动回收、内存峰值或物理heap结论。
