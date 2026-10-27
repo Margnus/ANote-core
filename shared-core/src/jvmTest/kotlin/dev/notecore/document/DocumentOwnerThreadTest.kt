@@ -4,6 +4,39 @@ import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
 class DocumentOwnerThreadTest {
+    @Test fun rejectedConstructionDoesNotBuildDenseIdentityCollections() {
+        // Host allocation regression only; 64 KiB is not a product heap/latency threshold.
+        val meter = assertIs<com.sun.management.ThreadMXBean>(java.lang.management.ManagementFactory.getThreadMXBean())
+        assertTrue(meter.isThreadAllocatedMemorySupported)
+        meter.isThreadAllocatedMemoryEnabled = true
+        val id = SceneId("construction-budget")
+        val samples = StrokeSamples.copyOf(doubleArrayOf(1.0), doubleArrayOf(2.0), floatArrayOf(.5f), longArrayOf(1))
+        val objects = (1..5000).map { StrokeObject(ObjectId("object-$it"), 1, LayerId("ink"),
+            BrushSpec(BrushKind.MONOLINE, 1, 2.0, -1), samples) }
+        val root = DocumentRoot.compose("title", SceneSnapshot.restored(id, 1, objects),
+            listOf(PageDescriptor(PageId("page"), LayerId("ink"), 595.0, 842.0, contentRevision = 1)))
+        val denied = IllegalStateException("foreign owner")
+        val rejectOwner: () -> Unit = { throw denied }
+        val rejectCapacity = DocumentBudget(maxObjects = 1)
+        fun attempt(ownerDenied: Boolean) {
+            if (ownerDenied) assertSame(denied, assertFailsWith<IllegalStateException> {
+                MemoryDocumentAuthority(root, ownerCheck = rejectOwner)
+            }) else assertFailsWith<IllegalArgumentException> { MemoryDocumentAuthority(root, rejectCapacity) }
+        }
+        for (ownerDenied in listOf(true, false)) {
+            repeat(8) { attempt(ownerDenied) }
+            val allocated = (1..3).minOf {
+                val before = meter.getThreadAllocatedBytes(Thread.currentThread().id)
+                attempt(ownerDenied)
+                meter.getThreadAllocatedBytes(Thread.currentThread().id) - before
+            }
+            println("authority-rejected-construction ownerDenied=$ownerDenied allocatedBytes=$allocated")
+            assertTrue(allocated < 64 * 1024, "Rejected authority allocated dense collections: $allocated")
+        }
+        assertEquals(5000, root.scene.objectCount)
+        assertSame(objects.last(), root.scene.find(objects.last().id))
+    }
+
     @Test fun pagedSessionRejectsActualWorkerMutationAndSnapshotCalls() {
         val executor = BoundedOwnerExecutor()
         val root = DocumentRoot.empty(SceneId("session-owner"), "title", PageDescriptor(PageId("a"), LayerId("ink-a"), 595.0, 842.0))
