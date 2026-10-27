@@ -26,8 +26,10 @@ class ViewportInstrumentation : Instrumentation() {
     private var titleOnly = false
     private var editOnly = false
     private var storageRetentionOnly = false
+    private var minimumApiOnly = false
     private var ownerRetirementOnly = false
     override fun onCreate(arguments: Bundle?) {
+        minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
         editOnly = arguments?.getString("notecore_case") == "preview_edit"
@@ -48,6 +50,12 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (minimumApiOnly) {
+                var failure: Throwable? = null
+                runOnMainSync { try { result.putString("minimum_api_observations",MinimumApiHostChecks.verify(host)) } catch (error: Throwable) { failure=error } }
+                failure?.let { throw it }
+                result.putString("minimum_api_status","passed"); finish(Activity.RESULT_OK,result); return
+            }
             if (ownerRetirementOnly) {
                 result.putString("owner_observations", OwnerRetirementHostChecks(this, host).verify())
                 result.putString("owner_status", "passed")
