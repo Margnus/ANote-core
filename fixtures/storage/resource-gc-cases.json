@@ -65,6 +65,13 @@
       "hex": "707172",
       "promoted_at": null,
       "state": "promoted"
+    },
+    {
+      "id": "shared-bytes-other-space",
+      "space": "local-b",
+      "hex": "0001020304",
+      "promoted_at": 50,
+      "state": "promoted"
     }
   ],
   "cases": [
@@ -105,7 +112,8 @@
       "space": "local-b",
       "cutoff": 100,
       "expected": [
-        "other-space"
+        "other-space",
+        "shared-bytes-other-space"
       ]
     },
     {
@@ -226,6 +234,19 @@
       ],
       "rollback_reference": "old-orphan",
       "expected_after": [
+        "old-orphan"
+      ]
+    },
+    {
+      "id": "same-hash-other-space-reference-does-not-own-this-space",
+      "cutoff": 100,
+      "refs": [
+        {
+          "resource": "shared-bytes-other-space",
+          "kind": "document"
+        }
+      ],
+      "expected": [
         "old-orphan"
       ]
     }

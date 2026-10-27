@@ -1,0 +1,166 @@
+{
+  "status": "passed",
+  "host_sqlite_version": "3.50.4",
+  "abrupt_process_exit_cases": 5,
+  "integrity_identity_cases": 3,
+  "observations": [
+    {
+      "fault": "partial-stage",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          null
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": false,
+      "source_preserved": true
+    },
+    {
+      "fault": "stage-closed",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": false,
+      "source_preserved": true
+    },
+    {
+      "fault": "promoted",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": true,
+      "source_preserved": true
+    },
+    {
+      "fault": "db-uncommitted",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 0,
+        "operations": 0,
+        "resources": 0,
+        "task": [
+          "running",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": true,
+      "source_preserved": true
+    },
+    {
+      "fault": "db-committed",
+      "abrupt_exit": 73,
+      "before": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "retry_status": "ALREADY_COMMITTED",
+      "after": {
+        "documents": 1,
+        "operations": 1,
+        "resources": 1,
+        "task": [
+          "complete",
+          "08bb5e5d6eaac1049ede0893d30ed022b1a4d9b5b48db414871f51c9cb35283d"
+        ]
+      },
+      "promoted_but_uncommitted_held_by_task": false,
+      "source_preserved": true
+    },
+    {
+      "case": "preexisting_corrupt_resource_is_not_overwritten",
+      "status": "REPAIR_REQUIRED",
+      "visible_documents": 0
+    },
+    {
+      "case": "operation_identity_conflict_does_not_stage_or_commit",
+      "status": "IDENTITY_CONFLICT"
+    },
+    {
+      "case": "committed_metadata_is_not_success_when_resource_damaged",
+      "status": "REPAIR_REQUIRED"
+    }
+  ],
+  "source_payloads_preserved": true,
+  "scope": "Host child-process exit, no-clobber file link and temporary SQLite transaction design probes; not a production importer or mobile durability implementation.",
+  "directory_fsync_verified": false,
+  "power_loss_verified": false,
+  "resource_gc_deletion_implemented": false,
+  "production_schema_frozen": false,
+  "production_sqlite_authorized": false,
+  "c1_gate_complete": false,
+  "limits": [
+    "Temporary host SQLite and synthetic opaque resources only; no App or production metadata schema",
+    "No directory fsync or Android/Apple durability claim; abrupt child exit is not power loss",
+    "No GC deletion, reader pin, cross-process resource retirement protocol or user cancellation implementation",
+    "Pending import task protects ownership; safe task expiry and final collection remain undefined"
+  ],
+  "source_and_artifact_sha256": {
+    "tools/resource_commit_probe.py": "7b89f614474ee94a8da58405711b384542ee68edc87d2eb2bbc3a44a6ceef62b",
+    "fixtures/storage/resource-commit-cases.json": "b7dc2953c8b189a152139b52ea6ea0c5dfe7bd74f1701dc11957319ea259efb1",
+    "fixtures/storage/resource-gc-cases.json": "e8af44013830e1ac43841c4fcf915114895dd7fed423348bbc2e1651fd84f4b5",
+    "tools/verify_resource_commit_rules.py": "6f8c6e0aac9f35573c9749dac04e9e9ef39abefac12fceba1db8ad8fa5cdc199"
+  }
+}

@@ -16,16 +16,18 @@
 
 [样本](../fixtures/storage/resource-gc-cases.json)声明synthetic和draft；字节是有限不透明载荷，不假装合法PDF/图像/字体或用户笔记。[验证器](../tools/verify_resource_gc_rules.py)在工作区build下生成唯一临时目录，对真实文件计算大小/SHA-256，把实际存在及校验结果写入临时主机SQLite。临时表仅用于表达反例，不能当作生产metadata迁移。
 
-17个固定期望场景包括未知catalog版本（实际PRAGMA user_version）、未配置策略、引用枚举不完整、精确时间边界、同空间/跨空间、八类引用、损坏/缺失/staging/未来状态、迟到引用与真实事务rollback。所有场景检查源载荷在查询期间集合/hash保持；查询本身不删文件。结束只清理验证器自己创建的临时目录。
+18个固定期望场景包括未知catalog版本（实际PRAGMA user_version）、未配置策略、引用枚举不完整、精确时间边界、同空间/跨空间、八类引用、损坏/缺失/staging/未来状态、迟到引用与真实事务rollback。所有场景检查源载荷在查询期间集合/hash保持；查询本身不删文件。结束只清理验证器自己创建的临时目录。
 
-5个错误查询变体分别移除引用、年龄、校验、空间及状态保护，全部被固定反例拒绝；这用于验证样本能发现保护条件缺失，不代表随机并发/断电已测。执行：
+6个错误查询变体分别移除引用、年龄、校验、空间、跨空间同hash引用关联及状态保护，全部被固定反例拒绝；这用于验证样本能发现保护条件缺失，不代表随机并发/断电已测。执行：
 
 ```text
 python tools/verify_resource_gc_rules.py
 python tools/validate_fixture_catalog.py
 ```
 
-[规则报告](../reports/resource-gc-rules.json)记录主机SQLite版本、每例候选/拒绝及源码绑定；catalog及verifyPrototype复用相同检查。17个规则场景不与437项JVM测试相加，不等同Android/Apple平台SQLite测试。
+[规则报告](../reports/resource-gc-rules.json)记录主机SQLite版本、每例候选/拒绝及源码绑定；catalog及verifyPrototype复用相同检查。18个规则场景不与437项JVM测试相加，不等同Android/Apple平台SQLite测试。
+
+补充的文件/DB边界及进行中任务责任见[资源联合提交恢复边界](资源联合提交恢复边界.md)。隔离主机验证不改变下列生产待办。
 
 ## 尚未完成
 

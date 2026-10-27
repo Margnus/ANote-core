@@ -1,0 +1,55 @@
+{
+  "schema": "resource-commit-boundaries-1-draft",
+  "origin": "synthetic",
+  "production_schema_frozen": false,
+  "payload_resource": "old-orphan",
+  "space": "fixture-space",
+  "crash_cases": [
+    {
+      "fault": "partial-stage",
+      "visible_documents": 0,
+      "operations": 0,
+      "resource_present": false,
+      "task_state": "running",
+      "stage_complete": false
+    },
+    {
+      "fault": "stage-closed",
+      "visible_documents": 0,
+      "operations": 0,
+      "resource_present": false,
+      "task_state": "running",
+      "stage_complete": true
+    },
+    {
+      "fault": "promoted",
+      "visible_documents": 0,
+      "operations": 0,
+      "resource_present": true,
+      "task_state": "running",
+      "stage_complete": true
+    },
+    {
+      "fault": "db-uncommitted",
+      "visible_documents": 0,
+      "operations": 0,
+      "resource_present": true,
+      "task_state": "running",
+      "stage_complete": true
+    },
+    {
+      "fault": "db-committed",
+      "visible_documents": 1,
+      "operations": 1,
+      "resource_present": true,
+      "task_state": "complete",
+      "stage_complete": true
+    }
+  ],
+  "limits": [
+    "Temporary host SQLite and synthetic opaque resources only; no App or production metadata schema",
+    "No directory fsync or Android/Apple durability claim; abrupt child exit is not power loss",
+    "No GC deletion, reader pin, cross-process resource retirement protocol or user cancellation implementation",
+    "Pending import task protects ownership; safe task expiry and final collection remain undefined"
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "case_count": 17,
+  "case_count": 18,
   "observations": [
     {
       "id": "old-verified-unreferenced-only",
@@ -37,7 +37,8 @@
     {
       "id": "workspace-selection-is-explicit",
       "eligible": [
-        "other-space"
+        "other-space",
+        "shared-bytes-other-space"
       ],
       "refusal": null,
       "after_mutation": null
@@ -115,12 +116,21 @@
       "after_mutation": [
         "old-orphan"
       ]
+    },
+    {
+      "id": "same-hash-other-space-reference-does-not-own-this-space",
+      "eligible": [
+        "old-orphan"
+      ],
+      "refusal": null,
+      "after_mutation": null
     }
   ],
   "unsafe_query_mutations_rejected": [
     "ignore_references",
     "ignore_age",
     "ignore_verification",
+    "ignore_reference_workspace",
     "ignore_workspace",
     "ignore_state"
   ],
@@ -140,7 +150,7 @@
     "No Android/Apple filesystem durability, source PDF/image/font decoding, or user resource deletion is verified"
   ],
   "source_and_artifact_sha256": {
-    "fixtures/storage/resource-gc-cases.json": "a44897d7c7ea6d3605bdbbfb70abe8d09474517181efdd62eaf547b4a3a28ce0",
-    "tools/verify_resource_gc_rules.py": "da821a1ef6e5ccaab3a56d66d566bb2d88377244a316b071e7258c130364850e"
+    "fixtures/storage/resource-gc-cases.json": "e8af44013830e1ac43841c4fcf915114895dd7fed423348bbc2e1651fd84f4b5",
+    "tools/verify_resource_gc_rules.py": "d86c073b77d2cbf8c185c0739648b800be71f7093ae2726c2fc3df12b72cba85"
   }
 }

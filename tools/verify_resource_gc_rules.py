@@ -69,6 +69,7 @@ def checks():
     mutants={'ignore_references':QUERY.replace(' AND NOT EXISTS (SELECT 1 FROM resource_ref f WHERE f.space=r.space AND f.hash=r.hash)',''),
              'ignore_age':QUERY.replace(' AND r.promoted_at < ?',' AND ? IS NOT NULL'),
              'ignore_verification':QUERY.replace(' AND r.verified=1',''),
+             'ignore_reference_workspace':QUERY.replace('f.space=r.space AND f.hash=r.hash','f.hash=r.hash'),
              'ignore_workspace':QUERY.replace('r.space=?','? IS NOT NULL'),
              'ignore_state':QUERY.replace(" AND r.state='promoted'",'')}
     killed=[]
