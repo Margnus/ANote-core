@@ -43,7 +43,15 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             val degenerate = listOf(ink.replace("\t2.5\t1\t", "\t1.0E-50\t1\t"),
                 ink.replace("\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n", "\t1.0\t1.0\t1.0\t1.00000001\t0.0\t0.0\n"))
             for (encoded in degenerate) {
-                check(PagedPreviewCodec.encode(PagedPreviewCodec.decode(encoded)) == encoded)
+                val canonical = PagedPreviewCodec.decode(encoded)
+                check(PagedPreviewCodec.encode(canonical) == encoded)
+                main {
+                    var ownerChecks = 0
+                    var refused = false
+                    try { PagedPreviewNotebook(canonical, "direct", ownerCheck={ ownerChecks++ }) }
+                    catch (_: IllegalArgumentException) { refused = true }
+                    check(refused && ownerChecks == 1)
+                }
                 file.writeText(encoded, Charsets.UTF_8)
                 refuse(LocalReadFailure.UNSUPPORTED_CONTENT.message)
                 check(file.readText(Charsets.UTF_8) == encoded)

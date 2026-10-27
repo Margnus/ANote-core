@@ -5,7 +5,7 @@ import dev.notecore.canvas.prototype.*
 /** UI-owner preview session. Exactly one authority; selected-page projection is a read-only cache. */
 class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(initial: DocumentRoot, private val sessionNonce: String,
                            budget: DocumentBudget = DocumentBudget(), private val ownerCheck: () -> Unit = {}) {
-    private val memory = MemoryDocumentAuthority(initial, budget, ownerCheck)
+    private val memory: MemoryDocumentAuthority
     private val inputObjectLimit = budget.maxObjects
     private val inputByteLimit = budget.inputBytes
     private var selected = initial.page(0).id
@@ -34,7 +34,10 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         ownerCheck()
         require(validSessionNonce(sessionNonce))
         require(budget.maxPages <= PagedPreviewCodec.MAX_PAGES && budget.maxObjects <= PagedPreviewCodec.MAX_OBJECTS && budget.liveBytes <= 8L * 1024 * 1024)
-        PagedPreviewCodec.retainedByteCharge(initial)
+        // The throwing constructor is still exported: it must not bypass validated adoption.
+        // Refuse before allocating the sole mutable authority or its identity/history state.
+        require(PreviewDocumentReader.accept(initial).failure == null) { "Unsupported preview content" }
+        memory = MemoryDocumentAuthority(initial, budget, ownerCheck)
     }
     private fun root(): DocumentRoot { ownerCheck(); return memory.snapshot() }
     val documentId: String get() = root().id.value
