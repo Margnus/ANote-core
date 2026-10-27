@@ -37,6 +37,7 @@ CURRENT = {
     'input-capture-contract': ('source_and_fixture_sha256',),
     'apple-current-revalidation': ('source_and_artifact_sha256',),
     'shared-native-contracts': ('source_and_artifact_sha256',),
+    'release-handoff': ('source_and_artifact_sha256',),
     'android-min-api-host-tests': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
     'android-input-host-tests': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
     'android-render-integration': ('source_evidence_sha256', 'sdk_contract_source_sha256'),

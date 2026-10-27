@@ -128,10 +128,18 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     internal fun releaseActive(note: PagedPreviewNotebook, lostEndpoint: Boolean = false): Boolean {
         executor.checkOwnerThread(); check(activeNotebook === note)
+        if (note.hasActiveStroke) return false
         if (note.hasPendingStroke) {
             if (activeSavedRoot.get() !== note.snapshot() || activeSavedPending.get() !== note.pendingStroke() || ledger.latest(note.documentId) != null) return false
             check(note.retireAfterRecovery(note.captureRecovery()))
-        } else check(note.retire())
+        } else {
+            val root = note.snapshot()
+            val retained = ledger.latest(note.documentId) as? PagedPreviewSnapshot
+            val durable = retained == null && activeSavedRoot.get() === root && activeSavedPending.get() == null
+            val admitted = retained?.root === root && retained?.pending == null
+            if (!durable && !admitted) return false
+            check(note.retire())
+        }
         retireInk(lostEndpoint); activeNotebook = null; activeSavedRoot.clear(); activeSavedPending.clear()
         return true
     }

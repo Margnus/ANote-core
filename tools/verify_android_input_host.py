@@ -17,7 +17,7 @@ CHECKS = {'double_scene_mapping_before_float_path', 'history_terminal_order_equa
 STORAGE_CHECKS = {'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
-OWNER_CHECKS = {'wrong_thread_retirement_rejected', 'accepted_root_saved_before_terminal_worker_stop',
+OWNER_CHECKS = {'unadmitted_release_refuses_before_retiring_authority', 'wrong_thread_retirement_rejected', 'accepted_root_saved_before_terminal_worker_stop',
                 'failed_root_retained_until_explicit_retry', 'active_input_and_picker_refuse_without_loss',
                 'pending_read_and_delivery_refuse_retirement', 'full_ledger_retry_frees_slot_before_retirement'}
 

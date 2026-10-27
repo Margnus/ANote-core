@@ -31,6 +31,23 @@ internal class OwnerRetirementHostChecks(private val test: Instrumentation, priv
         fun store(path: File): NoteStore = NoteStore.isolated(host, path).also { stores.add(it) }
         try {
             run {
+                lateinit var owner: NoteStore; lateinit var note: PagedPreviewNotebook
+                main {
+                    owner=store(File(root,"unadmitted")); note=owner.create(); draw(note)
+                    val before=note.snapshot(); val status=note.authorityStatus()
+                    check(!owner.releaseActive(note)) { "Unadmitted content was retired" }
+                    check(owner.activeDocumentId==note.documentId && note.snapshot()===before && note.authorityStatus()==status)
+                    check(note.rename("Still owned"))
+                    check(owner.save(note.capture()) { _,_ -> })
+                    check(note.beginStroke(5.0,6.0,.5f,3))
+                    check(!owner.releaseActive(note) && note.hasActiveStroke)
+                    note.cancelStroke() // Explicit fixture cancellation; release itself must preserve accepted input.
+                    check(owner.releaseActive(note)); check(owner.activeDocumentId==null)
+                }
+                eventually("Admitted content did not reach disk") { owner.saveStates().isEmpty() }
+                checks.add("unadmitted_release_refuses_before_retiring_authority")
+            }
+            run {
                 val directory = File(root, "accepted")
                 lateinit var owner: NoteStore; lateinit var note: PagedPreviewNotebook
                 lateinit var snapshot: PagedPreviewSnapshot
