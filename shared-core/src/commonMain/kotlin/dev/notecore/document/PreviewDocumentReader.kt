@@ -1,6 +1,7 @@
 package dev.notecore.document
 
 import dev.notecore.canvas.prototype.BrushKind
+import dev.notecore.canvas.prototype.Affine2D
 import kotlin.math.abs
 
 /** Unfrozen preview capability boundary, not the canonical format's complete support matrix. */
@@ -23,12 +24,21 @@ object PreviewDocumentReader {
     fun accept(root: DocumentRoot): PreviewDocumentRead {
         try { PagedPreviewCodec.retainedByteCharge(root) }
         catch (_: IllegalArgumentException) { return PreviewDocumentRead(null, PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT) }
-        for (stroke in root.scene.objects()) {
+        var supported = true
+        root.scene.forEachObject { stroke ->
             val m = stroke.transform
             if (stroke.brush.kind != BrushKind.MONOLINE || stroke.brush.algorithmVersion != 1 ||
                 listOf(m.a, m.b, m.c, m.d, m.tx, m.ty).any { !it.isFinite() || abs(it) > 1e12 })
-                return PreviewDocumentRead(null, PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)
+                { supported = false; return@forEachObject }
+            // Common preview capability includes the original Android Float Path/Matrix consumer.
+            // Preserve canonical doubles; refuse zero-radius/hairline or singular derived geometry.
+            if (stroke.brush.width.toFloat() / 2f <= 0f ||
+                Affine2D(m.a.toFloat().toDouble(), m.b.toFloat().toDouble(),
+                    m.c.toFloat().toDouble(), m.d.toFloat().toDouble(),
+                    m.tx.toFloat().toDouble(), m.ty.toFloat().toDouble()).inverseOrNull() == null)
+                supported = false
         }
-        return PreviewDocumentRead(root, null)
+        return if (supported) PreviewDocumentRead(root, null)
+            else PreviewDocumentRead(null, PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)
     }
 }

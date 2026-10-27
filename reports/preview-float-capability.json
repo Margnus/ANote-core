@@ -1,0 +1,38 @@
+{
+  "schema": "preview-float-capability-1",
+  "status": "passed",
+  "decision": "Refuse canonical widths with zero Float radius and transforms that lose invertibility in the existing Float adapter before preview adoption; preserve canonical doubles and source files. Apply through existing ordinary/recovery/retained/open boundaries, no new authority or format.",
+  "jvm_tests": 430,
+  "reader_tests": 7,
+  "recovery_reader_tests": 5,
+  "before_fix_tests": 7,
+  "before_fix_failures": 1,
+  "android_api": "35",
+  "android_view_checks": 10,
+  "android_storage_checks": 10,
+  "android_owner_checks": 6,
+  "original_note_count": 1,
+  "original_files_unchanged": true,
+  "ordinary_apk_sha256": "dbb452569b05bdf868204fe4d91662dfd76b2492aeeee7046bec1058a88c2cf3",
+  "limits": [
+    "Float representability refusal is not a complete numeric accuracy, AA, near-boundary or production geometry contract",
+    "Android native worker uses unique cache fixtures and original owner callbacks, not ordinary UI or physical stylus",
+    "Current Apple Native/framework/Swift execution unavailable; shared source adoption is not dual-platform verification",
+    "Physical M-1, total budgets, public/owner/IO/power-loss and full C1 remain pending"
+  ],
+  "c1_gate_complete": false,
+  "production_sqlite_authorized": false,
+  "source_and_artifact_sha256": {
+    "build/preview-float-capability/before-fix-reader.kt": "2c44bde93b3ccaff60598b167fe642ef5012f4b089f23a9cf8a567a5729b92c8",
+    "build/preview-float-capability/before-fix.log": "33ee3d6b49525d16b0143c9053089bf5aeef4ce77c84edb11aef63dd8c21dd49",
+    "build/preview-float-capability/before-fix.xml": "04cdd5a345c3b61c10f82925598f5395194350586dbca9a75a4284e8203972a0",
+    "build/preview-float-capability/build-android.log": "741eddc0c39c00d43c50cdaed638712766ab3396cb1ef1f187d89b31791a1886",
+    "build/preview-float-capability/original-after.json": "e9d49900ad55b2ad53b64206c5d8412189e7a93d32e457d1ede897a28382252f",
+    "build/preview-float-capability/original-before.json": "d363c68aaa8706c33b7d6cbd2c5d8487b81abfe5a2e179b4bbe6dc2706a9f197",
+    "reports/android-input-host-tests.json": "1359b47d194c0f15fb2671957d53b60079eaec9cb4b6d308fe17a953250685a0",
+    "reports/verification.json": "0a66750332e105a25e64e28b0bc1256331526b8f004bd654ac2a33bf96b4998e",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewDocumentReaderTest.xml": "b71b34e234e89488a26a5720181d23ab2538fe1de44f56e42035e7c2346e43a8",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryReaderTest.xml": "01e1d0c3fb2c19c3cd84bd0295117f6d4cc8a5decc03ca06ef4a3c19ed8734a7",
+    "tools/verify_preview_float_capability.py": "c0513edab40f21b105681ea16a7ca1536792814a51ba20a04a9e57c1f8a8c1d3"
+  }
+}

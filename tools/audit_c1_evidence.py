@@ -32,6 +32,7 @@ CURRENT = {
     'live-projection-budget': ('source_and_artifact_sha256',),
     'retired-editing-state': ('source_and_artifact_sha256',),
     'brush-oracle-numeric': ('source_and_artifact_sha256',),
+    'preview-float-capability': ('source_and_artifact_sha256',),
     'canonical-point-query': ('source_and_artifact_sha256',),
     'input-capture-contract': ('source_and_fixture_sha256',),
     'apple-current-revalidation': ('source_and_artifact_sha256',),

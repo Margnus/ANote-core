@@ -38,6 +38,16 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
                 ByteArray(PagedPreviewCodec.MAX_CHARACTERS+1) { 'x'.code.toByte() } to LocalReadFailure.CHARACTER_CAPACITY)) {
                 file.writeBytes(bytes);refuse(reason.message);check(file.readBytes().contentEquals(bytes))
             }
+            // Valid canonical doubles can degenerate in the original Float Path/Matrix adapter.
+            val ink="NCPREVIEW\t2\nD\t$id\ttitle\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\tink\tlayer\t1\tMONOLINE\t1\t-1\t2.5\t1\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.0\t2.0\t0.5\t1\nEND\n"
+            val degenerate = listOf(ink.replace("\t2.5\t1\t", "\t1.0E-50\t1\t"),
+                ink.replace("\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n", "\t1.0\t1.0\t1.0\t1.00000001\t0.0\t0.0\n"))
+            for (encoded in degenerate) {
+                check(PagedPreviewCodec.encode(PagedPreviewCodec.decode(encoded)) == encoded)
+                file.writeText(encoded, Charsets.UTF_8)
+                refuse(LocalReadFailure.UNSUPPORTED_CONTENT.message)
+                check(file.readText(Charsets.UTF_8) == encoded)
+            }
             RandomAccessFile(file,"rw").use { it.setLength(32L*1024*1024+1) }
             val largeBefore=file.readBytes()
             refuse(LocalReadFailure.BYTE_CAPACITY.message);check(file.readBytes().contentEquals(largeBefore))
