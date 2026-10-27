@@ -102,4 +102,40 @@ class PagedSaveLedgerTest {
         assertSame(reopened, ledger.latest(original.documentId)); assertEquals(reopened.retainedByteCharge, ledger.chargedBytes)
         assertTrue(ledger.complete(current, true)); assertTrue(ledger.isDrained)
     }
+    @Test fun largeImmutableSceneComparisonPreservesOrderHeadersAndLateObjectDifferences() {
+        val page=PageDescriptor(PageId("p"),LayerId("l"),595.0,842.0)
+        val objects=(0 until 5000).map { i -> StrokeObject(ObjectId("o-$i"),1,page.layerId,
+            BrushSpec(BrushKind.MONOLINE,1,2.5,-1),StrokeSamples.copyOf(doubleArrayOf(i.toDouble()),doubleArrayOf(2.0),floatArrayOf(.5f),longArrayOf(1))) }
+        fun scene(items:List<StrokeObject>,id:SceneId=SceneId("comparison"),revision:Long=1)=SceneSnapshot.restored(id,revision,items)
+        val first=scene(objects); val equal=scene(objects.map { it.copy() })
+        assertNotSame(first,equal); assertTrue(first.sameContent(equal)); assertTrue(equal.sameContent(first))
+        assertFalse(first.sameContent(scene(objects.reversed())))
+        assertFalse(first.sameContent(scene(objects.dropLast(1))))
+        assertFalse(first.sameContent(scene(objects,SceneId("other"))))
+        assertFalse(first.sameContent(scene(objects,revision=2)))
+        assertFalse(first.sameContent(scene(objects.dropLast(1)+objects.last().copy(objectRevision=2))))
+        val snapshot=PagedPreviewSnapshot.fromRoot(DocumentRoot.compose("title",first,listOf(page)))
+        val copy=PagedPreviewSnapshot.fromRoot(DocumentRoot.compose("title",equal,listOf(page)))
+        assertTrue(snapshot.sameContent(copy)); assertEquals(snapshot.retainedByteCharge,copy.retainedByteCharge)
+        assertFalse(snapshot.sameContent(PagedPreviewSnapshot.fromRoot(DocumentRoot.compose("other",equal,listOf(page)))))
+        assertEquals(5000,first.objectCount); assertSame(objects.last(),first.find(objects.last().id))
+    }
+    @Test fun sameVersionDeepCopyCoalescesButDifferentDrawOrderCannotReplaceAnInflightWrite() {
+        val note=note(); draw(note); draw(note,10.0)
+        val original=note.capture(); val encoded=original.encode()
+        val deep=PagedPreviewSnapshot.fromRoot(PagedPreviewCodec.decode(encoded))
+        assertTrue(original.sameContent(deep))
+        val ledger=PreviewSaveLedger(); accept(ledger,original)
+        val flight=assertNotNull(ledger.nextWrite())
+        accept(ledger,deep); assertSame(original,ledger.latest(original.documentId))
+        assertEquals(original.retainedByteCharge,ledger.chargedBytes)
+        val root=original.root
+        val reversed=PagedPreviewSnapshot.fromRoot(DocumentRoot.compose(root.title,
+            SceneSnapshot.reordered(root.scene,root.scene.objects().map { it.id }.reversed()),root.pages()))
+        assertFalse(original.sameContent(reversed))
+        assertEquals(PreviewSaveAdmission.VERSION_CONFLICT,ledger.offer(reversed))
+        assertSame(original,ledger.latest(original.documentId)); assertTrue(ledger.complete(flight,true)); assertTrue(ledger.isDrained)
+        assertEquals(encoded,original.encode()); assertEquals(encoded,deep.encode())
+    }
+
 }

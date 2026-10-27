@@ -40,6 +40,15 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             val independent = checkNotNull(created.notebook)
             check(independent.currentPage.paper == PaperKind.GRID && independent.beginStroke(1.0, 2.0, .5f, 1) && independent.endStroke(3.0, 4.0, 1f, 2))
             check(store.activeDocumentId == original.id.value && note.snapshot() === original)
+            // Exact same-version comparison must retain order even for separately decoded roots.
+            check(independent.beginStroke(5.0,6.0,.5f,3) && independent.endStroke(7.0,8.0,.5f,4))
+            val snapshot=independent.capture()
+            val deep=PagedPreviewSnapshot.fromRoot(PagedPreviewCodec.decode(snapshot.encode()))
+            check(snapshot.sameContent(deep))
+            val originalRoot=snapshot.root
+            val reverse=PagedPreviewSnapshot.fromRoot(DocumentRoot.compose(originalRoot.title,
+                dev.notecore.canvas.prototype.SceneSnapshot.reordered(originalRoot.scene,originalRoot.scene.objects().map { it.id }.reversed()),originalRoot.pages()))
+            check(!snapshot.sameContent(reverse))
             checks.add("validated_creation_refusal_and_independent_authority")
             val refused = PagedPreviewNotebook.open(original, "bad nonce", ownerCheck = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) })
             check(refused.notebook == null && refused.failure == PreviewOpenFailure.INVALID_SESSION_NONCE)

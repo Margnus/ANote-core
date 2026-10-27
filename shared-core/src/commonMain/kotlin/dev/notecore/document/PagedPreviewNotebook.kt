@@ -471,7 +471,7 @@ class PagedPreviewSnapshot internal constructor(val root: DocumentRoot, val pend
     override fun encode(): String = if (pending == null) PagedPreviewCodec.encode(root) else PreviewRecoveryCodec.encode(this)
     override fun sameContent(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot && pending == other.pending &&
         (root === other.root || documentId == other.documentId && version == other.version && title == other.title &&
-            root.pages() == other.root.pages() && root.scene.objects() == other.root.scene.objects())
+            root.pages() == other.root.pages() && root.scene.sameContent(other.root.scene))
     override fun strictlyExtends(other: PreviewSaveSnapshot): Boolean = other is PagedPreviewSnapshot &&
         root === other.root && other.pending == null && pending != null
     companion object {
