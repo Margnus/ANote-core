@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "requirement": "PAGE-06",
+  "status": "passed",
+  "scope": "Internal bookmark metadata plans and original SelectPage navigation on JVM; no durable bookmark format, App UI or read-only mode acceptance",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PageBookmarkRules.kt": "0939abb0449d493641ec49c4550bb98643f23eef6cf7c9ce7640895ccf8a8519",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "b38f7c72fa031a723fd94a1417966c52f1f12d43d6a4f7649bcb7839be054afc",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "fc25e5882405d8b1f2e0de3cd25467587bce95898d5732f8dc8ff4b19dd6b4a2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "8c45823294d1fd3508b21ca114a74fc71accfe840c1b40d58254af4763eb5888",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PageBookmarkRulesTest.kt": "cfc64d0b33876a7e7adfffb3b5fdb940f2c76899f86c6eb0052b585ceeaae5a6",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PageBookmarkRulesTest.xml": "3f6ee8af5327597df25ea3bf1f8aba68d1923fe4a65c3182a0830b935e35ae69",
+    "reports/verification.json": "52e1ef28273b3a3eb43580c2fab42f064df43ae28e4c820d70b50fe6e05154dc"
+  },
+  "scenarios": [
+    "navigationAfterReorderUsesStablePageIdThroughOriginalSession[jvm]",
+    "fullBookmarkCatalogAllowsCleanupButRefusesAdditionalMarks[jvm]",
+    "pageDeletedAfterPlanningIsRejectedByOriginalSelectPage[jvm]",
+    "deletedBookmarkIsExplicitlyMissingAndMayBeUnmarkedOrRestored[jvm]",
+    "markUnmarkAndNoOpPlansPreserveSourceAndBindBothRevisions[jvm]",
+    "invalidMetadataNeverProducesPatchOrNavigation[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "PAGE-04 and production bookmark transaction/format",
+    "Android and Apple bookmark UI and durable reopen",
+    "read-only input/navigation and retained tool behavior"
+  ]
+}

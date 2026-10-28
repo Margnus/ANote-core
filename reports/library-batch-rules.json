@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "requirement": "LIB-07",
+  "status": "passed",
+  "scope": "Internal atomic planning for batch move/favorite/recycle on JVM; no production transaction or App batch/copy acceptance",
+  "tests": 9,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryBatchRules.kt": "5705b3c9c13de5f39f82ad92049deebb068c6b3640a25dad10a1f640561f55f2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryNoteMoveRules.kt": "dad6cd372805d4aa9325059dcd1978a5740df4768914ccd9f92a5b713c891006",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryTrashRules.kt": "deaba3b19c148bc0e481745ef8236eddb7695c3035ced60bfd236822654ea276",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryBatchRulesTest.kt": "b78592abed3fe727ff15ceb1d3bff190606a438bfb99a1f409496e2dbcce03cd",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryBatchRulesTest.xml": "9fd168e9fe502e98ddfe5c70d0a744add52a4c03d636f5e2219b29887df3613c",
+    "reports/verification.json": "3f48bc9f0884c1b702622af5192e7bcf763a2342b200ddc54e0ba655ba31bf5c"
+  },
+  "scenarios": [
+    "staleAndCrossSpaceRequestsNeverProduceRows[jvm]",
+    "recycleMatchesSingleRuleAndHasOnlySelectedIdentities[jvm]",
+    "badLastIdentityNeverLeaksAPartialBatch[jvm]",
+    "favoriteAndUnfavoriteMatchSingleRuleWithoutModifyingTimestamps[jvm]",
+    "partialAndCorruptSnapshotsCannotBeUsedEvenForValidSelectedRows[jvm]",
+    "invalidDestinationTimestampAndPreviouslyRecycledSelectionRejectWholeBatch[jvm]",
+    "moveMatchesSingleRulesAndKeepsOtherRowsAndRequestOrder[jvm]",
+    "invalidSelectionsAreRejectedByEveryOperation[jvm]",
+    "maximumSelectionIsAdmittedAsOneVersionBoundBatch[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "LIB-06/DATA-04 production all-or-nothing transaction and operation receipt",
+    "Android and Apple selection/result UI and durable reopen",
+    "full copy identity/resource/reference mapping beyond preview stroke model"
+  ]
+}

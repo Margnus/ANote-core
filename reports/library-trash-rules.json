@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "requirement": "LIB-08",
+  "status": "passed",
+  "scope": "Internal metadata recycle/restore and exact empty-trash scope rules on JVM; no UI confirmation, durable transaction, content or resource deletion",
+  "tests": 10,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryTrashRules.kt": "deaba3b19c148bc0e481745ef8236eddb7695c3035ced60bfd236822654ea276",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryTrashRulesTest.kt": "fe6688f5180aa034dafc12e4599a35dccf096068e4a6ad9b1fd9375d9c7eca77",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryTrashRulesTest.xml": "c2b16feb8c8fd91e5b342ca13606c69b00ed2128845e99045fdb41fdb5a81bca",
+    "reports/verification.json": "3f48bc9f0884c1b702622af5192e7bcf763a2342b200ddc54e0ba655ba31bf5c"
+  },
+  "scenarios": [
+    "allOperationsRefuseWrongSpaceStaleAndPartialSnapshots[jvm]",
+    "recycleAndRestoreKeepIdentityOriginalFolderAndOtherRows[jvm]",
+    "alreadyEmptyScopeIsSafeNoOpAndOriginalContentsRemainUntouched[jvm]",
+    "corruptActiveFolderAndTotalCapacityRejectBeforePlanning[jvm]",
+    "changedScopeCannotConfirmNewTrashRowsOrCrossSpaceHistory[jvm]",
+    "rootNoteRemainsRootAfterRecycleAndRestore[jvm]",
+    "duplicateAndOverlappingIdentitiesMalformedHistoryAreRejected[jvm]",
+    "repeatedAndUnknownActionsAreExplicitAndNeverMutateSnapshot[jvm]",
+    "missingOriginalFolderRestoresToRootButSameTitleOtherFolderIsNotUsed[jvm]",
+    "emptyScopeIsSortedDetachedAndExplicitlyVersionBound[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "LIB-03/DATA-04 production transaction and operation receipt",
+    "Android and Apple recycle/restore/empty confirmation UI and durable reopen",
+    "editor deletion coordination and complete reference/GC protection"
+  ]
+}

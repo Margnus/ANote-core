@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "requirements": [
+    "LIB-04",
+    "LIB-05"
+  ],
+  "status": "passed",
+  "scope": "Internal bounded complete-metadata view projection and version-bound mutation plans on JVM; no App or durable preference acceptance",
+  "tests": 10,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryViewRulesTest.kt": "00393cc49dc487513c7633ce6d19759f3ddcf6dc5c2a1de032a25933c79b0306",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryViewRulesTest.xml": "5babc34eb43de925cc10c892881616c4c06cec9b7500912a0b9d4987c48c7f3d",
+    "reports/verification.json": "3f48bc9f0884c1b702622af5192e7bcf763a2342b200ddc54e0ba655ba31bf5c"
+  },
+  "scenarios": [
+    "openedTimestampDoesNotRegressOrChangeModificationTime[jvm]",
+    "stableSortKeysDoNotDependOnEnumerationOrder[jvm]",
+    "invalidMetadataCannotSilentlyHideRows[jvm]",
+    "missingAnchorUsesNearestIndexAndEmptyProjectionHasNoAnchor[jvm]",
+    "preferencePatchContainsBothBeforeAndAfterAndNoNoteMutation[jvm]",
+    "invalidScopeAndIncompleteEnumerationRejectProjectionAndMutation[jvm]",
+    "favoritesCanBeRemovedWithoutChangingContentOrSortKeys[jvm]",
+    "plannerRefusesOverCapacityBeforeReturningPartialRows[jvm]",
+    "legacyEmptyAndSupplementaryUnicodeTitlesArePreserved[jvm]",
+    "refreshKeepsIdentityAndOffsetAcrossReorderAndFavoriteFilter[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirements_accepted": false,
+  "remaining": [
+    "LIB-01 and production metadata transaction",
+    "Android and Apple list/grid and refresh scroll behavior",
+    "durable preferences and successful-open event integration",
+    "indexed pagination and supported collation decision"
+  ]
+}

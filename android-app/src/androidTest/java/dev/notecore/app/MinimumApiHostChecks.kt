@@ -7,10 +7,10 @@ import dev.notecore.document.*
 import java.io.File
 import org.json.JSONObject
 
-/** Actual original View/Store on the declared minimum OS. Bitmap pixels are not hardware/latency evidence. */
+/** Actual original View/Store at the declared Path fallback OS endpoints. Bitmap pixels are not hardware/latency evidence. */
 internal object MinimumApiHostChecks {
     fun verify(host: Activity): String {
-        check(android.os.Build.VERSION.SDK_INT == 26)
+        check(android.os.Build.VERSION.SDK_INT == 26 || android.os.Build.VERSION.SDK_INT == 32)
         val directory = File(host.cacheDir, "minimum-api-${java.util.UUID.randomUUID()}")
         val store = NoteStore.isolated(host, directory)
         val bitmap = Bitmap.createBitmap(595, 842, Bitmap.Config.ARGB_8888)
@@ -28,7 +28,7 @@ internal object MinimumApiHostChecks {
             check(note.insertPage()); draw(); check(bitmap.getPixel(150,150)==0xffffffff.toInt())
             check(note.selectPage(first)); draw(); check(bitmap.getPixel(150,150)==0xffff0000.toInt())
             check(PreviewDocumentReader.read(note.capture().encode()).root != null)
-            return JSONObject().put("api",26).put("original_view_store",true)
+            return JSONObject().put("api",android.os.Build.VERSION.SDK_INT).put("original_view_store",true)
                 .put("line_dot_undo_redo_page_pixels",true).put("surface_render_bytes",store.inkChargedBytes)
                 .put("hardware_canvas_verified",false).put("physical_device_verified",false).toString()
         } finally { bitmap.recycle(); store.stopTestBackend() }

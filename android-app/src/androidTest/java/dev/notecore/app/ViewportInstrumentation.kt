@@ -26,6 +26,8 @@ class ViewportInstrumentation : Instrumentation() {
     private var titleOnly = false
     private var editOnly = false
     private var storageRetentionOnly = false
+    private var processCheckpointCase: String? = null
+    private var processCheckpointScope = ""
     private var minimumApiOnly = false
     private var ownerRetirementOnly = false
     private var atomicCutAction: String? = null
@@ -35,6 +37,8 @@ class ViewportInstrumentation : Instrumentation() {
         atomicCutAction = arguments?.getString("notecore_atomic_cut")
         atomicCutIdentity = arguments?.getString("notecore_atomic_identity")
         atomicCutBoundary = arguments?.getString("notecore_atomic_boundary")
+        processCheckpointCase = arguments?.getString("notecore_case")?.takeIf { it.startsWith("process_checkpoint_") }
+        processCheckpointScope = arguments?.getString("process_checkpoint_scope") ?: ""
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
@@ -68,6 +72,10 @@ class ViewportInstrumentation : Instrumentation() {
                     else -> error("Unsupported atomic cut action")
                 }
                 return
+            }
+            processCheckpointCase?.let { phase ->
+                result.putString("process_checkpoint_observations",PendingRecoveryHostChecks(this,host).processCheckpoint(phase,processCheckpointScope))
+                result.putString("process_checkpoint_status","passed"); finish(Activity.RESULT_OK,result); return
             }
             if (minimumApiOnly) {
                 var failure: Throwable? = null
