@@ -19,5 +19,34 @@
   "guidance_path": "C:/Users/Administrator/.codex/plugins/cache/openai-bundled/computer-use/26.1013.40934/docs/guidance.md",
   "skill_sha256": "8211e4b11a19a0dc4f0ace91096c74c5b36037ca4cb2c8988f0f535bb209e951",
   "guidance_sha256": "b171b26bc19f49226bb594bf3ed3f36666e5dd063a996c297986b2b461ac8efd",
-  "scope": "Current restarted emulator window capture attempt, no screenshot or Android input. Not an APK/ordinary-process UI acceptance; instrumentation evidence remains separate."
+  "scope": "Current restarted emulator window capture attempt, no screenshot or Android input. Not an APK/ordinary-process UI acceptance; instrumentation evidence remains separate.",
+  "subsequent_attempts": [
+    {
+      "date": "2026-10-28",
+      "base_core": "74b30d15bf32cf39a52c55244718a7a9d07f1ef2",
+      "status": "pending-window-capture-unavailable",
+      "avd": "NoteCoreGui35",
+      "serial": "emulator-5584",
+      "boot_completed": "1",
+      "window_title": "Android Emulator - NoteCoreGui35:5584",
+      "window_id": 197846,
+      "returned_app": "process:D:\\DevData\\AndroidSdk\\emulator\\qemu\\windows-x86_64\\qemu-system-x86_64.exe",
+      "first_capture_error": "FrameArrived timed out: timed out waiting on channel",
+      "recovery": "Fresh list_windows, unique window selection and get_window, one new capture",
+      "recovery_capture_error": "window capture timed out: timed out waiting on channel",
+      "android_ui_input_performed": false,
+      "ordinary_ui_verified": false,
+      "ordinary_app_content_observed": false,
+      "setup_after_capture_attempt": {
+        "install_result": "Success",
+        "activity": "dev.notecore.preview/dev.notecore.app.MainActivity",
+        "ordinary_pid": 1841,
+        "local_and_installed_apk_sha256": "85fc37ae0269763c51c4d84dc13d5a26cba32e0d46f6280592b1a8d70f55e54e"
+      },
+      "skill_path": "C:/Users/Administrator/.codex/plugins/cache/openai-bundled/computer-use/26.1021.31345/skills/computer-use/SKILL.md",
+      "skill_sha256": "8211e4b11a19a0dc4f0ace91096c74c5b36037ca4cb2c8988f0f535bb209e951",
+      "guidance_sha256": "b171b26bc19f49226bb594bf3ed3f36666e5dd063a996c297986b2b461ac8efd",
+      "scope": "Independent GUI AVD boot and ordinary package installation/launch only. Capture failed before app installation. No ordinary UI acceptance, drawing, injected Android input, instrumentation or physical-device verification."
+    }
+  ]
 }
