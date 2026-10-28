@@ -11,6 +11,38 @@ final class SketchHostTests: XCTestCase {
         return session
     }
     private func point(_ x: Double, _ time: Int64) -> SketchPoint { SketchPoint(x: x, y: 100, pressure: 0.5, time: time) }
+    @MainActor func testEveryToolAndUnsupportedEditRejectBeforeMutatingCore() throws {
+        for width in [Double.nan, Double.infinity, 0.49, 16.01] {
+            let bad = [tools[0], SketchTool(label: "invalid", argb: 1, width: width)]
+            guard case .refused(let reason) = SketchSession.create(tools: bad, background: { _, _ in }) else {
+                XCTFail("A later invalid tool was accepted"); continue
+            }
+            XCTAssertEqual(reason, .invalidTool)
+        }
+        let valid = [SketchTool(label: "minimum", argb: 1, width: 0.5), SketchTool(label: "maximum", argb: 2, width: 16)]
+        guard case .opened(let boundary) = SketchSession.create(tools: valid, background: { _, _ in }) else {
+            return XCTFail("Valid endpoint tool widths were refused")
+        }
+        XCTAssertNil(boundary.selectTool(1)); XCTAssertNil(boundary.retire())
+        let host = try session(), note = host.notebook, before = note.snapshot()
+        XCTAssertTrue(host.offer(.down, points: [point(10, 1), point(20, 2)]).accepted)
+        let operation = note.activeInputOperationId, bytes = note.inputReservedByteCharge
+        let unsupported: [PreviewEdit] = [PreviewEditRename(title: "unsupported"),
+            PreviewEditSetPaper(width: 500, height: 600, paper: .grid), PreviewEditSelectPen(argb: 1, width: 3),
+            PreviewEditInsertPage.shared, PreviewEditCopyPage.shared, PreviewEditDeletePage.shared,
+            PreviewEditSelectPage(pageId: "missing"), PreviewEditMovePage(beforePageId: nil)]
+        for request in unsupported {
+            XCTAssertEqual(host.edit(request), .unsupportedEdit)
+            XCTAssertTrue(note.snapshot() === before); XCTAssertTrue(note.hasActiveStroke)
+            XCTAssertEqual(note.activeInputOperationId, operation); XCTAssertEqual(note.inputReservedByteCharge, bytes)
+            XCTAssertNil(note.lastFailure)
+        }
+        XCTAssertTrue(host.offer(.up, points: [point(30, 3)]).accepted)
+        XCTAssertEqual(note.pointCount(index: 0), 3)
+        XCTAssertNil(host.edit(PreviewEditUndo.shared)); XCTAssertEqual(note.totalStrokeCount, 0)
+        XCTAssertNil(host.edit(PreviewEditRedo.shared)); XCTAssertEqual(note.totalStrokeCount, 1)
+        XCTAssertNil(host.retire())
+    }
     @MainActor func testValidatedCreationAndHostInjectedToolsUseOriginalNotebook() throws {
         if case .coreFailure(let reason) = SketchSession.create(nonce: "bad nonce", tools: tools, background: { _, _ in }) {
             XCTAssertEqual(reason, .invalidSessionNonce)

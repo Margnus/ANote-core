@@ -15,3 +15,5 @@
 只采用为 ENG-19 的可运行 Android 第二消费者子范围；MONOLINE、固定单页、普通 canonical Path。背景回调只借用本帧 Canvas，不得保留 Canvas/Activity。规范 Path/Matrix 按 root revision 缓存，活动 Path 只是派生呈现。没有第二文档模型、worker 或原生图像池。未冻结 SDK，真机、完整资源生命周期/heap/触笔、完整跨端SDK conformance及 C1 仍待验；Apple独立内存样例现见[独立Apple宿主](../sketch-host-ios/README.md)，其当前实际证据与本样例旧包UI范围分开记录。
 
 当前样例直接使用 `PagedPreviewNotebook.createValidated` 返回的原会话，显式传主线程 ownerCheck；没有临时 Notebook → snapshot → 第二次 adopt。DocumentBudget/enum 是已验证值；宿主依旧对 owner 实现负责，不将默认空检查解释为线程安全。
+
+2026-10-28契约补充：注入工具的全列表先验证finite/0.5…16宽度再创建原Notebook，配置无效抛IllegalArgumentException；edit包装层仅转交Undo/Redo，不支持的编辑应保留Core root/活动输入及预留，工具通过selectTool。当前仪器验证可指定唯一build case目录，失败也要记录原NoteCore前后保持；旧固定包/CUA verifier不继承为当前运行。

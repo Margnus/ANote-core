@@ -12,8 +12,8 @@ data class SketchTool(val label: String, val argb: Int, val width: Double)
 
 /** Unfrozen sample policy, not another document authority or a persistence service. */
 class SketchSession(tools: List<SketchTool>, val background: PageBackground) {
+    init { require(tools.isNotEmpty() && tools.all { it.width.isFinite() && it.width in 0.5..16.0 }) { "Invalid sketch tool configuration" } }
     val tools = tools.toList()
-    init { require(tools.isNotEmpty()) }
     private val owner: () -> Unit = { check(Looper.myLooper() == Looper.getMainLooper()) { "Sketch owner must be the main thread" } }
     val notebook = checkNotNull(PagedPreviewNotebook.createValidated(UUID.randomUUID().toString(), "内存草图",
         UUID.randomUUID().toString(), ownerCheck = owner).notebook)
@@ -36,7 +36,7 @@ class SketchSession(tools: List<SketchTool>, val background: PageBackground) {
         readOnly = value
         return true
     }
-    fun edit(request: PreviewEdit): Boolean { owner(); return !readOnly && notebook.edit(request).accepted }
+    fun edit(request: PreviewEdit): Boolean { owner(); return !readOnly && (request == PreviewEdit.Undo || request == PreviewEdit.Redo) && notebook.edit(request).accepted }
 
     companion object {
         fun standard(): SketchSession {

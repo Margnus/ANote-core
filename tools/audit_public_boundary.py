@@ -31,6 +31,16 @@ CHANNELS = {
 }
 
 
+# Property accessors have no NSError parameter channel. Owner/index/precondition safety is separate.
+PROPERTY_CHANNELS = {
+    'NCPPreviewFailureKind': {'readOnly': (True, False)},
+    'NCPDocumentBudgetCreation': {'budget': (False, True), 'failure': (False, True)},
+    'NCPPagedPreviewNotebook': {'activeInputOperationId': (False, True), 'inputReservedByteCharge': (False, False),
+                               'hasPendingStroke': (False, False), 'lastFailure': (False, True)},
+    'NCPStrokeSamples': {'size': (False, False)},
+}
+
+
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -42,13 +52,20 @@ def inspect_header(text):
         if tail.lstrip().startswith('('):
             continue
         methods = []
+        properties = []
         for line in body.splitlines():
+            if line.startswith('@property '):
+                match = re.search(r'swift_name\("([^\"]+)"\)', line)
+                if match:
+                    properties.append({'swift_name': match.group(1), 'class_property': 'class,' in line or '(class)' in line,
+                                       'nullable': '_Nullable' in line, 'readonly': 'readonly' in line,
+                                       'declares_nserror': 'NSError * _Nullable *' in line})
             if not line.startswith(('- (', '+ (')) or 'unavailable' in line:
                 continue
             match = re.search(r'swift_name\("([^"]+)"\)', line)
             if match:
                 methods.append({'swift_name': match.group(1), 'declares_nserror': 'NSError * _Nullable *' in line})
-        result.append({'kind': kind, 'objc_name': name, 'methods': methods})
+        result.append({'kind': kind, 'objc_name': name, 'methods': methods, 'properties': properties})
     assert len({item['objc_name'] for item in result}) == len(result), 'Duplicate ObjC declaration'
     assert result, 'Empty generated header'
     return result
@@ -63,6 +80,21 @@ def check_channels(declarations):
             actual = [item for item in by_name[name]['methods'] if item['swift_name'] == method]
             assert len(actual) == 1 and actual[0]['declares_nserror'] == expected, ('Changed reviewed declaration', name, method)
             checked.append({'objc_name': name, 'swift_name': method, 'declares_nserror': expected})
+    return checked
+
+
+def check_property_channels(declarations):
+    by_name = {item['objc_name']: item for item in declarations}
+    checked = []
+    for name, members in PROPERTY_CHANNELS.items():
+        assert name in by_name, ('Missing property type', name)
+        for member, (class_property, nullable) in members.items():
+            matches = [p for p in by_name[name]['properties'] if p['swift_name'] == member]
+            assert len(matches) == 1, ('Missing/duplicate reviewed property', name, member)
+            value = matches[0]
+            assert value['class_property'] == class_property and value['nullable'] == nullable
+            assert value['readonly'] and not value['declares_nserror']
+            checked.append({'objc_name': name, **value})
     return checked
 
 
@@ -98,6 +130,7 @@ def main():
     header = (ROOT/HEADER).read_text(encoding='utf-8')
     declarations = inspect_header(header)
     checked = check_channels(declarations)
+    properties = check_property_channels(declarations)
     for name in (HEADER, 'reports/ios-preview-build.json', 'reports/preview-build.json', 'tools/check_architecture.py', 'tools/audit_public_boundary.py'):
         bindings[name] = sha(ROOT/name)
     report = {
@@ -105,21 +138,24 @@ def main():
         'source_and_artifact_sha256': bindings,
         'objc_declaration_count': len(declarations),
         'objc_method_count': sum(len(item['methods']) for item in declarations),
+        'objc_property_count': sum(len(item['properties']) for item in declarations),
+        'reviewed_property_count': len(properties), 'reviewed_property_channels': properties,
         'reviewed_method_count': len(checked), 'reviewed_declaration_channels': checked,
         'objc_declarations': [{'kind': item['kind'], 'objc_name': item['objc_name'],
+            'properties': item['properties'],
             'methods': [method['swift_name'] for method in item['methods']],
             'nserror_methods': [method['swift_name'] for method in item['methods'] if method['declares_nserror']]}
             for item in declarations],
         'physical_modules': {'shared-core': ['canvas-core'], 'canvas-core': []},
         'dependency_scope': 'Current build files separately checked by check_architecture.py; this map is the reviewed topology, not a transitive binary dependency scan.',
-        'scope': 'Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count.',
+        'scope': 'Inventory of retained source-bound iOS Simulator compiler header, including compiler support/generated methods. Properties are inventoried separately; readonly/nullable/class accessor shape is structural, not owner/index/exception safety. NSError declaration is structural evidence only: no claim that every thrown exception or callback is caught. Methods with no NSError may return typed failures or trap on precondition/owner/index violations. No API surface is approved by this count.',
         'decision': 'Retain the two physical core modules and unfrozen preview facade. Reject direct promotion of exported reference authorities, resource pool internals or experiment shims into a stable SDK. Freeze only a reviewed capability/typed-failure/owner boundary after conformance and C1; hide implementation types as a separately validated ABI change.',
         'all_exported_apis_safe_for_arbitrary_swift_input': False,
         'swift_abi_or_semver_frozen': False, 'complete_failure_conformance_verified': False,
         'new_native_execution_performed': False, 'physical_device_verified': False, 'c1_gate_complete': False,
     }
     (ROOT/'reports/public-boundary-inventory.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
-    print(json.dumps({k: report[k] for k in ('status', 'objc_declaration_count', 'objc_method_count', 'reviewed_method_count', 'c1_gate_complete')}))
+    print(json.dumps({k: report[k] for k in ('status', 'objc_declaration_count', 'objc_method_count', 'objc_property_count', 'reviewed_property_count', 'reviewed_method_count', 'c1_gate_complete')}))
 
 
 if __name__ == '__main__': main()

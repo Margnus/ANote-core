@@ -17,6 +17,7 @@ DEVICE = '7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
 BUNDLE = 'dev.notecore.sample.sketch.ios'
 FRAMEWORK = 'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework'
 EXPECTED = {
+    'testEveryToolAndUnsupportedEditRejectBeforeMutatingCore()',
     'testValidatedCreationAndHostInjectedToolsUseOriginalNotebook()',
     'testReadOnlyInvalidToolAndRejectedBatchKeepAcceptedPrefix()',
     'testCoalescedUIKitAndResizeReplacementKeepCanonicalSession()',
@@ -155,7 +156,7 @@ def execute():
             yield from cases(node.get('children', []))
     tests = list(cases(tree['testNodes']))
     assert {node['name'] for node in tests} == EXPECTED and all(node['result'] == 'Passed' for node in tests)
-    assert summary['result'] == 'Passed' and summary['totalTestCount'] == 6
+    assert summary['result'] == 'Passed' and summary['totalTestCount'] == len(EXPECTED)
     assert summary['failedTests'] == summary['skippedTests'] == summary['expectedFailures'] == 0
     assert any(d['device']['deviceId'] == DEVICE for d in summary['devicesAndConfigurations'])
     save(CASE / 'summary.json', summary)
@@ -216,8 +217,11 @@ def verify():
 
 
 def main():
-    parser = argparse.ArgumentParser(); parser.add_argument('--device', required=True); parser.add_argument('--verify-only', action='store_true')
+    global CASE
+    parser = argparse.ArgumentParser(); parser.add_argument('--case-directory', default='build/sketch-host-ios'); parser.add_argument('--device', required=True); parser.add_argument('--verify-only', action='store_true')
     args = parser.parse_args(); assert args.device == DEVICE
+    CASE = (ROOT / args.case_directory).resolve()
+    assert CASE.is_relative_to((ROOT/'build').resolve()), 'Evidence must stay under repository build/'
     if not args.verify_only:
         execute()
     verify()

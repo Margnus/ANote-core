@@ -28,6 +28,23 @@ class SketchInstrumentation : Instrumentation() {
             lateinit var root: DocumentRoot
             onOwner {
                 original = activity.session
+                val policyErrors = mutableListOf<String>()
+                for (width in listOf(Double.NaN, Double.POSITIVE_INFINITY, 0.49, 16.01)) {
+                    val attempt = runCatching { SketchSession(listOf(SketchTool("valid", 1, 2.0), SketchTool("invalid", 2, width)), PageBackground { _, _, _ -> }) }
+                    attempt.getOrNull()?.notebook?.retire()
+                    if (attempt.exceptionOrNull() !is IllegalArgumentException) policyErrors.add("later invalid tool accepted: $width")
+                }
+                val beforePolicy = original.notebook.snapshot()
+                check(original.notebook.beginStroke(1.0, 2.0, .5f, 1))
+                val operation = original.notebook.activeInputOperationId
+                val reservation = original.notebook.inputReservedByteCharge
+                if (original.edit(PreviewEdit.Rename("not an allowed sample edit"))) policyErrors.add("unsupported edit reached Core")
+                if (original.notebook.snapshot() !== beforePolicy || !original.notebook.hasActiveStroke ||
+                    original.notebook.activeInputOperationId != operation || original.notebook.inputReservedByteCharge != reservation)
+                    policyErrors.add("unsupported edit changed root or accepted input")
+                original.notebook.cancelStroke() // Explicit cleanup only; not a policy rejection side effect.
+                check(policyErrors.isEmpty()) { policyErrors.joinToString("; ") }
+                result.putString("policy_boundary", "passed: all tools validated before creation; only undo/redo forwarded; unsupported edit preserves root/input")
                 check(original.selectTool(1))
                 val view = activity.canvasView
                 check(view.width > 0 && view.height > 0)
