@@ -2,6 +2,14 @@
 
 2026-10-27，C1第4项、ENG-04/ENG-14的有限采用决策。复用原PagedPreviewNotebook、不可变PagedPreviewSnapshot及原ownerCheck，不新增会话authority、线程调度器或存储协议。实际证据见[原交接报告](../reports/release-handoff.json)与[原JVM owner消费者](../shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt)。
 
+## 2026-10-28 补充：文件已可见，owner回调尚未交付
+
+[API32原报告](../reports/android-path-api32-host-tests.json)的`undelivered_completion`与下文已确认回执场景分开记录：原owner在已有1笔3点/版本2上加入第二笔，原Store save准入，断言ledger仍in-flight、回调0，随后在同一owner action等待外部终止。原worker继续写入，主机只在新版本完整文件hash可见且原命令/PID仍活着时force-stop。旧PID10751消失，文件保持；PID10836用原Store重开，2笔5点/版本3/无pending，编码、坐标、压感和时间保持。宿主没有手工写入正文，没有退役旧owner或停止worker。
+
+采用：回调缺失不能等同保存失败。整个旧进程已确认终止后，新进程先完整读取/验证磁盘版本，再建立唯一新authority；不得仅因旧UI没收到成功就重放旧输入/另造对象或补发旧副作用。当前预览没有跨崩溃操作日志，本结果不证明任意opId跨崩溃幂等。旧进程是否终止未知时仍拒绝并行写者。
+
+本次只覆盖完整新文件已经可见但owner结果未知；没有在半写/rename中途选点，也没有worker成功回执或断电证明。阻塞仅在有限测试宿主，不进入产品UI，不是新生产调度器。连同已确认checkpoint的进程链，本有限消费者验证收口；当前Apple、普通GUI、活动arena、Native/GPU长期未signal和物理门禁仍保持待验。
+
 ## 2026-10-28 补充：确认写入后整个旧进程终止（API32子范围）
 
 与下文协作退休分开采用：当原完整checkpoint已由原Store worker实际写入并确认，且OS已经确认整个旧进程终止，新进程可从原文件经完整读取/能力/额度验证后，用新Store、新owner和新nonce采用。该路径不迁移旧Notebook/ledger/worker，也不依赖已终止owner再发退休回执。旧进程是否终止未知时，不能依据弱引用、超时或View消失启动并行写者。

@@ -127,7 +127,7 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
         } finally { main { store.stopTestBackend() }; dir.deleteRecursively() }
     }
     /** Test process remains alive with its original owner/worker until the external driver force-stops it.
-     * Only confirmed checkpoint/canonical writes are covered; no unconfirmed IO or power-loss claim.
+     * Separate confirmed writes from visible bytes before owner delivery; no partial-write or power-loss claim.
      */
     fun processCheckpoint(phase: String, scope: String): String {
         check(java.util.UUID.fromString(scope).toString() == scope)
@@ -217,6 +217,54 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
                 marker("committed-ready.json", note)
             }
             waitForExternalStop(store, note)
+        }
+        if (phase == "process_checkpoint_undelivered") {
+            val prior = org.json.JSONObject(File(case,"committed-ready.json").readText(Charsets.UTF_8))
+            check(sha(document) == prior.getString("document_sha256"))
+            main {
+                check(!note.hasPendingStroke && note.totalStrokeCount == 1 && note.changeVersion == 2L)
+                check(note.beginStroke(20.0,30.0,.75f,12) && note.endStroke(40.0,50.0,1f,13))
+                val snapshot = note.capture()
+                check(snapshot.version == 3L && note.totalStrokeCount == 2)
+                val expected = java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(snapshot.encode().toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+                var callbacks = 0
+                check(store.save(snapshot) { _, _ -> callbacks++ })
+                val state = store.saveStates().single()
+                check(callbacks == 0 && state.inFlight && state.snapshot.sameContent(snapshot))
+                val ready = org.json.JSONObject().put("pid",android.os.Process.myPid()).put("scope",scope)
+                    .put("document_sha256",expected).put("previous_document_sha256",prior.getString("document_sha256"))
+                    .put("revision",3).put("stroke_count",2).put("pending",false)
+                    .put("save_callback_count",callbacks).put("ledger_in_flight",true)
+                    .put("owner_not_retired",true).put("worker_not_stopped",true)
+                    .put("owner_callback_blocked",true)
+                File(case,"undelivered-ready.json").writeText(ready.toString(),Charsets.UTF_8)
+                // Same owner action cannot deliver queued completion before returning. Worker IO continues.
+                // Finally keeps both original objects and the callback state live throughout the wait.
+                try { java.util.concurrent.CountDownLatch(1).await(90,java.util.concurrent.TimeUnit.SECONDS) }
+                finally { check(store.activeDocumentId == note.documentId && callbacks == 0) }
+                error("External process-stop driver did not arrive before owner wait ended")
+            }
+            error("Blocked owner unexpectedly returned")
+        }
+        if (phase == "process_checkpoint_verify_undelivered") {
+            val prior = org.json.JSONObject(File(case,"undelivered-ready.json").readText(Charsets.UTF_8))
+            check(prior.getInt("pid") != android.os.Process.myPid() && prior.getInt("save_callback_count") == 0)
+            check(sha(document) == prior.getString("document_sha256"))
+            main {
+                check(!note.hasPendingStroke && note.totalStrokeCount == 2 && note.changeVersion == 3L)
+                check(note.pointCount(0) == 3 && note.pointCount(1) == 2)
+                check(note.pointX(0,0) == 1.25 && note.stroke(0).samples.timeMicros(2) == 10L)
+                check(note.pointX(1,0) == 20.0 && note.pointY(1,1) == 50.0)
+                check(note.pointPressure(1,0) == .75f && note.stroke(1).samples.timeMicros(1) == 13L)
+                check(note.retryPendingStroke() && note.totalStrokeCount == 2 && note.changeVersion == 3L)
+                check(document.readText(Charsets.UTF_8) == note.capture().encode())
+                store.stopTestBackend()
+            }
+            return org.json.JSONObject().put("pid",android.os.Process.myPid()).put("scope",scope)
+                .put("canonical_sha256",sha(document)).put("revision",3).put("stroke_count",2).put("point_count",5)
+                .put("pending",false).put("owner_delivery_absent_before_kill",true)
+                .put("partial_write_kill_verified",false).put("power_loss_verified",false).toString()
         }
         check(phase == "process_checkpoint_verify")
         val prior = org.json.JSONObject(File(case, "committed-ready.json").readText(Charsets.UTF_8))
