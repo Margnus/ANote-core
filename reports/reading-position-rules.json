@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "requirement": "PAGE-04",
+  "status": "passed",
+  "scope": "Internal reading-position capture and restore through original notebook and viewport across JVM sessions; no metadata IO, App integration or durable reopen acceptance",
+  "tests": 7,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ReadingPositionRules.kt": "65b413af8495fe47d042838f2bfda88ea9229ad2e650f9282d3e442462acffa0",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "9ff80fa3d5656b4461f88b9c36f457d7e8a0e657b42c61e3a12e91e49842bfc8",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "1dbb3e64c1e13f7b54de69ccff4d87c7c5900ca1ea3a98dc6033337f0ac54215",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/ReadingPositionRulesTest.kt": "e6731cee7a72ce1343d9030f2de6f18c482c08eef470ad769708fd8779eb6921",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ReadingPositionRulesTest.xml": "5a9b3e81c9731ba40eeebd5033451ed988c50f89842e9540674a45efb66fe525",
+    "reports/verification.json": "5c71c502ed28c70dc929aefeeec329939b4f5b0cef8ee9d13cfd57d8c365ec72"
+  },
+  "scenarios": [
+    "invalidRecordsAndForeignSpaceNeverChangeSelectionOrViewport[jvm]",
+    "zeroLayoutOrMismatchedPageCannotOverwriteLastValidCapture[jvm]",
+    "capturedPositionRestoresInNewSessionAndWindowWithoutChangingContent[jvm]",
+    "reorderKeepsIdentityAndDeletedPageNeverFallsBackToSameIndex[jvm]",
+    "activeAndPendingInputBlockRestoreWithoutCancellation[jvm]",
+    "changedPaperBoundsConstrainOldCenterEvenInLargeValidWindow[jvm]",
+    "closedSessionRefusesRestoreBeforeViewportChangesAndReadOnlyCanNavigate[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "production metadata ordering/transaction and actual save/reopen",
+    "Android and Apple layout/lifecycle capture and restore UI",
+    "thumbnail/direct page navigation and large-document loading",
+    "product zoom range and device acceptance"
+  ]
+}

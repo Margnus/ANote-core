@@ -138,6 +138,7 @@ def main():
     parser.add_argument('--serial', required=True)
     parser.add_argument('--adb', required=True)
     parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows', 'NoteCoreMin26', 'NoteCorePath32'), default='NoteCorePreview')
+    parser.add_argument('--budget-overlap', action='store_true')
     parser.add_argument('--minimum-api', action='store_true')
     parser.add_argument('--path-api32', action='store_true')
     parser.add_argument('--process-checkpoint', action='store_true', help='Also execute original confirmed/undelivered process recovery on the existing NoteCorePreview emulator')
@@ -257,9 +258,27 @@ def main():
         assert 'Status: ok' in adb('shell','am','start','-W','-n',BUNDLE+'/dev.notecore.app.MainActivity').decode('utf-8')
         pid = adb('shell','pidof',BUNDLE).decode('utf-8').strip()
         assert re.fullmatch(r'\d+',pid) and files()==before
+    budget_overlap = None
+    if args.budget_overlap:
+        assert args.serial == 'emulator-5554' and args.avd == 'NoteCorePreview' and not fallback
+        raw = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'budget_overlap',
+                  BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
+        overlap_log = folder/'budget-overlap.log'; overlap_log.write_text(raw, encoding='utf-8', newline='\n')
+        assert 'budget_overlap_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
+        budget_overlap = json.loads(re.search(r'budget_overlap_observations=(\{.*\})', raw).group(1))
+        assert budget_overlap['actual_release_callback_observed'] and budget_overlap['old_and_new_real_writes_verified']
+        assert budget_overlap['worker_stopped'] and budget_overlap['same_content_after_save'] and budget_overlap['final_strokes'] == 2
+        assert budget_overlap['unified_peak_admission_verified'] is False and budget_overlap['physical_heap_measured'] is False
+        bindings[overlap_log.relative_to(ROOT).as_posix()] = digest(overlap_log)
+        assert files() == before
+        adb('shell', 'am', 'force-stop', BUNDLE)
+        assert 'Status: ok' in adb('shell', 'am', 'start', '-W', '-n', BUNDLE+'/dev.notecore.app.MainActivity').decode('utf-8')
+        pid = adb('shell', 'pidof', BUNDLE).decode('utf-8').strip()
+        assert re.fullmatch(r'\d+', pid) and files() == before
     sdk = Path(args.adb).resolve().parent.parent
     contracts = [sdk/'sources/android-36/android/view'/name for name in ('MotionEvent.java', 'View.java')]
     report = {
+        'native_input_save_budget_overlap': budget_overlap,
         'confirmed_checkpoint_process_recovery':checkpoint_process,
         'minimum_api_environment':minimum_environment, 'minimum_api_fallback': minimum, 'schema': 'android-input-host-1', 'status': 'passed', 'serial': args.serial,
         'api': adb('shell', 'getprop', 'ro.build.version.sdk').decode('utf-8').strip(),

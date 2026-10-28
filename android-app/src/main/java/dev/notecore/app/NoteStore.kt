@@ -42,7 +42,8 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
     private val exportPickerByteLimit: Long = 8L * 1024 * 1024, private val beforeOpenRead: () -> Unit = {},
     private val catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit,
-    observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}) {
+    observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {},
+    private val documentBudget: DocumentBudget? = null) {
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead, observeWriteBoundary)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
@@ -119,7 +120,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     // An identity-only optimization must not retain an obsolete canonical root.
     private var activeSavedRoot = java.lang.ref.WeakReference<DocumentRoot>(null)
     private var activeSavedPending = java.lang.ref.WeakReference<DocumentCommand.Canvas>(null)
-    private fun previewBudget(): DocumentBudget = checkNotNull(DocumentBudget.validated(
+    private fun previewBudget(): DocumentBudget = documentBudget ?: checkNotNull(DocumentBudget.validated(
         journalEntries = 4096, journalBytes = 32L * 1024 * 1024, identityBytes = 4L * 1024 * 1024).budget)
     internal fun adopt(opened: OpenedDocument): PagedPreviewNotebook {
         executor.checkOwnerThread()
@@ -606,7 +607,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
             maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024, beforeOpenRead: () -> Unit = {},
             catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit,
-            observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}): NoteStore =
-            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead,catalogResultByteLimit,observeWriteBoundary)
+            observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}, documentBudget: DocumentBudget? = null): NoteStore =
+            NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead,catalogResultByteLimit,observeWriteBoundary,documentBudget)
     }
 }

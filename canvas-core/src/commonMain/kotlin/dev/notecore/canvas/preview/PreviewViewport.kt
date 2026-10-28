@@ -12,6 +12,7 @@ class PreviewViewport {
     var zoom: Double = 1.0; private set
     var offsetX: Double = 0.0; private set
     var offsetY: Double = 0.0; private set
+    private var suspendedCenter: PointD? = null
     val scale: Double get() = if (width > 0 && height > 0) min(width / pageWidth, height / pageHeight) * zoom else 0.0
 
     fun configurePage(width: Double, height: Double) {
@@ -23,12 +24,22 @@ class PreviewViewport {
     fun resize(width: Double, height: Double) {
         require(width.isFinite() && height.isFinite() && width in 0.0..1e7 && height in 0.0..1e7)
         if (width == this.width && height == this.height) return
-        val center = if (scale > 0) toScene(this.width / 2, this.height / 2) else PointD(pageWidth / 2, pageHeight / 2)
+        val center = if (scale > 0) toScene(this.width / 2, this.height / 2)
+            else suspendedCenter ?: PointD(pageWidth / 2, pageHeight / 2)
         this.width = width; this.height = height
+        if (scale <= 0) {
+            suspendedCenter = center
+            offsetX = 0.0; offsetY = 0.0
+            return
+        }
+        suspendedCenter = null
         offsetX = width / 2 - center.x * scale; offsetY = height / 2 - center.y * scale
         constrain()
     }
-    fun reset() { zoom = 1.0; offsetX = (width - pageWidth * scale) / 2; offsetY = (height - pageHeight * scale) / 2 }
+    fun reset() {
+        suspendedCenter = null
+        zoom = 1.0; offsetX = (width - pageWidth * scale) / 2; offsetY = (height - pageHeight * scale) / 2
+    }
     fun toScene(x: Double, y: Double): PointD {
         require(scale > 0 && x.isFinite() && y.isFinite())
         return PointD((x - offsetX) / scale, (y - offsetY) / scale)
