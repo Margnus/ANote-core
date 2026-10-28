@@ -30,11 +30,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--serial', required=True)
     parser.add_argument('--adb', required=True)
-    parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows', 'NoteCoreMin26'), default='NoteCorePreview')
+    parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows', 'NoteCoreMin26', 'NoteCorePath32'), default='NoteCorePreview')
     parser.add_argument('--minimum-api', action='store_true')
+    parser.add_argument('--path-api32', action='store_true')
     args = parser.parse_args()
-    assert (args.minimum_api and args.serial == 'emulator-5582' and args.avd == 'NoteCoreMin26') or (not args.minimum_api and args.serial in ('emulator-5580', 'emulator-5554') and args.avd != 'NoteCoreMin26'), 'Only the existing dedicated emulator is authorized'
-    folder = ROOT/('build/android-min-api-host' if args.minimum_api else 'build/android-input-host'); folder.mkdir(parents=True, exist_ok=True)
+    assert not (args.minimum_api and args.path_api32), 'Select one OS endpoint'
+    fallback = args.minimum_api or args.path_api32
+    assert (args.minimum_api and args.serial == 'emulator-5582' and args.avd == 'NoteCoreMin26') or (args.path_api32 and args.serial == 'emulator-5586' and args.avd == 'NoteCorePath32') or (not fallback and args.serial in ('emulator-5580', 'emulator-5554') and args.avd in ('NoteCorePreview', 'NoteCoreWindows')), 'Only the dedicated emulator for this OS is authorized'
+    folder = ROOT/('build/android-path-api32-host' if args.path_api32 else 'build/android-min-api-host' if args.minimum_api else 'build/android-input-host'); folder.mkdir(parents=True, exist_ok=True)
 
     def adb(*command):
         return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT,
@@ -54,8 +57,8 @@ def main():
         return result
 
     before = files()
-    if args.minimum_api:
-        assert adb('shell','getprop','ro.build.version.sdk').decode().strip() == '26'
+    if fallback:
+        assert adb('shell','getprop','ro.build.version.sdk').decode().strip() == ('32' if args.path_api32 else '26')
     build = json.loads((ROOT/'reports/preview-build.json').read_text(encoding='utf-8'))
     assert build['status'] == 'passed'
     apk = ROOT/build['android']['artifact']
@@ -113,21 +116,26 @@ def main():
         bindings[path.relative_to(ROOT).as_posix()] = digest(path)
     minimum = None
     minimum_environment = None
-    if args.minimum_api:
-        archive=ROOT.parent/'.codex/android-host/api26/x86_64-26_r01.zip'
-        assert archive.stat().st_size==474178332
+    if fallback:
+        api = 32 if args.path_api32 else 26
+        image_bytes = 1538792859 if args.path_api32 else 474178332
+        image_sha1 = '1b52794699c6889a2fd155bf235b67a592eb8f1d' if args.path_api32 else '432f149c048bffce7f9de526ec65b336daf7a0a3'
+        tag = 'google_apis' if args.path_api32 else 'android'
+        archive=ROOT.parent/('.codex/android-host/api32/x86_64-32_r08.zip' if args.path_api32 else '.codex/android-host/api26/x86_64-26_r01.zip')
+        assert archive.stat().st_size == image_bytes
         with archive.open('rb') as stream:
-            assert hashlib.file_digest(stream,'sha1').hexdigest()=='432f149c048bffce7f9de526ec65b336daf7a0a3'
-        metadata=ROOT/'build/api26-support/repository.xml'
+            assert hashlib.file_digest(stream,'sha1').hexdigest() == image_sha1
+        metadata=ROOT/f'build/api{api}-support/repository.xml'
         bindings[metadata.relative_to(ROOT).as_posix()] = digest(metadata)
-        minimum_environment={'image_package':'system-images;android-26;default;x86_64','image_revision':1,
-            'official_image_bytes':474178332,'official_image_sha1':'432f149c048bffce7f9de526ec65b336daf7a0a3',
-            'image_archive_sha256':digest(archive),'repository_url':'https://dl.google.com/android/repository/sys-img/android/sys-img2-3.xml',
+        minimum_environment={'image_package':f'system-images;android-{api};'+('google_apis' if args.path_api32 else 'default')+';x86_64','image_revision':8 if args.path_api32 else 1,
+            'official_image_bytes':image_bytes,'official_image_sha1':image_sha1,
+            'image_archive_sha256':digest(archive),'repository_url':f'https://dl.google.com/android/repository/sys-img/{tag}/sys-img2-3.xml',
             'build_fingerprint':adb('shell','getprop','ro.build.fingerprint').decode().strip(),'isolated_avd':args.avd}
         raw = adb('shell','am','instrument','-w','-r','-e','notecore_case','minimum_api',BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
         path = folder/'minimum-api.log'; path.write_text(raw,encoding='utf-8',newline='\n')
         assert 'minimum_api_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
         minimum = json.loads(re.search(r'minimum_api_observations=(\{.*\})',raw).group(1))
+        assert minimum['api'] == api
         assert minimum['line_dot_undo_redo_page_pixels'] and minimum['surface_render_bytes']==0
         bindings[path.relative_to(ROOT).as_posix()] = digest(path)
         assert files() == before
@@ -154,7 +162,7 @@ def main():
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,
         'c1_gate_complete': False,
     }
-    (ROOT/('reports/android-min-api-host-tests.json' if args.minimum_api else 'reports/android-input-host-tests.json')).write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+    (ROOT/('reports/android-path-api32-host-tests.json' if args.path_api32 else 'reports/android-min-api-host-tests.json' if args.minimum_api else 'reports/android-input-host-tests.json')).write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
     print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'storage_retention_check_count', 'owner_retirement_check_count', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
 
 
