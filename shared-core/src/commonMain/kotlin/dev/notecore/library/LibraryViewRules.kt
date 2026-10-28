@@ -39,7 +39,7 @@ internal data class LibraryViewPlan(val patch: LibraryViewPatch? = null, val rej
 internal object LibraryViewRules {
     const val MAX_NOTES = 100_000 // Planner admission only, not database pagination or heap acceptance.
     private fun validId(id: String) = id.isNotBlank() && id.length <= 128 && id.hasValidUnicode()
-    private fun validate(s: LibraryViewSnapshot, spaceId: String, revision: Long): LibraryViewRejection? {
+    fun validate(s: LibraryViewSnapshot, spaceId: String, revision: Long): LibraryViewRejection? {
         if (!validId(spaceId) || s.spaceId != spaceId) return LibraryViewRejection.WRONG_SPACE
         if (s.revision < 0 || s.revision != revision) return LibraryViewRejection.STALE_REVISION
         if (!s.complete) return LibraryViewRejection.INCOMPLETE_SNAPSHOT

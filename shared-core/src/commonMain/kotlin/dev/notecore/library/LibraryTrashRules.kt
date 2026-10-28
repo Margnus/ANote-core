@@ -25,12 +25,12 @@ internal data class LibraryEmptyTrashPlan(
 
 internal object LibraryTrashRules {
     private fun validId(id: String) = id.isNotBlank() && id.length <= 128 && id.hasValidUnicode()
-    private fun snapshotError(s: LibraryTrashSnapshot, space: String, revision: Long): LibraryFolderRejection? {
+    fun snapshotError(s: LibraryTrashSnapshot, space: String, revision: Long): LibraryFolderRejection? {
         LibraryFolderRules.validateSnapshot(s.active, space, revision)?.let { return it }
         if (s.trash.size > LibraryFolderRules.MAX_NOTES - s.active.notes.size) return LibraryFolderRejection.CAPACITY
         return null
     }
-    private fun invalidTrash(s: LibraryTrashSnapshot): Boolean {
+    fun invalidTrash(s: LibraryTrashSnapshot): Boolean {
         val activeIds = s.active.notes.map { it.noteId }.toSet()
         return s.trash.map { it.noteId }.toSet().size != s.trash.size || s.trash.any {
             !validId(it.noteId) || it.noteId in activeIds || it.deletedAtMillis < 0 ||
