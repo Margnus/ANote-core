@@ -47,6 +47,46 @@
       "skill_sha256": "8211e4b11a19a0dc4f0ace91096c74c5b36037ca4cb2c8988f0f535bb209e951",
       "guidance_sha256": "b171b26bc19f49226bb594bf3ed3f36666e5dd063a996c297986b2b461ac8efd",
       "scope": "Independent GUI AVD boot and ordinary package installation/launch only. Capture failed before app installation. No ordinary UI acceptance, drawing, injected Android input, instrumentation or physical-device verification."
+    },
+    {
+      "date": "2026-10-28",
+      "base_core": "4a5c924681ec1f563a004cb726955174662fa694",
+      "status": "pending-window-capture-unavailable",
+      "connection": "cua_repl native Windows apps",
+      "avd": "NoteCoreGui35",
+      "serial": "emulator-5584",
+      "boot_completed": "1",
+      "window_id": 591134,
+      "window_title": "Android Emulator - NoteCoreGui35:5584",
+      "console_session_state": "Active",
+      "display": {
+        "adapter": "NVIDIA GeForce GT 710",
+        "status": "OK",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "emulator_capture_error": "FrameArrived timed out: timed out waiting on channel",
+      "recovery": "Fresh window inventory and binding, observed Raise action, repeat capture",
+      "recovery_capture_error": "window capture timed out: timed out waiting on channel",
+      "control_window": {
+        "app": "Windows Notepad",
+        "title": "无标题 - 记事本",
+        "window_id": 198292,
+        "empty_document_observed": true,
+        "capture_error": "window capture timed out: timed out waiting on channel",
+        "close_button_error": "coordinate input geometry is unavailable",
+        "closed_with_targeted_alt_f4": true,
+        "absence_verified_in_window_inventory": true,
+        "file_written": false
+      },
+      "accessibility_available": true,
+      "keyboard_available": true,
+      "screen_capture_available": false,
+      "android_ui_input_performed": false,
+      "ordinary_ui_verified": false,
+      "scope": "Restored the existing isolated AVD without wiping or copying data. Current console/display and native accessibility available, but emulator and blank Win32 control both fail capture after Codex restart/new interface binding. No Android input or ordinary UI acceptance. Does not establish the root cause in graphics driver, capture provider or runtime."
     }
   ]
 }
