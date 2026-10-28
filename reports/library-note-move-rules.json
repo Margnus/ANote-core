@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "requirement": "LIB-06",
+  "status": "passed",
+  "scope": "Internal metadata location rules on JVM; no editor save, App or production persistence acceptance",
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "space/revision metadata transaction",
+    "editing move and durable save/reopen on Android and Apple"
+  ],
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryNoteMoveRulesTest.xml": "bb6d5c1201c811a91fa8cbae1709a5a5a28b91f29402fb155f2bf42741d59e66",
+    "reports/verification.json": "a521f86961b81ea13024bf1cb67ac837306013a157d69d2e9cefea82514e840a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryNoteMoveRules.kt": "dad6cd372805d4aa9325059dcd1978a5740df4768914ccd9f92a5b713c891006",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryNoteMoveRulesTest.kt": "65b690ae054e602767ba8a23b76ac2029dc1c466bbeebe898ca7f1001bbf699f"
+  },
+  "scenarios": [
+    "stalePlanCannotBeRevalidatedAfterConcurrentFolderDeletion[jvm]",
+    "unknownNoteAndDestinationNeverProducePatch[jvm]",
+    "sameDestinationIsAnIdentityPreservingNoOp[jvm]",
+    "staleIncompleteAndCrossSpaceSnapshotsAreRejected[jvm]",
+    "movingEditingNoteChangesOnlyItsLocationAndCanReturnToRoot[jvm]",
+    "unrelatedCorruptReferencesAndCyclesBlockMove[jvm]"
+  ]
+}

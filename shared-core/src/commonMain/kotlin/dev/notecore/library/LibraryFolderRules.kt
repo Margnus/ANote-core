@@ -39,30 +39,36 @@ internal object LibraryFolderRules {
     private fun validId(id: String) = id.isNotBlank() && id.length <= 128 && id.hasValidUnicode()
     private fun validTitle(title: String) = title.isNotBlank() && title.length <= 120 && title.hasValidUnicode()
 
-    fun plan(snapshot: LibraryFolderSnapshot, spaceId: String, expectedRevision: Long,
-             change: LibraryFolderChange): LibraryFolderPlan {
-        fun reject(reason: LibraryFolderRejection) = LibraryFolderPlan(rejection = reason)
-        if (!validId(spaceId) || spaceId != snapshot.spaceId) return reject(LibraryFolderRejection.WRONG_SPACE)
-        if (snapshot.revision < 0 || expectedRevision != snapshot.revision) return reject(LibraryFolderRejection.STALE_REVISION)
-        if (!snapshot.complete) return reject(LibraryFolderRejection.INCOMPLETE_SNAPSHOT)
-        if (snapshot.folders.size > MAX_FOLDERS || snapshot.notes.size > MAX_NOTES) return reject(LibraryFolderRejection.CAPACITY)
+    // Bounded parent walks also reject pre-existing cycles/orphans, including unrelated subtrees.
+    private fun depth(id: String, rows: Map<String, LibraryFolder>): Int? {
+        var current: String? = id
+        var count = 0
+        while (current != null) {
+            if (++count > MAX_DEPTH) return null
+            current = (rows[current] ?: return null).parentId
+        }
+        return count
+    }
+    fun validateSnapshot(snapshot: LibraryFolderSnapshot, spaceId: String, expectedRevision: Long): LibraryFolderRejection? {
+        if (!validId(spaceId) || spaceId != snapshot.spaceId) return LibraryFolderRejection.WRONG_SPACE
+        if (snapshot.revision < 0 || expectedRevision != snapshot.revision) return LibraryFolderRejection.STALE_REVISION
+        if (!snapshot.complete) return LibraryFolderRejection.INCOMPLETE_SNAPSHOT
+        if (snapshot.folders.size > MAX_FOLDERS || snapshot.notes.size > MAX_NOTES) return LibraryFolderRejection.CAPACITY
         val folders = snapshot.folders.associateBy { it.id }
         if (folders.size != snapshot.folders.size || snapshot.notes.map { it.noteId }.toSet().size != snapshot.notes.size ||
             folders.values.any { !validId(it.id) || !validTitle(it.title) || (it.parentId != null && it.parentId !in folders) } ||
             snapshot.notes.any { !validId(it.noteId) || (it.folderId != null && it.folderId !in folders) }) {
-            return reject(LibraryFolderRejection.INVALID_GRAPH)
+            return LibraryFolderRejection.INVALID_GRAPH
         }
-        // Bounded parent walks also reject pre-existing cycles/orphans, including unrelated subtrees.
-        fun depth(id: String, rows: Map<String, LibraryFolder>): Int? {
-            var current: String? = id
-            var count = 0
-            while (current != null) {
-                if (++count > MAX_DEPTH) return null
-                current = (rows[current] ?: return null).parentId
-            }
-            return count
-        }
-        if (folders.keys.any { depth(it, folders) == null }) return reject(LibraryFolderRejection.INVALID_GRAPH)
+        if (folders.keys.any { depth(it, folders) == null }) return LibraryFolderRejection.INVALID_GRAPH
+        return null
+    }
+
+    fun plan(snapshot: LibraryFolderSnapshot, spaceId: String, expectedRevision: Long,
+             change: LibraryFolderChange): LibraryFolderPlan {
+        fun reject(reason: LibraryFolderRejection) = LibraryFolderPlan(rejection = reason)
+        validateSnapshot(snapshot, spaceId, expectedRevision)?.let { return reject(it) }
+        val folders = snapshot.folders.associateBy { it.id }
         val id = when (change) {
             is LibraryFolderChange.Create -> change.id
             is LibraryFolderChange.Rename -> change.id
