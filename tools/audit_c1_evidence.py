@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
               'chunked-brush-costs', 'brush-tile-cache-costs')
 CURRENT = {
+    'android-authorized-adb-ui': ('source_and_artifact_sha256',),
     'legacy-container-framing': ('source_and_artifact_sha256',),
     'resource-commit-rules': ('source_and_artifact_sha256',),
     'resource-gc-rules': ('source_and_artifact_sha256',),
