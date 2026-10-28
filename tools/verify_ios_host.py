@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
+    'testOriginalProviderInputHistoryAndSaveFlightRetainIndependentResponsibilities()',
     'testAtomicWriteProcessBoundary()',
     'testCapturedStrokeTraversalRemainsImmutableAfterPageUndoAndRetirement()',
     'testRawBudgetFailuresDoNotTrapAndPreviewStillChecksPolicy()',
@@ -153,12 +154,18 @@ def main():
     attachments = BUILD/('attachments-' + result.stem)
     command('xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(result), '--output-path', str(attachments))
     traces = []
+    overlap = []
     for path in attachments.rglob('*.json'):
         data = json.loads(path.read_text(encoding='utf-8'))
+        if isinstance(data, dict) and data.get('trace_id') == 'c1-original-owner-overlap-v1':
+            overlap.append(data)
         if isinstance(data, dict) and data.get('trace_id') == 'dev034-fixed-viewport-v1':
             traces.append(data)
     assert len(traces) == 1 and traces[0]['closed_drained']
+    assert len(overlap) == 1 and overlap[0]['ledger_drained'] and overlap[0]['native_drained'] and overlap[0]['worker_stopped']
+    assert overlap[0]['unified_peak_admission_verified'] is False and overlap[0]['physical_heap_measured'] is False
     report = {
+        'original_owner_budget_overlap': overlap[0],
         'render_viewport_trace': traces[0], 'viewport_trace_test_count': 1,
         'status': 'passed', 'platform': 'iOS Simulator ARM64 app-host XCTest',
         'device': {k: device[k] for k in ('name', 'udid', 'state')}, 'test_count': len(actual),

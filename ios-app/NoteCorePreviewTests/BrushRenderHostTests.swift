@@ -6,6 +6,101 @@ import NoteCanvasPrototype
 
 // Actual app-host Kotlin/Native render -> existing Swift worker -> CGImage responsibility.
 final class BrushRenderHostTests: XCTestCase {
+    @MainActor func testOriginalProviderInputHistoryAndSaveFlightRetainIndependentResponsibilities() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("notecore-owner-overlap-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let lock = NSLock(), entered = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+        var armWrite = false
+        defer { release.signal() } // Cleanup only; successful assertions below require explicit real IO completion.
+        let budget = DocumentBudget(maxPages: 128, maxObjects: 2, liveBytes: 8*1024*1024,
+            journalEntries: 4096, journalBytes: 32*1024*1024, identityBytes: 4*1024*1024,
+            historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
+        let model = PreviewModel(directory: directory, documentBudget: budget, observeWriteBoundary: { boundary in
+            guard boundary == .beforeAtomicWrite else { return }
+            let pause = lock.withLock { let value = armWrite; armWrite = false; return value }
+            if pause { entered.signal(); release.wait() }
+        })
+        model.create(); let note = try XCTUnwrap(model.current)
+        XCTAssertTrue(note.setPaper(width: 200, height: 200, paper: .blank))
+        for x in [40.0, 80.0] {
+            XCTAssertTrue(note.beginStroke(x: x, y: 40, pressure: 0.25, timeMicros: 1))
+            XCTAssertTrue(note.endStroke(x: x+5, y: 45, pressure: 0.75, timeMicros: 2))
+        }
+        model.changed()
+        let file = directory.appendingPathComponent(note.documentId + ".ncp")
+        try await eventually { model.ownerRetirementStatus.pendingWrites == 0 && model.status.hasPrefix("已保存") }
+        let view = InkUIView(note: note); view.renderModel = model; view.contentScaleFactor = 1
+        view.frame = CGRect(x: 0, y: 0, width: 200, height: 200); view.layoutIfNeeded()
+        _ = viewImage(view); try await eventually { model.inkFramePublications > 0 }
+        var provider: CGDataProvider?
+        try model.retainInkSourceForTesting { provider = $0 }
+        XCTAssertNotNil(provider); let nativeBytes = model.inkChargedBytes; XCTAssertGreaterThan(nativeBytes, 0)
+        // Inspect the original ledger only; never create a test replacement authority or ledger.
+        let ledger = try XCTUnwrap(Mirror(reflecting: model).children.first { $0.label == "ledger" }?.value as? PreviewSaveLedger)
+        XCTAssertTrue(note.rename(value: "Old write still owns this root"))
+        let old = note.captureRecovery(), oldBytes = try old.encode()
+        lock.withLock { armWrite = true }
+        XCTAssertTrue(model.save())
+        try await eventually { entered.wait(timeout: .now()) == .success }
+        XCTAssertTrue(ledger.states().count == 1 && ledger.states()[0].inFlight)
+        XCTAssertEqual(ledger.chargedBytes, old.retainedByteCharge)
+        let full = note.snapshot()
+        XCTAssertFalse(note.beginStroke(x: 100, y: 100, pressure: 0.5, timeMicros: 3))
+        XCTAssertTrue(note.snapshot() === full); XCTAssertFalse(note.hasActiveStroke); XCTAssertFalse(note.hasPendingStroke)
+        XCTAssertTrue(note.undo()); XCTAssertTrue(note.undo()) // Undo rename and the second stroke; history remains charged.
+        XCTAssertEqual(note.totalStrokeCount, 1)
+        XCTAssertGreaterThan(note.authorityStatus().historyByteCharge, 0)
+        let middle = note.captureRecovery(); XCTAssertTrue(model.save())
+        XCTAssertEqual(ledger.chargedBytes, old.retainedByteCharge + middle.retainedByteCharge)
+        XCTAssertTrue(note.beginStroke(x: 120, y: 140, pressure: 0.125, timeMicros: 7))
+        let input = note.activeInputOperationId, inputBytes = note.inputReservedByteCharge
+        XCTAssertGreaterThan(inputBytes, 0); XCTAssertNotNil(input)
+        let activeRoot = note.snapshot(), historyBytes = note.authorityStatus().historyByteCharge
+        let invalid = note.edit(request: PreviewEditSetPaper(width: .nan, height: 200, paper: .blank))
+        XCTAssertFalse(invalid.accepted); XCTAssertEqual(invalid.failure?.kind, .invalidArgument)
+        XCTAssertTrue(note.snapshot() === activeRoot)
+        XCTAssertEqual(model.beginOwnerRetirement(), .inputPending)
+        XCTAssertEqual(note.activeInputOperationId, input); XCTAssertEqual(note.inputReservedByteCharge, inputBytes)
+        XCTAssertEqual(ledger.chargedBytes, old.retainedByteCharge + middle.retainedByteCharge)
+        XCTAssertEqual(model.inkChargedBytes, nativeBytes); XCTAssertNotNil(provider)
+        XCTAssertTrue(note.endStroke(x: 150, y: 160, pressure: 0.875, timeMicros: 9))
+        XCTAssertEqual(note.inputReservedByteCharge, 0); XCTAssertEqual(note.totalStrokeCount, 2)
+        let latest = note.captureRecovery(), latestBytes = try latest.encode()
+        XCTAssertNotEqual(oldBytes, latestBytes); XCTAssertTrue(model.save())
+        XCTAssertEqual(ledger.chargedBytes, old.retainedByteCharge + latest.retainedByteCharge)
+        var finished = false
+        XCTAssertEqual(model.beginOwnerRetirement { state in
+            XCTAssertEqual(state.renderBytes, 0); XCTAssertEqual(state.pendingWrites, 0); XCTAssertTrue(state.workerStopped)
+            finished = true
+        }, .started)
+        XCTAssertNil(model.current); XCTAssertEqual(note.authorityStatus().historyByteCharge, 0)
+        XCTAssertGreaterThan(ledger.chargedBytes, 0); XCTAssertFalse(finished)
+        NativeInkCanvas.dismantleUIView(view, coordinator: ())
+        XCTAssertGreaterThan(model.inkChargedBytes, 0)
+        release.signal() // Let the original worker really write old, ACK it, then write latest.
+        try await eventually { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(ledger.chargedBytes, 0)
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), latestBytes)
+        XCTAssertEqual(model.ownerRetirementStatus.phase, .retiring); XCTAssertFalse(finished)
+        XCTAssertFalse(model.ownerRetirementStatus.workerStopped); XCTAssertGreaterThan(model.inkChargedBytes, 0)
+        provider = nil // The real provider callback, not elapsed time, permits native settlement.
+        try await eventually { finished }
+        XCTAssertEqual(model.inkChargedBytes, 0); XCTAssertTrue(model.ownerRetirementStatus.workerStopped)
+        let reopened = try PreviewRecoveryCodec.shared.decode(text: String(contentsOf: file, encoding: .utf8))
+        XCTAssertTrue(reopened.sameContent(other: latest)); XCTAssertNil(reopened.pending)
+        let trace: [String: Any] = ["trace_id": "c1-original-owner-overlap-v1", "max_objects": 2,
+            "held_native_declared_bytes": nativeBytes, "active_input_declared_bytes": inputBytes,
+            "history_declared_bytes_at_overlap": historyBytes,
+            "old_flight_declared_bytes": old.retainedByteCharge, "new_latest_declared_bytes": middle.retainedByteCharge,
+            "capacity_refused_without_mutation": true, "active_input_survived_retirement_refusal": true,
+            "latest_file_preserved_after_old_ack": true, "provider_release_required_for_worker_stop": true,
+            "final_strokes": 2, "ledger_drained": ledger.isDrained, "native_drained": model.inkChargedBytes == 0,
+            "worker_stopped": model.ownerRetirementStatus.workerStopped, "physical_heap_measured": false,
+            "unified_peak_admission_verified": false]
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: trace, options: [.sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "notecore-original-owner-overlap.json"; attachment.lifetime = .keepAlways; add(attachment)
+        if finished && testRun?.failureCount == 0 { try FileManager.default.removeItem(at: directory) }
+    }
     @MainActor func testOwnerReferenceDropKeepsProviderUntilOriginalRetirement() async throws {
         var fixture: (PreviewModel, InkUIView)? = try preview()
         var model: PreviewModel? = fixture?.0

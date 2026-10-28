@@ -47,7 +47,7 @@ def main():
     host_path = ROOT / 'reports/ios-host-tests.json'
     built = json.loads(built_path.read_text(encoding='utf-8'))
     hosted = json.loads(host_path.read_text(encoding='utf-8'))
-    assert built['status'] == hosted['status'] == 'passed' and hosted['test_count'] == 63
+    assert built['status'] == hosted['status'] == 'passed' and hosted['test_count'] == len(hosted['checks']) and 'testAtomicWriteProcessBoundary()' in hosted['checks']
     bindings = {**built['source_and_build_input_sha256'], **hosted['source_and_framework_sha256'],
                 **hosted['test_build_sha256']}
     bindings.update({p.relative_to(ROOT).as_posix(): sha(p) for p in [Path(__file__), built_path, host_path]})
