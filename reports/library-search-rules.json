@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "requirement": "SEARCH-01",
+  "status": "passed",
+  "scope": "Internal metadata-only title/folder substring and typed target resolution rules on JVM; no App, database index or paging acceptance",
+  "tests": 9,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibrarySearchRules.kt": "dd05b6803fc638eb5152c2c818043e8291f3c52cbf1eb680097320bef5ec2ef9",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibrarySearchRulesTest.kt": "cc6394abd417814de950f45e5c28ca922ae0de6b7a89e6a8976880a2db9b0b80",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibrarySearchRulesTest.xml": "1409bc81c51b97afd7232c3daf79f0a7a1bab3d83a37f90195c928be3e15e256",
+    "reports/verification.json": "7c814967c351c8308af8fcdd5153f03467d9c0419a1bf7acc67d80f12ffc9f8c"
+  },
+  "scenarios": [
+    "resultBudgetAllowsExactLimitAndRejectsOverflowWithoutPartialHits[jvm]",
+    "sortingDoesNotDependOnMetadataEnumerationOrViewPreference[jvm]",
+    "invalidOrPartialScopeRejectsEvenBlankQueries[jvm]",
+    "sameStringFolderAndNoteIdsRemainDistinctTargets[jvm]",
+    "staleClickAfterMoveOrRecycleRequiresRefresh[jvm]",
+    "blankMalformedAndLiteralWhitespaceQueriesHaveExplicitSemantics[jvm]",
+    "resolveFindsIdentityAndCurrentLocationInsteadOfMatchingDuplicateTitle[jvm]",
+    "chineseAndEnglishSubstringSearchKeepTypedStableTargets[jvm]",
+    "trashOrMissingTitleRowsCannotBeSilentlyMixedIntoActiveSearch[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "LIB-09 indexed metadata paging and same-revision production query",
+    "Android and Apple search UI and typed click navigation",
+    "cancellation and old-result delivery integration",
+    "durable metadata and runtime/performance acceptance"
+  ]
+}
