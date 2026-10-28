@@ -6,6 +6,88 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testAtomicWriteProcessBoundary() async throws {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let control = caches.appendingPathComponent("NoteCoreAtomicCutControl", isDirectory: true)
+        let request = control.appendingPathComponent("request.json")
+        guard FileManager.default.fileExists(atPath: request.path) else {
+            let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            let file = dir.appendingPathComponent("normal.ncp")
+            try PreviewFileIO.writeUTF8("old", to: file)
+            var reached = [PreviewWriteBoundary]()
+            try PreviewFileIO.writeUTF8("new", to: file) { boundary in
+                reached.append(boundary)
+                XCTAssertEqual(try? String(contentsOf: file, encoding: .utf8), boundary == .beforeAtomicWrite ? "old" : "new")
+            }
+            XCTAssertEqual(reached, [.beforeAtomicWrite, .afterAtomicWrite]); return
+        }
+        let data = try Data(contentsOf: request)
+        guard data.count <= 4096,
+              let config = try JSONSerialization.jsonObject(with: data) as? [String: String],
+              let identity = config["identity"], UUID(uuidString: identity) != nil,
+              let name = config["boundary"], let boundary = PreviewWriteBoundary(rawValue: name),
+              let action = config["action"], ["prepare", "reopen"].contains(action) else { throw CocoaError(.fileReadCorruptFile) }
+        let dir = caches.appendingPathComponent("atomic-cut-" + identity, isDirectory: true)
+        let checkpoint = try windowCheckpoint(), file = dir.appendingPathComponent("pending-window.ncp")
+        let old = try PagedPreviewSnapshot.companion.fromRoot(root: checkpoint.root).encode()
+        let pending = try checkpoint.encode()
+        if action == "prepare" {
+            guard !FileManager.default.fileExists(atPath: dir.path) else { throw CocoaError(.fileWriteFileExists) }
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            try PreviewFileIO.writeUTF8(old, to: file)
+            try Data(old.utf8).write(to: dir.appendingPathComponent("expected-old.txt"))
+            try Data(pending.utf8).write(to: dir.appendingPathComponent("expected-pending.txt"))
+            let hold = DispatchSemaphore(value: 0)
+            // Prevent the original save() retry from committing the synthetic pending in this owner.
+            let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+                journalEntries: 4096, journalBytes: 32*1024*1024, identityBytes: 4*1024*1024,
+                historyEntries: 128, historyBytes: 0, inputBytes: 2*1024*1024)
+            var model: PreviewModel!
+            model = PreviewModel(directory: dir, documentBudget: budget, observeWriteBoundary: { reached in
+                guard reached == boundary else { return }
+                DispatchQueue.main.async {
+                    precondition(model.current?.hasPendingStroke == true && model.ownerRetirementStatus.pendingWrites == 1)
+                    precondition(model.status.hasPrefix("正在保存") && model.current!.captureRecovery().sameContent(other: checkpoint))
+                    let marker: [String: Any] = ["pid": ProcessInfo.processInfo.processIdentifier, "boundary": name,
+                        "pending_writes": 1, "status": model.status, "has_pending": true, "worker_returned": false]
+                    try! JSONSerialization.data(withJSONObject: marker).write(to: dir.appendingPathComponent("ready.json"), options: .atomic)
+                }
+                hold.wait() // No timeout or synthetic ACK; only external process termination ends this wait.
+            })
+            try model.adopt(checkpoint.root, persisted: false, recovery: checkpoint)
+            XCTAssertTrue(model.save())
+            while true { try await Task.sleep(nanoseconds: 100_000_000) }
+        }
+        let ready = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: dir.appendingPathComponent("ready.json"))) as? [String: Any])
+        let previous = try XCTUnwrap(ready["pid"] as? Int)
+        XCTAssertNotEqual(previous, Int(ProcessInfo.processInfo.processIdentifier))
+        let model = PreviewModel(directory: dir)
+        model.open("pending-window")
+        try await eventually("fresh process original Model opens actual file") { model.current != nil }
+        let note = try XCTUnwrap(model.current), recover = boundary == .afterAtomicWrite
+        XCTAssertEqual(note.hasPendingStroke, recover); XCTAssertEqual(note.totalStrokeCount, 0)
+        let expected = try recover ? checkpoint : PagedPreviewSnapshot.companion.fromRoot(root: checkpoint.root)
+        XCTAssertTrue(note.captureRecovery().sameContent(other: expected))
+        if recover {
+            XCTAssertTrue(note.retryPendingStroke()); XCTAssertEqual(note.changeVersion, 1); XCTAssertEqual(note.totalStrokeCount, 1)
+            XCTAssertTrue(note.retryPendingStroke()); XCTAssertEqual(note.changeVersion, 1); XCTAssertEqual(note.totalStrokeCount, 1)
+        }
+        let content = note.captureRecovery()
+        XCTAssertTrue(model.save())
+        try await eventually("fresh original owner confirms completed content") { model.ownerRetirementStatus.pendingWrites == 0 }
+        guard case .opened(let actual) = try PreviewFileIO.readRecovery(file, documentId: note.documentId, beforeRead: {}) else { throw CocoaError(.fileReadCorruptFile) }
+        XCTAssertNil(actual.pending); XCTAssertTrue(actual.sameContent(other: content))
+        XCTAssertEqual(actual.root.scene.objectCount, recover ? 1 : 0)
+        model.close(); XCTAssertNil(model.current); XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("fresh original worker and owner retire") { model.ownerRetirementStatus.phase == .retired }
+        let result: [String: Any] = ["previous_pid": previous, "pid": ProcessInfo.processInfo.processIdentifier,
+            "boundary": name, "recovered_pending": recover, "revision": actual.version,
+            "committed_strokes": actual.root.scene.objectCount, "same_content_after_save": true, "owner_retired": true]
+        try JSONSerialization.data(withJSONObject: result).write(to: control.appendingPathComponent("result.json"), options: .atomic)
+        // Only successful original retirement permits fixture removal. Failures remain available for diagnosis.
+        if model.ownerRetirementStatus.phase == .retired && testRun?.failureCount == 0 { try FileManager.default.removeItem(at: dir) }
+    }
     @MainActor func testCapturedStrokeTraversalRemainsImmutableAfterPageUndoAndRetirement() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         let model = PreviewModel(directory: dir); model.create()

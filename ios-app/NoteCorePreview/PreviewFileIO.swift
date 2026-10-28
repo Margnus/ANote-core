@@ -22,6 +22,8 @@ enum CatalogCapacityRefusal: Error { case tooManyRows }
 private enum TextReadRefusal: Error { case byteCapacity, invalidUTF8 }
 
 // Preview text IO only. No UIKit, mutable owner collections or production storage schema.
+enum PreviewWriteBoundary: String { case beforeAtomicWrite, afterAtomicWrite }
+
 enum PreviewFileIO {
     static let maxReadBytes = Int(PagedPreviewCodec.shared.maximumUtf8ByteCount())
     static func readUTF8(_ url: URL, maxBytes: Int = maxReadBytes) throws -> String {
@@ -88,11 +90,13 @@ enum PreviewFileIO {
         }
         throw CocoaError(.fileReadCorruptFile)
     }
-    static func writeUTF8(_ text: String, to url: URL) throws {
+    static func writeUTF8(_ text: String, to url: URL, observeBoundary: (PreviewWriteBoundary) -> Void = { _ in }) throws {
         guard text.utf16.count <= Int(PagedPreviewCodec.shared.maximumCharacterCount()) else { throw CocoaError(.fileWriteOutOfSpace) }
         let bytes = Data(text.utf8)
         guard bytes.count <= maxReadBytes else { throw CocoaError(.fileWriteOutOfSpace) }
+        observeBoundary(.beforeAtomicWrite)
         try bytes.write(to: url, options: .atomic)
+        observeBoundary(.afterAtomicWrite)
     }
     static func catalog(_ directory: URL) throws -> [URL] {
         var enumerationError: Error?

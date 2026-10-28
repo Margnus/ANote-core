@@ -286,15 +286,17 @@ final class PreviewModel: ObservableObject {
         }
         return false
     }
+    private let observeWriteBoundary: (PreviewWriteBoundary) -> Void
     private let beforeOpenRead: () throws -> Void
     init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
-         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, exportResultByteLimit: Int = 32 * 1024 * 1024, catalogResultByteLimit: Int64 = 2 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}) {
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, exportResultByteLimit: Int = 32 * 1024 * 1024, catalogResultByteLimit: Int64 = 2 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}, observeWriteBoundary: @escaping (PreviewWriteBoundary) -> Void = { _ in }) {
         precondition(Thread.isMainThread)
         precondition(exportResultByteLimit >= 0)
         precondition(catalogResultByteLimit >= 0)
         self.catalogResultByteLimit = catalogResultByteLimit
         self.exportResultByteLimit = exportResultByteLimit
         self.beforeOpenRead = beforeOpenRead
+        self.observeWriteBoundary = observeWriteBoundary
         self.documentBudget = documentBudget
         self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
         self.directory = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PreviewNotes", isDirectory: true)
@@ -595,9 +597,9 @@ final class PreviewModel: ObservableObject {
                 }
                 return
             }
-            let admission = try! executor.submit(input: (attempt, Self.file(attempt.snapshot.documentId, directory: directory)),
+            let admission = try! executor.submit(input: (attempt, Self.file(attempt.snapshot.documentId, directory: directory), observeWriteBoundary),
                 chargedBytes: attempt.snapshot.encodingWorkByteCharge, compute: { input in
-                    try PreviewFileIO.writeUTF8(input.0.snapshot.encode(), to: input.1)
+                    try PreviewFileIO.writeUTF8(input.0.snapshot.encode(), to: input.1, observeBoundary: input.2)
                     return true
                 }, receive: { input, result in
                     let success: Bool

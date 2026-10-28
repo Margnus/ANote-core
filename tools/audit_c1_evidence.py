@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
               'chunked-brush-costs', 'brush-tile-cache-costs')
 CURRENT = {
+    'apple-atomic-cut': ('source_and_artifact_sha256',),
     'android-atomic-cut': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
     'read-traversal': ('source_and_artifact_sha256',),
     'budget-creation': ('source_and_artifact_sha256',),
