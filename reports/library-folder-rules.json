@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "requirement": "LIB-03",
+  "status": "passed",
+  "scope": "Internal storage-independent folder business rules executed on JVM; no App consumer or metadata persistence acceptance",
+  "tests": 10,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "45e109b0485f60d86f3aa17c670dd54348a8c571941933a7d59e371699a62db0",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryFolderRulesTest.kt": "4dcdb35a198a491953a6967f168111e22ad27a6379217691d567fbd05790ed50",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryFolderRulesTest.xml": "c4fa4ac12e2ca44000d2448f95b34f7107c5f3d872060c47a53c125b36473c98",
+    "reports/verification.json": "febd2e58a2f7110ee212f6bde3db62a11b16b0eb41b1c4c434489de82a3c0c62"
+  },
+  "scenarios": [
+    "incompleteWrongSpaceAndStaleSnapshotsNeverProducePatch[jvm]",
+    "exactlyFiveLevelsAllowedAndSixthRejected[jvm]",
+    "boundedPlannerRejectsOversizedSnapshotAndCreationAtCapacity[jvm]",
+    "subtreeMoveChecksDeepestDescendantAndMoveBackToRootWorks[jvm]",
+    "corruptGraphRefusedEvenWhenRequestedBranchLooksValid[jvm]",
+    "missingIdsParentsAndReusedIdsHaveExplicitFailures[jvm]",
+    "unicodeTitlesArePreservedButMalformedAndBlankTitlesRefused[jvm]",
+    "selfParentAndDescendantParentCyclesRefused[jvm]",
+    "nonemptyFolderCannotDeleteChildrenOrNotesImplicitly[jvm]",
+    "createRenameMoveDeletePreservesNoteIdentityAndOtherRows[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "metadata transaction with space/revision compare-and-swap and complete reference enumeration",
+    "Android and Apple library UI and durable reopen",
+    "nonempty folder deletion product policy and note move/recycle integration"
+  ]
+}
