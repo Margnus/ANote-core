@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "requirement": "PAGE-06",
+  "status": "passed",
+  "scope": "Original notebook internal read-only admission executed on JVM; Android consumer compiled/linted, no mode UI/gesture activation or runtime acceptance",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "9ff80fa3d5656b4461f88b9c36f457d7e8a0e657b42c61e3a12e91e49842bfc8",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "5cf5b31208809b2cb564aa147f829f20e0b6e6ddca80a20ed15a5b194a111f37",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "4ac2f0d7007755e0f569b05dcd6c028f29583b0672c2a0992357d082a5b1b273",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/ReadOnlyNotebookTest.kt": "925b55c97a4dc8de962359b98fb0edcb0c30c0c73090fc2bc34c399c6d4e10fe",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ReadOnlyNotebookTest.xml": "2f24b21b91a18e9fdd83b6c1d19408f1df5e22134f541f99fb9929f20d2f9cb8",
+    "reports/verification.json": "5c9c0196967ca2060f2f6c77a79de26a9d41db1529c5d9c6da0b2ee38271ec2f",
+    "reports/android-build-inputs.sha256": "a239882103a7e06a412375fba7f81a443a74c3e3f67a00073ac55c4f56dd38ee",
+    "android-app/build/reports/lint-results-debug.xml": "56907741208c95504f946865bae33b773af34c497cec5fd44f67e4378a8aef4b",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "538cea88586aef86abc16a17e2371014e38776a82c72811dcaadf6f135e7b8ac"
+  },
+  "scenarios": [
+    "closedAndWrongOwnerModeAccessFailsWithoutChangingContent[jvm]",
+    "retainedCompletionBlocksModeChangeUntilExplicitRetry[jvm]",
+    "readonlyRejectsOriginalRawAndLegacyInputWithoutIdentityOrBudgetChanges[jvm]",
+    "originalEditFacadeAndDirectMethodsCannotBypassReadingMode[jvm]",
+    "activeInputPreventsModeChangeAndKeepsAcceptedPrefix[jvm]",
+    "navigationAndToolSurviveModeRoundtripWithoutContentMutation[jvm]"
+  ],
+  "android_build_verified": true,
+  "android_lint_errors": 0,
+  "android_lint_warnings": 8,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "app_mode_ui_integrated": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "Android and Apple read-only menu and original gesture/navigation integration",
+    "actual finger scroll/no ink, stylus/multitouch, rotation/background and retained tools",
+    "production bookmarks/mode storage and durable reopen",
+    "current Apple compilation/runtime and M-1/C1 gates"
+  ]
+}

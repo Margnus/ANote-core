@@ -22,6 +22,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var width = 2.5
     private var error = ""
     private var failure: PreviewSessionFailure? = null
+    private var readOnly = false
     private var retired = false
     private var projectionRevision = -1L
     private var projectionPage: PageId? = null
@@ -58,8 +59,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         ownerCheck()
         return if (input != null) inputReservation else pending?.let { PreviewRecoveryCodec.pendingCharge(it) } ?: 0L
     }
-    val canUndo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextUndoOperationId != null }
-    val canRedo: Boolean get() { ownerCheck(); return !retired && input == null && pending == null && memory.status().nextRedoOperationId != null }
+    val canUndo: Boolean get() { ownerCheck(); return !retired && !readOnly && input == null && pending == null && memory.status().nextUndoOperationId != null }
+    val canRedo: Boolean get() { ownerCheck(); return !retired && !readOnly && input == null && pending == null && memory.status().nextRedoOperationId != null }
     fun snapshot(): DocumentRoot = root()
     fun page(index: Int): PageDescriptor = root().page(index)
     fun authorityStatus(): DocumentAuthorityStatus { ownerCheck(); return memory.status() }
@@ -130,9 +131,20 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         fail("此会话编号已耗尽，请保留笔记并导出备份", PreviewFailureKind.IDENTITY_EXHAUSTED); return null
     }
     private fun operation(): CommandId? = identity("op")?.let(::CommandId)
-    private fun prepareEdit(): Boolean {
+    internal val isReadOnly: Boolean get() { ownerCheck(); return readOnly }
+    /** Mode changes never cancel accepted input or resolve a retained completion implicitly. */
+    internal fun setReadOnly(value: Boolean): Boolean {
         ownerCheck()
         if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+        if (value == readOnly) { clearError(); return true }
+        if (pending != null) return fail("上一笔尚未提交，请先重试保存", PreviewFailureKind.PENDING_STROKE)
+        if (input != null) return fail("请先完成当前笔画", PreviewFailureKind.ACTIVE_STROKE)
+        readOnly = value; clearError(); return true
+    }
+    private fun prepareEdit(contentChange: Boolean = true): Boolean {
+        ownerCheck()
+        if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
+        if (readOnly && contentChange) return fail("阅读模式不能修改笔记", PreviewFailureKind.READ_ONLY)
         if (pending != null) return fail("上一笔尚未提交，请先重试保存", PreviewFailureKind.PENDING_STROKE)
         clearError(); return true
     }
@@ -154,7 +166,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
         if (root().findPage(id) == null) return fail("页面不存在", PreviewFailureKind.MISSING_PAGE)
         if (id == selected) { clearError(); return true }
-        if (!prepareEdit()) return false
+        if (!prepareEdit(contentChange = false)) return false
         cancelStroke(); clearProjection(); selected = id; clearError(); return true // Presentation-only; no root commit.
     }
     fun insertPage(): Boolean {
@@ -337,6 +349,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     internal fun realBatchGate(phase: PointerPhase): PreviewInputResult? {
         ownerCheck()
         if (retired) return rejectRealBatch(PreviewFailureKind.CLOSED)
+        if (readOnly) return rejectRealBatch(PreviewFailureKind.READ_ONLY)
         if (pending != null) return rejectRealBatch(PreviewFailureKind.PENDING_STROKE)
         if (phase == PointerPhase.DOWN && input != null) return rejectRealBatch(PreviewFailureKind.ACTIVE_STROKE)
         if (phase != PointerPhase.DOWN && input == null) return rejectRealBatch(PreviewFailureKind.NO_ACTIVE_STROKE)
@@ -345,6 +358,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     internal fun rejectRealBatch(kind: PreviewFailureKind, reason: InputRejection? = null): PreviewInputResult {
         ownerCheck()
         fail(when (kind) {
+            PreviewFailureKind.READ_ONLY -> "阅读模式不接收笔迹，本批未接收"
             PreviewFailureKind.CLOSED -> "此会话已关闭，请重新打开笔记"
             PreviewFailureKind.PENDING_STROKE -> "请先重试当前笔画，本批未接收"
             PreviewFailureKind.ACTIVE_STROKE -> "请先完成当前笔画，本批未接收"
