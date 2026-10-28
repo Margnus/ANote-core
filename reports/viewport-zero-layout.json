@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "requirement": "PAGE-05",
+  "status": "passed",
+  "scope": "Original viewport zero-layout center recovery on JVM; Android consumer compiled/linted, no actual window/rotation or persistent reading-position acceptance",
+  "tests": 9,
+  "new_tests": 3,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "1dbb3e64c1e13f7b54de69ccff4d87c7c5900ca1ea3a98dc6033337f0ac54215",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/PreviewViewportContractTest.kt": "7d1b2e46ec5c2bd2c626a6323ba780ddd3a9134c1353a7cd1cebd5a45be005c3",
+    "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.PreviewViewportContractTest.xml": "ef9c9e798cf9d8735905923816b6be8e3e85916f1f034d46ecbad7613ab28314",
+    "reports/verification.json": "78fe35aa747f897e8ca0ed05f9bb25e6d4837a1c8ec28403b98588254c163769",
+    "reports/android-build-inputs.sha256": "a72311b27c0d29df196c740d33ef8deebbcbccea6fde3942ecc7bb8c1f58955b",
+    "android-app/build/reports/lint-results-debug.xml": "56907741208c95504f946865bae33b773af34c497cec5fd44f67e4378a8aef4b",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "f2ab7647038ca1b095344717375e1a9de2ac52eb743b214f50c6e3b169b0e428"
+  },
+  "scenarios": [
+    "zoomAndTranslationBoundsKeepPaperReachableAndRejectInvalidGestures[jvm]",
+    "pageDimensionsFitLandscapeAndResetWithoutChangingTheInverseMapping[jvm]",
+    "restoredCenterStillUsesExistingBoundaryConstraints[jvm]",
+    "fitCentersPaperAndResetRestoresExactMapping[jvm]",
+    "resizePreservesCenterWhenUnclampedAndZeroSizeCanRecover[jvm]",
+    "randomGestureMappingsRoundTripWithoutDocumentMutation[jvm]",
+    "zeroLayoutSequencePreservesPannedCenterLikeDirectResize[jvm]",
+    "resetAndPageReplacementDuringZeroLayoutDiscardOldReadingCenter[jvm]",
+    "zoomAndPanKeepCentroidAnchorWithoutChangingSceneCoordinates[jvm]"
+  ],
+  "android_build_verified": true,
+  "android_lint_errors": 0,
+  "android_lint_warnings": 8,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "actual Android and Apple window/rotation/zero-layout callbacks",
+    "25%-400% product zoom range and device input acceptance",
+    "PAGE-04 durable last reading position across sessions"
+  ]
+}

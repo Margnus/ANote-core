@@ -6,6 +6,39 @@ import kotlin.random.Random
 import kotlin.test.*
 
 class PreviewViewportContractTest {
+    private fun panned(): PreviewViewport = PreviewViewport().also {
+        it.resize(1000.0, 1400.0)
+        it.gesture(500.0, 700.0, 250.0, 400.0, 3.0)
+    }
+    @Test fun zeroLayoutSequencePreservesPannedCenterLikeDirectResize() {
+        val direct = panned(); val suspended = panned()
+        val before = suspended.toScene(500.0, 700.0)
+        assertNotEquals(PointD(500.0, 700.0), before)
+        suspended.resize(0.0, 1400.0); suspended.resize(0.0, 0.0)
+        suspended.resize(1400.0, 0.0); suspended.resize(0.0, 0.0)
+        assertEquals(0.0, suspended.scale); assertEquals(3.0, suspended.zoom)
+        assertFailsWith<IllegalArgumentException> { suspended.toScene(0.0, 0.0) }
+        assertFailsWith<IllegalArgumentException> { suspended.resize(-1.0, 100.0) }
+        direct.resize(1400.0, 1000.0); suspended.resize(1400.0, 1000.0)
+        assertEquals(direct.toScene(700.0, 500.0), suspended.toScene(700.0, 500.0))
+        assertEquals(direct.offsetX, suspended.offsetX); assertEquals(direct.offsetY, suspended.offsetY)
+        assertEquals(before.x, suspended.toScene(700.0, 500.0).x, 1e-9)
+        assertEquals(before.y, suspended.toScene(700.0, 500.0).y, 1e-9)
+    }
+    @Test fun resetAndPageReplacementDuringZeroLayoutDiscardOldReadingCenter() {
+        val reset = panned(); reset.resize(0.0, 0.0); reset.reset(); reset.resize(1000.0, 1400.0)
+        assertEquals(1.0, reset.zoom); assertEquals(PointD(500.0, 700.0), reset.toScene(500.0, 700.0))
+        val changed = panned(); changed.resize(0.0, 0.0); changed.configurePage(600.0, 800.0)
+        changed.resize(1000.0, 1400.0)
+        assertEquals(1.0, changed.zoom); assertEquals(PointD(300.0, 400.0), changed.toScene(500.0, 700.0))
+    }
+    @Test fun restoredCenterStillUsesExistingBoundaryConstraints() {
+        val direct = panned(); val suspended = panned()
+        suspended.resize(0.0, 0.0)
+        direct.resize(9000.0, 100.0); suspended.resize(9000.0, 100.0)
+        assertEquals(direct.toScene(4500.0, 50.0), suspended.toScene(4500.0, 50.0))
+        assertEquals((suspended.width - suspended.pageWidth * suspended.scale) / 2, suspended.offsetX)
+    }
     @Test fun pageDimensionsFitLandscapeAndResetWithoutChangingTheInverseMapping() {
         val v = PreviewViewport(); v.resize(600.0, 900.0)
         v.configurePage(1200.0, 600.0)
