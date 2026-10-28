@@ -63,7 +63,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(bytes); it.flush() }
     }
     fun importCopy(uri: Uri): DocumentRoot {
-        val bytes = checkNotNull(resolver.openInputStream(uri)).use(::readBounded)
+        val bytes = checkNotNull(resolver.openInputStream(uri)).use(::readBoundedPreviewBytes)
         val id = UUID.randomUUID().toString(); check(!file(id).exists())
         val source = readPreview(decode(bytes))
         return PagedPreviewCodec.copyAsNew(source, SceneId(id),
@@ -95,15 +95,6 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         }
         PreviewRecoveryCodec.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
     }
-    private fun readBounded(input: java.io.InputStream): ByteArray {
-        val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
-        while (true) {
-            val count = input.read(buffer); if (count < 0) break
-            if (output.size().toLong() + count > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
-            output.write(buffer, 0, count)
-        }
-        return output.toByteArray()
-    }
     private fun decode(bytes: ByteArray): String = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
         .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
     fun read(id: String): DocumentRoot = readRecovery(id).let {
@@ -111,7 +102,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     fun readRecovery(id: String): PagedPreviewSnapshot = AtomicFile(file(id)).openRead().use { stream ->
         if (stream.channel.size() > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
-        val text = try { decode(readBounded(stream)) } catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
+        val text = try { decode(readBoundedPreviewBytes(stream)) } catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
         val result = PreviewRecoveryCodec.read(text)
         val snapshot = result.snapshot ?: throw ReadRefused(when (checkNotNull(result.failure)) {
             PreviewReadFailure.CHARACTER_CAPACITY -> LocalReadFailure.CHARACTER_CAPACITY
@@ -142,4 +133,18 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         val result = PreviewDocumentReader.read(text)
         return requireNotNull(result.root) { "Preview document refused: ${result.failure}" }
     }
+}
+
+/** Bounded synchronous read on the original worker. A broken provider must not spin that worker forever. */
+internal fun readBoundedPreviewBytes(input: java.io.InputStream): ByteArray {
+    val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        if (count == 0) throw IOException("Preview input stream made no progress")
+        if (output.size().toLong() + count > PagedPreviewCodec.MAX_UTF8_BYTES.toLong())
+            throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+        output.write(buffer, 0, count)
+    }
+    return output.toByteArray()
 }

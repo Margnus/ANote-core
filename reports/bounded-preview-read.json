@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "requirement": "LIB-10",
+  "status": "passed",
+  "scope": "Original Android preview bounded InputStream helper tested with synthetic streams on host JVM; no ContentProvider, device, production PDF/image import or durable storage acceptance",
+  "tests": 5,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "96686655219ed9d7fdb06b74e28e8433cb015ea701c2860dcfa0a759c5a5fc47",
+    "android-app/src/test/java/dev/notecore/app/BoundedPreviewReadTest.kt": "b82050e1a8304bb09d0a27dff9f79e8cef152fe43360a7310535b9a0f8935a9c",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.BoundedPreviewReadTest.xml": "5f13bd0bca1a2fdeb090d34740b8faff83d4f62038c34cacff624a1124457ee8",
+    "reports/verification.json": "5c71c502ed28c70dc929aefeeec329939b4f5b0cef8ee9d13cfd57d8c365ec72",
+    "reports/android-build-inputs.sha256": "b75c6c8813d2807aa69684ca5ebc585cf1f387e23d1fce2a7187c2aa2595a846",
+    "android-app/build/reports/lint-results-debug.xml": "56907741208c95504f946865bae33b773af34c497cec5fd44f67e4378a8aef4b",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "26a2136a099d3fe8a95c3d27e3ed43d315fe8b06ec85cb508a4ebe787fd2ed38"
+  },
+  "scenarios": [
+    "fragmentedReadsAndEmptyEofPreserveEveryByte",
+    "actualByteCapacityAllowsExactLimitAndRefusesTheNextByte",
+    "originalReadExceptionIsPropagatedWithoutRetryOrPartialSuccess",
+    "zeroProgressIsIoFailureOnFirstObservationAndCallerClosesStream",
+    "partialPrefixIsNeverReturnedAfterZeroProgressAndUseClosesOnFailure"
+  ],
+  "android_build_verified": true,
+  "android_lint_errors": 0,
+  "android_lint_warnings": 8,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "real provider/file-picker/share runtime and blocking-read behavior",
+    "production PDF/PNG/JPEG import with cancel/retry and no partial files",
+    "DATA-07/DATA-04 storage and platform acceptance"
+  ]
+}
