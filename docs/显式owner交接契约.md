@@ -2,7 +2,15 @@
 
 2026-10-27，C1第4项、ENG-04/ENG-14的有限采用决策。复用原PagedPreviewNotebook、不可变PagedPreviewSnapshot及原ownerCheck，不新增会话authority、线程调度器或存储协议。实际证据见[原交接报告](../reports/release-handoff.json)与[原JVM owner消费者](../shared-core/src/jvmTest/kotlin/dev/notecore/document/DocumentOwnerThreadTest.kt)。
 
-## 可以采用的路径
+## 2026-10-28 补充：确认写入后整个旧进程终止（API32子范围）
+
+与下文协作退休分开采用：当原完整checkpoint已由原Store worker实际写入并确认，且OS已经确认整个旧进程终止，新进程可从原文件经完整读取/能力/额度验证后，用新Store、新owner和新nonce采用。该路径不迁移旧Notebook/ledger/worker，也不依赖已终止owner再发退休回执。旧进程是否终止未知时，不能依据弱引用、超时或View消失启动并行写者。
+
+[API32原宿主报告](../reports/android-path-api32-host-tests.json)的`confirmed_checkpoint_process_recovery`记录两次force-stop及三个PID：8913持有完成pending，原worker确认信封写入后整体终止；9001读盘后显式提交两次仍只一笔，确认规范替换后整体终止；9085重开保持1笔3点/版本2/无pending及同一规范文件hash。两个就绪点没有releaseActive或stopTestBackend，等待期间强持有原Store/Notebook并在主owner检查active/pending/空ledger。主机在kill前核对就绪PID确实存活、命令尚运行，kill后核对进程不存在和文件字节。新文件由原worker生成，没有手工seed；synthetic公开输入/owner故障仅构造合法pending，不宣称自然UI崩溃。
+
+采用的是已确认写入后的进程死亡恢复，不是进程内另一线程接管；新Store的程序调用不是普通UI自动恢复验收。原文件仍须完整解码，pending不得只取base。新会话历史重新建立，显式重试只提交一次。未确认IO、原子替换窗口、断电、活动arena自动恢复、未知旧进程、Native长期未signal/GC/物理heap与普通GUI仍未验证，完整C1及生产SQLite仍待。
+
+## 可以采用的路径（原协作范围）
 
 1. 原 owner 在自己的线程完成/显式取消活动输入。正文由原保存责任方准入；若有完成但未提交的 pending，必须保留完整 checkpoint，不能用 capture 的正文部分替代。
 2. 原 owner 捕获不可变 checkpoint；普通正文按原 retire 契约退休。pending 只在宿主确认同一 checkpoint 的真实 IO 后调用 retireAfterRecovery。引用比较守卫不是磁盘成功证明，回执由宿主负责。

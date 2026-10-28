@@ -126,4 +126,116 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             file.writeText(valid, Charsets.UTF_8)
         } finally { main { store.stopTestBackend() }; dir.deleteRecursively() }
     }
+    /** Test process remains alive with its original owner/worker until the external driver force-stops it.
+     * Only confirmed checkpoint/canonical writes are covered; no unconfirmed IO or power-loss claim.
+     */
+    fun processCheckpoint(phase: String, scope: String): String {
+        check(java.util.UUID.fromString(scope).toString() == scope)
+        val case = File(host.cacheDir, "process-recovery-$scope")
+        val directory = File(case, "document")
+        val document = File(directory, "process-recovery.ncp")
+        fun sha(file: File) = java.security.MessageDigest.getInstance("SHA-256").digest(file.readBytes())
+            .joinToString("") { "%02x".format(it) }
+        fun marker(name: String, note: PagedPreviewNotebook) {
+            val data = org.json.JSONObject().put("pid", android.os.Process.myPid()).put("scope", scope)
+                .put("document_sha256", sha(document)).put("revision", note.changeVersion)
+                .put("stroke_count", note.totalStrokeCount).put("pending", note.hasPendingStroke)
+                .put("owner_not_retired", true).put("worker_not_stopped", true)
+            File(case, name).writeText(data.toString(), Charsets.UTF_8)
+        }
+        fun waitForExternalStop(store: NoteStore, note: PagedPreviewNotebook): Nothing {
+            val until = SystemClock.uptimeMillis() + 90_000
+            while (SystemClock.uptimeMillis() < until) {
+                // Keep both original objects strongly reachable and check their live owner before death.
+                main {
+                    check(store.activeDocumentId == note.documentId && store.saveStates().isEmpty())
+                    check(note.hasPendingStroke == (phase == "process_checkpoint_prepare"))
+                }
+                SystemClock.sleep(100)
+            }
+            error("External process-stop driver did not arrive")
+        }
+        if (phase == "process_checkpoint_prepare") {
+            check(!case.exists() && case.mkdirs())
+            lateinit var store: NoteStore; lateinit var note: PagedPreviewNotebook
+            var armed = false; var probing = false; var saved = false
+            main {
+                store = NoteStore.isolated(host, directory)
+                val root = DocumentRoot.empty(SceneId("process-recovery"), "base",
+                    PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0))
+                note = PagedPreviewNotebook(root, "process-seed", ownerCheck = {
+                    check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
+                    if (armed && !probing) {
+                        probing = true; val pending = try { note.hasPendingStroke } finally { probing = false }
+                        if (pending) { armed = false; error("Synthetic commit owner fault") }
+                    }
+                })
+                store.attachActive(note); check(note.rename("process checkpoint"))
+                check(note.beginStroke(1.25,2.5,.125f,7) && note.appendStroke(3.0,4.0,.625f,9))
+                armed = true
+                try { note.endStroke(8.0,6.0,1f,10); error("Expected owner fault") }
+                catch (_: IllegalStateException) { check(!armed) }
+                check(note.hasPendingStroke && note.totalStrokeCount == 0)
+                check(store.save(note.captureRecovery()) { _, error -> check(error == null); saved = true })
+            }
+            eventually("Checkpoint write did not complete") { saved && store.saveStates().isEmpty() }
+            main {
+                check(store.activeDocumentId == note.documentId && note.hasPendingStroke)
+                check(note.authorityStatus().historyByteCharge > 0L)
+                check(document.readText(Charsets.UTF_8) == note.captureRecovery().encode())
+                marker("checkpoint-ready.json", note)
+            }
+            waitForExternalStop(store, note)
+        }
+        check(case.isDirectory && document.isFile)
+        lateinit var store: NoteStore; lateinit var note: PagedPreviewNotebook
+        var opened = false
+        main {
+            store = NoteStore.isolated(host, directory)
+            store.open("process-recovery") { value, error ->
+                check(error == null); note = store.adopt(checkNotNull(value)); opened = true
+            }
+        }
+        eventually("Process checkpoint did not reopen") { opened }
+        if (phase == "process_checkpoint_resume") {
+            val prior = org.json.JSONObject(File(case, "checkpoint-ready.json").readText(Charsets.UTF_8))
+            check(prior.getInt("pid") != android.os.Process.myPid())
+            check(sha(document) == prior.getString("document_sha256"))
+            var saved = false
+            main {
+                check(note.hasPendingStroke && note.totalStrokeCount == 0 && note.changeVersion == 1L)
+                val pending = checkNotNull(note.pendingStroke())
+                check(note.retryPendingStroke() && note.retryPendingStroke())
+                check(!note.hasPendingStroke && note.totalStrokeCount == 1 && note.changeVersion == 2L)
+                check(note.stroke(0).samples == (pending.command as CanvasCommand.AddStroke).samples)
+                check(store.save(note.captureRecovery()) { _, error -> check(error == null); saved = true })
+            }
+            eventually("Recovered canonical write did not complete") { saved && store.saveStates().isEmpty() }
+            main {
+                check(store.activeDocumentId == note.documentId)
+                check(document.readText(Charsets.UTF_8) == note.capture().encode())
+                marker("committed-ready.json", note)
+            }
+            waitForExternalStop(store, note)
+        }
+        check(phase == "process_checkpoint_verify")
+        val prior = org.json.JSONObject(File(case, "committed-ready.json").readText(Charsets.UTF_8))
+        check(prior.getInt("pid") != android.os.Process.myPid())
+        check(sha(document) == prior.getString("document_sha256"))
+        main {
+            check(!note.hasPendingStroke && note.totalStrokeCount == 1 && note.changeVersion == 2L)
+            check(note.title == "process checkpoint" && note.pointCount(0) == 3)
+            check(note.pointX(0,0) == 1.25 && note.pointY(0,2) == 6.0)
+            check(note.pointPressure(0,0) == .125f && note.stroke(0).samples.timeMicros(2) == 10L)
+            check(note.retryPendingStroke() && note.changeVersion == 2L && note.totalStrokeCount == 1)
+            check(document.readText(Charsets.UTF_8) == note.capture().encode())
+            store.stopTestBackend()
+        }
+        return org.json.JSONObject().put("pid",android.os.Process.myPid()).put("scope",scope)
+            .put("canonical_sha256",sha(document)).put("stroke_count",1).put("point_count",3)
+            .put("revision",2).put("pending",false).put("checkpoint_worker_write_verified",true)
+            .put("repeated_commit_did_not_duplicate",true).put("unconfirmed_io_kill_verified",false)
+            .put("power_loss_verified",false).toString()
+    }
+
 }

@@ -26,9 +26,13 @@ class ViewportInstrumentation : Instrumentation() {
     private var titleOnly = false
     private var editOnly = false
     private var storageRetentionOnly = false
+    private var processCheckpointCase: String? = null
+    private var processCheckpointScope = ""
     private var minimumApiOnly = false
     private var ownerRetirementOnly = false
     override fun onCreate(arguments: Bundle?) {
+        processCheckpointCase = arguments?.getString("notecore_case")?.takeIf { it.startsWith("process_checkpoint_") }
+        processCheckpointScope = arguments?.getString("process_checkpoint_scope") ?: ""
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
@@ -50,6 +54,10 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            processCheckpointCase?.let { phase ->
+                result.putString("process_checkpoint_observations",PendingRecoveryHostChecks(this,host).processCheckpoint(phase,processCheckpointScope))
+                result.putString("process_checkpoint_status","passed"); finish(Activity.RESULT_OK,result); return
+            }
             if (minimumApiOnly) {
                 var failure: Throwable? = null
                 runOnMainSync { try { result.putString("minimum_api_observations",MinimumApiHostChecks.verify(host)) } catch (error: Throwable) { failure=error } }
