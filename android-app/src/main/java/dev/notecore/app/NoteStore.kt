@@ -576,6 +576,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         if (ownerRetiring || (editors.isNotEmpty() && activeNotebook?.documentId != id)) {
             notifyUi { callback(null, "其他窗口正在编辑，或原笔记尚待保存，请完成后重试") }; return
         }
+        if (!isLocalPreviewDocumentId(id)) {
+            notifyUi { callback(null, LocalReadFailure.INVALID_LOCAL_IDENTITY.message) }; return
+        }
         activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot() && activeSavedPending.get() === it.pendingStroke(), it.captureRecovery()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
         request(Triple(id, retained, io), READ_WORK_BYTES, { input ->

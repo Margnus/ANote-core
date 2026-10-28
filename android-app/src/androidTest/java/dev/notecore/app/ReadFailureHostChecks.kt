@@ -18,6 +18,89 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
         while (!done && SystemClock.uptimeMillis()<end) { main { done=predicate() }; if (!done) SystemClock.sleep(20) }
         check(done) { "Read callback did not arrive" }
     }
+    private fun localFileIdentity(directory: File) {
+        check(directory.mkdirs())
+        val invalid = listOf("../outside", "a/b", "", "local\n", "local\r", "local\r\n", "local\u2028", "中文😀", "x".repeat(129))
+        val valid = listOf("A", "A0-z", "x".repeat(128))
+        val message = "笔记身份不适用于本机文件，原文件已保留"
+        fun fixture(id: String) = "NCPREVIEW\t2\nD\t$id\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+        for (id in valid) File(directory, "$id.ncp").writeText(fixture(id), Charsets.UTF_8)
+        val ignored = File(directory, "ignored\n.ncp"); val original = "keep ignored original".toByteArray()
+        ignored.writeBytes(original)
+        val adapterReads = java.util.concurrent.atomic.AtomicInteger()
+        val io = PreviewFileIO(directory, host.contentResolver, beforeRead = { adapterReads.incrementAndGet() })
+        check(io.catalog().map { it.id }.toSet() == valid.toSet())
+        val errors = mutableListOf<String>()
+        for ((index, id) in invalid.withIndex()) {
+            val result = runCatching { io.readOutcome(id) }
+            val refusal = result.getOrNull() as? LocalRecoveryRead.Refused
+            if (refusal?.reason?.message != message) errors.add("adapter[$index]=${result.exceptionOrNull()?.javaClass?.simpleName ?: result.getOrNull()}")
+        }
+        if (adapterReads.get() != 0) errors.add("invalid adapter read hooks=${adapterReads.get()}")
+        val ownerReads = java.util.concurrent.atomic.AtomicInteger()
+        lateinit var store: NoteStore
+        main { store = NoteStore.isolated(host, directory, beforeOpenRead = { ownerReads.incrementAndGet() }) }
+        fun refuse(id: String, index: Int) {
+            var done = false
+            main { store.open(id) { value, error ->
+                if (value != null || error != message) errors.add("owner[$index]=$error")
+                done = true
+            } }
+            await { done }
+        }
+        for ((index, id) in invalid.withIndex()) refuse(id, index)
+        lateinit var note: PagedPreviewNotebook
+        lateinit var root: DocumentRoot
+        var saved = false
+        main {
+            check(store.activeDocumentId == null)
+            note = store.create(); root = note.snapshot()
+            check(store.save(note.capture()) { _, error -> check(error == null); saved = true })
+        }
+        await { saved && store.saveStates().isEmpty() }
+        main { check(note.beginStroke(1.0, 2.0, .5f, 1) && note.appendStroke(3.0, 4.0, .5f, 2)) }
+        var operation: String? = null; var reservation = 0L
+        main { operation = note.activeInputOperationId; reservation = note.inputReservedByteCharge }
+        for ((index, id) in invalid.withIndex()) {
+            refuse(id, index + invalid.size)
+            main {
+                check(store.activeDocumentId == note.documentId && note.snapshot() === root && note.hasActiveStroke)
+                check(note.activeInputOperationId == operation && note.inputReservedByteCharge == reservation && store.saveStates().isEmpty())
+            }
+        }
+        if (ownerReads.get() != 0) errors.add("invalid owner read hooks=${ownerReads.get()}")
+        val readsBeforeValid = ownerReads.get()
+        var opened = false
+        main { store.open(valid.last()) { value, error ->
+            check(error == null && value?.root?.id?.value == valid.last()); opened = true
+        } }
+        await { opened }
+        check(ownerReads.get() == readsBeforeValid + 1)
+        saved = false
+        lateinit var completed: PagedPreviewSnapshot
+        main {
+            check(note.snapshot() === root && note.activeInputOperationId == operation)
+            check(note.endStroke(5.0, 6.0, .5f, 3) && note.pointCount(0) == 3)
+            completed = note.capture(); check(store.save(completed) { _, error -> check(error == null); saved = true })
+        }
+        await { saved && store.saveStates().isEmpty() }
+        check(File(directory, "${completed.documentId}.ncp").readText(Charsets.UTF_8) == completed.encode())
+        main { check(store.releaseActive(note)) }
+        opened = false
+        main { store.open(completed.documentId) { value, error ->
+            check(error == null); val restored = store.adopt(checkNotNull(value))
+            check(restored.capture().sameContent(completed) && restored.pointCount(0) == 3)
+            check(store.releaseActive(restored)); opened = true
+        } }
+        await { opened }
+        main {
+            val unicode = checkNotNull(PagedPreviewNotebook.createValidated("中文😀", "canonical", "unicode", ownerCheck = { check(Looper.myLooper() == Looper.getMainLooper()) }).notebook)
+            check(unicode.retire()); check(store.beginOwnerRetirement() == StoreRetirementRequest.STARTED)
+        }
+        await { store.ownerRetirementStatus().phase == StoreOwnerPhase.RETIRED && store.ownerRetirementStatus().workerStopped }
+        check(ignored.readBytes().contentEquals(original))
+        check(errors.isEmpty()) { errors.joinToString("; ") }
+    }
     private fun longNumericCheckpoint(directory: File) {
         val id = "long-capacity"; val layer = LayerId("ink")
         val samples = StrokeSamples.copyOf(DoubleArray(20000) { -1.2345678901234567e-100 },
@@ -85,6 +168,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
     }
     fun verify() {
         val directory=File(host.cacheDir,"read-failure-${java.util.UUID.randomUUID()}").apply { mkdirs() }
+        localFileIdentity(File(directory, "local-identity"))
         longNumericCheckpoint(File(directory, "long-numeric"))
         val id="read-failures"; val file=File(directory,"$id.ncp")
         val valid="NCPREVIEW\t2\nD\t$id\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"

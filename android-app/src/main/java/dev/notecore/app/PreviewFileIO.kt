@@ -13,6 +13,10 @@ import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
 import java.util.UUID
 
+/** Platform filename policy only; canonical document IDs retain their broader Unicode contract. */
+internal fun isLocalPreviewDocumentId(id: String): Boolean = id.length in 1..128 &&
+    id.all { it == '-' || it in '0'..'9' || it in 'A'..'Z' || it in 'a'..'z' }
+
 internal class CatalogCapacityRefusal : RuntimeException()
 internal enum class PreviewWriteBoundary { SYNCED_BEFORE_REPLACE, VERIFIED_BEFORE_RETURN }
 
@@ -24,6 +28,7 @@ internal enum class LocalReadFailure(val message: String) {
     BYTE_CAPACITY("笔记文件超过预览读取容量，原文件已保留"),
     INVALID_UTF8("笔记文本编码无效，原文件已保留"),
     WRONG_DOCUMENT("笔记身份与文件不一致，原文件已保留"),
+    INVALID_LOCAL_IDENTITY("笔记身份不适用于本机文件，原文件已保留"),
     IO_FAILURE("笔记文件读取失败，请检查文件后重试")
 }
 internal sealed interface LocalRecoveryRead {
@@ -37,7 +42,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     private val observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}) {
     private fun ensureDirectory() { check(directory.isDirectory || directory.mkdirs()) { "Storage directory unavailable" } }
     private fun file(id: String): File {
-        require(id.matches(Regex("[a-zA-Z0-9-]{1,128}")))
+        require(isLocalPreviewDocumentId(id))
         return File(directory, "$id.ncp")
     }
     fun write(snapshot: PreviewSaveSnapshot) {
@@ -89,7 +94,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
                 val name = path.fileName.toString()
                 if (name.endsWith(".ncp") || name.endsWith(".ncp.bak")) {
                     val id = name.removeSuffix(".bak").removeSuffix(".ncp")
-                    if (id.matches(Regex("[a-zA-Z0-9-]{1,128}"))) ids.add(id)
+                    if (isLocalPreviewDocumentId(id)) ids.add(id)
                     if (ids.size > PreviewCatalogBudget.maxDiskRows) throw CatalogCapacityRefusal()
                 }
             }
@@ -136,11 +141,14 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         })
         return if (snapshot.documentId == id) LocalRecoveryRead.Opened(snapshot) else LocalRecoveryRead.Refused(LocalReadFailure.WRONG_DOCUMENT)
     }
-    fun readOutcome(id: String): LocalRecoveryRead = try {
-        beforeRead()
-        LocalRecoveryRead.Opened(readRecovery(id))
-    } catch (refusal: ReadRefused) { LocalRecoveryRead.Refused(refusal.reason) }
-      catch (_: IOException) { LocalRecoveryRead.Refused(LocalReadFailure.IO_FAILURE) }
+    fun readOutcome(id: String): LocalRecoveryRead {
+        if (!isLocalPreviewDocumentId(id)) return LocalRecoveryRead.Refused(LocalReadFailure.INVALID_LOCAL_IDENTITY)
+        return try {
+            beforeRead()
+            LocalRecoveryRead.Opened(readRecovery(id))
+        } catch (refusal: ReadRefused) { LocalRecoveryRead.Refused(refusal.reason) }
+          catch (_: IOException) { LocalRecoveryRead.Refused(LocalReadFailure.IO_FAILURE) }
+    }
 
     /** Typed shared reader owns format/content refusal; only local worker IO errors escape this adapter. */
     private fun readPreview(text: String): DocumentRoot {
