@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "requirement": "PAGE-01",
+  "status": "passed",
+  "scope": "Internal A4/screen-ratio presets integrated with original document command, authority, undo/redo and codec on JVM; no App or durable storage acceptance",
+  "tests": 5,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PageTemplateRules.kt": "dd5fcf1b7d15e7e905fc6e88a1d58774d038bd249da1050d14745ab0b9be280c",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "b38f7c72fa031a723fd94a1417966c52f1f12d43d6a4f7649bcb7839be054afc",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "5cda54d679617b338e9eb1d4d868490eaefd0f85599abe13747aea136559194a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "2ab9c0d1270881e252c82b79e540091d28f334755eb76490bc468dc8970fcd87",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PageTemplateRulesTest.kt": "8082a0204a2e10f89043808e12bba889370e6837d9c75cfeecaaab0d056f53da",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PageTemplateRulesTest.xml": "5c9352662a30e0a98903088f74da6ad711ed7b3df7ad13d772990b4207ac1858",
+    "reports/verification.json": "38f098a9384bd4a36a864757c426f83d57648fc91cb42acc68706c7d5225ac33"
+  },
+  "scenarios": [
+    "missingPageAndStaleTemplateCannotChangeDocument[jvm]",
+    "templateChangeUsesOriginalAuthorityAndKeepsInkThroughUndoRedoAndCodec[jvm]",
+    "screenRatioUsesSnapshotOrientationAndIgnoresUniformDensityScale[jvm]",
+    "allFourPapersUseExistingA4CoordinateConventionAndOrientation[jvm]",
+    "invalidViewportAndExtremeAspectRatioNeverProduceCommands[jvm]"
+  ],
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "LIB-01 and production document transaction",
+    "Android and Apple usable viewport snapshot and preset UI",
+    "physical/template style specification and visual acceptance",
+    "durable save/reopen and platform acceptance"
+  ]
+}
