@@ -2,7 +2,7 @@ import Foundation
 import NoteCanvasPrototype
 
 enum LocalReadFailure {
-    case invalidFormat, unsupportedContent, characterCapacity, byteCapacity, invalidUTF8, wrongDocument, ioFailure
+    case invalidFormat, unsupportedContent, characterCapacity, byteCapacity, invalidUTF8, wrongDocument, invalidLocalIdentity, ioFailure
     var message: String {
         switch self {
         case .invalidFormat: return "笔记格式无效或版本不支持，原文件已保留"
@@ -11,6 +11,7 @@ enum LocalReadFailure {
         case .byteCapacity: return "笔记文件超过预览读取容量，原文件已保留"
         case .invalidUTF8: return "笔记文本编码无效，原文件已保留"
         case .wrongDocument: return "笔记身份与文件不一致，原文件已保留"
+        case .invalidLocalIdentity: return "笔记身份不适用于本机文件，原文件已保留"
         case .ioFailure: return "笔记文件读取失败，请检查文件后重试"
         }
     }
@@ -25,6 +26,13 @@ private enum TextReadRefusal: Error { case byteCapacity, invalidUTF8 }
 enum PreviewWriteBoundary: String { case beforeAtomicWrite, afterAtomicWrite }
 
 enum PreviewFileIO {
+    // Local filename policy only; canonical document IDs may contain other Unicode scalars.
+    // Check every byte explicitly: regex end-anchor behaviour differs across Foundation targets.
+    static func isLocalDocumentId(_ id: String) -> Bool {
+        (1...128).contains(id.utf16.count) && id.utf8.allSatisfy {
+            $0 == 45 || (48...57).contains($0) || (65...90).contains($0) || (97...122).contains($0)
+        }
+    }
     static let maxReadBytes = Int(PagedPreviewCodec.shared.maximumUtf8ByteCount())
     static func readUTF8(_ url: URL, maxBytes: Int = maxReadBytes) throws -> String {
         let handle = try FileHandle(forReadingFrom: url)
@@ -107,7 +115,7 @@ enum PreviewFileIO {
         guard try directory.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else { throw CocoaError(.fileReadNoSuchFile) }
         for case let url as URL in iterator where url.pathExtension == "ncp" {
             let id = url.deletingPathExtension().lastPathComponent
-            guard id.range(of: "^[a-zA-Z0-9-]{1,128}$", options: .regularExpression) != nil,
+            guard isLocalDocumentId(id),
                   try url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else { continue }
             guard urls.count < Int(PreviewCatalogBudget.shared.maxDiskRows) else { throw CatalogCapacityRefusal.tooManyRows }
             urls.append(url)

@@ -304,7 +304,7 @@ final class PreviewModel: ObservableObject {
         refresh()
     }
     private static func file(_ id: String, directory: URL) -> URL {
-        precondition(id.range(of: "^[a-zA-Z0-9-]{1,128}$", options: .regularExpression) != nil)
+        precondition(PreviewFileIO.isLocalDocumentId(id))
         return directory.appendingPathComponent(id).appendingPathExtension("ncp")
     }
     private func request<Input, Output>(input: Input, bytes: Int64, compute: @escaping (Input) throws -> Output,
@@ -456,6 +456,7 @@ final class PreviewModel: ObservableObject {
     }
     private func openDocument(_ id: String, replacingIdle: Bool, opened: ((PagedPreviewNotebook) -> Void)?) {
         guard !ownerRetiring, current == nil || (replacingIdle && editors.isEmpty) else { return }
+        guard PreviewFileIO.isLocalDocumentId(id) else { status = LocalReadFailure.invalidLocalIdentity.message; return }
         let previous = current
         navigationEpoch += 1
         let navigation = navigationEpoch, epoch = storageEpoch

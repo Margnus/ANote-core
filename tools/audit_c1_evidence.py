@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
               'chunked-brush-costs', 'brush-tile-cache-costs')
 CURRENT = {
+    'apple-local-file-identity': ('source_and_artifact_sha256',),
     'second-host-android-current': ('source_and_artifact_sha256',),
     'consumer-current-contracts': ('source_and_artifact_sha256',),
     'android-budget-overlap': ('source_and_artifact_sha256',),

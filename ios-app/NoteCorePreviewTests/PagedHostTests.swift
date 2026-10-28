@@ -6,6 +6,56 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testInvalidLocalFileIdentityRefusesBeforeIOAndPreservesCurrentInput() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let invalid = ["../outside", "a/b", "", "local\n", "local\r", "local\r\n", "local\u{2028}", "中文😀", String(repeating: "x", count: 129)]
+        let valid = ["A0-z", String(repeating: "x", count: 128)]
+        for id in invalid { XCTAssertFalse(PreviewFileIO.isLocalDocumentId(id)) }
+        for id in valid {
+            XCTAssertTrue(PreviewFileIO.isLocalDocumentId(id))
+            let encoded = "NCPREVIEW\t2\nD\t\(id)\tlocal\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+            try Data(encoded.utf8).write(to: dir.appendingPathComponent(id + ".ncp"))
+        }
+        let ignored = dir.appendingPathComponent("ignored\n.ncp"), original = Data("keep ignored original".utf8)
+        try original.write(to: ignored)
+        XCTAssertEqual(Set(try PreviewFileIO.catalog(dir).map { $0.deletingPathExtension().lastPathComponent }), Set(valid))
+        let readLock = NSLock(); var reads = 0, called = false
+        let model = PreviewModel(directory: dir, beforeOpenRead: { readLock.withLock { reads += 1 } })
+        for id in invalid {
+            model.open(id)
+            XCTAssertNil(model.current); XCTAssertEqual(model.status, "笔记身份不适用于本机文件，原文件已保留")
+        }
+        model.create()
+        let note = try XCTUnwrap(model.current)
+        try await eventually("original creation saves") { model.ownerRetirementStatus.pendingWrites == 0 }
+        let root = note.snapshot()
+        XCTAssertTrue(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
+        XCTAssertTrue(note.appendStroke(x: 3, y: 4, pressure: 0.5, timeMicros: 2))
+        let operation = note.activeInputOperationId, bytes = note.inputReservedByteCharge
+        for id in invalid {
+            model.openForEditor(id) { _ in called = true }
+            XCTAssertTrue(model.current === note); XCTAssertTrue(note.snapshot() === root)
+            XCTAssertEqual(model.status, "笔记身份不适用于本机文件，原文件已保留")
+            XCTAssertEqual(note.activeInputOperationId, operation); XCTAssertEqual(note.inputReservedByteCharge, bytes)
+            XCTAssertTrue(note.hasActiveStroke); XCTAssertEqual(model.ownerRetirementStatus.pendingWrites, 0)
+        }
+        XCTAssertFalse(called); XCTAssertEqual(readLock.withLock { reads }, 0)
+        XCTAssertTrue(note.endStroke(x: 5, y: 6, pressure: 0.5, timeMicros: 3))
+        XCTAssertEqual(note.pointCount(index: 0), 3); model.changed()
+        try await eventually("original owner still saves accepted input") { model.ownerRetirementStatus.pendingWrites == 0 }
+        model.close()
+        model.open(valid[1]); try await eventually("valid maximum-length identity opens") { model.current?.documentId == valid[1] }
+        XCTAssertEqual(readLock.withLock { reads }, 1); model.close()
+        XCTAssertEqual(try Data(contentsOf: ignored), original)
+        let unicode = PagedPreviewNotebook.companion.createValidated(documentId: "中文😀", title: "canonical", sessionNonce: "unicode",
+            width: 595, height: 842, paper: .blank, budget: DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+                journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
+                historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024), ownerCheck: { precondition(Thread.isMainThread) })
+        XCTAssertNotNil(unicode.notebook); XCTAssertTrue(unicode.notebook?.retire() == true)
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("same original model retires") { model.ownerRetirementStatus.phase == .retired }
+    }
     @MainActor func testAtomicWriteProcessBoundary() async throws {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let control = caches.appendingPathComponent("NoteCoreAtomicCutControl", isDirectory: true)
