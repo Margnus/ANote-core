@@ -1,5 +1,13 @@
 # 当前Android独立环境验证
 
+## 2026-10-29：真实选择器期间Activity配置重建
+
+本轮沿有限C1原picker消费者，起点7df23db，验收卡目标为真实系统选择器前台期间原Activity实际销毁重建后，导入/导出的成功结果与取消仍正确消费，取消后可再请求，既有文件保持。Manifest自行处理orientation/screenSize等，故不把旋转称Activity重建；改用系统font_scale 1.0→1.1→1.0→1.1→1.0，结束恢复原设置。未修改App或使用Instrumentation调用recreate。
+
+独立API35 AVD普通PID3244保持，实际完成导入取消→再次导入成功→导出成功→导出取消四个子场景。每次系统events都记录MainActivity的wm_relaunch_resume_activity（fontScale配置位40000000）、onDestroy、onCreate，随后onActivityResult；明确证明同进程Activity重建后结果交付。导入取消后系统picker可重新打开；第二次选择有效源仅增加一份两笔副本。导出成功落到Downloads的文件与该副本字节完全相同；导出取消重建后再次请求亦可打开picker并正常取消。原三份笔记所有字节保持，第四份新副本及导出文件保留，字体设置恢复1.0。见[报告](../reports/current-api35-picker-recreation.json)与原始系统事件/操作/截图；入口`tools/verify_current_android_picker_recreation.py`只核验保留证据。
+
+8项观察复核和可移植性检查通过，采用原Store会话/单次结果消费的当前Android真实配置重建子范围。没有重跑未修改的共同/主机/仪器检查。进程死亡、系统权限撤回、完整资源备份、Apple/物理M-1/完整C1仍待，配置重建不能替代这些验收。下一步针对已保存原文件，核查picker前台期间后台App进程被系统终止后的旧结果拒绝与新会话恢复，不把该验证称IO中途崩溃或完整owner丢失收口。
+
 ## 2026-10-29：真实Downloads Provider交换与拒绝后恢复
 
 本轮沿DEV-036/040有限C1原消费者矩阵，起点f5d9c4b；验证卡目标为现有预览正文经真实系统选择器导出→导入副本→损坏输入拒绝→有效输入重试。验收要求是原文件及Provider源字节保持、完整笔迹内容保持、副本身份独立、失败不生成可见半文档，使用同一普通App/原Store-worker完成。不新增业务实现、格式、Provider替身或生产资源备份。
