@@ -17,22 +17,22 @@ import org.json.JSONObject
 internal object PdfGeometryArtChecks {
     private fun sha(file: File) = MessageDigest.getInstance("SHA-256").digest(file.readBytes())
         .joinToString("") { "%02x".format(it) }
-    private fun mapping(rotation: Int): Affine2D {
+    private fun mapping(rotation: Int, userUnit: Double): Affine2D {
         // Test-only invocation of the same compiled internal rule, without exporting a new facade.
         val cropClass = Class.forName("dev.notecore.document.PdfCropBox")
         val crop = cropClass.getConstructor(Double::class.javaPrimitiveType, Double::class.javaPrimitiveType,
             Double::class.javaPrimitiveType, Double::class.javaPrimitiveType).newInstance(40.0, 50.0, 340.0, 230.0)
         val rules = Class.forName("dev.notecore.document.PdfPageGeometryRules")
         val result = rules.getMethod("resolve", cropClass, Int::class.javaPrimitiveType, Double::class.javaPrimitiveType)
-            .invoke(rules.getField("INSTANCE").get(null), crop, rotation, 1.0)
+            .invoke(rules.getField("INSTANCE").get(null), crop, rotation, userUnit)
         val geometry = checkNotNull(result.javaClass.getMethod("getGeometry").invoke(result))
         return geometry.javaClass.getMethod("getPdfToPage").invoke(geometry) as Affine2D
     }
-    fun verify(context: Context, assets: AssetManager): String {
+    fun verify(context: Context, assets: AssetManager, fixture: String = "crop-rotations.pdf", userUnit: Double = 1.0): String {
         val directory = File(context.cacheDir, "pdf-geometry-${UUID.randomUUID()}")
         check(directory.mkdirs())
         val source = File(directory, "source.pdf")
-        assets.open("pdf/crop-rotations.pdf").use { input -> source.outputStream().use { input.copyTo(it) } }
+        assets.open("pdf/$fixture").use { input -> source.outputStream().use { input.copyTo(it) } }
         val recipe = JSONObject(assets.open("pdf/recipe.json").bufferedReader(Charsets.UTF_8).use { it.readText() })
         val before = sha(source)
         val anchors = listOf(PointD(56.0, 66.0), PointD(324.0, 66.0), PointD(56.0, 214.0), PointD(324.0, 214.0))
@@ -49,15 +49,15 @@ internal object PdfGeometryArtChecks {
                         File(directory, "background-$index.png").outputStream().use {
                             check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, it))
                         }
-                        check(page.width == expected.getInt("width") && page.height == expected.getInt("height")) {
-                            "System PDF page $index size ${page.width}x${page.height} disagrees with CropBox recipe"
+                        check(page.width == (expected.getInt("width") * userUnit).toInt() && page.height == (expected.getInt("height") * userUnit).toInt()) {
+                            "System PDF $fixture page $index size ${page.width}x${page.height} disagrees with CropBox/UserUnit $userUnit recipe"
                         }
-                        val transform = mapping(expected.getInt("rotation"))
+                        val transform = mapping(expected.getInt("rotation"), userUnit)
                         val pixels = JSONArray()
                         anchors.forEachIndexed { i, sourcePoint ->
                             val p = transform.map(sourcePoint)
                             val xy = expected.getJSONArray("marker_xy").getJSONArray(i)
-                            check(kotlin.math.abs(xy.getDouble(0) - p.x) < 1e-8 && kotlin.math.abs(xy.getDouble(1) - p.y) < 1e-8)
+                            check(kotlin.math.abs(xy.getDouble(0) * userUnit - p.x) < 1e-8 && kotlin.math.abs(xy.getDouble(1) * userUnit - p.y) < 1e-8)
                             val color = recipe.getJSONArray("marker_rgb").getJSONArray(i)
                             val actual = bitmap.getPixel(p.x.toInt(), p.y.toInt())
                             val rgb = listOf(Color.red(actual), Color.green(actual), Color.blue(actual))
@@ -82,6 +82,6 @@ internal object PdfGeometryArtChecks {
         check(sha(source) == before)
         return JSONObject().put("pages", observations).put("source_sha256_before", before)
             .put("source_sha256_after", sha(source)).put("cache_directory", directory.name)
-            .put("user_unit", 1).put("app_annotation_or_export_verified", false).toString()
+            .put("fixture", fixture).put("user_unit", userUnit).put("app_annotation_or_export_verified", false).toString()
     }
 }

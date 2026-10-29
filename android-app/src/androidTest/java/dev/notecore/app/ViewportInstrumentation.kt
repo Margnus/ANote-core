@@ -31,8 +31,12 @@ class ViewportInstrumentation : Instrumentation() {
     private var minimumApiOnly = false
     private var ownerRetirementOnly = false
     private var pdfGeometryOnly = false
+    private var pdfFixture = "crop-rotations.pdf"
+    private var pdfUserUnit = 1.0
     override fun onCreate(arguments: Bundle?) {
-        pdfGeometryOnly = arguments?.getString("notecore_case") == "pdf_geometry"
+        pdfGeometryOnly = arguments?.getString("notecore_case") in listOf("pdf_geometry", "pdf_user_unit", "pdf_inherited")
+        if (arguments?.getString("notecore_case") == "pdf_user_unit") { pdfFixture = "user-unit-2.pdf"; pdfUserUnit = 2.0 }
+        if (arguments?.getString("notecore_case") == "pdf_inherited") pdfFixture = "inherited-geometry.pdf"
         processCheckpointCase = arguments?.getString("notecore_case")?.takeIf { it.startsWith("process_checkpoint_") }
         processCheckpointScope = arguments?.getString("process_checkpoint_scope") ?: ""
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
@@ -50,7 +54,7 @@ class ViewportInstrumentation : Instrumentation() {
         val result = Bundle()
         try {
             if (pdfGeometryOnly) {
-                result.putString("pdf_observations", PdfGeometryArtChecks.verify(targetContext, context.assets))
+                result.putString("pdf_observations", PdfGeometryArtChecks.verify(targetContext, context.assets, pdfFixture, pdfUserUnit))
                 result.putString("pdf_status", "passed")
                 finish(Activity.RESULT_OK, result); return
             }

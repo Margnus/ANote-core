@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "completed_with_capability_limit",
+  "requirement": "PDF-03",
+  "inherited_crop_rotation": {
+    "status": "passed",
+    "pages": 4,
+    "anchors": 16,
+    "overlay_centers": 16
+  },
+  "nonunit_userunit_direct_dimensions": {
+    "status": "failed",
+    "pages_reached": 1,
+    "user_unit": 2,
+    "reported_size": [
+      300,
+      180
+    ],
+    "shared_physical_size": [
+      600,
+      360
+    ],
+    "decision": "Reject using raw PdfRenderer dimensions directly as physical canonical page geometry for nonunit UserUnit. Metadata-to-render transform adapter is not implemented."
+  },
+  "scope": "Two metadata-only derivatives of original synthetic source; raw parent/leaf dictionaries and unchanged content streams audited. Actual API35 ART, no ordinary PDF feature, no production metadata parser or physical performance claim.",
+  "provider_source_files_preserved": true,
+  "five_note_files_preserved": true,
+  "poppler_review": "First page rendered with explicit CropBox for visual context; missing display-font warnings retained. Not used to override ART size failure or as pixel oracle.",
+  "apple_verified": false,
+  "app_pdf_integrated": false,
+  "c1_complete": false,
+  "goal_complete": false,
+  "evidence_sha256": {
+    "reports/pdf-metadata-art/inherited/background-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "reports/pdf-metadata-art/inherited/background-1.png": "8c6ac8911be51635674ba678724225716dec0bac12a5222d9486ed20d7fab73c",
+    "reports/pdf-metadata-art/inherited/background-2.png": "641ca08d48386808702524cba94fcc8e510abcde645808466ee4adc7e16ed789",
+    "reports/pdf-metadata-art/inherited/background-3.png": "504ddaf8aa360d656958bbb02d4297dc8731e6582b98e0698cbd26ecf7607fe6",
+    "reports/pdf-metadata-art/inherited/overlay-0.png": "16faddd406323b8d84b31a4804be59a923f68783c9d1a7a6bd44493447b631f8",
+    "reports/pdf-metadata-art/inherited/overlay-1.png": "98568d5c91a13db53b63619161611ac1f00aad199aa453eedca80fe7998d65be",
+    "reports/pdf-metadata-art/inherited/overlay-2.png": "d555c84e2ea42dd93fdd93d25c3cd0fbda26209459e3789d88df627981a9df04",
+    "reports/pdf-metadata-art/inherited/overlay-3.png": "89046d1548117e863228f95c8fab1b262e1d5b1b9470166b29ecadc9d03461fe",
+    "reports/pdf-metadata-art/inherited/result.json": "91eea9d432d441cd02cd6cfbe40e13f25c0abd816f3ab2ddaf8cd15cbb4927b4",
+    "reports/pdf-metadata-art/inherited/run.log": "c5c5cb2ffc611f69f3c689d121a76214cc8398f902a1f7381151f591af08923f",
+    "reports/pdf-metadata-art/inherited/source.pdf": "207d3371f656d7bd00a131e531f114b0841255b9b67253097cb2bb6ea1587c8d",
+    "reports/pdf-metadata-art/reference/inherited.png": "6cb99db3f10fed9b8717a0481e181629cedba178eb8c056103f2648565139dd9",
+    "reports/pdf-metadata-art/reference/inherited.stderr.log": "74095b267fcd746d2f088f0aea89f337e472614c4726d4626eb919cbb3107ff8",
+    "reports/pdf-metadata-art/reference/user-unit.png": "6cb99db3f10fed9b8717a0481e181629cedba178eb8c056103f2648565139dd9",
+    "reports/pdf-metadata-art/reference/user-unit.stderr.log": "74095b267fcd746d2f088f0aea89f337e472614c4726d4626eb919cbb3107ff8",
+    "reports/pdf-metadata-art/user-unit/background-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "reports/pdf-metadata-art/user-unit/result.json": "50e98920afd9b2d3eddb77c2ca047abeb2fb85f11d06e9bd96ee2e1cca1275d9",
+    "reports/pdf-metadata-art/user-unit/run.log": "90737ce1afa1b800ca0db7290f21d1277a483b1937ad78a960b58cda8b9d7d31",
+    "reports/pdf-metadata-art/user-unit/source.pdf": "50756efd2fbca67af2dfe986c15f68ea2c257872a071a9eee356ae0df975d48d"
+  },
+  "fixture_sha256": {
+    "user-unit-2.pdf": "50756efd2fbca67af2dfe986c15f68ea2c257872a071a9eee356ae0df975d48d",
+    "inherited-geometry.pdf": "207d3371f656d7bd00a131e531f114b0841255b9b67253097cb2bb6ea1587c8d"
+  },
+  "manifest_sha256": "4a68e1a806e02968658488b39101319604e58ef35339dd56673302854353b2b3",
+  "generator_sha256": "a0e1abe5565a7f6c5bed4d565735f1d774ffc8e0f3dec30c858d5f3c3328a91b",
+  "verifier_sha256": "bc94b072fd9346c5474404cef955c4ad001069611c3967a0bac84364437773df"
+}

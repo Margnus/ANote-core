@@ -1,5 +1,17 @@
 # PDF-03 主机原生背景与共享坐标接缝
 
+## 2026-10-29：UserUnit与继承几何的能力边界
+
+沿原卡未决元数据边界，起点7b66a6a。验收卡目标是区分父Pages节点继承CropBox/Rotate与页字典非1 UserUnit，实际系统尺寸/背景/共享物理页坐标不一致则记录限制，不修改oracle使其通过。复用原内容流，生成两个元数据派生样本；未改原PDF或生成新的图形模型。UserUnit的默认用户空间单位语义参照[iText官方说明](https://kb.itextpdf.com/itext/how-to-get-the-userunit-from-a-pdf-file)，页对象/单位属性接口参照[Adobe SDK文档](https://opensource.adobe.com/dc-acrobat-sdk-docs/pdflsdk/apireference/PD_Layer/PDPage.html)；本轮平台结论仅来自实际观察，不从规范或API存在推断支持。
+
+`tools/generate_pdf_metadata_fixtures.py`以原PDF派生UserUnit=2和继承几何各四页。生成后先检查原始leaf字典未含MediaBox/CropBox/Rotate，属性实际在父节点，再解析有效几何；两份内容流均与原四页逐字节相同。原PDF SHA保持；生成器/派生PDF/manifest指纹保留。没有把UserUnit当作继承属性。
+
+实际API35结果：继承样本四页/16锚点和16黑色叠加中心通过，背景/叠加图保留并查看；UserUnit=2直接尺寸接缝在第一页明确失败，PdfRenderer报告300×180，而当前共享物理页规则为600×360。该失败仅到第一页背景，未验证其后页/叠加；保留原始失败码0、日志及300×180背景，未吞异常、改尺寸期望或标绿。独立PNG复核确认该背景仍在未乘2的原锚点显示四颜色。不能仅凭此称所有系统渲染都“忽略UserUnit”，但当前直接尺寸消费方式不支持该场景。
+
+采用决定：当前原继承CropBox/Rotate样本的接缝可采用；拒绝把原始PdfRenderer width/height直接等同非1 UserUnit的共享物理页尺寸。生产port必须先得到有效元数据并建立明确渲染变换，当前没有该生产reader/adapter，不宣称完整非1 UserUnit支持。报告为`completed_with_capability_limit`，两个原生调用各自passed/failed保持，见[能力报告](../reports/pdf-metadata-art.json)。复核命令需有pypdf的Python运行`tools/verify_pdf_metadata_art.py`。
+
+Poppler按CropBox渲染首页面作视觉上下文，缺少部分display font的警告保留，未用其覆盖ART失败或充当像素oracle。五份正式笔记前后集合/hash保持，当前源码/安装产物指纹及仪器构建通过；无共同/普通App业务修改，不重复559/33主机结果。Apple/物理M-1/任意真实PDF/批注导出/资源事务及C1仍待，PDF-03统计不晋升。该有限元数据能力调查收口，下一步沿原系统PDF能力矩阵确定有效元数据读取与渲染port契约，不能自行扩展为PDF语法解析器或未批准的大SDK接入。
+
 ## 2026-10-29：原探针的实际ART出口通过
 
 本轮沿原卡“实际ART可用后验证同源背景/共享矩阵”的明确出口，起点d38cc79。前一owner/关闭入口有界复核未发现新可复现缺陷，不再增加相似owner参数测试；新独立AVD可用后，改用实际系统PdfRenderer完成本卡，不重试已知JVM FileDescriptor失败路径。
