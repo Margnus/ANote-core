@@ -1,5 +1,13 @@
 # PDF-03 主机原生背景与共享坐标接缝
 
+## 2026-10-29：Apple实际背景与共享Native坐标
+
+三份既有合成源在原iOS27.0实际进程验证：原CropBox四旋转、父Pages继承、leaf UserUnit=2。测试friend模块调用当前原shared-core Native klib的internal PdfPageGeometryRules/Affine2D，无新公开facade或矩阵副本；Swift原生CGContext.drawPDFPage消费同源原始坐标，独立recipe与保留PNG核对见[报告](../reports/apple-pdf-geometry.json)。
+
+首轮额外y翻转＋getDrawingTransform在48个有颜色身份中心中0个匹配，Unit1上下颠倒，Unit2背景居中而未到共享坐标；进程exit0只证明执行结束。完整失败源码/原始结果/24图保留。调整仅测试适配：将共享canonical向下坐标转换到CG位图向上坐标一次，用共享pdfToPage处理裁剪/旋转/UserUnit一次，不能再并用原生fit/旋转/单位矩阵。该实际组合12页48背景颜色中心/48叠加中心通过；直接源与继承源的整张背景/叠加bitmap均相等，Unit2正确得到600×360/360×600输出。原图保留，三张覆盖全部12页的派生review图已查看。
+
+采用此固定源接缝，停止扩同类正样例；不是完整CGPDF API否决，也不是App批注/任意真实PDF接入。源PDF/内容流、Apple16/普通payload保持；未验证reader预算/取消/原生最终释放回执、规范批注图文/导出或资源事务。普通App/shared业务未改，仅探针及证据，不重复旧平台全量。Android完整元数据port仍缺、原UserUnit直接尺寸失败不改；M-1/heap/触笔/完整C1与DEV-041生产SQLite保持待验。
+
 ## 2026-10-29：系统元数据port采用边界收口
 
 本机API35/编译API36公开接口已盘点，系统PdfRenderer/Page没有有效CropBox/Rotate/UserUnit或页字典读取入口；两个单位不同的受控PDF首张原生背景尺寸及全部解码像素相同。故系统renderer仅作为渲染候选，不能单独充当完整元数据port，也不能缺值就默认UserUnit=1。采用前置条件/失败及owner责任见[port边界](PDF元数据与渲染port边界.md)，原UserUnit=2失败保持。此有限调查已收口，不扩像素猜元数据/更多缩放样本或PDF SDK；真实元数据读取与跨端adapter、原资源/物理/C1门禁继续待验。

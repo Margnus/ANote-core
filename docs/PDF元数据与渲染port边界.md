@@ -1,5 +1,9 @@
 # PDF元数据与渲染port边界
 
+## 2026-10-29：Apple固定源渲染适配的采用
+
+当前[Apple接缝](../reports/apple-pdf-geometry.json)实际执行原shared-core Native矩阵，再由CGContext.drawPDFPage画同源PDF，12页48颜色/48叠加中心通过（含继承与Unit2）；源0/继承源1整张bitmap相等。采用共享raw PDF→canonical映射加一次canonical向下→位图向上转换，不与getDrawingTransform的fit/旋转/单位矩阵并用。首轮额外翻转/原生fit组合0/48颜色匹配的失败原样保留，只否决该组合。元数据候选和固定源坐标接缝在此有限收口，未实现生产reader、资源准入/最终释放或App批注/导出，不继续扩普通样例矩阵，完整C1/M-1前置保持。
+
 ## 2026-10-29：实际Apple元数据查询候选
 
 原三份合成PDF在实际iOS27.0 CoreGraphics进程读取12页，独立原始字典/内容流审计通过，见[Apple报告](../reports/apple-pdf-metadata.json)。CGPDFPage的有效MediaBox/CropBox与rotationAngle能取得父Pages继承结果，非零CropBox原点保持；CGPDFDictionary能证明leaf是否具有UserUnit并区分缺省1/显式2。不能将getBoxRect称为物理页尺寸：同源Unit2仍返回原始[40,50,340,230]，单位需要独立传入现有共享规则并明确renderer变换。

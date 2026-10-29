@@ -1,0 +1,43 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "spawn",
+      "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+      "/Users/lixiaofan/StudioProjects/notecore/build/apple-pdf-geometry-20261029/SharedPdfGeometryProbe.kexe",
+      "40,50,340,230,0,1",
+      "40,50,340,230,90,1",
+      "40,50,340,230,180,1",
+      "40,50,340,230,270,1",
+      "40,50,340,230,0,1",
+      "40,50,340,230,90,1",
+      "40,50,340,230,180,1",
+      "40,50,340,230,270,1",
+      "40,50,340,230,0,2",
+      "40,50,340,230,90,2",
+      "40,50,340,230,180,2",
+      "40,50,340,230,270,2"
+    ],
+    "exit_code": 0,
+    "stdout": "shared-geometry.json",
+    "stderr": "shared-geometry.stderr.log"
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "spawn",
+      "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+      "/Users/lixiaofan/StudioProjects/notecore/build/apple-pdf-geometry-20261029/PdfGeometryProbe",
+      "/Users/lixiaofan/StudioProjects/notecore/build/apple-pdf-geometry-20261029/shared-geometry.json",
+      "/Users/lixiaofan/StudioProjects/notecore/build/apple-pdf-geometry-20261029/images",
+      "/Users/lixiaofan/StudioProjects/notecore/android-app/src/androidTest/assets/pdf/crop-rotations.pdf",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/pdf-metadata-art/inherited/source.pdf",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/pdf-metadata-art/user-unit/source.pdf"
+    ],
+    "exit_code": 0,
+    "stdout": "render.json",
+    "stderr": "render.stderr.log"
+  }
+]
