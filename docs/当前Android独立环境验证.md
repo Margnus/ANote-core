@@ -1,5 +1,13 @@
 # 当前Android独立环境验证
 
+## 2026-10-29：真实Downloads Provider交换与拒绝后恢复
+
+本轮沿DEV-036/040有限C1原消费者矩阵，起点f5d9c4b；验证卡目标为现有预览正文经真实系统选择器导出→导入副本→损坏输入拒绝→有效输入重试。验收要求是原文件及Provider源字节保持、完整笔迹内容保持、副本身份独立、失败不生成可见半文档，使用同一普通App/原Store-worker完成。不新增业务实现、格式、Provider替身或生产资源备份。
+
+NoteCoreCurrent35/5590普通PID3244、当前绑定APK实际完成Downloads CREATE_DOCUMENT导出及OPEN_DOCUMENT导入。导出与原笔记字节完全一致；第一次导入得到新文档，两笔的几何/笔刷/采样点原样保持，文档/页面/图层/笔迹身份重新分配，初始revision/epoch按原复制契约重置。随后将导出前40字节作为独立损坏测试源送入Downloads并经实际选择器选择，UI明确提示“笔记格式无效或版本不支持，原文件已保留”，原两个文件集合及字节保持。可重开第一份副本，随后第二次主动选择有效备份成功导入另一份副本；文件集合观察为1→2→2→2→3，两个合法导入均为明确的独立系统选择操作。最终三份笔记及有效/损坏Provider源均保留。见[报告](../reports/current-api35-provider.json)、[原始观察](../reports/current-api35-provider/actions.jsonl)，验证入口`tools/verify_current_android_provider.py`只核验保留证据，不发送输入。
+
+采用当前AOSP Downloads Provider的普通预览交换/typed格式拒绝/同owner恢复子范围。未注入Provider权限撤回/写出故障，不证明完整资源备份、跨端往返、选择器期间Activity/进程死或Apple/M-1/C1。初次保留证据校验器把UI XML读取混入Provider源读取计数，已限定Downloads路径后通过；业务失败结果未修改。下一步核查真实picker配置重建后的匹配结果/取消责任，继续原会话与不复用请求号，不扩资源生产事务。
+
 2026-10-29，沿DEV-036/040现行有限C1消费者验证，起点Core 07d9e92。
 
 用户已明确允许新建独立测试AVD；原NoteCoreGui35/5584不存在的历史核查保持原范围。新建NoteCoreCurrent35/5590，API35 AOSP x86_64，与原保存环境分开，不继承原验收。
