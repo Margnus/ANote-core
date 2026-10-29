@@ -1,0 +1,90 @@
+{
+  "method": "CUA Device Hub com.apple.dt.Devices; manual AX and inline screenshot observations, no retained pixel oracle",
+  "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "initial_pid": 4629,
+  "successful_roundtrip_pid": 7586,
+  "source_file": "92583304-4FD9-49AF-8B06-EB954BA8B67B.ncp",
+  "imported_file": "2312B72A-26FE-4EA4-89EA-DEAE95155A1B.ncp",
+  "states": [
+    {
+      "label": "initial_library",
+      "ax_fragments": [
+        "NoteCore",
+        "新建笔记",
+        "导入备份",
+        "本机笔记"
+      ]
+    },
+    {
+      "label": "initial_import_attempt",
+      "observation": "First system importer showed white screen with no picker AX nodes. System logs show DocumentManagerUICore service. After Home, separate Files app opened old local NoteCore-UI-Backup; returning to NoteCore showed Files contents without AX nodes. Initial attempt was interrupted via App Switcher close; no result claimed and all original14 remained unchanged. Root cause not established."
+    },
+    {
+      "label": "app_switcher_recovery",
+      "ax_fragments": [
+        "NoteCore 预览",
+        "关闭“NoteCore 预览”"
+      ],
+      "observation": "Used exposed close action then Home and NoteCore icon; actual new ordinary PID7586 and original library returned."
+    },
+    {
+      "label": "synthetic_saved",
+      "ax_fragments": [
+        "C1-Files-20261029",
+        "已保存到本机 · 1 笔",
+        "手写画布",
+        "1笔"
+      ],
+      "observation": "Created and renamed through UI; actual drag (2200,1000) to (2370,1150), saved on original worker."
+    },
+    {
+      "label": "system_export",
+      "observation": "Actual Files export sheet in local NoteCore-UI-Backup with 保存 and filename field; no AX nodes, used screenshot coordinates. Keyboard forwarding was briefly enabled and restored off. Exact resulting filename has duplicated C1-Files-20261029 prefix; retained without overwrite/rename.",
+      "ax_fragments": [
+        "备份已导出",
+        "手写画布",
+        "1笔"
+      ]
+    },
+    {
+      "label": "system_import",
+      "observation": "Reopened actual system importer; screenshot showed two local files. Clicked new550-byte C1 file (2150,827), original old27KB backup untouched.",
+      "ax_fragments": [
+        "已导入为新笔记 · 1 笔",
+        "手写画布",
+        "1笔"
+      ]
+    },
+    {
+      "label": "library_after_import",
+      "ax_fragments": [
+        "本机笔记",
+        "C1-Files-20261029",
+        "C1-Files-20261029"
+      ]
+    },
+    {
+      "label": "import_cancel",
+      "observation": "Opened importer, used back arrow to Browse showing 我的iPhone; dragged sheet top (2290,626) to (2290,1440). Returned to library; same16 files and hashes. No synthetic callback invocation.",
+      "ax_fragments": [
+        "新建笔记",
+        "导入备份",
+        "本机笔记",
+        "C1-Files-20261029",
+        "C1-Files-20261029"
+      ]
+    },
+    {
+      "label": "post_cancel_retry_deferred",
+      "observation": "Next click on 导入备份 was rejected before action by CUA: The Mac is locked and automatic unlock is paused because physical input was detected. No post-cancel reopening, export cancellation, rotation, multitouch or permission-failure result claimed."
+    }
+  ],
+  "export_completed": true,
+  "import_completed": true,
+  "import_cancel_returned_to_library": true,
+  "post_cancel_reopen_verified": false,
+  "export_cancel_verified": false,
+  "mac_locked_at_end": true,
+  "keyboard_capture_restored_off": true,
+  "original_notes_never_opened_or_edited": true
+}
