@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED, OWNER_CLOSED, PENDING_RECOVERY }
 internal data class ExportPickerAdmission(val disposition: ExportPickerDisposition, val requestCode: Int? = null)
+internal enum class ImportPickerDisposition { READY, BUSY, IDENTITY_EXHAUSTED, OWNER_CLOSED }
+internal data class ImportPickerAdmission(val disposition: ImportPickerDisposition, val requestCode: Int? = null)
 internal enum class StoreOwnerPhase { ACTIVE, RETIRING, RETIRED }
 internal enum class StoreRetirementRequest { STARTED, ALREADY_RETIRING, RETIRED, INPUT_PENDING, TRANSFER_PENDING, WORK_PENDING, SAVE_REJECTED }
 internal data class StoreRetirementStatus(val phase: StoreOwnerPhase, val pendingWrites: Int,
@@ -55,7 +57,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         if (ownerRetired) return StoreRetirementRequest.RETIRED
         if (ownerRetiring) return StoreRetirementRequest.ALREADY_RETIRING
         if (activeNotebook?.let { it.hasActiveStroke || it.hasPendingStroke } == true) return StoreRetirementRequest.INPUT_PENDING
-        if (pendingExport != null) return StoreRetirementRequest.TRANSFER_PENDING
+        if (pendingExport != null || pendingImport != null) return StoreRetirementRequest.TRANSFER_PENDING
         if (requestsInFlight != 0 || executor.status().entries.any {
             it.stage == OwnedWorkStage.DELIVERING || it.stage == OwnedWorkStage.DELIVERY_BLOCKED
         }) return StoreRetirementRequest.WORK_PENDING
@@ -145,8 +147,26 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     // One app-owner capture while the external picker runs. No timeout/Activity destruction release.
     internal val exportPickerSession = UUID.randomUUID().toString()
+    internal val importPickerSession: String get() = exportPickerSession
+    // Shared non-reusing sequence: late import results cannot collide with later exports.
     private var nextExportRequestCode = 1000
     private var pendingExport: Pair<Int, PagedPreviewSnapshot>? = null
+    private var pendingImport: Int? = null
+    internal fun beginImportPicker(): ImportPickerAdmission {
+        executor.checkOwnerThread()
+        if (ownerRetiring) return ImportPickerAdmission(ImportPickerDisposition.OWNER_CLOSED)
+        if (pendingImport != null || pendingExport != null) return ImportPickerAdmission(ImportPickerDisposition.BUSY)
+        if (nextExportRequestCode > 65535) return ImportPickerAdmission(ImportPickerDisposition.IDENTITY_EXHAUSTED)
+        val code = nextExportRequestCode++
+        pendingImport = code
+        return ImportPickerAdmission(ImportPickerDisposition.READY, code)
+    }
+    internal fun takeImportPicker(requestCode: Int): Boolean {
+        executor.checkOwnerThread()
+        if (pendingImport != requestCode) return false
+        pendingImport = null
+        return true
+    }
     internal val exportReservedByteCharge: Long get() {
         executor.checkOwnerThread(); return pendingExport?.second?.retainedByteCharge ?: 0L
     }
@@ -154,7 +174,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         executor.checkOwnerThread()
         if (ownerRetiring) return ExportPickerAdmission(ExportPickerDisposition.OWNER_CLOSED)
         if (snapshot.pending != null) return ExportPickerAdmission(ExportPickerDisposition.PENDING_RECOVERY)
-        if (pendingExport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
+        if (pendingExport != null || pendingImport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
         if (snapshot.retainedByteCharge > exportPickerByteLimit) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
         if (nextExportRequestCode > 65535) return ExportPickerAdmission(ExportPickerDisposition.IDENTITY_EXHAUSTED)
         val code = nextExportRequestCode++

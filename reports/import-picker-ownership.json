@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "requirement": "DATA-06",
+  "status": "passed",
+  "scope": "Original Android preview Activity/Store/worker, Robolectric SDK35 host, controlled resolver stream; no actual system picker/URI permission/ART/process-death claim",
+  "new_tests": 5,
+  "default_host_regression": {
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "common_jvm_results_reused": 555,
+  "checks": [
+    "single pending import and cross-type picker exclusion",
+    "shared non-reusing request sequence; exhaustion refuses",
+    "old/duplicate numeric result cannot consume pending slot",
+    "pending import prevents owner retirement; cancellation permits it",
+    "Activity starts OPEN_DOCUMENT with admitted code",
+    "same-Store Activity destroy/recreate preserves request/session",
+    "wrong/duplicate cancellation leaves new slot intact",
+    "old-Store session result cannot consume same-number new-Store slot",
+    "legacy102 ignored and duplicate OK callback opens source once",
+    "actual worker commits copy once despite stale view; source bytes preserved",
+    "ActivityNotFoundException releases matching admission and permits new request",
+    "workers stopped before unique fixture cleanup"
+  ],
+  "launch_security_exception": "handled in source; not separately injected/runtime verified",
+  "owner_thread": "existing executor owner checks retained; new wrong-thread scenario not separately exercised",
+  "source_no_new_uri_persistence": "request slot contains Int only; existing worker holds Uri only during admitted work",
+  "android_build_verified": true,
+  "lint": {
+    "Error": 0,
+    "Warning": 8
+  },
+  "apk_installed": false,
+  "ordinary_ui_verified": false,
+  "android_art_verified": false,
+  "apple_verified": false,
+  "cross_crash_import_idempotency_verified": false,
+  "production_storage_verified": false,
+  "c1_complete": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "7c766ba1fe512fbe59108cbba2e2bb651f97c09c9129a0e0f2d26a588f173d2f",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "70d609b5004b5886814f7b950c966c0594072703fe0755ef906664a8c5ded6ae",
+    "android-app/src/main/res/values/strings.xml": "a273e9d84075261b00b59576701222fa15fd7ea60f739da71f2fef4ac8b476dc",
+    "android-app/src/test/java/dev/notecore/app/ImportPickerOwnershipTest.kt": "2a921143e1427d54008a15e179a7c6881a162f23b115484070984ebac9ab49be",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.ImportPickerOwnershipTest.xml": "d7774961facb569d5dfb717c9b4d20df6d9b93953474c2605da987c86b5fe1a7",
+    "android-app/build/reports/lint-results-debug.xml": "04edbc054be54bc473c1e2b3f907574a42e62716bf2817656b1b6247a07885eb",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "ab8cad4c7ab3bf10f82db98a89bedbe5856625454e0cff8cb5bec521d617350b",
+    "reports/android-build-inputs.sha256": "fb8939bed6257cbccd4a858f99e56a96e7f9359c757905963129bce60e6b46ea",
+    "reports/verification.json": "dc7a270a74b774a59d5d69f814989b08051258560c92ab74309c6b3032e11051"
+  }
+}
