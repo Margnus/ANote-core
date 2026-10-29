@@ -1,5 +1,9 @@
 # PDF-03 主机原生背景与共享坐标接缝
 
+## 2026-10-29：系统元数据port采用边界收口
+
+本机API35/编译API36公开接口已盘点，系统PdfRenderer/Page没有有效CropBox/Rotate/UserUnit或页字典读取入口；两个单位不同的受控PDF首张原生背景尺寸及全部解码像素相同。故系统renderer仅作为渲染候选，不能单独充当完整元数据port，也不能缺值就默认UserUnit=1。采用前置条件/失败及owner责任见[port边界](PDF元数据与渲染port边界.md)，原UserUnit=2失败保持。此有限调查已收口，不扩像素猜元数据/更多缩放样本或PDF SDK；真实元数据读取与跨端adapter、原资源/物理/C1门禁继续待验。
+
 ## 2026-10-29：UserUnit与继承几何的能力边界
 
 沿原卡未决元数据边界，起点7b66a6a。验收卡目标是区分父Pages节点继承CropBox/Rotate与页字典非1 UserUnit，实际系统尺寸/背景/共享物理页坐标不一致则记录限制，不修改oracle使其通过。复用原内容流，生成两个元数据派生样本；未改原PDF或生成新的图形模型。UserUnit的默认用户空间单位语义参照[iText官方说明](https://kb.itextpdf.com/itext/how-to-get-the-userunit-from-a-pdf-file)，页对象/单位属性接口参照[Adobe SDK文档](https://opensource.adobe.com/dc-acrobat-sdk-docs/pdflsdk/apireference/PD_Layer/PDPage.html)；本轮平台结论仅来自实际观察，不从规范或API存在推断支持。

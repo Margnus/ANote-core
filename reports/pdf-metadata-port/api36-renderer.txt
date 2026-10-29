@@ -1,0 +1,19 @@
+Compiled from "PdfRenderer.java"
+public final class android.graphics.pdf.PdfRenderer implements java.lang.AutoCloseable {
+  public static final int DOCUMENT_LINEARIZED_TYPE_LINEARIZED;
+  public static final int DOCUMENT_LINEARIZED_TYPE_NON_LINEARIZED;
+  public static final int PDF_FORM_TYPE_ACRO_FORM;
+  public static final int PDF_FORM_TYPE_NONE;
+  public static final int PDF_FORM_TYPE_XFA_FOREGROUND;
+  public static final int PDF_FORM_TYPE_XFA_FULL;
+  public android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor) throws java.io.IOException;
+  public android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor, android.graphics.pdf.LoadParams) throws java.io.IOException;
+  public void close();
+  protected void finalize() throws java.lang.Throwable;
+  public int getDocumentLinearizationType();
+  public int getPageCount();
+  public int getPdfFormType();
+  public android.graphics.pdf.PdfRenderer$Page openPage(int);
+  public boolean shouldScaleForPrinting();
+  public void write(android.os.ParcelFileDescriptor, boolean) throws java.io.IOException;
+}

@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "date": "2026-10-29",
+  "core_base": "48720dc5413912b1560bc4b84b8efbb2113ec9ee",
+  "status": "metadata_port_gap_confirmed",
+  "scope": "Read-only inventory of installed API35 and compile API36 SDK public PdfRenderer/Page stubs, combined with pinned actual API35 metadata probe. No runtime API36 execution or inspection of hidden APIs.",
+  "sdk_public_inventory": {
+    "35": {
+      "android_jar_sha256": "4566663c3876e022b4fa4ced8c8697c4ab1688267f090114fd92d027b32e619b",
+      "source_properties": "Pkg.Desc=Android SDK Platform 15\nPkg.UserSrc=false\nPlatform.Version=15\nPlatform.CodeName=\nPkg.Revision=2\nAndroidVersion.ApiLevel=35\nAndroidVersion.ExtensionLevel=13\nAndroidVersion.IsBaseSdk=true\nLayoutlib.Api=15\nLayoutlib.Revision=1\nPlatform.MinToolsRev=22\n",
+      "public_signatures": {
+        "renderer": [
+          "public final class android.graphics.pdf.PdfRenderer implements java.lang.AutoCloseable {",
+          "public static final int DOCUMENT_LINEARIZED_TYPE_LINEARIZED;",
+          "public static final int DOCUMENT_LINEARIZED_TYPE_NON_LINEARIZED;",
+          "public static final int PDF_FORM_TYPE_ACRO_FORM;",
+          "public static final int PDF_FORM_TYPE_NONE;",
+          "public static final int PDF_FORM_TYPE_XFA_FOREGROUND;",
+          "public static final int PDF_FORM_TYPE_XFA_FULL;",
+          "public android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor) throws java.io.IOException;",
+          "public android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor, android.graphics.pdf.LoadParams) throws java.io.IOException;",
+          "public void close();",
+          "public int getPageCount();",
+          "public boolean shouldScaleForPrinting();",
+          "public int getDocumentLinearizationType();",
+          "public android.graphics.pdf.PdfRenderer$Page openPage(int);",
+          "public int getPdfFormType();",
+          "public void write(android.os.ParcelFileDescriptor, boolean) throws java.io.IOException;"
+        ],
+        "page": [
+          "public final class android.graphics.pdf.PdfRenderer$Page implements java.lang.AutoCloseable {",
+          "public static final int RENDER_MODE_FOR_DISPLAY;",
+          "public static final int RENDER_MODE_FOR_PRINT;",
+          "public int getIndex();",
+          "public int getWidth();",
+          "public int getHeight();",
+          "public void render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int);",
+          "public void render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, android.graphics.pdf.RenderParams);",
+          "public java.util.List<android.graphics.pdf.content.PdfPageTextContent> getTextContents();",
+          "public java.util.List<android.graphics.pdf.content.PdfPageImageContent> getImageContents();",
+          "public java.util.List<android.graphics.pdf.models.PageMatchBounds> searchText(java.lang.String);",
+          "public android.graphics.pdf.models.selection.PageSelection selectContent(android.graphics.pdf.models.selection.SelectionBoundary, android.graphics.pdf.models.selection.SelectionBoundary);",
+          "public java.util.List<android.graphics.pdf.content.PdfPageLinkContent> getLinkContents();",
+          "public java.util.List<android.graphics.pdf.content.PdfPageGotoLinkContent> getGotoLinks();",
+          "public java.util.List<android.graphics.pdf.models.FormWidgetInfo> getFormWidgetInfos();",
+          "public java.util.List<android.graphics.pdf.models.FormWidgetInfo> getFormWidgetInfos(int[]);",
+          "public android.graphics.pdf.models.FormWidgetInfo getFormWidgetInfoAtIndex(int);",
+          "public android.graphics.pdf.models.FormWidgetInfo getFormWidgetInfoAtPosition(int, int);",
+          "public java.util.List<android.graphics.Rect> applyEdit(android.graphics.pdf.models.FormEditRecord);",
+          "public void close();"
+        ]
+      }
+    },
+    "36": {
+      "android_jar_sha256": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+      "source_properties": "Pkg.Desc=Android SDK Platform 16\nPkg.UserSrc=false\nPlatform.Version=16\nPlatform.CodeName=\nPkg.Revision=2\nAndroidVersion.ApiLevel=36\nAndroidVersion.ExtensionLevel=17\nAndroidVersion.IsBaseSdk=true\nLayoutlib.Api=15\nLayoutlib.Revision=1\nPlatform.MinToolsRev=22\n",
+      "public_signatures": {
+        "renderer": [
+          "public final class android.graphics.pdf.PdfRenderer implements java.lang.AutoCloseable {",
+          "public static final int DOCUMENT_LINEARIZED_TYPE_LINEARIZED;",
+          "public static final int DOCUMENT_LINEARIZED_TYPE_NON_LINEARIZED;",
+          "public static final int PDF_FORM_TYPE_ACRO_FORM;",
+          "public static final int PDF_FORM_TYPE_NONE;",
+          "public static final int PDF_FORM_TYPE_XFA_FOREGROUND;",
+          "public static final int PDF_FORM_TYPE_XFA_FULL;",
+          "public android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor) throws java.io.IOException;",
+          "public android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor, android.graphics.pdf.LoadParams) throws java.io.IOException;",
+          "public void close();",
+          "public int getDocumentLinearizationType();",
+          "public int getPageCount();",
+          "public int getPdfFormType();",
+          "public android.graphics.pdf.PdfRenderer$Page openPage(int);",
+          "public boolean shouldScaleForPrinting();",
+          "public void write(android.os.ParcelFileDescriptor, boolean) throws java.io.IOException;"
+        ],
+        "page": [
+          "public final class android.graphics.pdf.PdfRenderer$Page implements java.lang.AutoCloseable {",
+          "public static final int RENDER_MODE_FOR_DISPLAY;",
+          "public static final int RENDER_MODE_FOR_PRINT;",
+          "public java.util.List<android.graphics.Rect> applyEdit(android.graphics.pdf.models.FormEditRecord);",
+          "public void close();",
+          "public android.graphics.pdf.models.FormWidgetInfo getFormWidgetInfoAtIndex(int);",
+          "public android.graphics.pdf.models.FormWidgetInfo getFormWidgetInfoAtPosition(int, int);",
+          "public java.util.List<android.graphics.pdf.models.FormWidgetInfo> getFormWidgetInfos();",
+          "public java.util.List<android.graphics.pdf.models.FormWidgetInfo> getFormWidgetInfos(int[]);",
+          "public java.util.List<android.graphics.pdf.content.PdfPageGotoLinkContent> getGotoLinks();",
+          "public int getHeight();",
+          "public java.util.List<android.graphics.pdf.content.PdfPageImageContent> getImageContents();",
+          "public int getIndex();",
+          "public java.util.List<android.graphics.pdf.content.PdfPageLinkContent> getLinkContents();",
+          "public java.util.List<android.graphics.pdf.content.PdfPageTextContent> getTextContents();",
+          "public int getWidth();",
+          "public void render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, android.graphics.pdf.RenderParams);",
+          "public void render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int);",
+          "public java.util.List<android.graphics.pdf.models.PageMatchBounds> searchText(java.lang.String);",
+          "public android.graphics.pdf.models.selection.PageSelection selectContent(android.graphics.pdf.models.selection.SelectionBoundary, android.graphics.pdf.models.selection.SelectionBoundary);"
+        ]
+      }
+    }
+  },
+  "reviewed_gap": [
+    "effective CropBox origin/rectangle not exposed",
+    "effective Rotate not exposed",
+    "UserUnit value or verified absence not exposed",
+    "no public generic page-dictionary accessor in reviewed signatures"
+  ],
+  "decision": "Keep system PdfRenderer as a rendering candidate; do not adopt it alone as a complete source-metadata port or infer missing values from width/height. Separate validated metadata reader and explicit render-space transform are prerequisites.",
+  "actual_api35_metadata_report_sha256": "ce43e58350407e677cb46fb54831a0cf6bc34c4038006368b176b569d35304fa",
+  "c1_complete": false,
+  "pdf03_accepted": false,
+  "goal_complete": false,
+  "evidence_sha256": {
+    "reports/pdf-metadata-port/api35-page.txt": "256f6c9bb228f5039c2957b1919f9720b0e7738569a338489e56dcceba962d48",
+    "reports/pdf-metadata-port/api35-renderer.txt": "2e6fbf1ef5f5878138b131f257a393b3ca593375899bc620fa81c6c78a849ef6",
+    "reports/pdf-metadata-port/api36-page.txt": "8f1643c14397c5fc924feef4bad0cf217f75d3b04b92beb3387ba169618f9ba7",
+    "reports/pdf-metadata-port/api36-renderer.txt": "1220bb859686b6cd912fc867c198670166575e024705de682a54a263a7e40a62"
+  },
+  "nonidentifiability_witness": {
+    "scope": "Only first native rendered page of two controlled fixtures; not a statement about arbitrary PDFs.",
+    "unit1_source_sha256": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+    "unit2_source_sha256": "50756efd2fbca67af2dfe986c15f68ea2c257872a071a9eee356ae0df975d48d",
+    "native_size_both": [
+      300,
+      180
+    ],
+    "all_decoded_pixels_equal": true,
+    "unit1_background_sha256": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "unit2_background_sha256": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de"
+  }
+}
