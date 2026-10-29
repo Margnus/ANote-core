@@ -31,6 +31,10 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val beforeInkCompute: () -> Unit = {}, private val afterInkNativeClose: () -> Unit = {},
     private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
     private val exportPickerByteLimit: Long = 8L * 1024 * 1024, private val beforeOpenRead: () -> Unit = {}) {
+    init {
+        // This platform owner always wakes on main; reject before creating the worker or owner state.
+        check(Looper.myLooper() == Looper.getMainLooper()) { "Android Store requires the main owner thread" }
+    }
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
@@ -480,8 +484,11 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         private const val STORAGE_WORK_BYTES = 256L * 1024 * 1024
         private val READ_WORK_BYTES = PagedPreviewCodec.maximumDecodingWorkByteCharge() // Declared parsing/UTF/buffer reservation, not measured heap.
         @Volatile private var instance: NoteStore? = null
-        fun get(context: Context): NoteStore = instance ?: synchronized(this) {
-            instance ?: NoteStore(context.applicationContext).also { instance = it }
+        fun get(context: Context): NoteStore {
+            check(Looper.myLooper() == Looper.getMainLooper()) { "Android Store requires the main owner thread" }
+            return instance ?: synchronized(this) {
+                instance ?: NoteStore(context.applicationContext).also { instance = it }
+            }
         }
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},

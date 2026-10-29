@@ -1,0 +1,129 @@
+
+> Configure project :canvas-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution:
+Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: Invalid Source Set Dependency Across Trees
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+Solution:
+Please keep dependsOn edges only from one group and remove the others.
+
+
+> Task :android-app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :android-app:preBuild UP-TO-DATE
+> Task :android-app:preDebugBuild UP-TO-DATE
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preDebugBuild UP-TO-DATE
+> Task :canvas-core:writeDebugAarMetadata UP-TO-DATE
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preDebugBuild UP-TO-DATE
+> Task :shared-core:writeDebugAarMetadata UP-TO-DATE
+> Task :android-app:checkDebugAarMetadata UP-TO-DATE
+> Task :android-app:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResources UP-TO-DATE
+> Task :canvas-core:packageDebugResources UP-TO-DATE
+> Task :shared-core:generateDebugResValues UP-TO-DATE
+> Task :shared-core:generateDebugResources UP-TO-DATE
+> Task :shared-core:packageDebugResources UP-TO-DATE
+> Task :android-app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :android-app:generateDebugResources UP-TO-DATE
+> Task :android-app:mergeDebugResources UP-TO-DATE
+> Task :android-app:packageDebugResources UP-TO-DATE
+> Task :android-app:parseDebugLocalResources UP-TO-DATE
+> Task :android-app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android-app:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:processDebugManifest UP-TO-DATE
+> Task :shared-core:extractDeepLinksDebug UP-TO-DATE
+> Task :shared-core:processDebugManifest UP-TO-DATE
+> Task :android-app:processDebugMainManifest UP-TO-DATE
+> Task :android-app:processDebugManifest UP-TO-DATE
+> Task :android-app:processDebugManifestForPackage UP-TO-DATE
+> Task :canvas-core:compileDebugLibraryResources UP-TO-DATE
+> Task :canvas-core:parseDebugLocalResources UP-TO-DATE
+> Task :canvas-core:generateDebugRFile UP-TO-DATE
+> Task :shared-core:compileDebugLibraryResources UP-TO-DATE
+> Task :shared-core:parseDebugLocalResources UP-TO-DATE
+> Task :shared-core:generateDebugRFile UP-TO-DATE
+> Task :android-app:processDebugResources UP-TO-DATE
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :shared-core:javaPreCompileDebug UP-TO-DATE
+> Task :shared-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :shared-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :android-app:compileDebugKotlin UP-TO-DATE
+> Task :android-app:javaPreCompileDebug UP-TO-DATE
+> Task :android-app:compileDebugJavaWithJavac NO-SOURCE
+> Task :android-app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :android-app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :android-app:preDebugUnitTestBuild UP-TO-DATE
+> Task :android-app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :android-app:mergeDebugShaders UP-TO-DATE
+> Task :android-app:compileDebugShaders NO-SOURCE
+> Task :android-app:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugShaders UP-TO-DATE
+> Task :canvas-core:compileDebugShaders NO-SOURCE
+> Task :canvas-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugShaders UP-TO-DATE
+> Task :shared-core:compileDebugShaders NO-SOURCE
+> Task :shared-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:generateDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugAssets UP-TO-DATE
+> Task :android-app:mergeDebugAssets UP-TO-DATE
+> Task :android-app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :android-app:generateDebugUnitTestConfig UP-TO-DATE
+> Task :android-app:prepareRobolectricSdk UP-TO-DATE
+> Task :android-app:processDebugJavaRes UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :canvas-core:processDebugJavaRes UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :shared-core:processDebugJavaRes UP-TO-DATE
+> Task :android-app:compileDebugUnitTestKotlin
+> Task :android-app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :android-app:processDebugUnitTestJavaRes UP-TO-DATE
+
+> Task :android-app:testDebugUnitTest
+
+StoreOwnerAdmissionTest > backgroundConstructionRefusesBeforeCreatingAnExecutor FAILED
+    java.lang.AssertionError at StoreOwnerAdmissionTest.kt:44
+
+> Task :android-app:testDebugUnitTest FAILED
+
+1 test completed, 1 failed
+
+[Incubating] Problems report is available at: file:///D:/work/StudioProjects/ANote-core/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':android-app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///D:/work/StudioProjects/ANote-core/android-app/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 13s
+61 actionable tasks: 4 executed, 57 up-to-date

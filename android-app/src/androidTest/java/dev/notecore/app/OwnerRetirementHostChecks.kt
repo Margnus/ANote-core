@@ -31,6 +31,15 @@ internal class OwnerRetirementHostChecks(private val test: Instrumentation, priv
         fun store(path: File): NoteStore = NoteStore.isolated(host, path).also { stores.add(it) }
         try {
             run {
+                lateinit var original: NoteStore
+                main { original = NoteStore.get(host) }
+                check(runCatching { NoteStore.isolated(host, File(root, "wrong-owner")) }.exceptionOrNull() is IllegalStateException)
+                check(runCatching { NoteStore.get(host) }.exceptionOrNull() is IllegalStateException)
+                check(!File(root, "wrong-owner").exists())
+                main { check(NoteStore.get(host) === original) }
+                checks.add("wrong_thread_store_creation_and_lookup_refused")
+            }
+            run {
                 lateinit var owner: NoteStore; lateinit var note: PagedPreviewNotebook
                 main {
                     owner=store(File(root,"unadmitted")); note=owner.create(); draw(note)
