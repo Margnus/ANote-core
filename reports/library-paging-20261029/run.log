@@ -1,0 +1,147 @@
+{
+  "schema": "library-paging-1",
+  "status": "passed",
+  "date": "2026-10-29",
+  "origin": "synthetic actual host SQLite isolated temporary database",
+  "sqlite_version": "3.53.1",
+  "fixture_primary_rows": 10002,
+  "page_size": 37,
+  "queries": [
+    {
+      "sort": "NAME",
+      "favorites_only": false,
+      "rows": 9092,
+      "pages": 246,
+      "maximum_rows_per_page": 37,
+      "first_page_vm_steps": 540,
+      "last_page_vm_steps": 643,
+      "maximum_page_vm_steps": 921,
+      "ordered_rows_sha256": "68152a29f108c855baa5d401704829bedcb1fe228c1b601c754ef9ba21fdf2db"
+    },
+    {
+      "sort": "NAME",
+      "favorites_only": true,
+      "rows": 3032,
+      "pages": 82,
+      "maximum_rows_per_page": 37,
+      "first_page_vm_steps": 621,
+      "last_page_vm_steps": 839,
+      "maximum_page_vm_steps": 1021,
+      "ordered_rows_sha256": "38bf93b09906f9061cd4635865cd1ff25e55e522d4d0fef6c3af7f53fb102f4e"
+    },
+    {
+      "sort": "UPDATED",
+      "favorites_only": false,
+      "rows": 9092,
+      "pages": 246,
+      "maximum_rows_per_page": 37,
+      "first_page_vm_steps": 540,
+      "last_page_vm_steps": 643,
+      "maximum_page_vm_steps": 921,
+      "ordered_rows_sha256": "585bc355f9a08b200594bb417031ea29ecf486eadecd155e142f73f05db50f5a"
+    },
+    {
+      "sort": "UPDATED",
+      "favorites_only": true,
+      "rows": 3032,
+      "pages": 82,
+      "maximum_rows_per_page": 37,
+      "first_page_vm_steps": 621,
+      "last_page_vm_steps": 839,
+      "maximum_page_vm_steps": 1021,
+      "ordered_rows_sha256": "7b135fa711fe271b441a8f0368e12c87b30c64d91ccf888a6c07d2e70b0dc46b"
+    },
+    {
+      "sort": "RECENT",
+      "favorites_only": false,
+      "rows": 7793,
+      "pages": 211,
+      "maximum_rows_per_page": 37,
+      "first_page_vm_steps": 622,
+      "last_page_vm_steps": 665,
+      "maximum_page_vm_steps": 1089,
+      "ordered_rows_sha256": "a310d332ce6c6fb912b6de7738f0eff13b3ae9472173c04e0f8be39439243580"
+    },
+    {
+      "sort": "RECENT",
+      "favorites_only": true,
+      "rows": 2599,
+      "pages": 71,
+      "maximum_rows_per_page": 37,
+      "first_page_vm_steps": 719,
+      "last_page_vm_steps": 449,
+      "maximum_page_vm_steps": 1213,
+      "ordered_rows_sha256": "40c8a6d34f1c5c4fa8a2baab94c70006db3ab8eb80cd09aa7d7a96810d3871c9"
+    }
+  ],
+  "raw_binary_sort_witness": {
+    "sqlite_binary": [
+      "",
+      "😀"
+    ],
+    "existing_kotlin_utf16": [
+      "😀",
+      ""
+    ],
+    "orders_differ": true
+  },
+  "complete_restart_after_mutations_rows": 9092,
+  "deep_offset_witness": {
+    "offset": 8000,
+    "rows": 37,
+    "vm_steps": 24402,
+    "keyset_maximum_page_vm_steps": 921
+  },
+  "query_plans": [
+    "SEARCH note_meta USING COVERING INDEX page_name_0 (space=? AND trashed=? AND (name_key,id_key)>(?,?))",
+    "SEARCH note_meta USING COVERING INDEX page_name_0 (space=? AND trashed=?)",
+    "SEARCH note_meta USING COVERING INDEX page_name_1 (space=? AND trashed=? AND favorite=? AND (name_key,id_key)>(?,?))",
+    "SEARCH note_meta USING COVERING INDEX page_name_1 (space=? AND trashed=? AND favorite=?)",
+    "SEARCH note_meta USING COVERING INDEX page_recent_0 (space=? AND trashed=? AND (recent_key,id_key)>(?,?))",
+    "SEARCH note_meta USING COVERING INDEX page_recent_0 (space=? AND trashed=? AND recent_key>?)",
+    "SEARCH note_meta USING COVERING INDEX page_recent_1 (space=? AND trashed=? AND favorite=? AND (recent_key,id_key)>(?,?))",
+    "SEARCH note_meta USING COVERING INDEX page_recent_1 (space=? AND trashed=? AND favorite=? AND recent_key>?)",
+    "SEARCH note_meta USING COVERING INDEX page_updated_0 (space=? AND trashed=? AND (updated_key,id_key)>(?,?))",
+    "SEARCH note_meta USING COVERING INDEX page_updated_0 (space=? AND trashed=?)",
+    "SEARCH note_meta USING COVERING INDEX page_updated_1 (space=? AND trashed=? AND favorite=? AND (updated_key,id_key)>(?,?))",
+    "SEARCH note_meta USING COVERING INDEX page_updated_1 (space=? AND trashed=? AND favorite=?)"
+  ],
+  "metadata_tables_read": [
+    "fixture_scope",
+    "note_meta",
+    "space_revision"
+  ],
+  "checks": [
+    "all_pages_equal_independent_utf16_and_descending_time_oracle",
+    "equal_key_identity_tiebreak_no_duplicates_or_omissions",
+    "trash_and_space_isolation",
+    "favorite_and_non_null_recent_filters",
+    "covering_index_no_temporary_sort_no_offset",
+    "bounded_deep_page_vm_steps",
+    "payload_authorizer_denies_body_and_images",
+    "foreign_query_and_forged_anchor_refused",
+    "page_limit_and_empty_catalog",
+    "wal_page_is_single_snapshot_during_concurrent_update",
+    "old_cursor_refused_after_update_delete_insert",
+    "complete_restart_matches_mutated_catalog",
+    "raw_binary_unicode_sort_mismatch_retained",
+    "deep_offset_scan_work_exceeds_keyset_witness",
+    "revision_exhaustion_rolls_back_metadata_without_real_conversion"
+  ],
+  "decision": "Adopt metadata-only covering indexes with complete UTF-16/order+identity seek keys and per-page same-transaction revision fences as a candidate. Reject raw SQLite BINARY title ordering as equivalent to the existing Kotlin comparator.",
+  "limitations": [
+    "No App integration, production DDL/migration, durable metadata owner, platform SQLite or physical performance claim.",
+    "Revision triggers and encoded sort columns belong to this disposable fixture schema, not a second App authority.",
+    "Global revision rejects unrelated metadata changes conservatively; UI restart/anchor relocation and async covers remain unimplemented.",
+    "No Unicode casefold/locale/natural-sort change; exact existing UTF-16 title order only.",
+    "C1/M-1/heap/stylus and DEV-041 remain gated; LIB-09 is not wholly accepted."
+  ],
+  "c1_gate_complete": false,
+  "production_schema_frozen": false,
+  "whole_requirement_accepted": false,
+  "source_sha256": {
+    "tools/library_paging_probe.py": "5e6fc700a8d61e64fb5eafc965c567da200195db651b9c6e1c126fccded5b567",
+    "tools/verify_library_paging.py": "88763fb0639091e570faaa9ec0ecde608093879d4310cc4c294e54c737a65d3f",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3"
+  }
+}
