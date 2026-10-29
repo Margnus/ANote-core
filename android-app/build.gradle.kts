@@ -51,6 +51,9 @@ tasks.withType<Test>().configureEach {
     systemProperty("notecore.image.outputs", imageOutputs.absolutePath)
     inputs.files(rootProject.fileTree(imageFixtures))
     outputs.dir(imageOutputs)
+    val budgetOutputs = rootProject.file("build/image-decode-budget/$name")
+    systemProperty("notecore.image.budget.outputs", budgetOutputs.absolutePath)
+    outputs.dir(budgetOutputs)
     if (providers.gradleProperty("enablePdfGeometryNativeProbe").orNull == "true") {
         val pdfFixture = rootProject.file("output/pdf/crop-rotations.pdf")
         systemProperty("notecore.pdf.fixture", pdfFixture.absolutePath)
