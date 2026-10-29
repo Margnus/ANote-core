@@ -19,6 +19,24 @@ import kotlin.test.*
 @Config(sdk = [35])
 @LooperMode(LooperMode.Mode.PAUSED)
 class StoreOwnerAdmissionTest {
+    @Test fun invalidConfigurationDoesNotLeaveAnUnownedStorageWorker() {
+        val context: Application = RuntimeEnvironment.getApplication()
+        val directory = Files.createTempDirectory("store-invalid-budget-").toFile()
+        val before = Thread.getAllStackTraces().keys.toSet()
+        var created = emptyList<Thread>()
+        try {
+            assertFailsWith<IllegalArgumentException> {
+                NoteStore.isolated(context, directory, exportPickerByteLimit = -1)
+            }
+            created = Thread.getAllStackTraces().keys.filter { it !in before && it.name == "NoteCore-preview-storage" }
+            assertTrue(created.isEmpty(), "Rejected configuration started a worker without returning its owner")
+            assertTrue(directory.listFiles().orEmpty().isEmpty())
+        } finally {
+            // Only this rejected fixture's new empty worker can exist before the fix; never touch other workers.
+            created.forEach { it.interrupt(); it.join(5_000); check(!it.isAlive) }
+            directory.deleteRecursively()
+        }
+    }
     @Test fun backgroundSingletonLookupRefusesAndPreservesTheMainOwner() {
         val context: Application = RuntimeEnvironment.getApplication()
         val directory = Files.createTempDirectory("store-main-owner-").toFile()

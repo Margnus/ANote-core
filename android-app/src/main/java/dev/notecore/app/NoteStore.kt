@@ -34,6 +34,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     init {
         // This platform owner always wakes on main; reject before creating the worker or owner state.
         check(Looper.myLooper() == Looper.getMainLooper()) { "Android Store requires the main owner thread" }
+        require(exportPickerByteLimit >= 0) { "Export picker byte limit must be nonnegative" }
     }
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead)
     private val main = Handler(Looper.getMainLooper())
@@ -191,7 +192,6 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         val capture = pendingExport?.takeIf { it.first == requestCode } ?: return null
         pendingExport = null; return capture.second
     }
-    init { executor.checkOwnerThread(); require(exportPickerByteLimit >= 0) }
     private fun requestPump() {
         if (!wakePending.compareAndSet(false, true)) return
         if (!main.post {

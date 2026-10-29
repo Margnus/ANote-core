@@ -39,6 +39,15 @@ internal class OwnerRetirementHostChecks(private val test: Instrumentation, priv
                 main { check(NoteStore.get(host) === original) }
                 checks.add("wrong_thread_store_creation_and_lookup_refused")
             }
+            main {
+                val before = Thread.getAllStackTraces().keys.toSet()
+                check(runCatching {
+                    NoteStore.isolated(host, File(root, "bad-budget"), exportPickerByteLimit = -1)
+                }.exceptionOrNull() is IllegalArgumentException)
+                check(Thread.getAllStackTraces().keys.none { it !in before && it.name == "NoteCore-preview-storage" })
+                check(!File(root, "bad-budget").exists())
+                checks.add("invalid_store_configuration_does_not_start_worker")
+            }
             run {
                 lateinit var owner: NoteStore; lateinit var note: PagedPreviewNotebook
                 main {
