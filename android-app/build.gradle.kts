@@ -27,6 +27,8 @@ val robolectricSdk by configurations.creating { isCanBeConsumed = false; isTrans
 dependencies {
     implementation(project(":shared-core"))
     testImplementation(kotlin("test-junit"))
+    // Isolated encoded-fixture metadata reader; no production import dependency.
+    testImplementation("androidx.exifinterface:exifinterface:1.4.2")
     testImplementation("org.robolectric:robolectric:4.17")
     add(robolectricSdk.name, "org.robolectric:android-all-instrumented:15-robolectric-13954326-i7")
 }
