@@ -1,5 +1,13 @@
 # 当前Android独立环境验证
 
+## 2026-10-29：当前SurfaceControl与普通PID释放
+
+沿有限C1第4/5项，起点bba0017；验收卡目标为当前同一InkCanvasView/NoteStore/worker/SurfaceControl实际回执/未知责任/退休，不另建Surface demo，并补独立普通PID关闭后释放日志。先核对96项源码/构建输入，再以原`surface_frames`入口运行，五份正式文件前后保持；普通App随后独立启动并打开已保存笔记，返回资料库后须观察原source释放与owner drain，正式文件保持。不把软件gate或模拟器回执当真机长期GPU未signal/heap。
+
+实际仪器PID4939通过原宿主28个true契约字段，包括层级像素/alpha、页缩放/尺寸、pending完整fallback、真实release callback/有效fence、迟到ACK、弱View丢失、storage继续、UNKNOWN只读对账、owner退休等待回执与迟到输出。startup无瞬态空白及长期GPU未signal仍明确未验证。独立普通PID5033观察硬件Canvas与SurfaceControl帧调度charge19018272，返回资料库后release-receipt→source-released→owner-drained，charge0；这是原逻辑费用结算，不是整个进程heap归零。五份正式笔记在两阶段都保持原集合及字节。
+
+见[报告](../reports/current-api35-rendering.json)及[普通日志](../reports/current-api35-rendering/ordinary/render.log)，入口`tools/verify_current_android_rendering.py`仅验证保留观察。采用当前新API35/SwiftShader原生回执及普通PID释放子范围，C1六项现状已回填原清单；不提高Android最低支持版本，不改后端/API/生产格式。完全owner/线程丢失/跨线程接管、真实长期未signal、当前Apple/物理M-1和完整C1继续待验。
+
 ## 2026-10-29：真实picker前台时后台App进程死亡
 
 本轮沿有限C1原picker失败矩阵，起点6250ab7。验收卡目标是原四份已保存笔记下，系统选择器前台时仅终止后台预览App进程，返回旧结果须拒绝而非误用新Store；新会话主动重试可成功。仅已确认保存输入，禁止把它当worker写出中途终止、断电或全部owner丢失责任验收。
