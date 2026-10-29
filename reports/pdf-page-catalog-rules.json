@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "requirements": [
+    "PAGE-02",
+    "PDF-04"
+  ],
+  "status": "passed",
+  "scope": "Internal PDF source-index/display-order rules and original delete command plans on JVM with synthetic metadata; no PDF file read/render, production transaction or App acceptance",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfPageCatalogRules.kt": "147c8142506d2d27dc3c14fdcc2af82fa435b0379fb109018a6138af7bdd4857",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "b38f7c72fa031a723fd94a1417966c52f1f12d43d6a4f7649bcb7839be054afc",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "5cda54d679617b338e9eb1d4d868490eaefd0f85599abe13747aea136559194a",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PdfPageCatalogRulesTest.kt": "ef1995ba2a87ab08290a1c1d4c3814767a6f6896b625da77f292b3e7bc492ce5",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfPageCatalogRulesTest.xml": "bd2c88988fdd0d6f3279f45b655f68557e14979b8bbcebf680a10899d8380ddf",
+    "reports/verification.json": "13e0ce74841ff4f7c9076bd03181b18b9acee2e8e20438cc6906fc2fc6a13816"
+  },
+  "scenarios": [
+    "invalidMetadataNeverProducesPartialProjectionOrDeletion[jvm]",
+    "lastBlankPdfBackgroundRemovalHasNoFakeDocumentCommit[jvm]",
+    "oldMetadataAndDocumentCommandAreRejectedAndBlankPagesAreNotSourcePages[jvm]",
+    "originalReorderAndBlankInsertKeepPhysicalSourceNumbers[jvm]",
+    "duplicatedSourcePageUnderDifferentStablePageIdsIsAllowed[jvm]",
+    "deletePlanPairsOriginalCommandWithExactReferenceAndLeavesSourceRegistry[jvm]"
+  ],
+  "sample_origin": "synthetic-metadata",
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirements_accepted": false,
+  "remaining": [
+    "production PdfPageRef schema and paired document/metadata transaction/history",
+    "real PDF resource/renderer and page-label/outline capability adaptation",
+    "Android and Apple order/delete/undo/save-reopen UI and actual export verification"
+  ]
+}
