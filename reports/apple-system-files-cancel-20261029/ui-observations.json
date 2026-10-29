@@ -1,0 +1,23 @@
+{
+  "method": "CUA Device Hub; exact returned state/error messages transcribed from this run, no UI callback injection",
+  "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "initial_observation": "NoteCore library visible with two C1-Files-20261029 rows; Capture Keyboard off",
+  "actions": [
+    {
+      "call": "hub.click(18); hub.getAXState()",
+      "result": "The user changed '/Applications/Xcode.app/Contents/Applications/DeviceHub.app'. Re-query the latest state with `get_app_state` before sending more actions.",
+      "reopen_verified": false
+    },
+    {
+      "call": "hub.getAXState()",
+      "result": "Computer Use server error -10005: noWindowsAvailable"
+    },
+    {
+      "call": "hub.getAXStateAndScreenshot()",
+      "result": "Computer Use server error -10005: timeoutReached"
+    }
+  ],
+  "import_cancel_post_reopen_verified": false,
+  "export_cancel_verified": false,
+  "cause": "Control surface unavailable; lock or application/window state not diagnosed. No further input attempted."
+}

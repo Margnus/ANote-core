@@ -1,0 +1,53 @@
+{
+  "schema": "apple-system-files-cancel-1",
+  "status": "deferred_control_surface_unavailable",
+  "scope": "Attempt to close prior deferred ordinary Apple Files cancellation/reopen checks; no successful cancellation/reopen or new runtime pass claimed.",
+  "date": "2026-10-29",
+  "source_commit": "febfc657957b645c4f09fe52873f3454119880b7",
+  "artifact_sha256": "05c33ca339edceb1e281c0e6f4740273c8e1789d35e34ae6a8c79131e8a3ca21",
+  "original_files": 16,
+  "files_match_previous_geometry_and_system_files_baselines": true,
+  "files_unchanged": true,
+  "ordinary_payload_unchanged_without_xctest": true,
+  "ui": {
+    "method": "CUA Device Hub; exact returned state/error messages transcribed from this run, no UI callback injection",
+    "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+    "initial_observation": "NoteCore library visible with two C1-Files-20261029 rows; Capture Keyboard off",
+    "actions": [
+      {
+        "call": "hub.click(18); hub.getAXState()",
+        "result": "The user changed '/Applications/Xcode.app/Contents/Applications/DeviceHub.app'. Re-query the latest state with `get_app_state` before sending more actions.",
+        "reopen_verified": false
+      },
+      {
+        "call": "hub.getAXState()",
+        "result": "Computer Use server error -10005: noWindowsAvailable"
+      },
+      {
+        "call": "hub.getAXStateAndScreenshot()",
+        "result": "Computer Use server error -10005: timeoutReached"
+      }
+    ],
+    "import_cancel_post_reopen_verified": false,
+    "export_cancel_verified": false,
+    "cause": "Control surface unavailable; lock or application/window state not diagnosed. No further input attempted."
+  },
+  "static_review": [
+    "PreviewModel.save captures current.captureRecovery inside the synchronous owner call; it accepts no external snapshot. retryRetainedWrites only reoffers original ledger-retained entries. No Android-style late external capture path identified.",
+    "PreviewRecoveryCodec validates both committed and pending payloads before constructing a snapshot. openRecovery checks pending charge before mutable authority creation. Existing structural and capacity tests already cover these paths; no new defect or runtime result inferred from this audit."
+  ],
+  "remaining": [
+    "Real import-cancel reopening and export cancellation/reopening require a usable Device Hub window.",
+    "Physical M-1/stylus/heap, unified peak admission and full C1 remain open; DEV-041/production SQLite not authorized."
+  ],
+  "c1_gate_complete": false,
+  "whole_requirement_accepted": false,
+  "evidence_sha256": {
+    "reports/apple-system-files-cancel-20261029/payload-after.json": "cba10784c712bd200156074e88784c2907dbbd5a6e69555b831e8425af93b1a0",
+    "reports/apple-system-files-cancel-20261029/ui-observations.json": "87c93791ca1fbd72f7fa4b639c92c7e6a24e7500482f9305211313f2411609b1",
+    "reports/apple-system-files-cancel-20261029/files-before.json": "2f3ed1da913eddbd1e13aa0d7fec9e2a255c14d1d480f0e495ce61c3dc6d6284",
+    "reports/apple-system-files-cancel-20261029/files-after.json": "2f3ed1da913eddbd1e13aa0d7fec9e2a255c14d1d480f0e495ce61c3dc6d6284",
+    "reports/apple-system-files-cancel-20261029/payload-before.json": "cba10784c712bd200156074e88784c2907dbbd5a6e69555b831e8425af93b1a0",
+    "reports/apple-system-files-cancel-20261029/start.json": "c62689249b27ca7ffe59b72a5b3c05722830fcec7fec5b30628fc83724c6b23f"
+  }
+}
