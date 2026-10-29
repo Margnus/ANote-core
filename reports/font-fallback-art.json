@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "requirement": "OBJ-02",
+  "scope": "Read-only actual system-font samples on API35. TextRunShaper per-glyph Font file hash/TTC index distinguishes requested font and fallback despite hasGlyph=true. Native Canvas render retained; no font binary redistribution, App text box or production font catalog.",
+  "native_result_sha256": "367555cbc2b5516f9491eab35c08d893b77c0336a9368c8d72db612ac0715188",
+  "native_samples": [
+    {
+      "text": "A",
+      "utf16_length": 1,
+      "has_glyph": true,
+      "glyph_count": 1,
+      "advance": 31,
+      "fallback_observed": false,
+      "fonts": [
+        {
+          "file": "/system/fonts/RobotoStatic-Regular.ttf",
+          "ttc_index": 0,
+          "glyph_id": 38,
+          "x": 0,
+          "y": 64
+        }
+      ]
+    },
+    {
+      "text": "笔",
+      "utf16_length": 1,
+      "has_glyph": true,
+      "glyph_count": 1,
+      "advance": 48,
+      "fallback_observed": true,
+      "fonts": [
+        {
+          "file": "/system/fonts/NotoSansCJK-Regular.ttc",
+          "ttc_index": 2,
+          "glyph_id": 29758,
+          "x": 0,
+          "y": 64
+        }
+      ]
+    },
+    {
+      "text": "😀",
+      "utf16_length": 2,
+      "has_glyph": true,
+      "glyph_count": 1,
+      "advance": 60,
+      "fallback_observed": true,
+      "fonts": [
+        {
+          "file": "/system/fonts/NotoColorEmoji.ttf",
+          "ttc_index": 0,
+          "glyph_id": 1754,
+          "x": 0,
+          "y": 64
+        }
+      ]
+    },
+    {
+      "text": "é",
+      "utf16_length": 2,
+      "has_glyph": true,
+      "glyph_count": 1,
+      "advance": 25,
+      "fallback_observed": false,
+      "fonts": [
+        {
+          "file": "/system/fonts/RobotoStatic-Regular.ttf",
+          "ttc_index": 0,
+          "glyph_id": 2289,
+          "x": 0,
+          "y": 64
+        }
+      ]
+    }
+  ],
+  "font_file_sha256": {
+    "/system/fonts/RobotoStatic-Regular.ttf": "06cba01eb71ea5cbd3a7df498910624db68953beead4be18fd91f8ec7dc72351",
+    "/system/fonts/NotoSansCJK-Regular.ttc": "3e7e5afaac2c6d872592d76abedac03a51c6f0fc42d11e311ff2816a6c368afe",
+    "/system/fonts/NotoColorEmoji.ttf": "e98e9e1f19ceada5ade4dce5d25c2b0e4d14e5df4b3d06f6f3ea6735b5e8b658"
+  },
+  "rendered_ink_pixels_per_sample": [
+    425,
+    1007,
+    2026,
+    396
+  ],
+  "decision": "Do not use Paint.hasGlyph alone to certify requested-font coverage. Keep logical UTF-16 text separate from glyph count; actual fallback source must be explicit in a future font policy.",
+  "cross_platform_font_equivalence_verified": false,
+  "legacy_api26_diagnostics_verified": false,
+  "font_native_release_verified": false,
+  "app_text_box_integrated": false,
+  "apple_verified": false,
+  "physical_verified": false,
+  "c1_complete": false,
+  "goal_complete": false,
+  "evidence_sha256": {
+    "reports/font-fallback-art/result.json": "367555cbc2b5516f9491eab35c08d893b77c0336a9368c8d72db612ac0715188",
+    "reports/font-fallback-art/run.log": "2337413898aef94c8d81316f5c7cb0162465a29a14fafda43370636d13b022e5",
+    "reports/font-fallback-art/samples.png": "d8d4e6b4d75a3cc72bb9fbbeb1a672c84f82169cb4e0e09cd44ba35bbe9a458f"
+  },
+  "verifier_sha256": "56403a5156b12d47077408561a3aab4e48cfc8af1d7f2bdd7291e19f874dd9ed"
+}
