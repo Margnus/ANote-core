@@ -1,0 +1,445 @@
+[
+  {
+    "label": "avd",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "getprop",
+      "ro.boot.qemu.avd_name"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "c94a04237cbd5ac338e8735f1b67e628d324851953f0837388e1b3ee1b7d7d44",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "api",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "getprop",
+      "ro.build.version.sdk"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "a4b2c5db15348c29451e18b8307e5ef81625ea638e807935f39ceaa8d9ac7758",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "before-android-notes",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as dev.notecore.preview sh -c 'sha256sum files/preview-notes/*.ncp'"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "82be2fdfe1f034f03458750413115c75771cddcbe65b76f4961868279a9b1ad4",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "before-android-package",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "pm",
+      "path",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "265e166137dd6bb254ab941b2fd36eefe4e41bedde9d52bffe3cc294ae6ecb23",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "before-android-apk",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "exec-out",
+      "cat",
+      "/data/app/~~IE7DD_9OaioGmOVvNYOM3A==/dev.notecore.preview-xtWShfPt6mZ1OpnLRCZfHQ==/base.apk"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "a5a74e9d9d8f1dc062c5a969cb578b87ed5b9b4729450cf02cc72f4e8d95d995",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "apple-devices",
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "cc44d5dd1dc4ab33194ced9a5b61ca63477823cf0c1c7b20739ac71a251b282c",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "apple-data",
+    "argv": [
+      "xcrun",
+      "simctl",
+      "get_app_container",
+      "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+      "dev.notecore.preview",
+      "data"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "f52d0a32b785f72f838d4e783628d5539b2b51c99c92f9a88b0dab3f99435fd8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "apple-app",
+    "argv": [
+      "xcrun",
+      "simctl",
+      "get_app_container",
+      "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+      "dev.notecore.preview",
+      "app"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "eedd95e7c6571dff8084b2f16b603e96760914db65b633b5b97dc7195730edc7",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "prepare",
+    "argv": [
+      "/Users/lixiaofan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/Users/lixiaofan/StudioProjects/notecore/tools/prepare_library_paging_platform.py",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/fixture"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "ecced56a833e708af3f86b4312a24d256ef2581374d71962b0b34e66bf45e2dc",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "javac",
+    "argv": [
+      "/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/javac",
+      "-source",
+      "8",
+      "-target",
+      "8",
+      "-bootclasspath",
+      "/Users/lixiaofan/Library/Android/sdk/platforms/android-36/android.jar",
+      "-cp",
+      "/Users/lixiaofan/Library/Android/sdk/platforms/android-36/android.jar",
+      "-d",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/classes",
+      "/Users/lixiaofan/StudioProjects/notecore/tools/probes/LibraryPagingProbe.java"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "d8",
+    "argv": [
+      "/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/java",
+      "-Xmx512m",
+      "-cp",
+      "/Users/lixiaofan/Library/Android/sdk/build-tools/36.0.0/lib/d8.jar",
+      "com.android.tools.r8.D8",
+      "--min-api",
+      "26",
+      "--lib",
+      "/Users/lixiaofan/Library/Android/sdk/platforms/android-36/android.jar",
+      "--output",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/probe.jar",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/classes/dev/notecore/probes/LibraryPagingProbe$1.class",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/classes/dev/notecore/probes/LibraryPagingProbe.class"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "apple-sdk",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "--show-sdk-path"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "fc0e1f390e49274ccc3b9484c8af9047f9e78868439ada0261b8fcda80a25990",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "swiftc",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "swiftc",
+      "-target",
+      "arm64-apple-ios16.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/module-cache",
+      "/Users/lixiaofan/StudioProjects/notecore/tools/probes/LibraryPagingProbe.swift",
+      "-lsqlite3",
+      "-o",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/LibraryPagingProbe"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "stage-mkdir",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "mkdir",
+      "/data/local/tmp/notecore-library-paging-513c1b49-3df8-4216-b510-75d021832d23"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "push-fixture.sqlite",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "push",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/fixture/fixture.sqlite",
+      "/data/local/tmp/notecore-library-paging-513c1b49-3df8-4216-b510-75d021832d23/fixture.sqlite"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "db538285c5e8f59e47615f4638259dd4ca674a61e6fe7b825b22591f2cd52fa7"
+  },
+  {
+    "label": "push-cases.json",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "push",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/fixture/cases.json",
+      "/data/local/tmp/notecore-library-paging-513c1b49-3df8-4216-b510-75d021832d23/cases.json"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "925438256b50a0c0621ac4992dd1074d91c170f9dcd146a197fe25bac0e01b10"
+  },
+  {
+    "label": "push-probe.jar",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "push",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/probe.jar",
+      "/data/local/tmp/notecore-library-paging-513c1b49-3df8-4216-b510-75d021832d23/probe.jar"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "6fcdddae3a84e9278f96c4acb8531dfcd884e643b4f14a6f68df31d5b2fc312d"
+  },
+  {
+    "label": "cache-mkdir",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "mkdir",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "copy-fixture.sqlite",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "cp",
+      "/data/local/tmp/notecore-library-paging-513c1b49-3df8-4216-b510-75d021832d23/fixture.sqlite",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23/fixture.sqlite"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "copy-cases.json",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "cp",
+      "/data/local/tmp/notecore-library-paging-513c1b49-3df8-4216-b510-75d021832d23/cases.json",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23/cases.json"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "copy-probe.jar",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "cp",
+      "/data/local/tmp/notecore-library-paging-513c1b49-3df8-4216-b510-75d021832d23/probe.jar",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23/probe.jar"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "readonly-dex",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "chmod",
+      "444",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23/probe.jar"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "android-run",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "/system/bin/env",
+      "CLASSPATH=cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23/probe.jar",
+      "/system/bin/app_process",
+      "/system/bin",
+      "dev.notecore.probes.LibraryPagingProbe",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "6de56ecc32d5d7038dce38bc9298f59822482eea4f9f4ae18dba13ecdc68d675",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "apple-run",
+    "argv": [
+      "xcrun",
+      "simctl",
+      "spawn",
+      "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+      "/Users/lixiaofan/StudioProjects/notecore/build/library-paging-513c1b49-3df8-4216-b510-75d021832d23/LibraryPagingProbe",
+      "/Users/lixiaofan/Library/Developer/CoreSimulator/Devices/7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0/data/Containers/Data/Application/609CA51D-63AE-4F6A-BA95-3DE7EE7D6D5F/Library/Caches/library-paging-513c1b49-3df8-4216-b510-75d021832d23"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "7a6509cedef0e2b099649c679d4f49333c3a1c500f663e2dfb8ba5e2164602ab",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "after-fixture.sqlite",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23/fixture.sqlite"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "a4098836f461da3d57a09c196c916f980d345e66224e6a033f2aa5a0786d6ed6",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "after-cases.json",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/library-paging-513c1b49-3df8-4216-b510-75d021832d23/cases.json"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "1b444a6bff24e6a95b5afa446df2d9db6d4ac3b3e6ab6027cc774f47d478b123",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "after-android-notes",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "run-as dev.notecore.preview sh -c 'sha256sum files/preview-notes/*.ncp'"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "82be2fdfe1f034f03458750413115c75771cddcbe65b76f4961868279a9b1ad4",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "after-android-package",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "shell",
+      "pm",
+      "path",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "265e166137dd6bb254ab941b2fd36eefe4e41bedde9d52bffe3cc294ae6ecb23",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "after-android-apk",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5554",
+      "exec-out",
+      "cat",
+      "/data/app/~~IE7DD_9OaioGmOVvNYOM3A==/dev.notecore.preview-xtWShfPt6mZ1OpnLRCZfHQ==/base.apk"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "a5a74e9d9d8f1dc062c5a969cb578b87ed5b9b4729450cf02cc72f4e8d95d995",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

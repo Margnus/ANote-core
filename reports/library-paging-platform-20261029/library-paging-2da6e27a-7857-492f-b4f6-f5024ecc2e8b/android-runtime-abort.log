@@ -1,0 +1,212 @@
+10-29 22:05:09.358 14862 14862 W libc    : Access denied finding property "ro.debuggable"
+10-29 22:05:09.358 14862 14862 W libc    : Access denied finding property "ro.debuggable"
+10-29 22:05:09.356 14862 14862 W app_process: type=1400 audit(0.0:94): avc:  denied  { read } for  name="u:object_r:userdebug_or_eng_prop:s0" dev="tmpfs" ino=362 scontext=u:r:runas_app:s0:c214,c256,c512,c768 tcontext=u:object_r:userdebug_or_eng_prop:s0 tclass=file permissive=0 app=dev.notecore.preview
+10-29 22:05:09.358 14862 14862 W libc    : Access denied finding property "ro.debuggable"
+10-29 22:05:09.356 14862 14862 W app_process: type=1400 audit(0.0:95): avc:  denied  { read } for  name="u:object_r:userdebug_or_eng_prop:s0" dev="tmpfs" ino=362 scontext=u:r:runas_app:s0:c214,c256,c512,c768 tcontext=u:object_r:userdebug_or_eng_prop:s0 tclass=file permissive=0 app=dev.notecore.preview
+10-29 22:05:09.356 14862 14862 W app_process: type=1400 audit(0.0:96): avc:  denied  { read } for  name="u:object_r:userdebug_or_eng_prop:s0" dev="tmpfs" ino=362 scontext=u:r:runas_app:s0:c214,c256,c512,c768 tcontext=u:object_r:userdebug_or_eng_prop:s0 tclass=file permissive=0 app=dev.notecore.preview
+10-29 22:05:09.359 14862 14862 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 10214 <<<<<<
+10-29 22:05:09.359 14862 14862 W libc    : Access denied finding property "ro.debuggable"
+10-29 22:05:09.356 14862 14862 W app_process: type=1400 audit(0.0:97): avc:  denied  { read } for  name="u:object_r:userdebug_or_eng_prop:s0" dev="tmpfs" ino=362 scontext=u:r:runas_app:s0:c214,c256,c512,c768 tcontext=u:object_r:userdebug_or_eng_prop:s0 tclass=file permissive=0 app=dev.notecore.preview
+10-29 22:05:09.367 14862 14862 I AndroidRuntime: Using default boot image
+10-29 22:05:09.367 14862 14862 I AndroidRuntime: Leaving lock profiling enabled
+10-29 22:05:09.367 14862 14862 W libc    : Access denied finding property "odsign.verification.success"
+10-29 22:05:09.364 14862 14862 W app_process: type=1400 audit(0.0:98): avc:  denied  { read } for  name="u:object_r:odsign_prop:s0" dev="tmpfs" ino=264 scontext=u:r:runas_app:s0:c214,c256,c512,c768 tcontext=u:object_r:odsign_prop:s0 tclass=file permissive=0 app=dev.notecore.preview
+10-29 22:05:09.367 14862 14862 W libc    : Access denied finding property "ro.debuggable"
+10-29 22:05:09.368 14862 14862 W app_process: ART APEX data files are untrusted.
+10-29 22:05:09.368 14862 14862 I app_process: Using CollectorTypeCMC GC.
+10-29 22:05:09.439 14862 14862 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+10-29 22:05:09.449 14862 14862 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+10-29 22:05:09.449 14862 14862 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/9/icu") succeeded. 
+10-29 22:05:09.449 14862 14862 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt76l.dat
+10-29 22:05:09.450 14862 14862 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+10-29 22:05:09.450 14862 14862 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+10-29 22:05:09.453 14862 14862 E app_process: Attempt to load writable dex file: /data/user/0/dev.notecore.preview/cache/library-paging-2da6e27a-7857-492f-b4f6-f5024ecc2e8b/probe.jar
+10-29 22:05:09.453 14862 14862 W app_process: Ljava/lang/ClassLoader$SystemClassLoader; failed initialization: java.lang.SecurityException: Writable dex file '/data/user/0/dev.notecore.preview/cache/library-paging-2da6e27a-7857-492f-b4f6-f5024ecc2e8b/probe.jar' is not allowed.
+10-29 22:05:09.453 14862 14862 W app_process:   at java.lang.Object dalvik.system.DexFile.openDexFileNative(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:-2)
+10-29 22:05:09.453 14862 14862 W app_process:   at java.lang.Object dalvik.system.DexFile.openDexFile(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:406)
+10-29 22:05:09.453 14862 14862 W app_process:   at void dalvik.system.DexFile.<init>(java.lang.String, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:128)
+10-29 22:05:09.453 14862 14862 W app_process:   at void dalvik.system.DexFile.<init>(java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:101)
+10-29 22:05:09.453 14862 14862 W app_process:   at dalvik.system.DexFile dalvik.system.DexPathList.loadDexFile(java.io.File, java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexPathList.java:438)
+10-29 22:05:09.453 14862 14862 W app_process:   at dalvik.system.DexPathList$Element[] dalvik.system.DexPathList.makeDexElements(java.util.List, java.io.File, java.util.List, java.lang.ClassLoader, boolean) (DexPathList.java:397)
+10-29 22:05:09.453 14862 14862 W app_process:   at void dalvik.system.DexPathList.<init>(java.lang.ClassLoader, java.lang.String, java.lang.String, java.io.File, boolean) (DexPathList.java:166)
+10-29 22:05:09.453 14862 14862 W app_process:   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader, java.lang.ClassLoader[], java.lang.ClassLoader[], boolean) (BaseDexClassLoader.java:160)
+10-29 22:05:09.453 14862 14862 W app_process:   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.io.File, java.lang.String, java.lang.ClassLoader) (BaseDexClassLoader.java:105)
+10-29 22:05:09.453 14862 14862 W app_process:   at void dalvik.system.PathClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader) (PathClassLoader.java:71)
+10-29 22:05:09.453 14862 14862 W app_process:   at java.lang.ClassLoader java.lang.ClassLoader.createSystemClassLoader() (ClassLoader.java:267)
+10-29 22:05:09.453 14862 14862 W app_process:   at java.lang.ClassLoader java.lang.ClassLoader.-$$Nest$smcreateSystemClassLoader() (ClassLoader.java:-1)
+10-29 22:05:09.453 14862 14862 W app_process:   at void java.lang.ClassLoader$SystemClassLoader.<clinit>() (ClassLoader.java:217)
+10-29 22:05:09.453 14862 14862 W app_process:   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988] Check failed: system_class_loader != nullptr java.lang.ExceptionInInitializerError: 
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988] Caused by: java.lang.SecurityException: Writable dex file '/data/user/0/dev.notecore.preview/cache/library-paging-2da6e27a-7857-492f-b4f6-f5024ecc2e8b/probe.jar' is not allowed.
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at java.lang.Object dalvik.system.DexFile.openDexFileNative(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:-2)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at java.lang.Object dalvik.system.DexFile.openDexFile(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:406)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at void dalvik.system.DexFile.<init>(java.lang.String, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:128)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at void dalvik.system.DexFile.<init>(java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:101)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at dalvik.system.DexFile dalvik.system.DexPathList.loadDexFile(java.io.File, java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexPathList.java:438)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at dalvik.system.DexPathList$Element[] dalvik.system.DexPathList.makeDexElements(java.util.List, java.io.File, java.util.List, java.lang.ClassLoader, boolean) (DexPathList.java:397)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at void dalvik.system.DexPathList.<init>(java.lang.ClassLoader, java.lang.String, java.lang.String, java.io.File, boolean) (DexPathList.java:166)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader, java.lang.ClassLoader[], java.lang.ClassLoader[], boolean) (BaseDexClassLoader.java:160)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.io.File, java.lang.String, java.lang.ClassLoader) (BaseDexClassLoader.java:105)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at void dalvik.system.PathClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader) (PathClassLoader.java:71)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at java.lang.ClassLoader java.lang.ClassLoader.createSystemClassLoader() (ClassLoader.java:267)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at java.lang.ClassLoader java.lang.ClassLoader.-$$Nest$smcreateSystemClassLoader() (ClassLoader.java:-1)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at void java.lang.ClassLoader$SystemClassLoader.<clinit>() (ClassLoader.java:217)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988]   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.453 14862 14862 F app_process: runtime.cc:988] 
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] Runtime aborting...
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] All threads:
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] DALVIK THREADS (2):
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] "main" prio=5 tid=1 Runnable
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | group="" sCount=0 ucsCount=0 flags=0 obj=0x2002128 self=0xb40000762dd79be0
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | sysTid=14862 nice=0 cgrp=default sched=0/0 handle=0x78eada9090
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | state=R schedstat=( 151911757 1248916 108 ) utm=6 stm=8 core=1 HZ=100
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | stack=0x7fc441f000-0x7fc4421000 stackSize=8188KB
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | held mutexes= "abort lock" "mutator lock"(shared held)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #00 pc 004c9868  /apex/com.android.art/lib64/libart.so (art::DumpNativeStack+108) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #01 pc 004379b8  /apex/com.android.art/lib64/libart.so (art::Thread::DumpStack const+436) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #02 pc 004376d4  /apex/com.android.art/lib64/libart.so (art::DumpCheckpoint::Run+120) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #03 pc 00488918  /apex/com.android.art/lib64/libart.so (art::ThreadList::RunCheckpoint+2612) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #04 pc 004c8f64  /apex/com.android.art/lib64/libart.so (art::ThreadList::Dump+232) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #05 pc 008a53cc  /apex/com.android.art/lib64/libart.so (art::AbortState::Dump const+204) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #06 pc 008a160c  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort+836) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #07 pc 00016188  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter::$_0::__invoke+80) (BuildId: 5e1c2a9a9b42ab6e6a3f44738913b9f7)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #08 pc 00015730  /apex/com.android.art/lib64/libbase.so (android::base::LogMessage::~LogMessage+544) (BuildId: 5e1c2a9a9b42ab6e6a3f44738913b9f7)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #09 pc 00584834  /apex/com.android.art/lib64/libart.so (art::CreateSystemClassLoader +1116) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #10 pc 0058211c  /apex/com.android.art/lib64/libart.so (art::Runtime::Start+516) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #11 pc 005c0598  /apex/com.android.art/lib64/libart.so (JNI_CreateJavaVM+444) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #12 pc 0028f5f8  /system/lib64/libandroid_runtime.so (JNI_CreateJavaVM+68) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #13 pc 001288e8  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::startVm+12140) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #14 pc 0012900c  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start+520) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #15 pc 00004564  /system/bin/app_process64 (main+1200) (BuildId: bc83fa691872471af3dc0c1a72a63d9b)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #16 pc 00069ec8  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+120) (BuildId: 2445fc73ede03b9536eef49355aff375)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   (no managed stack frames)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] 
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] "Jit thread pool worker thread 0" prio=5 tid=2 Native
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | group="" sCount=1 ucsCount=0 flags=1 obj=0x2008030 self=0xb40000762dd78010
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | sysTid=14863 nice=9 cgrp=default sched=0/0 handle=0x75e5338500
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | state=S schedstat=( 66250 13417 1 ) utm=0 stm=0 core=3 HZ=100
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | stack=0x75e5239000-0x75e523b000 stackSize=1021KB
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | held mutexes=
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #00 pc 00095c1c  /apex/com.android.runtime/lib64/bionic/libc.so (syscall+28) (BuildId: 2445fc73ede03b9536eef49355aff375)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #01 pc 00201990  /apex/com.android.art/lib64/libart.so (art::ConditionVariable::WaitHoldingLocks+136) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #02 pc 0052df9c  /apex/com.android.art/lib64/libart.so (art::ThreadPoolWorker::Run+224) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #03 pc 00540014  /apex/com.android.art/lib64/libart.so (art::ThreadPoolWorker::Callback+164) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #04 pc 00080df8  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start+232) (BuildId: 2445fc73ede03b9536eef49355aff375)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #05 pc 00073dd8  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64) (BuildId: 2445fc73ede03b9536eef49355aff375)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   (no managed stack frames)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] 
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] Aborting thread:
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] "main" prio=5 tid=1 Runnable
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | group="" sCount=0 ucsCount=0 flags=0 obj=0x2002128 self=0xb40000762dd79be0
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | sysTid=14862 nice=0 cgrp=default sched=0/0 handle=0x78eada9090
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | state=R schedstat=( 156009466 1248916 115 ) utm=6 stm=8 core=1 HZ=100
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | stack=0x7fc441f000-0x7fc4421000 stackSize=8188KB
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   | held mutexes= "abort lock" "mutator lock"(shared held)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #00 pc 004c9868  /apex/com.android.art/lib64/libart.so (art::DumpNativeStack+108) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #01 pc 004379b8  /apex/com.android.art/lib64/libart.so (art::Thread::DumpStack const+436) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #02 pc 008afe94  /apex/com.android.art/lib64/libart.so (art::Thread::DumpStack const+96) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #03 pc 008a58c0  /apex/com.android.art/lib64/libart.so (art::AbortState::DumpThread const+56) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #04 pc 008a160c  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort+836) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #05 pc 00016188  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter::$_0::__invoke+80) (BuildId: 5e1c2a9a9b42ab6e6a3f44738913b9f7)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #06 pc 00015730  /apex/com.android.art/lib64/libbase.so (android::base::LogMessage::~LogMessage+544) (BuildId: 5e1c2a9a9b42ab6e6a3f44738913b9f7)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #07 pc 00584834  /apex/com.android.art/lib64/libart.so (art::CreateSystemClassLoader +1116) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #08 pc 0058211c  /apex/com.android.art/lib64/libart.so (art::Runtime::Start+516) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #09 pc 005c0598  /apex/com.android.art/lib64/libart.so (JNI_CreateJavaVM+444) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #10 pc 0028f5f8  /system/lib64/libandroid_runtime.so (JNI_CreateJavaVM+68) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #11 pc 001288e8  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::startVm+12140) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #12 pc 0012900c  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start+520) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #13 pc 00004564  /system/bin/app_process64 (main+1200) (BuildId: bc83fa691872471af3dc0c1a72a63d9b)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   native: #14 pc 00069ec8  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+120) (BuildId: 2445fc73ede03b9536eef49355aff375)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   (no managed stack frames)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] Pending exception java.lang.ExceptionInInitializerError: 
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] Caused by: java.lang.SecurityException: Writable dex file '/data/user/0/dev.notecore.preview/cache/library-paging-2da6e27a-7857-492f-b4f6-f5024ecc2e8b/probe.jar' is not allowed.
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at java.lang.Object dalvik.system.DexFile.openDexFileNative(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:-2)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at java.lang.Object dalvik.system.DexFile.openDexFile(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:406)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at void dalvik.system.DexFile.<init>(java.lang.String, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:128)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at void dalvik.system.DexFile.<init>(java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:101)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at dalvik.system.DexFile dalvik.system.DexPathList.loadDexFile(java.io.File, java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexPathList.java:438)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at dalvik.system.DexPathList$Element[] dalvik.system.DexPathList.makeDexElements(java.util.List, java.io.File, java.util.List, java.lang.ClassLoader, boolean) (DexPathList.java:397)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at void dalvik.system.DexPathList.<init>(java.lang.ClassLoader, java.lang.String, java.lang.String, java.io.File, boolean) (DexPathList.java:166)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader, java.lang.ClassLoader[], java.lang.ClassLoader[], boolean) (BaseDexClassLoader.java:160)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.io.File, java.lang.String, java.lang.ClassLoader) (BaseDexClassLoader.java:105)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at void dalvik.system.PathClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader) (PathClassLoader.java:71)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at java.lang.ClassLoader java.lang.ClassLoader.createSystemClassLoader() (ClassLoader.java:267)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at java.lang.ClassLoader java.lang.ClassLoader.-$$Nest$smcreateSystemClassLoader() (ClassLoader.java:-1)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at void java.lang.ClassLoader$SystemClassLoader.<clinit>() (ClassLoader.java:217)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709]   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:709] 
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717] Check failed: system_class_loader != nullptr java.lang.ExceptionInInitializerError: 
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717] Caused by: java.lang.SecurityException: Writable dex file '/data/user/0/dev.notecore.preview/cache/library-paging-2da6e27a-7857-492f-b4f6-f5024ecc2e8b/probe.jar' is not allowed.
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at java.lang.Object dalvik.system.DexFile.openDexFileNative(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:-2)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at java.lang.Object dalvik.system.DexFile.openDexFile(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:406)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at void dalvik.system.DexFile.<init>(java.lang.String, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:128)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at void dalvik.system.DexFile.<init>(java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:101)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at dalvik.system.DexFile dalvik.system.DexPathList.loadDexFile(java.io.File, java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexPathList.java:438)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at dalvik.system.DexPathList$Element[] dalvik.system.DexPathList.makeDexElements(java.util.List, java.io.File, java.util.List, java.lang.ClassLoader, boolean) (DexPathList.java:397)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at void dalvik.system.DexPathList.<init>(java.lang.ClassLoader, java.lang.String, java.lang.String, java.io.File, boolean) (DexPathList.java:166)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader, java.lang.ClassLoader[], java.lang.ClassLoader[], boolean) (BaseDexClassLoader.java:160)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.io.File, java.lang.String, java.lang.ClassLoader) (BaseDexClassLoader.java:105)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at void dalvik.system.PathClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader) (PathClassLoader.java:71)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at java.lang.ClassLoader java.lang.ClassLoader.createSystemClassLoader() (ClassLoader.java:267)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at java.lang.ClassLoader java.lang.ClassLoader.-$$Nest$smcreateSystemClassLoader() (ClassLoader.java:-1)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at void java.lang.ClassLoader$SystemClassLoader.<clinit>() (ClassLoader.java:217)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717]   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.485 14862 14862 F app_process: runtime.cc:717] 
+10-29 22:05:09.485 14862 14862 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 14862 (main), pid 14862 (main)
+10-29 22:05:09.509 14866 14866 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdTombstoneProto
+10-29 22:05:09.512 14866 14866 I crash_dump64: performing dump of process 14862 (target tid = 14862)
+10-29 22:05:09.621 14866 14866 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+10-29 22:05:09.621 14866 14866 F DEBUG   : Build fingerprint: 'google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys'
+10-29 22:05:09.621 14866 14866 F DEBUG   : Revision: '0'
+10-29 22:05:09.621 14866 14866 F DEBUG   : ABI: 'arm64'
+10-29 22:05:09.621 14866 14866 F DEBUG   : Timestamp: 2026-10-29 22:05:09.514304211+0800
+10-29 22:05:09.621 14866 14866 F DEBUG   : Process uptime: 2s
+10-29 22:05:09.621 14866 14866 F DEBUG   : Cmdline: /system/bin/app_process /system/bin dev.notecore.probes.LibraryPagingProbe cache/library-paging-2da6e27a-7857-492f-b4f6-f5024ecc2e8b
+10-29 22:05:09.621 14866 14866 F DEBUG   : pid: 14862, tid: 14862, name: main  >>> /system/bin/app_process <<<
+10-29 22:05:09.621 14866 14866 F DEBUG   : uid: 10214
+10-29 22:05:09.621 14866 14866 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+10-29 22:05:09.621 14866 14866 F DEBUG   : pac_enabled_keys: 000000000000000f (PR_PAC_APIAKEY, PR_PAC_APIBKEY, PR_PAC_APDAKEY, PR_PAC_APDBKEY)
+10-29 22:05:09.621 14866 14866 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+10-29 22:05:09.621 14866 14866 F DEBUG   : Abort message: 'Check failed: system_class_loader != nullptr java.lang.ExceptionInInitializerError: 
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)
+10-29 22:05:09.621 14866 14866 F DEBUG   : Caused by: java.lang.SecurityException: Writable dex file '/data/user/0/dev.notecore.preview/cache/library-paging-2da6e27a-7857-492f-b4f6-f5024ecc2e8b/probe.jar' is not allowed.
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at java.lang.Object dalvik.system.DexFile.openDexFileNative(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:-2)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at java.lang.Object dalvik.system.DexFile.openDexFile(java.lang.String, java.lang.String, int, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:406)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at void dalvik.system.DexFile.<init>(java.lang.String, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:128)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at void dalvik.system.DexFile.<init>(java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexFile.java:101)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at dalvik.system.DexFile dalvik.system.DexPathList.loadDexFile(java.io.File, java.io.File, java.lang.ClassLoader, dalvik.system.DexPathList$Element[]) (DexPathList.java:438)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at dalvik.system.DexPathList$Element[] dalvik.system.DexPathList.makeDexElements(java.util.List, java.io.File, java.util.List, java.lang.ClassLoader, boolean) (DexPathList.java:397)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at void dalvik.system.DexPathList.<init>(java.lang.ClassLoader, java.lang.String, java.lang.String, java.io.File, boolean) (DexPathList.java:166)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader, java.lang.ClassLoader[], java.lang.ClassLoader[], boolean) (BaseDexClassLoader.java:160)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at void dalvik.system.BaseDexClassLoader.<init>(java.lang.String, java.io.File, java.lang.String, java.lang.ClassLoader) (BaseDexClassLoader.java:105)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at void dalvik.system.PathClassLoader.<init>(java.lang.String, java.lang.String, java.lang.ClassLoader) (PathClassLoader.java:71)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at java.lang.ClassLoader java.lang.ClassLoader.createSystemClassLoader() (ClassLoader.java:267)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at java.lang.ClassLoader java.lang.ClassLoader.-$$Nest$smcreateSystemClassLoader() (ClassLoader.java:-1)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at void java.lang.ClassLoader$SystemClassLoader.<clinit>() (ClassLoader.java:217)
+10-29 22:05:09.621 14866 14866 F DEBUG   :   at java.lang.ClassLoader java.lang.ClassLoader.getSystemClassLoader() (ClassLoader.java:1907)'
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x0  0000000000000000  x1  0000000000003a0e  x2  0000000000000006  x3  0000007fc4c18860
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x4  78721f3963646b68  x5  78721f3963646b68  x6  78721f3963646b68  x7  7f7f7f7f7f7f7f7f
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x8  00000000000000f0  x9  a2b6e204e2322cb3  x10 000000ff00000020  x11 000000009039909f
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x12 000000000012800c  x13 000000007fffffff  x14 00000000001c41c2  x15 00000031c123b0d8
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x16 00000078d6fd70f8  x17 00000078d6fbe140  x18 00000078ea3e0000  x19 0000000000003a0e
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x20 0000000000003a0e  x21 00000000ffffffff  x22 000000761a80d000  x23 000000761a80ee20
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x24 b40000762dd7abe0  x25 0000000000fffff9  x26 000000005a000000  x27 b40000762dd7abe0
+10-29 22:05:09.621 14866 14866 F DEBUG   :     x28 000000005c000000  x29 0000007fc4c188e0
+10-29 22:05:09.621 14866 14866 F DEBUG   :     lr  00000078d6f5c78c  sp  0000007fc4c18860  pc  00000078d6f5c7b0  pst 0000000000000000
+10-29 22:05:09.621 14866 14866 F DEBUG   : 12 total frames
+10-29 22:05:09.621 14866 14866 F DEBUG   : backtrace:
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #00 pc 00000000000707b0  /apex/com.android.runtime/lib64/bionic/libc.so (abort+156) (BuildId: 2445fc73ede03b9536eef49355aff375)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #01 pc 00000000008a14a4  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+476) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #02 pc 0000000000016188  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_0::__invoke(char const*)+80) (BuildId: 5e1c2a9a9b42ab6e6a3f44738913b9f7)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #03 pc 0000000000015730  /apex/com.android.art/lib64/libbase.so (android::base::LogMessage::~LogMessage()+544) (BuildId: 5e1c2a9a9b42ab6e6a3f44738913b9f7)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #04 pc 0000000000584834  /apex/com.android.art/lib64/libart.so (art::CreateSystemClassLoader(art::Runtime*) (.__uniq.123643984379049060189133697593660836796)+1116) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #05 pc 000000000058211c  /apex/com.android.art/lib64/libart.so (art::Runtime::Start()+516) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #06 pc 00000000005c0598  /apex/com.android.art/lib64/libart.so (JNI_CreateJavaVM+444) (BuildId: b229f9d1b6196afaae086f29f029f907)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #07 pc 000000000028f5f8  /system/lib64/libandroid_runtime.so (JNI_CreateJavaVM+68) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #08 pc 00000000001288e8  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::startVm(_JavaVM**, _JNIEnv**, bool, bool)+12140) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #09 pc 000000000012900c  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start(char const*, android::Vector<android::String8> const&, bool)+520) (BuildId: d2709c129e71fb74eab7847fbed936ba)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #10 pc 0000000000004564  /system/bin/app_process64 (main+1200) (BuildId: bc83fa691872471af3dc0c1a72a63d9b)
+10-29 22:05:09.621 14866 14866 F DEBUG   :       #11 pc 0000000000069ec8  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+120) (BuildId: 2445fc73ede03b9536eef49355aff375)
