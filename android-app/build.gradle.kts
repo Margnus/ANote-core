@@ -45,6 +45,12 @@ tasks.withType<Test>().configureEach {
     val images = rootProject.file("build/android-brush-images/$name")
     systemProperty("notecore.brush.images", images.absolutePath)
     outputs.dir(images)
+    val imageFixtures = rootProject.file("fixtures/image-orientation")
+    systemProperty("notecore.image.fixtures", imageFixtures.absolutePath)
+    val imageOutputs = rootProject.file("build/image-orientation-native/$name")
+    systemProperty("notecore.image.outputs", imageOutputs.absolutePath)
+    inputs.files(rootProject.fileTree(imageFixtures))
+    outputs.dir(imageOutputs)
     if (providers.gradleProperty("enablePdfGeometryNativeProbe").orNull == "true") {
         val pdfFixture = rootProject.file("output/pdf/crop-rotations.pdf")
         systemProperty("notecore.pdf.fixture", pdfFixture.absolutePath)
