@@ -318,11 +318,14 @@ final class PagedHostTests: XCTestCase {
         try await eventually("request window receives backup") { model.exportDocument != nil }
         XCTAssertTrue(a.ownsExport); XCTAssertFalse(b.ownsExport)
         let backup = try XCTUnwrap(model.exportDocument)
+        let preparingStatus = model.status
         b.finishExport(); XCTAssertEqual(model.exportDocument?.data, backup.data)
+        XCTAssertEqual(model.status, preparingStatus) // A foreign window cannot publish cancellation.
         XCTAssertEqual(a.leave(), .detached)
         XCTAssertEqual(b.leave(), .retryRequired)
         a.disappear() // Explicitly cancels this window's derived result, not content.
         XCTAssertNil(model.exportDocument); XCTAssertEqual(model.exportRetainedByteCharge, 0)
+        XCTAssertEqual(model.status, "导出已取消，原笔记仍保留")
         XCTAssertTrue(model.current === note); XCTAssertTrue(note.snapshot() === root)
         b.prepareExport(); let cancelledRequest = try XCTUnwrap(b.exportRequest)
         b.disappear() // Cancel while accepted compute is still pending.
@@ -335,8 +338,13 @@ final class PagedHostTests: XCTestCase {
         XCTAssertNotEqual(b.exportRequest, cancelledRequest)
         b.finishExport(request: cancelledRequest) // A late callback cannot release a newer export.
         XCTAssertNotNil(model.exportDocument)
+        XCTAssertEqual(model.status, "正在准备备份…")
         XCTAssertEqual(String(data: model.exportDocument!.data, encoding: .utf8), expected)
-        b.finishExport(); XCTAssertEqual(b.leave(), .documentClosed); b.disappear()
+        b.finishExport(); XCTAssertEqual(model.status, "导出已取消，原笔记仍保留")
+        model.status = "后续操作反馈"
+        model.finishExport() // An already completed cancellation cannot overwrite later feedback.
+        XCTAssertEqual(model.status, "后续操作反馈")
+        XCTAssertEqual(b.leave(), .documentClosed); b.disappear()
         XCTAssertEqual(model.beginOwnerRetirement(), .started)
         try await eventually("export owner stops") { model.ownerRetirementStatus.phase == .retired }
     }

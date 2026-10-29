@@ -1,0 +1,70 @@
+{
+  "method": "CUA Device Hub actual ordinary application and system Files, manual AX/screenshot observations; no injected picker callbacks",
+  "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "artifact_sha256": "05c33ca339edceb1e281c0e6f4740273c8e1789d35e34ae6a8c79131e8a3ca21",
+  "states": [
+    {
+      "label": "reopen_after_previous_import_cancel",
+      "ax_fragments": [
+        "C1-Files-20261029",
+        "已打开 · 1 笔",
+        "当前页码 1/1",
+        "手写画布 1笔"
+      ]
+    },
+    {
+      "label": "export_sheet",
+      "observation": "Clicked original 导出; status 正在准备备份…. Actual screenshot showed system Files save sheet in NoteCore-UI-Backup, two existing files, filename NoteCore-backup, 保存. No picker AX nodes. Screenshot JPEG was 4096x2072."
+    },
+    {
+      "label": "export_cancel",
+      "observation": "Initial drag (2290,628)->(2290,1300) did not dismiss. Clicked observed back control (2112,665) to 我的iPhone, then 浏览, then root cancel control returned to original editor. Did not press 保存 or create an external file.",
+      "ax_fragments": [
+        "C1-Files-20261029",
+        "正在准备备份…",
+        "手写画布 1笔"
+      ],
+      "feedback_defect_observed": true
+    },
+    {
+      "label": "reopen_after_export_cancel",
+      "observation": "Actual 返回 to library, clicked same first C1-Files row; original page and one stroke present.",
+      "ax_fragments": [
+        "已打开 · 1 笔",
+        "当前页码 1/1",
+        "手写画布 1笔"
+      ]
+    },
+    {
+      "label": "import_sheet",
+      "observation": "Returned to library, clicked 导入备份; actual system Files screenshot showed existing 550-byte C1 and old27KB backup; no file selected. Back to 浏览, top-left click did not dismiss."
+    },
+    {
+      "label": "import_cancel",
+      "observation": "Dragged sheet top (2290,626)->(2290,1440), returned to original library.",
+      "ax_fragments": [
+        "新建笔记",
+        "导入备份",
+        "本机笔记",
+        "C1-Files-20261029"
+      ]
+    },
+    {
+      "label": "reopen_after_import_cancel",
+      "observation": "Clicked same first C1-Files row and original editor reopened.",
+      "ax_fragments": [
+        "已打开 · 1 笔",
+        "当前页码 1/1",
+        "手写画布 1笔"
+      ]
+    }
+  ],
+  "import_cancel_verified": true,
+  "post_import_cancel_reopen_verified": true,
+  "export_cancel_verified": true,
+  "post_export_cancel_reopen_verified": true,
+  "new_notes_created": 0,
+  "file_selection_or_export_save_performed": false,
+  "keyboard_capture_changed": false,
+  "limitation": "Old ordinary package only. Export cancellation left stale preparing status; correction and new-package GUI must be recorded separately. Two same-title synthetic files already exist; AX does not identify which document UUID was selected. All original hashes protect both."
+}

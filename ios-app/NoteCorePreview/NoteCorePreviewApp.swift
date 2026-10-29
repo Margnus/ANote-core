@@ -49,8 +49,12 @@ final class PreviewModel: ObservableObject {
     }
     func finishExport() {
         precondition(Thread.isMainThread)
+        let cancelledRequest = exportRequest != nil
         exportCancelled = true; exportEditor = nil; exportRequest = nil
         exportDocument = nil
+        // Sheet dismissal may have no result callback. Do not leave a finished export "preparing".
+        // A matching success/failure callback supplies its own outcome after this cleanup.
+        if cancelledRequest { status = "导出已取消，原笔记仍保留" }
     }
     func finishEditorExport(_ identity: UUID, request: UUID?) {
         precondition(Thread.isMainThread)

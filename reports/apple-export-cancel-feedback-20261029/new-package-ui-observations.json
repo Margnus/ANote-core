@@ -1,0 +1,70 @@
+{
+  "method": "CUA Device Hub actual system Files sheet and ordinary package; manual AX/screenshot observation, not API callback injection or automated pixel oracle",
+  "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "artifact_sha256": "f97597f27301d9163051f0e983eaf9bf11a40b3a645f1ff2cd86d8c839028184",
+  "states": [
+    {
+      "label": "new_package_open",
+      "ax_fragments": [
+        "C1-Files-20261029",
+        "已打开 · 1 笔",
+        "当前页码 1/1",
+        "手写画布 1笔"
+      ]
+    },
+    {
+      "label": "new_export_sheet",
+      "observation": "Actual system Files save sheet in NoteCore-UI-Backup, two old files and NoteCore-backup filename, 保存 control. Picker AX nodes absent. Did not save."
+    },
+    {
+      "label": "new_export_cancel",
+      "observation": "Returned through 我的iPhone then 浏览; root top-left tap did not immediately dismiss; top drag (2290,626)->(2290,1440) returned to editor.",
+      "ax_fragments": [
+        "导出已取消，原笔记仍保留",
+        "手写画布 1笔",
+        "当前页码 1/1"
+      ]
+    },
+    {
+      "label": "new_reopen_after_cancel",
+      "observation": "返回 to library, clicked same first existing C1-Files row.",
+      "ax_fragments": [
+        "已打开 · 1 笔",
+        "当前页码 1/1",
+        "手写画布 1笔"
+      ]
+    },
+    {
+      "label": "new_export_retry",
+      "observation": "Clicked 导出 again after reopening; actual screenshot confirmed Files save sheet opened again with old two files. No new file selected or saved."
+    },
+    {
+      "label": "new_retry_cancel",
+      "observation": "Back through upper directories to 浏览. Some fast taps/drag left sheet present. Once screenshot showed the root X, a 200ms click at (2112,665) actually dismissed it.",
+      "ax_fragments": [
+        "导出已取消，原笔记仍保留",
+        "手写画布 1笔"
+      ]
+    },
+    {
+      "label": "final_library",
+      "ax_fragments": [
+        "新建笔记",
+        "导入备份",
+        "本机笔记",
+        "C1-Files-20261029"
+      ]
+    }
+  ],
+  "export_cancel_feedback_verified": true,
+  "post_cancel_reopen_verified": true,
+  "post_cancel_export_retry_verified": true,
+  "retry_cancel_verified": true,
+  "new_notes_created": 0,
+  "save_in_external_picker_performed": false,
+  "keyboard_capture_changed": false,
+  "limitations": [
+    "No repeated import success/export success flow on the new package. Old 05c33ca3 cancellation/reopen observations are separate.",
+    "No permission revocation/cloud provider/write failure/rotation/multitouch/Pencil/physical performance or whole C1 acceptance."
+  ]
+}
