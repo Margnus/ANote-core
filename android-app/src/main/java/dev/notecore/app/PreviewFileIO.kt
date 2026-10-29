@@ -27,7 +27,16 @@ internal sealed interface LocalRecoveryRead {
     data class Opened(val snapshot: PagedPreviewSnapshot) : LocalRecoveryRead
     data class Refused(val reason: LocalReadFailure) : LocalRecoveryRead
 }
+internal sealed interface LocalImportResult {
+    data class Imported(val root: DocumentRoot) : LocalImportResult
+    data class Refused(val reason: LocalReadFailure) : LocalImportResult
+}
 private class ReadRefused(val reason: LocalReadFailure) : IllegalArgumentException(reason.name)
+private fun PreviewReadFailure.localReason(): LocalReadFailure = when (this) {
+    PreviewReadFailure.CHARACTER_CAPACITY -> LocalReadFailure.CHARACTER_CAPACITY
+    PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT -> LocalReadFailure.INVALID_FORMAT
+    PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT -> LocalReadFailure.UNSUPPORTED_CONTENT
+}
 
 /** Serial worker capability. Contains immutable filesystem/resolver handles, no UI or owner ledger. */
 internal class PreviewFileIO(private val directory: File, private val resolver: ContentResolver, private val beforeRead: () -> Unit = {}) {
@@ -62,15 +71,26 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
         checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(bytes); it.flush() }
     }
-    fun importCopy(uri: Uri): DocumentRoot {
-        val bytes = checkNotNull(resolver.openInputStream(uri)).use(::readBoundedPreviewBytes)
+    fun importCopy(uri: Uri): LocalImportResult {
+        // Only source-read failures are known refusals. A failed write may already be visible;
+        // leave it to the original executor's unknown outcome instead of claiming rollback.
+        val source = try {
+            val bytes = (resolver.openInputStream(uri) ?: throw IOException("Source unavailable"))
+                .use(::readBoundedPreviewBytes)
+            val reading = PreviewDocumentReader.read(decode(bytes))
+            reading.root ?: return LocalImportResult.Refused(checkNotNull(reading.failure).localReason())
+        } catch (refusal: ReadRefused) { return LocalImportResult.Refused(refusal.reason) }
+          catch (_: CharacterCodingException) { return LocalImportResult.Refused(LocalReadFailure.INVALID_UTF8) }
+          catch (_: IOException) { return LocalImportResult.Refused(LocalReadFailure.IO_FAILURE) }
+          catch (_: SecurityException) { return LocalImportResult.Refused(LocalReadFailure.IO_FAILURE) }
         val id = UUID.randomUUID().toString(); check(!file(id).exists())
-        val source = readPreview(decode(bytes))
-        return PagedPreviewCodec.copyAsNew(source, SceneId(id),
+        val copied = PagedPreviewCodec.copyAsNew(source, SceneId(id),
             source.pages().associate { it.id to PageId(UUID.randomUUID().toString()) },
             source.pages().associate { it.layerId to LayerId(UUID.randomUUID().toString()) },
             source.scene.objects().associate { it.id to ObjectId(UUID.randomUUID().toString()) }
-        ).also { write(PagedPreviewSnapshot.fromRoot(it)) }
+        )
+        write(PagedPreviewSnapshot.fromRoot(copied))
+        return LocalImportResult.Imported(copied)
     }
     fun catalog(): List<NoteSummary> {
         ensureDirectory()
@@ -128,11 +148,6 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     } catch (refusal: ReadRefused) { LocalRecoveryRead.Refused(refusal.reason) }
       catch (_: IOException) { LocalRecoveryRead.Refused(LocalReadFailure.IO_FAILURE) }
 
-    /** Typed shared reader owns format/content refusal; only local worker IO errors escape this adapter. */
-    private fun readPreview(text: String): DocumentRoot {
-        val result = PreviewDocumentReader.read(text)
-        return requireNotNull(result.root) { "Preview document refused: ${result.failure}" }
-    }
 }
 
 /** Bounded synchronous read on the original worker. A broken provider must not spin that worker forever. */

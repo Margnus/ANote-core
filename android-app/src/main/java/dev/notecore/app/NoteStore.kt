@@ -413,8 +413,13 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     fun importCopy(uri: Uri, callback: (OpenedDocument?, String?) -> Unit) {
         request(uri to io, READ_WORK_BYTES, { input -> input.second.importCopy(input.first) },
             { callback(null, "后台队列繁忙，请重新导入") }) { result ->
-            callback((result as? WorkResult.Succeeded)?.value?.let { OpenedDocument(it, true) },
-                if (result is WorkResult.Succeeded) null else "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖")
+            when (result) {
+                is WorkResult.Succeeded -> when (val imported = result.value) {
+                    is LocalImportResult.Imported -> callback(OpenedDocument(imported.root, true), null)
+                    is LocalImportResult.Refused -> callback(null, imported.reason.message)
+                }
+                else -> callback(null, "导入结果暂无法确认，请先查看列表；已有笔记未覆盖")
+            }
         }
     }
     fun list(callback: (List<NoteSummary>, String?) -> Unit) {
