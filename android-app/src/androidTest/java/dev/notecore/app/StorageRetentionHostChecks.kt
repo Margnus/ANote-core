@@ -104,6 +104,16 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             }
             checks.add("single_export_snapshot_preserves_original")
             eventually("Post-export edit did not save") { completed && store.saveStates().isEmpty() }
+            val confirmed = File(directory, "${changed.documentId}.ncp").readBytes()
+            main {
+                val root = note.snapshot(); val history = note.authorityStatus()
+                var refused = 0
+                check(!store.save(changed) { _, error -> check(error != null); refused++ })
+                check(refused == 1 && store.saveStates().isEmpty())
+                check(note.snapshot() === root && note.authorityStatus() == history)
+            }
+            check(File(directory, "${changed.documentId}.ncp").readBytes().contentEquals(confirmed))
+            checks.add("late_capture_refused_after_latest_ack_without_disk_rollback")
             main { store.releaseActive(note); store.stopTestBackend(); store = NoteStore.isolated(host, directory) }
             var opened = false
             main { store.open(changed.documentId) { value, error ->
@@ -120,8 +130,8 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                 val root = note.snapshot()
                 val foreign = PagedPreviewSnapshot.fromRoot(DocumentRoot.compose("Foreign same revision", root.scene, root.pages()))
                 var refused = 0
-                check(store.save(foreign) { _, error -> check(error != null); refused++ })
-                check(refused > 0 && store.saveStates().single().snapshot === foreign)
+                check(!store.save(foreign) { _, error -> check(error != null); refused++ })
+                check(refused == 1 && store.saveStates().isEmpty())
                 check(note.snapshot() === root)
                 checks.add("foreign_same_revision_is_not_acknowledged_as_saved")
             }

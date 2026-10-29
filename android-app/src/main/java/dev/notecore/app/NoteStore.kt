@@ -455,9 +455,12 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             if (callback != null) notifyUi { callback(snapshot.version, "当前会话已结束，原内容仍保留") }; return false
         }
         val active = activeNotebook
-        if (active?.documentId == snapshot.documentId && active.hasPendingStroke &&
+        // A drained ledger is not a version fence. The live authority still owns the current capture.
+        // This does not change already admitted flights or saves retained for inactive documents.
+        if (active?.documentId == snapshot.documentId &&
             (snapshot.root !== active.snapshot() || snapshot.pending !== active.pendingStroke())) {
-            if (callback != null) notifyUi { callback(snapshot.version, "仍有未提交笔迹，请保留完整恢复记录后重试") }; return false
+            if (callback != null) notifyUi { callback(snapshot.version, if (active.hasPendingStroke)
+                "仍有未提交笔迹，请保留完整恢复记录后重试" else "保存快照已过期，当前笔迹仍保留，请重新保存") }; return false
         }
         if (activeNotebook?.documentId == snapshot.documentId && activeSavedRoot.get() === snapshot.root &&
             activeSavedPending.get() === snapshot.pending && ledger.latest(snapshot.documentId) == null) {

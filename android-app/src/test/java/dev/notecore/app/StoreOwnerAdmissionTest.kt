@@ -5,6 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicInteger
+import dev.notecore.document.PreviewRecoveryCodec
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,6 +21,56 @@ import kotlin.test.*
 @Config(sdk = [35])
 @LooperMode(LooperMode.Mode.PAUSED)
 class StoreOwnerAdmissionTest {
+    @Test fun delayedCaptureCannotOverwriteCurrentAuthorityAfterLatestWriteAcknowledged() {
+        val context: Application = RuntimeEnvironment.getApplication()
+        val directory = Files.createTempDirectory("store-late-capture-").toFile()
+        val writes = AtomicInteger()
+        val store = NoteStore.isolated(context, directory, observeWriteBoundary = {
+            if (it == PreviewWriteBoundary.VERIFIED_BEFORE_RETURN) writes.incrementAndGet()
+        })
+        fun until(done: () -> Boolean) {
+            val deadline = System.nanoTime() + 5_000_000_000L
+            while (!done() && System.nanoTime() < deadline) {
+                shadowOf(Looper.getMainLooper()).idle(); Thread.sleep(5)
+            }
+            assertTrue(done(), "Original worker must deliver the actual result")
+        }
+        try {
+            val note = store.create()
+            assertTrue(note.rename("older capture")); val older = note.captureRecovery()
+            var saved = false
+            assertTrue(store.save(older) { _, failure -> assertNull(failure); saved = true })
+            until { saved && store.ownerRetirementStatus().pendingWrites == 0 }
+            assertTrue(note.rename("newer confirmed")); val newest = note.captureRecovery()
+            saved = false
+            assertTrue(store.save(newest) { _, failure -> assertNull(failure); saved = true })
+            until { saved && store.ownerRetirementStatus().pendingWrites == 0 }
+            val file = directory.resolve(note.documentId+".ncp")
+            val confirmed = file.readBytes(); val root = note.snapshot(); val history = note.authorityStatus()
+            val writesBefore = writes.get()
+            var delivered = false; var refused: String? = null
+            val admitted = store.save(older) { _, failure -> refused = failure; delivered = true }
+            until { delivered && store.ownerRetirementStatus().pendingWrites == 0 }
+            val disk = assertNotNull(PreviewRecoveryCodec.read(file.readText(Charsets.UTF_8)).snapshot)
+            assertFalse(admitted, "Late capture admitted after ledger drained; disk title=${disk.title}, active title=${note.title}")
+            assertNotNull(refused); assertEquals(writesBefore, writes.get())
+            assertContentEquals(confirmed, file.readBytes()); assertSame(root, note.snapshot()); assertEquals(history, note.authorityStatus())
+            // Same revision but different bytes came from a pure immutable reader, not another mutable authority.
+            val fork = assertNotNull(PreviewRecoveryCodec.read(newest.encode().replace("newer confirmed", "foreign revision")).snapshot)
+            assertEquals(newest.version, fork.version)
+            refused = null
+            assertFalse(store.save(fork) { _, failure -> refused = failure })
+            assertNotNull(refused); assertEquals(writesBefore, writes.get()); assertContentEquals(confirmed, file.readBytes())
+            assertTrue(note.rename("owner continues")); saved = false
+            assertTrue(store.save(note.captureRecovery()) { _, failure -> assertNull(failure); saved = true })
+            until { saved && store.ownerRetirementStatus().pendingWrites == 0 }
+            assertEquals("owner continues", assertNotNull(PreviewRecoveryCodec.read(file.readText(Charsets.UTF_8)).snapshot).title)
+        } finally {
+            store.stopTestBackend()
+            until { store.ownerRetirementStatus().workerStopped }
+            directory.deleteRecursively()
+        }
+    }
     @Test fun invalidConfigurationDoesNotLeaveAnUnownedStorageWorker() {
         val context: Application = RuntimeEnvironment.getApplication()
         val directory = Files.createTempDirectory("store-invalid-budget-").toFile()
