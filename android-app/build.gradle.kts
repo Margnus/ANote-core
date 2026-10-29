@@ -45,6 +45,15 @@ tasks.withType<Test>().configureEach {
     val images = rootProject.file("build/android-brush-images/$name")
     systemProperty("notecore.brush.images", images.absolutePath)
     outputs.dir(images)
+    if (providers.gradleProperty("enablePdfGeometryNativeProbe").orNull == "true") {
+        val pdfFixture = rootProject.file("output/pdf/crop-rotations.pdf")
+        systemProperty("notecore.pdf.fixture", pdfFixture.absolutePath)
+        systemProperty("notecore.pdf.recipe", rootProject.file("fixtures/pdf/recipe.json").absolutePath)
+        val pdfImages = rootProject.file("build/pdf-native-images/$name")
+        systemProperty("notecore.pdf.images", pdfImages.absolutePath)
+        inputs.files(pdfFixture, rootProject.file("fixtures/pdf/recipe.json"))
+        outputs.dir(pdfImages)
+    }
 }
 
 tasks.register("verifyNativeBrush") {
@@ -105,4 +114,9 @@ tasks.register("verifyBrushPathTestBuild") {
             "$digest  ${it.relativeTo(rootDir).invariantSeparatorsPath}"
         })
     }
+}
+
+// Explicit environment probe: SDK35 host PdfRenderer is currently unsupported; never part of default tests.
+if (providers.gradleProperty("enablePdfGeometryNativeProbe").orNull == "true") {
+    android.sourceSets.getByName("test").java.srcDir("../tools/probes/pdf-native")
 }
