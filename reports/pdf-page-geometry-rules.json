@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "requirement": "PDF-03",
+  "status": "passed",
+  "scope": "Internal effective-CropBox/right-angle/UserUnit bidirectional affine mapping on JVM; original synthetic recipe anchors only, no current PDF parser/native rendering or App acceptance",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfPageGeometryRules.kt": "efe908780ab3f12bf40b0921c7d850aa8aac7ce9580143227cb11c43847510fd",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "ec8e553a5586b60aedf78fbe3d57aca39a52dd405695a4cb1ab1f2db67ad2108",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PdfPageGeometryRulesTest.kt": "8aac8ea6dd197ed1bf0d86959d365774ec2bf6100ac249d7dbcdc51b83dc7bfb",
+    "fixtures/pdf/recipe.json": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfPageGeometryRulesTest.xml": "fad0bc939428272e7ac55b66df09b24cb4ba41201dc127aa1a64a838cc2b119b",
+    "reports/verification.json": "7a24e4ee04aab9bb34812f0c514fd800893d1985ead8f227e11bf6327f5fe24d"
+  },
+  "scenarios": [
+    "negativeOriginCornersCoverExactlyTheRotatedCanonicalPage[jvm]",
+    "multipleTurnsAndNegativeRightAnglesNormalizeWithoutDoubleRotation[jvm]",
+    "invalidBoxesUnitsAndCanonicalSizeOverflowReturnNoPartialGeometry[jvm]",
+    "originalFixtureFourRotationColorAnchorsMatchIndependentExpectedPositions[jvm]",
+    "userUnitScalesOnlyCanonicalCoordinatesAndInverseReturnsOriginalUnits[jvm]",
+    "asymmetricInteriorGridRoundTripsWithScaledReflectedAxis[jvm]"
+  ],
+  "sample_origin": "synthetic-coordinate-anchors",
+  "standards_reference": "https://developer.adobe.com/document-services/docs/assets/35e4369068f86065372c18787171a17e/PDF_ISO_32000-1.pdf",
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "native parser effective CropBox/MediaBox/inheritance and UserUnit adaptation",
+    "same-source native background/annotation/export mapping and actual pixels",
+    "production PdfPageRef/objects/resource transactions and Android/Apple UI",
+    "original INK-10/OBJ-03/M-1/C1 prerequisites"
+  ]
+}
