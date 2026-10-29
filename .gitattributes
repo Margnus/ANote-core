@@ -18,3 +18,6 @@ gradlew.bat text eol=crlf whitespace=cr-at-eol
 *.ncp binary
 *.png binary
 *.zip binary
+# Retain raw ADB output bytes, including native CR/CRLF and dump whitespace.
+reports/current-api35-instrumentation/*.log binary
+reports/current-api35-ui/activity-dump.txt binary
