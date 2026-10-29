@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "requirement": "ENG-15",
+  "status": "passed",
+  "scope": "Original MemoryDocumentAuthority admission and common JVM; Android build/default host consumers. No actual ART/Apple/native SDK acceptance",
+  "first_reproduction": "1 failing test: malformed InsertPage returned Accepted rather than Rejected on original source",
+  "new_common_tests": 4,
+  "malformed_command_variants": 81,
+  "malformed_initial_roots": 4,
+  "common_jvm": {
+    "tests": 559,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "common_execution": "shared jvm tests executed in final verification; unchanged canvas JVM results reused",
+  "default_android_host": {
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_host_execution": "executed for changed common source in first successful full build, final test-only change reused results",
+  "checks": [
+    "initial malformed document/page/layer/object identities refuse mutable authority",
+    "all command families check scalar validity before publication/journal allocation",
+    "INVALID_IDENTITY refusal preserves exact root and status",
+    "same valid opId with corrected payload remains usable",
+    "redo and original receipt survive refusal",
+    "valid Chinese/combining/supplementary identities round trip exactly",
+    "raw immutable malformed values remain constructible for negative fixtures",
+    "original owner exceptions are not caught; no new owner or authority"
+  ],
+  "android_build_verified": true,
+  "lint": {
+    "Error": 0,
+    "Warning": 8
+  },
+  "apk_installed": false,
+  "android_art_verified": false,
+  "apple_compile_or_runtime_verified": false,
+  "production_storage_verified": false,
+  "c1_complete": false,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "b35247a3ee08b0e45923a9a763d39e3b9b8a0d666f1226a237a756ad164a32d9",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "bdc64e76826cc78d9f0f3fea412dd51d091f0ef35b01a6db472f6a9a09367702",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/CanonicalIdentityTest.kt": "2fbfd3b0fa287d0c53f330e0aaf4e2896a3ced9928af06a2ab4655076e89d036",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.CanonicalIdentityTest.xml": "492fdc401d4595effc9cac99957b751e20f2502762ad860fca1db156ead15ff9",
+    "reports/verification.json": "94616ab4958a9007d77f6e7968da42ebe283c59c56718ae5f8f40b8916692c4b",
+    "reports/gradle-verification.sha256": "0b6e9f5917edb699044996b0826a309afe77f5a0d07640d2ea3a698d9f86bcec",
+    "reports/android-build-inputs.sha256": "d50abaa8edb2e54e011096a7c873c019b7145963752d916bb3484d1d5543f042",
+    "android-app/build/reports/lint-results-debug.xml": "04edbc054be54bc473c1e2b3f907574a42e62716bf2817656b1b6247a07885eb",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "9f2455b108acbd414537f222ce605ecc638698c3c3425dc4cd83f3c8908e023e",
+    "build/identity-first.log": "78162cabfdcb1919d04b8068497c195766be961d9c394a8b19efd53bbc819129"
+  }
+}
