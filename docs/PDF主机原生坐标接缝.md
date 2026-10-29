@@ -1,5 +1,15 @@
 # PDF-03 主机原生背景与共享坐标接缝
 
+## 2026-10-29：原探针的实际ART出口通过
+
+本轮沿原卡“实际ART可用后验证同源背景/共享矩阵”的明确出口，起点d38cc79。前一owner/关闭入口有界复核未发现新可复现缺陷，不再增加相似owner参数测试；新独立AVD可用后，改用实际系统PdfRenderer完成本卡，不重试已知JVM FileDescriptor失败路径。
+
+将原四页探针的同一CropBox/16锚点/共享规则调用移植到原ViewportInstrumentation的`pdf_geometry`分支。既有生成PDF与recipe仅复制为androidTest只读资产，PDF SHA-256仍8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee；没有生成新PDF或改变独立oracle。测试反射只调用现有internal PdfPageGeometryRules，不增加公开facade或普通App PDF入口。输出仅唯一cache目录，源PDF只读打开，Page/Renderer/FD以use关闭，Bitmap finally回收。
+
+当前API35/NoteCoreCurrent35实际通过：系统PdfRenderer四页尺寸300×180/180×300与非零CropBox recipe一致，0/90/180/270度16个颜色中心和实际共享pdfToPage逐一吻合；同一Bitmap/Canvas叠加黑点16个中心通过。保留4背景/4叠加PNG，已查看原背景及四旋转叠加图；独立保留证据脚本再次从PNG像素核对颜色和黑色中心。源PDF前后hash保持，五份正式笔记集合/hash保持，已安装App/仪器包及当前源码输入指纹核对通过。目标仪器构建、可移植性与依赖方向通过；共同/默认33主机未改不重跑。见[ART报告](../reports/pdf-art-geometry.json)、[原始输出](../reports/pdf-art-geometry/run.log)，复核入口`tools/verify_pdf_art_geometry.py`仅检查保留数据。
+
+采用此实际ART背景/共享坐标接缝，当前JVM主机路径仍不采用，原失败报告不改结论或绑定。仅UserUnit=1固定四页，不证明继承属性/UserUnit非1、任意真实PDF、真实批注对象/导出/取消/资源事务、当前Apple或物理性能；PDF-03及C1/生产存储状态不晋升。下一步核对PDF平台能力中已记录的UserUnit/继承属性与实际源元数据边界，必须形成支持/拒绝决定，不追加模拟背景或平行渲染器。
+
 ## 交付卡（2026-10-29）
 
 起点Core806a056。目标：回答Robolectric SDK35原生PdfRenderer/Canvas能否消费既有非零CropBox四旋转PDF，并与本轮实际共享Affine2D映射的16个独立锚点对齐。复用原生成器/recipe，不新建任务模型、authority或普通App入口。只读测试PDF源，输出在build；用测试反射调用internal规则的实际JVM实现，不冻结或扩大公开SDK。

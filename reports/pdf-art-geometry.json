@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "requirement": "PDF-03",
+  "scope": "Actual API35 system PdfRenderer/Canvas consumes original nonzero CropBox four-rotation UserUnit=1 PDF; test-only reflection calls current internal shared matrix. No App annotation/resource/export integration or Apple/physical acceptance.",
+  "native_result_sha256": "dced622b6f2b724e0a1004cc6a4037f27d7987c137e4926c77ebad634e71ed36",
+  "source_pdf_sha256": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+  "page_count": 4,
+  "anchor_checks": [
+    {
+      "page": 0,
+      "rotation": 0,
+      "x": 16,
+      "y": 164,
+      "background_rgb": [
+        255,
+        0,
+        0
+      ]
+    },
+    {
+      "page": 0,
+      "rotation": 0,
+      "x": 284,
+      "y": 164,
+      "background_rgb": [
+        0,
+        255,
+        0
+      ]
+    },
+    {
+      "page": 0,
+      "rotation": 0,
+      "x": 16,
+      "y": 16,
+      "background_rgb": [
+        0,
+        0,
+        255
+      ]
+    },
+    {
+      "page": 0,
+      "rotation": 0,
+      "x": 284,
+      "y": 16,
+      "background_rgb": [
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "page": 1,
+      "rotation": 90,
+      "x": 16,
+      "y": 16,
+      "background_rgb": [
+        255,
+        0,
+        0
+      ]
+    },
+    {
+      "page": 1,
+      "rotation": 90,
+      "x": 16,
+      "y": 284,
+      "background_rgb": [
+        0,
+        255,
+        0
+      ]
+    },
+    {
+      "page": 1,
+      "rotation": 90,
+      "x": 164,
+      "y": 16,
+      "background_rgb": [
+        0,
+        0,
+        255
+      ]
+    },
+    {
+      "page": 1,
+      "rotation": 90,
+      "x": 164,
+      "y": 284,
+      "background_rgb": [
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "page": 2,
+      "rotation": 180,
+      "x": 284,
+      "y": 16,
+      "background_rgb": [
+        255,
+        0,
+        0
+      ]
+    },
+    {
+      "page": 2,
+      "rotation": 180,
+      "x": 16,
+      "y": 16,
+      "background_rgb": [
+        0,
+        255,
+        0
+      ]
+    },
+    {
+      "page": 2,
+      "rotation": 180,
+      "x": 284,
+      "y": 164,
+      "background_rgb": [
+        0,
+        0,
+        255
+      ]
+    },
+    {
+      "page": 2,
+      "rotation": 180,
+      "x": 16,
+      "y": 164,
+      "background_rgb": [
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "page": 3,
+      "rotation": 270,
+      "x": 164,
+      "y": 284,
+      "background_rgb": [
+        255,
+        0,
+        0
+      ]
+    },
+    {
+      "page": 3,
+      "rotation": 270,
+      "x": 164,
+      "y": 16,
+      "background_rgb": [
+        0,
+        255,
+        0
+      ]
+    },
+    {
+      "page": 3,
+      "rotation": 270,
+      "x": 16,
+      "y": 284,
+      "background_rgb": [
+        0,
+        0,
+        255
+      ]
+    },
+    {
+      "page": 3,
+      "rotation": 270,
+      "x": 16,
+      "y": 16,
+      "background_rgb": [
+        255,
+        0,
+        255
+      ]
+    }
+  ],
+  "overlay_centers_black": 16,
+  "decision": "Adopt actual ART path for this background/shared-coordinate seam; preserve host NoSuchMethodError report as failed_environment.",
+  "app_feature_integrated": false,
+  "apple_verified": false,
+  "physical_verified": false,
+  "arbitrary_pdf_or_nonunit_userunit_verified": false,
+  "c1_complete": false,
+  "goal_complete": false,
+  "evidence_sha256": {
+    "reports/pdf-art-geometry/background-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "reports/pdf-art-geometry/background-1.png": "8c6ac8911be51635674ba678724225716dec0bac12a5222d9486ed20d7fab73c",
+    "reports/pdf-art-geometry/background-2.png": "641ca08d48386808702524cba94fcc8e510abcde645808466ee4adc7e16ed789",
+    "reports/pdf-art-geometry/background-3.png": "504ddaf8aa360d656958bbb02d4297dc8731e6582b98e0698cbd26ecf7607fe6",
+    "reports/pdf-art-geometry/overlay-0.png": "16faddd406323b8d84b31a4804be59a923f68783c9d1a7a6bd44493447b631f8",
+    "reports/pdf-art-geometry/overlay-1.png": "98568d5c91a13db53b63619161611ac1f00aad199aa453eedca80fe7998d65be",
+    "reports/pdf-art-geometry/overlay-2.png": "d555c84e2ea42dd93fdd93d25c3cd0fbda26209459e3789d88df627981a9df04",
+    "reports/pdf-art-geometry/overlay-3.png": "89046d1548117e863228f95c8fab1b262e1d5b1b9470166b29ecadc9d03461fe",
+    "reports/pdf-art-geometry/result.json": "dced622b6f2b724e0a1004cc6a4037f27d7987c137e4926c77ebad634e71ed36",
+    "reports/pdf-art-geometry/run.log": "112bac84198eda3b55fa62878a418a447d12a98980b0a8d18365232a631327a3",
+    "reports/pdf-art-geometry/source.pdf": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee"
+  },
+  "recipe_sha256": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8",
+  "verifier_sha256": "2dcfc9dd9c6f1942267a9dd65273ea1b4bb59970f0ea544e999416966dfec07d"
+}

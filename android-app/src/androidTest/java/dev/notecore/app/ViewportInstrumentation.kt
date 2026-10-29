@@ -30,7 +30,9 @@ class ViewportInstrumentation : Instrumentation() {
     private var processCheckpointScope = ""
     private var minimumApiOnly = false
     private var ownerRetirementOnly = false
+    private var pdfGeometryOnly = false
     override fun onCreate(arguments: Bundle?) {
+        pdfGeometryOnly = arguments?.getString("notecore_case") == "pdf_geometry"
         processCheckpointCase = arguments?.getString("notecore_case")?.takeIf { it.startsWith("process_checkpoint_") }
         processCheckpointScope = arguments?.getString("process_checkpoint_scope") ?: ""
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
@@ -47,6 +49,11 @@ class ViewportInstrumentation : Instrumentation() {
     override fun onStart() {
         val result = Bundle()
         try {
+            if (pdfGeometryOnly) {
+                result.putString("pdf_observations", PdfGeometryArtChecks.verify(targetContext, context.assets))
+                result.putString("pdf_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (brushPathOnly) {
                 result.putInt("brush_path_pixels", BrushPathOffscreen.verify(context.assets))
                 result.putString("brush_path_status", "passed")
