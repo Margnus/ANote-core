@@ -1,5 +1,15 @@
 # 当前Android独立环境验证
 
+## 2026-10-29：真实picker前台时后台App进程死亡
+
+本轮沿有限C1原picker失败矩阵，起点6250ab7。验收卡目标是原四份已保存笔记下，系统选择器前台时仅终止后台预览App进程，返回旧结果须拒绝而非误用新Store；新会话主动重试可成功。仅已确认保存输入，禁止把它当worker写出中途终止、断电或全部owner丢失责任验收。
+
+在独立API35普通包上用`am kill dev.notecore.preview`两次终止后台进程，picker保持前台；先实际观察旧PID不存在，再选择文件/位置。导入PID3244→4460，系统events记录kill background及新进程create/result，UI显示“会话已重建，请重新导入”，原四份文件集合/字节保持；新会话重新选有效源成功，仅增加第五份副本。随后导出PID4460→4686，旧捕获不跨新Store采用，返回后Toast明确“会话已重建，请重新导出”；该Toast已查看保留截图，UI XML未收录Toast，不以XML文字断言冒充可见证据。新会话重新导出到独立命名目标成功，文件与第五份笔记字节相同。见[报告](../reports/current-api35-picker-process.json)、[原始系统事件](../reports/current-api35-picker-process/events-final.txt)，入口`tools/verify_current_android_picker_process.py`只核验保留证据。
+
+重要实际边界：CREATE_DOCUMENT已经在Provider建立0字节目标后才向新进程交付旧结果；本次拒绝没有宣称该空文件是备份，也没有删除或覆盖它。空目标保留为`rejected-export-target.bin`和设备Downloads原文件，成功重试使用不同文件名。五份笔记、导入源、空目标及成功备份全部保留。普通App源码未修改；七项观察复核/可移植性通过。起始一次fetch连接中断，随后重试两仓成功。
+
+采用当前Android旧picker结果跨进程的明确拒绝及新会话恢复子范围，不保证自动续导出或跨崩溃任务幂等。当前Android picker的主机/实际系统交换、配置重建和已保存输入进程死子矩阵收口，不再扩相似旁路检查。回到原有限C1事实表核查真正未验证的owner/fence与平台门禁；权限撤回/写出故障、完整资源备份/跨端、Apple/物理M-1/完整C1继续待验。
+
 ## 2026-10-29：真实选择器期间Activity配置重建
 
 本轮沿有限C1原picker消费者，起点7df23db，验收卡目标为真实系统选择器前台期间原Activity实际销毁重建后，导入/导出的成功结果与取消仍正确消费，取消后可再请求，既有文件保持。Manifest自行处理orientation/screenSize等，故不把旋转称Activity重建；改用系统font_scale 1.0→1.1→1.0→1.1→1.0，结束恢复原设置。未修改App或使用Instrumentation调用recreate。
