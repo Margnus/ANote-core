@@ -1,0 +1,17 @@
+2026-10-29 20:42:02.719 xcodebuild[8357:99602]  DVTFilePathFSEvents: Failed to start fs event stream.
+2026-10-29 20:42:02.902 xcodebuild[8357:99601] [MT] DVTDeveloperPaths: Failed to get length of DARWIN_USER_CACHE_DIR from confstr(3), error = Error Domain=NSPOSIXErrorDomain Code=5 "Input/output error". Using NSCachesDirectory instead.
+2026-10-29 20:42:03.319 xcodebuild[8361:99639]  DVTFilePathFSEvents: Failed to start fs event stream.
+2026-10-29 20:42:03.417 xcodebuild[8361:99638] [MT] DVTDeveloperPaths: Failed to get length of DARWIN_USER_CACHE_DIR from confstr(3), error = Error Domain=NSPOSIXErrorDomain Code=5 "Input/output error". Using NSCachesDirectory instead.
+tools/probes/pdf-apple/PdfMetadataProbe.swift:17:30: error: initializer 'init(bitPattern:)' requires that 'CGPDFDictionaryRef' conform to '_Pointer'
+15 |     var visited = Set<UInt>()
+16 |     for depth in 0..<32 {
+17 |         guard visited.insert(UInt(bitPattern: dictionary)).inserted else { throw ProbeFailure.cyclicParent }
+   |                              `- error: initializer 'init(bitPattern:)' requires that 'CGPDFDictionaryRef' conform to '_Pointer'
+18 |         if has(dictionary, key) { return (dictionary, depth) }
+19 |         var parent: CGPDFDictionaryRef?
+
+Swift.UInt.init:2:8: note: where 'P' = 'CGPDFDictionaryRef'
+1 | struct UInt {
+2 | public init<P>(bitPattern pointer: P?) where P : _Pointer}
+  |        `- note: where 'P' = 'CGPDFDictionaryRef'
+3 | 

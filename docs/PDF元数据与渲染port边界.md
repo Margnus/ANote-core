@@ -1,5 +1,11 @@
 # PDF元数据与渲染port边界
 
+## 2026-10-29：实际Apple元数据查询候选
+
+原三份合成PDF在实际iOS27.0 CoreGraphics进程读取12页，独立原始字典/内容流审计通过，见[Apple报告](../reports/apple-pdf-metadata.json)。CGPDFPage的有效MediaBox/CropBox与rotationAngle能取得父Pages继承结果，非零CropBox原点保持；CGPDFDictionary能证明leaf是否具有UserUnit并区分缺省1/显式2。不能将getBoxRect称为物理页尺寸：同源Unit2仍返回原始[40,50,340,230]，单位需要独立传入现有共享规则并明确renderer变换。
+
+采用这些系统原生查询作为Apple元数据port候选，优于从图像猜单位；本次不作正式跨端接口冻结。探针只支持受控三类源，32层继承上限不是生产reader预算；缺省CropBox/Rotate回退、任意树/错误/加密文件、取消/读者最终释放尚未验证。未调用drawPDFPage或共享矩阵，不能推断背景/批注对齐。下一步同源Apple背景与实际共享几何接缝必须另验；Android没有完整元数据port的原否决继续有效。原PDF不变、Apple16/普通payload保持，不新增App功能或生产资源事务，PDF-03/C1/M-1/DEV-041状态不晋升。
+
 2026-10-29，沿DEV-039/040与C1第5项，起点48720dc。交付卡目标：回答现有Android系统API能否独立提供共享页几何所需的有效元数据，明确缺失输入时的责任；结合实际反例决定采用范围并停止同类探针。不是冻结生产接口或新建PDF解析器。
 
 ## 决定及证据
