@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "runtime": {
+    "serial": "emulator-5590",
+    "avd": "NoteCoreCurrent35",
+    "ordinary_pid": 3244,
+    "font_scale_before": "1.0",
+    "font_scale_after": "1.0",
+    "font_scale_transitions": [
+      "1.1",
+      "1.0",
+      "1.1",
+      "1.0"
+    ],
+    "initial_note_count": 3,
+    "final_note_count": 4,
+    "notes_retained": true,
+    "source": "7df23db4c11bb8756402408e8d140d243b43726b"
+  },
+  "lifecycles": [
+    {
+      "phase": "import_cancel",
+      "relaunch": "10-29 06:18:20.724   585  1056 I wm_relaunch_resume_activity: [0,219453039,14,dev.notecore.preview/dev.notecore.app.MainActivity,40000000]",
+      "callbacks": [
+        "10-29 06:18:20.727  3244  3244 I wm_on_destroy_called: [219453039,dev.notecore.app.MainActivity,performDestroy,0]",
+        "10-29 06:18:20.753  3244  3244 I wm_on_create_called: [219453039,dev.notecore.app.MainActivity,performCreate,11]",
+        "10-29 06:18:20.756  3244  3244 I wm_on_activity_result_called: [219453039,dev.notecore.app.MainActivity,RESUME_ACTIVITY]"
+      ]
+    },
+    {
+      "phase": "import_success",
+      "relaunch": "10-29 06:18:56.839   585  2008 I wm_relaunch_resume_activity: [0,219453039,14,dev.notecore.preview/dev.notecore.app.MainActivity,40000000]",
+      "callbacks": [
+        "10-29 06:18:56.841  3244  3244 I wm_on_destroy_called: [219453039,dev.notecore.app.MainActivity,performDestroy,0]",
+        "10-29 06:18:56.851  3244  3244 I wm_on_create_called: [219453039,dev.notecore.app.MainActivity,performCreate,2]",
+        "10-29 06:18:56.852  3244  3244 I wm_on_activity_result_called: [219453039,dev.notecore.app.MainActivity,RESUME_ACTIVITY]"
+      ]
+    },
+    {
+      "phase": "export_success",
+      "relaunch": "10-29 06:19:12.910   585  2131 I wm_relaunch_resume_activity: [0,219453039,14,dev.notecore.preview/dev.notecore.app.MainActivity,40000000]",
+      "callbacks": [
+        "10-29 06:19:12.913  3244  3244 I wm_on_destroy_called: [219453039,dev.notecore.app.MainActivity,performDestroy,0]",
+        "10-29 06:19:12.965  3244  3244 I wm_on_create_called: [219453039,dev.notecore.app.MainActivity,performCreate,29]",
+        "10-29 06:19:12.967  3244  3244 I wm_on_activity_result_called: [219453039,dev.notecore.app.MainActivity,RESUME_ACTIVITY]"
+      ]
+    },
+    {
+      "phase": "export_cancel",
+      "relaunch": "10-29 06:20:14.935   585  2008 I wm_relaunch_resume_activity: [0,219453039,14,dev.notecore.preview/dev.notecore.app.MainActivity,40000000]",
+      "callbacks": [
+        "10-29 06:20:14.938  3244  3244 I wm_on_destroy_called: [219453039,dev.notecore.app.MainActivity,performDestroy,0]",
+        "10-29 06:20:14.974  3244  3244 I wm_on_create_called: [219453039,dev.notecore.app.MainActivity,performCreate,23]",
+        "10-29 06:20:14.976  3244  3244 I wm_on_activity_result_called: [219453039,dev.notecore.app.MainActivity,RESUME_ACTIVITY]"
+      ]
+    }
+  ],
+  "scope": "Ordinary App same process, four system font-scale changes while real SAF picker is foreground. Framework events prove MainActivity destroy/create before result delivery. Rotation is handled in manifest and is not used as recreation evidence.",
+  "checks": [
+    "four_real_main_activity_recreations_before_result",
+    "import_cancel_then_new_request",
+    "import_success_after_recreation",
+    "export_exact_snapshot_after_recreation",
+    "export_cancel_then_new_request",
+    "three_prior_notes_unchanged",
+    "one_intentional_import_copy_retained",
+    "font_setting_restored"
+  ],
+  "final_note_sha256": {
+    "00b74f72-faf2-4bda-bd28-62cd4ceed060.ncp": "fc2c49286b260239e4008fcf3af251ef3394b1c93ce94d382a9fc8452c65261a",
+    "4f2b3e5e-ff4e-44be-81b1-2930fa3dd9b0.ncp": "29475acf8cf31c5f9af724d0d318d059c756885c8ee5dd809362d63e7fe04a4a",
+    "8552d3d1-714c-4bd3-bc86-e522a52741b0.ncp": "7bda02c1fc7a69f89b32ed9aceb374e028cca87b547febb3c225da4943cfb150",
+    "f743ab19-790b-4ccb-8604-60ee539e4dbc.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0"
+  },
+  "source_build_report_sha256": "7e4565870f84dfde82cba992c6b7d84bfc5978e73f4c9390e2cc23023329cc1d",
+  "process_death_verified": false,
+  "permission_revocation_verified": false,
+  "physical_device_verified": false,
+  "apple_verified": false,
+  "c1_complete": false,
+  "goal_complete": false,
+  "evidence_sha256": {
+    "reports/current-api35-picker-recreation/00-library.png": "51978f6cccf639cc4c031903a9ce6ec0c319ad98354564c86145488da56468a5",
+    "reports/current-api35-picker-recreation/00-library.xml": "a83aa2ea9ed21c1b4cc4000708b2861c9bb3422c1049260fde398e2d48d198a4",
+    "reports/current-api35-picker-recreation/00b74f72-faf2-4bda-bd28-62cd4ceed060.ncp": "fc2c49286b260239e4008fcf3af251ef3394b1c93ce94d382a9fc8452c65261a",
+    "reports/current-api35-picker-recreation/01-import-picker.png": "44ee7de06ec3edb78ab9944148fa8d9d4f89b58f279b5e4da119089f36e8560c",
+    "reports/current-api35-picker-recreation/01-import-picker.xml": "502c8909c7c9b212c248176e1b08104e6e197c8a5220ae0bf17d941e38b073f2",
+    "reports/current-api35-picker-recreation/02-import-font-change.png": "6ca8cb94e96454a44211452752d2d1e524cc48d2e31ac736370f820843a309ba",
+    "reports/current-api35-picker-recreation/02-import-font-change.xml": "d1f7e907faf98ed2f3157c451c11d48709a7a7a6b59b71fa059a0a6e45d48ebd",
+    "reports/current-api35-picker-recreation/03-import-cancelled.png": "8bb51266f46131e005b6c753c3548fe9c84282e02d59d6956eaf59977e5284cd",
+    "reports/current-api35-picker-recreation/03-import-cancelled.xml": "e568d4a30e016391d8669de90d9855d66e941837b676af877abea31242eaef2c",
+    "reports/current-api35-picker-recreation/04-import-retry-picker.png": "2ef0b0e0d2958dc72710d0652dea674b4aa42f7aa6e1b9716f398b98d51f99df",
+    "reports/current-api35-picker-recreation/04-import-retry-picker.xml": "d1f7e907faf98ed2f3157c451c11d48709a7a7a6b59b71fa059a0a6e45d48ebd",
+    "reports/current-api35-picker-recreation/05-import-font-restored.png": "5eb980b07acbd0cb06c6d372e44be1f5b02c3a3e97231ee3247f944169a6943e",
+    "reports/current-api35-picker-recreation/05-import-font-restored.xml": "502c8909c7c9b212c248176e1b08104e6e197c8a5220ae0bf17d941e38b073f2",
+    "reports/current-api35-picker-recreation/06-import-result-after-recreate.png": "778c9ac92decad22a9c60fadf18b5c801dd6aa6985bef0f7f5730d642d2a6762",
+    "reports/current-api35-picker-recreation/06-import-result-after-recreate.xml": "959a85d3a159c5a87e8a1ad534d6f8d5e360c30f19f09d00ed2dd0a48e592fcf",
+    "reports/current-api35-picker-recreation/07-export-picker.png": "a38b78a464924977963b47d2ead21d70def44f7db13a61b300218039e675fa19",
+    "reports/current-api35-picker-recreation/07-export-picker.xml": "2ef47dfff48d646ba6a6ab2c42a8a2817281b0fbb4e75dfc78957401d0f59c4c",
+    "reports/current-api35-picker-recreation/08-export-font-change.png": "2d1d3cdd3a50cf714d2d80534ceb04b817490011bf3c493f91550b764dd405ec",
+    "reports/current-api35-picker-recreation/08-export-font-change.xml": "1aa7de69bae27dd781554226bb887af63590fc0f159735ed1ee39ea4a63baa72",
+    "reports/current-api35-picker-recreation/09-export-result-after-recreate.png": "4ce7cc46c06bc1a2eb05bf073fb438f13671a73baa2b1bc2ecef153c93da2657",
+    "reports/current-api35-picker-recreation/09-export-result-after-recreate.xml": "8e4bfecd9fc40edd069379f0d9f26c175002b0a894961718f5cbf77fb9432dab",
+    "reports/current-api35-picker-recreation/10-export-cancel-picker.png": "2ea1b881fc32d66039fce3bc1ac5b87bcab45a809d84340b559c5599d56e9e22",
+    "reports/current-api35-picker-recreation/10-export-cancel-picker.xml": "f21a4bd35d88626ff66799f3ecf4cb782c43bc6ef14b84c9a29fc2927bba8fe7",
+    "reports/current-api35-picker-recreation/11-export-cancelled-after-recreate.png": "82eccf8fb18d269c2c793e8f0c9b2bf7f5f4d8a7ae5f7e35222ec9b1fa21b752",
+    "reports/current-api35-picker-recreation/11-export-cancelled-after-recreate.xml": "5f71acecd67d83543761d6db399172ca7265757a96cd5d6a1df0e8ebcdad524b",
+    "reports/current-api35-picker-recreation/12-export-request-after-cancel.png": "71ff08830db6093b9c6ed962618929f4f6f0dfab2dd015a399e84b418f260e94",
+    "reports/current-api35-picker-recreation/12-export-request-after-cancel.xml": "6e9ed6f230a32ee7bc80733ae06008b8f4f73d09aa1aae400a8e8beb75d4b31b",
+    "reports/current-api35-picker-recreation/13-final-editor.png": "0bcaafbe0bc703ca2441c6d893684f3ee785fcc77a8aa1874b46dd44c2288ef2",
+    "reports/current-api35-picker-recreation/13-final-editor.xml": "7d933bb45fea2756553a8e585680b8e23d2375b3a0a8593394e9e606e39cc86c",
+    "reports/current-api35-picker-recreation/4f2b3e5e-ff4e-44be-81b1-2930fa3dd9b0.ncp": "29475acf8cf31c5f9af724d0d318d059c756885c8ee5dd809362d63e7fe04a4a",
+    "reports/current-api35-picker-recreation/8552d3d1-714c-4bd3-bc86-e522a52741b0.ncp": "7bda02c1fc7a69f89b32ed9aceb374e028cca87b547febb3c225da4943cfb150",
+    "reports/current-api35-picker-recreation/actions.jsonl": "4bf17486f250c0c9c46878204aaac29fafadddb7e7c0140fec4704727593f233",
+    "reports/current-api35-picker-recreation/events-after-export-success.txt": "398c23396157d7a07e1ee56629b448c27dcecd56d5141df0bcf529fe8b5bf04f",
+    "reports/current-api35-picker-recreation/events-after-import-success.txt": "1fafce53201d70be399f54667f2aa7842cd6214f56ccfad072b48117b3a86ccd",
+    "reports/current-api35-picker-recreation/events-after-import.txt": "75f44cf8391efa149a1c51e89f5da08da4aa9bdcb729099c2befdc94c2ca53f3",
+    "reports/current-api35-picker-recreation/events-final.txt": "19f1b4afdfb9a692adcecbd6c8b3413cf86152774050eccdc111b6800d027549",
+    "reports/current-api35-picker-recreation/export-after-recreate.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0",
+    "reports/current-api35-picker-recreation/f743ab19-790b-4ccb-8604-60ee539e4dbc.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0",
+    "reports/current-api35-picker-recreation/new-import-name.txt": "bee7440688ce03bdb7ead581b435f58f19da5dec0b49b4f713a91b71a10a7270",
+    "reports/current-api35-picker-recreation/runtime.json": "c176b1bb026a270761690188723a495168d262f25e5c35ca654db7f144b6a170"
+  },
+  "verifier_sha256": "16f8e955ced8075d7654da11a114010ffa86068ee2a80c62f2427f4ef8b018e3"
+}

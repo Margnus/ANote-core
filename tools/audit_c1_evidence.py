@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
               'chunked-brush-costs', 'brush-tile-cache-costs')
 CURRENT = {
+    'remote-integration-20261029': ('source_and_artifact_sha256',),
     'android-local-file-identity': ('source_and_artifact_sha256',),
     'apple-local-file-identity': ('source_and_artifact_sha256',),
     'second-host-android-current': ('source_and_artifact_sha256',),

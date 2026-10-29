@@ -55,7 +55,7 @@ def main():
     assert locked.decrypt('wrong-fixture-password')==0 and locked.decrypt(recipe['password_fixture'])!=0
     assert len(locked.pages)==4 and len(PdfReader(output/'many-pages.pdf').pages)==recipe['large_document_pages']
     files = [output/name for name in ('crop-rotations.pdf','password.pdf','many-pages.pdf','malformed.pdf')]
-    manifest = {'schema':recipe['schema'],'fixture_sha256':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
+    manifest = {'schema':recipe['schema'],'fixture_sha256':{p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
                 'recipe_sha256':hashlib.sha256((ROOT/'fixtures/pdf/recipe.json').read_bytes()).hexdigest(),
                 'generator_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 'scope':recipe['scope'],'malformed_fixture_is_intentionally_invalid':True}

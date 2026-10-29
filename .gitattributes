@@ -18,3 +18,28 @@ gradlew.bat text eol=crlf whitespace=cr-at-eol
 *.ncp binary
 *.png binary
 *.zip binary
+# Retain raw ADB output bytes, including native CR/CRLF and dump whitespace.
+reports/current-api35-instrumentation/*.log binary
+reports/current-api35-ui/activity-dump.txt binary
+reports/current-api35-picker-recreation/events*.txt binary
+reports/current-api35-picker-recreation/actions.jsonl text eol=lf
+reports/current-api35-picker-process/events*.txt binary
+reports/current-api35-picker-process/actions.jsonl text eol=lf
+reports/current-api35-rendering/host/run.log binary
+reports/current-api35-rendering/ordinary/render.log binary
+reports/current-api35-rendering/ordinary/actions.jsonl text eol=lf
+reports/store-owner-admission/before/run.log binary
+reports/store-owner-admission/native/run.log binary
+reports/store-owner-admission/before/tests.xml binary
+reports/store-owner-admission/after/*.xml binary
+reports/store-owner-configuration/before/run.log binary
+reports/store-owner-configuration/before/tests.xml binary
+reports/store-owner-configuration/after/*.xml binary
+reports/store-owner-configuration/native/run.log binary
+android-app/src/androidTest/assets/pdf/*.pdf binary
+reports/pdf-art-geometry/*.pdf binary
+reports/pdf-art-geometry/run.log binary
+reports/pdf-metadata-art/**/*.pdf binary
+reports/pdf-metadata-art/**/*.log binary
+reports/pdf-metadata-port/*.txt text eol=lf
+reports/font-fallback-art/run.log binary

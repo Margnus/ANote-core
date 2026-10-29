@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "requirement": "OBJ-03",
+  "status": "passed",
+  "scope": "Original bounded executor real threads with actual host BitmapFactory results: cooperative checks before decode/after decode, owner recycle and exact blocked-result retry; test-only consumer, no production image task owner",
+  "tests": 3,
+  "observations": {
+    "queued": {
+      "source_bytes": 1149,
+      "argb_bytes": 2400,
+      "decode_calls": 0,
+      "charge_before_ack": 7098,
+      "charge_after_ack": 0
+    },
+    "running": {
+      "source_bytes": 1149,
+      "argb_bytes": 2400,
+      "decode_calls": 1,
+      "recycle_calls": 1,
+      "charge_until_owner_ack": 3549,
+      "charge_after_ack": 0,
+      "inside_jni_cancellation_tested": false
+    },
+    "delivery": {
+      "source_bytes": 390,
+      "argb_bytes": 2400,
+      "deliveries": 2,
+      "recycle_calls": 1,
+      "blocked_charge": 2790,
+      "final_charge": 0,
+      "same_result_retried": true
+    }
+  },
+  "declared_charge_policy": "encoded input bytes plus planned ARGB payload; not runtime object/scratch/heap total",
+  "default_android_host_regression": {
+    "tests": 19,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "common_jvm_tests_reused": 555,
+  "source_and_artifact_sha256": {
+    "android-app/src/test/java/dev/notecore/app/ImageDecodeOwnershipNativeTest.kt": "681b4330098db5dbd963c93220d3f458f534e05a08baf7b1199237652a776fb5",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageDecodeRules.kt": "c7191df444b403ee4331d52ba27d82b104ed0377edcec788dafd1f67db38e4bf",
+    "fixtures/image-orientation/manifest.json": "d174767d004dfc63ffc6ee7dbff87d6323de776d8f05d2b7b43e49407b121d50",
+    "fixtures/image-orientation/jpeg-1.jpeg": "04aff48004d759be073f3d497eddfdb5b22c5cf7c5ea16208f76d55b8d9b8120",
+    "fixtures/image-orientation/png-1.png": "27a573e768b617e3de4dd5a15cf4602cfdd8f921e7107d525a8add45403e5d71",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.BoundedPreviewReadTest.xml": "eda2640290694ca0dae7f7a4140efb1bdf860be5a9d1aa1481afee732693ed19",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.ImageDecodeBudgetNativeTest.xml": "47ee09b1f35f5c5f1bb505502b0a96184f5d0f4cae55f04abc1ace75f1ce59de",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.ImageDecodeOwnershipNativeTest.xml": "43a7c052bf97a44fc4b960c70f2d4c6e02e83187ebe6e20b72c94fbab5a4ed30",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.ImageOrientationNativeTest.xml": "d6944d52db6f7f7ae8365212136c0f7f5b7d2537a7b36c1d98987171f8a3b0e1",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.NativeBrushRendererTest.xml": "53503be97f964f23d2888df7df08b849c64c60f408f5d5344430f15a012608c5",
+    "build/image-decode-budget/testDebugUnitTest/ownership-queued.json": "1375777f765a7256f83b3c21e321141ac05f0f56326c6859ff8feebc7f1fce6b",
+    "build/image-decode-budget/testDebugUnitTest/ownership-running.json": "a3fcff00fe54379a2d7d97074eaf29c405701acfb54e5acb7890579ffa0e6e2d",
+    "build/image-decode-budget/testDebugUnitTest/ownership-delivery.json": "3496df89e3058865d469de9d08d0d69f3cbd223afbf133bf61eb768573628a57",
+    "reports/verification.json": "dc7a270a74b774a59d5d69f814989b08051258560c92ab74309c6b3032e11051",
+    "reports/android-build-inputs.sha256": "8b4c0e23cc69d5bd1b1aa9b35dd535c4e9dde3e2ccc0a8acfa508588bedf4fb5",
+    "android-app/build/reports/lint-results-debug.xml": "56907741208c95504f946865bae33b773af34c497cec5fd44f67e4378a8aef4b",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "1d9aec7e566177d1f48e36b1b588e03b02bc9e17677f7839898bb6a506f0910a"
+  },
+  "android_build_verified": true,
+  "android_build_tasks_mostly_reused": true,
+  "android_lint_errors": 0,
+  "android_lint_warnings": 8,
+  "inside_jni_cancellation_verified": false,
+  "heap_release_verified": false,
+  "gpu_retirement_verified": false,
+  "android_art_verified": false,
+  "apple_runtime_verified": false,
+  "app_integrated": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "production source reader pin/version and Image task integration",
+    "decoder blocking/actual platform cancellation and owner loss coordination",
+    "scratch/object/hidden memory and simultaneous input-render envelope",
+    "ART/Apple/native readers/GPU release and original storage prerequisites"
+  ]
+}

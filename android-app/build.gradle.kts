@@ -27,6 +27,8 @@ val robolectricSdk by configurations.creating { isCanBeConsumed = false; isTrans
 dependencies {
     implementation(project(":shared-core"))
     testImplementation(kotlin("test-junit"))
+    // Isolated encoded-fixture metadata reader; no production import dependency.
+    testImplementation("androidx.exifinterface:exifinterface:1.4.2")
     testImplementation("org.robolectric:robolectric:4.17")
     add(robolectricSdk.name, "org.robolectric:android-all-instrumented:15-robolectric-13954326-i7")
 }
@@ -45,6 +47,24 @@ tasks.withType<Test>().configureEach {
     val images = rootProject.file("build/android-brush-images/$name")
     systemProperty("notecore.brush.images", images.absolutePath)
     outputs.dir(images)
+    val imageFixtures = rootProject.file("fixtures/image-orientation")
+    systemProperty("notecore.image.fixtures", imageFixtures.absolutePath)
+    val imageOutputs = rootProject.file("build/image-orientation-native/$name")
+    systemProperty("notecore.image.outputs", imageOutputs.absolutePath)
+    inputs.files(rootProject.fileTree(imageFixtures))
+    outputs.dir(imageOutputs)
+    val budgetOutputs = rootProject.file("build/image-decode-budget/$name")
+    systemProperty("notecore.image.budget.outputs", budgetOutputs.absolutePath)
+    outputs.dir(budgetOutputs)
+    if (providers.gradleProperty("enablePdfGeometryNativeProbe").orNull == "true") {
+        val pdfFixture = rootProject.file("output/pdf/crop-rotations.pdf")
+        systemProperty("notecore.pdf.fixture", pdfFixture.absolutePath)
+        systemProperty("notecore.pdf.recipe", rootProject.file("fixtures/pdf/recipe.json").absolutePath)
+        val pdfImages = rootProject.file("build/pdf-native-images/$name")
+        systemProperty("notecore.pdf.images", pdfImages.absolutePath)
+        inputs.files(pdfFixture, rootProject.file("fixtures/pdf/recipe.json"))
+        outputs.dir(pdfImages)
+    }
 }
 
 tasks.register("verifyNativeBrush") {
@@ -105,4 +125,9 @@ tasks.register("verifyBrushPathTestBuild") {
             "$digest  ${it.relativeTo(rootDir).invariantSeparatorsPath}"
         })
     }
+}
+
+// Explicit environment probe: SDK35 host PdfRenderer is currently unsupported; never part of default tests.
+if (providers.gradleProperty("enablePdfGeometryNativeProbe").orNull == "true") {
+    android.sourceSets.getByName("test").java.srcDir("../tools/probes/pdf-native")
 }

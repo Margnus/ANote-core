@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "runtime": {
+    "serial": "emulator-5590",
+    "avd": "NoteCoreCurrent35",
+    "source": "6250ab7a33ee6f1075dd18551c92f921935f0320",
+    "import_old_pid": 3244,
+    "import_new_pid": 4460,
+    "export_old_pid": 4460,
+    "export_new_pid": 4686,
+    "both_old_processes_observed_absent_before_picker_result": true,
+    "kill_command": "am kill dev.notecore.preview while system DocumentsUI foreground",
+    "initial_note_count": 4,
+    "final_note_count": 5,
+    "intentional_new_session_imports": 1,
+    "rejected_export_target_bytes": 0,
+    "empty_provider_target_retained": true,
+    "all_notes_retained": true,
+    "scope": "Picker result after background App process death; all input notes already durably saved, no worker IO in-flight kill claimed."
+  },
+  "process_events": [
+    {
+      "phase": "import",
+      "kill": "10-29 06:24:14.013   585   664 I am_kill : [0,3244,dev.notecore.preview,700,kill background,193312]",
+      "start": "10-29 06:24:25.981   585   621 I am_proc_start: [0,4460,10148,dev.notecore.preview,top-activity,{dev.notecore.preview/dev.notecore.app.MainActivity}]",
+      "callbacks": [
+        "10-29 06:24:26.336  4460  4460 I wm_on_create_called: [219453039,dev.notecore.app.MainActivity,performCreate,114]",
+        "10-29 06:24:26.346  4460  4460 I wm_on_activity_result_called: [219453039,dev.notecore.app.MainActivity,RESUME_ACTIVITY]"
+      ]
+    },
+    {
+      "phase": "export",
+      "kill": "10-29 06:24:54.176   585   605 I am_kill : [0,4460,dev.notecore.preview,700,kill background,184776]",
+      "start": "10-29 06:25:20.662   585   621 I am_proc_start: [0,4686,10148,dev.notecore.preview,top-activity,{dev.notecore.preview/dev.notecore.app.MainActivity}]",
+      "callbacks": [
+        "10-29 06:25:21.011  4686  4686 I wm_on_create_called: [219453039,dev.notecore.app.MainActivity,performCreate,91]",
+        "10-29 06:25:21.017  4686  4686 I wm_on_activity_result_called: [219453039,dev.notecore.app.MainActivity,RESUME_ACTIVITY]"
+      ]
+    }
+  ],
+  "scope": "Actual system am kill of the background ordinary App while DocumentsUI remains foreground. Saved input files only; old import result refused, explicit new-session retry succeeds. Export loses old captured snapshot and refuses old result; new-session export succeeds.",
+  "checks": [
+    "two_background_process_kills_and_new_pid_result_delivery",
+    "stale_import_refused_without_new_copy",
+    "new_session_import_succeeds_once",
+    "four_existing_files_preserved",
+    "new_session_export_exact_bytes",
+    "provider_import_source_preserved",
+    "empty_rejected_export_target_retained"
+  ],
+  "export_old_result_toast": {
+    "text": "会话已重建，请重新导出",
+    "screenshot": "reports/current-api35-picker-process/08-export-old-result.png",
+    "visually_verified": true,
+    "included_in_xml": false
+  },
+  "final_note_sha256": {
+    "00b74f72-faf2-4bda-bd28-62cd4ceed060.ncp": "fc2c49286b260239e4008fcf3af251ef3394b1c93ce94d382a9fc8452c65261a",
+    "4f2b3e5e-ff4e-44be-81b1-2930fa3dd9b0.ncp": "29475acf8cf31c5f9af724d0d318d059c756885c8ee5dd809362d63e7fe04a4a",
+    "8552d3d1-714c-4bd3-bc86-e522a52741b0.ncp": "7bda02c1fc7a69f89b32ed9aceb374e028cca87b547febb3c225da4943cfb150",
+    "e4048328-74d8-4ce3-9eb5-ad763214e032.ncp": "21e6fe2c6c81d179872ab3af2369d95417d63d244404599016d111b2a73b63a1",
+    "f743ab19-790b-4ccb-8604-60ee539e4dbc.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0"
+  },
+  "in_flight_write_kill_verified": false,
+  "power_loss_verified": false,
+  "physical_device_verified": false,
+  "apple_verified": false,
+  "c1_complete": false,
+  "goal_complete": false,
+  "source_build_report_sha256": "7e4565870f84dfde82cba992c6b7d84bfc5978e73f4c9390e2cc23023329cc1d",
+  "evidence_sha256": {
+    "reports/current-api35-picker-process/00-initial-editor.png": "e536983cef9ceccc6b67ccabdac24c7a9085d0997c1f17b9922ea0e47736a259",
+    "reports/current-api35-picker-process/00-initial-editor.xml": "7d933bb45fea2756553a8e585680b8e23d2375b3a0a8593394e9e606e39cc86c",
+    "reports/current-api35-picker-process/00b74f72-faf2-4bda-bd28-62cd4ceed060.ncp": "fc2c49286b260239e4008fcf3af251ef3394b1c93ce94d382a9fc8452c65261a",
+    "reports/current-api35-picker-process/01-import-picker.png": "0aea93ac4d21f0c7f1850f67943dddb2aa6824c8ab1f4bfdf7bceec87f91b641",
+    "reports/current-api35-picker-process/01-import-picker.xml": "9d874ae4032cfceb182e639561a88899331526e83296471de2285229f2ffd3ac",
+    "reports/current-api35-picker-process/02-picker-after-app-kill.png": "0aea93ac4d21f0c7f1850f67943dddb2aa6824c8ab1f4bfdf7bceec87f91b641",
+    "reports/current-api35-picker-process/02-picker-after-app-kill.xml": "9d874ae4032cfceb182e639561a88899331526e83296471de2285229f2ffd3ac",
+    "reports/current-api35-picker-process/03-import-old-result.png": "35d65e8df57fb86f900130f27ea70c37d57dfff5b4eb7497e5fc262d6ad4132f",
+    "reports/current-api35-picker-process/03-import-old-result.xml": "6298d58ba9d83c711a31d7f27de1c7646bc436ea7b3d55c2bb4024e009fdb2ea",
+    "reports/current-api35-picker-process/04-fresh-import-picker.png": "0aea93ac4d21f0c7f1850f67943dddb2aa6824c8ab1f4bfdf7bceec87f91b641",
+    "reports/current-api35-picker-process/04-fresh-import-picker.xml": "9d874ae4032cfceb182e639561a88899331526e83296471de2285229f2ffd3ac",
+    "reports/current-api35-picker-process/05-fresh-import-success.png": "f9189359bbf4504a382b7985aef5c53236aa2487db045d65d1e62b95a3338daa",
+    "reports/current-api35-picker-process/05-fresh-import-success.xml": "959a85d3a159c5a87e8a1ad534d6f8d5e360c30f19f09d00ed2dd0a48e592fcf",
+    "reports/current-api35-picker-process/06-export-picker.png": "4684844c999dba689a25af4a0608060a2cfc79a5349dcc5a23d22438500da776",
+    "reports/current-api35-picker-process/06-export-picker.xml": "5d26b3ccb972d82ad1dfcec283ed64526e9a1df3d70617df044c3d14ed25d727",
+    "reports/current-api35-picker-process/07-export-picker-app-dead.png": "4684844c999dba689a25af4a0608060a2cfc79a5349dcc5a23d22438500da776",
+    "reports/current-api35-picker-process/07-export-picker-app-dead.xml": "5d26b3ccb972d82ad1dfcec283ed64526e9a1df3d70617df044c3d14ed25d727",
+    "reports/current-api35-picker-process/08-export-old-result.png": "6a6f48345546b903cf400c26974292bff90db5aff1decfcad1d26cd470a6462c",
+    "reports/current-api35-picker-process/08-export-old-result.xml": "5f71acecd67d83543761d6db399172ca7265757a96cd5d6a1df0e8ebcdad524b",
+    "reports/current-api35-picker-process/09-export-retry-picker.png": "3a7aaa0a6f2584f65e82b8cbf149fc7cf0b65716009d3136188514b9633f5263",
+    "reports/current-api35-picker-process/09-export-retry-picker.xml": "d19775d8d3f4ab267490e1b01032667d10a2aa1504a1af7ff5813539d0994cbd",
+    "reports/current-api35-picker-process/10-export-retry-name.png": "48b714bb9a9c04e5ca05ce116672eeb304d67e9358bdc939f3c1d36eb7ca2e41",
+    "reports/current-api35-picker-process/10-export-retry-name.xml": "58205659660a192e0f1dd694dada4e461adf5887c3bcd06b1e08daa61d7aa2ad",
+    "reports/current-api35-picker-process/11-export-retry-success.png": "179f87a78541d87fb5b7d252a1e787b6300a0298913b591169cd8148dc0826c2",
+    "reports/current-api35-picker-process/11-export-retry-success.xml": "7d933bb45fea2756553a8e585680b8e23d2375b3a0a8593394e9e606e39cc86c",
+    "reports/current-api35-picker-process/4f2b3e5e-ff4e-44be-81b1-2930fa3dd9b0.ncp": "29475acf8cf31c5f9af724d0d318d059c756885c8ee5dd809362d63e7fe04a4a",
+    "reports/current-api35-picker-process/8552d3d1-714c-4bd3-bc86-e522a52741b0.ncp": "7bda02c1fc7a69f89b32ed9aceb374e028cca87b547febb3c225da4943cfb150",
+    "reports/current-api35-picker-process/actions.jsonl": "5f9ad2e27dd8e39ceb7f74307d48a748f8f5e7dab959e5277e4c651a5b9f3e59",
+    "reports/current-api35-picker-process/e4048328-74d8-4ce3-9eb5-ad763214e032.ncp": "21e6fe2c6c81d179872ab3af2369d95417d63d244404599016d111b2a73b63a1",
+    "reports/current-api35-picker-process/events-final.txt": "9761cc24868351c8c1bdadc149df868d129380fba9f84ed3552c36e182e8246e",
+    "reports/current-api35-picker-process/export-killed-pid.txt": "731e88ce52c6febf8c04dbf5e208e3e46da85bf219313f31f56225f29024f36b",
+    "reports/current-api35-picker-process/export-new-pid.txt": "9f1d68d37ee45034544337839f98d9d0d1035f2497d447b1b8bebaf16d0517fe",
+    "reports/current-api35-picker-process/f743ab19-790b-4ccb-8604-60ee539e4dbc.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0",
+    "reports/current-api35-picker-process/fresh-import-name.txt": "3bfa6780cada7ebc527c2cc489872bb092ec3ca5f81d45444232fa5fc82f9711",
+    "reports/current-api35-picker-process/import-killed-pid.txt": "3157fb5efb99f26b67b76b54bc8cc16b8d9e3d905a7ef8af0e01042083a08b2d",
+    "reports/current-api35-picker-process/import-new-pid.txt": "731e88ce52c6febf8c04dbf5e208e3e46da85bf219313f31f56225f29024f36b",
+    "reports/current-api35-picker-process/provider-import-source.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0",
+    "reports/current-api35-picker-process/rejected-export-target.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/current-api35-picker-process/retry-export.ncp": "21e6fe2c6c81d179872ab3af2369d95417d63d244404599016d111b2a73b63a1",
+    "reports/current-api35-picker-process/runtime.json": "35e59e56dd391e6c00b5adaccc61005b1d9c799843141dd156dfa2a6e3995acc"
+  },
+  "verifier_sha256": "91fd9ac2ebfa863aad84bdcaac73bbf536cbb3a2ab53b4eff410d7ed63d246d7"
+}

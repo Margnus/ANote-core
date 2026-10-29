@@ -34,11 +34,19 @@ class ViewportInstrumentation : Instrumentation() {
     private var atomicCutAction: String? = null
     private var atomicCutIdentity: String? = null
     private var atomicCutBoundary: String? = null
+    private var pdfGeometryOnly = false
+    private var pdfFixture = "crop-rotations.pdf"
+    private var pdfUserUnit = 1.0
+    private var fontFallbackOnly = false
     override fun onCreate(arguments: Bundle?) {
         budgetOverlapOnly = arguments?.getString("notecore_case") == "budget_overlap"
         atomicCutAction = arguments?.getString("notecore_atomic_cut")
         atomicCutIdentity = arguments?.getString("notecore_atomic_identity")
         atomicCutBoundary = arguments?.getString("notecore_atomic_boundary")
+        fontFallbackOnly = arguments?.getString("notecore_case") == "font_fallback"
+        pdfGeometryOnly = arguments?.getString("notecore_case") in listOf("pdf_geometry", "pdf_user_unit", "pdf_inherited")
+        if (arguments?.getString("notecore_case") == "pdf_user_unit") { pdfFixture = "user-unit-2.pdf"; pdfUserUnit = 2.0 }
+        if (arguments?.getString("notecore_case") == "pdf_inherited") pdfFixture = "inherited-geometry.pdf"
         processCheckpointCase = arguments?.getString("notecore_case")?.takeIf { it.startsWith("process_checkpoint_") }
         processCheckpointScope = arguments?.getString("process_checkpoint_scope") ?: ""
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
@@ -55,6 +63,16 @@ class ViewportInstrumentation : Instrumentation() {
     override fun onStart() {
         val result = Bundle()
         try {
+            if (fontFallbackOnly) {
+                result.putString("font_observations", FontFallbackArtChecks.verify(targetContext))
+                result.putString("font_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
+            if (pdfGeometryOnly) {
+                result.putString("pdf_observations", PdfGeometryArtChecks.verify(targetContext, context.assets, pdfFixture, pdfUserUnit))
+                result.putString("pdf_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (brushPathOnly) {
                 result.putInt("brush_path_pixels", BrushPathOffscreen.verify(context.assets))
                 result.putString("brush_path_status", "passed")

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "requirements": [
+    "DATA-06"
+  ],
+  "status": "passed",
+  "scope": "Existing Android preview ContentResolver adapter / original Store serial worker and main looper on Robolectric SDK35; controlled stream doubles; no actual provider/ART/Apple or production resource transaction acceptance",
+  "new_host_tests": 5,
+  "default_host_regression": {
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "common_jvm_results_reused": 555,
+  "known_read_refusals": [
+    "invalid UTF-8",
+    "invalid/unsupported format",
+    "valid canonical content unsupported by preview",
+    "character capacity",
+    "byte capacity",
+    "source read IOException",
+    "source read SecurityException",
+    "source open SecurityException"
+  ],
+  "ownership_checks": [
+    "stream closed after success/read refusal/read exception",
+    "source and existing payloads byte-identical",
+    "refusal creates no copy",
+    "original Store worker reads off main and delivers on main",
+    "same Store imports valid content after refusal and reopens exact committed copy",
+    "write failure stays outcome unknown; not source refusal or rollback confirmation",
+    "unexpected provider fault still escapes to original worker unknown protocol",
+    "worker stopped before fixture cleanup"
+  ],
+  "unknown_message": "导入结果暂无法确认，请先查看列表；已有笔记未覆盖",
+  "source_open_null": "defensive IO refusal implemented; resolver shadow replaces null supplier with unregistered stream, so null-open branch not runtime-verified",
+  "write_failure_injection": "regular file obstructs storage directory; does not simulate crash or post-rename lost acknowledgement",
+  "android_build_verified": true,
+  "lint": {
+    "Error": 0,
+    "Warning": 8
+  },
+  "app_source_connected": true,
+  "apk_installed": false,
+  "ordinary_ui_verified": false,
+  "android_art_verified": false,
+  "apple_changed_or_verified": false,
+  "production_storage_verified": false,
+  "task_idempotency_or_cancel_verified": false,
+  "c1_complete": false,
+  "source_and_artifact_sha256": {
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "a5cacdbc8c9d63d88237dbd420dad8e420721dbcb118f603f413804abd4f2276",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "5a64dc3ee4724eab48df9d0615e2913b310316eae69ee1215cf402cacc801680",
+    "android-app/src/test/java/dev/notecore/app/PreviewImportOutcomeTest.kt": "290868cb6d56ec88e05f62aa41a916e5fc604ce58d4cf1d4857ee8ad7f1bbb1d",
+    "android-app/build.gradle.kts": "44e78f16a6a495f95e16d5841b491f311ec91a33809f79b298d6870f2383c6a0",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "29480992140eb476e1b3a612a2170297bb191342cfbeead550a7b9994353f0aa",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.PreviewImportOutcomeTest.xml": "ead7e96b360a379b3ea03aa26d2801c28c5a20e53e1ad16818dd88a7768f87c4",
+    "android-app/build/reports/lint-results-debug.xml": "56907741208c95504f946865bae33b773af34c497cec5fd44f67e4378a8aef4b",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "52bc50409077d310c00b731657222054c21a018582f0039b9261e7371608659d",
+    "reports/android-build-inputs.sha256": "df808c4c7e4113137aec90f8d74e63753eeee474e4684e4bd1bbddd5a0d5fafb",
+    "reports/verification.json": "dc7a270a74b774a59d5d69f814989b08051258560c92ab74309c6b3032e11051"
+  }
+}

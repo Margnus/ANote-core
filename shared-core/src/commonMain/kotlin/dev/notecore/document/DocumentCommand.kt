@@ -93,7 +93,7 @@ class DocumentBudgetCreation internal constructor(val budget: DocumentBudget?, v
 enum class DocumentRejection { WRONG_DOCUMENT, STALE_ROOT, REVISION_EXHAUSTED, MISSING_PAGE, WRONG_LAYER, STALE_PAGE,
     REUSED_OPERATION_ID, REUSED_IDENTITY, COPY_MAPPING, INVALID_PAGE, INVALID_TITLE, SCENE_REJECTED, NO_CHANGE,
     PAGE_CAPACITY, OBJECT_CAPACITY, LIVE_BYTE_CAPACITY, JOURNAL_CAPACITY, IDENTITY_CAPACITY,
-    HISTORY_EMPTY, HISTORY_TARGET, HISTORY_CONFLICT, HISTORY_CAPACITY, CLOSED }
+    HISTORY_EMPTY, HISTORY_TARGET, HISTORY_CONFLICT, HISTORY_CAPACITY, CLOSED, INVALID_IDENTITY }
 class DocumentReceipt internal constructor(val operationId: CommandId, val rootRevision: Long, affectedPages: Set<PageId>) {
     private val pages = affectedPages.toSet()
     val durability: Durability get() = Durability.MEMORY_ONLY

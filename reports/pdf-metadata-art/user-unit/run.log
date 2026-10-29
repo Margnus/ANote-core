@@ -1,0 +1,7 @@
+INSTRUMENTATION_RESULT: failure=java.lang.IllegalStateException: System PDF user-unit-2.pdf page 0 size 300x180 disagrees with CropBox/UserUnit 2.0 recipe
+	at dev.notecore.app.PdfGeometryArtChecks.verify(PdfGeometryArtChecks.kt:52)
+	at dev.notecore.app.ViewportInstrumentation.onStart(ViewportInstrumentation.kt:57)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2594)
+
+INSTRUMENTATION_RESULT: viewport_status=failed
+INSTRUMENTATION_CODE: 0

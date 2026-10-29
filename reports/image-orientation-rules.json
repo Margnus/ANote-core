@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "requirement": "OBJ-03",
+  "status": "passed",
+  "scope": "Internal non-destructive EXIF orientation affine rules on JVM with synthetic pixel-grid permutations and independent host Pillow oracle; no PNG/JPEG/platform decoder or App acceptance",
+  "tests": 4,
+  "failures": 0,
+  "errors": 0,
+  "oracle_orientations": 8,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageOrientationRules.kt": "31175c1be9a5c69c972f3d65a804ae953bda007553c18989fb96f2264116d86c",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "ec8e553a5586b60aedf78fbe3d57aca39a52dd405695a4cb1ab1f2db67ad2108",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/ImageOrientationRulesTest.kt": "072df600a0032e7e658e999f8fd38d3b59c38af27f3e8b778179b6f138d149fd",
+    "tools/verify_image_orientation_oracle.py": "7ab994b9eb1b9b61c0efff3a56db9f2f2eab8d2770ca1dfd650bf3824fc1244b",
+    "reports/image-orientation-oracle.json": "7b63e51ebb9bb8f972d00f604d1d5493ad0c2973c0d3cfd42673a8d891226efa",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ImageOrientationRulesTest.xml": "83d74d6e9aa77161b689168193d28cbcc8af927618f5adff966d316627d492c6",
+    "reports/verification.json": "bf6a4945d00de651d30b9d6515c13491b42ba3b104d0a15b7a061d33acb92be4"
+  },
+  "scenarios": [
+    "invalidDimensionsUnknownOrientationAndBudgetReturnNoMapping[jvm]",
+    "allEightDirectionsMatchIndependentAsymmetricPixelGrid[jvm]",
+    "pixelAdmissionUsesLongAndNeverOverflowsIntMultiplication[jvm]",
+    "cornersCoverWholeDisplayAndEveryMappingIsInvertible[jvm]"
+  ],
+  "sample_origin": "synthetic-labelled-pixel-grid",
+  "app_integrated": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "real PNG/JPEG/EXIF/ICC/alpha and once-only decoder orientation adaptation",
+    "viewport decode budget and immutable original resource transaction",
+    "production Image objects/history and Android/Apple save-reopen",
+    "original DATA-05/M-1/C1 prerequisites"
+  ]
+}

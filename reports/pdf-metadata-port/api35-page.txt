@@ -1,0 +1,25 @@
+Compiled from "PdfRenderer.java"
+public final class android.graphics.pdf.PdfRenderer$Page implements java.lang.AutoCloseable {
+  public static final int RENDER_MODE_FOR_DISPLAY;
+  public static final int RENDER_MODE_FOR_PRINT;
+  final android.graphics.pdf.PdfRenderer this$0;
+  android.graphics.pdf.PdfRenderer$Page(android.graphics.pdf.PdfRenderer);
+  public int getIndex();
+  public int getWidth();
+  public int getHeight();
+  public void render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int);
+  public void render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, android.graphics.pdf.RenderParams);
+  public java.util.List<android.graphics.pdf.content.PdfPageTextContent> getTextContents();
+  public java.util.List<android.graphics.pdf.content.PdfPageImageContent> getImageContents();
+  public java.util.List<android.graphics.pdf.models.PageMatchBounds> searchText(java.lang.String);
+  public android.graphics.pdf.models.selection.PageSelection selectContent(android.graphics.pdf.models.selection.SelectionBoundary, android.graphics.pdf.models.selection.SelectionBoundary);
+  public java.util.List<android.graphics.pdf.content.PdfPageLinkContent> getLinkContents();
+  public java.util.List<android.graphics.pdf.content.PdfPageGotoLinkContent> getGotoLinks();
+  public java.util.List<android.graphics.pdf.models.FormWidgetInfo> getFormWidgetInfos();
+  public java.util.List<android.graphics.pdf.models.FormWidgetInfo> getFormWidgetInfos(int[]);
+  public android.graphics.pdf.models.FormWidgetInfo getFormWidgetInfoAtIndex(int);
+  public android.graphics.pdf.models.FormWidgetInfo getFormWidgetInfoAtPosition(int, int);
+  public java.util.List<android.graphics.Rect> applyEdit(android.graphics.pdf.models.FormEditRecord);
+  public void close();
+  protected void finalize() throws java.lang.Throwable;
+}

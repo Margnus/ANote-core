@@ -13,7 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DEVICE = '7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
 BUNDLE = 'dev.notecore.preview'
 ANDROID_CHECKS = {'invalid_title_keeps_root_receipts_and_file', 'same_operation_valid_retry_and_utf8_file_reopen',
-                  'invalid_title_keeps_redo_branch', 'invalid_initial_title_refused'}
+                  'invalid_title_keeps_redo_branch', 'invalid_initial_title_refused',
+                  'invalid_identity_keeps_root_status_and_file',
+                  'same_identity_operation_corrected_unicode_page_file_reopen'}
 
 
 def sha(path):
@@ -62,7 +64,7 @@ def main():
     android_log = folder/'android.log'; android_log.write_text(output, encoding='utf-8')
     assert 'title_status=passed' in output and 'INSTRUMENTATION_CODE: -1' in output, output
     android = json.loads(re.search(r'title_observations=(\{.*\})', output).group(1))
-    assert len(android['checks']) == 4 and set(android['checks']) == ANDROID_CHECKS and android['unicode_utf16_length'] == 120
+    assert len(android['checks']) == len(ANDROID_CHECKS) and set(android['checks']) == ANDROID_CHECKS and android['unicode_utf16_length'] == 120
     assert files() == before
     baseline = folder/'original-files.json'; baseline.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8')
     devices = json.loads(command('xcrun', 'simctl', 'list', 'devices', 'available', '--json'))['devices']
@@ -104,7 +106,7 @@ def main():
         'apple_filesystem_invalid_text_tested': False, 'ordinary_app_ui_verified': False,
         'physical_device_or_power_loss_verified': False, 'c1_gate_complete': False}
     (ROOT/'reports/canonical-title-contract.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
-    print(json.dumps({'status': 'passed', 'android_checks': 4, 'native_tests': 4, 'jvm_tests': 4, 'original_android_files': len(before)}))
+    print(json.dumps({'status': 'passed', 'android_checks': len(ANDROID_CHECKS), 'native_tests': 4, 'jvm_tests': 4, 'original_android_files': len(before)}))
 
 
 if __name__ == '__main__': main()

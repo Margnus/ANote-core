@@ -22,6 +22,8 @@ class MainActivity : Activity() {
     private var lastPresentation: EditorPresentation? = null
     private var exportRequestCode: Int? = null
     private var exportPickerSession: String? = null
+    private var importRequestCode: Int? = null
+    private var importPickerSession: String? = null
     private var notebook: PagedPreviewNotebook? = null
     private var canvas: InkCanvasView? = null
     private var status: TextView? = null
@@ -55,6 +57,8 @@ class MainActivity : Activity() {
         }
         exportRequestCode = savedInstanceState?.getInt("exportRequest", -1)?.takeIf { it in 1000..65535 }
         exportPickerSession = savedInstanceState?.getString("exportSession")
+        importRequestCode = savedInstanceState?.getInt("importRequest", -1)?.takeIf { it in 1000..65535 }
+        importPickerSession = savedInstanceState?.getString("importSession")
         val id = savedInstanceState?.getString("document") ?: store.activeDocumentId
         if (id == null) library() else open(id)
     }
@@ -85,13 +89,7 @@ class MainActivity : Activity() {
             if (note == null) showError("其他窗口正在编辑，或原笔记尚待保存，请完成后重试")
             else { editor(note); save() }
         }, LinearLayout.LayoutParams(-1, dp(56)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
-        root.addView(button("导入备份") {
-            try {
-                startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE); type = "*/*"
-                }, 102)
-            } catch (_: android.content.ActivityNotFoundException) { showError("系统文件选择器不可用") }
-        }, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
+        root.addView(button("导入备份") { importBackup() }, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         status = text("", 13f).apply { setPadding(dp(20), 0, dp(20), dp(8)) }
         root.addView(status)
         val frame = FrameLayout(this)
@@ -255,8 +253,35 @@ class MainActivity : Activity() {
             EditorDeparture.STALE -> { library(); showError("此编辑窗口已结束，请重新打开笔记") }
         }
     }
+    private fun importBackup() {
+        if (exportRequestCode != null) { showError(getString(R.string.export_picker_busy)); return }
+        if (importRequestCode != null) { showError(getString(R.string.import_picker_busy)); return }
+        val admission = store.beginImportPicker()
+        val code = admission.requestCode
+        if (code == null) {
+            showError(getString(when (admission.disposition) {
+                ImportPickerDisposition.OWNER_CLOSED -> R.string.import_picker_owner_closed
+                ImportPickerDisposition.IDENTITY_EXHAUSTED -> R.string.import_picker_identity_exhausted
+                else -> R.string.import_picker_busy
+            }))
+            return
+        }
+        importRequestCode = code; importPickerSession = store.importPickerSession
+        try {
+            startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE); type = "*/*"
+            }, code)
+        } catch (_: android.content.ActivityNotFoundException) {
+            store.takeImportPicker(code); importRequestCode = null; importPickerSession = null
+            showError("系统文件选择器不可用")
+        } catch (_: SecurityException) {
+            store.takeImportPicker(code); importRequestCode = null; importPickerSession = null
+            showError("系统文件选择器不可用")
+        }
+    }
     private fun exportBackup() {
         val note = notebook ?: return
+        if (importRequestCode != null) { showError(getString(R.string.import_picker_busy)); return }
         if (exportRequestCode != null) { showError(getString(R.string.export_picker_busy)); return }
         canvas?.cancelInk()
         if (!note.retryPendingStroke()) { showError(note.lastError); return }
@@ -288,8 +313,7 @@ class MainActivity : Activity() {
     @Deprecated("Framework result callback keeps the preview dependency-free")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode in 1000..65535) {
-            if (requestCode != exportRequestCode) return
+        if (requestCode in 1000..65535 && requestCode == exportRequestCode) {
             val session = exportPickerSession
             exportRequestCode = null; exportPickerSession = null
             val snapshot = if (session == store.exportPickerSession) store.takeExportPicker(requestCode) else null
@@ -299,13 +323,21 @@ class MainActivity : Activity() {
             store.export(uri, snapshot) { failure -> if (!isFinishing && !isDestroyed) {
                 if (failure != null) showError(failure) else Toast.makeText(this, "备份已导出", Toast.LENGTH_LONG).show()
             } }
-        } else if (requestCode == 102 && resultCode == RESULT_OK) {
+        } else if (requestCode in 1000..65535 && requestCode == importRequestCode) {
+            val session = importPickerSession
+            importRequestCode = null; importPickerSession = null
+            val matched = session == store.importPickerSession && store.takeImportPicker(requestCode)
+            if (resultCode != RESULT_OK) return
+            if (!matched) { showError("会话已重建，请重新导入"); return }
             val uri = data?.data ?: return showError("未获取导入文件")
             val generation = viewGeneration
             store.importCopy(uri) { note, failure ->
                 if (isFinishing || isDestroyed || generation != viewGeneration) return@importCopy
-                if (note != null) { val session = store.adopt(note); editor(session); status?.text = getString(R.string.imported, session.totalStrokeCount) }
-                else showError(failure ?: "导入失败")
+                if (note != null) {
+                    val session = store.adoptForEditor(note)
+                    if (session != null) { editor(session); status?.text = getString(R.string.imported, session.totalStrokeCount) }
+                    else { library(); showError("备份已导入为新笔记，可返回列表查看") }
+                } else showError(failure ?: "导入失败")
             }
         }
     }
@@ -322,5 +354,6 @@ class MainActivity : Activity() {
     }
     override fun onSaveInstanceState(outState: Bundle) {
         exportRequestCode?.let { outState.putInt("exportRequest", it); outState.putString("exportSession", exportPickerSession) }
+        importRequestCode?.let { outState.putInt("importRequest", it); outState.putString("importSession", importPickerSession) }
         notebook?.let { outState.putString("document", it.documentId) }; super.onSaveInstanceState(outState) }
 }

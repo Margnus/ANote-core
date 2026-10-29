@@ -42,8 +42,26 @@ internal object CanonicalTitleHostChecks {
         var refused = false
         try { MemoryDocumentAuthority(root("\uD800")) } catch (_: IllegalArgumentException) { refused = true }
         check(refused)
+        // Same runtime entry now also guards the new identity refusal at the original authority/file port.
+        val identityDoc = SceneId("identity-native")
+        val identityOwner = MemoryDocumentAuthority(DocumentRoot.empty(identityDoc, "identity", page),
+            ownerCheck = { check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) })
+        io.write(PagedPreviewSnapshot.fromRoot(identityOwner.snapshot()))
+        val identityFile = File(directory, "identity-native.ncp")
+        val identityBytes = identityFile.readBytes()
+        val identityRoot = identityOwner.snapshot(); val identityStatus = identityOwner.status()
+        val insertion = DocumentCommand.InsertPage(CommandId("identity-retry"), identityDoc, 0,
+            page.copy(id = PageId("\uD800"), layerId = LayerId("new-layer")))
+        check((identityOwner.commit(insertion) as DocumentCommit.Rejected).reason == DocumentRejection.INVALID_IDENTITY)
+        check(identityOwner.snapshot() === identityRoot && identityOwner.status() == identityStatus)
+        check(identityFile.readBytes().contentEquals(identityBytes))
+        val unicodePage = insertion.page.copy(id = PageId("页面😀"), layerId = LayerId("笔迹e\u0301"))
+        check(identityOwner.commit(insertion.copy(page = unicodePage)) is DocumentCommit.Accepted)
+        io.write(PagedPreviewSnapshot.fromRoot(identityOwner.snapshot()))
+        check(io.read("identity-native").page(1).let { it.id == unicodePage.id && it.layerId == unicodePage.layerId })
         return JSONObject().put("checks", JSONArray(listOf("invalid_title_keeps_root_receipts_and_file", "same_operation_valid_retry_and_utf8_file_reopen",
-            "invalid_title_keeps_redo_branch", "invalid_initial_title_refused")))
+            "invalid_title_keeps_redo_branch", "invalid_initial_title_refused", "invalid_identity_keeps_root_status_and_file",
+            "same_identity_operation_corrected_unicode_page_file_reopen")))
             .put("synthetic_file_bytes", file.length()).put("unicode_utf16_length", title.length).toString()
     }
 }

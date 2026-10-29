@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "requirement": "OBJ-03",
+  "status": "passed",
+  "scope": "Internal source/display/ARGB admission with conservative power-of-two sampling on JVM and actual synthetic odd JPEG/PNG host BitmapFactory decode; no production import or process/native heap budget acceptance",
+  "common_tests": 5,
+  "native_host_tests": 2,
+  "observations": [
+    {
+      "format": "jpeg",
+      "source_sha256": "7db84e50374f91636deb29b11ef3d3be89520b37b33878f302cdd5c9a1c5b06f",
+      "sample": 4,
+      "width": 65,
+      "height": 49,
+      "row_bytes": 260,
+      "allocation_bytes": 12740,
+      "planned_argb_bytes": 12740,
+      "rejected_full_decode_calls": 0,
+      "successful_full_decode_calls": 1
+    },
+    {
+      "format": "png",
+      "source_sha256": "f55a20881ab9245e3573d2735e3a063a5fc13d3c5023286b431f29deac66658b",
+      "sample": 4,
+      "width": 64,
+      "height": 48,
+      "row_bytes": 256,
+      "allocation_bytes": 12288,
+      "planned_argb_bytes": 12740,
+      "rejected_full_decode_calls": 0,
+      "successful_full_decode_calls": 1
+    }
+  ],
+  "test_orientation_metadata": 6,
+  "exif_parser_tested": false,
+  "default_android_host_regression": {
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageDecodeRules.kt": "c7191df444b403ee4331d52ba27d82b104ed0377edcec788dafd1f67db38e4bf",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/ImageDecodeRulesTest.kt": "1089ebdd7a7ceb58e1425ed03cba71bd1abf18e99ed9c634dd9981e3781f128b",
+    "android-app/src/test/java/dev/notecore/app/ImageDecodeBudgetNativeTest.kt": "bffabb168bf4d909add01596b247e30909eb335c86115ba939f6f471cb9bc6f5",
+    "android-app/build.gradle.kts": "9153457ab10ac10d976d88046c336806e605aa840f54aefcf91171eea524fd54",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ImageDecodeRulesTest.xml": "3ec709bce1a1b5d7c8df138f006d0c5ef88f84652fa11091b95e717780172333",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.BoundedPreviewReadTest.xml": "80996c00c46ccb81e99456933af0e05597870123f7c9f45db541625f521e3400",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.ImageDecodeBudgetNativeTest.xml": "bd1fa4ea55a8698d35c80b55f21dcb43ad8ef0b52f0f4058d2169b4816b7ced3",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.ImageOrientationNativeTest.xml": "0b0c94f8a5037eff1268cfe533f85b1e8fd0c8618fd3b069247c50fe41184627",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.NativeBrushRendererTest.xml": "334de44b9f855c0da848863aaac4684c7397cafcf5679f6c4cb90c478fafeaf6",
+    "build/image-decode-budget/testDebugUnitTest/jpeg.json": "11cdca3639b4ae7bfc9a383444b2edad5b3621f820f437b600625029f5bd8fa2",
+    "build/image-decode-budget/testDebugUnitTest/odd.jpeg": "7db84e50374f91636deb29b11ef3d3be89520b37b33878f302cdd5c9a1c5b06f",
+    "build/image-decode-budget/testDebugUnitTest/png.json": "907e92964361c36ee5b1f68c1740caea35f234d5006d3bd780e7fd06ecb24472",
+    "build/image-decode-budget/testDebugUnitTest/odd.png": "f55a20881ab9245e3573d2735e3a063a5fc13d3c5023286b431f29deac66658b",
+    "reports/verification.json": "dc7a270a74b774a59d5d69f814989b08051258560c92ab74309c6b3032e11051",
+    "reports/android-build-inputs.sha256": "8b4c0e23cc69d5bd1b1aa9b35dd535c4e9dde3e2ccc0a8acfa508588bedf4fb5",
+    "android-app/build/reports/lint-results-debug.xml": "56907741208c95504f946865bae33b773af34c497cec5fd44f67e4378a8aef4b",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "1d9aec7e566177d1f48e36b1b588e03b02bc9e17677f7839898bb6a506f0910a"
+  },
+  "android_build_verified": true,
+  "android_lint_errors": 0,
+  "android_lint_warnings": 8,
+  "android_art_verified": false,
+  "apple_runtime_verified": false,
+  "app_integrated": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "actual projected viewport/density and trusted bounds/EXIF/resource identity adaptation",
+    "decoder scratch/stride/configuration and simultaneous work/input/render heap envelope",
+    "actual ART/Apple/ICC/F16/high-depth and failure/cancel/release",
+    "production original resources/Image objects/history and durable reopen"
+  ]
+}

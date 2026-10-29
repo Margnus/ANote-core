@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 internal enum class ExportPickerDisposition { READY, BUSY, CAPACITY, IDENTITY_EXHAUSTED, OWNER_CLOSED, PENDING_RECOVERY }
 internal data class ExportPickerAdmission(val disposition: ExportPickerDisposition, val requestCode: Int? = null)
+internal enum class ImportPickerDisposition { READY, BUSY, IDENTITY_EXHAUSTED, OWNER_CLOSED }
+internal data class ImportPickerAdmission(val disposition: ImportPickerDisposition, val requestCode: Int? = null)
 internal enum class StoreOwnerPhase { ACTIVE, RETIRING, RETIRED }
 internal enum class StoreRetirementRequest { STARTED, ALREADY_RETIRING, RETIRED, INPUT_PENDING, TRANSFER_PENDING, WORK_PENDING, SAVE_REJECTED }
 internal data class StoreRetirementStatus(val phase: StoreOwnerPhase, val pendingWrites: Int,
@@ -44,6 +46,12 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit,
     observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {},
     private val documentBudget: DocumentBudget? = null) {
+    init {
+        // The fixed main wake route requires this owner before allocating a worker or ledger.
+        check(Looper.myLooper() == Looper.getMainLooper()) { "Android Store requires the main owner thread" }
+        require(exportPickerByteLimit >= 0) { "Export picker byte limit must be nonnegative" }
+        require(catalogResultByteLimit >= 0) { "Catalog result byte limit must be nonnegative" }
+    }
     private val io = PreviewFileIO(directory, context.applicationContext.contentResolver, beforeOpenRead, observeWriteBoundary)
     private val main = Handler(Looper.getMainLooper())
     private val wakePending = AtomicBoolean()
@@ -81,7 +89,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         if (ownerRetiring) return StoreRetirementRequest.ALREADY_RETIRING
         if (editors.isNotEmpty()) return StoreRetirementRequest.WORK_PENDING
         if (activeNotebook?.let { it.hasActiveStroke || it.hasPendingStroke } == true) return StoreRetirementRequest.INPUT_PENDING
-        if (pendingExport != null) return StoreRetirementRequest.TRANSFER_PENDING
+        if (pendingExport != null || pendingImport != null) return StoreRetirementRequest.TRANSFER_PENDING
         if (requestsInFlight != 0 || executor.status().entries.any {
             it.stage == OwnedWorkStage.DELIVERING || it.stage == OwnedWorkStage.DELIVERY_BLOCKED
         }) return StoreRetirementRequest.WORK_PENDING
@@ -253,8 +261,26 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     // One app-owner capture while the external picker runs. No timeout/Activity destruction release.
     internal val exportPickerSession = UUID.randomUUID().toString()
+    internal val importPickerSession: String get() = exportPickerSession
+    // Shared non-reusing sequence: late import results cannot collide with later exports.
     private var nextExportRequestCode = 1000
     private var pendingExport: Pair<Int, PagedPreviewSnapshot>? = null
+    private var pendingImport: Int? = null
+    internal fun beginImportPicker(): ImportPickerAdmission {
+        executor.checkOwnerThread()
+        if (ownerRetiring) return ImportPickerAdmission(ImportPickerDisposition.OWNER_CLOSED)
+        if (pendingImport != null || pendingExport != null) return ImportPickerAdmission(ImportPickerDisposition.BUSY)
+        if (nextExportRequestCode > 65535) return ImportPickerAdmission(ImportPickerDisposition.IDENTITY_EXHAUSTED)
+        val code = nextExportRequestCode++
+        pendingImport = code
+        return ImportPickerAdmission(ImportPickerDisposition.READY, code)
+    }
+    internal fun takeImportPicker(requestCode: Int): Boolean {
+        executor.checkOwnerThread()
+        if (pendingImport != requestCode) return false
+        pendingImport = null
+        return true
+    }
     internal val exportReservedByteCharge: Long get() {
         executor.checkOwnerThread(); return pendingExport?.second?.retainedByteCharge ?: 0L
     }
@@ -262,7 +288,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         executor.checkOwnerThread()
         if (ownerRetiring) return ExportPickerAdmission(ExportPickerDisposition.OWNER_CLOSED)
         if (snapshot.pending != null) return ExportPickerAdmission(ExportPickerDisposition.PENDING_RECOVERY)
-        if (pendingExport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
+        if (pendingExport != null || pendingImport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
         if (snapshot.retainedByteCharge > exportPickerByteLimit) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
         if (nextExportRequestCode > 65535) return ExportPickerAdmission(ExportPickerDisposition.IDENTITY_EXHAUSTED)
         val code = nextExportRequestCode++
@@ -275,7 +301,6 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         val capture = pendingExport?.takeIf { it.first == requestCode } ?: return null
         pendingExport = null; return capture.second
     }
-    init { executor.checkOwnerThread(); require(exportPickerByteLimit >= 0 && catalogResultByteLimit >= 0) }
     private fun requestPump() {
         if (!wakePending.compareAndSet(false, true)) return
         if (!main.post {
@@ -530,8 +555,13 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     fun importCopy(uri: Uri, callback: (OpenedDocument?, String?) -> Unit) {
         request(uri to io, READ_WORK_BYTES, { input -> input.second.importCopy(input.first) },
             { callback(null, "后台队列繁忙，请重新导入") }) { result ->
-            callback((result as? WorkResult.Succeeded)?.value?.let { OpenedDocument(it, true) },
-                if (result is WorkResult.Succeeded) null else "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖")
+            when (result) {
+                is WorkResult.Succeeded -> when (val imported = result.value) {
+                    is LocalImportResult.Imported -> callback(OpenedDocument(imported.root, true), null)
+                    is LocalImportResult.Refused -> callback(null, imported.reason.message)
+                }
+                else -> callback(null, "导入结果暂无法确认，请先查看列表；已有笔记未覆盖")
+            }
         }
     }
     private fun deliverCatalog(disk: List<NoteSummary>, failure: String?, callback: (List<NoteSummary>, String?) -> Unit) {
@@ -603,8 +633,11 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         private const val STORAGE_WORK_BYTES = 256L * 1024 * 1024
         private val READ_WORK_BYTES = PagedPreviewCodec.maximumDecodingWorkByteCharge() // Declared parsing/UTF/buffer reservation, not measured heap.
         @Volatile private var instance: NoteStore? = null
-        fun get(context: Context): NoteStore = instance ?: synchronized(this) {
-            instance ?: NoteStore(context.applicationContext).also { instance = it }
+        fun get(context: Context): NoteStore {
+            check(Looper.myLooper() == Looper.getMainLooper()) { "Android Store requires the main owner thread" }
+            return instance ?: synchronized(this) {
+                instance ?: NoteStore(context.applicationContext).also { instance = it }
+            }
         }
         internal fun isolated(context: Context, directory: File, beforeInkCompute: () -> Unit = {},
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},

@@ -45,6 +45,9 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     init {
         ownerCheck()
         require(initial.title.hasValidUnicode()) { "Invalid Unicode title" }
+        require(initial.id.value.hasValidUnicode()) { "Invalid Unicode document identity" }
+        require(initial.pages().all { it.id.value.hasValidUnicode() && it.layerId.value.hasValidUnicode() }) { "Invalid Unicode page identity" }
+        initial.scene.forEachObject { require(validObjectIdentity(it)) { "Invalid Unicode object identity" } }
         require(initialCapacityFailure(initial, budget) == null)
         // Do not build dense editing identity collections until owner and capacity admission pass.
         // Keep only the original tombstones/epochs, populated without temporary all-scene lists.
@@ -133,9 +136,41 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     }
     private fun reject(reason: DocumentRejection, scene: Rejection? = null) = DocumentCommit.Rejected(reason, scene)
 
+    private fun validObjectIdentity(obj: StrokeObject): Boolean =
+        obj.id.value.hasValidUnicode() && obj.layerId.value.hasValidUnicode()
+
+    /** Match codec scalar validity without normalizing IDs or publishing an unencodable root.
+     * Raw immutable values remain constructible for negative fixtures and other canonical consumers.
+     */
+    private fun validCommandIdentity(command: DocumentCommand): Boolean {
+        if (!command.id.value.hasValidUnicode() || !command.documentId.value.hasValidUnicode()) return false
+        return when (command) {
+            is DocumentCommand.Rename -> true
+            is DocumentCommand.Undo -> command.expectedOperationId.value.hasValidUnicode()
+            is DocumentCommand.Redo -> command.expectedOperationId.value.hasValidUnicode()
+            is DocumentCommand.InsertPage -> command.page.id.value.hasValidUnicode() && command.page.layerId.value.hasValidUnicode() &&
+                command.before?.value?.hasValidUnicode() != false
+            is DocumentCommand.MovePage -> command.pageId.value.hasValidUnicode() && command.before?.value?.hasValidUnicode() != false
+            is DocumentCommand.DeletePage -> command.pageId.value.hasValidUnicode()
+            is DocumentCommand.SetPaper -> command.pageId.value.hasValidUnicode()
+            is DocumentCommand.CopyPage -> command.source.value.hasValidUnicode() && command.newPageId.value.hasValidUnicode() &&
+                command.newLayerId.value.hasValidUnicode() && command.before?.value?.hasValidUnicode() != false &&
+                command.bindings().all { (before, after) -> before.value.hasValidUnicode() && after.value.hasValidUnicode() }
+            is DocumentCommand.Canvas -> command.pageId.value.hasValidUnicode() && when (val action = command.command) {
+                is CanvasCommand.AddStroke -> action.objectId.value.hasValidUnicode() && action.target.layerId.value.hasValidUnicode()
+                is CanvasCommand.DeleteStroke -> action.objectId.value.hasValidUnicode()
+                is CanvasCommand.TransformStroke -> action.objectId.value.hasValidUnicode()
+            }
+            is DocumentCommand.PreparedCanvas -> command.pageId.value.hasValidUnicode() && command.patch.changes().all {
+                it.before?.let(::validObjectIdentity) != false && it.after?.let(::validObjectIdentity) != false
+            }
+        }
+    }
+
     fun commit(command: DocumentCommand): DocumentCommit {
         ownerCheck()
         if (editingRetired) return reject(DocumentRejection.CLOSED)
+        if (!validCommandIdentity(command)) return reject(DocumentRejection.INVALID_IDENTITY)
         val old = state; val root = old.root
         old.journal[command.id]?.let { return if (it.command == command) DocumentCommit.Accepted(it.receipt) else reject(DocumentRejection.REUSED_OPERATION_ID) }
         if (command is DocumentCommand.Rename && (command.title.length > 120 || !command.title.hasValidUnicode())) return reject(DocumentRejection.INVALID_TITLE)

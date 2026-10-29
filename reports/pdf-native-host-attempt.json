@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "requirement": "PDF-03",
+  "status": "failed_environment",
+  "decision": "Do not use current Robolectric SDK35 PdfRenderer path as native PDF geometry acceptance",
+  "scope": "Explicit opt-in native host probe fails at PdfRenderer construction before rendering; no background/overlay pixel result",
+  "probe": {
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "exception": "java.lang.NoSuchMethodError: 'long java.io.FileDescriptor.getOwnerId$()'",
+    "phase": "PdfProcessor.create -> ParcelFileDescriptor.detachFd -> IoUtils.acquireRawFd",
+    "pixel_verification_reached": false,
+    "source_hash_check_in_test_reached": false
+  },
+  "external_source_sha_after": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+  "source_matches_pre_probe_generation": true,
+  "fixture_manifest_forward_slash_check": "passed",
+  "default_android_host_regression": {
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_build_verified": true,
+  "android_lint_errors": 0,
+  "android_lint_warnings": 8,
+  "common_jvm_tests_reused": 546,
+  "source_and_artifact_sha256": {
+    "tools/probes/pdf-native/PdfGeometryNativeTest.kt": "ee375d5d0f2e1e5381ddc6762bdc1c159f652784cebc05203f7fe960ffceb9d0",
+    "tools/generate_pdf_fixtures.py": "1ade2aa68e3360f6218b1d8b5fda7ecefc12f7a06ab357783048f852756d7287",
+    "android-app/build.gradle.kts": "80287e27a89ea4e748c7aa850ab8fbba92cee48abdccd3abccf2bcf5ebfc5c88",
+    "fixtures/pdf/recipe.json": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8",
+    "output/pdf/crop-rotations.pdf": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+    "output/pdf/manifest.json": "e6636ff4c743651ef98a421c000b7f014ec484d086df3571981021d5cd10ad97",
+    "build/pdf-native-attempt/TEST-dev.notecore.app.PdfGeometryNativeTest.xml": "7ab3eba1b56b894566aa6f7b5ec090fa38303cef71cc67e935aabffe34e10567",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.BoundedPreviewReadTest.xml": "3d3975a911973448bb73a301444926669cf101927455fecb84ec406a2969587d",
+    "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.NativeBrushRendererTest.xml": "d4841748f7225b4b8c526aeaeba37ec99ad577fba5f23ba0aaa038ca905840eb",
+    "reports/verification.json": "013df48930d7f5f847e3f3c19e5931e36f66cb4e3b0abb9d2da9002304ac662e",
+    "reports/android-build-inputs.sha256": "80a5798ff3fa7ebc17bafc9363ef22160abaff1ffd48bc5bf2106dd616dfc2e5",
+    "android-app/build/reports/lint-results-debug.xml": "56907741208c95504f946865bae33b773af34c497cec5fd44f67e4378a8aef4b",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "2c2b4e3da1fefc3601fab0ebf156728bdaf2aa6717890e241fd2edf4da33e403"
+  },
+  "android_art_verified": false,
+  "apple_runtime_verified": false,
+  "app_integrated": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "actual ART/Apple same-source renderer/shared mapping adapter and pixels",
+    "UserUnit non-1/inheritance/effective boxes and actual PDF sources",
+    "production objects/resource transactions and original prerequisites"
+  ]
+}
