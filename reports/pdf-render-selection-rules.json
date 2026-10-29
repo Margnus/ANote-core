@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "requirement": "PDF-02",
+  "status": "passed",
+  "scope": "Internal current/adjacent PDF task selection and stale-plan validation on JVM with synthetic metadata; no renderer, queue, cancellation or App acceptance",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "source_and_artifact_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfRenderSelectionRules.kt": "0da5ad0e02467ca2fb5d36b55c72e31ff67046cffe330326f19b3f1a03c4fb94",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfPageCatalogRules.kt": "147c8142506d2d27dc3c14fdcc2af82fa435b0379fb109018a6138af7bdd4857",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "b38f7c72fa031a723fd94a1417966c52f1f12d43d6a4f7649bcb7839be054afc",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PdfRenderSelectionRulesTest.kt": "cce179d333784dd1c71a1e78cb30d149b755c70d19880cbd40a01e32a9eb67b5",
+    "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfRenderSelectionRulesTest.xml": "20b6977e0da16b7baf16704558927a21a8ee379c3dbcd345181c55e409dd96a8",
+    "reports/verification.json": "bea445b58be6ae1ecbf19d27333321794a52b7b7313a004ff179dce91542991f"
+  },
+  "scenarios": [
+    "pageSwitchReorderAndEitherRevisionChangeInvalidateOldPlan[jvm]",
+    "firstLastAndReducedBudgetsNeverFetchBeyondAdjacency[jvm]",
+    "malformedCatalogMissingPageAndInvalidLimitsNeverReturnTasks[jvm]",
+    "currentComesFirstAndOnlyTwoImmediateNeighborsAreSelected[jvm]",
+    "modifiedTaskPayloadAndForeignPlanCannotPassRevalidation[jvm]",
+    "blankPagesAreSkippedWithoutSearchingFartherAndDuplicateSourcePagesStayDistinct[jvm]"
+  ],
+  "sample_origin": "synthetic-metadata",
+  "app_integrated": false,
+  "render_dispatch_verified": false,
+  "cancellation_verified": false,
+  "android_runtime_verified": false,
+  "apple_runtime_verified": false,
+  "production_storage_verified": false,
+  "requirement_accepted": false,
+  "remaining": [
+    "renderer port and original queue integration with current-first budget admission",
+    "real cancel/retirement/publication token/native reader responsibility",
+    "Android and Apple current-page and neighbor behavior without blocking handwriting",
+    "device performance and original PDF-01/M-1/C1 prerequisites"
+  ]
+}
