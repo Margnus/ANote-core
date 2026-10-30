@@ -75,3 +75,17 @@ data class DocumentAuthorityStatus(val liveByteCharge: Long, val journalByteChar
                                    val undoCount: Int, val redoCount: Int, val historyByteCharge: Long,
                                    val nextUndoOperationId: CommandId?, val nextRedoOperationId: CommandId?,
                                    val evictedHistoryCount: Long)
+
+/** Model-only candidate. Selection is copied before transport; no preview UI entry point. */
+internal class OrderObjects(override val id: CommandId, override val documentId: SceneId,
+    override val baseRevision: Long, val pageId: PageId, selected: List<ObjectId>,
+    val direction: ObjectOrderDirection) : DocumentCommand {
+    private val selection = selected.also { require(it.size <= 100_000) }.toList()
+    internal fun selectedIds(): List<ObjectId> = selection.toList()
+    internal val selectionCharge: Long get() = selection.sumOf { 48L + it.value.length * 2L }
+    internal fun validIds(): Boolean = pageId.value.hasValidUnicode() && selection.all { it.value.hasValidUnicode() }
+    override fun equals(other: Any?): Boolean = other is OrderObjects && id == other.id &&
+        documentId == other.documentId && baseRevision == other.baseRevision && pageId == other.pageId &&
+        selection == other.selection && direction == other.direction
+    override fun hashCode(): Int = listOf(id, documentId, baseRevision, pageId, selection, direction).hashCode()
+}

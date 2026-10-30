@@ -4,7 +4,7 @@ import dev.notecore.canvas.prototype.*
 
 /** Authority-owned sparse delta; no root/scene map is retained by a history entry. */
 internal class DocumentDelta(operationId: CommandId, before: DocumentRoot, after: DocumentRoot,
-                             changes: List<ObjectChange>, affected: Set<PageId>) {
+                             changes: List<ObjectChange>, affected: Set<PageId>, val objectOrder: PageObjectOrder? = null) {
     val operationId = operationId
     val objects = changes.toList()
     private val membershipIds = changes.filter { it.before == null || it.after == null }.map { (it.before ?: it.after!!).id }.toSet()
@@ -18,7 +18,7 @@ internal class DocumentDelta(operationId: CommandId, before: DocumentRoot, after
     val beforeTitle = before.title
     val afterTitle = after.title
     // Conservative logical accounting: each side is charged even when immutable samples are shared.
-    val charge: Long = chargeFor(beforeTitle, afterTitle, beforeOrder, afterOrder, this.affected, pages, objectChangesCharge(objects))
+    val charge: Long = chargeFor(beforeTitle, afterTitle, beforeOrder, afterOrder, this.affected, pages, objectChangesCharge(objects)) + (objectOrder?.charge ?: 0L)
 
     companion object {
         /** Same accounting as the accepted delta, before a new canonical scene/root is allocated. */
@@ -66,3 +66,37 @@ internal fun sameObjectContent(left: StrokeObject?, right: StrokeObject?): Boole
     if (left == null || right == null) left == right else left.id == right.id && left.layerId == right.layerId &&
         left.brush == right.brush && left.transform == right.transform &&
         (left.samples === right.samples || left.samples == right.samples)
+
+/** Only the changed page's identity order is retained, never a root or object payload. */
+internal class PageObjectOrder(val pageId: PageId, before: List<ObjectId>, after: List<ObjectId>) {
+    private val left = before.toList()
+    private val right = after.toList()
+    val charge: Long get() = 128L + pageId.value.length * 2L +
+        left.sumOf { 48L + it.value.length * 2L } + right.sumOf { 48L + it.value.length * 2L }
+    fun matches(root: DocumentRoot, undo: Boolean): Boolean {
+        val page = root.findPage(pageId) ?: return false
+        val expected = if (undo) right else left
+        var index = 0
+        var matches = true
+        root.scene.forEachObject { if (it.layerId == page.layerId) {
+            if (index >= expected.size || expected[index] != it.id) matches = false
+            index++
+        } }
+        return matches && index == expected.size
+    }
+    fun apply(scene: SceneSnapshot, layer: LayerId, undo: Boolean): SceneSnapshot {
+        val target = if (undo) left else right
+        var index = 0
+        val order = scene.objects().map { if (it.layerId == layer) target[index++] else it.id }
+        check(index == target.size)
+        return SceneSnapshot.reordered(scene, order)
+    }
+    companion object {
+        /** Both sides have the same membership; admission needs no full-scene identity array. */
+        fun projectedCharge(root: DocumentRoot, page: PageDescriptor): Long {
+            var bytes = 128L + page.id.value.length * 2L
+            root.scene.forEachObject { if (it.layerId == page.layerId) bytes += 2L * (48L + it.id.value.length * 2L) }
+            return bytes
+        }
+    }
+}
