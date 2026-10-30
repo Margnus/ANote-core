@@ -76,8 +76,10 @@ class SketchInstrumentation : Instrumentation() {
                 original.notebook.cancelStroke()
                 // Inject a host resource and tool set into a separate session; no authority or App object shared.
                 var draws = 0
+                var backgroundSize = Pair(0f, 0f)
                 val provided = mutableListOf(SketchTool("injected", 0xff125634.toInt(), 3.0))
-                val other = SketchSession(provided, PageBackground { canvas, _, _ ->
+                val other = SketchSession(provided, PageBackground { canvas, width, height ->
+                    backgroundSize = Pair(width, height)
                     draws++; canvas.drawColor(0xfffedcba.toInt())
                     canvas.translate(1000f, 0f); canvas.clipRect(0f, 0f, 1f, 1f)
                 })
@@ -95,6 +97,30 @@ class SketchInstrumentation : Instrumentation() {
                     injected.layout(0, 0, 595, 842); injected.draw(Canvas(pageBitmap))
                     check(pageBitmap.getPixel(10, 10) == 0xfffedcba.toInt())
                     check(pageBitmap.getPixel(100, 100) == 0xff125634.toInt()) { "Background transform/clip leaked into canonical ink" }
+                    val firstPage = other.notebook.currentPageId.value
+                    check(other.edit(PreviewEdit.InsertPage))
+                    val emptyPage = other.notebook.currentPageId.value
+                    val pageRoot = other.notebook.snapshot()
+                    injected.draw(Canvas(pageBitmap))
+                    check(pageBitmap.getPixel(100, 100) == 0xfffedcba.toInt())
+                    check(other.edit(PreviewEdit.SelectPage(firstPage)))
+                    check(other.notebook.snapshot() === pageRoot)
+                    injected.draw(Canvas(pageBitmap))
+                    check(pageBitmap.getPixel(100, 100) == 0xff125634.toInt()) { "Selected page reused another page's cached paths at the same root revision" }
+                    check(other.edit(PreviewEdit.SelectPage(emptyPage)))
+                    check(other.notebook.snapshot() === pageRoot)
+                    injected.draw(Canvas(pageBitmap))
+                    check(pageBitmap.getPixel(100, 100) == 0xfffedcba.toInt())
+                    result.putString("page_cache_identity", "passed: same immutable root selects ink/empty pages without cross-page stale paths")
+                    check(other.edit(PreviewEdit.SetPaper(300.0, 600.0, PaperKind.BLANK)))
+                    check(other.notebook.beginStroke(100.0, 100.0, 1f, 3))
+                    check(other.notebook.endStroke(100.0, 100.0, 1f, 4))
+                    injected.draw(Canvas(pageBitmap))
+                    check(backgroundSize == Pair(300f, 600f)) { "Background did not receive the selected page dimensions" }
+                    val resizedScale = minOf(595f / 300f, 842f / 600f)
+                    val resizedCenter = (100f * resizedScale).toInt()
+                    check(pageBitmap.getPixel(resizedCenter, resizedCenter) == 0xff125634.toInt()) { "Page size was ignored by the canonical ink transform" }
+                    result.putString("page_geometry", "passed: 300x600 background bounds and canonical dot use current page scale")
                 } finally { pageBitmap.recycle() }
                 result.putString("background_canvas_isolation", "passed: injected translate/clip preserves canonical dot and background pixels")
                 result.putString("input_policy_resources", "passed: historical batch 4 real points; injected red tool; readonly root identity; undo/redo; active-prefix guard; resource pixels and copied tool list")

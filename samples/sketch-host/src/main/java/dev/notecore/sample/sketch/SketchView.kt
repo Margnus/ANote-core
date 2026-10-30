@@ -23,12 +23,13 @@ class SketchView(context: Context, private val session: SketchSession, private v
     private var startX = 0f
     private var startY = 0f
     private var moved = false
-    private val scale get() = min(width / 595f, height / 842f)
+    private val scale get() = min(width / note.currentPage.width.toFloat(), height / note.currentPage.height.toFloat())
     private data class RenderStroke(val path: Path, val matrix: Matrix, val argb: Int, val width: Float, val x: Float, val y: Float, val dot: Boolean)
     private val paths = mutableListOf<RenderStroke>()
     private var cachedRevision = -1L
+    private var cachedPageId: String? = null
     private fun refreshPaths() {
-        if (cachedRevision == note.changeVersion) return
+        if (cachedRevision == note.changeVersion && cachedPageId == note.currentPageId.value) return
         paths.clear()
         for (i in 0 until note.strokeCount) {
             val stroke = note.stroke(i); val samples = stroke.samples
@@ -45,15 +46,16 @@ class SketchView(context: Context, private val session: SketchSession, private v
             paths += RenderStroke(path, matrix, stroke.brush.argb, stroke.brush.width.toFloat(), x, y, dot)
         }
         cachedRevision = note.changeVersion
+        cachedPageId = note.currentPageId.value
     }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (scale <= 0) return
         val pageState = canvas.save()
         try {
-            canvas.scale(scale, scale); canvas.clipRect(0f, 0f, 595f, 842f)
+            canvas.scale(scale, scale); canvas.clipRect(0f, 0f, note.currentPage.width.toFloat(), note.currentPage.height.toFloat())
             val backgroundState = canvas.save()
-            try { session.background.draw(canvas, 595f, 842f) }
+            try { session.background.draw(canvas, note.currentPage.width.toFloat(), note.currentPage.height.toFloat()) }
             finally { canvas.restoreToCount(backgroundState) }
             refreshPaths()
             for (stroke in paths) {
