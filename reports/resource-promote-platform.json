@@ -1,0 +1,332 @@
+{
+  "schema": "resource-promote-platform-1",
+  "status": "completed_with_android_rejection",
+  "date": "2026-10-29",
+  "scope": "resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514",
+  "environment": {
+    "android_api": 36,
+    "android_avd": "NoteCorePreview",
+    "apple_runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+    "apple_device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0"
+  },
+  "platforms": {
+    "android": {
+      "standalone": {
+        "cases": {
+          "mode": "cases",
+          "pid": 15350,
+          "selinux_context": "u:r:runas_app:s0:c214,c256,c512,c768",
+          "status": "access_denied",
+          "error": "java.nio.file.AccessDeniedException: /data/user/0/dev.notecore.preview/cache/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/fresh.resource -> /data/user/0/dev.notecore.preview/cache/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/fresh.stage",
+          "stage": {
+            "bytes": 65539,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+            "inode": 369449,
+            "device": 65077
+          },
+          "target_exists": false
+        }
+      },
+      "actual_app_domain": {
+        "mode": "cases",
+        "pid": 15432,
+        "selinux_context": "u:r:untrusted_app:s0:c219,c256,c512,c768",
+        "status": "access_denied",
+        "error": "java.nio.file.AccessDeniedException: /data/user/0/dev.notecore.probes.resourcepromote.p2e53756a6fe049258de05be2fed47514/cache/resource-promote-e8169460-ac48-4406-b15f-2949cff2a513/fresh.resource -> /data/user/0/dev.notecore.probes.resourcepromote.p2e53756a6fe049258de05be2fed47514/cache/resource-promote-e8169460-ac48-4406-b15f-2949cff2a513/fresh.stage",
+        "stage": {
+          "bytes": 65539,
+          "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+          "inode": 369459,
+          "device": 65077
+        },
+        "target_exists": false
+      },
+      "decision": "Reject hard-link candidate in tested API36 App cache: fresh link denied; collision/crash scenarios not reachable."
+    },
+    "apple": {
+      "cases": {
+        "corrupt": {
+          "error": {
+            "code": 516,
+            "description": "“corrupt.stage” couldn’t be linked to “resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514” because an item with the same name already exists.",
+            "domain": "NSCocoaErrorDomain",
+            "underlying_code": 17,
+            "underlying_domain": "NSPOSIXErrorDomain"
+          },
+          "stage": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947505,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          },
+          "target": {
+            "bytes": 3,
+            "device": 16777234,
+            "inode": 21947506,
+            "sha256": "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81"
+          }
+        },
+        "fresh": {
+          "stage": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947499,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          },
+          "target": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947499,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          }
+        },
+        "identical": {
+          "error": {
+            "code": 516,
+            "description": "“identical.stage” couldn’t be linked to “resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514” because an item with the same name already exists.",
+            "domain": "NSCocoaErrorDomain",
+            "underlying_code": 17,
+            "underlying_domain": "NSPOSIXErrorDomain"
+          },
+          "stage": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947503,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          },
+          "target": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947504,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          }
+        },
+        "mode": "cases",
+        "pid": 18773,
+        "stage_unlink_keeps_target": true,
+        "status": "passed"
+      },
+      "crash": {
+        "linked_before_stage_cleanup": {
+          "stage": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947509,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          },
+          "target": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947509,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          }
+        },
+        "mode": "crash",
+        "pid": 18784,
+        "status": "kill_boundary"
+      },
+      "recover": {
+        "after_process_death": {
+          "stage": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947509,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          },
+          "target": {
+            "bytes": 65539,
+            "device": 16777234,
+            "inode": 21947509,
+            "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+          }
+        },
+        "mode": "recover",
+        "pid": 18794,
+        "status": "passed"
+      }
+    }
+  },
+  "synthetic_payload": {
+    "bytes": 65539,
+    "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32"
+  },
+  "preservation": {
+    "android_original_files": 66,
+    "apple_original_files": 16,
+    "all_original_hashes_and_installed_payloads_unchanged": true,
+    "ordinary_processes_unchanged": true
+  },
+  "decision": "Reject hard-link promotion on tested Android API36 real App and run-as cache domains. Adopt only the tested Apple simulator same-volume no-clobber candidate; a common production port is unresolved.",
+  "limitations": [
+    "No production resource port, database transaction, reader pin, cancellation/GC or import integration.",
+    "Synchronized stage and SIGKILL recovery are not directory synchronization, power-loss or physical storage durability evidence.",
+    "Cache-only same-volume files; no cross-volume, cloud/provider, arbitrary filesystem, API26/32 or physical iPad/manufacturer matrix.",
+    "Synthetic opaque bytes do not validate PDF/image/font parsing; C1/M-1/DEV-041 gates unchanged."
+  ],
+  "sdk_sha256": {
+    "android_jar": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+    "apple_darwin_header": "1546ce7485287bec0d15a643ef5d5f882d21272f2f089fed71c36457e609b92a"
+  },
+  "c1_gate_complete": false,
+  "whole_requirement_accepted": false,
+  "retained_initial_failures": [
+    "Swift probe used isEmpty() instead of isEmpty; compile failed before any link operation.",
+    "Initial standalone Android fresh link raised AccessDeniedException; actual App domain was then independently checked without relaxing policy."
+  ],
+  "source_and_retained_evidence_sha256": {
+    "tools/verify_resource_promote_platform.py": "67c7aa2b9985949a259bbaec49714a4587bb217187fdfc81ac83670139dcaf9a",
+    "tools/probes/ResourcePromoteProbe.java": "e0f627b9966c4b1816fa7cb08f7d93bbd7b8a6df31f7855b62fa4fb8ac2d813a",
+    "tools/probes/ResourcePromoteProbe.swift": "9563d847fa11e0fa53e6eb73fbd385e5432a3d11f7ffe0a4e8f0d9894eb5492c",
+    "tools/probes/ResourcePromoteInstrumentation.java": "31f22536c9fced6a1b93ead01ee72efcc0e5859ab4f81777725e24da95ee4fba",
+    "tools/probes/resource-promote-AndroidManifest.xml": "edff1145601a585ad679fde9f6b8daaa2cd3c97fbc782ba5692849a0427745d4",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before.json": "8fe435483414c3ebeae026010ff8d89c474305ee7944a8efca3224e770c837c8",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/javac.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/readonly-dex.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-android-package.stdout.log": "265e166137dd6bb254ab941b2fd36eefe4e41bedde9d52bffe3cc294ae6ecb23",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/android-cases.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-android-notes.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-sdk.stdout.log": "fc0e1f390e49274ccc3b9484c8af9047f9e78868439ada0261b8fcda80a25990",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-devices.stdout.log": "33a27f3ea78b6ff3b95aff4e49169d3f0843562b876ca5fc7e2fc225a81fd479",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/install-disposable-probe.stderr.log": "0b43830fe6c70c0556e5d0510aae3e171dc955d86b450f13bedec332ce1af30c",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/copy-probe.jar.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/avd.stdout.log": "c94a04237cbd5ac338e8735f1b67e628d324851953f0837388e1b3ee1b7d7d44",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-app.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/android-app-domain.stdout.log": "f36e514d9d958ab6f55d187ca82514804bd0610a197e38c2799db69e430208ea",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-android-package.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/probe-package-removed.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/copy-scope.txt.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/swiftc.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/stage-mkdir.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/cache-mkdir.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-apple-jobs.stdout.log": "f25d13c2e46740003c7944ec3cf80cc35c2f3bbe4895cb7ac2c9d027fd4bdd7f",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/d8.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-android-pid.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/sign-probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/push-probe.jar.stderr.log": "9f4908f48bf104f4a888411aa375e18ec1b3d0f416a2112c64d54bb433c296a5",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/probe-key.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-recover.stdout.log": "f6d3932f5938c0003c49b09b031d35ff19b779c44daa11da370a10c76c183069",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-cases.stdout.log": "b707be2d265a51a9e4854f988491cf6f9ccb27b582b196fa9096b76524db40bf",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/api.stdout.log": "a4b2c5db15348c29451e18b8307e5ef81625ea638e807935f39ceaa8d9ac7758",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-android-notes.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-data.stdout.log": "04c1000dbe90967fabdc77454e336f6118960548c2f1661c739e7e75e0b7256e",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/aapt2.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-crash.stderr.log": "1c6ea21037b0fb3d34051c6db4b6ede935e813692401e6157e9112ae96398538",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-android-pid.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/push-scope.txt.stderr.log": "50d9b5e40faddb957d378cd1cf819d6713cc904944ad0bd98b06cb1a6bc81b35",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/remove-disposable-probe.stdout.log": "7fc0023a6402c7bd7abd98bb3e580968de4833eed07d88d1cc8d70819d69c7a0",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-apple-jobs.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/probe-package-absent.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after.json": "8fe435483414c3ebeae026010ff8d89c474305ee7944a8efca3224e770c837c8",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-app.stdout.log": "5195afc5bfc09f701929f0dc7516f1e952e0a5286bbaefc3c39d315b45b5a849",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/avd.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/android-app-domain.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-android-package.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/android-cases.stdout.log": "bd82da3020009ee7bb321f83518aec7e95d7638250d3951f50be11632fff01a0",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/readonly-dex.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/javac.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/copy-probe.jar.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/install-disposable-probe.stdout.log": "b7f1c1d8869738f95f6f29dbb94b0bcd452dd656f2221a66b448cc8a01432155",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-android-notes.stdout.log": "82be2fdfe1f034f03458750413115c75771cddcbe65b76f4961868279a9b1ad4",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-devices.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-sdk.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/d8.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-apple-jobs.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-android-pid.stdout.log": "e892e084e3956eee21fd52d1daa2a67daf90bd77d80daa32ef395a6f9579c7c0",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/probe-package-removed.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/executables.zip": "edee971373d5c06abe51ce49e9b266233fa842a4d43a7515a830ff7890d839f4",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/before-android-package.stdout.log": "265e166137dd6bb254ab941b2fd36eefe4e41bedde9d52bffe3cc294ae6ecb23",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/cache-mkdir.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/swiftc.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/copy-scope.txt.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/stage-mkdir.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/aapt2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-data.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-crash.stdout.log": "bcb21558a83448170dee22db1494c48cb26ba064cd481ef161e8a35d88390259",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-android-pid.stdout.log": "e892e084e3956eee21fd52d1daa2a67daf90bd77d80daa32ef395a6f9579c7c0",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-recover.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/probe-key.stderr.log": "6a05995814cac26f7e013ce3b2477036eaacb6a83dd9c1bc57710fd41cd780a7",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/sign-probe.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/push-probe.jar.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-android-notes.stdout.log": "82be2fdfe1f034f03458750413115c75771cddcbe65b76f4961868279a9b1ad4",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/api.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/source-at-start.json": "056fb0231df10b1d5b58f8dbfbb6d701eaa0baea5947b0c6dcfa63eb2c867ea6",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/apple-cases.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/probe-package-absent.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/execution.json": "a35ca3bd08662cdcdbd126647531a46f5c2408dc90db6b3ce7d4a437d66e78bb",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/remove-disposable-probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/push-scope.txt.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-2e53756a-6fe0-4925-8de0-5be2fed47514/after-apple-jobs.stdout.log": "053accfa13bf241136cbd4c42e7770473347dcb9fcb0ac679a475d8d339bce03",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before.json": "8fe435483414c3ebeae026010ff8d89c474305ee7944a8efca3224e770c837c8",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/javac.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/readonly-dex.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/android-cases.stderr.log": "45a1126530b79c2f79c9bd1a9feda95b72d11bd455306102a3c212bf593229ef",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-android-notes.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-sdk.stdout.log": "fc0e1f390e49274ccc3b9484c8af9047f9e78868439ada0261b8fcda80a25990",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-devices.stdout.log": "f4f757e0c4c9d6a0d76dc3ec53aa20407264770e3c992be7c38e569ef8a869f6",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/copy-probe.jar.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/avd.stdout.log": "c94a04237cbd5ac338e8735f1b67e628d324851953f0837388e1b3ee1b7d7d44",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-app.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-android-package.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/copy-scope.txt.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/swiftc.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/stage-mkdir.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/cache-mkdir.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-apple-jobs.stdout.log": "5fb2ae8870e8bc9fd27fa5a4bfe7fd0238b99e2777383db468cf750715ba40d0",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/d8.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-android-pid.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/push-probe.jar.stderr.log": "a14bd181544acc6ce086bfbc2fbfc19404371a4b97b7f7b3769e8e59e00ce168",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/api.stdout.log": "a4b2c5db15348c29451e18b8307e5ef81625ea638e807935f39ceaa8d9ac7758",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-data.stdout.log": "04c1000dbe90967fabdc77454e336f6118960548c2f1661c739e7e75e0b7256e",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/push-scope.txt.stderr.log": "67b472e8fb2f40a2dcab680d67506b59b03fb236f3ff8ac919afb8bc83d2f7cf",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-app.stdout.log": "5195afc5bfc09f701929f0dc7516f1e952e0a5286bbaefc3c39d315b45b5a849",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/avd.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/android-cases.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/readonly-dex.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/javac.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/copy-probe.jar.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-android-notes.stdout.log": "82be2fdfe1f034f03458750413115c75771cddcbe65b76f4961868279a9b1ad4",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-devices.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-sdk.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/d8.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-apple-jobs.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-android-pid.stdout.log": "e892e084e3956eee21fd52d1daa2a67daf90bd77d80daa32ef395a6f9579c7c0",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/before-android-package.stdout.log": "265e166137dd6bb254ab941b2fd36eefe4e41bedde9d52bffe3cc294ae6ecb23",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/cache-mkdir.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/swiftc.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/copy-scope.txt.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/stage-mkdir.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/apple-data.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/push-probe.jar.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/api.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/execution.json": "6abe7b2a8fd3dd7584444ec52871c651135844208414eafa3c414bbf96556acc",
+    "reports/resource-promote-platform-20261029/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/push-scope.txt.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before.json": "8fe435483414c3ebeae026010ff8d89c474305ee7944a8efca3224e770c837c8",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/javac.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-android-notes.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-sdk.stdout.log": "fc0e1f390e49274ccc3b9484c8af9047f9e78868439ada0261b8fcda80a25990",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-devices.stdout.log": "f4f757e0c4c9d6a0d76dc3ec53aa20407264770e3c992be7c38e569ef8a869f6",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/avd.stdout.log": "c94a04237cbd5ac338e8735f1b67e628d324851953f0837388e1b3ee1b7d7d44",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-app.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-android-package.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/swiftc.stderr.log": "2ef020273bc1e12002a94a6e79867a9ade7e045a299866455a73fb3da4b4999e",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-apple-jobs.stdout.log": "bd19c6808c757685de9c512c1d165358aa3835ea6afdf5bd6a07d4f45e7cbc46",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/d8.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-android-pid.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/api.stdout.log": "a4b2c5db15348c29451e18b8307e5ef81625ea638e807935f39ceaa8d9ac7758",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-data.stdout.log": "04c1000dbe90967fabdc77454e336f6118960548c2f1661c739e7e75e0b7256e",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-app.stdout.log": "5195afc5bfc09f701929f0dc7516f1e952e0a5286bbaefc3c39d315b45b5a849",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/avd.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/javac.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-android-notes.stdout.log": "82be2fdfe1f034f03458750413115c75771cddcbe65b76f4961868279a9b1ad4",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-devices.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-sdk.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/d8.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-apple-jobs.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-android-pid.stdout.log": "e892e084e3956eee21fd52d1daa2a67daf90bd77d80daa32ef395a6f9579c7c0",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/before-android-package.stdout.log": "265e166137dd6bb254ab941b2fd36eefe4e41bedde9d52bffe3cc294ae6ecb23",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/swiftc.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/apple-data.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/api.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/resource-promote-platform-20261029/resource-promote-57d39a79-5f1c-4704-b55e-d9f4545baa75/execution.json": "3f1699b420a0bc64fe0b049d7513e4192e08de2463c0b27be86b9059e8294d59"
+  }
+}

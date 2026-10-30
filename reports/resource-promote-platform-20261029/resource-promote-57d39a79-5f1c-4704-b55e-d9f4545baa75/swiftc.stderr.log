@@ -1,0 +1,7 @@
+/Users/lixiaofan/StudioProjects/notecore/tools/probes/ResourcePromoteProbe.swift:67:37: error: cannot call value of non-function type 'Bool'
+65 |                 }
+66 |             }
+67 |             try check(!errorDetails.isEmpty(), "must reject existing target")
+   |                                     `- error: cannot call value of non-function type 'Bool'
+68 |             try check(equal(before, facts(destination)) && equal(sourceBefore, facts(source)), "no mutation")
+69 |             result[name] = ["error": errorDetails, "stage": try facts(source), "target": try facts(destination)]

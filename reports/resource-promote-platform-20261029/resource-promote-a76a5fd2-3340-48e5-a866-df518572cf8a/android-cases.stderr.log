@@ -1,0 +1,6 @@
+java.nio.file.AccessDeniedException: /data/user/0/dev.notecore.preview/cache/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/fresh.resource -> /data/user/0/dev.notecore.preview/cache/resource-promote-a76a5fd2-3340-48e5-a866-df518572cf8a/fresh.stage
+	at sun.nio.fs.UnixFileSystemProvider.createLink(UnixFileSystemProvider.java:496)
+	at java.nio.file.Files.createLink(Files.java:1086)
+	at dev.notecore.probes.ResourcePromoteProbe.main(ResourcePromoteProbe.java:60)
+	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:371)
