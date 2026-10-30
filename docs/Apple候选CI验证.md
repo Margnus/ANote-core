@@ -8,6 +8,6 @@
 
 入口`.github/workflows/apple-candidate.yml`与`ci/verify_apple_candidate.py`，总限时45分钟、单阶段亦有限时。CI记录commit、Xcode/系统/设备、编译输入/框架与测试二进制哈希、Native原始日志和XCTest实际summary/tree；失败也保留阶段和错误。原报告保留其历史绑定，产物仅build/apple-candidate，未写回reports/旧iOS报告。
 
-当前状态：本地静态检查后提交触发真实CI，只有实际完成并检查日志/测试结果后才补结论。若runner或依赖获取不可用，记录具体失败，不声称已获得Apple验证。物理M-1、普通交互/真实触笔/heap和完整C1继续待验；不因增加CI而放行生产SQLite或113条验收。
+实际结果：固定提交c20ad15a60f4fc1173c389f3af6f2d6a776abe62的[运行40993095695](https://github.com/Margnus/ANote-core/actions/runs/40993095695)成功；macOS15.7.9/Xcode16.4 arm64、新建iPad Pro 11-inch M4/iOS18.5 simulator，canvas211/shared306 Native及49项Swift App-host全部通过，XCTest失败/跳过/预期失败均0。下载产物ZIP SHA256 b64b91d089fc54a216ea3e218936e92903805de1c5f3080b5d88218b5dd3b38a与GitHub记录一致；155个编译输入逐一对比固定Git提交，7份日志/结果逐一对比报告哈希一致。[报告与原始日志](../reports/apple-candidate-ci-40993095695/report.json)已留存，避免14天远端产物过期丢失。采用当前Apple编译/原生/App-host子范围，原历史Mac报告不重绑定。物理M-1、普通交互/真实触笔/heap和完整C1继续待验；不因增加CI而放行生产SQLite或113条验收。
 
 Runner依据：[GitHub标准托管runner](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)、[macOS15 arm64镜像清单](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md)。实际运行环境以CI报告为准，不把镜像文档当执行证据。
