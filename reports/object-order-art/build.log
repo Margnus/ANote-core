@@ -1,0 +1,133 @@
+
+> Configure project :canvas-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: Invalid Source Set Dependency Across Trees
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+Solution: Please keep dependsOn edges only from one group and remove the others.
+
+
+> Configure project :shared-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':shared-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: Invalid Source Set Dependency Across Trees
+Kotlin Source Set 'androidInstrumentedTest' can't depend on 'commonTest' as they are from different Source Set Trees.
+Solution: Please remove this dependency edge.
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preDebugBuild UP-TO-DATE
+> Task :canvas-core:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResources UP-TO-DATE
+> Task :canvas-core:packageDebugResources UP-TO-DATE
+> Task :canvas-core:parseDebugLocalResources UP-TO-DATE
+> Task :canvas-core:generateDebugRFile UP-TO-DATE
+> Task :canvas-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preDebugBuild UP-TO-DATE
+> Task :shared-core:generateDebugResValues UP-TO-DATE
+> Task :shared-core:generateDebugResources UP-TO-DATE
+> Task :shared-core:packageDebugResources UP-TO-DATE
+> Task :shared-core:parseDebugLocalResources UP-TO-DATE
+> Task :shared-core:generateDebugRFile UP-TO-DATE
+> Task :shared-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :shared-core:javaPreCompileDebug UP-TO-DATE
+> Task :shared-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :shared-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :canvas-core:compileDebugLibraryResources UP-TO-DATE
+> Task :canvas-core:writeDebugAarMetadata UP-TO-DATE
+> Task :shared-core:preDebugAndroidTestBuild UP-TO-DATE
+> Task :shared-core:writeDebugAarMetadata UP-TO-DATE
+> Task :shared-core:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :shared-core:compileDebugLibraryResources UP-TO-DATE
+> Task :shared-core:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :shared-core:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :shared-core:generateDebugAndroidTestResources UP-TO-DATE
+> Task :shared-core:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :canvas-core:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:processDebugManifest UP-TO-DATE
+> Task :shared-core:extractDeepLinksDebug UP-TO-DATE
+> Task :shared-core:processDebugManifest UP-TO-DATE
+> Task :shared-core:processDebugAndroidTestManifest UP-TO-DATE
+> Task :shared-core:processDebugAndroidTestResources UP-TO-DATE
+> Task :shared-core:compileDebugAndroidTestKotlinAndroid UP-TO-DATE
+> Task :shared-core:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :shared-core:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :canvas-core:mergeDebugShaders UP-TO-DATE
+> Task :canvas-core:compileDebugShaders NO-SOURCE
+> Task :canvas-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :shared-core:compileDebugAndroidTestShaders NO-SOURCE
+> Task :shared-core:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :shared-core:mergeDebugShaders UP-TO-DATE
+> Task :shared-core:compileDebugShaders NO-SOURCE
+> Task :shared-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:generateDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :shared-core:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :shared-core:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :shared-core:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :shared-core:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :canvas-core:processDebugJavaRes UP-TO-DATE
+> Task :shared-core:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :shared-core:processDebugJavaRes UP-TO-DATE
+> Task :shared-core:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :shared-core:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :shared-core:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :shared-core:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :canvas-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugNativeLibs NO-SOURCE
+> Task :canvas-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :shared-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :shared-core:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :shared-core:mergeDebugNativeLibs NO-SOURCE
+> Task :shared-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :shared-core:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :shared-core:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :shared-core:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :shared-core:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :shared-core:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :shared-core:packageDebugAndroidTest UP-TO-DATE
+> Task :shared-core:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :shared-core:assembleDebugAndroidTest UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///D:/work/StudioProjects/ANote-core/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 1s
+66 actionable tasks: 2 executed, 64 up-to-date
