@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.canvas.prototype.SubmissionQueueContractTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-30T14:32:02.925Z" hostname="lixiaofandeMac-mini.local" time="0.013">
+  <properties/>
+  <testcase name="countCapacityLeavesRejectedOutputWithCallerAndKeepsAdmittedStroke[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.001"/>
+  <testcase name="byteCapacityAndOversizedAdmissionNeverEvictExistingPayload[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="duplicateAdmissionDoesNotChargeTwiceButDifferentPayloadCannotReuseId[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="fifoUsesLatestAuthorityBaseAtFirstDispatchAndCapturedLayer[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="inFlightIsChargedAndOnlyOneAttemptCanRun[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="lostAckReplaysExactPatchAndCommitsOnlyOnce[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="failureBeforeCommitCanRetrySamePayloadWithoutLoss[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="definitiveFailureBlocksFifoAndRequiresExplicitRecoveryHandoff[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="staleSceneFailureDoesNotSilentlyRebaseTheProposal[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="sessionCloseAndStopAdmissionDoNotDiscardQueuedOrInFlightStroke[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="confirmedPayloadIsChargedUntilHostCollectsItAndIsNeverCalledDurable[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="wrongReceiptCannotConfirmAndDuplicateCallbackCannotChangeAccounting[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="attemptFromAnotherQueueCannotConfirmMatchingLocalId[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="prepareFailureRetainsPayloadAndWrongDocumentDoesNotPoisonQueue[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="repeatedBackpressureAndAckLossPreserveAllAdmittedObjectsAndBudget[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

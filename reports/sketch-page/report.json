@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "baseline_core": "7f56858987166b4fc8ad0eb3fedd303c724e578e",
+  "environment": {
+    "avd": "NoteCoreCurrent35",
+    "serial": "emulator-5590",
+    "api": 35
+  },
+  "before": "Actual Bitmap fails after same-root page selection: cached empty paths reused on ink page.",
+  "cache_only": "PageId+revision key passes original ink/empty page case.",
+  "before_paper": "Additional existing SetPaper consumer fails: background still receives hardcoded 595x842.",
+  "after": "Same-root ink/empty switching and 300x600 background/ink transformed pixels pass; original history input/readonly/background isolation/resources/Activity recreation pass.",
+  "installed_apk_sha256": {
+    "dev.notecore.sample.sketch": "7c20afdb77d9ae0f06b47f80474a84287d0bd033ab96304dc8f53e9dbaf8805d",
+    "dev.notecore.sample.sketch.test": "a876d61db0cb780cbbc196d7369a32a115c7daf2109c066a93c575d1e0cd7137"
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 4
+  },
+  "original_note_count": 5,
+  "original_notes_byte_identical": true,
+  "scope": "Existing Android memory-only separate host now consumes PageId and current geometry for its original path/background/input scale. New-size bitmap rendering measured; default-size historical input measured. No shared/Swift code change, production App/physical/C1 acceptance.",
+  "source_sha256": {
+    "samples/sketch-host/src/androidTest/java/dev/notecore/sample/sketch/SketchInstrumentation.kt": "572c7c09795492b9f041c0ff89c5bc17662c182bbfdff05bd3ed75892f194d27",
+    "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt": "a85fdd99dce87429b0247d30c07e61f4fd419f0afbe078c8a9c3a0ac2ed32b99"
+  },
+  "evidence_sha256": {
+    "reports/sketch-page/notes-after.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-page/notes-before.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-page/after/build-inputs.sha256": "7daed58f7bcd94aa0cabfdba1d4ac37f285ca654ffe237d680ee7174671f145a",
+    "reports/sketch-page/after/build.log": "3fe11e4d1c26605c1c0bfbcb6b0e2619b4a42bb69a36a67ea1ab6dcd8f49ba3c",
+    "reports/sketch-page/after/lint.xml": "e214305aa6d4fe54c378dba6d5c845c5afeac4c7159d8fea2e24766dc8f6ac40",
+    "reports/sketch-page/after/run.log": "7a6284b852bb077cf38cb7b29b5299ede92de6d5d380e3b64826b79cc13e42a9",
+    "reports/sketch-page/before/build-inputs.sha256": "c07b5861d3a8594cf367a91ecf3edea07c761cdc9c722ca66c42daa0d0bdca86",
+    "reports/sketch-page/before/build.log": "98a0b24e2800203266d9b25fd945f6198ab324eaed3fabdc56e89e2e559a3f55",
+    "reports/sketch-page/before/run.log": "d8015d7ff3d02e0454f45e17104d485f534801216bdae38b596aca07eb0a39ad",
+    "reports/sketch-page/before/SketchInstrumentation.kt": "b662849db03db6087d38477b868ad4d88be2510734379a57796e795664b3d212",
+    "reports/sketch-page/before-paper/build-inputs.sha256": "91523d02bb97db1dca2d3f32fe2d09d6552baec05672aaf282a352deba003ebd",
+    "reports/sketch-page/before-paper/build.log": "49f337475b5a37fd6fe374e9324d6fede8b30ac9b3ceada148dbb49f246d791e",
+    "reports/sketch-page/before-paper/run.log": "51587e0bb9cf0aa1a0ce39de6b115149128438aebb045ad84e2b7facde568342",
+    "reports/sketch-page/before-paper/SketchInstrumentation.kt": "572c7c09795492b9f041c0ff89c5bc17662c182bbfdff05bd3ed75892f194d27",
+    "reports/sketch-page/cache-only/build-inputs.sha256": "40df8157b10ff39fecf125c4b367b10c39ed98f093af59aeffbeed8e116c97e0",
+    "reports/sketch-page/cache-only/build.log": "fae169bc0129333c81143c704cc812c5a3c3653ea6ac6ac89b468336a644e4c1",
+    "reports/sketch-page/cache-only/run.log": "5c6ac9c94eeb5c11a1726a53098990f042f252d1d2ede0f97e6b9d25ddf475ef",
+    "reports/sketch-page/cache-only/SketchInstrumentation.kt": "b662849db03db6087d38477b868ad4d88be2510734379a57796e795664b3d212"
+  }
+}

@@ -26,6 +26,7 @@ EXPECTED = {
     'testCatalogCapacityPreservesCompleteOldRowsAndChargesRetainedOverlay()',
     'testExportResultCapacityRefusalKeepsSourceAndExactChargeUntilConsumerRelease()',
     'testMaximumProducerBatchPreservesAllScalarsAndRejectsOversizeBeforeRecovery()',
+    'testPublicReadingModeBlocksDirectEditsAndKeepsActivePrefix()',
     'testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown()',
     'testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook()',
     'testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen()',
@@ -127,6 +128,9 @@ def main():
     with log.open('w') as output:
         run = subprocess.run(['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
             '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id='+args.device,
+            # The scheme also contains the separate ordinary UI journey. Keep this original
+            # source-bound host verifier confined to its API/file/render tests and EXPECTED set.
+            '-only-testing:NoteCorePreviewTests',
             '-derivedDataPath', str(BUILD), 'CODE_SIGNING_ALLOWED=NO', '-resultBundlePath', str(result),
             '-collect-test-diagnostics', 'never', 'test'],
             cwd=ROOT, stdout=output, stderr=subprocess.STDOUT, timeout=600)

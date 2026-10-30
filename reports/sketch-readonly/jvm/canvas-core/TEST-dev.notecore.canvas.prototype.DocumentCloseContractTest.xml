@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.canvas.prototype.DocumentCloseContractTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-28T11:12:03.580Z" hostname="LIXIAOFAN" time="0.013">
+  <properties/>
+  <testcase name="completedButUnsubmittedInputRequiresTwoPhaseRecoveryAcknowledgment[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.002"/>
+  <testcase name="closeCommitFenceAndHandoffInterleaveWithoutDroppingAnyObligation[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.003"/>
+  <testcase name="acceptedCommitInvalidatesOldContentFrameBeforeHostUpdatesExpectedFrame[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.0"/>
+  <testcase name="authoritySnapshotObservationRejectsStaleSessionWithoutAnyQueuedSubmission[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.001"/>
+  <testcase name="sessionLimitsReserveInputBeforeAdmissionAndRejectForeignTokens[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.001"/>
+  <testcase name="admissionCanRetryCapacityBeforeCloseWithoutChangingCommandIdentity[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.001"/>
+  <testcase name="closingKeepsLateAllocationAndReadersChargedUntilDestructionAcknowledged[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.0"/>
+  <testcase name="capacityRejectedProposalKeepsStableIdsAndFullSamplesAcrossClose[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.001"/>
+  <testcase name="stoppingSessionStillAllowsPendingAdmissionIntoLiveDocument[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.0"/>
+  <testcase name="unallocatedReservationMustBeExplicitlyCancelledBeforeOwnerCanClose[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.0"/>
+  <testcase name="emptyCloseIsTerminalAndRepeatDoesNotReopenAdmissions[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.0"/>
+  <testcase name="ambiguousCommitAtCloseReplaysExactPatchAndRejectsOldAcknowledgment[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.001"/>
+  <testcase name="definitiveRejectionTransfersOnlyAfterReceiverAcknowledges[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.001"/>
+  <testcase name="unfinishedInputReportsCancellationAndLateFrameCannotPublish[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.0"/>
+  <testcase name="unknownDestructionCannotMakeCloseCompleteOrTriggerDoubleFree[jvm]" classname="dev.notecore.canvas.prototype.DocumentCloseContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

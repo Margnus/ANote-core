@@ -2,6 +2,7 @@
 """Compare retained iOS CoreGraphics metadata with independent raw PDF dictionaries."""
 import hashlib
 import json
+import sys
 from pathlib import Path
 from pypdf import PdfReader
 
@@ -19,6 +20,9 @@ def sha(path):
 
 
 def main():
+    if "--evidence" in sys.argv:
+        from verify_apple_pdf_ci import main as verify_ci
+        return verify_ci()
     result = load(CASE/'result.json')
     env = load(CASE/'environment.json')
     manifest = load(ASSETS/'metadata-manifest.json')

@@ -1,0 +1,60 @@
+Downloading https://services.gradle.org/distributions/gradle-8.14-bin.zip
+.............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%..............100%
+
+Welcome to Gradle 8.14!
+
+Here are the highlights of this release:
+ - Java 24 support
+ - GraalVM Native Image toolchain selection
+ - Enhancements to test reporting
+ - Build Authoring improvements
+
+For more details see https://docs.gradle.org/8.14/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :canvas-core
+w: ⚠️ Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[iosArm64Main, iosMain, iosSimulatorArm64Main, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:downloadKotlinNativeDistribution
+Kotlin/Native bundle directory /Users/runner/work/ANote-core/ANote-core/.konan/kotlin-native-prebuilt-macos-aarch64-2.2.21 is not empty. Native bundle files will be overwritten.
+Downloading native dependencies (LLVM, sysroot etc). This is a one-time action performed only on the first run of the compiler.
+Downloading dependency https://download.jetbrains.com/kotlin/native/resources/llvm/19-aarch64-macos/llvm-19-aarch64-macos-essentials-79.tar.gz to /Users/runner/work/ANote-core/ANote-core/.konan/dependencies/cache/llvm-19-aarch64-macos-essentials-79.tar.gz
+Done.
+Extracting dependency: /Users/runner/work/ANote-core/ANote-core/.konan/dependencies/cache/llvm-19-aarch64-macos-essentials-79.tar.gz into /Users/runner/work/ANote-core/ANote-core/.konan/dependencies
+Downloading dependency https://download.jetbrains.com/kotlin/native/libffi-3.3-1-macos-arm64.tar.gz to /Users/runner/work/ANote-core/ANote-core/.konan/dependencies/cache/libffi-3.3-1-macos-arm64.tar.gz
+Done.
+Extracting dependency: /Users/runner/work/ANote-core/ANote-core/.konan/dependencies/cache/libffi-3.3-1-macos-arm64.tar.gz into /Users/runner/work/ANote-core/ANote-core/.konan/dependencies
+
+> Task :canvas-core:compileKotlinIosSimulatorArm64
+> Task :canvas-core:iosSimulatorArm64ProcessResources NO-SOURCE
+> Task :canvas-core:iosSimulatorArm64MainKlibrary
+> Task :canvas-core:compileTestKotlinIosSimulatorArm64
+> Task :canvas-core:linkDebugTestIosSimulatorArm64
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:downloadKotlinNativeDistribution
+> Task :shared-core:compileKotlinIosSimulatorArm64
+> Task :shared-core:iosSimulatorArm64ProcessResources NO-SOURCE
+> Task :shared-core:iosSimulatorArm64MainKlibrary
+> Task :shared-core:compileTestKotlinIosSimulatorArm64
+> Task :shared-core:linkDebugTestIosSimulatorArm64
+> Task :shared-core:linkDebugFrameworkIosSimulatorArm64
+
+[Incubating] Problems report is available at: file:///Users/runner/work/ANote-core/ANote-core/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 3m 40s
+11 actionable tasks: 11 executed

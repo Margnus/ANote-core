@@ -1,0 +1,734 @@
+[==========] Running 306 tests from 39 test cases.
+[----------] Global test environment set-up.
+[----------] 12 tests from dev.notecore.canvas.prototype.PreviewSaveLedgerTest
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.completeLatestSnapshotSupersedesUnsentContentAndCountsOnlyRetainedVersion
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.completeLatestSnapshotSupersedesUnsentContentAndCountsOnlyRetainedVersion (3 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.runningOldWriteKeepsBudgetAndCannotEraseLatestAcceptedVersion
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.runningOldWriteKeepsBudgetAndCannotEraseLatestAcceptedVersion (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.failedWriteRetainsOriginalUntilExplicitOfferRetriesAndDuplicateCompletionCannotFreeIt
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.failedWriteRetainsOriginalUntilExplicitOfferRetriesAndDuplicateCompletionCannotFreeIt (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.unknownOldWriteDoesNotBlockNewerCompleteReplacement
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.unknownOldWriteDoesNotBlockNewerCompleteReplacement (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.byteRejectionIsAtomicAndCallerStillOwnsRejectedSnapshot
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.byteRejectionIsAtomicAndCallerStillOwnsRejectedSnapshot (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.newVersionMayFitWhenUnsentOldVersionIsSupersededButNotWhileBothAreRetained
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.newVersionMayFitWhenUnsentOldVersionIsSupersededButNotWhileBothAreRetained (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.perDocumentSingleFlightAndOtherDocumentsRemainEligible
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.perDocumentSingleFlightAndOtherDocumentsRemainEligible (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.foreignAndLateAttemptsCannotClearReopenedDocumentResponsibility
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.foreignAndLateAttemptsCannotClearReopenedDocumentResponsibility (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.rejectedBackendAdmissionReturnsUnstartedWithoutLosingSnapshotOrBudget
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.rejectedBackendAdmissionReturnsUnstartedWithoutLosingSnapshotOrBudget (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.staleVersionCannotOverwritePendingNewerAndSameVersionRetryKeepsOriginal
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.staleVersionCannotOverwritePendingNewerAndSameVersionRetryKeepsOriginal (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.boundedCatalogHeaderKeepsEscapedUnicodeTitleWithoutDecodingStrokeBody
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.boundedCatalogHeaderKeepsEscapedUnicodeTitleWithoutDecodingStrokeBody (1 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.catalogHeaderRejectsUnsupportedTruncatedInvalidAndOversizedData
+[       OK ] dev.notecore.canvas.prototype.PreviewSaveLedgerTest.catalogHeaderRejectsUnsupportedTruncatedInvalidAndOversizedData (0 ms)
+[----------] 12 tests from dev.notecore.canvas.prototype.PreviewSaveLedgerTest (6 ms total)
+
+[----------] 4 tests from dev.notecore.document.CanonicalIdentityTest
+[ RUN      ] dev.notecore.document.CanonicalIdentityTest.malformedDirectInsertCannotPublishAnUnencodableRoot
+[       OK ] dev.notecore.document.CanonicalIdentityTest.malformedDirectInsertCannotPublishAnUnencodableRoot (4 ms)
+[ RUN      ] dev.notecore.document.CanonicalIdentityTest.everyExternalIdentitySlotRejectsMalformedScalarsBeforeOtherMutation
+[       OK ] dev.notecore.document.CanonicalIdentityTest.everyExternalIdentitySlotRejectsMalformedScalarsBeforeOtherMutation (1 ms)
+[ RUN      ] dev.notecore.document.CanonicalIdentityTest.initialMalformedIdentityCannotBecomeMutableAuthority
+[       OK ] dev.notecore.document.CanonicalIdentityTest.initialMalformedIdentityCannotBecomeMutableAuthority (0 ms)
+[ RUN      ] dev.notecore.document.CanonicalIdentityTest.rejectedIdentityKeepsRedoAndValidSupplementaryIdsRoundTripExactly
+[       OK ] dev.notecore.document.CanonicalIdentityTest.rejectedIdentityKeepsRedoAndValidSupplementaryIdsRoundTripExactly (0 ms)
+[----------] 4 tests from dev.notecore.document.CanonicalIdentityTest (7 ms total)
+
+[----------] 4 tests from dev.notecore.document.CanonicalTitleTest
+[ RUN      ] dev.notecore.document.CanonicalTitleTest.malformedDirectRenameRejectsWithoutPublishingOrConsumingIdentity
+[       OK ] dev.notecore.document.CanonicalTitleTest.malformedDirectRenameRejectsWithoutPublishingOrConsumingIdentity (0 ms)
+[ RUN      ] dev.notecore.document.CanonicalTitleTest.invalidRenameKeepsRedoBranchAndOriginalReceipt
+[       OK ] dev.notecore.document.CanonicalTitleTest.invalidRenameKeepsRedoBranchAndOriginalReceipt (0 ms)
+[ RUN      ] dev.notecore.document.CanonicalTitleTest.invalidInitialTitleCannotBecomeAnAuthority
+[       OK ] dev.notecore.document.CanonicalTitleTest.invalidInitialTitleCannotBecomeAnAuthority (0 ms)
+[ RUN      ] dev.notecore.document.CanonicalTitleTest.validSupplementaryCharactersAtTitleLimitRoundTripUnchanged
+[       OK ] dev.notecore.document.CanonicalTitleTest.validSupplementaryCharactersAtTitleLimitRoundTripUnchanged (0 ms)
+[----------] 4 tests from dev.notecore.document.CanonicalTitleTest (0 ms total)
+
+[----------] 20 tests from dev.notecore.document.DocumentAuthorityTest
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.denseInitialAdmissionPreservesIdentityBudgetAndObjectEpochs
+[       OK ] dev.notecore.document.DocumentAuthorityTest.denseInitialAdmissionPreservesIdentityBudgetAndObjectEpochs (195 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.allocationProbeUsesOriginalTombstonesAndJournalWithoutMutation
+[       OK ] dev.notecore.document.DocumentAuthorityTest.allocationProbeUsesOriginalTombstonesAndJournalWithoutMutation (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.directoryIsDefensivelyOwnedAndRejectsOrphanObjectsOrDuplicateMembership
+[       OK ] dev.notecore.document.DocumentAuthorityTest.directoryIsDefensivelyOwnedAndRejectsOrphanObjectsOrDuplicateMembership (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.metadataAndCanvasShareExactlyOneRootRevisionAndImmutablePriorSnapshots
+[       OK ] dev.notecore.document.DocumentAuthorityTest.metadataAndCanvasShareExactlyOneRootRevisionAndImmutablePriorSnapshots (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.movePreservesPageIdentityContentRevisionAndCanonicalObjectIdentity
+[       OK ] dev.notecore.document.DocumentAuthorityTest.movePreservesPageIdentityContentRevisionAndCanonicalObjectIdentity (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.capturedTargetCannotBeRetargetedByPageOrderAndLateOldBaseIsRejected
+[       OK ] dev.notecore.document.DocumentAuthorityTest.capturedTargetCannotBeRetargetedByPageOrderAndLateOldBaseIsRejected (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.copyAssignsFreshPageLayerAndObjectIdsWhileSharingImmutableSamples
+[       OK ] dev.notecore.document.DocumentAuthorityTest.copyAssignsFreshPageLayerAndObjectIdsWhileSharingImmutableSamples (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.invalidCopyMappingMissingDuplicateAndReusedIdsAreAtomicRejections
+[       OK ] dev.notecore.document.DocumentAuthorityTest.invalidCopyMappingMissingDuplicateAndReusedIdsAreAtomicRejections (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.deleteCascadesDirectoryAndObjectsInOneCommitWithoutOrphans
+[       OK ] dev.notecore.document.DocumentAuthorityTest.deleteCascadesDirectoryAndObjectsInOneCommitWithoutOrphans (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.deletingLastPageKeepsStableIdAndLayerWithBlankBackgroundAndEmptyContent
+[       OK ] dev.notecore.document.DocumentAuthorityTest.deletingLastPageKeepsStableIdAndLayerWithBlankBackgroundAndEmptyContent (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.operationIdChecksFullPayloadBeforeRevisionAndEvenWhenJournalIsFull
+[       OK ] dev.notecore.document.DocumentAuthorityTest.operationIdChecksFullPayloadBeforeRevisionAndEvenWhenJournalIsFull (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.capacitiesRejectBeforePublishingAndKeepCallerInputOwned
+[       OK ] dev.notecore.document.DocumentAuthorityTest.capacitiesRejectBeforePublishingAndKeepCallerInputOwned (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.paperAndTitleUpdateOneSequenceWithoutMutatingSamplesOrOtherPageContent
+[       OK ] dev.notecore.document.DocumentAuthorityTest.paperAndTitleUpdateOneSequenceWithoutMutatingSamplesOrOtherPageContent (1 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.foreignOwnerAndDocumentCannotReadOrMutateAuthority
+[       OK ] dev.notecore.document.DocumentAuthorityTest.foreignOwnerAndDocumentCannotReadOrMutateAuthority (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.rootRevisionExhaustionCannotWrapAndRestoredSnapshotsValidateCanonicalObjects
+[       OK ] dev.notecore.document.DocumentAuthorityTest.rootRevisionExhaustionCannotWrapAndRestoredSnapshotsValidateCanonicalObjects (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.missingAnchorNoOpAndReusedLayerDoNotConsumeRevisionOrJournalBudget
+[       OK ] dev.notecore.document.DocumentAuthorityTest.missingAnchorNoOpAndReusedLayerDoNotConsumeRevisionOrJournalBudget (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.missingAndStaleCanvasObjectsReportSceneFailureWithoutMutatingRoot
+[       OK ] dev.notecore.document.DocumentAuthorityTest.missingAndStaleCanvasObjectsReportSceneFailureWithoutMutatingRoot (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.oversizedTitleCannotHideUnboundedRawInputInTheReceiptJournal
+[       OK ] dev.notecore.document.DocumentAuthorityTest.oversizedTitleCannotHideUnboundedRawInputInTheReceiptJournal (1 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.preparedSessionPatchCanRetryAfterLostAckOrMetadataAdvanceWithoutAnotherAuthority
+[       OK ] dev.notecore.document.DocumentAuthorityTest.preparedSessionPatchCanRetryAfterLostAckOrMetadataAdvanceWithoutAnotherAuthority (0 ms)
+[ RUN      ] dev.notecore.document.DocumentAuthorityTest.staleAndCrossPagePreparedPatchesCannotLeaveObjectsOrPartiallyUpdatePageMetadata
+[       OK ] dev.notecore.document.DocumentAuthorityTest.staleAndCrossPagePreparedPatchesCannotLeaveObjectsOrPartiallyUpdatePageMetadata (0 ms)
+[----------] 20 tests from dev.notecore.document.DocumentAuthorityTest (205 ms total)
+
+[----------] 4 tests from dev.notecore.document.DocumentHistoryPreflightTest
+[ RUN      ] dev.notecore.document.DocumentHistoryPreflightTest.exactIndependentHistoryBoundaryRemains1704BytesForTwoPointStroke
+[       OK ] dev.notecore.document.DocumentHistoryPreflightTest.exactIndependentHistoryBoundaryRemains1704BytesForTwoPointStroke (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryPreflightTest.oversizedHistoryRefusesAtomicallyAndDoesNotConsumeOperationIdentity
+[       OK ] dev.notecore.document.DocumentHistoryPreflightTest.oversizedHistoryRefusesAtomicallyAndDoesNotConsumeOperationIdentity (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryPreflightTest.externalPreparedPatchStillReportsStaleObjectBeforeHistoryCapacity
+[       OK ] dev.notecore.document.DocumentHistoryPreflightTest.externalPreparedPatchStillReportsStaleObjectBeforeHistoryCapacity (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryPreflightTest.projectedChargeMatchesActualHistoryAcrossMetadataAndMembershipEdits
+[       OK ] dev.notecore.document.DocumentHistoryPreflightTest.projectedChargeMatchesActualHistoryAcrossMetadataAndMembershipEdits (2 ms)
+[----------] 4 tests from dev.notecore.document.DocumentHistoryPreflightTest (2 ms total)
+
+[----------] 14 tests from dev.notecore.document.DocumentHistoryTest
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.undoDeletingEarlierInkRestoresOriginalDrawOrderAcrossRepeatedTraversal
+[       OK ] dev.notecore.document.DocumentHistoryTest.undoDeletingEarlierInkRestoresOriginalDrawOrderAcrossRepeatedTraversal (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.restoringDeletedPagePlacesItsInkBeforeOtherPagesInk
+[       OK ] dev.notecore.document.DocumentHistoryTest.restoringDeletedPagePlacesItsInkBeforeOtherPagesInk (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.mixedPageAndCanvasEditsRoundTripWithoutRewindingRootOrContentVersions
+[       OK ] dev.notecore.document.DocumentHistoryTest.mixedPageAndCanvasEditsRoundTripWithoutRewindingRootOrContentVersions (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.copyUndoRedoRestoresTheSameIdsAndSamplesWithFreshLifecycleEpochs
+[       OK ] dev.notecore.document.DocumentHistoryTest.copyUndoRedoRestoresTheSameIdsAndSamplesWithFreshLifecycleEpochs (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.pageDeletionUndoRestoresMembershipOrderAndRedoDoesNotAllocateNewIdentity
+[       OK ] dev.notecore.document.DocumentHistoryTest.pageDeletionUndoRestoresMembershipOrderAndRedoDoesNotAllocateNewIdentity (2 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.clearingLastPageUndoRestoresPaperAndInkWhileKeepingPageAndLayerIds
+[       OK ] dev.notecore.document.DocumentHistoryTest.clearingLastPageUndoRestoresPaperAndInkWhileKeepingPageAndLayerIds (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.transformUndoRedoAndDeleteRestorationAlwaysInvalidateOldObjectVersions
+[       OK ] dev.notecore.document.DocumentHistoryTest.transformUndoRedoAndDeleteRestorationAlwaysInvalidateOldObjectVersions (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.successfulNewEditClearsRedoButRejectedEditsAndRetryReceiptsDoNot
+[       OK ] dev.notecore.document.DocumentHistoryTest.successfulNewEditClearsRedoButRejectedEditsAndRetryReceiptsDoNot (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.staleForeignAndWrongTopHistoryCommandsCannotMoveStacksOrConsumeReceipts
+[       OK ] dev.notecore.document.DocumentHistoryTest.staleForeignAndWrongTopHistoryCommandsCannotMoveStacksOrConsumeReceipts (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.entryHorizonEvictsOnlyOldestUndoAndDoesNotRetireReceiptIdentity
+[       OK ] dev.notecore.document.DocumentHistoryTest.entryHorizonEvictsOnlyOldestUndoAndDoesNotRetireReceiptIdentity (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.byteHorizonIncludesRedoAndOversizedEditLeavesExistingBranchUntouched
+[       OK ] dev.notecore.document.DocumentHistoryTest.byteHorizonIncludesRedoAndOversizedEditLeavesExistingBranchUntouched (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.journalFullBlocksTraversalAtomicallyButOriginalUndoReceiptStillRetries
+[       OK ] dev.notecore.document.DocumentHistoryTest.journalFullBlocksTraversalAtomicallyButOriginalUndoReceiptStillRetries (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.exhaustedObjectEpochBlocksDeletionWithoutPublishingMetadataOrHistory
+[       OK ] dev.notecore.document.DocumentHistoryTest.exhaustedObjectEpochBlocksDeletionWithoutPublishingMetadataOrHistory (0 ms)
+[ RUN      ] dev.notecore.document.DocumentHistoryTest.preparedPatchRetryAfterUndoReturnsOriginalReceiptAndLateNewOperationCannotResurrectInk
+[       OK ] dev.notecore.document.DocumentHistoryTest.preparedPatchRetryAfterUndoReturnsOriginalReceiptAndLateNewOperationCannotResurrectInk (0 ms)
+[----------] 14 tests from dev.notecore.document.DocumentHistoryTest (8 ms total)
+
+[----------] 5 tests from dev.notecore.document.ImageDecodeRulesTest
+[ RUN      ] dev.notecore.document.ImageDecodeRulesTest.oddDimensionsUseFloorForQualityAndCeilForMemory
+[       OK ] dev.notecore.document.ImageDecodeRulesTest.oddDimensionsUseFloorForQualityAndCeilForMemory (0 ms)
+[ RUN      ] dev.notecore.document.ImageDecodeRulesTest.rotatedDisplayRequestUsesSwappedSourceAxes
+[       OK ] dev.notecore.document.ImageDecodeRulesTest.rotatedDisplayRequestUsesSwappedSourceAxes (0 ms)
+[ RUN      ] dev.notecore.document.ImageDecodeRulesTest.exactBudgetAcceptedButOneByteLessDoesNotSilentlyLowerQuality
+[       OK ] dev.notecore.document.ImageDecodeRulesTest.exactBudgetAcceptedButOneByteLessDoesNotSilentlyLowerQuality (0 ms)
+[ RUN      ] dev.notecore.document.ImageDecodeRulesTest.invalidInputsAndOriginalPixelCapacityRefuseBeforePlanning
+[       OK ] dev.notecore.document.ImageDecodeRulesTest.invalidInputsAndOriginalPixelCapacityRefuseBeforePlanning (0 ms)
+[ RUN      ] dev.notecore.document.ImageDecodeRulesTest.hugeInputsDoNotOverflowPixelsBytesOrPowerOfTwoSampling
+[       OK ] dev.notecore.document.ImageDecodeRulesTest.hugeInputsDoNotOverflowPixelsBytesOrPowerOfTwoSampling (0 ms)
+[----------] 5 tests from dev.notecore.document.ImageDecodeRulesTest (0 ms total)
+
+[----------] 4 tests from dev.notecore.document.ImageOrientationRulesTest
+[ RUN      ] dev.notecore.document.ImageOrientationRulesTest.allEightDirectionsMatchIndependentAsymmetricPixelGrid
+[       OK ] dev.notecore.document.ImageOrientationRulesTest.allEightDirectionsMatchIndependentAsymmetricPixelGrid (0 ms)
+[ RUN      ] dev.notecore.document.ImageOrientationRulesTest.cornersCoverWholeDisplayAndEveryMappingIsInvertible
+[       OK ] dev.notecore.document.ImageOrientationRulesTest.cornersCoverWholeDisplayAndEveryMappingIsInvertible (0 ms)
+[ RUN      ] dev.notecore.document.ImageOrientationRulesTest.invalidDimensionsUnknownOrientationAndBudgetReturnNoMapping
+[       OK ] dev.notecore.document.ImageOrientationRulesTest.invalidDimensionsUnknownOrientationAndBudgetReturnNoMapping (0 ms)
+[ RUN      ] dev.notecore.document.ImageOrientationRulesTest.pixelAdmissionUsesLongAndNeverOverflowsIntMultiplication
+[       OK ] dev.notecore.document.ImageOrientationRulesTest.pixelAdmissionUsesLongAndNeverOverflowsIntMultiplication (0 ms)
+[----------] 4 tests from dev.notecore.document.ImageOrientationRulesTest (0 ms total)
+
+[----------] 3 tests from dev.notecore.document.LegacyPreviewReadTest
+[ RUN      ] dev.notecore.document.LegacyPreviewReadTest.fixedHistoricalBytesMigrateToCanonicalRootAndOnlyEncodeV2
+[       OK ] dev.notecore.document.LegacyPreviewReadTest.fixedHistoricalBytesMigrateToCanonicalRootAndOnlyEncodeV2 (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReadTest.malformedLegacyIdentityPayloadAndTrailingRowsAreRejected
+[       OK ] dev.notecore.document.LegacyPreviewReadTest.malformedLegacyIdentityPayloadAndTrailingRowsAreRejected (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReadTest.legacyHeaderIsBoundedAndNeverTreatsPayloadAsValidated
+[       OK ] dev.notecore.document.LegacyPreviewReadTest.legacyHeaderIsBoundedAndNeverTreatsPayloadAsValidated (0 ms)
+[----------] 3 tests from dev.notecore.document.LegacyPreviewReadTest (0 ms total)
+
+[----------] 13 tests from dev.notecore.document.LegacyPreviewReaderTest
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.preservesEscapedUnicodeMetadataAndCanonicalDrawOrder
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.preservesEscapedUnicodeMetadataAndCanonicalDrawOrder (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.realTimePressureColorAndWidthSurviveReadOnlyMigration
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.realTimePressureColorAndWidthSurviveReadOnlyMigration (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.decoderReturnsOnlyImmutableRootAndAllFutureWritesAreV2
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.decoderReturnsOnlyImmutableRootAndAllFutureWritesAreV2 (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.legacyMetadataIdentityCounterIsValidatedButNeverCreatesAnotherOwner
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.legacyMetadataIdentityCounterIsValidatedButNeverCreatesAnotherOwner (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.repeatedAndOrphanIdentitiesCannotEnterMigratedScene
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.repeatedAndOrphanIdentitiesCannotEnterMigratedScene (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.truncationUnknownVersionFooterAndTrailingDataAreRejected
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.truncationUnknownVersionFooterAndTrailingDataAreRejected (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.invalidRealSamplesAndTimeRegressionAreRejected
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.invalidRealSamplesAndTimeRegressionAreRejected (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.strokeAndDocumentClaimsRejectBeforeReadingMissingPayload
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.strokeAndDocumentClaimsRejectBeforeReadingMissingPayload (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.malformedFieldsAndOversizedLinesRejectBeforeSplitAllocation
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.malformedFieldsAndOversizedLinesRejectBeforeSplitAllocation (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.individuallyValidLegacyStrokesCannotBypassAggregatePointCapacity
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.individuallyValidLegacyStrokesCannotBypassAggregatePointCapacity (3704 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.malformedEscapesAndSurrogateTextAreRejected
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.malformedEscapesAndSurrogateTextAreRejected (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.crlfAndNoFinalTerminatorReadIdenticallyWithoutWritingInput
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.crlfAndNoFinalTerminatorReadIdenticallyWithoutWritingInput (0 ms)
+[ RUN      ] dev.notecore.document.LegacyPreviewReaderTest.boundedHeaderDoesNotPretendThePayloadWasValidated
+[       OK ] dev.notecore.document.LegacyPreviewReaderTest.boundedHeaderDoesNotPretendThePayloadWasValidated (0 ms)
+[----------] 13 tests from dev.notecore.document.LegacyPreviewReaderTest (3707 ms total)
+
+[----------] 6 tests from dev.notecore.document.PageBookmarkRulesTest
+[ RUN      ] dev.notecore.document.PageBookmarkRulesTest.markUnmarkAndNoOpPlansPreserveSourceAndBindBothRevisions
+[       OK ] dev.notecore.document.PageBookmarkRulesTest.markUnmarkAndNoOpPlansPreserveSourceAndBindBothRevisions (0 ms)
+[ RUN      ] dev.notecore.document.PageBookmarkRulesTest.navigationAfterReorderUsesStablePageIdThroughOriginalSession
+[       OK ] dev.notecore.document.PageBookmarkRulesTest.navigationAfterReorderUsesStablePageIdThroughOriginalSession (0 ms)
+[ RUN      ] dev.notecore.document.PageBookmarkRulesTest.deletedBookmarkIsExplicitlyMissingAndMayBeUnmarkedOrRestored
+[       OK ] dev.notecore.document.PageBookmarkRulesTest.deletedBookmarkIsExplicitlyMissingAndMayBeUnmarkedOrRestored (0 ms)
+[ RUN      ] dev.notecore.document.PageBookmarkRulesTest.pageDeletedAfterPlanningIsRejectedByOriginalSelectPage
+[       OK ] dev.notecore.document.PageBookmarkRulesTest.pageDeletedAfterPlanningIsRejectedByOriginalSelectPage (0 ms)
+[ RUN      ] dev.notecore.document.PageBookmarkRulesTest.invalidMetadataNeverProducesPatchOrNavigation
+[       OK ] dev.notecore.document.PageBookmarkRulesTest.invalidMetadataNeverProducesPatchOrNavigation (0 ms)
+[ RUN      ] dev.notecore.document.PageBookmarkRulesTest.fullBookmarkCatalogAllowsCleanupButRefusesAdditionalMarks
+[       OK ] dev.notecore.document.PageBookmarkRulesTest.fullBookmarkCatalogAllowsCleanupButRefusesAdditionalMarks (3 ms)
+[----------] 6 tests from dev.notecore.document.PageBookmarkRulesTest (4 ms total)
+
+[----------] 4 tests from dev.notecore.document.PageProjectionBudgetTest
+[ RUN      ] dev.notecore.document.PageProjectionBudgetTest.pageProjectionKeepsCanonicalOrderAndOnlyOwnsReferences
+[       OK ] dev.notecore.document.PageProjectionBudgetTest.pageProjectionKeepsCanonicalOrderAndOnlyOwnsReferences (0 ms)
+[ RUN      ] dev.notecore.document.PageProjectionBudgetTest.projectionPrepaymentSurvivesReadsButReferencesClearBeforeAcceptedAndRejectedCommit
+[       OK ] dev.notecore.document.PageProjectionBudgetTest.projectionPrepaymentSurvivesReadsButReferencesClearBeforeAcceptedAndRejectedCommit (0 ms)
+[ RUN      ] dev.notecore.document.PageProjectionBudgetTest.projectedReferencesParticipateInDirectAndDownLiveAdmissionWithoutConsumingRefusedIds
+[       OK ] dev.notecore.document.PageProjectionBudgetTest.projectedReferencesParticipateInDirectAndDownLiveAdmissionWithoutConsumingRefusedIds (0 ms)
+[ RUN      ] dev.notecore.document.PageProjectionBudgetTest.copyDeleteUndoAndRedoUseTheSameProjectionEnvelope
+[       OK ] dev.notecore.document.PageProjectionBudgetTest.copyDeleteUndoAndRedoUseTheSameProjectionEnvelope (4 ms)
+[----------] 4 tests from dev.notecore.document.PageProjectionBudgetTest (5 ms total)
+
+[----------] 5 tests from dev.notecore.document.PageTemplateRulesTest
+[ RUN      ] dev.notecore.document.PageTemplateRulesTest.allFourPapersUseExistingA4CoordinateConventionAndOrientation
+[       OK ] dev.notecore.document.PageTemplateRulesTest.allFourPapersUseExistingA4CoordinateConventionAndOrientation (0 ms)
+[ RUN      ] dev.notecore.document.PageTemplateRulesTest.screenRatioUsesSnapshotOrientationAndIgnoresUniformDensityScale
+[       OK ] dev.notecore.document.PageTemplateRulesTest.screenRatioUsesSnapshotOrientationAndIgnoresUniformDensityScale (0 ms)
+[ RUN      ] dev.notecore.document.PageTemplateRulesTest.invalidViewportAndExtremeAspectRatioNeverProduceCommands
+[       OK ] dev.notecore.document.PageTemplateRulesTest.invalidViewportAndExtremeAspectRatioNeverProduceCommands (0 ms)
+[ RUN      ] dev.notecore.document.PageTemplateRulesTest.templateChangeUsesOriginalAuthorityAndKeepsInkThroughUndoRedoAndCodec
+[       OK ] dev.notecore.document.PageTemplateRulesTest.templateChangeUsesOriginalAuthorityAndKeepsInkThroughUndoRedoAndCodec (1 ms)
+[ RUN      ] dev.notecore.document.PageTemplateRulesTest.missingPageAndStaleTemplateCannotChangeDocument
+[       OK ] dev.notecore.document.PageTemplateRulesTest.missingPageAndStaleTemplateCannotChangeDocument (0 ms)
+[----------] 5 tests from dev.notecore.document.PageTemplateRulesTest (2 ms total)
+
+[----------] 18 tests from dev.notecore.document.PagedPreviewCodecTest
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.utf8MetadataAndFiniteNumberWidthsFitTheDeclaredEnvelope
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.utf8MetadataAndFiniteNumberWidthsFitTheDeclaredEnvelope (1 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.declaredPointCapacityKeepsLongNumericSamplesSerializableAfterAdoption
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.declaredPointCapacityKeepsLongNumericSamplesSerializableAfterAdoption (20740 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.legacyBottomRightInkKeepsOriginalPaperExtentAndDecodedCopySharesSamples
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.legacyBottomRightInkKeepsOriginalPaperExtentAndDecodedCopySharesSamples (2 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.cumulativePointsCannotBypassAdmissionWithManyIndividuallyValidStrokes
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.cumulativePointsCannotBypassAdmissionWithManyIndividuallyValidStrokes (6553 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.roundTripPreservesEveryCanonicalFieldPageAndDrawOrderAndTextBytes
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.roundTripPreservesEveryCanonicalFieldPageAndDrawOrderAndTextBytes (1 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.emptyPageAndCrLfInputRoundTripWithNoHistoryOrReceipts
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.emptyPageAndCrLfInputRoundTripWithNoHistoryOrReceipts (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.boundedHeaderReportsV2MetadataWithoutValidatingBody
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.boundedHeaderReportsV2MetadataWithoutValidatingBody (1 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.v1MigrationKeepsOriginalTimePressureAndVersionAndDoesNotModifyInput
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.v1MigrationKeepsOriginalTimePressureAndVersionAndDoesNotModifyInput (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.duplicateMembershipAndOrphanObjectsAreRejected
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.duplicateMembershipAndOrphanObjectsAreRejected (1 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.countsAndPointCapacityRejectBeforeReadingOrAllocatingClaimedPayload
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.countsAndPointCapacityRejectBeforeReadingOrAllocatingClaimedPayload (1 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.invalidGeometrySamplesAndMonotonicTimeCannotEnterCanonicalScene
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.invalidGeometrySamplesAndMonotonicTimeCannotEnterCanonicalScene (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.unknownFormatsPaperBrushAndAlgorithmVersionsFailExplicitly
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.unknownFormatsPaperBrushAndAlgorithmVersionsFailExplicitly (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.negativeOrFuturePageRevisionsAndNonPositiveObjectRevisionsAreRejected
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.negativeOrFuturePageRevisionsAndNonPositiveObjectRevisionsAreRejected (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.truncationExtraFieldsTrailingDataAndBadEscapesAreRejected
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.truncationExtraFieldsTrailingDataAndBadEscapesAreRejected (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.oversizedRowsAndUnpairedSurrogatesCannotBecomeUtf8ReplacementData
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.oversizedRowsAndUnpairedSurrogatesCannotBecomeUtf8ReplacementData (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.importAsCopyRequiresFreshCompleteUniqueMappingsAndResetsAllContentVersions
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.importAsCopyRequiresFreshCompleteUniqueMappingsAndResetsAllContentVersions (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.copyMappingErrorsNeverChangeTheSourceOrReturnPartialDocuments
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.copyMappingErrorsNeverChangeTheSourceOrReturnPartialDocuments (5 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewCodecTest.workChargeIncludesRetainedSnapshotAndBoundedEncodingReservation
+[       OK ] dev.notecore.document.PagedPreviewCodecTest.workChargeIncludesRetainedSnapshotAndBoundedEncodingReservation (1 ms)
+[----------] 18 tests from dev.notecore.document.PagedPreviewCodecTest (27320 ms total)
+
+[----------] 14 tests from dev.notecore.document.PagedPreviewNotebookTest
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.fullLongNumericInputUndoRedoAndRenameRemainSaveableWithoutPointLoss
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.fullLongNumericInputUndoRedoAndRenameRemainSaveableWithoutPointLoss (11457 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.reusedNonceSkipsInitialIdentitiesAcrossKindsWithoutDuplicatingIndex
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.reusedNonceSkipsInitialIdentitiesAcrossKindsWithoutDuplicatingIndex (1 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.invalidMetadataDoesNotCancelAcceptedUnfinishedSamples
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.invalidMetadataDoesNotCancelAcceptedUnfinishedSamples (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.retiredOwnerCannotAcceptLateInputOrEditWhileImmutableCaptureRemainsReadable
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.retiredOwnerCannotAcceptLateInputOrEditWhileImmutableCaptureRemainsReadable (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.selectionAndMoveKeepStablePageIdentityAndOneDocumentRevision
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.selectionAndMoveKeepStablePageIdentityAndOneDocumentRevision (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.copyingUsesFreshIdentitiesSharesSamplesAndInsertsAfterCurrentPage
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.copyingUsesFreshIdentitiesSharesSamplesAndInsertsAfterCurrentPage (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.deletingSelectedPageSelectsSuccessorThenPredecessorAndLastPageClearKeepsIdentity
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.deletingSelectedPageSelectsSuccessorThenPredecessorAndLastPageClearKeepsIdentity (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.pageSwitchCancelsUnfinishedInkAndLateUpCannotWriteToNewPage
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.pageSwitchCancelsUnfinishedInkAndLateUpCannotWriteToNewPage (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.capturedBrushSurvivesToolChangeAndOnlySelectedProjectionIsRebuilt
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.capturedBrushSurvivesToolChangeAndOnlySelectedProjectionIsRebuilt (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.completedRejectedInkRetainsExactCommandAndSamplesAcrossCancelAndAllPageActions
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.completedRejectedInkRetainsExactCommandAndSamplesAcrossCancelAndAllPageActions (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.snapshotContainsAllPagesAndStaysImmutableDuringSubsequentChangesAndEncoding
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.snapshotContainsAllPagesAndStaysImmutableDuringSubsequentChangesAndEncoding (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.transformedProjectionAndPageDimensionsComeFromCanonicalRoot
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.transformedProjectionAndPageDimensionsComeFromCanonicalRoot (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.invalidTargetsTitlesAndSampleSequencesCannotPartiallyMutateSessionContent
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.invalidTargetsTitlesAndSampleSequencesCannotPartiallyMutateSessionContent (0 ms)
+[ RUN      ] dev.notecore.document.PagedPreviewNotebookTest.ownerGuardCoversPresentationToolsPendingAndSnapshotReads
+[       OK ] dev.notecore.document.PagedPreviewNotebookTest.ownerGuardCoversPresentationToolsPendingAndSnapshotReads (0 ms)
+[----------] 14 tests from dev.notecore.document.PagedPreviewNotebookTest (11465 ms total)
+
+[----------] 11 tests from dev.notecore.document.PagedSaveLedgerTest
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.migratedLegacyIdentityCounterCannotReintroduceOldObjectIdsOrAV1Writer
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.migratedLegacyIdentityCounterCannotReintroduceOldObjectIdsOrAV1Writer (0 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.oldPageWriteCannotClearNewerOtherPageContentAndBothVersionsRemainCharged
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.oldPageWriteCannotClearNewerOtherPageContentAndBothVersionsRemainCharged (1 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.failedRootCanRetryFromEquivalentReopenedContentWithoutReplacingRetainedSnapshot
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.failedRootCanRetryFromEquivalentReopenedContentWithoutReplacingRetainedSnapshot (2 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.sameVersionForksInTitlePaperOrderBrushTransformAndObjectRevisionRemainRejected
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.sameVersionForksInTitlePaperOrderBrushTransformAndObjectRevisionRemainRejected (0 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.capacityRejectionKeepsNewPageRootWithCallerAndDoesNotChangeOldFlight
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.capacityRejectionKeepsNewPageRootWithCallerAndDoesNotChangeOldFlight (0 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.migratedAndNewRootsUseTheSameSingleFlightLedgerAndKeepIndependentResponsibilities
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.migratedAndNewRootsUseTheSameSingleFlightLedgerAndKeepIndependentResponsibilities (0 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.migratedRootRecoveryComparesCanonicalContentRatherThanSessionOrWrapperIdentity
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.migratedRootRecoveryComparesCanonicalContentRatherThanSessionOrWrapperIdentity (3 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.pagedSameVersionDifferentInkIsNotAcknowledgedAsTheOldSavedContent
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.pagedSameVersionDifferentInkIsNotAcknowledgedAsTheOldSavedContent (1 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.oldAttemptCannotCompleteNewSaveEpochEvenWhenIdentityAndVersionAreEqual
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.oldAttemptCannotCompleteNewSaveEpochEvenWhenIdentityAndVersionAreEqual (0 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.largeImmutableSceneComparisonPreservesOrderHeadersAndLateObjectDifferences
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.largeImmutableSceneComparisonPreservesOrderHeadersAndLateObjectDifferences (895 ms)
+[ RUN      ] dev.notecore.document.PagedSaveLedgerTest.sameVersionDeepCopyCoalescesButDifferentDrawOrderCannotReplaceAnInflightWrite
+[       OK ] dev.notecore.document.PagedSaveLedgerTest.sameVersionDeepCopyCoalescesButDifferentDrawOrderCannotReplaceAnInflightWrite (0 ms)
+[----------] 11 tests from dev.notecore.document.PagedSaveLedgerTest (906 ms total)
+
+[----------] 6 tests from dev.notecore.document.PdfPageCatalogRulesTest
+[ RUN      ] dev.notecore.document.PdfPageCatalogRulesTest.originalReorderAndBlankInsertKeepPhysicalSourceNumbers
+[       OK ] dev.notecore.document.PdfPageCatalogRulesTest.originalReorderAndBlankInsertKeepPhysicalSourceNumbers (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageCatalogRulesTest.deletePlanPairsOriginalCommandWithExactReferenceAndLeavesSourceRegistry
+[       OK ] dev.notecore.document.PdfPageCatalogRulesTest.deletePlanPairsOriginalCommandWithExactReferenceAndLeavesSourceRegistry (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageCatalogRulesTest.lastBlankPdfBackgroundRemovalHasNoFakeDocumentCommit
+[       OK ] dev.notecore.document.PdfPageCatalogRulesTest.lastBlankPdfBackgroundRemovalHasNoFakeDocumentCommit (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageCatalogRulesTest.duplicatedSourcePageUnderDifferentStablePageIdsIsAllowed
+[       OK ] dev.notecore.document.PdfPageCatalogRulesTest.duplicatedSourcePageUnderDifferentStablePageIdsIsAllowed (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageCatalogRulesTest.invalidMetadataNeverProducesPartialProjectionOrDeletion
+[       OK ] dev.notecore.document.PdfPageCatalogRulesTest.invalidMetadataNeverProducesPartialProjectionOrDeletion (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageCatalogRulesTest.oldMetadataAndDocumentCommandAreRejectedAndBlankPagesAreNotSourcePages
+[       OK ] dev.notecore.document.PdfPageCatalogRulesTest.oldMetadataAndDocumentCommandAreRejectedAndBlankPagesAreNotSourcePages (0 ms)
+[----------] 6 tests from dev.notecore.document.PdfPageCatalogRulesTest (0 ms total)
+
+[----------] 6 tests from dev.notecore.document.PdfPageGeometryRulesTest
+[ RUN      ] dev.notecore.document.PdfPageGeometryRulesTest.originalFixtureFourRotationColorAnchorsMatchIndependentExpectedPositions
+[       OK ] dev.notecore.document.PdfPageGeometryRulesTest.originalFixtureFourRotationColorAnchorsMatchIndependentExpectedPositions (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageGeometryRulesTest.userUnitScalesOnlyCanonicalCoordinatesAndInverseReturnsOriginalUnits
+[       OK ] dev.notecore.document.PdfPageGeometryRulesTest.userUnitScalesOnlyCanonicalCoordinatesAndInverseReturnsOriginalUnits (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageGeometryRulesTest.negativeOriginCornersCoverExactlyTheRotatedCanonicalPage
+[       OK ] dev.notecore.document.PdfPageGeometryRulesTest.negativeOriginCornersCoverExactlyTheRotatedCanonicalPage (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageGeometryRulesTest.multipleTurnsAndNegativeRightAnglesNormalizeWithoutDoubleRotation
+[       OK ] dev.notecore.document.PdfPageGeometryRulesTest.multipleTurnsAndNegativeRightAnglesNormalizeWithoutDoubleRotation (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageGeometryRulesTest.invalidBoxesUnitsAndCanonicalSizeOverflowReturnNoPartialGeometry
+[       OK ] dev.notecore.document.PdfPageGeometryRulesTest.invalidBoxesUnitsAndCanonicalSizeOverflowReturnNoPartialGeometry (0 ms)
+[ RUN      ] dev.notecore.document.PdfPageGeometryRulesTest.asymmetricInteriorGridRoundTripsWithScaledReflectedAxis
+[       OK ] dev.notecore.document.PdfPageGeometryRulesTest.asymmetricInteriorGridRoundTripsWithScaledReflectedAxis (0 ms)
+[----------] 6 tests from dev.notecore.document.PdfPageGeometryRulesTest (0 ms total)
+
+[----------] 6 tests from dev.notecore.document.PdfRenderSelectionRulesTest
+[ RUN      ] dev.notecore.document.PdfRenderSelectionRulesTest.currentComesFirstAndOnlyTwoImmediateNeighborsAreSelected
+[       OK ] dev.notecore.document.PdfRenderSelectionRulesTest.currentComesFirstAndOnlyTwoImmediateNeighborsAreSelected (0 ms)
+[ RUN      ] dev.notecore.document.PdfRenderSelectionRulesTest.firstLastAndReducedBudgetsNeverFetchBeyondAdjacency
+[       OK ] dev.notecore.document.PdfRenderSelectionRulesTest.firstLastAndReducedBudgetsNeverFetchBeyondAdjacency (0 ms)
+[ RUN      ] dev.notecore.document.PdfRenderSelectionRulesTest.blankPagesAreSkippedWithoutSearchingFartherAndDuplicateSourcePagesStayDistinct
+[       OK ] dev.notecore.document.PdfRenderSelectionRulesTest.blankPagesAreSkippedWithoutSearchingFartherAndDuplicateSourcePagesStayDistinct (0 ms)
+[ RUN      ] dev.notecore.document.PdfRenderSelectionRulesTest.pageSwitchReorderAndEitherRevisionChangeInvalidateOldPlan
+[       OK ] dev.notecore.document.PdfRenderSelectionRulesTest.pageSwitchReorderAndEitherRevisionChangeInvalidateOldPlan (0 ms)
+[ RUN      ] dev.notecore.document.PdfRenderSelectionRulesTest.malformedCatalogMissingPageAndInvalidLimitsNeverReturnTasks
+[       OK ] dev.notecore.document.PdfRenderSelectionRulesTest.malformedCatalogMissingPageAndInvalidLimitsNeverReturnTasks (0 ms)
+[ RUN      ] dev.notecore.document.PdfRenderSelectionRulesTest.modifiedTaskPayloadAndForeignPlanCannotPassRevalidation
+[       OK ] dev.notecore.document.PdfRenderSelectionRulesTest.modifiedTaskPayloadAndForeignPlanCannotPassRevalidation (0 ms)
+[----------] 6 tests from dev.notecore.document.PdfRenderSelectionRulesTest (0 ms total)
+
+[----------] 7 tests from dev.notecore.document.PreviewCommitCapacityTest
+[ RUN      ] dev.notecore.document.PreviewCommitCapacityTest.fullJournalRefusesDownAndCommittedDocumentCanBeReopenedWithoutPending
+[       OK ] dev.notecore.document.PreviewCommitCapacityTest.fullJournalRefusesDownAndCommittedDocumentCanBeReopenedWithoutPending (0 ms)
+[ RUN      ] dev.notecore.document.PreviewCommitCapacityTest.journalByteBoundaryAdmitsOnlyWholeAffordableStrokeWithoutConsumingRejectedIds
+[       OK ] dev.notecore.document.PreviewCommitCapacityTest.journalByteBoundaryAdmitsOnlyWholeAffordableStrokeWithoutConsumingRejectedIds (0 ms)
+[ RUN      ] dev.notecore.document.PreviewCommitCapacityTest.historyByteBoundaryAllowsEvictableOldHistoryAndEmptyTerminal
+[       OK ] dev.notecore.document.PreviewCommitCapacityTest.historyByteBoundaryAllowsEvictableOldHistoryAndEmptyTerminal (0 ms)
+[ RUN      ] dev.notecore.document.PreviewCommitCapacityTest.identityBoundaryRefusesBeforeAllocationAndMetadataRetryKeepsOriginalId
+[       OK ] dev.notecore.document.PreviewCommitCapacityTest.identityBoundaryRefusesBeforeAllocationAndMetadataRetryKeepsOriginalId (0 ms)
+[ RUN      ] dev.notecore.document.PreviewCommitCapacityTest.exhaustedRootRevisionRefusesWithoutOwningInputAndRemainsEncodable
+[       OK ] dev.notecore.document.PreviewCommitCapacityTest.exhaustedRootRevisionRefusesWithoutOwningInputAndRemainsEncodable (0 ms)
+[ RUN      ] dev.notecore.document.PreviewCommitCapacityTest.projectedStrokePlanMatchesActualDeltaWithoutConstructingPlaceholderSamples
+[       OK ] dev.notecore.document.PreviewCommitCapacityTest.projectedStrokePlanMatchesActualDeltaWithoutConstructingPlaceholderSamples (7 ms)
+[ RUN      ] dev.notecore.document.PreviewCommitCapacityTest.arenaAndJournalLimitsIntersectAndNoopToolChangeCannotInvalidateCommitPlan
+[       OK ] dev.notecore.document.PreviewCommitCapacityTest.arenaAndJournalLimitsIntersectAndNoopToolChangeCannotInvalidateCommitPlan (0 ms)
+[----------] 7 tests from dev.notecore.document.PreviewCommitCapacityTest (9 ms total)
+
+[----------] 7 tests from dev.notecore.document.PreviewDocumentReaderTest
+[ RUN      ] dev.notecore.document.PreviewDocumentReaderTest.supportedCanonicalContentIsUnchangedAndExistingRootIsNotCloned
+[       OK ] dev.notecore.document.PreviewDocumentReaderTest.supportedCanonicalContentIsUnchangedAndExistingRootIsNotCloned (2 ms)
+[ RUN      ] dev.notecore.document.PreviewDocumentReaderTest.oldReadOnlyFormatStillMigratesThroughTheSameReader
+[       OK ] dev.notecore.document.PreviewDocumentReaderTest.oldReadOnlyFormatStillMigratesThroughTheSameReader (0 ms)
+[ RUN      ] dev.notecore.document.PreviewDocumentReaderTest.malformedVersionsTruncationAndScalarsReturnRefusalWithoutPartialRoot
+[       OK ] dev.notecore.document.PreviewDocumentReaderTest.malformedVersionsTruncationAndScalarsReturnRefusalWithoutPartialRoot (14 ms)
+[ RUN      ] dev.notecore.document.PreviewDocumentReaderTest.validCanonicalBrushesUnsupportedByPreviewAreRefusedWithoutLossyConversion
+[       OK ] dev.notecore.document.PreviewDocumentReaderTest.validCanonicalBrushesUnsupportedByPreviewAreRefusedWithoutLossyConversion (0 ms)
+[ RUN      ] dev.notecore.document.PreviewDocumentReaderTest.characterCapacityRefusesBeforeParsingAndDoesNotAffectLaterReads
+[       OK ] dev.notecore.document.PreviewDocumentReaderTest.characterCapacityRefusesBeforeParsingAndDoesNotAffectLaterReads (138 ms)
+[ RUN      ] dev.notecore.document.PreviewDocumentReaderTest.canonicalWidthsAndTransformsThatDegenerateInFloatAreRefusedBeforeAdoption
+[       OK ] dev.notecore.document.PreviewDocumentReaderTest.canonicalWidthsAndTransformsThatDegenerateInFloatAreRefusedBeforeAdoption (6 ms)
+[ RUN      ] dev.notecore.document.PreviewDocumentReaderTest.supportedFloatWidthsAndReflectedShearRemainCanonicalAndUnchanged
+[       OK ] dev.notecore.document.PreviewDocumentReaderTest.supportedFloatWidthsAndReflectedShearRemainCanonicalAndUnchanged (1 ms)
+[----------] 7 tests from dev.notecore.document.PreviewDocumentReaderTest (164 ms total)
+
+[----------] 7 tests from dev.notecore.document.PreviewEditTest
+[ RUN      ] dev.notecore.document.PreviewEditTest.allEditRequestsUseOriginalRootAndSelectionHistory
+[       OK ] dev.notecore.document.PreviewEditTest.allEditRequestsUseOriginalRootAndSelectionHistory (0 ms)
+[ RUN      ] dev.notecore.document.PreviewEditTest.invalidRawParametersKeepActiveSamplesRootAndOperationIdentity
+[       OK ] dev.notecore.document.PreviewEditTest.invalidRawParametersKeepActiveSamplesRootAndOperationIdentity (0 ms)
+[ RUN      ] dev.notecore.document.PreviewEditTest.rejectedDocumentEditPreservesActiveInputAndExposesExactCapacity
+[       OK ] dev.notecore.document.PreviewEditTest.rejectedDocumentEditPreservesActiveInputAndExposesExactCapacity (0 ms)
+[ RUN      ] dev.notecore.document.PreviewEditTest.emptyHistoryAndMissingPagesAreSpecificAndDoNotCancelInk
+[       OK ] dev.notecore.document.PreviewEditTest.emptyHistoryAndMissingPagesAreSpecificAndDoNotCancelInk (0 ms)
+[ RUN      ] dev.notecore.document.PreviewEditTest.pendingCompletedCommandRemainsOwnedAcrossRejectedEdits
+[       OK ] dev.notecore.document.PreviewEditTest.pendingCompletedCommandRemainsOwnedAcrossRejectedEdits (0 ms)
+[ RUN      ] dev.notecore.document.PreviewEditTest.closedSessionRejectsAllRequestsBeforeInvalidPayloadValidation
+[       OK ] dev.notecore.document.PreviewEditTest.closedSessionRejectsAllRequestsBeforeInvalidPayloadValidation (0 ms)
+[ RUN      ] dev.notecore.document.PreviewEditTest.ownerViolationIsNotHiddenAsRecoverableParameterFailure
+[       OK ] dev.notecore.document.PreviewEditTest.ownerViolationIsNotHiddenAsRecoverableParameterFailure (0 ms)
+[----------] 7 tests from dev.notecore.document.PreviewEditTest (1 ms total)
+
+[----------] 8 tests from dev.notecore.document.PreviewInputBudgetTest
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.producerOverlapIsReservedBeforePreparationWithoutAcceptingSamplesOrIdentities
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.producerOverlapIsReservedBeforePreparationWithoutAcceptingSamplesOrIdentities (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.preparationRefusalKeepsPrefixAndSuccessMustBeRecheckedAfterRetirement
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.preparationRefusalKeepsPrefixAndSuccessMustBeRecheckedAfterRetirement (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.preparationValidatesRawCountsAndRequiresOriginalOwner
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.preparationValidatesRawCountsAndRequiresOriginalOwner (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.insufficientBudgetRejectsBeforeIdentityAndEmptyUpCanFinishExactBudget
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.insufficientBudgetRejectsBeforeIdentityAndEmptyUpCanFinishExactBudget (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.wholeBatchRefusalPreservesPrefixAndAllowsSmallerRetry
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.wholeBatchRefusalPreservesPrefixAndAllowsSmallerRetry (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.chunkBoundaryIsChargedBeforeDownAndCancellationReleasesReservation
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.chunkBoundaryIsChargedBeforeDownAndCancellationReleasesReservation (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.pendingAcceptedInkKeepsChargeAfterOwnerFailureAndCancellation
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.pendingAcceptedInkKeepsChargeAfterOwnerFailureAndCancellation (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputBudgetTest.arenaAndCanonicalLiveLimitsBothApplyAfterRemoteIntegration
+[       OK ] dev.notecore.document.PreviewInputBudgetTest.arenaAndCanonicalLiveLimitsBothApplyAfterRemoteIntegration (0 ms)
+[----------] 8 tests from dev.notecore.document.PreviewInputBudgetTest (1 ms total)
+
+[----------] 5 tests from dev.notecore.document.PreviewInputCapacityTest
+[ RUN      ] dev.notecore.document.PreviewInputCapacityTest.fullDocumentRefusesDownBeforeAcceptingInkAndUndoCanRestoreWriting
+[       OK ] dev.notecore.document.PreviewInputCapacityTest.fullDocumentRefusesDownBeforeAcceptingInkAndUndoCanRestoreWriting (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputCapacityTest.redoRestoresTheCapacityGateWithoutCreatingAPendingCommand
+[       OK ] dev.notecore.document.PreviewInputCapacityTest.redoRestoresTheCapacityGateWithoutCreatingAPendingCommand (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputCapacityTest.liveBytesFullRefusesDownWithoutPendingAndUndoRestoresWriting
+[       OK ] dev.notecore.document.PreviewInputCapacityTest.liveBytesFullRefusesDownWithoutPendingAndUndoRestoresWriting (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputCapacityTest.liveBytesBoundWholeBatchesAndEmptyUpCommitsAllAdmittedPoints
+[       OK ] dev.notecore.document.PreviewInputCapacityTest.liveBytesBoundWholeBatchesAndEmptyUpCommitsAllAdmittedPoints (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputCapacityTest.liveByteDownBatchRefusalDoesNotConsumeIdentityOrPreventRetry
+[       OK ] dev.notecore.document.PreviewInputCapacityTest.liveByteDownBatchRefusalDoesNotConsumeIdentityOrPreventRetry (0 ms)
+[----------] 5 tests from dev.notecore.document.PreviewInputCapacityTest (1 ms total)
+
+[----------] 8 tests from dev.notecore.document.PreviewInputTest
+[ RUN      ] dev.notecore.document.PreviewInputTest.multipleRealBatchesCaptureOriginalBrushAndNeverRetainCallerBuffers
+[       OK ] dev.notecore.document.PreviewInputTest.multipleRealBatchesCaptureOriginalBrushAndNeverRetainCallerBuffers (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputTest.invalidSuffixAndMalformedLengthsRejectWholeBatchAndAllowSameTimeRetry
+[       OK ] dev.notecore.document.PreviewInputTest.invalidSuffixAndMalformedLengthsRejectWholeBatchAndAllowSameTimeRetry (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputTest.batchLimitAndInvalidDownDoNotConsumeIdentityOrAcceptedPrefix
+[       OK ] dev.notecore.document.PreviewInputTest.batchLimitAndInvalidDownDoNotConsumeIdentityOrAcceptedPrefix (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputTest.strokeCapacityRejectsWholeProducerBatchAndEmptyUpFinishesOnlyAcceptedPoints
+[       OK ] dev.notecore.document.PreviewInputTest.strokeCapacityRejectsWholeProducerBatchAndEmptyUpFinishesOnlyAcceptedPoints (19 ms)
+[ RUN      ] dev.notecore.document.PreviewInputTest.terminalAcceptedButPendingIsNotARejectedBatchOrAReasonToResend
+[       OK ] dev.notecore.document.PreviewInputTest.terminalAcceptedButPendingIsNotARejectedBatchOrAReasonToResend (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputTest.eventClockRejectionDoesNotAdvanceSequenceAndEqualTimestampDistinctPointsStayReal
+[       OK ] dev.notecore.document.PreviewInputTest.eventClockRejectionDoesNotAdvanceSequenceAndEqualTimestampDistinctPointsStayReal (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputTest.pageChangeCancellationClosedAndLegacyPolicyRemainExplicit
+[       OK ] dev.notecore.document.PreviewInputTest.pageChangeCancellationClosedAndLegacyPolicyRemainExplicit (0 ms)
+[ RUN      ] dev.notecore.document.PreviewInputTest.ownerFailureIsNotConvertedIntoCapacityOrInvalidData
+[       OK ] dev.notecore.document.PreviewInputTest.ownerFailureIsNotConvertedIntoCapacityOrInvalidData (0 ms)
+[----------] 8 tests from dev.notecore.document.PreviewInputTest (22 ms total)
+
+[----------] 4 tests from dev.notecore.document.PreviewNotebookCreationTest
+[ RUN      ] dev.notecore.document.PreviewNotebookCreationTest.invalidRawIdentityTitleAndNonceReturnFailureBeforeCreatingAuthority
+[       OK ] dev.notecore.document.PreviewNotebookCreationTest.invalidRawIdentityTitleAndNonceReturnFailureBeforeCreatingAuthority (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookCreationTest.invalidRawPageCannotReachPageDescriptorPrecondition
+[       OK ] dev.notecore.document.PreviewNotebookCreationTest.invalidRawPageCannotReachPageDescriptorPrecondition (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookCreationTest.validBoundaryCreationPreservesUnicodeAndUsesOriginalEditableAuthority
+[       OK ] dev.notecore.document.PreviewNotebookCreationTest.validBoundaryCreationPreservesUnicodeAndUsesOriginalEditableAuthority (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookCreationTest.capacityIsTypedAndOwnerFailuresNeverBecomeContentRefusal
+[       OK ] dev.notecore.document.PreviewNotebookCreationTest.capacityIsTypedAndOwnerFailuresNeverBecomeContentRefusal (0 ms)
+[----------] 4 tests from dev.notecore.document.PreviewNotebookCreationTest (0 ms total)
+
+[----------] 8 tests from dev.notecore.document.PreviewNotebookOpenTest
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.acceptedOpeningUsesExactRootAndOriginalAuthority
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.acceptedOpeningUsesExactRootAndOriginalAuthority (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.invalidNonceIsRefusedBeforeConstructingAnOwner
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.invalidNonceIsRefusedBeforeConstructingAnOwner (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.unsupportedPreviewBudgetIsTypedButBudgetConstructionRemainsExplicit
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.unsupportedPreviewBudgetIsTypedButBudgetConstructionRemainsExplicit (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.initialCapacityUsesExactAuthorityBoundaryAndDoesNotConsumeRoot
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.initialCapacityUsesExactAuthorityBoundaryAndDoesNotConsumeRoot (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.originalReaderCapabilityAndMalformedContentRemainDistinct
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.originalReaderCapabilityAndMalformedContentRemainDistinct (1 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.ownerFailuresAreNeverConvertedEvenDuringConstruction
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.ownerFailuresAreNeverConvertedEvenDuringConstruction (0 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.directConstructorCannotBypassTheOriginalPreviewCapabilityBoundary
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.directConstructorCannotBypassTheOriginalPreviewCapabilityBoundary (2 ms)
+[ RUN      ] dev.notecore.document.PreviewNotebookOpenTest.supportedEditingHistoryAndReopenRemainInsideTheSameCapabilityBoundary
+[       OK ] dev.notecore.document.PreviewNotebookOpenTest.supportedEditingHistoryAndReopenRemainInsideTheSameCapabilityBoundary (9 ms)
+[----------] 8 tests from dev.notecore.document.PreviewNotebookOpenTest (16 ms total)
+
+[----------] 5 tests from dev.notecore.document.PreviewRecoveryReaderTest
+[ RUN      ] dev.notecore.document.PreviewRecoveryReaderTest.fullCheckpointRetainsPendingUntilOriginalOwnerExplicitlyCommitsOnce
+[       OK ] dev.notecore.document.PreviewRecoveryReaderTest.fullCheckpointRetainsPendingUntilOriginalOwnerExplicitlyCommitsOnce (0 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryReaderTest.ordinaryV1V2RemainReadableWithoutManufacturingPending
+[       OK ] dev.notecore.document.PreviewRecoveryReaderTest.ordinaryV1V2RemainReadableWithoutManufacturingPending (0 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryReaderTest.malformedOrOverCapacityInputNeverReturnsPartialBaseAndLaterReadStillWorks
+[       OK ] dev.notecore.document.PreviewRecoveryReaderTest.malformedOrOverCapacityInputNeverReturnsPartialBaseAndLaterReadStillWorks (155 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryReaderTest.validButUnsupportedOrdinaryAndEnvelopeContentKeepCapabilityRefusal
+[       OK ] dev.notecore.document.PreviewRecoveryReaderTest.validButUnsupportedOrdinaryAndEnvelopeContentKeepCapabilityRefusal (6 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryReaderTest.floatDegeneratePendingOrBaseRefusesTheWholeCheckpoint
+[       OK ] dev.notecore.document.PreviewRecoveryReaderTest.floatDegeneratePendingOrBaseRefusesTheWholeCheckpoint (3 ms)
+[----------] 5 tests from dev.notecore.document.PreviewRecoveryReaderTest (167 ms total)
+
+[----------] 11 tests from dev.notecore.document.PreviewRecoveryTest
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.completionCannotCrossRetainedCodecBytesOrObjectCapacity
+[       OK ] dev.notecore.document.PreviewRecoveryTest.completionCannotCrossRetainedCodecBytesOrObjectCapacity (345 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.longNumericRecoveryFitsAndImpossibleCompletionIsRefusedBeforeAdoption
+[       OK ] dev.notecore.document.PreviewRecoveryTest.longNumericRecoveryFitsAndImpossibleCompletionIsRefusedBeforeAdoption (22099 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.denseCheckpointKeepsOrderChargesAndDuplicateIdentityRefusalThroughOneRetry
+[       OK ] dev.notecore.document.PreviewRecoveryTest.denseCheckpointKeepsOrderChargesAndDuplicateIdentityRefusalThroughOneRetry (2957 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.exactPendingRoundtripAndOriginalOwnerExplicitRetryOnce
+[       OK ] dev.notecore.document.PreviewRecoveryTest.exactPendingRoundtripAndOriginalOwnerExplicitRetryOnce (4 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.oldFlightCannotConfirmExtensionAndFailureRetainsExactRecovery
+[       OK ] dev.notecore.document.PreviewRecoveryTest.oldFlightCannotConfirmExtensionAndFailureRetainsExactRecovery (0 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.capacityRejectionAndSameRevisionForkDoNotDropBaseOrCompletion
+[       OK ] dev.notecore.document.PreviewRecoveryTest.capacityRejectionAndSameRevisionForkDoNotDropBaseOrCompletion (0 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.corruptUnknownTruncatedAndTrailingInputNeverReturnsOnlyBase
+[       OK ] dev.notecore.document.PreviewRecoveryTest.corruptUnknownTruncatedAndTrailingInputNeverReturnsOnlyBase (0 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.signedOrNonAsciiFramingCannotChangeRecoveredOperationIdentity
+[       OK ] dev.notecore.document.PreviewRecoveryTest.signedOrNonAsciiFramingCannotChangeRecoveredOperationIdentity (3 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.recoveryRetirementRequiresExactRootAndCommandAndCannotResubmit
+[       OK ] dev.notecore.document.PreviewRecoveryTest.recoveryRetirementRequiresExactRootAndCommandAndCannotResubmit (2 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.restoredCapacityRefusalKeepsPendingAndOwnerErrorsEscape
+[       OK ] dev.notecore.document.PreviewRecoveryTest.restoredCapacityRefusalKeepsPendingAndOwnerErrorsEscape (1 ms)
+[ RUN      ] dev.notecore.document.PreviewRecoveryTest.pendingMetadataBudgetRefusalPreservesCheckpointAndExactBudgetRestoresOnce
+[       OK ] dev.notecore.document.PreviewRecoveryTest.pendingMetadataBudgetRefusalPreservesCheckpointAndExactBudgetRestoresOnce (1 ms)
+[----------] 11 tests from dev.notecore.document.PreviewRecoveryTest (25419 ms total)
+
+[----------] 6 tests from dev.notecore.document.PreviewSaveDispatchTest
+[ RUN      ] dev.notecore.document.PreviewSaveDispatchTest.invalidAndTemporaryBudgetsRetainContentWithoutConsumingAnAttempt
+[       OK ] dev.notecore.document.PreviewSaveDispatchTest.invalidAndTemporaryBudgetsRetainContentWithoutConsumingAnAttempt (0 ms)
+[ RUN      ] dev.notecore.document.PreviewSaveDispatchTest.oversizedDocumentDoesNotBlockAnotherDocumentAndRemainsRecoverable
+[       OK ] dev.notecore.document.PreviewSaveDispatchTest.oversizedDocumentDoesNotBlockAnotherDocumentAndRemainsRecoverable (0 ms)
+[ RUN      ] dev.notecore.document.PreviewSaveDispatchTest.temporaryBackpressureKeepsEligibleOrderSoSmallerSavesCannotStarveTheFirstDocument
+[       OK ] dev.notecore.document.PreviewSaveDispatchTest.temporaryBackpressureKeepsEligibleOrderSoSmallerSavesCannotStarveTheFirstDocument (0 ms)
+[ RUN      ] dev.notecore.document.PreviewSaveDispatchTest.oldFlightAndNewContentKeepTheirChargesAndLateCompletionCannotClearTheReplacement
+[       OK ] dev.notecore.document.PreviewSaveDispatchTest.oldFlightAndNewContentKeepTheirChargesAndLateCompletionCannotClearTheReplacement (0 ms)
+[ RUN      ] dev.notecore.document.PreviewSaveDispatchTest.ownerFailuresPropagateBeforeAllReadsAndMutationsAndLeaveTheOriginalFlightIntact
+[       OK ] dev.notecore.document.PreviewSaveDispatchTest.ownerFailuresPropagateBeforeAllReadsAndMutationsAndLeaveTheOriginalFlightIntact (0 ms)
+[ RUN      ] dev.notecore.document.PreviewSaveDispatchTest.stoppedBackendIsNotTemporaryBytePressureAndDoesNotCancelAnExistingFlight
+[       OK ] dev.notecore.document.PreviewSaveDispatchTest.stoppedBackendIsNotTemporaryBytePressureAndDoesNotCancelAnExistingFlight (0 ms)
+[----------] 6 tests from dev.notecore.document.PreviewSaveDispatchTest (1 ms total)
+
+[----------] 6 tests from dev.notecore.document.ReadOnlyNotebookTest
+[ RUN      ] dev.notecore.document.ReadOnlyNotebookTest.readonlyRejectsOriginalRawAndLegacyInputWithoutIdentityOrBudgetChanges
+[       OK ] dev.notecore.document.ReadOnlyNotebookTest.readonlyRejectsOriginalRawAndLegacyInputWithoutIdentityOrBudgetChanges (0 ms)
+[ RUN      ] dev.notecore.document.ReadOnlyNotebookTest.originalEditFacadeAndDirectMethodsCannotBypassReadingMode
+[       OK ] dev.notecore.document.ReadOnlyNotebookTest.originalEditFacadeAndDirectMethodsCannotBypassReadingMode (0 ms)
+[ RUN      ] dev.notecore.document.ReadOnlyNotebookTest.navigationAndToolSurviveModeRoundtripWithoutContentMutation
+[       OK ] dev.notecore.document.ReadOnlyNotebookTest.navigationAndToolSurviveModeRoundtripWithoutContentMutation (0 ms)
+[ RUN      ] dev.notecore.document.ReadOnlyNotebookTest.activeInputPreventsModeChangeAndKeepsAcceptedPrefix
+[       OK ] dev.notecore.document.ReadOnlyNotebookTest.activeInputPreventsModeChangeAndKeepsAcceptedPrefix (0 ms)
+[ RUN      ] dev.notecore.document.ReadOnlyNotebookTest.retainedCompletionBlocksModeChangeUntilExplicitRetry
+[       OK ] dev.notecore.document.ReadOnlyNotebookTest.retainedCompletionBlocksModeChangeUntilExplicitRetry (0 ms)
+[ RUN      ] dev.notecore.document.ReadOnlyNotebookTest.closedAndWrongOwnerModeAccessFailsWithoutChangingContent
+[       OK ] dev.notecore.document.ReadOnlyNotebookTest.closedAndWrongOwnerModeAccessFailsWithoutChangingContent (0 ms)
+[----------] 6 tests from dev.notecore.document.ReadOnlyNotebookTest (1 ms total)
+
+[----------] 7 tests from dev.notecore.document.ReadingPositionRulesTest
+[ RUN      ] dev.notecore.document.ReadingPositionRulesTest.capturedPositionRestoresInNewSessionAndWindowWithoutChangingContent
+[       OK ] dev.notecore.document.ReadingPositionRulesTest.capturedPositionRestoresInNewSessionAndWindowWithoutChangingContent (0 ms)
+[ RUN      ] dev.notecore.document.ReadingPositionRulesTest.reorderKeepsIdentityAndDeletedPageNeverFallsBackToSameIndex
+[       OK ] dev.notecore.document.ReadingPositionRulesTest.reorderKeepsIdentityAndDeletedPageNeverFallsBackToSameIndex (0 ms)
+[ RUN      ] dev.notecore.document.ReadingPositionRulesTest.invalidRecordsAndForeignSpaceNeverChangeSelectionOrViewport
+[       OK ] dev.notecore.document.ReadingPositionRulesTest.invalidRecordsAndForeignSpaceNeverChangeSelectionOrViewport (0 ms)
+[ RUN      ] dev.notecore.document.ReadingPositionRulesTest.zeroLayoutOrMismatchedPageCannotOverwriteLastValidCapture
+[       OK ] dev.notecore.document.ReadingPositionRulesTest.zeroLayoutOrMismatchedPageCannotOverwriteLastValidCapture (0 ms)
+[ RUN      ] dev.notecore.document.ReadingPositionRulesTest.activeAndPendingInputBlockRestoreWithoutCancellation
+[       OK ] dev.notecore.document.ReadingPositionRulesTest.activeAndPendingInputBlockRestoreWithoutCancellation (0 ms)
+[ RUN      ] dev.notecore.document.ReadingPositionRulesTest.closedSessionRefusesRestoreBeforeViewportChangesAndReadOnlyCanNavigate
+[       OK ] dev.notecore.document.ReadingPositionRulesTest.closedSessionRefusesRestoreBeforeViewportChangesAndReadOnlyCanNavigate (0 ms)
+[ RUN      ] dev.notecore.document.ReadingPositionRulesTest.changedPaperBoundsConstrainOldCenterEvenInLargeValidWindow
+[       OK ] dev.notecore.document.ReadingPositionRulesTest.changedPaperBoundsConstrainOldCenterEvenInLargeValidWindow (0 ms)
+[----------] 7 tests from dev.notecore.document.ReadingPositionRulesTest (0 ms total)
+
+[----------] 4 tests from dev.notecore.document.RetiredEditingStateTest
+[ RUN      ] dev.notecore.document.RetiredEditingStateTest.originalAuthorityRetiresEditingReferencesAndRejectsOldAndNewCommands
+[       OK ] dev.notecore.document.RetiredEditingStateTest.originalAuthorityRetiresEditingReferencesAndRejectsOldAndNewCommands (0 ms)
+[ RUN      ] dev.notecore.document.RetiredEditingStateTest.stronglyRetainedOldNotebooksKeepOnlyCanonicalReadResponsibilityWhileNewOwnerEdits
+[       OK ] dev.notecore.document.RetiredEditingStateTest.stronglyRetainedOldNotebooksKeepOnlyCanonicalReadResponsibilityWhileNewOwnerEdits (3 ms)
+[ RUN      ] dev.notecore.document.RetiredEditingStateTest.failedRecoveryRetirementKeepsEditingAndExactHandoffRetainsPendingForSingleNewOwnerCommit
+[       OK ] dev.notecore.document.RetiredEditingStateTest.failedRecoveryRetirementKeepsEditingAndExactHandoffRetainsPendingForSingleNewOwnerCommit (4 ms)
+[ RUN      ] dev.notecore.document.RetiredEditingStateTest.wrongOwnerCannotRetireNotebookOrCancelItsAcceptedPrefix
+[       OK ] dev.notecore.document.RetiredEditingStateTest.wrongOwnerCannotRetireNotebookOrCancelItsAcceptedPrefix (0 ms)
+[----------] 4 tests from dev.notecore.document.RetiredEditingStateTest (9 ms total)
+
+[----------] 9 tests from dev.notecore.library.LibraryBatchRulesTest
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.moveMatchesSingleRulesAndKeepsOtherRowsAndRequestOrder
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.moveMatchesSingleRulesAndKeepsOtherRowsAndRequestOrder (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.favoriteAndUnfavoriteMatchSingleRuleWithoutModifyingTimestamps
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.favoriteAndUnfavoriteMatchSingleRuleWithoutModifyingTimestamps (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.recycleMatchesSingleRuleAndHasOnlySelectedIdentities
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.recycleMatchesSingleRuleAndHasOnlySelectedIdentities (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.badLastIdentityNeverLeaksAPartialBatch
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.badLastIdentityNeverLeaksAPartialBatch (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.invalidSelectionsAreRejectedByEveryOperation
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.invalidSelectionsAreRejectedByEveryOperation (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.staleAndCrossSpaceRequestsNeverProduceRows
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.staleAndCrossSpaceRequestsNeverProduceRows (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.partialAndCorruptSnapshotsCannotBeUsedEvenForValidSelectedRows
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.partialAndCorruptSnapshotsCannotBeUsedEvenForValidSelectedRows (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.invalidDestinationTimestampAndPreviouslyRecycledSelectionRejectWholeBatch
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.invalidDestinationTimestampAndPreviouslyRecycledSelectionRejectWholeBatch (0 ms)
+[ RUN      ] dev.notecore.library.LibraryBatchRulesTest.maximumSelectionIsAdmittedAsOneVersionBoundBatch
+[       OK ] dev.notecore.library.LibraryBatchRulesTest.maximumSelectionIsAdmittedAsOneVersionBoundBatch (3 ms)
+[----------] 9 tests from dev.notecore.library.LibraryBatchRulesTest (4 ms total)
+
+[----------] 10 tests from dev.notecore.library.LibraryFolderRulesTest
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.createRenameMoveDeletePreservesNoteIdentityAndOtherRows
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.createRenameMoveDeletePreservesNoteIdentityAndOtherRows (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.exactlyFiveLevelsAllowedAndSixthRejected
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.exactlyFiveLevelsAllowedAndSixthRejected (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.subtreeMoveChecksDeepestDescendantAndMoveBackToRootWorks
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.subtreeMoveChecksDeepestDescendantAndMoveBackToRootWorks (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.selfParentAndDescendantParentCyclesRefused
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.selfParentAndDescendantParentCyclesRefused (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.incompleteWrongSpaceAndStaleSnapshotsNeverProducePatch
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.incompleteWrongSpaceAndStaleSnapshotsNeverProducePatch (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.nonemptyFolderCannotDeleteChildrenOrNotesImplicitly
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.nonemptyFolderCannotDeleteChildrenOrNotesImplicitly (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.corruptGraphRefusedEvenWhenRequestedBranchLooksValid
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.corruptGraphRefusedEvenWhenRequestedBranchLooksValid (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.unicodeTitlesArePreservedButMalformedAndBlankTitlesRefused
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.unicodeTitlesArePreservedButMalformedAndBlankTitlesRefused (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.missingIdsParentsAndReusedIdsHaveExplicitFailures
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.missingIdsParentsAndReusedIdsHaveExplicitFailures (0 ms)
+[ RUN      ] dev.notecore.library.LibraryFolderRulesTest.boundedPlannerRejectsOversizedSnapshotAndCreationAtCapacity
+[       OK ] dev.notecore.library.LibraryFolderRulesTest.boundedPlannerRejectsOversizedSnapshotAndCreationAtCapacity (73 ms)
+[----------] 10 tests from dev.notecore.library.LibraryFolderRulesTest (73 ms total)
+
+[----------] 6 tests from dev.notecore.library.LibraryNoteMoveRulesTest
+[ RUN      ] dev.notecore.library.LibraryNoteMoveRulesTest.movingEditingNoteChangesOnlyItsLocationAndCanReturnToRoot
+[       OK ] dev.notecore.library.LibraryNoteMoveRulesTest.movingEditingNoteChangesOnlyItsLocationAndCanReturnToRoot (0 ms)
+[ RUN      ] dev.notecore.library.LibraryNoteMoveRulesTest.sameDestinationIsAnIdentityPreservingNoOp
+[       OK ] dev.notecore.library.LibraryNoteMoveRulesTest.sameDestinationIsAnIdentityPreservingNoOp (0 ms)
+[ RUN      ] dev.notecore.library.LibraryNoteMoveRulesTest.unknownNoteAndDestinationNeverProducePatch
+[       OK ] dev.notecore.library.LibraryNoteMoveRulesTest.unknownNoteAndDestinationNeverProducePatch (0 ms)
+[ RUN      ] dev.notecore.library.LibraryNoteMoveRulesTest.staleIncompleteAndCrossSpaceSnapshotsAreRejected
+[       OK ] dev.notecore.library.LibraryNoteMoveRulesTest.staleIncompleteAndCrossSpaceSnapshotsAreRejected (0 ms)
+[ RUN      ] dev.notecore.library.LibraryNoteMoveRulesTest.unrelatedCorruptReferencesAndCyclesBlockMove
+[       OK ] dev.notecore.library.LibraryNoteMoveRulesTest.unrelatedCorruptReferencesAndCyclesBlockMove (0 ms)
+[ RUN      ] dev.notecore.library.LibraryNoteMoveRulesTest.stalePlanCannotBeRevalidatedAfterConcurrentFolderDeletion
+[       OK ] dev.notecore.library.LibraryNoteMoveRulesTest.stalePlanCannotBeRevalidatedAfterConcurrentFolderDeletion (0 ms)
+[----------] 6 tests from dev.notecore.library.LibraryNoteMoveRulesTest (0 ms total)
+
+[----------] 9 tests from dev.notecore.library.LibrarySearchRulesTest
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.chineseAndEnglishSubstringSearchKeepTypedStableTargets
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.chineseAndEnglishSubstringSearchKeepTypedStableTargets (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.sortingDoesNotDependOnMetadataEnumerationOrViewPreference
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.sortingDoesNotDependOnMetadataEnumerationOrViewPreference (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.resolveFindsIdentityAndCurrentLocationInsteadOfMatchingDuplicateTitle
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.resolveFindsIdentityAndCurrentLocationInsteadOfMatchingDuplicateTitle (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.sameStringFolderAndNoteIdsRemainDistinctTargets
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.sameStringFolderAndNoteIdsRemainDistinctTargets (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.staleClickAfterMoveOrRecycleRequiresRefresh
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.staleClickAfterMoveOrRecycleRequiresRefresh (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.trashOrMissingTitleRowsCannotBeSilentlyMixedIntoActiveSearch
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.trashOrMissingTitleRowsCannotBeSilentlyMixedIntoActiveSearch (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.invalidOrPartialScopeRejectsEvenBlankQueries
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.invalidOrPartialScopeRejectsEvenBlankQueries (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.blankMalformedAndLiteralWhitespaceQueriesHaveExplicitSemantics
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.blankMalformedAndLiteralWhitespaceQueriesHaveExplicitSemantics (0 ms)
+[ RUN      ] dev.notecore.library.LibrarySearchRulesTest.resultBudgetAllowsExactLimitAndRejectsOverflowWithoutPartialHits
+[       OK ] dev.notecore.library.LibrarySearchRulesTest.resultBudgetAllowsExactLimitAndRejectsOverflowWithoutPartialHits (17 ms)
+[----------] 9 tests from dev.notecore.library.LibrarySearchRulesTest (18 ms total)
+
+[----------] 10 tests from dev.notecore.library.LibraryTrashRulesTest
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.recycleAndRestoreKeepIdentityOriginalFolderAndOtherRows
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.recycleAndRestoreKeepIdentityOriginalFolderAndOtherRows (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.missingOriginalFolderRestoresToRootButSameTitleOtherFolderIsNotUsed
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.missingOriginalFolderRestoresToRootButSameTitleOtherFolderIsNotUsed (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.rootNoteRemainsRootAfterRecycleAndRestore
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.rootNoteRemainsRootAfterRecycleAndRestore (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.repeatedAndUnknownActionsAreExplicitAndNeverMutateSnapshot
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.repeatedAndUnknownActionsAreExplicitAndNeverMutateSnapshot (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.allOperationsRefuseWrongSpaceStaleAndPartialSnapshots
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.allOperationsRefuseWrongSpaceStaleAndPartialSnapshots (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.duplicateAndOverlappingIdentitiesMalformedHistoryAreRejected
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.duplicateAndOverlappingIdentitiesMalformedHistoryAreRejected (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.corruptActiveFolderAndTotalCapacityRejectBeforePlanning
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.corruptActiveFolderAndTotalCapacityRejectBeforePlanning (129 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.emptyScopeIsSortedDetachedAndExplicitlyVersionBound
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.emptyScopeIsSortedDetachedAndExplicitlyVersionBound (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.changedScopeCannotConfirmNewTrashRowsOrCrossSpaceHistory
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.changedScopeCannotConfirmNewTrashRowsOrCrossSpaceHistory (0 ms)
+[ RUN      ] dev.notecore.library.LibraryTrashRulesTest.alreadyEmptyScopeIsSafeNoOpAndOriginalContentsRemainUntouched
+[       OK ] dev.notecore.library.LibraryTrashRulesTest.alreadyEmptyScopeIsSafeNoOpAndOriginalContentsRemainUntouched (0 ms)
+[----------] 10 tests from dev.notecore.library.LibraryTrashRulesTest (130 ms total)
+
+[----------] 10 tests from dev.notecore.library.LibraryViewRulesTest
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.stableSortKeysDoNotDependOnEnumerationOrder
+[       OK ] dev.notecore.library.LibraryViewRulesTest.stableSortKeysDoNotDependOnEnumerationOrder (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.favoritesCanBeRemovedWithoutChangingContentOrSortKeys
+[       OK ] dev.notecore.library.LibraryViewRulesTest.favoritesCanBeRemovedWithoutChangingContentOrSortKeys (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.openedTimestampDoesNotRegressOrChangeModificationTime
+[       OK ] dev.notecore.library.LibraryViewRulesTest.openedTimestampDoesNotRegressOrChangeModificationTime (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.refreshKeepsIdentityAndOffsetAcrossReorderAndFavoriteFilter
+[       OK ] dev.notecore.library.LibraryViewRulesTest.refreshKeepsIdentityAndOffsetAcrossReorderAndFavoriteFilter (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.missingAnchorUsesNearestIndexAndEmptyProjectionHasNoAnchor
+[       OK ] dev.notecore.library.LibraryViewRulesTest.missingAnchorUsesNearestIndexAndEmptyProjectionHasNoAnchor (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.preferencePatchContainsBothBeforeAndAfterAndNoNoteMutation
+[       OK ] dev.notecore.library.LibraryViewRulesTest.preferencePatchContainsBothBeforeAndAfterAndNoNoteMutation (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.invalidScopeAndIncompleteEnumerationRejectProjectionAndMutation
+[       OK ] dev.notecore.library.LibraryViewRulesTest.invalidScopeAndIncompleteEnumerationRejectProjectionAndMutation (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.invalidMetadataCannotSilentlyHideRows
+[       OK ] dev.notecore.library.LibraryViewRulesTest.invalidMetadataCannotSilentlyHideRows (0 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.plannerRefusesOverCapacityBeforeReturningPartialRows
+[       OK ] dev.notecore.library.LibraryViewRulesTest.plannerRefusesOverCapacityBeforeReturningPartialRows (21 ms)
+[ RUN      ] dev.notecore.library.LibraryViewRulesTest.legacyEmptyAndSupplementaryUnicodeTitlesArePreserved
+[       OK ] dev.notecore.library.LibraryViewRulesTest.legacyEmptyAndSupplementaryUnicodeTitlesArePreserved (0 ms)
+[----------] 10 tests from dev.notecore.library.LibraryViewRulesTest (21 ms total)
+
+[----------] Global test environment tear-down
+[==========] 306 tests from 39 test cases ran. (69717 ms total)
+[  PASSED  ] 306 tests.

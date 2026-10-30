@@ -128,6 +128,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
             is CanvasCommand.AddStroke -> action.samples.size.toLong() * POINT_BYTES
             else -> 0L
         }
+        is OrderObjects -> command.selectionCharge
         is DocumentCommand.CopyPage -> command.objectMappingCount * 768L
         is DocumentCommand.PreparedCanvas -> command.patch.changes().sumOf {
             1024L + (it.before?.samples?.size ?: 0).toLong() * 28 + (it.after?.samples?.size ?: 0).toLong() * 28
@@ -145,6 +146,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
     private fun validCommandIdentity(command: DocumentCommand): Boolean {
         if (!command.id.value.hasValidUnicode() || !command.documentId.value.hasValidUnicode()) return false
         return when (command) {
+            is OrderObjects -> command.validIds()
             is DocumentCommand.Rename -> true
             is DocumentCommand.Undo -> command.expectedOperationId.value.hasValidUnicode()
             is DocumentCommand.Redo -> command.expectedOperationId.value.hasValidUnicode()
@@ -185,6 +187,8 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
         var title = root.title
         val changes = mutableListOf<ObjectChange>()
         var historyDelta: DocumentDelta? = null
+        var objectOrder: PageObjectOrder? = null
+        var plannedOrder: ObjectOrderPlan? = null
         val undoing = command is DocumentCommand.Undo
         var canvasPatch: ScenePatch? = null
         val affected = linkedSetOf<PageId>()
@@ -207,6 +211,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                 val delta = (if (undoing) old.undo else old.redo).lastOrNull() ?: return reject(DocumentRejection.HISTORY_EMPTY)
                 if (delta.operationId != expected) return reject(DocumentRejection.HISTORY_TARGET)
                 historyDelta = delta
+                if (delta.objectOrder?.matches(root, undoing) == false) return reject(DocumentRejection.HISTORY_CONFLICT)
                 val expectedOrder = if (undoing) delta.afterOrder else delta.beforeOrder
                 val targetOrder = if (undoing) delta.beforeOrder else delta.afterOrder
                 val expectedTitle = if (undoing) delta.afterTitle else delta.beforeTitle
@@ -233,6 +238,30 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                     changes.add(ObjectChange(current, targetObject?.copy(objectRevision = epoch + 1)))
                 }
                 affected.addAll(delta.affected)
+            }
+            is OrderObjects -> {
+                val page = root.findPage(command.pageId) ?: return reject(DocumentRejection.MISSING_PAGE)
+                // Admit retained history and bounded temporary identity containers before planning.
+                val afterPages = pages.map { if (it.id == page.id) it.copy(contentRevision = nextRevision) else it }
+                val projected = DocumentDelta.projectedCharge(root, title, afterPages, emptyList(), setOf(page.id)) +
+                    PageObjectOrder.projectedCharge(root, page)
+                if (projected > budget.historyBytes) return reject(DocumentRejection.HISTORY_CAPACITY)
+                val scratch = 512L + root.scene.objectCount * 256L + command.selectionCharge * 4L
+                if (scratch > budget.inputBytes) return reject(DocumentRejection.LIVE_BYTE_CAPACITY)
+                val result = ObjectOrderRules.plan(root, root.id, root.revision, page.id,
+                    command.selectedIds(), command.direction, budget.maxObjects)
+                val plan = result.plan ?: return reject(when (result.failure) {
+                    ObjectOrderFailure.NO_CHANGE -> DocumentRejection.NO_CHANGE
+                    ObjectOrderFailure.WRONG_PAGE -> DocumentRejection.WRONG_LAYER
+                    ObjectOrderFailure.CAPACITY -> DocumentRejection.OBJECT_CAPACITY
+                    else -> DocumentRejection.INVALID_IDENTITY
+                })
+                plannedOrder = plan
+                val before = root.pageObjects(page.id).map { it.id }
+                val after = plan.objectIds().filter { root.scene.find(it)!!.layerId == page.layerId }
+                objectOrder = PageObjectOrder(page.id, before, after)
+                pages[pages.indexOf(page)] = page.copy(contentRevision = nextRevision)
+                affected.add(page.id)
             }
             is DocumentCommand.Rename -> {
                 title = command.title.trim().take(120).ifBlank { "未命名笔记" }
@@ -350,12 +379,14 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
         // Original commands have passed canonical preparation above. Reject oversized history before
         // copying the complete scene map. External prepared patches keep their existing CAS-first check.
         if (historyDelta == null && command !is DocumentCommand.PreparedCanvas &&
-            DocumentDelta.projectedCharge(root, title, pages, changes, affected) > budget.historyBytes)
+            DocumentDelta.projectedCharge(root, title, pages, changes, affected) + (objectOrder?.charge ?: 0L) > budget.historyBytes)
             return reject(DocumentRejection.HISTORY_CAPACITY)
         val application = SceneReducer.apply(root.scene, patch)
         if (application is SceneApplication.Rejected) return reject(DocumentRejection.SCENE_REJECTED, application.reason)
         var scene = (application as SceneApplication.Applied).snapshot
+        plannedOrder?.let { scene = SceneSnapshot.reordered(scene, it.objectIds()) }
         historyDelta?.let { delta ->
+            delta.objectOrder?.let { scene = it.apply(scene, root.findPage(it.pageId)!!.layerId, undoing) }
             val positions = if (undoing) delta.beforePositions else delta.afterPositions
             // Only newly restored members need placement; transforms keep their existing draw order.
             val restored = changes.filter { it.before == null }.map { it.after!!.id }.toSet()
@@ -374,7 +405,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
             nextUndo = if (undoing) old.undo.dropLast(1) else old.undo + traversal
             nextRedo = if (undoing) old.redo + traversal else old.redo.dropLast(1)
         } else {
-            val delta = DocumentDelta(command.id, root, nextRoot, changes, affected)
+            val delta = DocumentDelta(command.id, root, nextRoot, changes, affected, objectOrder)
             if (delta.charge > budget.historyBytes) return reject(DocumentRejection.HISTORY_CAPACITY)
             val retained = old.undo.toMutableList()
             var retainedBytes = retained.sumOf { it.charge }

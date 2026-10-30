@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.canvas.prototype.ResourceLeaseContractTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-30T14:32:02.550Z" hostname="lixiaofandeMac-mini.local" time="0.001">
+  <properties/>
+  <testcase name="reservationPrecedesAllocationAndCancellationRestoresBudget[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="admissionFailureNeverEvictsResidentOrPretendsRetiredBytesAreFree[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="evictionCannotDestroyAResourceStillBorrowedByReader[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="multipleReadersCountUniqueBytesAndAllMustReturn[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="sameKeyReplacementRetainsOldGenerationUntilItsOwnLeaseEnds[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="lruBorrowOrderEvictsOldestResidentWithoutFreeingBytesEarly[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="terminalCloseRejectsNewWorkButLateAllocationTransfersForRelease[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="closeCannotCancelReservationOfWorkerWhoseAllocationOutcomeIsUnknown[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="foreignAndDuplicateTokensCannotReleaseAnotherOwnersBudget[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="duplicateRawResourceCannotBeRegisteredUnderTwoOwnersInSamePool[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="failedDestructionKeepsBudgetAndUsesFreshAttemptForExplicitRetry[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="unknownDestructionQuarantinesUntilExplicitBackendReconciliation[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="reconciliationThatResourceStillLivesAllowsAnExplicitNewRelease[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="laneAndMetadataLimitsFailWithoutMutation[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="subtractionBasedAdmissionDoesNotOverflowLongBudget[iosSimulatorArm64]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

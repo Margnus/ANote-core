@@ -1,0 +1,56 @@
+name: Apple independent sketch
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apple-sketch.yml'
+      - 'ci/verify_apple_sketch.py'
+      - 'samples/apple-sketch/**'
+      - 'canvas-core/src/commonMain/**'
+      - 'canvas-core/src/iosMain/**'
+      - 'shared-core/src/commonMain/**'
+      - 'shared-core/src/iosMain/**'
+      - 'canvas-core/build.gradle.kts'
+      - 'shared-core/build.gradle.kts'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/wrapper/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-sketch-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Select bundled JDK 17
+        run: |
+          test -x "$JAVA_HOME_17_arm64/bin/java"
+          echo "JAVA_HOME=$JAVA_HOME_17_arm64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_17_arm64/bin" >> "$GITHUB_PATH"
+      - name: Verify independent UIKit sketch
+        run: python3 ci/verify_apple_sketch.py
+      - name: Retain evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: apple-sketch-${{ github.sha }}
+          path: |
+            build/apple-sketch/*.json
+            build/apple-sketch/*.log
+            build/apple-sketch/attachments/**
+          if-no-files-found: error
+          retention-days: 14

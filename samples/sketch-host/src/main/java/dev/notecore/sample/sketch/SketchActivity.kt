@@ -55,6 +55,10 @@ class SketchActivity : Activity() {
         canvasView.invalidate()
     }
     override fun onRetainNonConfigurationInstance(): Any = session
+    override fun onPause() {
+        canvasView.cancelActiveInput()
+        super.onPause()
+    }
     override fun onDestroy() {
         // Only an unfinished contact is cancelled. A completed pending command is never cleared here.
         canvasView.cancelActiveInput()

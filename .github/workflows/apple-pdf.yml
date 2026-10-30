@@ -1,0 +1,42 @@
+name: Apple PDF capability
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apple-pdf.yml'
+      - 'ci/collect_apple_pdf.py'
+      - 'tools/probes/PdfCapabilityProbe.swift'
+      - 'android-app/src/androidTest/assets/pdf/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-pdf-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: macos-15
+    timeout-minutes: 15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Collect metadata and native images
+        run: python3 ci/collect_apple_pdf.py
+      - name: Retain observations, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: apple-pdf-${{ github.sha }}
+          path: |
+            build/apple-pdf/*.json
+            build/apple-pdf/*.log
+            build/apple-pdf/*.png
+          if-no-files-found: error
+          retention-days: 14

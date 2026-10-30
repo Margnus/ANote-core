@@ -1,0 +1,89 @@
+Writing result bundle at path:
+	/Users/lixiaofan/StudioProjects/notecore/ios-app/build/host-tests/run-97c0c44015e047d99b624bcd72b63924.xcresult
+
+error: the following command failed with exit code 0 but produced no further output
+SwiftCompile normal arm64 /Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift (in target 'NoteCorePreviewTests' from project 'NoteCorePreview')
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:222:18: warning: weak variable 'goneInput' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 220 |         inputView?.touchesBegan([SyntheticInkTouch(80, 3)], with: nil)
+ 221 |         XCTAssertTrue(reopened.hasActiveStroke)
+ 222 |         weak var goneInput = inputView
+     |                  `- warning: weak variable 'goneInput' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 223 |         inputView = nil; XCTAssertNil(goneInput)
+ 224 |         a.cancelInput() // Explicit cancellation uses its original operation, never ARC as a receipt.
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:623:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 621 |         let note = try XCTUnwrap(model?.current); draw(note); model?.changed()
+ 622 |         let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+ 623 |         weak var observer = model
+     |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 624 |         var finished = false
+ 625 |         XCTAssertEqual(model?.beginOwnerRetirement { status in
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:645:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 643 |         let identity = ObjectIdentifier(try XCTUnwrap(model))
+ 644 |         let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+ 645 |         weak var observer = model
+     |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 646 |         model = nil
+ 647 |         try await eventually("original owner retains failed accepted write before retirement") {
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:671:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 669 |         let note = try XCTUnwrap(model?.current); draw(note); model?.changed()
+ 670 |         let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+ 671 |         weak var observer = model
+     |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 672 |         var finished = false
+ 673 |         XCTAssertEqual(model?.beginOwnerRetirement { status in
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[#WeakMutability]: <https://docs.swift.org/compiler/documentation/diagnostics/weak-mutability>
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:108:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+106 |         var model: PreviewModel? = fixture?.0
+107 |         var view: InkUIView? = fixture?.1; fixture = nil
+108 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+109 |         let identity = ObjectIdentifier(try XCTUnwrap(model))
+110 |         _ = viewImage(try XCTUnwrap(view))
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:140:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+138 |         var model: PreviewModel? = fixture?.0
+139 |         var view: InkUIView? = fixture?.1; fixture = nil
+140 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+141 |         _ = viewImage(try XCTUnwrap(view))
+142 |         try await eventually { (model?.inkFramePublications ?? 0) > 0 }
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:159:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+157 |         var model: PreviewModel? = fixture?.0
+158 |         var view: InkUIView? = fixture?.1; fixture = nil
+159 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+160 |         _ = viewImage(try XCTUnwrap(view))
+161 |         try await eventually { (model?.inkFramePublications ?? 0) > 0 }
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:186:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+184 |         var model: PreviewModel? = fixture?.0
+185 |         var view: InkUIView? = fixture?.1; fixture = nil
+186 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+187 |         _ = viewImage(try XCTUnwrap(view))
+188 |         try await eventually { started.wait(timeout: .now()) == .success }
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:277:18: warning: weak variable 'goneView' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+275 |         })
+276 |         let model = try XCTUnwrap(captured).0
+277 |         weak var goneView = captured?.1
+    |                  `- warning: weak variable 'goneView' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+278 |         var view: InkUIView? = captured?.1; captured = nil
+279 |         _ = viewImage(try XCTUnwrap(view))
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[#WeakMutability]: <https://docs.swift.org/compiler/documentation/diagnostics/weak-mutability>
+2026-10-30 22:37:17.820 xcodebuild[23409:179874] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:37:37.117 xcodebuild[23409:179874] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:37:37.118 xcodebuild[23409:179874] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:37:37.121 xcodebuild[23409:179874] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:37:37.407 xcodebuild[23409:179874] [MT] IDETestOperationsObserverDebug: 20.700 elapsed -- Testing started completed.
+2026-10-30 22:37:37.407 xcodebuild[23409:179874] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-30 22:37:37.407 xcodebuild[23409:179874] [MT] IDETestOperationsObserverDebug: 20.700 sec, +20.700 sec -- end
+Testing started

@@ -1,0 +1,48 @@
+
+> Configure project :canvas-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:compileKotlinJvm UP-TO-DATE
+> Task :canvas-core:compileJvmMainJava NO-SOURCE
+> Task :canvas-core:jvmProcessResources NO-SOURCE
+> Task :canvas-core:processJvmMainResources SKIPPED
+> Task :canvas-core:jvmMainClasses UP-TO-DATE
+> Task :canvas-core:jvmJar UP-TO-DATE
+> Task :canvas-core:compileTestKotlinJvm UP-TO-DATE
+> Task :canvas-core:compileJvmTestJava NO-SOURCE
+> Task :canvas-core:generateScaleFixtures UP-TO-DATE
+> Task :canvas-core:jvmTestProcessResources UP-TO-DATE
+> Task :canvas-core:processJvmTestResources SKIPPED
+> Task :canvas-core:jvmTestClasses UP-TO-DATE
+> Task :canvas-core:jvmTest UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:jvmProcessResources NO-SOURCE
+> Task :shared-core:processJvmMainResources SKIPPED
+> Task :shared-core:jvmTestProcessResources NO-SOURCE
+> Task :shared-core:processJvmTestResources SKIPPED
+> Task :shared-core:compileKotlinJvm
+> Task :shared-core:compileJvmMainJava NO-SOURCE
+> Task :shared-core:jvmMainClasses
+> Task :shared-core:jvmJar
+> Task :shared-core:compileTestKotlinJvm
+> Task :shared-core:compileJvmTestJava NO-SOURCE
+> Task :shared-core:jvmTestClasses
+> Task :shared-core:jvmTest
+
+[Incubating] Problems report is available at: file:///D:/work/StudioProjects/ANote-core/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 46s
+12 actionable tasks: 6 executed, 6 up-to-date

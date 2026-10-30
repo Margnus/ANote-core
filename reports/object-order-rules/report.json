@@ -1,0 +1,36 @@
+{
+  "status": "jvm_passed_native_pending",
+  "baseline_core": "7a61c0db42f6b2cc8785b2752051835bd6270c21",
+  "new_checks": [
+    "selectedObjectsAndResultsCannotAliasCallerLists[jvm]",
+    "stableFrontAndBackKeepSelectionOrderAndOtherPageSlots[jvm]",
+    "duplicateMissingCrossPageAndPaperSelectionsRefuseWholePlan[jvm]",
+    "existingFormatKeepsProposedOrderButLedgerRejectsUnversionedFork[jvm]",
+    "admissionChecksDocumentRevisionPageAndCountBeforePlanning[jvm]",
+    "noChangeProducesNoPlanAndNewRootInvalidatesOldProposal[jvm]"
+  ],
+  "suite_counts": {
+    "canvas-core": {
+      "tests": 234,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 331,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "scope": "Internal OBJ05 stable front/back order proposal rules, current stroke-only canonical scene. No authority reorder command/undo, storage/App integration, mixed text/image objects or complete requirement acceptance. Same-version codec fixture is deliberately refused by original ledger.",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ObjectOrderRules.kt": "e6be57bc02c78e0482d060e320fb3fdf0d78529f19a7d031d0ecd878c9648232",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/ObjectOrderRulesTest.kt": "51634e6dc7fcd22613a64f3474c65fe673e3a5a8334d53bc907cc723af2f934b",
+    "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1"
+  },
+  "evidence_sha256": {
+    "reports/object-order-rules/build.log": "b9f517bd5c1d386da5fca11ce2c4f257276707e022384e2b8ea586c7089dc873",
+    "reports/object-order-rules/new-tests.xml": "b3e38c64b4ce982cd2cb79f96734732331f85217dfa436d1dd6402b6a86abaf1"
+  }
+}

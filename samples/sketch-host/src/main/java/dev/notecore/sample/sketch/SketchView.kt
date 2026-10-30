@@ -23,12 +23,13 @@ class SketchView(context: Context, private val session: SketchSession, private v
     private var startX = 0f
     private var startY = 0f
     private var moved = false
-    private val scale get() = min(width / 595f, height / 842f)
+    private val scale get() = min(width / note.currentPage.width.toFloat(), height / note.currentPage.height.toFloat())
     private data class RenderStroke(val path: Path, val matrix: Matrix, val argb: Int, val width: Float, val x: Float, val y: Float, val dot: Boolean)
     private val paths = mutableListOf<RenderStroke>()
     private var cachedRevision = -1L
+    private var cachedPageId: String? = null
     private fun refreshPaths() {
-        if (cachedRevision == note.changeVersion) return
+        if (cachedRevision == note.changeVersion && cachedPageId == note.currentPageId.value) return
         paths.clear()
         for (i in 0 until note.strokeCount) {
             val stroke = note.stroke(i); val samples = stroke.samples
@@ -45,28 +46,34 @@ class SketchView(context: Context, private val session: SketchSession, private v
             paths += RenderStroke(path, matrix, stroke.brush.argb, stroke.brush.width.toFloat(), x, y, dot)
         }
         cachedRevision = note.changeVersion
+        cachedPageId = note.currentPageId.value
     }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (scale <= 0) return
-        canvas.save(); canvas.scale(scale, scale); canvas.clipRect(0f, 0f, 595f, 842f)
-        session.background.draw(canvas, 595f, 842f)
-        refreshPaths()
-        for (stroke in paths) {
-            canvas.save(); canvas.concat(stroke.matrix)
-            paint.color = stroke.argb; paint.strokeWidth = stroke.width
-            paint.style = if (stroke.dot) Paint.Style.FILL else Paint.Style.STROKE
-            if (stroke.dot) canvas.drawCircle(stroke.x, stroke.y, stroke.width / 2, paint) else canvas.drawPath(stroke.path, paint)
-            canvas.restore()
-        }
-        active?.let { path ->
-            val tool = session.tools[session.toolIndex]
-            paint.color = tool.argb; paint.strokeWidth = tool.width.toFloat()
-            paint.style = if (moved) Paint.Style.STROKE else Paint.Style.FILL
-            if (moved) canvas.drawPath(path, paint) else canvas.drawCircle(startX, startY, paint.strokeWidth / 2, paint)
-        }
-        canvas.restore()
+        val pageState = canvas.save()
+        try {
+            canvas.scale(scale, scale); canvas.clipRect(0f, 0f, note.currentPage.width.toFloat(), note.currentPage.height.toFloat())
+            val backgroundState = canvas.save()
+            try { session.background.draw(canvas, note.currentPage.width.toFloat(), note.currentPage.height.toFloat()) }
+            finally { canvas.restoreToCount(backgroundState) }
+            refreshPaths()
+            for (stroke in paths) {
+                canvas.save(); canvas.concat(stroke.matrix)
+                paint.color = stroke.argb; paint.strokeWidth = stroke.width
+                paint.style = if (stroke.dot) Paint.Style.FILL else Paint.Style.STROKE
+                if (stroke.dot) canvas.drawCircle(stroke.x, stroke.y, stroke.width / 2, paint) else canvas.drawPath(stroke.path, paint)
+                canvas.restore()
+            }
+            active?.let { path ->
+                val tool = session.tools[session.toolIndex]
+                paint.color = tool.argb; paint.strokeWidth = tool.width.toFloat()
+                paint.style = if (moved) Paint.Style.STROKE else Paint.Style.FILL
+                if (moved) canvas.drawPath(path, paint) else canvas.drawCircle(startX, startY, paint.strokeWidth / 2, paint)
+            }
+        } finally { canvas.restoreToCount(pageState) }
     }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (session.readOnly || scale <= 0) return false
         if (event.actionMasked == MotionEvent.ACTION_CANCEL) { cancelActiveInput(); return true }
@@ -92,7 +99,7 @@ class SketchView(context: Context, private val session: SketchSession, private v
             val millis = if (current) event.eventTime else event.getHistoricalEventTime(i)
             times[i] = if (millis in 0..Long.MAX_VALUE / 1000) millis * 1000 else -1
         }
-        if (phase == PointerPhase.DOWN && (xs[0] !in 0.0..595.0 || ys[0] !in 0.0..842.0)) return false
+        if (phase == PointerPhase.DOWN && (xs[0] !in 0.0..note.currentPage.width || ys[0] !in 0.0..note.currentPage.height)) return false
         val result = note.offerRealBatch(phase, times.last(), xs, ys, pressures, times)
         if (!result.admitted) { blockInput(); return true }
         if (phase == PointerPhase.DOWN) {
@@ -112,5 +119,13 @@ class SketchView(context: Context, private val session: SketchSession, private v
     }
     private fun blockInput() { blocked = true; changed("输入被拒绝，已接受部分保留；请明确取消当前笔") }
     fun cancelActiveInput() { note.cancelStroke(); active = null; pointer = -1; blocked = false; invalidate() }
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != oldw || h != oldh) cancelActiveInput()
+    }
+    override fun onDetachedFromWindow() {
+        cancelActiveInput()
+        super.onDetachedFromWindow()
+    }
     override fun performClick(): Boolean { super.performClick(); return true }
 }

@@ -1,0 +1,38 @@
+{
+  "status": "passed",
+  "baseline_core": "38dc8a2ba525f782b467a2e53a66df1e7d1c8682",
+  "environment": {
+    "avd": "NoteCoreCurrent35",
+    "serial": "emulator-5590",
+    "api": 35
+  },
+  "before": "Actual small-page outside DOWN accepted due to leftover 595x842 admission boundary.",
+  "after": "Current-page bounds refuse small-page outside DOWN without root/active/charge mutation; actual MotionEvent dots on 300x600 and 900x1200 pages retain expected canonical x/y within 0.001, two real samples each. Original input/readonly/background/page/Activity owner groups pass.",
+  "installed_apk_sha256": {
+    "dev.notecore.sample.sketch": "f4b6e2b5b0388e5526ef3126d3f6ceb72d879c390aee48db8af0075d011884fc",
+    "dev.notecore.sample.sketch.test": "e623662eb200a87f14c047a61827d1def88346dfbcff9ffe92fd2ec9f471daa4"
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 4
+  },
+  "original_note_count": 5,
+  "original_notes_byte_identical": true,
+  "scope": "Existing independent Android memory host input page boundary completion. No shared/Swift/production App changes, no physical/Pencil/multitouch/C1 acceptance.",
+  "source_sha256": {
+    "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt": "d60850b754491d8397947b87e5286f33a0d71434324bbbd3e7f0e6841e976988",
+    "samples/sketch-host/src/androidTest/java/dev/notecore/sample/sketch/SketchInstrumentation.kt": "8dbdbd2cc8d5084db5cdf58a21b4fad8c11eea3f5d03b269b8c2db5913a3e7cf"
+  },
+  "evidence_sha256": {
+    "reports/sketch-page-input/notes-after.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-page-input/notes-before.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-page-input/after/build-inputs.sha256": "cdc3665a1a42e6ac08d360c499541dce88684bfd3e9a7c59f46e9d331511eee1",
+    "reports/sketch-page-input/after/build.log": "3fe11e4d1c26605c1c0bfbcb6b0e2619b4a42bb69a36a67ea1ab6dcd8f49ba3c",
+    "reports/sketch-page-input/after/lint.xml": "e214305aa6d4fe54c378dba6d5c845c5afeac4c7159d8fea2e24766dc8f6ac40",
+    "reports/sketch-page-input/after/run.log": "59865a777aeb03c0cf790d980aa9654840f946a64cffafa22a43609ee8ce707e",
+    "reports/sketch-page-input/before/build-inputs.sha256": "241eb1684d2c64e3669ac21a54dba7e90c4a4ea1da4e6d01e072e06d1802915b",
+    "reports/sketch-page-input/before/build.log": "49f337475b5a37fd6fe374e9324d6fede8b30ac9b3ceada148dbb49f246d791e",
+    "reports/sketch-page-input/before/run.log": "9a32275d1cf90803faf96f9f3ef9857b52ba5bcc2870b0ef3fc017de0c4f94ab",
+    "reports/sketch-page-input/before/SketchInstrumentation.kt": "8dbdbd2cc8d5084db5cdf58a21b4fad8c11eea3f5d03b269b8c2db5913a3e7cf"
+  }
+}

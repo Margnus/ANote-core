@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "baseline_core": "cd445253a04ac21243b73b1880f46467f4c078a0",
+  "environment": {
+    "avd": "NoteCoreCurrent35",
+    "serial": "emulator-5590",
+    "api": 35
+  },
+  "observations": {
+    "status": "passed",
+    "output": "/data/user/0/dev.notecore.preview/cache/image-budget-art-4ff01de8-8b13-482f-94de-87565fae69cf",
+    "rows": [
+      {
+        "format": "jpeg",
+        "source_sha256": "7db84e50374f91636deb29b11ef3d3be89520b37b33878f302cdd5c9a1c5b06f",
+        "sample": 4,
+        "width": 65,
+        "height": 49,
+        "row_bytes": 260,
+        "allocation_bytes": 12740,
+        "planned_argb_bytes": 12740,
+        "rejected_full_decode_calls": 0,
+        "successful_full_decode_calls": 1
+      },
+      {
+        "format": "png",
+        "source_sha256": "f55a20881ab9245e3573d2735e3a063a5fc13d3c5023286b431f29deac66658b",
+        "sample": 4,
+        "width": 64,
+        "height": 48,
+        "row_bytes": 256,
+        "allocation_bytes": 12288,
+        "planned_argb_bytes": 12740,
+        "rejected_full_decode_calls": 0,
+        "successful_full_decode_calls": 1
+      }
+    ],
+    "scope": "Actual API35 BitmapFactory profile; orientation6 is trusted test metadata, no EXIF/heap/scratch/owner/App acceptance"
+  },
+  "build_input_count": 106,
+  "installed_apk_sha256": {
+    "dev.notecore.preview": "3e9733dee5a699b2829394a8872c9179013010b34ed7db47a547b62641d4587c",
+    "dev.notecore.preview.test": "e3256078deadbd9dea0ec78e37c0391a085a2a6ca4f1bf3a8c7515cc061f5787"
+  },
+  "original_note_count": 5,
+  "original_notes_byte_identical": true,
+  "scope": "Actual ART counterpart of original odd-image host decode admission; trusted orientation6, no EXIF parser/decoder scratch/process heap/worker owner/Apple/App-object acceptance. All created Bitmap instances explicitly recycled.",
+  "evidence_sha256": {
+    "reports/image-budget-art/build-inputs.sha256": "9f8688ea77d24ce3e40ab5ce869ab899a293ddb4c1b326ad8de9579787910967",
+    "reports/image-budget-art/build.log": "2fffa2748d0989d2f294a01c7ca30db4fef8bb584af486be6452350bfda037d5",
+    "reports/image-budget-art/jpeg-decoded.png": "77622a7397159bdff9852b180437dbb8d1b12d402171e108872c689cc8ec3100",
+    "reports/image-budget-art/notes-after.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/image-budget-art/notes-before.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/image-budget-art/odd.jpeg": "7db84e50374f91636deb29b11ef3d3be89520b37b33878f302cdd5c9a1c5b06f",
+    "reports/image-budget-art/odd.png": "f55a20881ab9245e3573d2735e3a063a5fc13d3c5023286b431f29deac66658b",
+    "reports/image-budget-art/png-decoded.png": "a972ac65e10685f55f1b55a81ec67d6580bc82ce41214b06861866249406a4b5",
+    "reports/image-budget-art/result.json": "8fb501358481c85eaff48e72e4a8fbeab648da9aa182c75bac720a4754b3fdef",
+    "reports/image-budget-art/run.log": "becc79ad6b442ba3e34ae842cb2a7e43e4ae4921f0471f3eb95903144ebcf6cb"
+  }
+}

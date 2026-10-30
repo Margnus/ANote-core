@@ -1,0 +1,56 @@
+{
+  "model": {
+    "suites": {
+      "ObjectOrderRulesTest": 6,
+      "ObjectOrderAuthorityTest": 6,
+      "DocumentHistoryTest": 14,
+      "DocumentAuthorityTest": 20,
+      "RetiredEditingStateTest": 4
+    },
+    "apk_sha256": "c7bf9957a565ef16583ac933de5f647a9328f4c59038c16f1470ed9ee3652cff",
+    "ignored": 0
+  },
+  "image_budget": {
+    "status": "passed",
+    "output": "/data/user/0/dev.notecore.preview/cache/image-budget-art-5ca22075-3f9c-45c6-b7bf-13fa48a39921",
+    "rows": [
+      {
+        "format": "jpeg",
+        "source_sha256": "7db84e50374f91636deb29b11ef3d3be89520b37b33878f302cdd5c9a1c5b06f",
+        "sample": 4,
+        "width": 65,
+        "height": 49,
+        "row_bytes": 260,
+        "allocation_bytes": 12740,
+        "planned_argb_bytes": 12740,
+        "rejected_full_decode_calls": 0,
+        "successful_full_decode_calls": 1
+      },
+      {
+        "format": "png",
+        "source_sha256": "f55a20881ab9245e3573d2735e3a063a5fc13d3c5023286b431f29deac66658b",
+        "sample": 4,
+        "width": 64,
+        "height": 48,
+        "row_bytes": 256,
+        "allocation_bytes": 12288,
+        "planned_argb_bytes": 12740,
+        "rejected_full_decode_calls": 0,
+        "successful_full_decode_calls": 1
+      }
+    ],
+    "scope": "Actual API35 BitmapFactory profile; orientation6 is trusted test metadata, no EXIF/heap/scratch/owner/App acceptance"
+  },
+  "image_ownership": {
+    "status": "passed",
+    "output": "/data/user/0/dev.notecore.preview/cache/image-owner-art-41e9b8dd-3835-464f-922c-9c96f88cc96c",
+    "sources_sha256": {
+      "jpeg-1.jpeg": "04aff48004d759be073f3d497eddfdb5b22c5cf7c5ea16208f76d55b8d9b8120",
+      "png-1.png": "27a573e768b617e3de4dd5a15cf4602cfdd8f921e7107d525a8add45403e5d71"
+    },
+    "joined_workers": 3,
+    "tracked_bitmaps": 2,
+    "all_bitmaps_recycled": true,
+    "scope": "Actual ART original executor ownership scenarios; API recycle state and declared payload charges only, no JNI interruption/native heap/production task or owner loss acceptance"
+  }
+}

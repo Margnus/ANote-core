@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.document.DocumentHistoryTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-30T04:31:03.641Z" hostname="LIXIAOFAN" time="0.012">
+  <properties/>
+  <testcase name="staleForeignAndWrongTopHistoryCommandsCannotMoveStacksOrConsumeReceipts[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.002"/>
+  <testcase name="pageDeletionUndoRestoresMembershipOrderAndRedoDoesNotAllocateNewIdentity[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="entryHorizonEvictsOnlyOldestUndoAndDoesNotRetireReceiptIdentity[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="exhaustedObjectEpochBlocksDeletionWithoutPublishingMetadataOrHistory[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="journalFullBlocksTraversalAtomicallyButOriginalUndoReceiptStillRetries[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.0"/>
+  <testcase name="undoDeletingEarlierInkRestoresOriginalDrawOrderAcrossRepeatedTraversal[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="copyUndoRedoRestoresTheSameIdsAndSamplesWithFreshLifecycleEpochs[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="mixedPageAndCanvasEditsRoundTripWithoutRewindingRootOrContentVersions[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="preparedPatchRetryAfterUndoReturnsOriginalReceiptAndLateNewOperationCannotResurrectInk[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.0"/>
+  <testcase name="transformUndoRedoAndDeleteRestorationAlwaysInvalidateOldObjectVersions[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="byteHorizonIncludesRedoAndOversizedEditLeavesExistingBranchUntouched[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.0"/>
+  <testcase name="restoringDeletedPagePlacesItsInkBeforeOtherPagesInk[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.0"/>
+  <testcase name="clearingLastPageUndoRestoresPaperAndInkWhileKeepingPageAndLayerIds[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.001"/>
+  <testcase name="successfulNewEditClearsRedoButRejectedEditsAndRetryReceiptsDoNot[jvm]" classname="dev.notecore.document.DocumentHistoryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

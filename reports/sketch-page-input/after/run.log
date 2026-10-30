@@ -1,0 +1,9 @@
+INSTRUMENTATION_RESULT: actual_points=[(63.99998536685634, 96.0002902240159), (80.00013779543612, 111.9998183051329), (96.0002902240159, 127.99997073371269), (127.99997073371269, 160.00027559087223)]
+INSTRUMENTATION_RESULT: background_canvas_isolation=passed: injected translate/clip preserves canonical dot and background pixels
+INSTRUMENTATION_RESULT: input_policy_resources=passed: historical batch 4 real points; injected red tool; readonly root identity; undo/redo; active-prefix guard; resource pixels and copied tool list
+INSTRUMENTATION_RESULT: lifecycle_owner=passed: actual Activity recreation retains identical session/root/tool; non-owner thread rejected
+INSTRUMENTATION_RESULT: page_cache_identity=passed: same immutable root selects ink/empty pages without cross-page stale paths
+INSTRUMENTATION_RESULT: page_geometry=passed: 300x600 background bounds and canonical dot use current page scale
+INSTRUMENTATION_RESULT: page_input_bounds=passed: small-page outside DOWN refused without input/root mutation; small/large actual MotionEvent dots keep canonical coordinates
+INSTRUMENTATION_RESULT: status=passed
+INSTRUMENTATION_CODE: -1

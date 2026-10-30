@@ -1,0 +1,508 @@
+[==========] Running 211 tests from 26 test cases.
+[----------] Global test environment set-up.
+[----------] 10 tests from dev.notecore.canvas.prototype.BrushEnvelopePocTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.tinyDiscsDoNotTreatTheirBoundingBoxAsExactCoverage
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.tinyDiscsDoNotTreatTheirBoundingBoxAsExactCoverage (3 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.tinyPressureSweepsAndReflectedShearedCornersKeepNormalScaleClassification
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.tinyPressureSweepsAndReflectedShearedCornersKeepNormalScaleClassification (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.radiusUnderflowRefusesButRepresentableSubnormalDiscsStayGeometric
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.radiusUnderflowRefusesButRepresentableSubnormalDiscsStayGeometric (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.roundCapsJoinsAndOpenOutsideCorner
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.roundCapsJoinsAndOpenOutsideCorner (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.pressureUsesSweptTaperRatherThanInterpolatingAtNearestCenter
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.pressureUsesSweptTaperRatherThanInterpolatingAtNearestCenter (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.stationaryAndContainedDiscsPreserveAllSamples
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.stationaryAndContainedDiscsPreserveAllSamples (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.highlighterCoverageUnionsBeforeAlphaAndKeepsArgbOpacity
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.highlighterCoverageUnionsBeforeAlphaAndKeepsArgbOpacity (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.affineDiscBecomesEllipseAndShearBoundsUseRowNorms
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.affineDiscBecomesEllipseAndShearBoundsUseRowNorms (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.invalidVersionBudgetSingularityAndOverflowExplicitlyReject
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.invalidVersionBudgetSingularityAndOverflowExplicitlyReject (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.transformedPaintedBoundsNeverExcludeInteriorFromEitherIndex
+[       OK ] dev.notecore.canvas.prototype.BrushEnvelopePocTest.transformedPaintedBoundsNeverExcludeInteriorFromEitherIndex (53 ms)
+[----------] 10 tests from dev.notecore.canvas.prototype.BrushEnvelopePocTest (59 ms total)
+
+[----------] 12 tests from dev.notecore.canvas.prototype.BrushGeometryTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.monolineIgnoresPressureAndKeepsMaximumConfiguredDiameter
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.monolineIgnoresPressureAndKeepsMaximumConfiguredDiameter (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.pressureUsesStoredFloatWithNonzeroFloorAndBoundedMaximum
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.pressureUsesStoredFloatWithNonzeroFloorAndBoundedMaximum (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.highlighterCapsOpacityWithoutChangingRgbOrIncreasingLowerOpacity
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.highlighterCapsOpacityWithoutChangingRgbOrIncreasingLowerOpacity (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.retracedHighlighterIsOneNonzeroFillRatherThanEvenOddOrRepeatedCompositing
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.retracedHighlighterIsOneNonzeroFillRatherThanEvenOddOrRepeatedCompositing (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.singleDotAndRepeatedLocationsRetainEverySampleWithoutZeroLengthBridges
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.singleDotAndRepeatedLocationsRetainEverySampleWithoutZeroLengthBridges (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.acuteTurnsReversalsAndDiagonalsHaveFinitePositiveContoursInsideConservativeStrokeBounds
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.acuteTurnsReversalsAndDiagonalsHaveFinitePositiveContoursInsideConservativeStrokeBounds (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.originRebasingPreservesTinyDotsAtLargeSampleCoordinates
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.originRebasingPreservesTinyDotsAtLargeSampleCoordinates (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.unrepresentableRadiiOrFarLocalOffsetsReturnNumericFailureWithoutPartialGeometry
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.unrepresentableRadiiOrFarLocalOffsetsReturnNumericFailureWithoutPartialGeometry (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.exactCapacityIsAcceptedAndEachSmallerBudgetRejectsExplicitly
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.exactCapacityIsAcceptedAndEachSmallerBudgetRejectsExplicitly (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.longStrokeAtDefaultLimitRetainsAllSamplesAndNextSampleIsRejected
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.longStrokeAtDefaultLimitRetainsAllSamplesAndNextSampleIsRejected (86 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.unknownAndLegacyVersionsAreRejectedWithoutFallbackOrChangingInput
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.unknownAndLegacyVersionsAreRejectedWithoutFallbackOrChangingInput (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushGeometryTest.inputOwnershipAndIndependentBuildsCannotMutatePublishedGeometry
+[       OK ] dev.notecore.canvas.prototype.BrushGeometryTest.inputOwnershipAndIndependentBuildsCannotMutatePublishedGeometry (0 ms)
+[----------] 12 tests from dev.notecore.canvas.prototype.BrushGeometryTest (88 ms total)
+
+[----------] 7 tests from dev.notecore.canvas.prototype.BrushPathPlanTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPlanTest.targetOriginIsCancelledBeforeFloatConversionAndGeometryIsUnchanged
+[       OK ] dev.notecore.canvas.prototype.BrushPathPlanTest.targetOriginIsCancelledBeforeFloatConversionAndGeometryIsUnchanged (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPlanTest.fullAffineIncludingReflectionPreservesCommonContourOrientation
+[       OK ] dev.notecore.canvas.prototype.BrushPathPlanTest.fullAffineIncludingReflectionPreservesCommonContourOrientation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPlanTest.float32QuantizationIsExplicitAndWithinTargetPixelTolerance
+[       OK ] dev.notecore.canvas.prototype.BrushPathPlanTest.float32QuantizationIsExplicitAndWithinTargetPixelTolerance (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPlanTest.remoteUnrebasedCoordinatesAreRejectedRatherThanDrawingCollapsedFloatPaths
+[       OK ] dev.notecore.canvas.prototype.BrushPathPlanTest.remoteUnrebasedCoordinatesAreRejectedRatherThanDrawingCollapsedFloatPaths (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPlanTest.singularTransformsAndVertexBudgetAreRejectedBeforeNativeAllocation
+[       OK ] dev.notecore.canvas.prototype.BrushPathPlanTest.singularTransformsAndVertexBudgetAreRejectedBeforeNativeAllocation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPlanTest.numericOverflowAndDegenerationReturnTypedRejections
+[       OK ] dev.notecore.canvas.prototype.BrushPathPlanTest.numericOverflowAndDegenerationReturnTypedRejections (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPlanTest.repeatedPlansDoNotChangeSourceOrAliasMutableTargetData
+[       OK ] dev.notecore.canvas.prototype.BrushPathPlanTest.repeatedPlansDoNotChangeSourceOrAliasMutableTargetData (0 ms)
+[----------] 7 tests from dev.notecore.canvas.prototype.BrushPathPlanTest (1 ms total)
+
+[----------] 4 tests from dev.notecore.canvas.prototype.BrushPathPocTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPocTest.compoundContoursAgreeWithIndependentOracleAwayFromApproximationBoundary
+[       OK ] dev.notecore.canvas.prototype.BrushPathPocTest.compoundContoursAgreeWithIndependentOracleAwayFromApproximationBoundary (1093 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPocTest.coincidentSamplesContainedDiscsAndReverseStrokeKeepSingleAlpha
+[       OK ] dev.notecore.canvas.prototype.BrushPathPocTest.coincidentSamplesContainedDiscsAndReverseStrokeKeepSingleAlpha (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPocTest.countsBytesAndToleranceAreAdmittedBeforeOutputAndNeverTruncate
+[       OK ] dev.notecore.canvas.prototype.BrushPathPocTest.countsBytesAndToleranceAreAdmittedBeforeOutputAndNeverTruncate (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushPathPocTest.cancellationBeforeAndDuringGenerationPublishesNoPartialPath
+[       OK ] dev.notecore.canvas.prototype.BrushPathPocTest.cancellationBeforeAndDuringGenerationPublishesNoPartialPath (15 ms)
+[----------] 4 tests from dev.notecore.canvas.prototype.BrushPathPocTest (1109 ms total)
+
+[----------] 7 tests from dev.notecore.canvas.prototype.BrushReductionPocTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushReductionPocTest.straightRunRetainsEndpointsAndCanonicalSampleIdentity
+[       OK ] dev.notecore.canvas.prototype.BrushReductionPocTest.straightRunRetainsEndpointsAndCanonicalSampleIdentity (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushReductionPocTest.turnsReversalAndNonLatticeCoordinatesAreConservativelyRetained
+[       OK ] dev.notecore.canvas.prototype.BrushReductionPocTest.turnsReversalAndNonLatticeCoordinatesAreConservativelyRetained (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushReductionPocTest.pressureMustBeLinearNotJustBoundedByEndpointWidths
+[       OK ] dev.notecore.canvas.prototype.BrushReductionPocTest.pressureMustBeLinearNotJustBoundedByEndpointWidths (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushReductionPocTest.integerProductExtremesDoNotOverflowOrEraseTurns
+[       OK ] dev.notecore.canvas.prototype.BrushReductionPocTest.integerProductExtremesDoNotOverflowOrEraseTurns (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushReductionPocTest.reducedPathAgreesWithOriginalOracleUnderAffineAndAlpha
+[       OK ] dev.notecore.canvas.prototype.BrushReductionPocTest.reducedPathAgreesWithOriginalOracleUnderAffineAndAlpha (717 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushReductionPocTest.budgetsAndCancellationNeverPublishPartialPlansOrDiscardSource
+[       OK ] dev.notecore.canvas.prototype.BrushReductionPocTest.budgetsAndCancellationNeverPublishPartialPlansOrDiscardSource (1 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushReductionPocTest.denseTraceTurnsPressureResetsAndPlateausMatchOriginalCoverage
+[       OK ] dev.notecore.canvas.prototype.BrushReductionPocTest.denseTraceTurnsPressureResetsAndPlateausMatchOriginalCoverage (8057 ms)
+[----------] 7 tests from dev.notecore.canvas.prototype.BrushReductionPocTest (8778 ms total)
+
+[----------] 14 tests from dev.notecore.canvas.prototype.BrushRenderOwnerPocTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.multiTileFrameMatchesIndependentSmallGridsAndNeverPublishesAnIncompleteTileSet
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.multiTileFrameMatchesIndependentSmallGridsAndNeverPublishesAnIncompleteTileSet (111 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.completePageComposesCanonicalOrderAndKeepsNativeReaderAfterClose
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.completePageComposesCanonicalOrderAndKeepsNativeReaderAfterClose (116 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.laterStrokeFailureAndCancellationNeverPublishPartialPage
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.laterStrokeFailureAndCancellationNeverPublishPartialPage (128 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.emptyPageIsCompleteAndAdmissionRejectsUnsupportedOrWrongContent
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.emptyPageIsCompleteAndAdmissionRejectsUnsupportedOrWrongContent (1 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.fullSceneRetentionIsChargedAndLateCompletePageIsDiscarded
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.fullSceneRetentionIsChargedAndLateCompletePageIsDiscarded (93 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.actualMaskAndRgbaStayPeakChargedUntilExecutorAcknowledges
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.actualMaskAndRgbaStayPeakChargedUntilExecutorAcknowledges (177 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.viewportChangeAndCancellationNeverReleaseQueuedOrDeliveredWorkEarly
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.viewportChangeAndCancellationNeverReleaseQueuedOrDeliveredWorkEarly (306 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.closeKeepsInFlightReservationAndLatePixelsNeverBecomeResident
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.closeKeepsInFlightReservationAndLatePixelsNeverBecomeResident (57 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.jobAndTotalBudgetsIncludeReadyResultsAndOldBorrowedOutput
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.jobAndTotalBudgetsIncludeReadyResultsAndOldBorrowedOutput (239 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.pureRenderFailuresCooperativeCancellationAndRejectedDispatchReleaseAfterAck
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.pureRenderFailuresCooperativeCancellationAndRejectedDispatchReleaseAfterAck (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.unknownOutcomeStaysQuarantinedUntilExplicitReconciliation
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.unknownOutcomeStaysQuarantinedUntilExplicitReconciliation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.foreignResultsTokensAndWrongSceneCannotDischargeAnotherOwner
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.foreignResultsTokensAndWrongSceneCannotDischargeAnotherOwner (79 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.peakReservationCannotPublishBeforeSettlementOrExceedOutputLimit
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.peakReservationCannotPublishBeforeSettlementOrExceedOutputLimit (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.nativeCopyAllowanceIsExclusiveAndUnknownReleaseKeepsItsLease
+[       OK ] dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.nativeCopyAllowanceIsExclusiveAndUnknownReleaseKeepsItsLease (94 ms)
+[----------] 14 tests from dev.notecore.canvas.prototype.BrushRenderOwnerPocTest (1408 ms total)
+
+[----------] 8 tests from dev.notecore.canvas.prototype.BrushTileCachePocTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.viewportReuseSharesPixelsButRequiresFreshPublicationToken
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.viewportReuseSharesPixelsButRequiresFreshPublicationToken (3 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.retiredReadersKeepBudgetAndRejectionPreservesCurrentResident
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.retiredReadersKeepBudgetAndRejectionPreservesCurrentResident (3 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.identicalObjectIdsCannotAliasAnotherCatalogPageRevisionOrSession
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.identicalObjectIdsCannotAliasAnotherCatalogPageRevisionOrSession (27 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.gridPrecisionAndLatticeArePartOfCacheIdentity
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.gridPrecisionAndLatticeArePartOfCacheIdentity (38 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.failedAndCancelledJobsReleaseReservationsWithoutPoisoningCache
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.failedAndCancelledJobsReleaseReservationsWithoutPoisoningCache (3 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.readerLimitRejectsBeforeRenderingAndReturnedReadersCannotAccessPixels
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.readerLimitRejectsBeforeRenderingAndReturnedReadersCannotAccessPixels (2 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.closeWaitsForReadersAndForeignReturnCannotDischargeTheirBudget
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.closeWaitsForReadersAndForeignReturnCannotDischargeTheirBudget (2 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCachePocTest.closeDuringRenderingRetiresLateOutputAndDoesNotPublishIt
+[       OK ] dev.notecore.canvas.prototype.BrushTileCachePocTest.closeDuringRenderingRetiresLateOutputAndDoesNotPublishIt (2 ms)
+[----------] 8 tests from dev.notecore.canvas.prototype.BrushTileCachePocTest (86 ms total)
+
+[----------] 4 tests from dev.notecore.canvas.prototype.BrushTilePixelsPocTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.rgbaPremultipliesOnceAndRemainsOwnedAfterReaderReturn
+[       OK ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.rgbaPremultipliesOnceAndRemainsOwnedAfterReaderReturn (59 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.pixelBudgetAndCancellationDoNotPublishPartialPayloadOrReturnReader
+[       OK ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.pixelBudgetAndCancellationDoNotPublishPartialPayloadOrReturnReader (57 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.expandedGridIncludesTrueNeighborsAndKeepsWorldSubpixelLattice
+[       OK ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.expandedGridIncludesTrueNeighborsAndKeepsWorldSubpixelLattice (137 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.gutterAdmissionDoesNotClampOrChangePixelSizeAndSampling
+[       OK ] dev.notecore.canvas.prototype.BrushTilePixelsPocTest.gutterAdmissionDoesNotClampOrChangePixelSizeAndSampling (0 ms)
+[----------] 4 tests from dev.notecore.canvas.prototype.BrushTilePixelsPocTest (255 ms total)
+
+[----------] 8 tests from dev.notecore.canvas.prototype.ChunkedBrushPocTest
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.sharedEndpointsCoverEveryOriginalEdgeExactlyOnceAndSinglePointWorks
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.sharedEndpointsCoverEveryOriginalEdgeExactlyOnceAndSinglePointWorks (1 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.indexedChunkQueriesMatchBruteBoundsAndDoNotMissTransformedCoverage
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.indexedChunkQueriesMatchBruteBoundsAndDoNotMissTransformedCoverage (2 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.overlappingReversalChunksUnionBitsBeforeApplyingMarkerAlpha
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.overlappingReversalChunksUnionBitsBeforeApplyingMarkerAlpha (231 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.chunkedTaperAndShearMatchOriginalOracleAtStableSubpixels
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.chunkedTaperAndShearMatchOriginalOracleAtStableSubpixels (162 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.invisibleChunksAreNotGeneratedAndCompletedResultsRemainFrameBound
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.invisibleChunksAreNotGeneratedAndCompletedResultsRemainFrameBound (5 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.budgetsAndMidRasterCancellationNeverPublishPartialMasks
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.budgetsAndMidRasterCancellationNeverPublishPartialMasks (53 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.fullSubpixelCoverageStopsRemainingChunkWorkWithoutChangingUnion
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.fullSubpixelCoverageStopsRemainingChunkWorkWithoutChangingUnion (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.adjacentTilesShareTheSameWorldSubpixelLatticeWithoutASeam
+[       OK ] dev.notecore.canvas.prototype.ChunkedBrushPocTest.adjacentTilesShareTheSameWorldSubpixelLatticeWithoutASeam (147 ms)
+[----------] 8 tests from dev.notecore.canvas.prototype.ChunkedBrushPocTest (605 ms total)
+
+[----------] 15 tests from dev.notecore.canvas.prototype.DocumentCloseContractTest
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.emptyCloseIsTerminalAndRepeatDoesNotReopenAdmissions
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.emptyCloseIsTerminalAndRepeatDoesNotReopenAdmissions (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.unfinishedInputReportsCancellationAndLateFrameCannotPublish
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.unfinishedInputReportsCancellationAndLateFrameCannotPublish (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.acceptedCommitInvalidatesOldContentFrameBeforeHostUpdatesExpectedFrame
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.acceptedCommitInvalidatesOldContentFrameBeforeHostUpdatesExpectedFrame (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.authoritySnapshotObservationRejectsStaleSessionWithoutAnyQueuedSubmission
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.authoritySnapshotObservationRejectsStaleSessionWithoutAnyQueuedSubmission (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.completedButUnsubmittedInputRequiresTwoPhaseRecoveryAcknowledgment
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.completedButUnsubmittedInputRequiresTwoPhaseRecoveryAcknowledgment (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.capacityRejectedProposalKeepsStableIdsAndFullSamplesAcrossClose
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.capacityRejectedProposalKeepsStableIdsAndFullSamplesAcrossClose (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.stoppingSessionStillAllowsPendingAdmissionIntoLiveDocument
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.stoppingSessionStillAllowsPendingAdmissionIntoLiveDocument (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.admissionCanRetryCapacityBeforeCloseWithoutChangingCommandIdentity
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.admissionCanRetryCapacityBeforeCloseWithoutChangingCommandIdentity (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.ambiguousCommitAtCloseReplaysExactPatchAndRejectsOldAcknowledgment
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.ambiguousCommitAtCloseReplaysExactPatchAndRejectsOldAcknowledgment (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.definitiveRejectionTransfersOnlyAfterReceiverAcknowledges
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.definitiveRejectionTransfersOnlyAfterReceiverAcknowledges (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.closingKeepsLateAllocationAndReadersChargedUntilDestructionAcknowledged
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.closingKeepsLateAllocationAndReadersChargedUntilDestructionAcknowledged (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.unknownDestructionCannotMakeCloseCompleteOrTriggerDoubleFree
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.unknownDestructionCannotMakeCloseCompleteOrTriggerDoubleFree (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.unallocatedReservationMustBeExplicitlyCancelledBeforeOwnerCanClose
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.unallocatedReservationMustBeExplicitlyCancelledBeforeOwnerCanClose (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.closeCommitFenceAndHandoffInterleaveWithoutDroppingAnyObligation
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.closeCommitFenceAndHandoffInterleaveWithoutDroppingAnyObligation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.DocumentCloseContractTest.sessionLimitsReserveInputBeforeAdmissionAndRejectForeignTokens
+[       OK ] dev.notecore.canvas.prototype.DocumentCloseContractTest.sessionLimitsReserveInputBeforeAdmissionAndRejectForeignTokens (0 ms)
+[----------] 15 tests from dev.notecore.canvas.prototype.DocumentCloseContractTest (2 ms total)
+
+[----------] 6 tests from dev.notecore.canvas.prototype.GeometryContractTest
+[ RUN      ] dev.notecore.canvas.prototype.GeometryContractTest.inversePredicatePreservesConstructedInverseSupportAtNumericEdges
+[       OK ] dev.notecore.canvas.prototype.GeometryContractTest.inversePredicatePreservesConstructedInverseSupportAtNumericEdges (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.GeometryContractTest.inverseRoundTripsSeededTransforms
+[       OK ] dev.notecore.canvas.prototype.GeometryContractTest.inverseRoundTripsSeededTransforms (2 ms)
+[ RUN      ] dev.notecore.canvas.prototype.GeometryContractTest.compositionOrderIsExplicit
+[       OK ] dev.notecore.canvas.prototype.GeometryContractTest.compositionOrderIsExplicit (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.GeometryContractTest.rejectsNonFiniteAndSingularValues
+[       OK ] dev.notecore.canvas.prototype.GeometryContractTest.rejectsNonFiniteAndSingularValues (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.GeometryContractTest.verySmallValidScaleCanBeInverted
+[       OK ] dev.notecore.canvas.prototype.GeometryContractTest.verySmallValidScaleCanBeInverted (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.GeometryContractTest.mappedBoundsCoverRotatedRectangle
+[       OK ] dev.notecore.canvas.prototype.GeometryContractTest.mappedBoundsCoverRotatedRectangle (0 ms)
+[----------] 6 tests from dev.notecore.canvas.prototype.GeometryContractTest (2 ms total)
+
+[----------] 13 tests from dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalPointQueriesFilterBboxFalsePositivesPressureAndOtherLayers
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalPointQueriesFilterBboxFalsePositivesPressureAndOtherLayers (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalBindingRefusesUnsupportedOrUnboundedSourcesAndNoPartialPointResults
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalBindingRefusesUnsupportedOrUnboundedSourcesAndNoPartialPointResults (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.actualCanonicalMoveDeleteRestorePatchKeepsBindingsAndRejectsLatePublication
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.actualCanonicalMoveDeleteRestorePatchKeepsBindingsAndRejectsLatePublication (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalUpdateAndPointCancellationCannotPublishPrefixOrForgeUnchangedObjects
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalUpdateAndPointCancellationCannotPublishPrefixOrForgeUnchangedObjects (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.moveDeleteUndoMasksOldBoundsAndPreservesSnapshots
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.moveDeleteUndoMasksOldBoundsAndPreservesSnapshots (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.staleBaseSceneSessionAndRevisionExhaustionCannotPublish
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.staleBaseSceneSessionAndRevisionExhaustionCannotPublish (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.invalidBatchNeverAppliesItsValidPrefix
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.invalidBatchNeverAppliesItsValidPrefix (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.capacityBackpressureRequiresCompactionWithoutDroppingAcceptedContent
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.capacityBackpressureRequiresCompactionWithoutDroppingAcceptedContent (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.degenerateQueryBudgetsNeverReturnAPartialHitSet
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.degenerateQueryBudgetsNeverReturnAPartialHitSet (32 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.cancellationDuringPreparationAndCompactionLeavesOriginalUsable
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.cancellationDuringPreparationAndCompactionLeavesOriginalUsable (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.randomEditsAndCompactionsMatchIndependentBruteForce
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.randomEditsAndCompactionsMatchIndependentBruteForce (656 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalScenePatchesFeedDerivedBoundsWithoutAnotherAuthority
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.canonicalScenePatchesFeedDerivedBoundsWithoutAnotherAuthority (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.inputIsolationEmptyQueriesAndExtremeFiniteBounds
+[       OK ] dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.inputIsolationEmptyQueriesAndExtremeFiniteBounds (0 ms)
+[----------] 13 tests from dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest (692 ms total)
+
+[----------] 6 tests from dev.notecore.canvas.prototype.InputArenaContractTest
+[ RUN      ] dev.notecore.canvas.prototype.InputArenaContractTest.blockBoundaryFlattensOnceAndTheRetiredBuilderCannotMutateCanonicalSamples
+[       OK ] dev.notecore.canvas.prototype.InputArenaContractTest.blockBoundaryFlattensOnceAndTheRetiredBuilderCannotMutateCanonicalSamples (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputArenaContractTest.lastChunkNeverAllocatesBeyondTheConfiguredPointCapacityAndRefusalIsAtomic
+[       OK ] dev.notecore.canvas.prototype.InputArenaContractTest.lastChunkNeverAllocatesBeyondTheConfiguredPointCapacityAndRefusalIsAtomic (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputArenaContractTest.rejectedTimeOrderDoesNotAllocateAnotherChunkOrAlterAnAcceptedPrefix
+[       OK ] dev.notecore.canvas.prototype.InputArenaContractTest.rejectedTimeOrderDoesNotAllocateAnotherChunkOrAlterAnAcceptedPrefix (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputArenaContractTest.originalSessionRetainsAllBatchedPointsAcrossChunksAndDoesNotAliasTheNextStroke
+[       OK ] dev.notecore.canvas.prototype.InputArenaContractTest.originalSessionRetainsAllBatchedPointsAcrossChunksAndDoesNotAliasTheNextStroke (2 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputArenaContractTest.predictionDoesNotGrowTheRealArenaAndCancellationReleasesOnlyUnfinishedInput
+[       OK ] dev.notecore.canvas.prototype.InputArenaContractTest.predictionDoesNotGrowTheRealArenaAndCancellationReleasesOnlyUnfinishedInput (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputArenaContractTest.reservationCoversOwnedChunksAndImmutableCompletionPayloadBeforeAdmission
+[       OK ] dev.notecore.canvas.prototype.InputArenaContractTest.reservationCoversOwnedChunksAndImmutableCompletionPayloadBeforeAdmission (0 ms)
+[----------] 6 tests from dev.notecore.canvas.prototype.InputArenaContractTest (4 ms total)
+
+[----------] 11 tests from dev.notecore.canvas.prototype.InputReplayContractTest
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.historyIsRetainedAndPredictionNeverEntersCompletedSamples
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.historyIsRetainedAndPredictionNeverEntersCompletedSamples (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.targetIsCapturedAtDownAndCompletedOutputSurvivesClose
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.targetIsCapturedAtDownAndCompletedOutputSurvivesClose (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.cancelDiscardsOnlyUnfinishedStrokeAndAllowsNewStroke
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.cancelDiscardsOnlyUnfinishedStrokeAndAllowsNewStroke (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.secondStylusIsExplicitlyRejectedAndFingerCannotEndInk
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.secondStylusIsExplicitlyRejectedAndFingerCannotEndInk (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.invalidBatchDoesNotAppendPartialHistoryOrAdvanceSequence
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.invalidBatchDoesNotAppendPartialHistoryOrAdvanceSequence (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.overflowPreservesStrokeAndReportsCapacity
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.overflowPreservesStrokeAndReportsCapacity (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.duplicateSequenceAndRegressingEventTimeAreRejected
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.duplicateSequenceAndRegressingEventTimeAreRejected (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.ownedBatchSurvivesCallerListMutation
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.ownedBatchSurvivesCallerListMutation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.emptyUpAndPredictionOnlyMoveDoNotDuplicateRealPoints
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.emptyUpAndPredictionOnlyMoveDoNotDuplicateRealPoints (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.nonFuturePredictionAndWrongPointerDoNotChangeActiveStroke
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.nonFuturePredictionAndWrongPointerDoNotChangeActiveStroke (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputReplayContractTest.longStrokeRetainsEveryRealPoint
+[       OK ] dev.notecore.canvas.prototype.InputReplayContractTest.longStrokeRetainsEveryRealPoint (80 ms)
+[----------] 11 tests from dev.notecore.canvas.prototype.InputReplayContractTest (80 ms total)
+
+[----------] 5 tests from dev.notecore.canvas.prototype.InputScalarReplayTest
+[ RUN      ] dev.notecore.canvas.prototype.InputScalarReplayTest.scalarAndLegacyPathsMatchAcrossChunksAndCallerArraysNeverEscape
+[       OK ] dev.notecore.canvas.prototype.InputScalarReplayTest.scalarAndLegacyPathsMatchAcrossChunksAndCallerArraysNeverEscape (1 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputScalarReplayTest.invalidSuffixAndRegressingTimeRejectWholeBatchWithoutAdvancingPrefixOrSequence
+[       OK ] dev.notecore.canvas.prototype.InputScalarReplayTest.invalidSuffixAndRegressingTimeRejectWholeBatchWithoutAdvancingPrefixOrSequence (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputScalarReplayTest.invalidEnvelopeAndShapeRefuseBeforeAnyPointAllocationAndClosedIsTerminal
+[       OK ] dev.notecore.canvas.prototype.InputScalarReplayTest.invalidEnvelopeAndShapeRefuseBeforeAnyPointAllocationAndClosedIsTerminal (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputScalarReplayTest.capacityRefusesSuffixThenEmptyUpAndCancellationKeepOriginalOwnershipRules
+[       OK ] dev.notecore.canvas.prototype.InputScalarReplayTest.capacityRefusesSuffixThenEmptyUpAndCancellationKeepOriginalOwnershipRules (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.InputScalarReplayTest.mixedPredictionNavigationAndPointerRefusalUseTheSameStateMachine
+[       OK ] dev.notecore.canvas.prototype.InputScalarReplayTest.mixedPredictionNavigationAndPointerRefusalUseTheSameStateMachine (0 ms)
+[----------] 5 tests from dev.notecore.canvas.prototype.InputScalarReplayTest (1 ms total)
+
+[----------] 6 tests from dev.notecore.canvas.prototype.PresentationContractTest
+[ RUN      ] dev.notecore.canvas.prototype.PresentationContractTest.intermediateContentChangeInvalidatesOldFrame
+[       OK ] dev.notecore.canvas.prototype.PresentationContractTest.intermediateContentChangeInvalidatesOldFrame (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PresentationContractTest.detachedSurfaceCannotAcceptLateFrameOrBeReopened
+[       OK ] dev.notecore.canvas.prototype.PresentationContractTest.detachedSurfaceCannotAcceptLateFrameOrBeReopened (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PresentationContractTest.viewportSceneSessionAndSurfaceAllInvalidateEarlierResults
+[       OK ] dev.notecore.canvas.prototype.PresentationContractTest.viewportSceneSessionAndSurfaceAllInvalidateEarlierResults (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PresentationContractTest.oldRequestCannotRegressCurrentExpectation
+[       OK ] dev.notecore.canvas.prototype.PresentationContractTest.oldRequestCannotRegressCurrentExpectation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PresentationContractTest.geometryCacheIncludesObjectAndAlgorithmRevision
+[       OK ] dev.notecore.canvas.prototype.PresentationContractTest.geometryCacheIncludesObjectAndAlgorithmRevision (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PresentationContractTest.repeatedLocalObjectIdsAcrossHostsCannotShareGeometry
+[       OK ] dev.notecore.canvas.prototype.PresentationContractTest.repeatedLocalObjectIdsAcrossHostsCannotShareGeometry (0 ms)
+[----------] 6 tests from dev.notecore.canvas.prototype.PresentationContractTest (0 ms total)
+
+[----------] 9 tests from dev.notecore.canvas.prototype.PreviewViewportContractTest
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.zeroLayoutSequencePreservesPannedCenterLikeDirectResize
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.zeroLayoutSequencePreservesPannedCenterLikeDirectResize (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.resetAndPageReplacementDuringZeroLayoutDiscardOldReadingCenter
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.resetAndPageReplacementDuringZeroLayoutDiscardOldReadingCenter (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.restoredCenterStillUsesExistingBoundaryConstraints
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.restoredCenterStillUsesExistingBoundaryConstraints (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.pageDimensionsFitLandscapeAndResetWithoutChangingTheInverseMapping
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.pageDimensionsFitLandscapeAndResetWithoutChangingTheInverseMapping (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.fitCentersPaperAndResetRestoresExactMapping
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.fitCentersPaperAndResetRestoresExactMapping (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.zoomAndPanKeepCentroidAnchorWithoutChangingSceneCoordinates
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.zoomAndPanKeepCentroidAnchorWithoutChangingSceneCoordinates (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.zoomAndTranslationBoundsKeepPaperReachableAndRejectInvalidGestures
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.zoomAndTranslationBoundsKeepPaperReachableAndRejectInvalidGestures (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.resizePreservesCenterWhenUnclampedAndZeroSizeCanRecover
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.resizePreservesCenterWhenUnclampedAndZeroSizeCanRecover (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.PreviewViewportContractTest.randomGestureMappingsRoundTripWithoutDocumentMutation
+[       OK ] dev.notecore.canvas.prototype.PreviewViewportContractTest.randomGestureMappingsRoundTripWithoutDocumentMutation (3 ms)
+[----------] 9 tests from dev.notecore.canvas.prototype.PreviewViewportContractTest (3 ms total)
+
+[----------] 15 tests from dev.notecore.canvas.prototype.ResourceLeaseContractTest
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.reservationPrecedesAllocationAndCancellationRestoresBudget
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.reservationPrecedesAllocationAndCancellationRestoresBudget (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.admissionFailureNeverEvictsResidentOrPretendsRetiredBytesAreFree
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.admissionFailureNeverEvictsResidentOrPretendsRetiredBytesAreFree (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.evictionCannotDestroyAResourceStillBorrowedByReader
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.evictionCannotDestroyAResourceStillBorrowedByReader (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.multipleReadersCountUniqueBytesAndAllMustReturn
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.multipleReadersCountUniqueBytesAndAllMustReturn (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.sameKeyReplacementRetainsOldGenerationUntilItsOwnLeaseEnds
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.sameKeyReplacementRetainsOldGenerationUntilItsOwnLeaseEnds (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.lruBorrowOrderEvictsOldestResidentWithoutFreeingBytesEarly
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.lruBorrowOrderEvictsOldestResidentWithoutFreeingBytesEarly (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.terminalCloseRejectsNewWorkButLateAllocationTransfersForRelease
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.terminalCloseRejectsNewWorkButLateAllocationTransfersForRelease (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.closeCannotCancelReservationOfWorkerWhoseAllocationOutcomeIsUnknown
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.closeCannotCancelReservationOfWorkerWhoseAllocationOutcomeIsUnknown (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.foreignAndDuplicateTokensCannotReleaseAnotherOwnersBudget
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.foreignAndDuplicateTokensCannotReleaseAnotherOwnersBudget (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.duplicateRawResourceCannotBeRegisteredUnderTwoOwnersInSamePool
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.duplicateRawResourceCannotBeRegisteredUnderTwoOwnersInSamePool (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.failedDestructionKeepsBudgetAndUsesFreshAttemptForExplicitRetry
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.failedDestructionKeepsBudgetAndUsesFreshAttemptForExplicitRetry (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.unknownDestructionQuarantinesUntilExplicitBackendReconciliation
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.unknownDestructionQuarantinesUntilExplicitBackendReconciliation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.reconciliationThatResourceStillLivesAllowsAnExplicitNewRelease
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.reconciliationThatResourceStillLivesAllowsAnExplicitNewRelease (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.laneAndMetadataLimitsFailWithoutMutation
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.laneAndMetadataLimitsFailWithoutMutation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.subtractionBasedAdmissionDoesNotOverflowLongBudget
+[       OK ] dev.notecore.canvas.prototype.ResourceLeaseContractTest.subtractionBasedAdmissionDoesNotOverflowLongBudget (0 ms)
+[----------] 15 tests from dev.notecore.canvas.prototype.ResourceLeaseContractTest (0 ms total)
+
+[----------] 5 tests from dev.notecore.canvas.prototype.ResourceScheduleContractTest
+[ RUN      ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.detachBeforeGpuFenceKeepsReaderAliveAndBlocksLateFramePublication
+[       OK ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.detachBeforeGpuFenceKeepsReaderAliveAndBlocksLateFramePublication (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.fenceBeforeDetachAndDetachBeforeFenceBothDestroyExactlyOnce
+[       OK ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.fenceBeforeDetachAndDetachBeforeFenceBothDestroyExactlyOnce (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.fullExecutorReturnsUnexecutedTicketWithoutFreeingBudgetOrResource
+[       OK ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.fullExecutorReturnsUnexecutedTicketWithoutFreeingBudgetOrResource (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.destructorLaneFailureIsDefinitiveAndRetryRunsOnGpuLane
+[       OK ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.destructorLaneFailureIsDefinitiveAndRetryRunsOnGpuLane (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.destructionWithLostAckNeverAutomaticallyRunsDestructorTwice
+[       OK ] dev.notecore.canvas.prototype.ResourceScheduleContractTest.destructionWithLostAckNeverAutomaticallyRunsDestructorTwice (0 ms)
+[----------] 5 tests from dev.notecore.canvas.prototype.ResourceScheduleContractTest (0 ms total)
+
+[----------] 4 tests from dev.notecore.canvas.prototype.SceneCompositionTest
+[ RUN      ] dev.notecore.canvas.prototype.SceneCompositionTest.drawOrderCompositionOwnsOrderAndRejectsMissingOrDuplicateMembers
+[       OK ] dev.notecore.canvas.prototype.SceneCompositionTest.drawOrderCompositionOwnsOrderAndRejectsMissingOrDuplicateMembers (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneCompositionTest.metadataOnlyPatchAdvancesOneCanonicalRevisionAndKeepsPriorSnapshotImmutable
+[       OK ] dev.notecore.canvas.prototype.SceneCompositionTest.metadataOnlyPatchAdvancesOneCanonicalRevisionAndKeepsPriorSnapshotImmutable (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneCompositionTest.multipleObjectChangesApplyAtomicallyAndDefensivelyOwnTheProposedList
+[       OK ] dev.notecore.canvas.prototype.SceneCompositionTest.multipleObjectChangesApplyAtomicallyAndDefensivelyOwnTheProposedList (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneCompositionTest.invalidChangeSetNeverPartiallyAppliesOrAcceptsObjectRevisionRollback
+[       OK ] dev.notecore.canvas.prototype.SceneCompositionTest.invalidChangeSetNeverPartiallyAppliesOrAcceptsObjectRevisionRollback (0 ms)
+[----------] 4 tests from dev.notecore.canvas.prototype.SceneCompositionTest (0 ms total)
+
+[----------] 9 tests from dev.notecore.canvas.prototype.SceneContractTest
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.realSampleArraysAreDefensivelyOwned
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.realSampleArraysAreDefensivelyOwned (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.rejectsMalformedSamples
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.rejectsMalformedSamples (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.capturedLayerSurvivesLaterUiSelectionChange
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.capturedLayerSurvivesLaterUiSelectionChange (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.sameBaseConcurrentProposalsCannotBothCommit
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.sameBaseConcurrentProposalsCannotBothCommit (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.replayIsIdempotentButReusedIdWithDifferentPayloadIsRejected
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.replayIsIdempotentButReusedIdWithDifferentPayloadIsRejected (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.intermediateObjectUpdateChangesRevisionWithoutChangingFirstLastOrCount
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.intermediateObjectUpdateChangesRevisionWithoutChangingFirstLastOrCount (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.staleObjectAndSingularTransformLeaveSceneUnmodified
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.staleObjectAndSingularTransformLeaveSceneUnmodified (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.boundedJournalRejectsWithoutLosingAcceptedCommand
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.boundedJournalRejectsWithoutLosingAcceptedCommand (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SceneContractTest.wrongSceneCannotEnterAnotherDocument
+[       OK ] dev.notecore.canvas.prototype.SceneContractTest.wrongSceneCannotEnterAnotherDocument (0 ms)
+[----------] 9 tests from dev.notecore.canvas.prototype.SceneContractTest (0 ms total)
+
+[----------] 6 tests from dev.notecore.canvas.prototype.SpatialIndexPocTest
+[ RUN      ] dev.notecore.canvas.prototype.SpatialIndexPocTest.inclusiveEdgesNegativeCellsAndZeroArea
+[       OK ] dev.notecore.canvas.prototype.SpatialIndexPocTest.inclusiveEdgesNegativeCellsAndZeroArea (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SpatialIndexPocTest.oversizedAndUnrepresentableCellsFallBackWithoutDroppingObjects
+[       OK ] dev.notecore.canvas.prototype.SpatialIndexPocTest.oversizedAndUnrepresentableCellsFallBackWithoutDroppingObjects (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SpatialIndexPocTest.replaceRemoveAndSnapshotIsolation
+[       OK ] dev.notecore.canvas.prototype.SpatialIndexPocTest.replaceRemoveAndSnapshotIsolation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SpatialIndexPocTest.randomEditsQueriesAgreeWithBruteForce
+[       OK ] dev.notecore.canvas.prototype.SpatialIndexPocTest.randomEditsQueriesAgreeWithBruteForce (452 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SpatialIndexPocTest.overlappingLargeBoxesExplicitlyDegenerateToAllEntries
+[       OK ] dev.notecore.canvas.prototype.SpatialIndexPocTest.overlappingLargeBoxesExplicitlyDegenerateToAllEntries (773 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SpatialIndexPocTest.invalidConfigurationDuplicatesAndEmptyInputs
+[       OK ] dev.notecore.canvas.prototype.SpatialIndexPocTest.invalidConfigurationDuplicatesAndEmptyInputs (0 ms)
+[----------] 6 tests from dev.notecore.canvas.prototype.SpatialIndexPocTest (1226 ms total)
+
+[----------] 15 tests from dev.notecore.canvas.prototype.SubmissionQueueContractTest
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.countCapacityLeavesRejectedOutputWithCallerAndKeepsAdmittedStroke
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.countCapacityLeavesRejectedOutputWithCallerAndKeepsAdmittedStroke (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.byteCapacityAndOversizedAdmissionNeverEvictExistingPayload
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.byteCapacityAndOversizedAdmissionNeverEvictExistingPayload (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.duplicateAdmissionDoesNotChargeTwiceButDifferentPayloadCannotReuseId
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.duplicateAdmissionDoesNotChargeTwiceButDifferentPayloadCannotReuseId (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.fifoUsesLatestAuthorityBaseAtFirstDispatchAndCapturedLayer
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.fifoUsesLatestAuthorityBaseAtFirstDispatchAndCapturedLayer (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.inFlightIsChargedAndOnlyOneAttemptCanRun
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.inFlightIsChargedAndOnlyOneAttemptCanRun (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.lostAckReplaysExactPatchAndCommitsOnlyOnce
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.lostAckReplaysExactPatchAndCommitsOnlyOnce (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.failureBeforeCommitCanRetrySamePayloadWithoutLoss
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.failureBeforeCommitCanRetrySamePayloadWithoutLoss (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.definitiveFailureBlocksFifoAndRequiresExplicitRecoveryHandoff
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.definitiveFailureBlocksFifoAndRequiresExplicitRecoveryHandoff (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.staleSceneFailureDoesNotSilentlyRebaseTheProposal
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.staleSceneFailureDoesNotSilentlyRebaseTheProposal (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.sessionCloseAndStopAdmissionDoNotDiscardQueuedOrInFlightStroke
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.sessionCloseAndStopAdmissionDoNotDiscardQueuedOrInFlightStroke (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.confirmedPayloadIsChargedUntilHostCollectsItAndIsNeverCalledDurable
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.confirmedPayloadIsChargedUntilHostCollectsItAndIsNeverCalledDurable (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.wrongReceiptCannotConfirmAndDuplicateCallbackCannotChangeAccounting
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.wrongReceiptCannotConfirmAndDuplicateCallbackCannotChangeAccounting (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.attemptFromAnotherQueueCannotConfirmMatchingLocalId
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.attemptFromAnotherQueueCannotConfirmMatchingLocalId (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.prepareFailureRetainsPayloadAndWrongDocumentDoesNotPoisonQueue
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.prepareFailureRetainsPayloadAndWrongDocumentDoesNotPoisonQueue (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.repeatedBackpressureAndAckLossPreserveAllAdmittedObjectsAndBudget
+[       OK ] dev.notecore.canvas.prototype.SubmissionQueueContractTest.repeatedBackpressureAndAckLossPreserveAllAdmittedObjectsAndBudget (33 ms)
+[----------] 15 tests from dev.notecore.canvas.prototype.SubmissionQueueContractTest (35 ms total)
+
+[----------] 6 tests from dev.notecore.canvas.prototype.WeightedLruContractTest
+[ RUN      ] dev.notecore.canvas.prototype.WeightedLruContractTest.repeatedKeyLegacyCounterexampleStaysBounded
+[       OK ] dev.notecore.canvas.prototype.WeightedLruContractTest.repeatedKeyLegacyCounterexampleStaysBounded (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.WeightedLruContractTest.readsChangeEvictionOrder
+[       OK ] dev.notecore.canvas.prototype.WeightedLruContractTest.readsChangeEvictionOrder (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.WeightedLruContractTest.oversizedReplacementDoesNotDestroyExistingEntry
+[       OK ] dev.notecore.canvas.prototype.WeightedLruContractTest.oversizedReplacementDoesNotDestroyExistingEntry (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.WeightedLruContractTest.invalidWeightIsRejectedBeforeMutation
+[       OK ] dev.notecore.canvas.prototype.WeightedLruContractTest.invalidWeightIsRejectedBeforeMutation (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.WeightedLruContractTest.admissionArithmeticDoesNotOverflow
+[       OK ] dev.notecore.canvas.prototype.WeightedLruContractTest.admissionArithmeticDoesNotOverflow (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.WeightedLruContractTest.seededRepeatedUpdatesNeverExceedBudget
+[       OK ] dev.notecore.canvas.prototype.WeightedLruContractTest.seededRepeatedUpdatesNeverExceedBudget (16 ms)
+[----------] 6 tests from dev.notecore.canvas.prototype.WeightedLruContractTest (16 ms total)
+
+[----------] 3 tests from dev.notecore.canvas.prototype.BrushRenderThreadTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderThreadTest.nativeWorkerGeneratesMaskAndRgbaWithOwnerOnlyResourceSettlement
+[       OK ] dev.notecore.canvas.prototype.BrushRenderThreadTest.nativeWorkerGeneratesMaskAndRgbaWithOwnerOnlyResourceSettlement (62 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderThreadTest.nativeCancellationAndCloseKeepChargeWhileWorkerIsBlocked
+[       OK ] dev.notecore.canvas.prototype.BrushRenderThreadTest.nativeCancellationAndCloseKeepChargeWhileWorkerIsBlocked (0 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushRenderThreadTest.nativeImageKeepsCopyAllowanceUntilCgReleaseAndReaderReturn
+NOTECORE_NATIVE_RENDER {"render_native_lease":true,"rgba_bytes":8192,"native_copy_allowance_bytes":16384,"image_plus_context_row_storage_upper_bytes":16384,"charged_while_closed_reader_held":24576}
+[       OK ] dev.notecore.canvas.prototype.BrushRenderThreadTest.nativeImageKeepsCopyAllowanceUntilCgReleaseAndReaderReturn (67 ms)
+[----------] 3 tests from dev.notecore.canvas.prototype.BrushRenderThreadTest (130 ms total)
+
+[----------] 3 tests from dev.notecore.canvas.prototype.BrushTileCGImageTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCGImageTest.premultipliedImageCompositesOriginalMarkerColorAndSingleAlpha
+NOTECORE_NATIVE_IMAGE {"color_pixels":2048,"payload_bytes":8192,"image_row_bytes":256,"output_row_bytes":256,"conversion_elapsed_ns":492542,"copy_create_elapsed_ns":664583,"draw_elapsed_ns":1562500,"release_call_elapsed_ns":25042}
+[       OK ] dev.notecore.canvas.prototype.BrushTileCGImageTest.premultipliedImageCompositesOriginalMarkerColorAndSingleAlpha (106 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCGImageTest.adjacentNearestScaledImagesMatchWholeImage
+[       OK ] dev.notecore.canvas.prototype.BrushTileCGImageTest.adjacentNearestScaledImagesMatchWholeImage (134 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCGImageTest.filteredTilesUseTrueNeighborBorderAndClipToNonoverlappingCore
+NOTECORE_NATIVE_IMAGE {"filter_cases":6,"max_channel_delta":0,"unpadded_channel_differences":199}
+[       OK ] dev.notecore.canvas.prototype.BrushTileCGImageTest.filteredTilesUseTrueNeighborBorderAndClipToNonoverlappingCore (1373 ms)
+[----------] 3 tests from dev.notecore.canvas.prototype.BrushTileCGImageTest (1614 ms total)
+
+[----------] Global test environment tear-down
+[==========] 211 tests from 26 test cases ran. (16206 ms total)
+[  PASSED  ] 211 tests.

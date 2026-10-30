@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-30T04:31:03.465Z" hostname="LIXIAOFAN" time="0.099">
+  <properties/>
+  <testcase name="rejectedBackendAdmissionReturnsUnstartedWithoutLosingSnapshotOrBudget[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.031"/>
+  <testcase name="failedWriteRetainsOriginalUntilExplicitOfferRetriesAndDuplicateCompletionCannotFreeIt[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.001"/>
+  <testcase name="byteRejectionIsAtomicAndCallerStillOwnsRejectedSnapshot[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.028"/>
+  <testcase name="catalogHeaderRejectsUnsupportedTruncatedInvalidAndOversizedData[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.01"/>
+  <testcase name="foreignAndLateAttemptsCannotClearReopenedDocumentResponsibility[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.0"/>
+  <testcase name="staleVersionCannotOverwritePendingNewerAndSameVersionRetryKeepsOriginal[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.0"/>
+  <testcase name="runningOldWriteKeepsBudgetAndCannotEraseLatestAcceptedVersion[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.001"/>
+  <testcase name="perDocumentSingleFlightAndOtherDocumentsRemainEligible[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.0"/>
+  <testcase name="newVersionMayFitWhenUnsentOldVersionIsSupersededButNotWhileBothAreRetained[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.001"/>
+  <testcase name="unknownOldWriteDoesNotBlockNewerCompleteReplacement[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.0"/>
+  <testcase name="completeLatestSnapshotSupersedesUnsentContentAndCountsOnlyRetainedVersion[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.0"/>
+  <testcase name="boundedCatalogHeaderKeepsEscapedUnicodeTitleWithoutDecodingStrokeBody[jvm]" classname="dev.notecore.canvas.prototype.PreviewSaveLedgerTest" time="0.026"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

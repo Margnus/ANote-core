@@ -6,7 +6,8 @@ import android.os.Looper
 import dev.notecore.document.*
 import java.util.UUID
 
-/** Host-owned resource: borrowed Canvas is valid only during draw; never retained by the resource. */
+/** Host-owned resource: Canvas is borrowed only during draw; never retained.
+ * The view isolates callback transform/clip state before drawing canonical ink. */
 fun interface PageBackground { fun draw(canvas: Canvas, width: Float, height: Float) }
 data class SketchTool(val label: String, val argb: Int, val width: Double)
 
@@ -17,8 +18,7 @@ class SketchSession(tools: List<SketchTool>, val background: PageBackground) {
     private val owner: () -> Unit = { check(Looper.myLooper() == Looper.getMainLooper()) { "Sketch owner must be the main thread" } }
     val notebook = checkNotNull(PagedPreviewNotebook.createValidated(UUID.randomUUID().toString(), "内存草图",
         UUID.randomUUID().toString(), ownerCheck = owner).notebook)
-    var readOnly = false
-        private set
+    val readOnly: Boolean get() = notebook.isReadOnly
     var toolIndex = 0
         private set
     init { owner(); check(selectTool(0)) }
@@ -32,9 +32,7 @@ class SketchSession(tools: List<SketchTool>, val background: PageBackground) {
     }
     fun setReadOnly(value: Boolean): Boolean {
         owner()
-        if (notebook.hasActiveStroke || notebook.hasPendingStroke) return false
-        readOnly = value
-        return true
+        return notebook.setReadOnly(value)
     }
     fun edit(request: PreviewEdit): Boolean { owner(); return !readOnly && (request == PreviewEdit.Undo || request == PreviewEdit.Redo) && notebook.edit(request).accepted }
 
