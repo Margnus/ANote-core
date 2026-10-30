@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Small C1 source boundary check, not a Kotlin compiler or full dependency audit."""
 import json
+import plistlib
 import re
 from pathlib import Path
 
@@ -33,8 +34,19 @@ def main():
     for path in (ROOT/'samples/sketch-host/src').rglob('*.kt'):
         if re.search(r'^\s*import\s+dev\.notecore\.app\.', path.read_text(encoding='utf-8'), re.M):
             errors.append(f'Sample imports NoteCore App: {path.relative_to(ROOT)}')
+    apple_sample = ROOT/'samples/apple-sketch'
+    apple_objects = plistlib.loads((apple_sample/'NoteCoreSketch.xcodeproj/project.pbxproj').read_bytes())['objects']
+    apple_refs = [v['path'] for v in apple_objects.values() if v['isa'] == 'PBXFileReference']
+    if any('ios-app' in p or 'NoteCorePreview' in p for p in apple_refs):
+        errors.append('Independent Apple sketch references the Preview App')
+    apple_imports = set()
+    for path in apple_sample.rglob('*.swift'):
+        names = re.findall(r'^\s*(?:@testable\s+)?import\s+(\w+)', path.read_text(encoding='utf-8'), re.M)
+        apple_imports.update(names)
+        if set(names) - {'UIKit', 'XCTest', 'NoteCanvasPrototype', 'NoteCoreSketch'}:
+            errors.append(f'Unexpected Apple sketch dependency: {path.relative_to(ROOT)}')
     retired = re.compile(r'\b(?:PreviewNotebook|PreviewNotebookSnapshot|PreviewNotebookHeader|LegacyPreviewSaveSnapshot)\b')
-    roots = ['canvas-core/src', 'shared-core/src', 'android-app/src', 'ios-app/NoteCorePreview', 'ios-app/NoteCorePreviewTests', 'samples/sketch-host/src']
+    roots = ['canvas-core/src', 'shared-core/src', 'android-app/src', 'ios-app/NoteCorePreview', 'ios-app/NoteCorePreviewTests', 'samples/sketch-host/src', 'samples/apple-sketch']
     for root in roots:
         for path in (ROOT/root).rglob('*'):
             if path.suffix in {'.kt', '.swift'} and retired.search(path.read_text(encoding='utf-8')):
@@ -43,6 +55,7 @@ def main():
               'imports_checked': imports, 'errors': errors,
               'modules': ['canvas-core', 'shared-core'], 'project_dependency_direction': 'shared-core -> canvas-core only',
               'independent_sketch_host_project_dependencies': sample_dependencies,
+              'independent_apple_sketch_imports': sorted(apple_imports),
               'retired_single_page_stack_absent': not any('Retired single-page' in e for e in errors),
               'scope': 'commonMain imports and direct project dependencies; not a transitive bytecode audit'}
     print(json.dumps(report, ensure_ascii=False, indent=2))
