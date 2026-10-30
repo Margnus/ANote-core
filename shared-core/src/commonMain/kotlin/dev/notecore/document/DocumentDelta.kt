@@ -8,8 +8,8 @@ internal class DocumentDelta(operationId: CommandId, before: DocumentRoot, after
     val operationId = operationId
     val objects = changes.toList()
     private val membershipIds = changes.filter { it.before == null || it.after == null }.map { (it.before ?: it.after!!).id }.toSet()
-    val beforePositions = before.scene.objects().withIndex().filter { it.value.id in membershipIds }.associate { it.value.id to it.index }
-    val afterPositions = after.scene.objects().withIndex().filter { it.value.id in membershipIds }.associate { it.value.id to it.index }
+    val beforePositions = memberPositions(before.scene, membershipIds)
+    val afterPositions = memberPositions(after.scene, membershipIds)
     val affected = affected.toSet()
     val beforeOrder = before.pages().map { it.id }
     val afterOrder = after.pages().map { it.id }
@@ -21,6 +21,17 @@ internal class DocumentDelta(operationId: CommandId, before: DocumentRoot, after
     val charge: Long = chargeFor(beforeTitle, afterTitle, beforeOrder, afterOrder, this.affected, pages, objectChangesCharge(objects)) + (objectOrder?.charge ?: 0L)
 
     companion object {
+        /** Metadata and pure order edits retain no membership positions. Scan without dense object lists. */
+        private fun memberPositions(scene: SceneSnapshot, ids: Set<ObjectId>): Map<ObjectId, Int> {
+            if (ids.isEmpty()) return emptyMap()
+            val positions = mutableMapOf<ObjectId, Int>()
+            var index = 0
+            scene.forEachObject {
+                if (it.id in ids) positions[it.id] = index
+                index++
+            }
+            return positions
+        }
         /** Same accounting as the accepted delta, before a new canonical scene/root is allocated. */
         fun projectedCharge(before: DocumentRoot, afterTitle: String, afterPages: List<PageDescriptor>,
             changes: List<ObjectChange>, affected: Set<PageId>): Long = chargeFor(

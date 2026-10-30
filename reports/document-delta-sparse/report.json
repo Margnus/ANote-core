@@ -1,0 +1,36 @@
+{
+  "status": "jvm_and_art_passed_native_pending",
+  "baseline_commit": "fbc88af40f63fc90bb045e67f786cf7272d85c20",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "6cef3cbe164e9813be54f0f55619d564a13a94ffe475c84e5b435eb1b4aae75b"
+  },
+  "source_binding": "raw local build source; not Git EOL equivalence",
+  "change": "Original membership-position collector now skips empty membership and scans scene entries retaining only changed IDs; no full-scene object arrays in this collector. Accounting and position semantics unchanged.",
+  "jvm": {
+    "canvas-core": {
+      "tests": 234,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 337,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "new_tests": 0,
+  "physical_heap_measured": false,
+  "c1_passed": false,
+  "goal_complete": false,
+  "evidence_sha256": {
+    "DocumentAuthorityTest.xml": "7afb18ba7c97d53edadf971938d8c017fcbd1b1078735722f8b01fa298b43f26",
+    "DocumentHistoryTest.xml": "ee92b31bf6349aace4f83ca781bc28c8cf28c53fb774b6b6810f127e31fd904f",
+    "jvm-build.log": "189b334ea2ba0f3266a5044f07e4cd6a3be85d7c274c845119cf1c950b467050",
+    "ObjectOrderAuthorityTest.xml": "831bba146d611d9b8079c447515e6faf915a5b6af4e352cd05a374eea47e4b67"
+  },
+  "art_report": "reports/document-delta-sparse-art/report.json",
+  "art_tests": 50,
+  "preview_notes_preserved": 5
+}

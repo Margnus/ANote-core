@@ -22,6 +22,7 @@ def sha(data):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--adb', required=True)
+    parser.add_argument('--output', default='build/document-order-art')
     args = parser.parse_args()
     def adb(*command):
         return subprocess.run([args.adb, '-s', 'emulator-5590', *command], cwd=ROOT,
@@ -50,7 +51,7 @@ def main():
     assert info['applicationId'] == PACKAGE and len(info['elements']) == 1
     apk = metadata.parent/info['elements'][0]['outputFile']
     apk_hash = sha(apk.read_bytes())
-    out = ROOT/'reports/object-order-art'
+    out = ROOT/args.output
     out.mkdir(exist_ok=True)
     (out/'install.log').write_bytes(adb('install', '-r', str(apk)))
     remote = adb('shell', 'pm', 'path', PACKAGE).decode().strip()
