@@ -14,3 +14,12 @@ Runner依据：[GitHub标准托管runner](https://docs.github.com/en/actions/ref
 
 
 2026-10-30下一交付卡（计划A）：在同一候选CI新增独立XCUITest target，仅操作原App普通界面。验收两页各实际手指拖动、撤销/重做后的画布笔数、页隔离、缩放按钮、Home/恢复、保存返回列表重开、确认保存后terminate/launch重开，独立读取保留实际ncp文件及截图。无启动注入/模型调用/测试专用数据路径；新增控件identifier仅用于稳定定位。49项App-host仍单独完整执行；新增UI结果单列，失败不放宽断言。独立simulator与预览格式子范围不代表Pencil、在途写杀进程、物理性能或完整C1。实际结果待新运行。
+
+
+### 当前普通UI实际结果（运行40999919318）
+
+固定4b9039f0d35c13b8369916012362b6a34d319008在新iPad Pro 11-inch M4/iOS18.5 simulator通过原211/306 Native及49项App-host，并由独立XCUITest进程完成两页三笔、撤销/重做、页隔离、缩放按钮、Home/恢复、保存返回列表重开及确认写后terminate/launch重开。UI 1个完整操作链，无失败/跳过；[实际报告](../reports/apple-ui-ci-40999919318/report.json)、实际ordinary-ui-note.ncp和4张截图/manifest已留存。四图已查看：第一页两笔、第二页放大一笔、保存三笔、进程重开后第二页一笔均对应。
+
+156项源码/构建输入与固定Git对象逐一匹配，16项报告附属产物哈希一致；远端ZIP SHA256 3eeb3c2f40eabba6151b7007b054c713f210c09e6ccb77517b5cd651916f6bbc一致。实际文件SHA256 1ee74c4e8f808296572e9537b5dbba494e25f76dfb229e87b17d9957b312afbf；两页正文分属2笔/1笔，均为多点实际拖动采样。新容器测试前PreviewNotes为空，原文件保持断言没有非空样本，不能据此声称Apple旧笔记保持；原Mac/Android已有文件报告不重绑定。只采用当前候选模拟手指/普通App界面及确认保存后恢复子范围，Pencil/多指/旋转、在途IO终止、物理延迟/heap、完整C1/生产存储和113条原验收仍待。
+
+本操作链按上述范围收口，后续不重复增加相同界面happy path。下一项按DEV-039现有真实PDF样本补Apple元数据/原生渲染能力与坐标接缝，决定双端支持/拒绝边界，不接生产App或引入新PDF SDK。
