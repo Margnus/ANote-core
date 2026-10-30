@@ -23,3 +23,8 @@ Runner依据：[GitHub标准托管runner](https://docs.github.com/en/actions/ref
 156项源码/构建输入与固定Git对象逐一匹配，16项报告附属产物哈希一致；远端ZIP SHA256 3eeb3c2f40eabba6151b7007b054c713f210c09e6ccb77517b5cd651916f6bbc一致。实际文件SHA256 1ee74c4e8f808296572e9537b5dbba494e25f76dfb229e87b17d9957b312afbf；两页正文分属2笔/1笔，均为多点实际拖动采样。新容器测试前PreviewNotes为空，原文件保持断言没有非空样本，不能据此声称Apple旧笔记保持；原Mac/Android已有文件报告不重绑定。只采用当前候选模拟手指/普通App界面及确认保存后恢复子范围，Pencil/多指/旋转、在途IO终止、物理延迟/heap、完整C1/生产存储和113条原验收仍待。
 
 本操作链按上述范围收口，后续不重复增加相同界面happy path。下一项按DEV-039现有真实PDF样本补Apple元数据/原生渲染能力与坐标接缝，决定双端支持/拒绝边界，不接生产App或引入新PDF SDK。
+
+
+### 原只读公开入口当前候选（运行41003459044）
+
+固定6b1c155/独立macOS15.8.2/Xcode16.4/iOS18.5 simulator实际canvas211/shared306 Native、50项Swift App-host（新增公开模式的直接编辑/输入拒绝、活动前缀、退休拒绝）与原普通UI链1项全通过。156项编译输入与固定Git对象、16份附属产物与报告、ZIP SHA256 329005bc786f5fe401222b4b91291529bcef127c886c18bb8b7346318f0aa6e9逐项一致；4截图已查看，实际两页2+1笔文件留存。见[报告](../reports/apple-readonly-ci-41003459044/report.json)、[采用回执](../reports/sketch-readonly/apple-verification.json)。原Android/JVM报告不重绑定，新增公开模式子范围收口；物理M-1/完整C1/稳定SDK与全部113条验收未关闭。
