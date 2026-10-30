@@ -131,9 +131,9 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         fail("此会话编号已耗尽，请保留笔记并导出备份", PreviewFailureKind.IDENTITY_EXHAUSTED); return null
     }
     private fun operation(): CommandId? = identity("op")?.let(::CommandId)
-    internal val isReadOnly: Boolean get() { ownerCheck(); return readOnly }
+    val isReadOnly: Boolean get() { ownerCheck(); return readOnly }
     /** Mode changes never cancel accepted input or resolve a retained completion implicitly. */
-    internal fun setReadOnly(value: Boolean): Boolean {
+    fun setReadOnly(value: Boolean): Boolean {
         ownerCheck()
         if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
         if (value == readOnly) { clearError(); return true }

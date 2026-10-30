@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-28T11:12:02.569Z" hostname="LIXIAOFAN" time="0.132">
+  <properties/>
+  <testcase name="destructionOutcomeUnknownKeepsResourceUntilWorkerQueryAndOwnerReconciliation[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.064"/>
+  <testcase name="reentrantDrainCannotDeliverAnotherResultWhileCurrentReceiverOwnsIt[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.007"/>
+  <testcase name="blockedReceiverKeepsExactResultAndFifoUntilExplicitRetryWithoutRerunningWork[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.002"/>
+  <testcase name="infrastructureTerminationReturnsUnknownRunningAndNeverExecutedQueuedResultsInFifo[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.005"/>
+  <testcase name="realWorkerExecutesFifoAndOwnerReceivesFiniteBatches[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.005"/>
+  <testcase name="wakeRunsAfterPublicationOffMonitorAndFailureKeepsResultsAndAcceptedNextJob[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.001"/>
+  <testcase name="idleWorkerInterruptionRetainsReadyResultUntilReceiverAcknowledges[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.003"/>
+  <testcase name="foreignThreadCannotAdmitDrainStopInspectRetryOrMutateDocument[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.005"/>
+  <testcase name="computeFailureIsUnknownOutcomeAndNextAcceptedJobStillExecutes[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.002"/>
+  <testcase name="stopDoesNotInterruptRunningJobOrLoseQueuedWorkAndTimeoutDoesNotCancel[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.003"/>
+  <testcase name="taskSelfInterruptDoesNotContaminateNextAlreadyAcceptedJob[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.002"/>
+  <testcase name="receiverExceptionAfterPartialApplyRequiresIdempotentReceiverAndRetainsCharge[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.002"/>
+  <testcase name="runningQueuedAndReadyJobsAllConsumeCapacityAndRejectedWorkNeverRuns[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.003"/>
+  <testcase name="foreignDeliveryTicketAndDuplicateAcknowledgmentCannotFreeAnotherExecutorBudget[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.002"/>
+  <testcase name="lostCommitOutcomeCanReplayExactPatchAcrossRealWorkerOwnerBoundaryDuringClose[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.02"/>
+  <testcase name="byteAdmissionUsesRemainingBudgetWithoutOverflowAndRejectsInvalidCharge[jvm]" classname="dev.notecore.canvas.prototype.BoundedOwnerExecutorTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

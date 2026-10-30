@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.canvas.prototype.ResourceLeaseContractTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-28T11:12:03.788Z" hostname="LIXIAOFAN" time="0.003">
+  <properties/>
+  <testcase name="laneAndMetadataLimitsFailWithoutMutation[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.001"/>
+  <testcase name="reservationPrecedesAllocationAndCancellationRestoresBudget[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="sameKeyReplacementRetainsOldGenerationUntilItsOwnLeaseEnds[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="closeCannotCancelReservationOfWorkerWhoseAllocationOutcomeIsUnknown[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="admissionFailureNeverEvictsResidentOrPretendsRetiredBytesAreFree[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.001"/>
+  <testcase name="evictionCannotDestroyAResourceStillBorrowedByReader[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="foreignAndDuplicateTokensCannotReleaseAnotherOwnersBudget[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="duplicateRawResourceCannotBeRegisteredUnderTwoOwnersInSamePool[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="failedDestructionKeepsBudgetAndUsesFreshAttemptForExplicitRetry[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="multipleReadersCountUniqueBytesAndAllMustReturn[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="terminalCloseRejectsNewWorkButLateAllocationTransfersForRelease[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="lruBorrowOrderEvictsOldestResidentWithoutFreeingBytesEarly[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="unknownDestructionQuarantinesUntilExplicitBackendReconciliation[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="reconciliationThatResourceStillLivesAllowsAnExplicitNewRelease[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <testcase name="subtractionBasedAdmissionDoesNotOverflowLongBudget[jvm]" classname="dev.notecore.canvas.prototype.ResourceLeaseContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

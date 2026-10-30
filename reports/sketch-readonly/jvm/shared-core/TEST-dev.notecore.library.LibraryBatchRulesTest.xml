@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.library.LibraryBatchRulesTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-30T04:31:07.242Z" hostname="LIXIAOFAN" time="0.011">
+  <properties/>
+  <testcase name="staleAndCrossSpaceRequestsNeverProduceRows[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.005"/>
+  <testcase name="recycleMatchesSingleRuleAndHasOnlySelectedIdentities[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.001"/>
+  <testcase name="badLastIdentityNeverLeaksAPartialBatch[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.0"/>
+  <testcase name="favoriteAndUnfavoriteMatchSingleRuleWithoutModifyingTimestamps[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.001"/>
+  <testcase name="partialAndCorruptSnapshotsCannotBeUsedEvenForValidSelectedRows[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.0"/>
+  <testcase name="invalidDestinationTimestampAndPreviouslyRecycledSelectionRejectWholeBatch[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.001"/>
+  <testcase name="moveMatchesSingleRulesAndKeepsOtherRowsAndRequestOrder[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.001"/>
+  <testcase name="invalidSelectionsAreRejectedByEveryOperation[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.001"/>
+  <testcase name="maximumSelectionIsAdmittedAsOneVersionBoundBatch[jvm]" classname="dev.notecore.library.LibraryBatchRulesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.canvas.prototype.SubmissionQueueContractTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-28T11:12:04.509Z" hostname="LIXIAOFAN" time="0.013">
+  <properties/>
+  <testcase name="fifoUsesLatestAuthorityBaseAtFirstDispatchAndCapturedLayer[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="duplicateAdmissionDoesNotChargeTwiceButDifferentPayloadCannotReuseId[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="repeatedBackpressureAndAckLossPreserveAllAdmittedObjectsAndBudget[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.009"/>
+  <testcase name="prepareFailureRetainsPayloadAndWrongDocumentDoesNotPoisonQueue[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.001"/>
+  <testcase name="confirmedPayloadIsChargedUntilHostCollectsItAndIsNeverCalledDurable[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="wrongReceiptCannotConfirmAndDuplicateCallbackCannotChangeAccounting[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="sessionCloseAndStopAdmissionDoNotDiscardQueuedOrInFlightStroke[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="failureBeforeCommitCanRetrySamePayloadWithoutLoss[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="inFlightIsChargedAndOnlyOneAttemptCanRun[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.001"/>
+  <testcase name="definitiveFailureBlocksFifoAndRequiresExplicitRecoveryHandoff[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="attemptFromAnotherQueueCannotConfirmMatchingLocalId[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="lostAckReplaysExactPatchAndCommitsOnlyOnce[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.001"/>
+  <testcase name="staleSceneFailureDoesNotSilentlyRebaseTheProposal[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="byteCapacityAndOversizedAdmissionNeverEvictExistingPayload[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <testcase name="countCapacityLeavesRejectedOutputWithCallerAndKeepsAdmittedStroke[jvm]" classname="dev.notecore.canvas.prototype.SubmissionQueueContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

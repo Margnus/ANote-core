@@ -5,6 +5,29 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testPublicReadingModeBlocksDirectEditsAndKeepsActivePrefix() throws {
+        let opening = PagedPreviewNotebook.companion.createValidated(documentId: "swift-reading", title: "reading",
+            sessionNonce: "swift-reading-owner", width: 595, height: 842, paper: .blank,
+            budget: DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024, journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024, historyEntries: 128, historyBytes: 16 * 1024 * 1024, inputBytes: 2 * 1024 * 1024), ownerCheck: { precondition(Thread.isMainThread) })
+        let note = try XCTUnwrap(opening.notebook)
+        let root = note.snapshot()
+        XCTAssertTrue(note.setReadOnly(value: true)); XCTAssertTrue(note.isReadOnly)
+        let refused = note.edit(request: PreviewEditRename(title: "bypass"))
+        XCTAssertFalse(refused.accepted); XCTAssertEqual(refused.failure?.kind, .readOnly)
+        XCTAssertFalse(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
+        XCTAssertTrue(note.snapshot() === root); XCTAssertFalse(note.hasActiveStroke)
+        XCTAssertTrue(note.setReadOnly(value: false))
+        XCTAssertTrue(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
+        let reserved = note.inputReservedByteCharge
+        XCTAssertFalse(note.setReadOnly(value: true)); XCTAssertFalse(note.isReadOnly)
+        XCTAssertEqual(note.lastFailure?.kind, .activeStroke); XCTAssertTrue(note.hasActiveStroke)
+        XCTAssertEqual(note.inputReservedByteCharge, reserved)
+        XCTAssertTrue(note.endStroke(x: 3, y: 4, pressure: 0.7, timeMicros: 2))
+        XCTAssertEqual(note.pointCount(index: 0), 2); XCTAssertTrue(note.setReadOnly(value: true))
+        XCTAssertTrue(note.retire()); XCTAssertFalse(note.setReadOnly(value: false))
+        XCTAssertEqual(note.lastFailure?.kind, .closed)
+    }
+
     @MainActor func testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen() async throws {
         let dir = directory(), moved = directory()
         defer { try? FileManager.default.removeItem(at: dir); try? FileManager.default.removeItem(at: moved) }

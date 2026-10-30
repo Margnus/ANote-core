@@ -17,8 +17,7 @@ class SketchSession(tools: List<SketchTool>, val background: PageBackground) {
     private val owner: () -> Unit = { check(Looper.myLooper() == Looper.getMainLooper()) { "Sketch owner must be the main thread" } }
     val notebook = checkNotNull(PagedPreviewNotebook.createValidated(UUID.randomUUID().toString(), "内存草图",
         UUID.randomUUID().toString(), ownerCheck = owner).notebook)
-    var readOnly = false
-        private set
+    val readOnly: Boolean get() = notebook.isReadOnly
     var toolIndex = 0
         private set
     init { owner(); check(selectTool(0)) }
@@ -32,9 +31,7 @@ class SketchSession(tools: List<SketchTool>, val background: PageBackground) {
     }
     fun setReadOnly(value: Boolean): Boolean {
         owner()
-        if (notebook.hasActiveStroke || notebook.hasPendingStroke) return false
-        readOnly = value
-        return true
+        return notebook.setReadOnly(value)
     }
     fun edit(request: PreviewEdit): Boolean { owner(); return !readOnly && notebook.edit(request).accepted }
 

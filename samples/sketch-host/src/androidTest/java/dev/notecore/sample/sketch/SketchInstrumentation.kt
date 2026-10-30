@@ -60,6 +60,7 @@ class SketchInstrumentation : Instrumentation() {
                 result.putString("actual_points", expectedX.zip(expectedY).toString())
                 root = original.notebook.snapshot()
                 check(original.setReadOnly(true))
+                check(!original.notebook.edit(PreviewEdit.Rename("readonly-bypass")).accepted) { "Readonly host exposes an editable notebook" }
                 val rejected = MotionEvent.obtain(start, start + 40, MotionEvent.ACTION_DOWN, 32 * scale, 32 * scale, 0)
                 try { check(!view.onTouchEvent(rejected)) } finally { rejected.recycle() }
                 check(!original.edit(PreviewEdit.Undo) && !original.selectTool(0) && !original.selectTool(-1))

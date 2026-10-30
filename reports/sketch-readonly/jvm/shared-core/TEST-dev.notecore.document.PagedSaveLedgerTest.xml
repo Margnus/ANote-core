@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.document.PagedSaveLedgerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-30T04:31:05.907Z" hostname="LIXIAOFAN" time="0.024">
+  <properties/>
+  <testcase name="migratedAndNewRootsUseTheSameSingleFlightLedgerAndKeepIndependentResponsibilities[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.0"/>
+  <testcase name="failedRootCanRetryFromEquivalentReopenedContentWithoutReplacingRetainedSnapshot[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.001"/>
+  <testcase name="sameVersionForksInTitlePaperOrderBrushTransformAndObjectRevisionRemainRejected[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.001"/>
+  <testcase name="migratedLegacyIdentityCounterCannotReintroduceOldObjectIdsOrAV1Writer[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.0"/>
+  <testcase name="migratedRootRecoveryComparesCanonicalContentRatherThanSessionOrWrapperIdentity[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.001"/>
+  <testcase name="pagedSameVersionDifferentInkIsNotAcknowledgedAsTheOldSavedContent[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.0"/>
+  <testcase name="oldAttemptCannotCompleteNewSaveEpochEvenWhenIdentityAndVersionAreEqual[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.0"/>
+  <testcase name="oldPageWriteCannotClearNewerOtherPageContentAndBothVersionsRemainCharged[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.0"/>
+  <testcase name="capacityRejectionKeepsNewPageRootWithCallerAndDoesNotChangeOldFlight[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.0"/>
+  <testcase name="sameVersionDeepCopyCoalescesButDifferentDrawOrderCannotReplaceAnInflightWrite[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.0"/>
+  <testcase name="largeImmutableSceneComparisonPreservesOrderHeadersAndLateObjectDifferences[jvm]" classname="dev.notecore.document.PagedSaveLedgerTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
