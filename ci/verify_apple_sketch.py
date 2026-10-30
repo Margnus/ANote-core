@@ -85,16 +85,25 @@ def main():
             ('ui', 'NoteCoreSketchUITests', SAMPLE/'NoteCoreSketchUITests/SketchJourneyUITests.swift')):
             report['stage'] = label
             result = OUTPUT/(label+'.xcresult')
-            run(label, ['xcodebuild', '-quiet', '-project', str(project.parent), '-scheme', 'NoteCoreSketch',
+            execution_failure = None
+            try:
+                run(label, ['xcodebuild', '-quiet', '-project', str(project.parent), '-scheme', 'NoteCoreSketch',
                 '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id='+device,
                 '-derivedDataPath', str(OUTPUT/'xcode'), 'CODE_SIGNING_ALLOWED=NO', '-resultBundlePath', str(result),
                 '-collect-test-diagnostics', 'never', '-parallel-testing-enabled', 'NO', '-only-testing:'+target, 'test'], 900)
+            except subprocess.CalledProcessError as failure:
+                execution_failure = failure
+                report[label+'_execution_failure'] = repr(failure)
+            # A failing XCTest still has an authoritative result bundle. Keep its assertions before refusing.
             summary = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(result), '--format', 'json'))
             tree = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(result), '--format', 'json'))
             for name, value in (('summary', summary), ('tests', tree)):
                 (OUTPUT/(label+'-'+name+'.json')).write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8', newline='\n')
             expected = {name+'()' for name in re.findall(r'func\s+(test\w+)\(', source.read_text(encoding='utf-8'))}
             actual = list(cases(tree['testNodes']))
+            report[label] = {'tests': len(actual), 'checks': sorted(c['name'] for c in actual), 'summary': summary}
+            if execution_failure is not None:
+                raise execution_failure
             assert {c['name'] for c in actual} == expected and all(c['result'] == 'Passed' for c in actual)
             assert summary['result'] == 'Passed' and summary['totalTestCount'] == len(expected)
             assert summary['failedTests'] == summary['skippedTests'] == summary['expectedFailures'] == 0
