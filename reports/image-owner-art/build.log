@@ -1,0 +1,167 @@
+
+> Configure project :canvas-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: Invalid Source Set Dependency Across Trees
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+Solution: Please keep dependsOn edges only from one group and remove the others.
+
+
+> Task :android-app:preBuild UP-TO-DATE
+> Task :android-app:preDebugBuild UP-TO-DATE
+> Task :android-app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :android-app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preDebugBuild UP-TO-DATE
+> Task :canvas-core:writeDebugAarMetadata UP-TO-DATE
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preDebugBuild UP-TO-DATE
+> Task :shared-core:writeDebugAarMetadata UP-TO-DATE
+> Task :android-app:checkDebugAarMetadata UP-TO-DATE
+> Task :android-app:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResources UP-TO-DATE
+> Task :canvas-core:packageDebugResources UP-TO-DATE
+> Task :shared-core:generateDebugResValues UP-TO-DATE
+> Task :shared-core:generateDebugResources UP-TO-DATE
+> Task :shared-core:packageDebugResources UP-TO-DATE
+> Task :android-app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :android-app:generateDebugResources UP-TO-DATE
+> Task :android-app:mergeDebugResources UP-TO-DATE
+> Task :android-app:packageDebugResources UP-TO-DATE
+> Task :android-app:parseDebugLocalResources UP-TO-DATE
+> Task :android-app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android-app:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:processDebugManifest UP-TO-DATE
+> Task :shared-core:extractDeepLinksDebug UP-TO-DATE
+> Task :shared-core:processDebugManifest UP-TO-DATE
+> Task :android-app:processDebugMainManifest UP-TO-DATE
+> Task :android-app:processDebugManifest UP-TO-DATE
+> Task :android-app:processDebugManifestForPackage UP-TO-DATE
+> Task :canvas-core:compileDebugLibraryResources UP-TO-DATE
+> Task :canvas-core:parseDebugLocalResources UP-TO-DATE
+> Task :canvas-core:generateDebugRFile UP-TO-DATE
+> Task :shared-core:compileDebugLibraryResources UP-TO-DATE
+> Task :shared-core:parseDebugLocalResources UP-TO-DATE
+> Task :shared-core:generateDebugRFile UP-TO-DATE
+> Task :android-app:processDebugResources UP-TO-DATE
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :shared-core:javaPreCompileDebug UP-TO-DATE
+> Task :shared-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :shared-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :android-app:compileDebugKotlin UP-TO-DATE
+> Task :android-app:javaPreCompileDebug UP-TO-DATE
+> Task :android-app:compileDebugJavaWithJavac NO-SOURCE
+> Task :android-app:mergeDebugShaders UP-TO-DATE
+> Task :android-app:compileDebugShaders NO-SOURCE
+> Task :android-app:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugShaders UP-TO-DATE
+> Task :canvas-core:compileDebugShaders NO-SOURCE
+> Task :canvas-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugShaders UP-TO-DATE
+> Task :shared-core:compileDebugShaders NO-SOURCE
+> Task :shared-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:generateDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugAssets UP-TO-DATE
+> Task :android-app:mergeDebugAssets UP-TO-DATE
+> Task :android-app:compressDebugAssets UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :android-app:desugarDebugFileDependencies UP-TO-DATE
+> Task :android-app:dexBuilderDebug UP-TO-DATE
+> Task :android-app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :android-app:processDebugJavaRes UP-TO-DATE
+> Task :canvas-core:processDebugJavaRes UP-TO-DATE
+> Task :shared-core:processDebugJavaRes UP-TO-DATE
+> Task :android-app:mergeDebugJavaResource UP-TO-DATE
+> Task :android-app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :android-app:mergeExtDexDebug UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :android-app:mergeProjectDexDebug UP-TO-DATE
+> Task :android-app:mergeLibDexDebug UP-TO-DATE
+> Task :android-app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugNativeLibs NO-SOURCE
+> Task :canvas-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :shared-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :shared-core:mergeDebugNativeLibs NO-SOURCE
+> Task :shared-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :android-app:mergeDebugNativeLibs NO-SOURCE
+> Task :android-app:stripDebugDebugSymbols NO-SOURCE
+> Task :android-app:validateSigningDebug UP-TO-DATE
+> Task :android-app:writeDebugAppMetadata UP-TO-DATE
+> Task :android-app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :android-app:packageDebug UP-TO-DATE
+> Task :android-app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :android-app:assembleDebug UP-TO-DATE
+> Task :android-app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :android-app:preDebugAndroidTestBuild SKIPPED
+> Task :android-app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :android-app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :android-app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :android-app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :android-app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :android-app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :android-app:processDebugAndroidTestResources UP-TO-DATE
+> Task :android-app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :android-app:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :android-app:compileDebugAndroidTestShaders NO-SOURCE
+> Task :android-app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :android-app:mergeDebugAndroidTestAssets
+> Task :android-app:compressDebugAndroidTestAssets
+> Task :android-app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :android-app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :android-app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :android-app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :android-app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :android-app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :android-app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :android-app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :android-app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+
+> Task :android-app:compileDebugAndroidTestKotlin
+w: file:///D:/work/StudioProjects/ANote-core/android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt:451:48 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///D:/work/StudioProjects/ANote-core/android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt:454:114 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///D:/work/StudioProjects/ANote-core/android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt:456:75 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///D:/work/StudioProjects/ANote-core/android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt:460:95 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///D:/work/StudioProjects/ANote-core/android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt:461:46 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :android-app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :android-app:dexBuilderDebugAndroidTest
+> Task :android-app:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :android-app:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :android-app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :android-app:mergeProjectDexDebugAndroidTest
+> Task :android-app:packageDebugAndroidTest
+> Task :android-app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :android-app:assembleDebugAndroidTest
+
+[Incubating] Problems report is available at: file:///D:/work/StudioProjects/ANote-core/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 16s
+101 actionable tasks: 8 executed, 93 up-to-date

@@ -33,9 +33,11 @@ class ViewportInstrumentation : Instrumentation() {
     private var pdfGeometryOnly = false
     private var pdfFixture = "crop-rotations.pdf"
     private var pdfUserUnit = 1.0
+    private var imageOwnershipOnly = false
     private var imageBudgetOnly = false
     private var fontFallbackOnly = false
     override fun onCreate(arguments: Bundle?) {
+        imageOwnershipOnly = arguments?.getString("notecore_case") == "image_ownership"
         imageBudgetOnly = arguments?.getString("notecore_case") == "image_budget"
         fontFallbackOnly = arguments?.getString("notecore_case") == "font_fallback"
         pdfGeometryOnly = arguments?.getString("notecore_case") in listOf("pdf_geometry", "pdf_user_unit", "pdf_inherited")
@@ -57,6 +59,11 @@ class ViewportInstrumentation : Instrumentation() {
     override fun onStart() {
         val result = Bundle()
         try {
+            if (imageOwnershipOnly) {
+                result.putString("image_owner_observations", ImageDecodeOwnershipArtChecks.verify(targetContext, context))
+                result.putString("image_owner_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (imageBudgetOnly) {
                 result.putString("image_observations", ImageDecodeBudgetArtChecks.verify(targetContext))
                 result.putString("image_status", "passed")

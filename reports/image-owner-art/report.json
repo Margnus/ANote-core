@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "baseline_core": "4064619686c4f97bafdf7ddf811a4fd3d889f264",
+  "environment": {
+    "avd": "NoteCoreCurrent35",
+    "serial": "emulator-5590",
+    "api": 35
+  },
+  "observations": {
+    "status": "passed",
+    "output": "/data/user/0/dev.notecore.preview/cache/image-owner-art-d5a2efaf-a822-4077-93a5-c62bde4fae3c",
+    "sources_sha256": {
+      "jpeg-1.jpeg": "04aff48004d759be073f3d497eddfdb5b22c5cf7c5ea16208f76d55b8d9b8120",
+      "png-1.png": "27a573e768b617e3de4dd5a15cf4602cfdd8f921e7107d525a8add45403e5d71"
+    },
+    "joined_workers": 3,
+    "tracked_bitmaps": 2,
+    "all_bitmaps_recycled": true,
+    "scope": "Actual ART original executor ownership scenarios; API recycle state and declared payload charges only, no JNI interruption/native heap/production task or owner loss acceptance"
+  },
+  "phase_results": {
+    "queued": {
+      "source_bytes": 1149,
+      "argb_bytes": 2400,
+      "decode_calls": 0,
+      "charge_before_ack": 7098,
+      "charge_after_ack": 0
+    },
+    "running": {
+      "source_bytes": 1149,
+      "argb_bytes": 2400,
+      "decode_calls": 1,
+      "recycle_calls": 1,
+      "charge_until_owner_ack": 3549,
+      "charge_after_ack": 0,
+      "inside_jni_cancellation_tested": false
+    },
+    "delivery": {
+      "source_bytes": 390,
+      "argb_bytes": 2400,
+      "deliveries": 2,
+      "recycle_calls": 1,
+      "blocked_charge": 2790,
+      "final_charge": 0,
+      "same_result_retried": true
+    }
+  },
+  "build_input_count": 109,
+  "installed_apk_sha256": {
+    "dev.notecore.preview": "3e9733dee5a699b2829394a8872c9179013010b34ed7db47a547b62641d4587c",
+    "dev.notecore.preview.test": "a20b5f7e7e3a4771369cc96d61c13edb414a50f8f2cb5e31e1e114199d703f20"
+  },
+  "original_note_count": 5,
+  "original_notes_byte_identical": true,
+  "scope": "Actual ART counterpart of original host three fixed image ownership scenarios using original executor. API recycle state/declared input+ARGB charges only, no JNI interruption/native heap/GPU receipt/production task/complete owner-loss acceptance.",
+  "evidence_sha256": {
+    "reports/image-owner-art/build-inputs.sha256": "b8950fca9fd24879385a60055210ddc670935cb4954ee5933caba252bae9cf9c",
+    "reports/image-owner-art/build.log": "842f56f5f2df5694511e59fef737f29e80b28273b3dc7790e5a77eefeb4eae9c",
+    "reports/image-owner-art/jpeg-1.jpeg": "04aff48004d759be073f3d497eddfdb5b22c5cf7c5ea16208f76d55b8d9b8120",
+    "reports/image-owner-art/notes-after.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/image-owner-art/notes-before.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/image-owner-art/ownership-delivery.json": "3496df89e3058865d469de9d08d0d69f3cbd223afbf133bf61eb768573628a57",
+    "reports/image-owner-art/ownership-queued.json": "1375777f765a7256f83b3c21e321141ac05f0f56326c6859ff8feebc7f1fce6b",
+    "reports/image-owner-art/ownership-running.json": "a3fcff00fe54379a2d7d97074eaf29c405701acfb54e5acb7890579ffa0e6e2d",
+    "reports/image-owner-art/png-1.png": "27a573e768b617e3de4dd5a15cf4602cfdd8f921e7107d525a8add45403e5d71",
+    "reports/image-owner-art/result.json": "e63756ae8557ef36d937a1c7861f5b936a9c8197243f7714f367ea7ca3a4166c",
+    "reports/image-owner-art/run.log": "b246b7cf2473617489f4cb87f8955b005d5d82847155fc3a4cc73cebf27d76d2"
+  }
+}
