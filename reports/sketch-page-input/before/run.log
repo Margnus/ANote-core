@@ -1,0 +1,22 @@
+INSTRUMENTATION_RESULT: actual_points=[(63.99998536685634, 96.0002902240159), (80.00013779543612, 111.9998183051329), (96.0002902240159, 127.99997073371269), (127.99997073371269, 160.00027559087223)]
+INSTRUMENTATION_RESULT: error=java.lang.IllegalStateException: Small page accepted a DOWN outside its actual bounds
+	at dev.notecore.sample.sketch.SketchInstrumentation.onStart$lambda$0(SketchInstrumentation.kt:126)
+	at dev.notecore.sample.sketch.SketchInstrumentation.$r8$lambda$z4TfyhE118X3-lFtOHS1ZCHw2oQ(Unknown Source:0)
+	at dev.notecore.sample.sketch.SketchInstrumentation$$ExternalSyntheticLambda0.invoke(D8$$SyntheticClass:0)
+	at dev.notecore.sample.sketch.SketchInstrumentation.onOwner$lambda$0(SketchInstrumentation.kt:19)
+	at dev.notecore.sample.sketch.SketchInstrumentation.$r8$lambda$IGfLcbAEgDPApxvu6fZT3ZSMAkc(Unknown Source:0)
+	at dev.notecore.sample.sketch.SketchInstrumentation$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+	at android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2612)
+	at android.os.Handler.handleCallback(Handler.java:959)
+	at android.os.Handler.dispatchMessage(Handler.java:100)
+	at android.os.Looper.loopOnce(Looper.java:232)
+	at android.os.Looper.loop(Looper.java:317)
+	at android.app.ActivityThread.main(ActivityThread.java:8705)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+
+INSTRUMENTATION_RESULT: page_cache_identity=passed: same immutable root selects ink/empty pages without cross-page stale paths
+INSTRUMENTATION_RESULT: page_geometry=passed: 300x600 background bounds and canonical dot use current page scale
+INSTRUMENTATION_RESULT: status=failed
+INSTRUMENTATION_CODE: 0

@@ -121,6 +121,27 @@ class SketchInstrumentation : Instrumentation() {
                     val resizedCenter = (100f * resizedScale).toInt()
                     check(pageBitmap.getPixel(resizedCenter, resizedCenter) == 0xff125634.toInt()) { "Page size was ignored by the canonical ink transform" }
                     result.putString("page_geometry", "passed: 300x600 background bounds and canonical dot use current page scale")
+                    val beforeOutside = other.notebook.snapshot()
+                    val outside = MotionEvent.obtain(start, start + 100, MotionEvent.ACTION_DOWN, 400f * resizedScale, 100f * resizedScale, 0)
+                    try { check(!injected.onTouchEvent(outside)) { "Small page accepted a DOWN outside its actual bounds" } }
+                    finally { outside.recycle() }
+                    check(other.notebook.snapshot() === beforeOutside && !other.notebook.hasActiveStroke && other.notebook.inputReservedByteCharge == 0L)
+                    fun touchDot(x: Float, y: Float, pageScale: Float, offset: Long) {
+                        val down = MotionEvent.obtain(start + offset, start + offset, MotionEvent.ACTION_DOWN, x * pageScale, y * pageScale, 0)
+                        try { check(injected.onTouchEvent(down)) } finally { down.recycle() }
+                        val up = MotionEvent.obtain(start + offset, start + offset + 1, MotionEvent.ACTION_UP, x * pageScale, y * pageScale, 0)
+                        try { check(injected.onTouchEvent(up)) } finally { up.recycle() }
+                        val last = other.notebook.strokeCount - 1
+                        check(other.notebook.pointCount(last) == 2)
+                        for (point in 0..1) {
+                            check(kotlin.math.abs(other.notebook.pointX(last, point) - x) < 0.001)
+                            check(kotlin.math.abs(other.notebook.pointY(last, point) - y) < 0.001)
+                        }
+                    }
+                    touchDot(30f, 60f, resizedScale, 110)
+                    check(other.edit(PreviewEdit.SetPaper(900.0, 1200.0, PaperKind.BLANK)))
+                    touchDot(800f, 1000f, minOf(595f / 900f, 842f / 1200f), 120)
+                    result.putString("page_input_bounds", "passed: small-page outside DOWN refused without input/root mutation; small/large actual MotionEvent dots keep canonical coordinates")
                 } finally { pageBitmap.recycle() }
                 result.putString("background_canvas_isolation", "passed: injected translate/clip preserves canonical dot and background pixels")
                 result.putString("input_policy_resources", "passed: historical batch 4 real points; injected red tool; readonly root identity; undo/redo; active-prefix guard; resource pixels and copied tool list")

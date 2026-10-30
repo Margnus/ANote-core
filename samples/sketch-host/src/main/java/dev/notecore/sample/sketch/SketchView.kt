@@ -99,7 +99,7 @@ class SketchView(context: Context, private val session: SketchSession, private v
             val millis = if (current) event.eventTime else event.getHistoricalEventTime(i)
             times[i] = if (millis in 0..Long.MAX_VALUE / 1000) millis * 1000 else -1
         }
-        if (phase == PointerPhase.DOWN && (xs[0] !in 0.0..595.0 || ys[0] !in 0.0..842.0)) return false
+        if (phase == PointerPhase.DOWN && (xs[0] !in 0.0..note.currentPage.width || ys[0] !in 0.0..note.currentPage.height)) return false
         val result = note.offerRealBatch(phase, times.last(), xs, ys, pressures, times)
         if (!result.admitted) { blockInput(); return true }
         if (phase == PointerPhase.DOWN) {
