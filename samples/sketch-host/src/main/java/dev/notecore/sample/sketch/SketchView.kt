@@ -49,24 +49,29 @@ class SketchView(context: Context, private val session: SketchSession, private v
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (scale <= 0) return
-        canvas.save(); canvas.scale(scale, scale); canvas.clipRect(0f, 0f, 595f, 842f)
-        session.background.draw(canvas, 595f, 842f)
-        refreshPaths()
-        for (stroke in paths) {
-            canvas.save(); canvas.concat(stroke.matrix)
-            paint.color = stroke.argb; paint.strokeWidth = stroke.width
-            paint.style = if (stroke.dot) Paint.Style.FILL else Paint.Style.STROKE
-            if (stroke.dot) canvas.drawCircle(stroke.x, stroke.y, stroke.width / 2, paint) else canvas.drawPath(stroke.path, paint)
-            canvas.restore()
-        }
-        active?.let { path ->
-            val tool = session.tools[session.toolIndex]
-            paint.color = tool.argb; paint.strokeWidth = tool.width.toFloat()
-            paint.style = if (moved) Paint.Style.STROKE else Paint.Style.FILL
-            if (moved) canvas.drawPath(path, paint) else canvas.drawCircle(startX, startY, paint.strokeWidth / 2, paint)
-        }
-        canvas.restore()
+        val pageState = canvas.save()
+        try {
+            canvas.scale(scale, scale); canvas.clipRect(0f, 0f, 595f, 842f)
+            val backgroundState = canvas.save()
+            try { session.background.draw(canvas, 595f, 842f) }
+            finally { canvas.restoreToCount(backgroundState) }
+            refreshPaths()
+            for (stroke in paths) {
+                canvas.save(); canvas.concat(stroke.matrix)
+                paint.color = stroke.argb; paint.strokeWidth = stroke.width
+                paint.style = if (stroke.dot) Paint.Style.FILL else Paint.Style.STROKE
+                if (stroke.dot) canvas.drawCircle(stroke.x, stroke.y, stroke.width / 2, paint) else canvas.drawPath(stroke.path, paint)
+                canvas.restore()
+            }
+            active?.let { path ->
+                val tool = session.tools[session.toolIndex]
+                paint.color = tool.argb; paint.strokeWidth = tool.width.toFloat()
+                paint.style = if (moved) Paint.Style.STROKE else Paint.Style.FILL
+                if (moved) canvas.drawPath(path, paint) else canvas.drawCircle(startX, startY, paint.strokeWidth / 2, paint)
+            }
+        } finally { canvas.restoreToCount(pageState) }
     }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (session.readOnly || scale <= 0) return false
         if (event.actionMasked == MotionEvent.ACTION_CANCEL) { cancelActiveInput(); return true }

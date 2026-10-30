@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "baseline_core": "5d2e07db59dc90e9a6d4407e5342f95870e7e976",
+  "environment": {
+    "avd": "NoteCoreCurrent35",
+    "serial": "emulator-5590",
+    "api": 35
+  },
+  "before": "Actual injected background translate/clip hides canonical dot; expected pixel assertion fails.",
+  "after": "Background #fedcba and canonical dot #125634 match at (10,10)/(100,100); original input/readonly/resources/owner/Activity recreation checks pass.",
+  "installed_apk_sha256": {
+    "dev.notecore.sample.sketch": "265db6c9c020759f67b3e159e64a9deeb9ab6bec470234165a4a03c3cd1450ff",
+    "dev.notecore.sample.sketch.test": "c580a7d5a761442419533a512bd80bc166efa8834782fcaee465e406071cc071"
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 4
+  },
+  "original_note_count": 5,
+  "original_notes_byte_identical": true,
+  "unchanged_shared_and_apple_evidence": "reports/sketch-readonly/apple-verification.json",
+  "scope": "Existing memory-only Android separate host callback state isolation; no new renderer, shared/Swift change, App production resource or physical/C1 acceptance.",
+  "source_sha256": {
+    "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt": "8313c3a6c0a4c0ac89533054cfff600e9c10cb5e86d9c4f46b2bf60f2d642409",
+    "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchSession.kt": "1a3f5bef295c07ac872fd5cc32c319b27b2519254378a1bfb7b5981330c18c85",
+    "samples/sketch-host/src/androidTest/java/dev/notecore/sample/sketch/SketchInstrumentation.kt": "5b2eb30344af3d02b5759d3ef0979888f3b3d9cf0745e9aad6fb997bf07651a9"
+  },
+  "evidence_sha256": {
+    "reports/sketch-background/notes-after.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-background/notes-before.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-background/after/build-inputs.sha256": "ee5842caf9c967cda78d9b3437a4997b2279eb16ddf4bb79920b7b2b43685c79",
+    "reports/sketch-background/after/build.log": "c002006e0a9a0360650e7803eb95ba0988022010c20dc7f0b5157f733a452fc8",
+    "reports/sketch-background/after/lint.xml": "e214305aa6d4fe54c378dba6d5c845c5afeac4c7159d8fea2e24766dc8f6ac40",
+    "reports/sketch-background/after/run.log": "7c455e9826470001e6074f6124d2c75489f5c1f490e89bf90de3e1288e1a3b0a",
+    "reports/sketch-background/before/build-inputs.sha256": "36a6e198db62259c0d26d01312d0c68689bb8bb7db7c113ac37ce2b5c56b678f",
+    "reports/sketch-background/before/build.log": "ffffe3eb9b4ad4934dc49daf6dea99d6d12d04103e7902dbb26f88890eaacb60",
+    "reports/sketch-background/before/run.log": "2b04b00a2149b02eb4411ffbe7c2ce1e46ebc1d09b7c28bc216193d4de52c542"
+  }
+}

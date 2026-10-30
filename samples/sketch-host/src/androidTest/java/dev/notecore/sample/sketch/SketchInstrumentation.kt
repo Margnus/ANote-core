@@ -77,7 +77,10 @@ class SketchInstrumentation : Instrumentation() {
                 // Inject a host resource and tool set into a separate session; no authority or App object shared.
                 var draws = 0
                 val provided = mutableListOf(SketchTool("injected", 0xff125634.toInt(), 3.0))
-                val other = SketchSession(provided, PageBackground { canvas, _, _ -> draws++; canvas.drawColor(0xfffedcba.toInt()) })
+                val other = SketchSession(provided, PageBackground { canvas, _, _ ->
+                    draws++; canvas.drawColor(0xfffedcba.toInt())
+                    canvas.translate(1000f, 0f); canvas.clipRect(0f, 0f, 1f, 1f)
+                })
                 provided.clear()
                 check(other.tools.size == 1 && other.notebook.documentId != original.notebook.documentId)
                 val surface = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -85,6 +88,15 @@ class SketchInstrumentation : Instrumentation() {
                 injected.layout(0, 0, 100, 100); injected.draw(Canvas(surface))
                 check(draws == 1 && surface.getPixel(10, 10) == 0xfffedcba.toInt())
                 surface.recycle()
+                check(other.notebook.beginStroke(100.0, 100.0, 1f, 1))
+                check(other.notebook.endStroke(100.0, 100.0, 1f, 2))
+                val pageBitmap = Bitmap.createBitmap(595, 842, Bitmap.Config.ARGB_8888)
+                try {
+                    injected.layout(0, 0, 595, 842); injected.draw(Canvas(pageBitmap))
+                    check(pageBitmap.getPixel(10, 10) == 0xfffedcba.toInt())
+                    check(pageBitmap.getPixel(100, 100) == 0xff125634.toInt()) { "Background transform/clip leaked into canonical ink" }
+                } finally { pageBitmap.recycle() }
+                result.putString("background_canvas_isolation", "passed: injected translate/clip preserves canonical dot and background pixels")
                 result.putString("input_policy_resources", "passed: historical batch 4 real points; injected red tool; readonly root identity; undo/redo; active-prefix guard; resource pixels and copied tool list")
             }
             var ownerRejected = false

@@ -6,7 +6,8 @@ import android.os.Looper
 import dev.notecore.document.*
 import java.util.UUID
 
-/** Host-owned resource: borrowed Canvas is valid only during draw; never retained by the resource. */
+/** Host-owned resource: Canvas is borrowed only during draw; never retained.
+ * The view isolates callback transform/clip state before drawing canonical ink. */
 fun interface PageBackground { fun draw(canvas: Canvas, width: Float, height: Float) }
 data class SketchTool(val label: String, val argb: Int, val width: Double)
 
