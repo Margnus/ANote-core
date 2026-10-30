@@ -1,0 +1,676 @@
+{
+  "status": "collected_pending_pixel_verification",
+  "stage": "complete",
+  "source_sha256": {
+    "tools/probes/ImageCapabilityProbe.swift": "99d89fc864a069d34ef99e1bad9b27fa6bf511d67b6c6b61fa221f17cba67b47",
+    "ci/collect_apple_image.py": "68ef52bb12f3a1f5c82f4b882829afed7d95b37fe0ca0d43657157ff7c911c22",
+    ".github/workflows/apple-image.yml": "cb343d4429b63b3e45bc0591b9b49054cd4dfcfe8627b1b118f669297d42a17f",
+    "fixtures/image-orientation/manifest.json": "d174767d004dfc63ffc6ee7dbff87d6323de776d8f05d2b7b43e49407b121d50",
+    "fixtures/image-orientation/jpeg-1.jpeg": "04aff48004d759be073f3d497eddfdb5b22c5cf7c5ea16208f76d55b8d9b8120",
+    "fixtures/image-orientation/jpeg-2.jpeg": "3043bb2fd7a7cb42d4d0de2d66f05acfa29cb602ff6f165b099d97567a207f83",
+    "fixtures/image-orientation/jpeg-3.jpeg": "66e21e6043e48ec83a0939a98cd025322053eed0927d32b213c401ab0675e43e",
+    "fixtures/image-orientation/jpeg-4.jpeg": "fee5a63e33219d78462f60fc984a3b181c349059c82700184034b4cf11916f0c",
+    "fixtures/image-orientation/jpeg-5.jpeg": "0a50a6778dc877af2ff530e4bdbeaad55356a16a9f5e1d94245ad00c3bfe5693",
+    "fixtures/image-orientation/jpeg-6.jpeg": "5aa84c9c20ab43c8e603cefee881882504f57f82843d9d19bf24023eb1bcfc4a",
+    "fixtures/image-orientation/jpeg-7.jpeg": "3ed6cdd7e64753f953ccf861beaf66ace4a45af9c82376a2ae5b59f1a1e142eb",
+    "fixtures/image-orientation/jpeg-8.jpeg": "b7533f2d8103f8c79cafb0ec107ad7de27f8033349e7b40c6352169317b5b650",
+    "fixtures/image-orientation/png-1.png": "27a573e768b617e3de4dd5a15cf4602cfdd8f921e7107d525a8add45403e5d71",
+    "fixtures/image-orientation/png-2.png": "412ffbe3aaba59487ad997f2eca456d40da3df3573b3754d738b96d19f1596df",
+    "fixtures/image-orientation/png-3.png": "ccabe5cc6ae4bb03df96a37331fb4d4f81fe895a6cec46646aed380e65dd9c98",
+    "fixtures/image-orientation/png-4.png": "d40bff6c3e4283f51f49c7e50f5e744d4e4f396597d6a8cf5da927983d1d0b8e",
+    "fixtures/image-orientation/png-5.png": "d9251546ef24a39b419c604e42ffddcc878e1bfc42e21635f999d20084779e47",
+    "fixtures/image-orientation/png-6.png": "45b64daedcf60bad5b89ef55bfd35c72e60261b9440af70ffd58762e8ae78384",
+    "fixtures/image-orientation/png-7.png": "d366fe02220a2c1529c4ed200cdef331ebabbdb6b8b0b9c802e50b0435337044",
+    "fixtures/image-orientation/png-8.png": "920491168bf9d5091d08ba4cf00ec177ebd41ba2dec41ca4aec08a7d69338369"
+  },
+  "pixel_verification_complete": false,
+  "app_integration": false,
+  "c1_complete": false,
+  "commit": "014fdaf3a3eaa5f445e627322b20a36785441bab",
+  "run_id": "41028040339",
+  "xcode": "Xcode 16.4\nBuild version 16F6",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t15.7.9\nBuildVersion:\t\t24G830",
+  "binary_sha256": "40a05e66409d51e33281d1d2bd94941f9a5cd4b33120ef8f57825245fe059399",
+  "binary_build_version": "/Users/runner/work/ANote-core/ANote-core/build/apple-image/ImageCapabilityProbe:\nLoad command 11\n      cmd LC_BUILD_VERSION\n  cmdsize 32\n platform IOSSIMULATOR\n    minos 17.0\n      sdk 18.5\n   ntools 1\n     tool LD\n  version 1167.5\n",
+  "device": {
+    "id": "4DE8E651-EF8B-415F-948A-AC4A979EC2B8",
+    "name": "NoteCoreImage-359c660219b2",
+    "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-18-5",
+    "type": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-8GB"
+  },
+  "observations": {
+    "rows": [
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 1,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-1-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-1.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-1-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-1-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 2,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-2-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-2.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-2-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-2-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 3,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-3-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-3.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-3-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-3-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 4,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-4-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-4.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-4-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-4-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 5,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-5-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-5.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-5-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-5-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 6,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-6-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-6.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-6-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-6-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 7,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-7-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-7.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-7-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-7-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 8,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 5,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-8-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "jpeg-8.jpeg",
+        "thumbnail_oriented": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-8-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 6,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "jpeg-8-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 1,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-1-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-1.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-1-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-1-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 2,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-2-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-2.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-2-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-2-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 3,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-3-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-3.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-3-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-3-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 4,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-4-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-4.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-4-thumbnail_oriented.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-4-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 5,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-5-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-5.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-5-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-5-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 6,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-6-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-6.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-6-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-6-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 7,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-7-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-7.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-7-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-7-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      },
+      {
+        "metadata_height": 120,
+        "metadata_orientation": 8,
+        "metadata_width": 80,
+        "raw": {
+          "alpha_info": 1,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-8-raw.png",
+          "height": 120,
+          "row_bytes": 320,
+          "row_payload_bytes": 38400,
+          "width": 80
+        },
+        "source": "png-8.png",
+        "thumbnail_oriented": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-8-thumbnail_oriented.png",
+          "height": 40,
+          "row_bytes": 240,
+          "row_payload_bytes": 9600,
+          "width": 60
+        },
+        "thumbnail_raw": {
+          "alpha_info": 2,
+          "bits_per_component": 8,
+          "bits_per_pixel": 32,
+          "file": "png-8-thumbnail_raw.png",
+          "height": 60,
+          "row_bytes": 160,
+          "row_payload_bytes": 9600,
+          "width": 40
+        }
+      }
+    ],
+    "scope": "Actual iOS ImageIO observations only; pixel/source audit separate. No shared adapter, heap/scratch, worker owner or App acceptance.",
+    "thumbnail_max_pixel_size": 60
+  },
+  "evidence_sha256": {
+    "jpeg-5-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "png-2-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "png-4-thumbnail_oriented.png": "ec30452a6201f23a138a8531c745afda7af463377f8c4f84657466455c8cf038",
+    "png-7-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62",
+    "jpeg-7-thumbnail_oriented.png": "feabce5179f9b3517054bf2ef1138180f643140ac3e01b8ce4767b6750d046d9",
+    "boot.log": "73bcc51d44cbba162b08ea32a2add3b01ee9f452ecfb9d0cf06f27785173c578",
+    "png-7-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "png-3-thumbnail_oriented.png": "a6da925270db76043913362623e0a70d37793372053175e3c8fb59a56eee0f08",
+    "jpeg-3-thumbnail_oriented.png": "01b19a20f353392885785eb90a55e3a10455524848e3931bb9df8c7082c44d49",
+    "png-3-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "images.log": "8ab8fa8a872f51292148c612684be93f73306732bc8704a91ca9b5b037b3962c",
+    "png-6-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "jpeg-4-thumbnail_oriented.png": "28cf2a53c5b70dc918ffc073ee8329678b8b8cd401aab5eba27dc76a618e2c8e",
+    "jpeg-4-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "png-7-thumbnail_oriented.png": "ad7891f1a58a2224fb9bc3766cc185a4fd8b161dd3b1d9e12843ad4ea32f21ce",
+    "png-6-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62",
+    "jpeg-8-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "jpeg-5-thumbnail_oriented.png": "6082b166434654bc7758209d57ca0d788631019d4250c0ac47dde8144e94e74b",
+    "png-6-thumbnail_oriented.png": "00339d383fb93a224a9e51bcc524ced359fd3e9384ee7f13ebcd40f50ab7791e",
+    "jpeg-8-thumbnail_oriented.png": "c984aa3759fa1458da809ac1b82a34bcc32a320ab972723700069c1fb075f9dd",
+    "jpeg-2-thumbnail_oriented.png": "b6e6a0b983edb2064e8362dfef97c38425597927bacd443608c32f9eb54b8a3f",
+    "png-1-thumbnail_oriented.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "png-5-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "png-4-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62",
+    "jpeg-6-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "png-2-thumbnail_oriented.png": "19837d09a589f19423148f7427033625b79ba789b512b78fd9c754482f5d5b8e",
+    "jpeg-1-thumbnail_oriented.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "png-8-thumbnail_oriented.png": "e29fa830d9bcc13d60a8bc522376b25e853ab377e68b9e5fe9cb006dfb7007ec",
+    "png-1-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "png-5-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62",
+    "jpeg-7-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "png-5-thumbnail_oriented.png": "fb5eb0fff41df8406f5a777d2cacd757bf67142e942c3353f090ebe97d4cca77",
+    "jpeg-6-thumbnail_oriented.png": "00adcc4ad0c1545395622a07210b8a1538993ee6e08254b6e5949bc10c12f9a7",
+    "png-4-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "jpeg-5-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "jpeg-2-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "png-8-thumbnail_raw.png": "1ec2537709af5103aab8d985c4168b89582c0fcec810d24e197fcc9e00b5ef10",
+    "png-1-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62",
+    "jpeg-4-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "jpeg-3-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "png-8-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62",
+    "jpeg-1-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "jpeg-1-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "jpeg-7-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "png-3-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62",
+    "jpeg-2-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "jpeg-8-raw.png": "ead5e7837d798752863efa66d2b27f7eb90fee3c58deae9c6daec1b8618d0d1b",
+    "jpeg-6-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "jpeg-3-thumbnail_raw.png": "38832cebfb61612ab97a5443d53245be154710f5bbf7e2435aea9786577005ca",
+    "png-2-raw.png": "d1abe4155ee2a5387610fb3e1d900b260c4088aad32522ba37ed4b8870bc2b62"
+  }
+}
