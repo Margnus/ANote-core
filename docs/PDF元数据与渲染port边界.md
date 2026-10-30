@@ -34,3 +34,8 @@
 起点53be7bc，原App普通UI收口后沿DEV-039核对Apple原生平台差异。复用原CoreGraphics/PDFKit探针，仅新增显式--metadata分支；原模式与固定原Mac脚本保持，不修改源PDF。独立托管macOS15/Xcode16.4/iOS simulator编译实际iOS二进制，读取原crop-rotations及既有inherited-geometry/UserUnit2共12页的有效框、旋转、实际页字典UserUnit；未设置与非数值明确区分，不从renderer宽高猜单位。输出原尺寸及按实际单位选择目标矩形的原生图像和drawing transform，记录来源/二进制哈希。没有调用internal共享几何或新增public facade，故本轮只决定平台reader/render候选，不宣称共享runtime adapter已实现。
 
 验收：原源哈希/内容流绑定保持，12页元数据与原recipe/manifest匹配，16图独立按既有四颜色锚点及实际目标尺寸核对并查看。CI仅采集，成功状态明确collected_pending_pixel_verification；不能以绿灯替代像素检查。若单位/继承属性或图像不符，保留实际失败/限制，不改oracle。无新SDK/PDF写入/App资源接入；Android已知UserUnit限制、物理M-1、C1及PDF-03原验收不变。入口.github/workflows/apple-pdf.yml、ci/collect_apple_pdf.py。
+
+
+运行41001924807（固定1b1a9d6，macOS15.8.2/Xcode16.4/iOS18.5）实际采集完成；独立核验12页元数据全匹配，24次raw/physical图像检查20通过，UserUnit2四张physical图锚点失败。目标尺寸虽为600×360/360×600，内容仍原尺寸居中，首图getDrawingTransform返回[1,0,0,1,110,40]。失败原图/日志及verification.json保留在reports/apple-pdf-ci-41001924807，ZIP SHA256 c977e9381bf877836e8225c624ab743932b6a6cd667cb772ea14e52af9c6a01a；源/产物哈希与原始继承字典/内容流审计通过。结论仅否决本样本“增大目标矩形即得到物理尺度”的消费方式，不外推所有CoreGraphics变换。
+
+据实际失败调整原render helper：按已读UserUnit显式缩放context，再拼接原未放大目标的drawing transform；unit1/原模式行为保持。继续使用原16锚点/每页原oracle，不扩大样本或改变期望；新运行通过前不采纳物理尺度适配。源元数据reader仍只作为平台候选，共享runtime adapter/生产owner/资源接入未实现。

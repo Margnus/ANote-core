@@ -21,7 +21,9 @@ func render(_ page: CGPDFPage, _ file: URL, tile: Bool = false, gutter: Int = 0,
             space:CGColorSpaceCreateDeviceRGB(),bitmapInfo:CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue) else { throw ProbeFailure.invariant }
         context.setFillColor(CGColor(gray:1,alpha:1));context.fill(CGRect(x:0,y:0,width:w,height:h))
         if tile { context.translateBy(x:CGFloat(-50+gutter),y:CGFloat(h-height+40-gutter)) }
-        context.concatenate(page.getDrawingTransform(.cropBox,rect:CGRect(x:0,y:0,width:width,height:height),rotate:0,preserveAspectRatio:true))
+        // getDrawingTransform may center without upscaling; apply pixel/unit scale explicitly.
+        context.scaleBy(x: scale, y: scale)
+        context.concatenate(page.getDrawingTransform(.cropBox,rect:CGRect(x:0,y:0,width:CGFloat(width)/scale,height:CGFloat(height)/scale),rotate:0,preserveAspectRatio:true))
         context.drawPDFPage(page)
         guard let image=context.makeImage(),let output=CGImageDestinationCreateWithURL(file as CFURL,UTType.png.identifier as CFString,1,nil) else {throw ProbeFailure.invariant}
         CGImageDestinationAddImage(output,image,nil);try require(CGImageDestinationFinalize(output))
@@ -107,6 +109,8 @@ func metadataMain() throws {
             let physicalImage = unit == 1 ? rawImage : stem + "-physical.png"
             if unit != 1 { _ = try render(page, root.appendingPathComponent(physicalImage), scale: CGFloat(unit)) }
             let transform = page.getDrawingTransform(.cropBox, rect: CGRect(x: 0, y: 0, width: CGFloat(width) * CGFloat(unit), height: CGFloat(height) * CGFloat(unit)), rotate: 0, preserveAspectRatio: true)
+            let rawTransform = page.getDrawingTransform(.cropBox, rect: CGRect(x: 0, y: 0, width: width, height: height), rotate: 0, preserveAspectRatio: true)
+            let scaled = rawTransform.concatenating(CGAffineTransform(scaleX: CGFloat(unit), y: CGFloat(unit)))
             var cropObject: CGPDFObjectRef?
             let leafCropPresent = CGPDFDictionaryGetObject(dictionary, "CropBox", &cropObject)
             pages.append(["index": index, "rotation": page.rotationAngle,
@@ -115,7 +119,8 @@ func metadataMain() throws {
                 "leaf_crop_key_present": leafCropPresent, "leaf_user_unit_present": unitPresent,
                 "user_unit": unit, "unscaled_width": width, "unscaled_height": height,
                 "physical_width": CGFloat(width) * CGFloat(unit), "physical_height": CGFloat(height) * CGFloat(unit),
-                "physical_drawing_transform": [transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty],
+                "target_rect_drawing_transform": [transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty],
+                "explicit_scaled_drawing_transform": [scaled.a, scaled.b, scaled.c, scaled.d, scaled.tx, scaled.ty],
                 "raw_image": rawImage, "physical_image": physicalImage])
         }
         files.append(["name": name, "pages": pages])
