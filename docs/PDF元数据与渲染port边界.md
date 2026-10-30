@@ -39,3 +39,12 @@
 运行41001924807（固定1b1a9d6，macOS15.8.2/Xcode16.4/iOS18.5）实际采集完成；独立核验12页元数据全匹配，24次raw/physical图像检查20通过，UserUnit2四张physical图锚点失败。目标尺寸虽为600×360/360×600，内容仍原尺寸居中，首图getDrawingTransform返回[1,0,0,1,110,40]。失败原图/日志及verification.json保留在reports/apple-pdf-ci-41001924807，ZIP SHA256 c977e9381bf877836e8225c624ab743932b6a6cd667cb772ea14e52af9c6a01a；源/产物哈希与原始继承字典/内容流审计通过。结论仅否决本样本“增大目标矩形即得到物理尺度”的消费方式，不外推所有CoreGraphics变换。
 
 据实际失败调整原render helper：按已读UserUnit显式缩放context，再拼接原未放大目标的drawing transform；unit1/原模式行为保持。继续使用原16锚点/每页原oracle，不扩大样本或改变期望；新运行通过前不采纳物理尺度适配。源元数据reader仍只作为平台候选，共享runtime adapter/生产owner/资源接入未实现。
+
+
+### 实际采用与收口
+
+固定8b2ad2414acb57cecac49b77953b469c5ad2290f的[运行41002383325](https://github.com/Margnus/ANote-core/actions/runs/41002383325)完成后，独立核验[verification.json](../reports/apple-pdf-ci-41002383325/verification.json)通过12页源元数据、24个raw/physical尺寸/四锚点核对项（16个唯一PNG）。源8项/附属产物19项哈希、三份PDF原内容流/继承leaf审计通过；ZIP SHA256 457da6b6747cf81a26757f8980eb7c2bb60982b2ecd51e0160026fe4ba44d6d7与远端一致。16图已查看；UserUnit2首图显式组合矩阵[2,0,0,2,-80,-100]，原色锚点在物理尺度位置，四旋转均通过。实际环境macOS15.8.2/Xcode16.4 arm64、独立iPad M4/iOS18.5 simulator；没有继承旧Mac或普通App结果。
+
+采纳本样本范围的CGPDFPage有效框/rotationAngle与页字典UserUnit读取候选；未设置由实际字典缺值证明，非数值不吞成1。采纳“显式context尺度→原未放大drawing transform”的原生渲染子范围，不采用仅增大目标矩形的路径；首次20/24反例与报告保持。Apple可读元数据不补Android API35/36缺口，也不是共享runtime adapter或生产reader已实现。当前规则仅既有裁剪/四旋转/单位1或2样本，不外推任意PDF、解密/非法单位/复杂box继承、文本字体/批注导出、原owner取消/资源事务或物理性能。本有限能力卡收口，停止同类数值/图片探针；下一步回到C1原最小公开消费者白名单的双端责任/支持与拒绝缺口，DEV-041仍受原门禁。
+
+复核：使用含Pillow/pypdf的Python执行tools/verify_apple_pdf_metadata.py --evidence reports/apple-pdf-ci-41002383325；首次目录41001924807预期completed_with_capability_limit，不能改为passed。两个结果均检查固定Git源而不是套用当前HEAD。
