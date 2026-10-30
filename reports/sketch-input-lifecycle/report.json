@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "baseline_core": "475f2cb0d2ac0e8da94fc0db2713f6b0cbae2b0f",
+  "environment": {
+    "avd": "NoteCoreCurrent35",
+    "serial": "emulator-5590",
+    "api": 35
+  },
+  "before": "Actual View.layout changes dimensions while original contact remains active; assertion fails.",
+  "after": "Actual resize and attached View removal, plus Instrumentation pause/resume callbacks, cancel unfinished contacts, release input charge, keep identical root, reject late UP and admit a new contact. Existing independent host groups pass.",
+  "installed_apk_sha256": {
+    "dev.notecore.sample.sketch": "2a2c3ff57cf1ebe9e7449d51fc8669c35f8989ddfe8fa31ee3457bdab8a5d223",
+    "dev.notecore.sample.sketch.test": "3383a328a478e434d7f7d49d75bec39c57c23ff0db5117a7f2e9f5db64706580"
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 4
+  },
+  "original_note_count": 5,
+  "original_notes_byte_identical": true,
+  "scope": "Existing Android memory host lifecycle cancels only unfinished contact using original cancelStroke. Pause is a callback invocation, not ordinary OS Home evidence; no new completed-pending platform, owner-loss/IO/physical/C1 acceptance.",
+  "source_sha256": {
+    "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt": "178a1bfae20a3b226662f3e49b08588394d6267bd0671c405b2ae4a30b9aec2c",
+    "samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchActivity.kt": "f61fcb350959ef8e31440a15eacaa64320cdfb1360a301487fcf9c1d60ef26de",
+    "samples/sketch-host/src/androidTest/java/dev/notecore/sample/sketch/SketchInstrumentation.kt": "ceb6f63932aecf473e84abfb249677ea25c6a14c6a37f6bd20cd9b42447cbba1"
+  },
+  "evidence_sha256": {
+    "reports/sketch-input-lifecycle/notes-after.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-input-lifecycle/notes-before.txt": "0c5fb4b3dec63830055166d221b29818bbb1db2dfe3bba8de166734a9bc8b86b",
+    "reports/sketch-input-lifecycle/after/build-inputs.sha256": "2e6b92b12f6c608ddf1f0f8aa05af23da7b6417b72f565de16524445da28fcaa",
+    "reports/sketch-input-lifecycle/after/build.log": "9092076ed07053cc18f2aca2e442f1e865536285029092ff46760fe2f47d5c30",
+    "reports/sketch-input-lifecycle/after/lint.xml": "e214305aa6d4fe54c378dba6d5c845c5afeac4c7159d8fea2e24766dc8f6ac40",
+    "reports/sketch-input-lifecycle/after/run.log": "1a4e3ba244993394ea794eaa895cf6747e3b5ce6d6822570c04c092a7ccb7914",
+    "reports/sketch-input-lifecycle/before/build-inputs.sha256": "4f07f1e896d82bc25c7818fb4c105032e4af00251094b349741ca947b554c5a5",
+    "reports/sketch-input-lifecycle/before/build.log": "a0e59b31fb582c4c3144718f27baf25aeb1fcc026b38247ede230d6991586ef5",
+    "reports/sketch-input-lifecycle/before/run.log": "e32644d3aab847b1155b1a5912fcd1ee512d6c04638ef8b2ba534aaff1bf5a4c",
+    "reports/sketch-input-lifecycle/before/SketchInstrumentation.kt": "ceb6f63932aecf473e84abfb249677ea25c6a14c6a37f6bd20cd9b42447cbba1"
+  }
+}

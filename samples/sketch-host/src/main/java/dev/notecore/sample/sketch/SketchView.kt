@@ -119,5 +119,13 @@ class SketchView(context: Context, private val session: SketchSession, private v
     }
     private fun blockInput() { blocked = true; changed("输入被拒绝，已接受部分保留；请明确取消当前笔") }
     fun cancelActiveInput() { note.cancelStroke(); active = null; pointer = -1; blocked = false; invalidate() }
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != oldw || h != oldh) cancelActiveInput()
+    }
+    override fun onDetachedFromWindow() {
+        cancelActiveInput()
+        super.onDetachedFromWindow()
+    }
     override fun performClick(): Boolean { super.performClick(); return true }
 }

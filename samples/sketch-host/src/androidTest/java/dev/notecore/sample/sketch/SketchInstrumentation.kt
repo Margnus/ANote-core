@@ -144,6 +144,37 @@ class SketchInstrumentation : Instrumentation() {
                     result.putString("page_input_bounds", "passed: small-page outside DOWN refused without input/root mutation; small/large actual MotionEvent dots keep canonical coordinates")
                 } finally { pageBitmap.recycle() }
                 result.putString("background_canvas_isolation", "passed: injected translate/clip preserves canonical dot and background pixels")
+                fun contact(target: SketchView, action: Int, offset: Long) {
+                    val event = MotionEvent.obtain(start + offset, start + offset, action, 30f, 40f, 0)
+                    try { check(target.onTouchEvent(event)) } finally { event.recycle() }
+                }
+                val originalView = activity.canvasView
+                val stableRoot = original.notebook.snapshot()
+                contact(originalView, MotionEvent.ACTION_DOWN, 200)
+                check(original.notebook.hasActiveStroke)
+                originalView.layout(0, 0, originalView.width - 1, originalView.height)
+                check(!original.notebook.hasActiveStroke && original.notebook.inputReservedByteCharge == 0L) { "Resize left the original contact active under a changed transform" }
+                contact(originalView, MotionEvent.ACTION_UP, 201)
+                check(original.notebook.snapshot() === stableRoot)
+                contact(originalView, MotionEvent.ACTION_DOWN, 210)
+                val parent = originalView.parent as android.view.ViewGroup
+                val params = originalView.layoutParams
+                parent.removeView(originalView)
+                check(!original.notebook.hasActiveStroke && original.notebook.inputReservedByteCharge == 0L)
+                contact(originalView, MotionEvent.ACTION_UP, 211)
+                check(original.notebook.snapshot() === stableRoot)
+                parent.addView(originalView, params)
+                contact(originalView, MotionEvent.ACTION_DOWN, 220)
+                callActivityOnPause(activity)
+                check(!original.notebook.hasActiveStroke && original.notebook.inputReservedByteCharge == 0L)
+                contact(originalView, MotionEvent.ACTION_UP, 221)
+                check(original.notebook.snapshot() === stableRoot)
+                callActivityOnResume(activity)
+                contact(originalView, MotionEvent.ACTION_DOWN, 230)
+                check(original.notebook.hasActiveStroke)
+                originalView.cancelActiveInput()
+                check(original.notebook.snapshot() === stableRoot)
+                result.putString("input_lifecycle", "passed: actual resize/detach and pause callback cancel unfinished contact, reject late UP, preserve root and admit next contact")
                 result.putString("input_policy_resources", "passed: historical batch 4 real points; injected red tool; readonly root identity; undo/redo; active-prefix guard; resource pixels and copied tool list")
             }
             var ownerRejected = false

@@ -1,0 +1,223 @@
+
+> Configure project :canvas-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: Invalid Source Set Dependency Across Trees
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+Solution: Please keep dependsOn edges only from one group and remove the others.
+
+
+> Task :samples:sketch-host:preBuild UP-TO-DATE
+> Task :samples:sketch-host:preDebugBuild UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preDebugBuild UP-TO-DATE
+> Task :canvas-core:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResources UP-TO-DATE
+> Task :canvas-core:packageDebugResources UP-TO-DATE
+> Task :canvas-core:parseDebugLocalResources UP-TO-DATE
+> Task :canvas-core:generateDebugRFile UP-TO-DATE
+> Task :canvas-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preDebugBuild UP-TO-DATE
+> Task :shared-core:generateDebugResValues UP-TO-DATE
+> Task :shared-core:generateDebugResources UP-TO-DATE
+> Task :shared-core:packageDebugResources UP-TO-DATE
+> Task :shared-core:parseDebugLocalResources UP-TO-DATE
+> Task :shared-core:generateDebugRFile UP-TO-DATE
+> Task :shared-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :shared-core:javaPreCompileDebug UP-TO-DATE
+> Task :shared-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :shared-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :samples:sketch-host:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:compileDebugLibraryResources UP-TO-DATE
+> Task :shared-core:compileDebugLibraryResources UP-TO-DATE
+> Task :canvas-core:writeDebugAarMetadata UP-TO-DATE
+> Task :shared-core:writeDebugAarMetadata UP-TO-DATE
+> Task :samples:sketch-host:checkDebugAarMetadata UP-TO-DATE
+> Task :samples:sketch-host:generateDebugResValues UP-TO-DATE
+> Task :samples:sketch-host:mapDebugSourceSetPaths UP-TO-DATE
+> Task :samples:sketch-host:generateDebugResources UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugResources UP-TO-DATE
+> Task :samples:sketch-host:packageDebugResources UP-TO-DATE
+> Task :samples:sketch-host:parseDebugLocalResources UP-TO-DATE
+> Task :samples:sketch-host:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :canvas-core:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:processDebugManifest UP-TO-DATE
+> Task :shared-core:extractDeepLinksDebug UP-TO-DATE
+> Task :shared-core:processDebugManifest UP-TO-DATE
+> Task :samples:sketch-host:extractDeepLinksDebug UP-TO-DATE
+> Task :samples:sketch-host:processDebugMainManifest UP-TO-DATE
+> Task :samples:sketch-host:processDebugManifest UP-TO-DATE
+> Task :samples:sketch-host:processDebugManifestForPackage UP-TO-DATE
+> Task :samples:sketch-host:processDebugResources UP-TO-DATE
+> Task :samples:sketch-host:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:mergeDebugShaders UP-TO-DATE
+> Task :canvas-core:compileDebugShaders NO-SOURCE
+> Task :canvas-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugShaders UP-TO-DATE
+> Task :shared-core:compileDebugShaders NO-SOURCE
+> Task :shared-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:generateDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugAssets UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugShaders UP-TO-DATE
+> Task :samples:sketch-host:compileDebugShaders NO-SOURCE
+> Task :samples:sketch-host:generateDebugAssets UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAssets UP-TO-DATE
+> Task :samples:sketch-host:compressDebugAssets UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :samples:sketch-host:desugarDebugFileDependencies UP-TO-DATE
+> Task :canvas-core:processDebugJavaRes UP-TO-DATE
+> Task :shared-core:processDebugJavaRes UP-TO-DATE
+> Task :samples:sketch-host:checkDebugDuplicateClasses UP-TO-DATE
+> Task :samples:sketch-host:mergeExtDexDebug UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :samples:sketch-host:mergeLibDexDebug UP-TO-DATE
+> Task :canvas-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugNativeLibs NO-SOURCE
+> Task :canvas-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :shared-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :shared-core:mergeDebugNativeLibs NO-SOURCE
+> Task :shared-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugJniLibFolders UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugNativeLibs NO-SOURCE
+> Task :samples:sketch-host:stripDebugDebugSymbols NO-SOURCE
+> Task :samples:sketch-host:validateSigningDebug UP-TO-DATE
+> Task :samples:sketch-host:writeDebugAppMetadata UP-TO-DATE
+> Task :samples:sketch-host:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :samples:sketch-host:preDebugAndroidTestBuild SKIPPED
+> Task :samples:sketch-host:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :samples:sketch-host:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :samples:sketch-host:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :samples:sketch-host:generateDebugAndroidTestResources UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :samples:sketch-host:processDebugAndroidTestManifest UP-TO-DATE
+> Task :samples:sketch-host:processDebugAndroidTestResources UP-TO-DATE
+> Task :samples:sketch-host:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :samples:sketch-host:compileDebugAndroidTestShaders NO-SOURCE
+> Task :samples:sketch-host:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :samples:sketch-host:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :samples:sketch-host:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :samples:sketch-host:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :samples:sketch-host:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :samples:sketch-host:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :samples:sketch-host:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :canvas-core:stripDebugDebugSymbols NO-SOURCE
+> Task :canvas-core:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :canvas-core:extractDebugAnnotations UP-TO-DATE
+> Task :canvas-core:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :canvas-core:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :canvas-core:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :canvas-core:prepareDebugArtProfile UP-TO-DATE
+> Task :canvas-core:prepareLintJarForPublish UP-TO-DATE
+> Task :canvas-core:mergeDebugJavaResource UP-TO-DATE
+> Task :canvas-core:syncDebugLibJars UP-TO-DATE
+> Task :canvas-core:bundleDebugLocalLintAar UP-TO-DATE
+> Task :canvas-core:createFullJarDebug UP-TO-DATE
+> Task :canvas-core:preDebugAndroidTestBuild UP-TO-DATE
+> Task :canvas-core:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :canvas-core:writeDebugLintModelMetadata UP-TO-DATE
+> Task :canvas-core:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :canvas-core:extractProguardFiles UP-TO-DATE
+> Task :canvas-core:generateDebugLintModel UP-TO-DATE
+> Task :canvas-core:preDebugUnitTestBuild UP-TO-DATE
+> Task :canvas-core:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :canvas-core:lintAnalyzeDebug UP-TO-DATE
+> Task :canvas-core:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :canvas-core:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :shared-core:stripDebugDebugSymbols NO-SOURCE
+> Task :shared-core:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :shared-core:extractDebugAnnotations UP-TO-DATE
+> Task :shared-core:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :shared-core:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :shared-core:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :shared-core:prepareDebugArtProfile UP-TO-DATE
+> Task :shared-core:prepareLintJarForPublish UP-TO-DATE
+> Task :shared-core:mergeDebugJavaResource UP-TO-DATE
+> Task :shared-core:syncDebugLibJars UP-TO-DATE
+> Task :shared-core:bundleDebugLocalLintAar UP-TO-DATE
+> Task :shared-core:createFullJarDebug UP-TO-DATE
+> Task :shared-core:preDebugAndroidTestBuild UP-TO-DATE
+> Task :shared-core:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :shared-core:writeDebugLintModelMetadata UP-TO-DATE
+> Task :shared-core:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :shared-core:extractProguardFiles UP-TO-DATE
+> Task :shared-core:generateDebugLintModel UP-TO-DATE
+> Task :shared-core:preDebugUnitTestBuild UP-TO-DATE
+> Task :shared-core:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :shared-core:lintAnalyzeDebug UP-TO-DATE
+> Task :shared-core:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :shared-core:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :samples:sketch-host:extractProguardFiles UP-TO-DATE
+> Task :samples:sketch-host:preDebugUnitTestBuild UP-TO-DATE
+> Task :samples:sketch-host:compileDebugKotlin
+> Task :samples:sketch-host:compileDebugJavaWithJavac NO-SOURCE
+> Task :samples:sketch-host:dexBuilderDebug
+> Task :samples:sketch-host:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :samples:sketch-host:processDebugJavaRes UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugJavaResource UP-TO-DATE
+> Task :samples:sketch-host:bundleDebugClassesToCompileJar
+> Task :samples:sketch-host:mergeProjectDexDebug
+> Task :samples:sketch-host:packageDebug
+> Task :samples:sketch-host:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :samples:sketch-host:assembleDebug
+> Task :samples:sketch-host:generateDebugAndroidTestLintModel
+> Task :samples:sketch-host:generateDebugLintReportModel
+> Task :samples:sketch-host:generateDebugUnitTestLintModel
+> Task :samples:sketch-host:lintAnalyzeDebug
+> Task :samples:sketch-host:lintAnalyzeDebugAndroidTest
+> Task :samples:sketch-host:lintAnalyzeDebugUnitTest
+> Task :samples:sketch-host:lintReportDebug UP-TO-DATE
+> Task :samples:sketch-host:lintDebug
+> Task :samples:sketch-host:compileDebugAndroidTestKotlin
+> Task :samples:sketch-host:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :samples:sketch-host:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :samples:sketch-host:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :samples:sketch-host:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :samples:sketch-host:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:packageDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :samples:sketch-host:assembleDebugAndroidTest UP-TO-DATE
+> Task :samples:sketch-host:verifySketchHost
+
+[Incubating] Problems report is available at: file:///D:/work/StudioProjects/ANote-core/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 12s
+150 actionable tasks: 16 executed, 134 up-to-date
