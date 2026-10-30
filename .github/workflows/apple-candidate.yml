@@ -49,5 +49,7 @@ jobs:
           path: |
             build/apple-candidate/*.json
             build/apple-candidate/*.log
+            build/apple-candidate/*.ncp
+            build/apple-candidate/ui-attachments/**
           if-no-files-found: error
           retention-days: 14

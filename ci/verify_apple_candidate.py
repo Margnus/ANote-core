@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Current-source Apple CI gate on an isolated hosted simulator; never physical/ordinary-UI acceptance."""
+"""Current-source Apple CI on an isolated simulator; UI scope is separate from host/physical evidence."""
 import hashlib
 import json
 import os
@@ -111,7 +111,8 @@ def main():
         run('app-host', ['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
             '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id=' + device,
             '-derivedDataPath', str(OUTPUT / 'xcode'), 'CODE_SIGNING_ALLOWED=NO',
-            '-resultBundlePath', str(result), '-collect-test-diagnostics', 'never', 'test'], 900)
+            '-resultBundlePath', str(result), '-collect-test-diagnostics', 'never',
+            '-only-testing:NoteCorePreviewTests', '-parallel-testing-enabled', 'NO', 'test'], 900)
         summary = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(result), '--format', 'json'))
         tree = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(result), '--format', 'json'))
         (OUTPUT / 'xctest-summary.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8', newline='\n')
@@ -129,6 +130,49 @@ def main():
         assert summary['failedTests'] == summary['skippedTests'] == summary['expectedFailures'] == 0
         assert any(d['device']['deviceId'] == device for d in summary['devicesAndConfigurations'])
         report['app_host'] = {'tests': len(actual), 'checks': sorted(EXPECTED), 'summary': summary}
+        report['stage'] = 'ordinary_app_ui_tests'
+        container = Path(capture('xcrun', 'simctl', 'get_app_container', device, 'dev.notecore.preview', 'data').strip())
+        notes = container / 'Documents/PreviewNotes'
+        originals = {p.name: sha(p) for p in notes.glob('*.ncp')}
+        ui_result = OUTPUT / 'ui.xcresult'
+        run('ordinary-ui', ['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
+            '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id=' + device,
+            '-derivedDataPath', str(OUTPUT / 'xcode'), 'CODE_SIGNING_ALLOWED=NO',
+            '-resultBundlePath', str(ui_result), '-collect-test-diagnostics', 'never',
+            '-only-testing:NoteCorePreviewUITests', '-parallel-testing-enabled', 'NO', 'test'], 900)
+        ui_summary = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(ui_result), '--format', 'json'))
+        ui_tree = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(ui_result), '--format', 'json'))
+        (OUTPUT / 'ui-summary.json').write_text(json.dumps(ui_summary, indent=2) + '\n', encoding='utf-8', newline='\n')
+        (OUTPUT / 'ui-tests.json').write_text(json.dumps(ui_tree, indent=2) + '\n', encoding='utf-8', newline='\n')
+        ui_cases = list(cases(ui_tree['testNodes']))
+        ui_expected = {'testTwoPageInkHistoryBackgroundSaveAndProcessReopen()'}
+        assert {c['name'] for c in ui_cases} == ui_expected and all(c['result'] == 'Passed' for c in ui_cases)
+        assert ui_summary['result'] == 'Passed' and ui_summary['totalTestCount'] == 1
+        assert ui_summary['failedTests'] == ui_summary['skippedTests'] == ui_summary['expectedFailures'] == 0
+        assert any(d['device']['deviceId'] == device for d in ui_summary['devicesAndConfigurations'])
+        capture('xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(ui_result), '--output-path', str(OUTPUT / 'ui-attachments'))
+        assert list((OUTPUT / 'ui-attachments').rglob('*.png')), 'No UI screenshots retained'
+        # Re-resolve the installed container rather than assuming its path survived launch.
+        container = Path(capture('xcrun', 'simctl', 'get_app_container', device, 'dev.notecore.preview', 'data').strip())
+        notes = container / 'Documents/PreviewNotes'
+        after = {p.name: sha(p) for p in notes.glob('*.ncp')}
+        assert all(after.get(name) == digest for name, digest in originals.items()), 'Original files changed'
+        added = set(after) - set(originals)
+        assert len(added) == 1, added
+        actual_file = notes / next(iter(added))
+        lines = [line.split('\t') for line in actual_file.read_text(encoding='utf-8').splitlines()]
+        assert lines[0] == ['NCPREVIEW', '2'] and lines[1][0] == 'D' and lines[1][2].startswith('AppleUI-')
+        pages = [line for line in lines if line[0] == 'G']
+        strokes = [line for line in lines if line[0] == 'S']
+        assert len(pages) == 2 and len(strokes) == 3
+        assert [sum(s[2] == page[2] for s in strokes) for page in pages] == [2, 1]
+        assert all(int(s[8]) > 1 for s in strokes), 'No real dragged sample sequences'
+        (OUTPUT / 'ordinary-ui-note.ncp').write_bytes(actual_file.read_bytes())
+        report['ordinary_ui'] = {'tests': 1, 'checks': sorted(ui_expected), 'summary': ui_summary,
+            'original_files_sha256': originals, 'final_files_sha256': after,
+            'saved_note_sha256': sha(actual_file), 'pages': 2, 'strokes_per_page': [2, 1],
+            'scope': 'Separate XCUITest process, ordinary App UI, simulated finger input; saved-write process reopen only. No Pencil, in-flight IO kill or physical performance claim.'}
+        report['ordinary_ui_verified'] = True
         assert before == inputs(), 'Inputs changed during candidate verification'
         assert sha(framework) == report['framework_sha256']
         report.update(status='passed', stage='complete')
@@ -137,7 +181,8 @@ def main():
         raise
     finally:
         report['evidence_sha256'] = {p.relative_to(ROOT).as_posix(): sha(p)
-                                     for p in OUTPUT.iterdir() if p.is_file() and p.name != 'report.json'}
+                                     for p in OUTPUT.rglob('*') if p.is_file() and p.name != 'report.json'
+                                     and not any(part in ('xcode', 'host.xcresult', 'ui.xcresult') for part in p.relative_to(OUTPUT).parts)}
         (OUTPUT / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
 
 

@@ -11,3 +11,6 @@
 实际结果：固定提交c20ad15a60f4fc1173c389f3af6f2d6a776abe62的[运行40993095695](https://github.com/Margnus/ANote-core/actions/runs/40993095695)成功；macOS15.7.9/Xcode16.4 arm64、新建iPad Pro 11-inch M4/iOS18.5 simulator，canvas211/shared306 Native及49项Swift App-host全部通过，XCTest失败/跳过/预期失败均0。下载产物ZIP SHA256 b64b91d089fc54a216ea3e218936e92903805de1c5f3080b5d88218b5dd3b38a与GitHub记录一致；155个编译输入逐一对比固定Git提交，7份日志/结果逐一对比报告哈希一致。[报告与原始日志](../reports/apple-candidate-ci-40993095695/report.json)已留存，避免14天远端产物过期丢失。采用当前Apple编译/原生/App-host子范围，原历史Mac报告不重绑定。物理M-1、普通交互/真实触笔/heap和完整C1继续待验；不因增加CI而放行生产SQLite或113条验收。
 
 Runner依据：[GitHub标准托管runner](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)、[macOS15 arm64镜像清单](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md)。实际运行环境以CI报告为准，不把镜像文档当执行证据。
+
+
+2026-10-30下一交付卡（计划A）：在同一候选CI新增独立XCUITest target，仅操作原App普通界面。验收两页各实际手指拖动、撤销/重做后的画布笔数、页隔离、缩放按钮、Home/恢复、保存返回列表重开、确认保存后terminate/launch重开，独立读取保留实际ncp文件及截图。无启动注入/模型调用/测试专用数据路径；新增控件identifier仅用于稳定定位。49项App-host仍单独完整执行；新增UI结果单列，失败不放宽断言。独立simulator与预览格式子范围不代表Pencil、在途写杀进程、物理性能或完整C1。实际结果待新运行。

@@ -534,7 +534,7 @@ struct PreviewRoot: View {
                     HStack {
                         Button("返回") { model.close() }
                         Spacer()
-                        Button(note.title) { note.cancelStroke(); title = note.title; renaming = true }.font(.headline).lineLimit(1)
+                        Button(note.title) { note.cancelStroke(); title = note.title; renaming = true }.font(.headline).lineLimit(1).accessibilityIdentifier("note-title")
                         Spacer(); Button("保存") { model.retryRetainedWrites(); model.save() }
                         Button("导出") { model.prepareExport() }.disabled(model.transferBusy)
                     }.padding(.horizontal)
@@ -588,7 +588,7 @@ struct PreviewRoot: View {
                             }.padding(.trailing)
                         }
                     }.padding(.horizontal).frame(minHeight: 44)
-                    Text(model.status).font(.caption).foregroundStyle(.secondary)
+                    Text(model.status).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("note-status")
                     NativeInkCanvas(note: note, renderModel: model, color: color, width: width, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
                         changed: { model.changed() }, failed: { model.status = $0 })
                         .id(note.documentId)
