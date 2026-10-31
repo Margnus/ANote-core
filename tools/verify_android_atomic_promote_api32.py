@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""DRAFT: replay the retained API36 probe unchanged on a prepared API32 AVD.
+"""Experimental replay of the unchanged retained probe on a prepared API32 AVD.
 
-Syntax checked only; this script has not produced API32 runtime evidence.
-It requires NoteCoreAtomic32/emulator-5582 and the preserved API36 original App.
-Environment preparation was interrupted; this tool does not download or create it.
+Only actual emitted receipts establish runtime evidence. The original NoteCorePreview
+AVD stays stopped and every disk file is hashed before/after; no original App run is
+claimed. This tool does not download images or create devices.
 """
 from pathlib import Path
 import hashlib
@@ -21,7 +21,11 @@ AVD = 'NoteCoreAtomic32'
 
 
 def sha(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        while chunk := stream.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def save(path, value):
@@ -29,8 +33,9 @@ def save(path, value):
 
 
 def main():
-    RAW.mkdir(exist_ok=True)
-    work = ROOT / 'build/android-api32-environment-20261031'
+    RAW.mkdir(exist_ok=False)  # A failed attempt must be inspected, never overwritten.
+    work = Path('/private/tmp/notecore-api32-single-sdk')
+    work.mkdir(exist_ok=True)
     receipt_path = ROOT / 'reports/android-atomic-promote.json'
     prior = json.loads(receipt_path.read_text(encoding='utf-8'))
     assert prior['status'] == 'passed'
@@ -59,26 +64,17 @@ def main():
         return run([SDK / 'platform-tools/adb', '-s', serial, *args], label, **kwargs)
 
     def original(label):
-        notes = adb('shell', "run-as dev.notecore.preview sh -c 'sha256sum files/preview-notes/*.ncp'",
-                    label=label + '-notes', serial='emulator-5554')
-        hashes = {}
-        for line in notes.splitlines():
-            digest, path = line.split(None, 1)
-            assert re.fullmatch('[a-f0-9]{64}', digest)
-            assert re.fullmatch(r'files/preview-notes/[A-Za-z0-9-]+\.ncp', path)
-            hashes[Path(path).name] = digest
-        remote = adb('shell', 'pm', 'path', 'dev.notecore.preview', label=label + '-package',
-                     serial='emulator-5554').removeprefix('package:')
-        assert re.fullmatch(r'/data/app/[A-Za-z0-9_./=+~:-]+/base.apk', remote)
-        return {'notes': hashes, 'apk_sha256': hashlib.sha256(adb('exec-out', 'cat', remote,
-                label=label + '-apk', serial='emulator-5554', binary=True)).hexdigest(),
-                'pid': adb('shell', 'pidof', 'dev.notecore.preview', label=label + '-pid',
-                           serial='emulator-5554', allowed=(0, 1))}
+        folder = ROOT / '.android-avd/NoteCorePreview.avd'
+        processes = subprocess.check_output(['ps', '-axo', 'pid=,command='], text=True)
+        assert not any('qemu-system' in line and ('NoteCorePreview' in line or str(folder) in line)
+                       for line in processes.splitlines()), 'Original AVD must remain stopped'
+        files = {p.relative_to(folder).as_posix(): {'bytes': p.stat().st_size, 'sha256': sha(p)}
+                 for p in sorted(folder.rglob('*')) if p.is_file()}
+        assert files and any('userdata' in name for name in files)
+        return {'avd': 'NoteCorePreview', 'offline_file_hashes': files,
+                'scope': 'All existing original AVD disk bytes, no fresh original App/66-note runtime claim'}
 
     before = original('before'); save(RAW / 'before.json', before)
-    expected = json.loads((ROOT / 'reports/merge-20261030/original-files-after.json').read_text(encoding='utf-8'))['android']
-    assert before['notes'] == expected and len(expected) == 66
-    assert before['apk_sha256'] == json.loads((ROOT / 'reports/preview-build.json').read_text(encoding='utf-8'))['android']['sha256']
     assert adb('shell', 'getprop', 'sys.boot_completed', label='boot') == '1'
     assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name', label='avd') == AVD
     assert adb('shell', 'getprop', 'ro.build.version.sdk', label='api') == '32'
@@ -127,7 +123,8 @@ def main():
     report = {'schema': 'android-atomic-promote-api32-1', 'status': cases['status'], 'scope': scope,
               'environment': environment, 'cases': cases, 'recovery': recovery,
               'retained_api36_report_sha256': sha(receipt_path), 'retained_executables_sha256': sha(archive),
-              'identical_apk_sha256': sha(apk), 'original_66_apk_pid_unchanged': True, 'probe_removed': True,
+              'identical_apk_sha256': sha(apk), 'original_avd_all_bytes_unchanged': True,
+              'fresh_original_app_runtime_verified': False, 'probe_removed': True,
               'decision': 'Adopt only observed API32/App-domain same-volume no-replace capability.' if recovery else
                           'Reject native candidate on this runtime; keep errno and stage, no fallback.',
               'limits': ['Identical prior APK, no new JNI build or production port.',

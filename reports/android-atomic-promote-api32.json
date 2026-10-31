@@ -1,0 +1,224 @@
+{
+  "schema": "android-atomic-promote-api32-1",
+  "status": "passed",
+  "scope": "resource-atomic-234b662f-7579-49a8-bf23-45d6b900f798",
+  "environment": {
+    "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+    "kernel": "5.10.101-android12-9-00027-g1292f517889e-ab8602202",
+    "selinux": "Enforcing",
+    "page_size": "4096",
+    "android_api": 32,
+    "abi": "arm64-v8a",
+    "avd": "NoteCoreAtomic32"
+  },
+  "cases": {
+    "pid": 2653,
+    "mode": "cases",
+    "selinux_context": "u:r:untrusted_app:s0:c149,c256,c512,c768",
+    "fresh": {
+      "errno": 0,
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 131550,
+        "device": 65053
+      },
+      "stage_absent": true
+    },
+    "identical": {
+      "errno": 17,
+      "stage": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 131551,
+        "device": 65053
+      },
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 131553,
+        "device": 65053
+      }
+    },
+    "corrupt": {
+      "errno": 17,
+      "stage": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 131554,
+        "device": 65053
+      },
+      "target": {
+        "bytes": 3,
+        "sha256": "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81",
+        "inode": 131555,
+        "device": 65053
+      }
+    },
+    "race": {
+      "winner": 0,
+      "winner_errno": 0,
+      "loser_errno": 17,
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 131556,
+        "device": 65053
+      },
+      "loser_stage": {
+        "bytes": 65539,
+        "sha256": "0817763fda29f2d15c3841ab41d0d21fde7e30ae233dd1f0b878ad27981e5f18",
+        "inode": 131559,
+        "device": 65053
+      }
+    },
+    "status": "passed"
+  },
+  "recovery": {
+    "pid": 3016,
+    "mode": "recover",
+    "selinux_context": "u:r:untrusted_app:s0:c149,c256,c512,c768",
+    "before_death": {
+      "pid": 2888,
+      "errno": 0,
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 131609,
+        "device": 65053
+      },
+      "stage_absent": true
+    },
+    "after_death": {
+      "bytes": 65539,
+      "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+      "inode": 131609,
+      "device": 65053
+    },
+    "status": "passed"
+  },
+  "retained_api36_report_sha256": "5765a9049d4dfc27e19716c083d2909d0864c3cbda4448eba1896f25416a367d",
+  "retained_executables_sha256": "c3482748190b869cdb1d891e11c2f2ea6839fe6715a83316f694d703249a232f",
+  "identical_apk_sha256": "6c214d2de85b5dee2c4c7263fc7abb5ec994c8d459345ab5b29c45f742e675c0",
+  "original_avd_all_bytes_unchanged": true,
+  "fresh_original_app_runtime_verified": false,
+  "probe_removed": true,
+  "decision": "Adopt only observed API32/App-domain same-volume no-replace capability.",
+  "limits": [
+    "Identical prior APK, no new JNI build or production port.",
+    "No API26, manufacturer, physical storage/heap, cross-volume, directory fsync or power-loss evidence.",
+    "Same-App thread race and SIGKILL-after-success only, not cross-process coordination or interrupted syscall.",
+    "No production resource/DB/task/GC integration, C1/M-1/DEV-041 approval or requirement promotion.",
+    "Temporary host AVD tag label was inherited from prior PlayStore template; actual pinned image/API32/ABI/fingerprint, not that label, identify the tested OS. No PlayStore/UI or temporary disk peak claim."
+  ],
+  "c1_complete": false,
+  "whole_requirement_accepted": false,
+  "source_and_evidence_sha256": {
+    "tools/verify_android_atomic_promote_api32.py": "6067535180afd0da99d969f0c4d9ca114311b8f5d3316f40a1ba6fec2028182f",
+    "reports/android-atomic-promote.json": "5765a9049d4dfc27e19716c083d2909d0864c3cbda4448eba1896f25416a367d",
+    "reports/android-atomic-promote-20261031/resource-atomic-798be55b-1d79-4059-a399-b67169f31297/executables.zip": "c3482748190b869cdb1d891e11c2f2ea6839fe6715a83316f694d703249a232f",
+    "reports/android-atomic-promote-api32-20261031/before.json": "a1850b7ad5280e63a76247117f723601c62e2e20959e2081797e7aef9db07a3e",
+    "reports/android-atomic-promote-api32-20261031/no-preview-in-isolated-avd.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/fingerprint.stdout.log": "c522bc88554283839ffd330352feb2b4de6aadcf16563dad0c1abdb40942a652",
+    "reports/android-atomic-promote-api32-20261031/page_size.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/avd.stdout.log": "65b0e5adecd5234b4b36e8d300e1a8b959126a8b62a8219e17f5cca385075535",
+    "reports/android-atomic-promote-api32-20261031/own-kill-log.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/probe-removed.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/probe-absent.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/instrument-crash.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/instrument-cases.stdout.log": "cc3c5a899df8c99319374bd35fc98e6a473ce2c7915df6870abc2c35eddc5c6e",
+    "reports/android-atomic-promote-api32-20261031/boot.stdout.log": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "reports/android-atomic-promote-api32-20261031/crash-marker.stdout.log": "d843de3ff00a5610542b780248c0c831569b14128ab5d20ec67606c6c30f3661",
+    "reports/android-atomic-promote-api32-20261031/install-retained-probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/remove-probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/api.stdout.log": "2115cdb6bfcfb008eb2bab2bb79347cb064a48e4e7c4115ccbe4469c787bb6c4",
+    "reports/android-atomic-promote-api32-20261031/abi.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/instrument-recover.stdout.log": "cee37161e40d12cd7e2f07214db4a5b86c435ea57d79a04cea8d20128897537b",
+    "reports/android-atomic-promote-api32-20261031/probe-stopped.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/retained-apk-badging.stdout.log": "c0bb6db8b7f60bfac2304fc62bedb1828e1ba64e76fced007dc6c6ea298ccdac",
+    "reports/android-atomic-promote-api32-20261031/kernel.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/after.json": "a1850b7ad5280e63a76247117f723601c62e2e20959e2081797e7aef9db07a3e",
+    "reports/android-atomic-promote-api32-20261031/selinux.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/avd.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/probe-absent.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/own-kill-log.stdout.log": "49da5a8f307a15547d8ec6117abd469743d6e9df9c06991f508b884477fc1b95",
+    "reports/android-atomic-promote-api32-20261031/probe-removed.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/no-preview-in-isolated-avd.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/page_size.stdout.log": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+    "reports/android-atomic-promote-api32-20261031/fingerprint.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/instrument-cases.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/instrument-crash.stdout.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "reports/android-atomic-promote-api32-20261031/instrument-recover.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/crash-marker.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/boot.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/api.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/abi.stdout.log": "7f10c3cd4593d1d6ded27d658e7c05216011c955c200aac551caad0c979d4d90",
+    "reports/android-atomic-promote-api32-20261031/source-at-start.json": "d26cfe62070e5fc0ac79945387903b22c7442047c1f97be96a38823db6ba63f8",
+    "reports/android-atomic-promote-api32-20261031/install-retained-probe.stdout.log": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "reports/android-atomic-promote-api32-20261031/remove-probe.stdout.log": "7fc0023a6402c7bd7abd98bb3e580968de4833eed07d88d1cc8d70819d69c7a0",
+    "reports/android-atomic-promote-api32-20261031/selinux.stdout.log": "4fefafd0dcddf54b31a0fef448083e7b77576d86a9ec97c14bfd92479c404290",
+    "reports/android-atomic-promote-api32-20261031/execution.json": "b54a444e50e5bd90a50b4c7f75ed05886bb8bb4dca4e449bfcb6089d0f9be332",
+    "reports/android-atomic-promote-api32-20261031/retained-apk-badging.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/probe-stopped.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/kernel.stdout.log": "6f52e9008aab048537105f59c36164c896a487edcb2bcee9378f5013549d40ad",
+    "reports/android-atomic-promote-api32-20261031/environment/sdk-initial.log": "cd11646041d4c79d01232dff92e64fb2baf36ead0d59351a0a04add87e0b82f2",
+    "reports/android-atomic-promote-api32-20261031/environment/range-1-0.headers": "d4b74fd42ac759379d1a63d2b03922df28de97c151d6407f3745c9c062e63b27",
+    "reports/android-atomic-promote-api32-20261031/environment/probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/range-0.json": "fc91b856b1bc8651fce56a05e55fbdc03f598b6eeac2a3571fe8bcaaa905b047",
+    "reports/android-atomic-promote-api32-20261031/environment/download-result.json": "9a1c1407476bc57ba97f0a71588b37bfdd545161f287e0b6795afbc1c1e7e4b0",
+    "reports/android-atomic-promote-api32-20261031/environment/range-1.json": "dd7b906081a2ac2e45013818ac1159600de0ad1b78d9699b0f49fa72c9eec39a",
+    "reports/android-atomic-promote-api32-20261031/environment/pipeline-as-executed.py.txt": "3e594827da40cbb152d402602a7a613d79beed5a9c19940524f84fbfc5e459b0",
+    "reports/android-atomic-promote-api32-20261031/environment/emulator.log.gz": "309118f008d0f4bd934dd380169b10e8af7b42854b4591e694903bf535277672",
+    "reports/android-atomic-promote-api32-20261031/environment/cleanup-identity.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/cleanup-stop.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/pipeline-state.json": "dc59c997d3af9fdd6d303d00edc909a043db76e2fefbaaa84b90d8a9f399b6ce",
+    "reports/android-atomic-promote-api32-20261031/environment/range-4-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/range-3-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/range-0-0.headers": "545369044f1bfe4f4fa5c343ff99e9cf4164291f1bc8af1c52cb605c9bc810dd",
+    "reports/android-atomic-promote-api32-20261031/environment/emulator-process.json": "35ea55aa5d01c4892ff20f8671a71aacd9e1fdebf1b33e6def6410d65a0c8be2",
+    "reports/android-atomic-promote-api32-20261031/environment/range-2-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/range-5-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/source.properties": "db37864c9cb4c902e55c5333d3d0111c3718bac93d42d48d511d2b0598eea9a2",
+    "reports/android-atomic-promote-api32-20261031/environment/probe.stdout.log": "dd4aa0763f2b2e941bce4a55b844878f3486a54e8285855741d8a962901e0ef8",
+    "reports/android-atomic-promote-api32-20261031/environment/range-4.json": "66af3bbaaac718ea3ef291de69361a0993dd9b2cfaeebcc90889d884face379b",
+    "reports/android-atomic-promote-api32-20261031/environment/download-as-executed.py.txt": "e4e3c9aa3f584232e61e6702e06f04d17996e016fa3ee900002335356225fe1a",
+    "reports/android-atomic-promote-api32-20261031/environment/range-0-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/official-package.xml": "3adf5bcb0cf91a2104859955f2f786d84ab09e89c2b93a1ac69f387628c15664",
+    "reports/android-atomic-promote-api32-20261031/environment/installed-image-sha256.json": "d25f5e1528fff6a179c4e2c03ce518d1d6456a0292d2364a6e450324dd9aa27e",
+    "reports/android-atomic-promote-api32-20261031/environment/sdk-install-result.json": "1e3f6691f455051e8adb15d961e4bf3c7a17e83dd88b2afdd13315cc288250bb",
+    "reports/android-atomic-promote-api32-20261031/environment/range-3-0.headers": "e6cfc28ba345961cb26df43ec5faa35bf1e110c0b1bdfc0eeece19cdbe41da9d",
+    "reports/android-atomic-promote-api32-20261031/environment/cache-prepare-stop.json": "38049067f0fdba4df13a167de8d8bc7c2c93711e57a55d82f08e28a6d32ea596",
+    "reports/android-atomic-promote-api32-20261031/environment/range-1-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api32-20261031/environment/cleanup-stop.stdout.log": "e2d4238ce853e3f4c1ba7b36adf25ff824d93c36a0b94db50cb96dc047aac6d3",
+    "reports/android-atomic-promote-api32-20261031/environment/range-5-0.headers": "17e3870fac10a761e4c7ee4fe9912e709c47d22f002ccf8d3986e290fdff08ec",
+    "reports/android-atomic-promote-api32-20261031/environment/existing-emulator-before.json": "fe13f471d779cd4467f7cbb1fe13288f8d9257c3d5eee0e7656f590c529e9e6c",
+    "reports/android-atomic-promote-api32-20261031/environment/range-5.json": "55d1f81aaff8ad5412624c7df0a855738db0edcc2bd8a95c38164ec9a6a458c7",
+    "reports/android-atomic-promote-api32-20261031/environment/cleanup-identity.stdout.log": "65b0e5adecd5234b4b36e8d300e1a8b959126a8b62a8219e17f5cca385075535",
+    "reports/android-atomic-promote-api32-20261031/environment/host-configuration-observation.json": "d313b894e5b5826376d31cb1b83f772b555168541969e853b902756a1a97ba5f",
+    "reports/android-atomic-promote-api32-20261031/environment/official-package-facts.json": "a15dd4cf00d5392fff2e04380c89c20c576b72da66f9e7beceb68da7c3bce3bb",
+    "reports/android-atomic-promote-api32-20261031/environment/range-2.json": "3e6eb53180212a5ae78f41fcd1e462eaa4d39ed478ba59d4f3d2d5d27866337e",
+    "reports/android-atomic-promote-api32-20261031/environment/existing-emulator-after.json": "fe13f471d779cd4467f7cbb1fe13288f8d9257c3d5eee0e7656f590c529e9e6c",
+    "reports/android-atomic-promote-api32-20261031/environment/range-2-0.headers": "f3e8332fbe2cf26eaa632c90e200eea748d2df77e04c6fc17ef733d15ca00a10",
+    "reports/android-atomic-promote-api32-20261031/environment/sdk-cache-install.log": "d0135b0481437f241440c80101d366b7da071059c95b0f9bfbd4c8fa1bc98aa1",
+    "reports/android-atomic-promote-api32-20261031/environment/range-3.json": "80f0f8ac29d411a07296d0c9dcf523467a718e1ec341bdb5ba7b0ebcce594a48",
+    "reports/android-atomic-promote-api32-20261031/environment/range-4-0.headers": "696760d56eb8b9541bf9f41ceeaeb3a8121968b62334161e65467639c584d257"
+  },
+  "preparation": {
+    "single_existing_sdk_root": "/Users/lixiaofan/Library/Android/sdk",
+    "official_installer_exit": 0,
+    "official_archive_bytes": 1569899980,
+    "official_archive_sha1": "7940d3d7357e35b6f720c2bba1159d185bdb2fd5",
+    "official_archive_sha256": "8c356d3b819cde8cbd34bed7deec4562f3935da4e46abf4f45b7019e23bca354",
+    "registered_package_revision": [
+      "8"
+    ],
+    "archive_source_properties_revision": "4 (retained as published; registered package revision is 8)",
+    "existing_emulator_fingerprints_unchanged": true,
+    "temporary_avd_stopped_and_removed": true,
+    "download_archive_removed": true,
+    "sdk_temporary_zip_count_after": 0,
+    "original_AVD_protection": "All stopped original AVD file bytes hashed before/after; no fresh original App/PID or 66-note traversal result",
+    "temporary_emulator_log_sha256": "2786c3a343e9fb13b0bef97718013ca83fc9506741cfc01793e456aa7391ff2f",
+    "host_metadata_observation": "reports/android-atomic-promote-api32-20261031/environment/host-configuration-observation.json"
+  }
+}

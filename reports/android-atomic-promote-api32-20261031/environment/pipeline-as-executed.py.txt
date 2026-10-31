@@ -1,0 +1,88 @@
+from pathlib import Path
+import subprocess,json,os,signal,time,hashlib,shutil,configparser,datetime
+ROOT=Path('/Users/lixiaofan/StudioProjects/notecore');W=Path('/private/tmp/notecore-api32-single-sdk');SDK=Path('/Users/lixiaofan/Library/Android/sdk');JDK='/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home';PY='/Users/lixiaofan/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3'
+SDKMANAGER=SDK/'cmdline-tools/latest/bin/sdkmanager';ADB=SDK/'platform-tools/adb';IMAGE=SDK/'system-images/android-32/google_apis/arm64-v8a';environment={**os.environ,'JAVA_HOME':JDK,'ANDROID_HOME':str(SDK),'ANDROID_SDK_ROOT':str(SDK),'ANDROID_AVD_HOME':str(W/'avds'),'ANDROID_USER_HOME':str(W/'user'),'ANDROID_EMULATOR_HOME':str(W/'user')}
+def save(name,v):(W/name).write_text(json.dumps(v,indent=2)+'\n',encoding='utf-8')
+def phase(name,**v):
+ save('pipeline-state.json',{'phase':name,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),**v});print(name,v,flush=True)
+def sha(p,kind='sha256'):
+ h=hashlib.new(kind)
+ with p.open('rb') as f:
+  while b:=f.read(1024*1024):h.update(b)
+ return h.hexdigest()
+def sdk_command():return [str(SDKMANAGER),'--sdk_root='+str(SDK),'--install','system-images;android-32;google_apis;arm64-v8a','--channel=0','--verbose']
+def sdk_java():
+ rows=[]
+ for line in subprocess.check_output(['ps','-axo','pid=,ppid=,command='],text=True).splitlines():
+  if 'SdkManagerCli' in line and '--sdk_root='+str(SDK) in line:
+   p,parent,cmd=line.strip().split(None,2);rows.append((int(p),int(parent),cmd))
+ return rows
+def stop_own_sdk(proc):
+ rows=sdk_java();assert len(rows)==1,rows;p,parent,cmd=rows[0];assert p==proc.pid or parent==proc.pid,(rows,proc.pid);os.kill(p,signal.SIGTERM);return proc.wait(timeout=30)
+def run(args,label,timeout=180):
+ r=subprocess.run([str(x) for x in args],cwd=ROOT,env=environment,capture_output=True,text=True,timeout=timeout)
+ (W/(label+'.stdout.log')).write_text(r.stdout,encoding='utf-8');(W/(label+'.stderr.log')).write_text(r.stderr,encoding='utf-8');assert r.returncode==0,(label,r.returncode,r.stderr[-1200:]);return r.stdout
+try:
+ phase('waiting_for_single_verified_archive')
+ while not (W/'download-result.json').exists():
+  lines=subprocess.check_output(['ps','-axo','pid=,command='],text=True);assert str(W/'download.py') in lines,'Download no longer live; inspect retained state';time.sleep(2)
+ proof=json.loads((W/'download-result.json').read_text(encoding='utf-8'));facts=json.loads((W/'official-package-facts.json').read_text(encoding='utf-8'));archive=W/'verified-image.zip';assert proof['status']=='verified' and sha(archive,'sha1')==facts['checksum']
+ assert shutil.disk_usage(SDK).free>10*2**30
+ assert not IMAGE.exists(),'Inspect existing image rather than replace it'
+ assert not sdk_java(),'Another SDK installer is active'
+ preserved=[SDK/'emulator/emulator',SDK/'emulator/qemu/darwin-aarch64/qemu-system-aarch64',SDK/'emulator/package.xml']
+ tool_before={str(p):sha(p) for p in preserved};save('existing-emulator-before.json',tool_before)
+ phase('official_installer_preparing_own_cache')
+ log=(W/'sdk-initial.log').open('w',encoding='utf-8');proc=subprocess.Popen(sdk_command(),cwd=ROOT,env=environment,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT)
+ install_data=IMAGE/'.installer/.installData';deadline=time.monotonic()+60
+ while not install_data.exists():
+  assert proc.poll() is None,('SDK installer exited early',proc.returncode)
+  if time.monotonic()>deadline:
+   stop_own_sdk(proc);raise RuntimeError('No image cache prepared; inspect before any retry')
+  time.sleep(0.25)
+ props=dict(line.split('=',1) for line in install_data.read_text(encoding='utf-8').splitlines() if '=' in line and not line.startswith('#'))
+ assert props['class']=='com.android.repository.impl.installer.BasicInstaller'
+ cache=Path(props['path']);assert cache.resolve().is_relative_to(SDK/'.temp')
+ code=stop_own_sdk(proc);log.close();save('cache-prepare-stop.json',{'returncode':code,'properties':props});assert code in (-15,143)
+ assert all(sha(Path(p))==v for p,v in tool_before.items())
+ target=cache/facts['url'];cache.mkdir(exist_ok=True)
+ if target.exists():target.unlink() # Only this task's partial download, no installed image/data.
+ shutil.move(str(archive),str(target));assert sha(target,'sha1')==facts['checksum']
+ phase('official_installer_reusing_verified_archive')
+ log=(W/'sdk-cache-install.log').open('w',encoding='utf-8');proc=subprocess.Popen(sdk_command(),cwd=ROOT,env=environment,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT)
+ try:code=proc.wait(timeout=180)
+ except subprocess.TimeoutExpired:
+  stop_own_sdk(proc);raise RuntimeError('Official cache install exceeded bound; inspect actual cache/log, do not redownload blindly')
+ log.close();save('sdk-install-result.json',{'returncode':code});assert code==0 and (IMAGE/'package.xml').is_file()
+ assert all(sha(Path(p))==v for p,v in tool_before.items());save('existing-emulator-after.json',{str(p):sha(p) for p in preserved})
+ image_hash={p.relative_to(IMAGE).as_posix():sha(p) for p in IMAGE.rglob('*') if p.is_file()};save('installed-image-sha256.json',image_hash)
+ phase('creating_one_temporary_avd_from_existing_configuration')
+ avdhome=W/'avds';avdhome.mkdir(exist_ok=True);avd=avdhome/'NoteCoreAtomic32.avd';assert not avd.exists();avd.mkdir();(W/'user').mkdir(exist_ok=True)
+ values={}
+ for line in (ROOT/'.android-avd/NoteCorePreview.avd/config.ini').read_text(encoding='utf-8').splitlines():
+  if '=' in line:
+   k,v=line.split('=',1);values[k.strip()]=v.strip()
+ values.update({'AvdId':'NoteCoreAtomic32','avd.ini.displayname':'NoteCoreAtomic32','image.sysdir.1':str(IMAGE)+'/', 'PlayStore.enabled':'false','hw.cpu.ncore':'2','hw.ramSize':'1536','disk.dataPartition.size':'2147483648','fastboot.forceColdBoot':'yes','showDeviceFrame':'no'})
+ (avd/'config.ini').write_text(''.join(k+' = '+v+'\n' for k,v in values.items()),encoding='utf-8');(avdhome/'NoteCoreAtomic32.ini').write_text('avd.ini.encoding=UTF-8\npath='+str(avd)+'\ntarget=android-32\n',encoding='utf-8')
+ assert 'emulator-5582' not in run([ADB,'devices'],'devices-before')
+ log=(W/'emulator.log').open('w',encoding='utf-8');command=[str(SDK/'emulator/emulator'),'-avd','NoteCoreAtomic32','-port','5582','-no-window','-no-audio','-no-snapshot','-no-boot-anim','-gpu','swiftshader_indirect','-memory','1536','-cores','2'];emu=subprocess.Popen(command,cwd=ROOT,env=environment,stdout=log,stderr=subprocess.STDOUT);save('emulator-process.json',{'pid':emu.pid,'argv':command});phase('waiting_for_actual_boot',pid=emu.pid)
+ deadline=time.monotonic()+600
+ while True:
+  assert emu.poll() is None,('Emulator actually exited',emu.returncode)
+  r=subprocess.run([str(ADB),'-s','emulator-5582','shell','getprop','sys.boot_completed'],capture_output=True,text=True,timeout=20)
+  if r.returncode==0 and r.stdout.strip()=='1':break
+  if time.monotonic()>deadline:raise RuntimeError('Boot observation deadline with emulator still alive; inspect same PID, no automatic restart')
+  time.sleep(3)
+ phase('running_identical_retained_apk')
+ try:run([PY,ROOT/'tools/verify_android_atomic_promote_api32.py'],'probe',timeout=300)
+ finally:
+  identity=run([ADB,'-s','emulator-5582','shell','getprop','ro.boot.qemu.avd_name'],'cleanup-identity').strip();assert identity=='NoteCoreAtomic32';run([ADB,'-s','emulator-5582','emu','kill'],'cleanup-stop');emu.wait(timeout=60);log.close()
+ report=json.loads((ROOT/'reports/android-atomic-promote-api32.json').read_text(encoding='utf-8'));assert report['probe_removed'] and report['original_avd_all_bytes_unchanged']
+ assert all(sha(IMAGE/p)==v for p,v in image_hash.items())
+ shutil.rmtree(avdhome)
+ # Keep small metadata/logs pending archival. Remove only this task's reusable transient files.
+ for p in (W/'retained-probe.apk',W/'verified-image.zip'):
+  if p.exists():p.unlink()
+ phase('complete',probe_status=report['status'],single_installed_image=str(IMAGE),temporary_avd_removed=True)
+except Exception as e:
+ phase('failed_or_needs_inspection',error=repr(e));raise

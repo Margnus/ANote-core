@@ -1,0 +1,37 @@
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor,as_completed
+import subprocess,os,json,hashlib,time
+W=Path('/private/tmp/notecore-api32-single-sdk');facts=json.loads((W/'official-package-facts.json').read_text());SIZE=int(facts['size']);URL='https://dl.google.com/android/repository/sys-img/google_apis/'+facts['url'];archive=W/'verified-image.zip';assert not archive.exists()
+fd=os.open(archive,os.O_CREAT|os.O_EXCL|os.O_RDWR,0o600);os.ftruncate(fd,SIZE)
+def save(p,v):
+ t=p.with_suffix('.tmp');t.write_text(json.dumps(v,indent=2)+'\n');t.replace(p)
+def fetch(i):
+ start=i*SIZE//6;end=(i+1)*SIZE//6;position=start;attempts=[]
+ for attempt in range(3):
+  if position==end:break
+  began=position;headers=W/('range-'+str(i)+'-'+str(attempt)+'.headers');err=W/('range-'+str(i)+'-'+str(attempt)+'.stderr.log')
+  with err.open('wb') as error:
+   child=subprocess.Popen(['curl','--fail','--location','--range',str(position)+'-'+str(end-1),'--max-filesize',str(end-position),'--max-time','1800','--retry','0','--silent','--show-error','--dump-header',str(headers),URL],stdout=subprocess.PIPE,stderr=error)
+   checkpoint=position+8*1024*1024
+   while data:=child.stdout.read(65536):
+    assert position+len(data)<=end
+    written=os.pwrite(fd,data,position);assert written==len(data);position+=written
+    if position>=checkpoint:save(W/('range-'+str(i)+'.json'),{'range':[start,end-1],'received_bytes':position-start,'pid':child.pid});checkpoint=position+8*1024*1024
+   code=child.wait();assert code in (0,28),(i,code,err.read_text())
+  assert 'content-range: bytes '+str(began)+'-'+str(end-1)+'/'+str(SIZE) in headers.read_text().lower()
+  attempts.append({'requested':[began,end-1],'received':position-began,'returncode':code})
+  save(W/('range-'+str(i)+'.json'),{'range':[start,end-1],'received_bytes':position-start,'attempts':attempts})
+ assert position==end
+ return {'range':[start,end-1],'bytes':end-start,'attempts':attempts}
+try:
+ records=[]
+ with ThreadPoolExecutor(max_workers=6) as pool:
+  for f in as_completed([pool.submit(fetch,i) for i in range(6)]):records.append(f.result());print('Completed',records[-1]['range'],flush=True)
+ os.fsync(fd)
+finally:os.close(fd)
+h=hashlib.sha1();h256=hashlib.sha256()
+with archive.open('rb') as stream:
+ while chunk:=stream.read(1024*1024):h.update(chunk);h256.update(chunk)
+assert archive.stat().st_size==SIZE and h.hexdigest()==facts['checksum']
+save(W/'download-result.json',{'status':'verified','bytes':SIZE,'sha1':h.hexdigest(),'sha256':h256.hexdigest(),'ranges':records})
+print('Official archive verified',h256.hexdigest(),flush=True)
