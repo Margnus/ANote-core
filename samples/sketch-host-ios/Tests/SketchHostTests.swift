@@ -132,6 +132,43 @@ final class SketchHostTests: XCTestCase {
         XCTAssertTrue(replacement.session.notebook.snapshot() === root)
         XCTAssertEqual(host.toolIndex, 1); XCTAssertTrue(host.readOnly)
     }
+    @MainActor func testSiblingCanvasLifecycleAndLateCallbacksCannotTakeAnotherInput() throws {
+        let host = try session(), a = SketchCanvas(session: host), b = SketchCanvas(session: host)
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 595, height: 842))
+        let controller = UIViewController(); window.rootViewController = controller; window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil }
+        controller.view.addSubview(a); a.frame = window.bounds; a.layoutIfNeeded()
+        let note = host.notebook, root = note.snapshot(), first = SampleTouch(10, 0.001)
+        a.touchesBegan([first], with: nil)
+        let operation = note.activeInputOperationId, charge = note.inputReservedByteCharge
+        XCTAssertNotNil(operation); XCTAssertGreaterThan(charge, 0)
+        controller.view.addSubview(b); b.frame = window.bounds; b.layoutIfNeeded()
+        XCTAssertEqual(note.activeInputOperationId, operation); XCTAssertEqual(note.inputReservedByteCharge, charge)
+        b.touchesCancelled([], with: nil); b.removeFromSuperview()
+        XCTAssertEqual(note.activeInputOperationId, operation); XCTAssertEqual(note.inputReservedByteCharge, charge)
+        XCTAssertTrue(note.snapshot() === root)
+        guard note.hasActiveStroke else { return XCTFail("Sibling lifecycle cancelled accepted DOWN") }
+        first.position.x = 20; first.seconds = 0.002; a.touchesEnded([first], with: nil)
+        XCTAssertEqual(note.totalStrokeCount, 1)
+        XCTAssertEqual(note.pointCount(index: 0), 2)
+        let old = SampleTouch(30, 0.003); a.touchesBegan([old], with: nil)
+        XCTAssertNil(host.cancelUnfinished()) // Explicit same-owner cancellation ends A's operation.
+        controller.view.addSubview(b); b.frame = window.bounds; b.layoutIfNeeded()
+        let next = SampleTouch(40, 0.004); b.touchesBegan([next], with: nil)
+        let nextOperation = note.activeInputOperationId, nextCharge = note.inputReservedByteCharge
+        XCTAssertNotNil(nextOperation); XCTAssertNotEqual(nextOperation, operation)
+        old.position.x = 50; old.seconds = 0.005; a.touchesMoved([old], with: nil)
+        old.position.x = 60; old.seconds = 0.006; a.touchesEnded([old], with: nil)
+        a.removeFromSuperview()
+        XCTAssertEqual(note.activeInputOperationId, nextOperation); XCTAssertEqual(note.inputReservedByteCharge, nextCharge)
+        next.position.x = 70; next.seconds = 0.007; b.touchesEnded([next], with: nil)
+        guard note.totalStrokeCount == 2 else { return XCTFail("Late A callback consumed B's operation") }
+        XCTAssertEqual(note.pointCount(index: 1), 2)
+        XCTAssertEqual(note.pointX(index: 1, point: 0), 40)
+        XCTAssertEqual(note.pointX(index: 1, point: 1), 70)
+        XCTAssertFalse(note.hasActiveStroke); XCTAssertFalse(note.hasPendingStroke)
+        XCTAssertEqual(note.inputReservedByteCharge, 0)
+    }
     @MainActor func testBorrowedBackgroundDrawsActualPixels() throws {
         var draws = 0
         let host = try session { context, page in draws += 1; context.setFillColor(UIColor.green.cgColor); context.fill(page) }

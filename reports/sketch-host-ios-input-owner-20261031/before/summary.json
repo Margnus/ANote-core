@@ -1,0 +1,57 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+        "deviceName": "NoteCorePreview",
+        "modelName": "iPhone 17",
+        "osBuildNumber": "24A434",
+        "osVersion": "27.0",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 1,
+      "passedTests": 7,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "SketchHost · Built with macOS 27.0.1",
+  "expectedFailures": 0,
+  "failedTests": 1,
+  "finishTime": 1793418603.493,
+  "passedTests": 7,
+  "result": "Failed",
+  "runtimeWarnings": [],
+  "skippedTests": 0,
+  "startTime": 1793418598.629,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(\"DE018B15-4511-4606-B31C-0D4E2B524F4E-op-1\")\")",
+      "targetName": "SketchHostTests",
+      "testIdentifier": 7,
+      "testIdentifierString": "SketchHostTests/testSiblingCanvasLifecycleAndLateCallbacksCannotTakeAnotherInput()",
+      "testIdentifierURL": "test://com.apple.xcode/SketchHost/SketchHostTests/SketchHostTests/testSiblingCanvasLifecycleAndLateCallbacksCannotTakeAnotherInput",
+      "testName": "testSiblingCanvasLifecycleAndLateCallbacksCannotTakeAnotherInput()"
+    }
+  ],
+  "title": "Test - SketchHost",
+  "topInsights": [
+    {
+      "category": "Common Failures",
+      "impact": "100% of failures",
+      "text": "2 runs of 1 test failed with XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(\"DE018B15-4511-4606-B31C-0D4E2B524F4E-op-1\")\")"
+    },
+    {
+      "category": "Common Failures",
+      "impact": "100% of failures",
+      "text": "2 runs of 1 test failed with XCTAssertEqual failed: (\"0\") is not equal to (\"1329280\")"
+    }
+  ],
+  "totalTestCount": 8
+}

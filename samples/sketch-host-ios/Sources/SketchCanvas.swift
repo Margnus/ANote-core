@@ -6,6 +6,8 @@ final class SketchCanvas: UIView {
     let session: SketchSession
     var changed: (String) -> Void = { _ in }
     private var contact: UITouch?
+    private var inputOperation: String?
+    private var ownsInput: Bool { inputOperation != nil && inputOperation == session.notebook.activeInputOperationId }
     private var active: UIBezierPath?
     private var blocked = false
     private var lastSize = CGSize.zero
@@ -24,8 +26,8 @@ final class SketchCanvas: UIView {
         super.willMove(toWindow: newWindow)
     }
     func cancelUnfinished() {
-        _ = session.cancelUnfinished(); contact = nil; blocked = false
-        if !session.notebook.hasPendingStroke { active = nil }
+        if ownsInput { _ = session.cancelUnfinished() }
+        inputOperation = nil; contact = nil; blocked = false; active = nil
         setNeedsDisplay()
     }
     private func color(_ argb: Int32) -> CGColor {
@@ -67,7 +69,7 @@ final class SketchCanvas: UIView {
         if let pending = note.pendingStroke()?.command as? CanvasCommandAddStroke {
             context.addPath(path(pending.samples)); context.setStrokeColor(color(pending.target.brush.argb))
             context.setLineWidth(pending.target.brush.width); context.setLineCap(.round); context.setLineJoin(.round); context.strokePath()
-        } else if note.hasActiveStroke, let active {
+        } else if ownsInput, let active {
             context.addPath(active.cgPath); let tool = session.tools[session.toolIndex]
             context.setStrokeColor(color(tool.argb)); context.setLineWidth(tool.width); context.setLineCap(.round); context.setLineJoin(.round); context.strokePath()
         }
@@ -100,18 +102,22 @@ final class SketchCanvas: UIView {
         setNeedsDisplay(); return true
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if contact != nil && !ownsInput { cancelUnfinished() }
         guard !session.readOnly, contact == nil, !blocked, let touch = touches.first else { return }
+        guard !session.notebook.hasActiveStroke else { return }
         guard touch.type != .indirectPointer && touch.type != .indirect else { return }
-        if admit(.down, touch: touch, event: event) { contact = touch }
+        if admit(.down, touch: touch, event: event) {
+            contact = touch; inputOperation = session.notebook.activeInputOperationId
+        }
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard !blocked, let contact, touches.contains(contact) else { return }
+        guard !blocked, let contact, touches.contains(contact), ownsInput else { return }
         _ = admit(.move, touch: contact, event: event)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard !blocked, let contact, touches.contains(contact) else { return }
+        guard !blocked, let contact, touches.contains(contact), ownsInput else { return }
         if admit(.up, touch: contact, event: event) {
-            self.contact = nil; active = nil
+            self.contact = nil; inputOperation = nil; active = nil
             changed(session.notebook.hasPendingStroke ? "完整笔已保留，请重试提交" : "未保存 · \(session.notebook.strokeCount)笔")
         }
     }
