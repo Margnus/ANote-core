@@ -1,0 +1,56 @@
+{
+  "schema": "environment-after-cleanup-1",
+  "status": "facts_recorded_not_platform_acceptance",
+  "base_commit": "626c475f78d93b43bf7089cc32e2c18e5a6b583f",
+  "authoritative_observations": {
+    "old_exec_handles": {
+      "68047": "Unknown process id after interruption",
+      "37267": "Unknown process id after interruption"
+    },
+    "related_installer_emulator_pipeline_processes": [],
+    "temporary_stage_exists": false,
+    "api32_runtime_report_exists": false,
+    "installed_api32_package_xml": []
+  },
+  "observation_scope": "Actual local filesystem plus filtered process inventory checked after interrupted turn and cleanup. Absence does not reveal exact termination cause or completed download bytes. Prior byte-progress observations are historical, not current live-job evidence.",
+  "api32_probe_status": "not_executed_or_proven; no support/adopt/reject result",
+  "draft": {
+    "path": "tools/verify_android_atomic_promote_api32.py",
+    "sha256": "84927b7bac784bcb46922bbdc1104005d41542e6ce940b0b9168fef6671bfe8f",
+    "validation": "ast.parse only; no adb install, native API or process recovery execution"
+  },
+  "cleanup_receipt": {
+    "path": "reports/environment-after-cleanup-20261031/cleanup-result.json",
+    "sha256": "e131ed7811749416f33a2d6a25a168a1ca2e0fb3da09e62e784feac4d93a84ec",
+    "scope": "Prior cleanup preserved source/report hashes, uncommitted changes and all AVD file sizes/mtimes/inodes; active compiler/dependencies and raw xcresult bundles kept. Compiled products may require rebuild when actually needed."
+  },
+  "requirements": {
+    "total": 129,
+    "priority_counts": {
+      "P0": 83,
+      "P1": 30,
+      "P2": 11,
+      "Excluded": 5
+    },
+    "implementation_counts": {
+      "部分实现": 59,
+      "未开发": 54,
+      "延期": 11,
+      "排除": 5
+    },
+    "acceptance_counts": {
+      "待验收": 111,
+      "不在本轮": 16,
+      "待环境": 2
+    }
+  },
+  "decision": "Close stale live-wait state as interrupted preparation with no API32 capability conclusion. Keep replay tool explicitly draft. Do not automatically recreate multiple SDK copies/large downloads immediately after cleanup; prefer a prepared single SDK environment for future required sampling. Preserve API26/32 and physical gaps.",
+  "c1_complete": false,
+  "whole_requirement_accepted": false,
+  "production_sqlite_authorized": false,
+  "next_gates": [
+    "Physical Android stylus tablet and Pencil iPad M-1/heap/frame/latency remain unavailable per user.",
+    "Final applicable public/owner semantics, actual simultaneous physical peak and declared backend support remain C1 gates.",
+    "No production SQLite, resource deletion or later product integration before M-1/C1."
+  ]
+}
