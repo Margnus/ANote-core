@@ -11,7 +11,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryNoteMoveRules.kt": "dad6cd372805d4aa9325059dcd1978a5740df4768914ccd9f92a5b713c891006",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryBatchRules.kt": "5705b3c9c13de5f39f82ad92049deebb068c6b3640a25dad10a1f640561f55f2",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "75eeb78ef8b2580814e3991d35e3ed15d931e2574270c0e2a7775fd2081e5bc3",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "e9b7b81a185c939b29f627ad03068c0cc7c60b137fac46bd3b48ecd73e6fe1e4",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "4ac2f0d7007755e0f569b05dcd6c028f29583b0672c2a0992357d082a5b1b273",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "2ab9c0d1270881e252c82b79e540091d28f334755eb76490bc468dc8970fcd87",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageDecodeRules.kt": "c7191df444b403ee4331d52ba27d82b104ed0377edcec788dafd1f67db38e4bf",
@@ -22,14 +22,15 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfPageGeometryRules.kt": "efe908780ab3f12bf40b0921c7d850aa8aac7ce9580143227cb11c43847510fd",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PageTemplateRules.kt": "dd5fcf1b7d15e7e905fc6e88a1d58774d038bd249da1050d14745ab0b9be280c",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "5cf5b31208809b2cb564aa147f829f20e0b6e6ddca80a20ed15a5b194a111f37",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "4521dc6d1e0ddff7b547947c6545863112d9eed6edea50d394a239979678a975",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "fc0a144c100d4011bc623a47c10af9ce5a25305f0e268dc0e070aa7011491d32",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfRenderSelectionRules.kt": "0da5ad0e02467ca2fb5d36b55c72e31ff67046cffe330326f19b3f1a03c4fb94",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "ee91eb84ce06f55520f175fc041701788822b859ebba0abe15b7811c3b3c9181",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "4d08dbc77bd6ba4ee86f5918e0670122b3c7a14c8c47c38f3ff21e34f6073690",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "0f0a2906607e867df28878f4d3214eebac8e1be0a577fb76cf0a3502aaa5197c",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfPageCatalogRules.kt": "147c8142506d2d27dc3c14fdcc2af82fa435b0379fb109018a6138af7bdd4857",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ObjectOrderRules.kt": "e6be57bc02c78e0482d060e320fb3fdf0d78529f19a7d031d0ecd878c9648232",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PageBookmarkRules.kt": "0939abb0449d493641ec49c4550bb98643f23eef6cf7c9ce7640895ccf8a8519",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "51d19b7053371506991c9fb0fdfaab00e851184da5ea22234b462a1489228166",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "bdc64e76826cc78d9f0f3fea412dd51d091f0ef35b01a6db472f6a9a09367702",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "cfadc1871fc0a5f3123aca5f73f694ad53ec894ea0f449e8186b8f8e4fdb4a16",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "b38f7c72fa031a723fd94a1417966c52f1f12d43d6a4f7649bcb7839be054afc",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewNotebookOpen.kt": "2dd49c6902aff3050c38c84ab87d82ec7d9236d9748be1ecde6686d525e53015",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
@@ -60,18 +61,18 @@
     "ios-app/NoteCorePreview/PreviewFileIO.swift": "b906b88ac3da24a393df3b5c23daa3b05a056e1c036ed44d8584ccad0e1015bb",
     "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
     "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85",
-    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "1b1e44d65e33d5b821ab2199238e630206c14ed580b782dfa00f81846fd6f48b",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "f2b8d624959431a0c105ee411d8ede6a762384acbb942d8d4b81b34534324455",
     "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
     "settings.gradle.kts": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc",
     "canvas-core/build.gradle.kts": "ac4f2148968181b43b165d52d086f7f48e120ff85289e2e544bf3ec974694709",
-    "shared-core/build.gradle.kts": "54e107b494cdc84b056d9cf5ba152e7fe909aaf8498906209b9a86ba7c6f51b1",
+    "shared-core/build.gradle.kts": "a45e630699e51515b27bccbfe6a56e48d6f4c761663d8e6bf91ced6ee770e872",
     "gradle.properties": "a29e188235a52da45ce914db097aa8f585297256b2fcb469a51048bf88f542b0",
-    "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "69a65c3ea689a769df1da634c8280a58919359278b06f4a36bf3e5f207cd028b",
-    "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "06f46eb9aad27b70135641361e1a191baab1a78fe2f4c660dde81a6a55f53cbc",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "22e4600dea4448da96aa06f1bce9d753b300861ace45e5042c9e1cec3c6b5afa",
+    "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "c400782174697878c9dd9a53c4a14d9f91c41b39cede184668d2911c132e86fa",
+    "ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme": "bee27ef2d37e4b9f2fc7f9aa9684a61b6cb3d8b5ef7313c9b6206c455d9de93b",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "26a3ed009c9602b603c7610d915808ad80cacc85e96c275a321e29f9f92d3287",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/__preview.dylib": "aa76befa0bbd1e954f9726932da69b7c908db2d0294a2e72be93829e4eb3cea4",
-    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "565392561b89dee3c4cc7562ffe8bd0ea4110de6758673df6d5e6c4048d7a91e",
+    "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "647c18e55774e1e04d55b76e7c88fca1c91d607bc6626e5507e1a092359c7bd9",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/Info.plist": "a09aae9143cabe4e5b6c4248d36c71c7f6534c1be03946668658071362576ff0",
     "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
     "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
@@ -83,25 +84,25 @@
     "android-app/src/main/res/values/strings.xml": "a273e9d84075261b00b59576701222fa15fd7ea60f739da71f2fef4ac8b476dc",
     "android-app/src/main/res/xml/data_extraction_rules.xml": "ec0f1c6431c2434ac85c7933dd0fe21c430e9601ec4db70d0112557cbebf9993",
     "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "bd38845f008eef7e6ebe763c33a618c52a5cd80adab705a73f625e5281fdd514",
-    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "fb1c1ba9780f59835bae47b2ee3958f47630a5760ddffdfbc1a308bfc815dea1",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "98f16ab6d9610260ec9b985679fd7a8bc70bfba8137816b5b7cdc41056cd724d",
     "android-app/src/main/java/dev/notecore/app/NativeBrushRenderer.kt": "e696190da1627d8115a4870f9145869fdf71d3302644a1faa990d337fe8420f7",
     "android-app/src/main/java/dev/notecore/app/NoteListAdapter.kt": "48b9ba684a7980f54e49716f530c146d08fc75942c0b29c006b07e95a30a0dd1",
     "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "f7a93321b9f80a527c5e07beb0d8be932f2986ca96f9f8641c1f08e1d9f9bf86",
     "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "d3edf246ba39492dfa053ede08bb53c25421dac6187d0636507a5fe0c4b81e1b",
     "android-app/src/main/java/dev/notecore/app/InkSurfaceHost.kt": "96515e50606d5a3a5f5d742d851c2492bc6c103227c067d02b6c497ee566ad2f",
     "android-app/build.gradle.kts": "44e78f16a6a495f95e16d5841b491f311ec91a33809f79b298d6870f2383c6a0",
-    "android-app/build/outputs/apk/debug/android-app-debug.apk": "8054f2d77d1965123802df998382c4fb5df1dc7dfc3d04728c1f3c0ff9d7beb6",
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "0157c603c77fefff5c229ed1ce40b4737e563711a5005d69ded589098acaea05",
     "android-app/build/reports/lint-results-debug.xml": "ab46e3ec8f7a8e48e7af0d11d83f68a9e3b3e80612afcbcc6b6ed287aca57f75",
-    "dist/NoteCore-0.1.0-preview.apk": "8054f2d77d1965123802df998382c4fb5df1dc7dfc3d04728c1f3c0ff9d7beb6",
-    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "31966e5c3d184351fd97ed5b5236bebd6edc9af9a642d8ca1a3682216c16d3fa",
-    "reports/ios-preview-build.json": "a1a4c5eb09ae4d31cddfda89305cf1c6523d2d628ae8926e94dbc44a78acde1f",
-    "reports/preview-build.json": "e55dd3109e2395bb8b99e77d647bad7d92ec4e99824ba11a94b2e371a73ba78b",
-    "tools/check_architecture.py": "abcc309a6e5820e8fea5845a4a6867e93f0e903d8301a749b92150d85deae8a3",
-    "tools/audit_public_boundary.py": "9f31fd24a9a79420f203e09864283e65f91043072d69c2c390db6201e37c70f3"
+    "dist/NoteCore-0.1.0-preview.apk": "0157c603c77fefff5c229ed1ce40b4737e563711a5005d69ded589098acaea05",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "981c11a07040547f5a51ad871e21378b7aaebf3f178ba3770bdb057f478a5311",
+    "reports/ios-preview-build.json": "7d37ea3be20e5497bc5ba08513ff7ef8696e246dbf0400e96e6a51232b619efa",
+    "reports/preview-build.json": "81aa13f349fa92c4eea42e471e04d83990dc20b204bc55743778239630e78aba",
+    "tools/check_architecture.py": "56f48a4b5a9c874cbd0b5036f0d548fd0314eda0f808b32fe41326616f21e804",
+    "tools/audit_public_boundary.py": "4a7e876d199b657dd165dc260e956c7357a1a78ced49ed7aa4db2ad63ceea8f2"
   },
   "objc_declaration_count": 260,
-  "objc_method_count": 879,
-  "objc_property_count": 686,
+  "objc_method_count": 880,
+  "objc_property_count": 687,
   "reviewed_property_count": 8,
   "reviewed_property_channels": [
     {
@@ -332,6 +333,453 @@
       "declares_nserror": false
     }
   ],
+  "candidate_method_count": 28,
+  "candidate_methods": [
+    {
+      "objc_name": "NCPDocumentBudgetCompanion",
+      "swift_name": "validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "open(initial:sessionNonce:budget:ownerCheck:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "openRecovery(snapshot:sessionNonce:budget:ownerCheck:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentReader",
+      "swift_name": "read(text:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentReader",
+      "swift_name": "accept(root:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPreviewRecoveryCodec",
+      "swift_name": "read(text:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPApplePreviewInput",
+      "swift_name": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "edit(request:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "prepareRealBatch(phase:count:)",
+      "declares_nserror": false,
+      "nullable_return": true
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "setReadOnly(value:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "cancelStroke()",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "retryPendingStroke()",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pendingStroke()",
+      "declares_nserror": false,
+      "nullable_return": true
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "page(index:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "stroke(index:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointCount(index:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointX(index:point:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointY(index:point:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointPressure(index:point:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "capture()",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "captureRecovery()",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "snapshot()",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "retire()",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "retireAfterRecovery(snapshot:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "encode()",
+      "declares_nserror": true,
+      "nullable_return": true
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "sameContent(other:)",
+      "declares_nserror": false,
+      "nullable_return": false
+    }
+  ],
+  "candidate_property_count": 34,
+  "candidate_properties": [
+    {
+      "objc_name": "NCPDocumentBudgetCreation",
+      "swift_name": "budget",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPDocumentBudgetCreation",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentRead",
+      "swift_name": "root",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentRead",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewRecoveryRead",
+      "swift_name": "snapshot",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewRecoveryRead",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewNotebookOpen",
+      "swift_name": "notebook",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewNotebookOpen",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewNotebookOpen",
+      "swift_name": "documentReason",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewEditResult",
+      "swift_name": "accepted",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewEditResult",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewEditResult",
+      "swift_name": "rootRevision",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "disposition",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "acceptedSamples",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "activeSamples",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "admitted",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "inputReason",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewSessionFailure",
+      "swift_name": "kind",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewSessionFailure",
+      "swift_name": "documentReason",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "root",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "pending",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "version",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "retainedByteCharge",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "encodingWorkByteCharge",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "isReadOnly",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "hasActiveStroke",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "hasPendingStroke",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "lastFailure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "activeInputOperationId",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "inputReservedByteCharge",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "currentPage",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pageCount",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "strokeCount",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    }
+  ],
+  "candidate_scope": "Selected preview consumer declaration shape only: NSError parameter, return nullability and readonly/class/nullable result properties. Not full ABI type layout or semantic validation, exception safety, owner transfer, index safety, host I/O acknowledgement or frozen SDK approval.",
   "objc_declarations": [
     {
       "kind": "interface",
@@ -6976,6 +7424,13 @@
           "declares_nserror": false
         },
         {
+          "swift_name": "isReadOnly",
+          "class_property": false,
+          "nullable": false,
+          "readonly": true,
+          "declares_nserror": false
+        },
+        {
           "swift_name": "lastError",
           "class_property": false,
           "nullable": false,
@@ -7048,6 +7503,7 @@
         "selectPage(id:)",
         "selectPen(argb:width:)",
         "setPaper(width:height:paper:)",
+        "setReadOnly(value:)",
         "snapshot()",
         "stroke(index:)",
         "strokeColor(index:)",

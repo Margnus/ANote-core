@@ -40,6 +40,48 @@ PROPERTY_CHANNELS = {
     'NCPStrokeSamples': {'size': (False, False)},
 }
 
+# The selected consumer path is distinct from legacy examples above. These are structural
+# requirements, not a promise that owner callbacks, indexes or every raw value are recoverable.
+# Each method maps to (declares NSError, nullable return), including nullable NSError returns.
+CANDIDATE_METHODS = {
+    'NCPDocumentBudgetCompanion': {
+        'validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)': (False, False)},
+    'NCPPagedPreviewNotebookCompanion': {
+        'createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)': (False, False),
+        'open(initial:sessionNonce:budget:ownerCheck:)': (False, False),
+        'openRecovery(snapshot:sessionNonce:budget:ownerCheck:)': (False, False)},
+    'NCPPreviewDocumentReader': {'read(text:)': (False, False), 'accept(root:)': (False, False)},
+    'NCPPreviewRecoveryCodec': {'read(text:)': (False, False)},
+    'NCPApplePreviewInput': {'offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)': (False, False)},
+    'NCPPagedPreviewNotebook': {
+        'edit(request:)': (False, False), 'prepareRealBatch(phase:count:)': (False, True),
+        'offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)': (False, False),
+        'setReadOnly(value:)': (False, False), 'cancelStroke()': (False, False),
+        'retryPendingStroke()': (False, False), 'pendingStroke()': (False, True),
+        'page(index:)': (False, False), 'stroke(index:)': (False, False),
+        'pointCount(index:)': (False, False), 'pointX(index:point:)': (False, False),
+        'pointY(index:point:)': (False, False), 'pointPressure(index:point:)': (False, False),
+        'capture()': (False, False), 'captureRecovery()': (False, False), 'snapshot()': (False, False),
+        'retire()': (False, False), 'retireAfterRecovery(snapshot:)': (False, False)},
+    'NCPPagedPreviewSnapshot': {'encode()': (True, True), 'sameContent(other:)': (False, False)},
+}
+CANDIDATE_PROPERTIES = {
+    'NCPDocumentBudgetCreation': {'budget': (False, True), 'failure': (False, True)},
+    'NCPPreviewDocumentRead': {'root': (False, True), 'failure': (False, True)},
+    'NCPPreviewRecoveryRead': {'snapshot': (False, True), 'failure': (False, True)},
+    'NCPPreviewNotebookOpen': {'notebook': (False, True), 'failure': (False, True), 'documentReason': (False, True)},
+    'NCPPreviewEditResult': {'accepted': (False, False), 'failure': (False, True), 'rootRevision': (False, False)},
+    'NCPPreviewInputResult': {'disposition': (False, False), 'acceptedSamples': (False, False),
+        'activeSamples': (False, False), 'admitted': (False, False), 'failure': (False, True), 'inputReason': (False, True)},
+    'NCPPreviewSessionFailure': {'kind': (False, False), 'documentReason': (False, True)},
+    'NCPPagedPreviewSnapshot': {'root': (False, False), 'pending': (False, True), 'version': (False, False),
+        'retainedByteCharge': (False, False), 'encodingWorkByteCharge': (False, False)},
+    'NCPPagedPreviewNotebook': {'isReadOnly': (False, False), 'hasActiveStroke': (False, False),
+        'hasPendingStroke': (False, False), 'lastFailure': (False, True), 'activeInputOperationId': (False, True),
+        'inputReservedByteCharge': (False, False), 'currentPage': (False, False), 'pageCount': (False, False),
+        'strokeCount': (False, False)},
+}
+
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -64,7 +106,9 @@ def inspect_header(text):
                 continue
             match = re.search(r'swift_name\("([^"]+)"\)', line)
             if match:
-                methods.append({'swift_name': match.group(1), 'declares_nserror': 'NSError * _Nullable *' in line})
+                return_type = re.match(r'^[-+] \(([^)]+)\)', line).group(1)
+                methods.append({'swift_name': match.group(1), 'declares_nserror': 'NSError * _Nullable *' in line,
+                                'nullable_return': '_Nullable' in return_type})
         result.append({'kind': kind, 'objc_name': name, 'methods': methods, 'properties': properties})
     assert len({item['objc_name'] for item in result}) == len(result), 'Duplicate ObjC declaration'
     assert result, 'Empty generated header'
@@ -83,17 +127,32 @@ def check_channels(declarations):
     return checked
 
 
-def check_property_channels(declarations):
+def check_property_channels(declarations, expected=PROPERTY_CHANNELS):
     by_name = {item['objc_name']: item for item in declarations}
     checked = []
-    for name, members in PROPERTY_CHANNELS.items():
+    for name, members in expected.items():
         assert name in by_name, ('Missing property type', name)
         for member, (class_property, nullable) in members.items():
             matches = [p for p in by_name[name]['properties'] if p['swift_name'] == member]
             assert len(matches) == 1, ('Missing/duplicate reviewed property', name, member)
             value = matches[0]
-            assert value['class_property'] == class_property and value['nullable'] == nullable
-            assert value['readonly'] and not value['declares_nserror']
+            assert value['class_property'] == class_property and value['nullable'] == nullable, ('Changed reviewed property shape', name, member)
+            assert value['readonly'] and not value['declares_nserror'], ('Changed reviewed property qualifiers', name, member)
+            checked.append({'objc_name': name, **value})
+    return checked
+
+
+def check_candidate_channels(declarations):
+    by_name = {item['objc_name']: item for item in declarations}
+    checked = []
+    for name, members in CANDIDATE_METHODS.items():
+        assert name in by_name, ('Missing candidate type', name)
+        for member, (nserror, nullable) in members.items():
+            values = [m for m in by_name[name]['methods'] if m['swift_name'] == member]
+            assert len(values) == 1, ('Missing/duplicate candidate method', name, member)
+            value = values[0]
+            assert value['declares_nserror'] == nserror, ('Changed candidate NSError channel', name, member)
+            assert value['nullable_return'] == nullable, ('Changed candidate nullable return', name, member)
             checked.append({'objc_name': name, **value})
     return checked
 
@@ -131,6 +190,8 @@ def main():
     declarations = inspect_header(header)
     checked = check_channels(declarations)
     properties = check_property_channels(declarations)
+    candidate_methods = check_candidate_channels(declarations)
+    candidate_properties = check_property_channels(declarations, CANDIDATE_PROPERTIES)
     for name in (HEADER, 'reports/ios-preview-build.json', 'reports/preview-build.json', 'tools/check_architecture.py', 'tools/audit_public_boundary.py'):
         bindings[name] = sha(ROOT/name)
     report = {
@@ -141,6 +202,9 @@ def main():
         'objc_property_count': sum(len(item['properties']) for item in declarations),
         'reviewed_property_count': len(properties), 'reviewed_property_channels': properties,
         'reviewed_method_count': len(checked), 'reviewed_declaration_channels': checked,
+        'candidate_method_count': len(candidate_methods), 'candidate_methods': candidate_methods,
+        'candidate_property_count': len(candidate_properties), 'candidate_properties': candidate_properties,
+        'candidate_scope': 'Selected preview consumer declaration shape only: NSError parameter, return nullability and readonly/class/nullable result properties. Not full ABI type layout or semantic validation, exception safety, owner transfer, index safety, host I/O acknowledgement or frozen SDK approval.',
         'objc_declarations': [{'kind': item['kind'], 'objc_name': item['objc_name'],
             'properties': item['properties'],
             'methods': [method['swift_name'] for method in item['methods']],
@@ -155,7 +219,7 @@ def main():
         'new_native_execution_performed': False, 'physical_device_verified': False, 'c1_gate_complete': False,
     }
     (ROOT/'reports/public-boundary-inventory.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
-    print(json.dumps({k: report[k] for k in ('status', 'objc_declaration_count', 'objc_method_count', 'objc_property_count', 'reviewed_property_count', 'reviewed_method_count', 'c1_gate_complete')}))
+    print(json.dumps({k: report[k] for k in ('status', 'objc_declaration_count', 'objc_method_count', 'objc_property_count', 'reviewed_property_count', 'reviewed_method_count', 'candidate_method_count', 'candidate_property_count', 'c1_gate_complete')}))
 
 
 if __name__ == '__main__': main()
