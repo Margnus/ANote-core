@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.notecore.document.DocumentOwnerThreadTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T14:08:25.275Z" hostname="lixiaofandeMac-mini.local" time="0.093">
+  <properties/>
+  <testcase name="pendingOwnerThreadHandsOffOnlyAfterExactHostFileWriteAndNewOwnerCommitsOnce[jvm]" classname="dev.notecore.document.DocumentOwnerThreadTest" time="0.021"/>
+  <testcase name="rejectedConstructionDoesNotBuildDenseIdentityCollections[jvm]" classname="dev.notecore.document.DocumentOwnerThreadTest" time="0.059"/>
+  <testcase name="pagedSessionRejectsActualWorkerMutationAndSnapshotCalls[jvm]" classname="dev.notecore.document.DocumentOwnerThreadTest" time="0.006"/>
+  <testcase name="historyTraversalRemainsOnActualOwnerThreadAndForeignAttemptKeepsStacks[jvm]" classname="dev.notecore.document.DocumentOwnerThreadTest" time="0.001"/>
+  <testcase name="realWorkerCannotCommitOrInspectDocumentAndOwnerCanContinueAfterFailedForeignCall[jvm]" classname="dev.notecore.document.DocumentOwnerThreadTest" time="0.001"/>
+  <testcase name="retiredOwnerThreadTransfersOnlyImmutableRootAndNewOwnerContinuesCanonicalContent[jvm]" classname="dev.notecore.document.DocumentOwnerThreadTest" time="0.004"/>
+  <system-out><![CDATA[authority-rejected-construction ownerDenied=true allocatedBytes=160
+authority-rejected-construction ownerDenied=false allocatedBytes=1560
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

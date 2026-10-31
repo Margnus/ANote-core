@@ -1,0 +1,82 @@
+{
+  "scope_id": "c6a00e75-cbf7-4bc4-8f81-7728ef93b467",
+  "killed_processes": [
+    {
+      "pid": 4240,
+      "scope": "c6a00e75-cbf7-4bc4-8f81-7728ef93b467",
+      "document_sha256": "8e8707a26db0da913fb61575938135b86bc8bd9a03f3414905ef5657e34f6372",
+      "revision": 1,
+      "stroke_count": 0,
+      "pending": true,
+      "owner_not_retired": true,
+      "worker_not_stopped": true,
+      "instrumentation_command_returncode": 0,
+      "process_absent_after_force_stop": true,
+      "file_unchanged_after_kill": true,
+      "owner_confirmation_received": true
+    },
+    {
+      "pid": 4399,
+      "scope": "c6a00e75-cbf7-4bc4-8f81-7728ef93b467",
+      "document_sha256": "f1ff4d4d49cabbda51a5ab39316b31c7c71c1f5f7eb505ba0b8d37af90f677ea",
+      "revision": 2,
+      "stroke_count": 1,
+      "pending": false,
+      "owner_not_retired": true,
+      "worker_not_stopped": true,
+      "instrumentation_command_returncode": 0,
+      "process_absent_after_force_stop": true,
+      "file_unchanged_after_kill": true,
+      "owner_confirmation_received": true
+    }
+  ],
+  "final_reopen": {
+    "pid": 4513,
+    "scope": "c6a00e75-cbf7-4bc4-8f81-7728ef93b467",
+    "canonical_sha256": "f1ff4d4d49cabbda51a5ab39316b31c7c71c1f5f7eb505ba0b8d37af90f677ea",
+    "stroke_count": 1,
+    "point_count": 3,
+    "revision": 2,
+    "pending": false,
+    "checkpoint_worker_write_verified": true,
+    "repeated_commit_did_not_duplicate": true,
+    "unconfirmed_io_kill_verified": false,
+    "power_loss_verified": false
+  },
+  "ordinary_ui_verified": false,
+  "native_pool_or_unsignaled_receipt_verified": false,
+  "scope": "Confirmed-write subcase: original isolated Store/worker wrote and confirmed a pending checkpoint before full process force-stop. New PID reopened, committed once and confirmed canonical replacement before a second force-stop. Third PID reopened exact canonical bytes. Synthetic input/owner fault; no manually seeded checkpoint, partial-write kill, power loss or ordinary UI claim. The separate undelivered_completion subcase records visible worker bytes before owner delivery.",
+  "undelivered_completion": {
+    "killed_process": {
+      "pid": 4571,
+      "scope": "c6a00e75-cbf7-4bc4-8f81-7728ef93b467",
+      "document_sha256": "146c4cebf0976d59440831119610d02c6b562a577b7ffd3a20221556bb0f03cd",
+      "previous_document_sha256": "f1ff4d4d49cabbda51a5ab39316b31c7c71c1f5f7eb505ba0b8d37af90f677ea",
+      "revision": 3,
+      "stroke_count": 2,
+      "pending": false,
+      "save_callback_count": 0,
+      "ledger_in_flight": true,
+      "owner_not_retired": true,
+      "worker_not_stopped": true,
+      "owner_callback_blocked": true,
+      "instrumentation_command_returncode": 0,
+      "process_absent_after_force_stop": true,
+      "file_unchanged_after_kill": true,
+      "owner_confirmation_received": false
+    },
+    "reopen": {
+      "pid": 4750,
+      "scope": "c6a00e75-cbf7-4bc4-8f81-7728ef93b467",
+      "canonical_sha256": "146c4cebf0976d59440831119610d02c6b562a577b7ffd3a20221556bb0f03cd",
+      "revision": 3,
+      "stroke_count": 2,
+      "point_count": 5,
+      "pending": false,
+      "owner_delivery_absent_before_kill": true,
+      "partial_write_kill_verified": false,
+      "power_loss_verified": false
+    },
+    "scope": "Original worker new canonical bytes were visible while the main owner was blocked inside its save action with zero callbacks and an in-flight ledger. Full process force-stop before owner delivery; new PID reopened the exact two-stroke canonical root. Not a partial-write or power-loss test."
+  }
+}

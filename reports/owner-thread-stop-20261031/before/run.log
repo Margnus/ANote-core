@@ -1,0 +1,6 @@
+CASE withTasks=false stopped=false computed=0 delivered=0 retained=true foreignOwnerRefused=true
+CASE withTasks=true stopped=false computed=2 delivered=0 retained=true foreignOwnerRefused=true
+CASE liveOwner=true wakeFailure=true idleRetained=true normalShutdown=true
+Exception in thread "main" java.lang.IllegalStateException: Terminated creator left original workers alive
+	at dev.notecore.probes.OwnerThreadStopKt.main(OwnerThreadStop.kt:71)
+	at dev.notecore.probes.OwnerThreadStopKt.main(OwnerThreadStop.kt)

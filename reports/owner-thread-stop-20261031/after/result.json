@@ -1,0 +1,46 @@
+{
+  "phase": "after",
+  "status": "passed",
+  "child_pid": 4010,
+  "child_returncode": 0,
+  "parent_forced_process_cleanup": false,
+  "source_at_execution_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "fe45ebf45c6b2c0138dfaaf44aeddf293a40354af75d36394b73feee6f0502d5",
+    "tools/probes/OwnerThreadStop.kt": "24e59071ef4503a103ec1b0950fb6abf4ec2976c0732bb6ffe8f2ef8928392dc",
+    "tools/verify_owner_thread_stop.py": "8d763bba37bc65444c157f7a591551dd25dc08eeb1138701259221c2268ce9bf"
+  },
+  "compiler_sha256": {
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar": "9588fa696ac5507af764fd5660df6894185e12704ec1bc3f5cb772af4987f295",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar": "2b1519b427b514d1536c1b425674b03fe914af637924028e9959c6625442df51",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar": "3277ac102ae17aad10a55abec75ff5696c8d109790396434b496e75087854203",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar": "91c0673c22e44b054ae0314d323860ebe1f3aff3f0ebc74fff82c4733dde09be",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar": "9860906a1937490bf5f3b06d2f0e10ef451e65b95b269f22daf68a3d1f5065c5",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar": "ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478"
+  },
+  "compile_argv": [
+    "/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/java",
+    "-cp",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar",
+    "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
+    "-no-stdlib",
+    "-no-reflect",
+    "-jvm-target",
+    "17",
+    "-classpath",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar",
+    "-d",
+    "/Users/lixiaofan/StudioProjects/notecore/reports/owner-thread-stop-20261031/after/probe.jar",
+    "/Users/lixiaofan/StudioProjects/notecore/canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt",
+    "/Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt",
+    "/Users/lixiaofan/StudioProjects/notecore/tools/probes/OwnerThreadStop.kt"
+  ],
+  "evidence_sha256": {
+    "reports/owner-thread-stop-20261031/after/run.log": "3f50b64c2a6a60a379537ce2ba7e2b821b1abc51e842b43a8a56a33a1b755978",
+    "reports/owner-thread-stop-20261031/after/compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/owner-thread-stop-20261031/after/probe.jar": "2fcc2375353c1b7a85d0d6b891166f412a5c8111c5a997900b98decad5d6336c",
+    "reports/owner-thread-stop-20261031/after/executed-executor.kt.txt": "fe45ebf45c6b2c0138dfaaf44aeddf293a40354af75d36394b73feee6f0502d5"
+  },
+  "scope": "Real JVM creator termination: empty idle executor and running+queued original work. Foreign owner still refused; exact input/result/charge retained. Live idle owner with failed wake stays accepting. No takeover, ACK after death, native resource release, hung running job cancellation or physical-platform proof."
+}
