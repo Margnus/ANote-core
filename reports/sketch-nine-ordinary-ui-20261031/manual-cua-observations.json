@@ -1,0 +1,55 @@
+{
+  "kind": "manual_transcription_of_actual_CUA_AX_and_inline_screenshots",
+  "artifact_sha256": "764db61c87aea762bb80167379b017d6f0926758fe25c9d2aac5b5c83affe34d",
+  "bundle": "dev.notecore.sample.sketch.ios",
+  "device": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+  "gui_pid": 6306,
+  "steps": [
+    {
+      "action": "Cold launch of already installed nine-test ordinary package",
+      "AX": "未保存 · 0笔"
+    },
+    {
+      "action": "CUA drag [2170,930]→[2390,1030] blue",
+      "AX": "未保存 · 1笔"
+    },
+    {
+      "action": "Click 红笔, drag [2170,1100]→[2390,1200]",
+      "AX": "未保存 · 2笔"
+    },
+    {
+      "action": "Click 只读/编辑",
+      "AX": "只读 · 2笔"
+    },
+    {
+      "action": "Drag [2180,1260]→[2390,1350]",
+      "AX": "unchanged 只读 · 2笔"
+    },
+    {
+      "action": "Click 撤销 in read only",
+      "AX": "操作未接受，当前笔迹保留"
+    },
+    {
+      "action": "Exit read only",
+      "AX": "未保存 · 2笔"
+    },
+    {
+      "action": "Click 撤销",
+      "AX": "未保存 · 1笔",
+      "inline_screenshot": "Blue remains and red absent"
+    },
+    {
+      "action": "Red remains selected; drag [2170,1100]→[2390,1200]",
+      "AX": "未保存 · 2笔"
+    },
+    {
+      "action": "Click 取消未完成笔 without active contact",
+      "AX": "unchanged 未保存 · 2笔",
+      "inline_screenshot": "One blue and one red stroke visible"
+    }
+  ],
+  "screenshots_retained_as_files": false,
+  "screenshot_location": "Inline CUA results in this chat only",
+  "automated_UI_or_pixel_oracle": false,
+  "scope": "Selected single-window memory sketch flow only; no redo button, persistence or simultaneous-window claim. Device intentionally shut down after observations; memory sample promised no persistence."
+}
