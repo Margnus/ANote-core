@@ -24,7 +24,7 @@ final class SketchSession: ObservableObject {
     let tools: [SketchTool]
     // CGContext is borrowed only for one draw. The resource must not retain it or the view.
     let background: (CGContext, CGRect) -> Void
-    private(set) var readOnly = false
+    var readOnly: Bool { notebook.isReadOnly }
     private(set) var toolIndex = 0
     private init(_ notebook: PagedPreviewNotebook, tools: [SketchTool], background: @escaping (CGContext, CGRect) -> Void) {
         self.notebook = notebook; self.tools = tools; self.background = background
@@ -69,7 +69,7 @@ final class SketchSession: ObservableObject {
     func setReadOnly(_ value: Bool) -> SketchRefusal? {
         guard Thread.isMainThread else { return .wrongOwner }
         guard !notebook.hasActiveStroke && !notebook.hasPendingStroke else { return .activeInk }
-        readOnly = value; return nil
+        return notebook.setReadOnly(value: value) ? nil : .coreRejected
     }
     func edit(_ request: PreviewEdit) -> SketchRefusal? {
         guard Thread.isMainThread else { return .wrongOwner }

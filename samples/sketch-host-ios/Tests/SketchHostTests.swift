@@ -82,12 +82,20 @@ final class SketchHostTests: XCTestCase {
         XCTAssertEqual(host.notebook.pointCount(index: 0), 3)
         let completed = host.notebook.snapshot()
         XCTAssertNil(host.setReadOnly(true)); XCTAssertEqual(host.edit(PreviewEditUndo.shared), .readOnly)
+        XCTAssertTrue(host.notebook.isReadOnly)
+        let directUndo = host.notebook.edit(request: PreviewEditUndo.shared)
+        XCTAssertFalse(directUndo.accepted); XCTAssertEqual(directUndo.failure?.kind, .readOnly)
         if case .refused(let reason) = host.offer(.down, points: [point(50, 5)]) { XCTAssertEqual(reason, .readOnly) }
         else { XCTFail("Read-only input accepted") }
         XCTAssertTrue(host.notebook.snapshot() === completed)
         XCTAssertNil(host.setReadOnly(false)); XCTAssertNil(host.edit(PreviewEditUndo.shared))
         XCTAssertEqual(host.notebook.strokeCount, 0); XCTAssertNil(host.edit(PreviewEditRedo.shared))
         XCTAssertEqual(host.notebook.pointCount(index: 0), 3)
+        // Another same-owner consumer changes the original mode; the host must observe it.
+        XCTAssertTrue(host.notebook.setReadOnly(value: true)); XCTAssertTrue(host.readOnly)
+        XCTAssertEqual(host.selectTool(1), .readOnly)
+        XCTAssertTrue(host.notebook.setReadOnly(value: false)); XCTAssertFalse(host.readOnly)
+        XCTAssertNil(host.selectTool(1))
     }
     @MainActor func testCoalescedUIKitAndResizeReplacementKeepCanonicalSession() throws {
         let host = try session(), view = SketchCanvas(session: host)
@@ -164,6 +172,8 @@ final class SketchHostTests: XCTestCase {
         guard case .core(let closed) = host.offer(.down, points: [point(50, 5)]) else { return XCTFail("Core closed result not forwarded") }
         XCTAssertFalse(closed.admitted); XCTAssertEqual(closed.failure?.kind, .closed)
         XCTAssertTrue(host.notebook.snapshot() === committed)
+        XCTAssertEqual(host.setReadOnly(true), .coreRejected)
+        XCTAssertFalse(host.readOnly)
     }
 }
 private final class SampleTouch: UITouch {

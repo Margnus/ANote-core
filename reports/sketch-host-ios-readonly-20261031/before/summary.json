@@ -1,0 +1,54 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0",
+        "deviceName": "NoteCorePreview",
+        "modelName": "iPhone 17",
+        "osBuildNumber": "24A434",
+        "osVersion": "27.0",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 2,
+      "passedTests": 5,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "SketchHost · Built with macOS 27.0.1",
+  "expectedFailures": 0,
+  "failedTests": 2,
+  "finishTime": 1793418394.886,
+  "passedTests": 5,
+  "result": "Failed",
+  "runtimeWarnings": [],
+  "skippedTests": 0,
+  "startTime": 1793418385.181,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(SketchHost.SketchRefusal.coreRejected)\")",
+      "targetName": "SketchHostTests",
+      "testIdentifier": 4,
+      "testIdentifierString": "SketchHostTests/testExplicitCancelAndRetirementKeepCompletedInk()",
+      "testIdentifierURL": "test://com.apple.xcode/SketchHost/SketchHostTests/SketchHostTests/testExplicitCancelAndRetirementKeepCompletedInk",
+      "testName": "testExplicitCancelAndRetirementKeepCompletedInk()"
+    },
+    {
+      "failureText": "XCTAssertTrue failed",
+      "targetName": "SketchHostTests",
+      "testIdentifier": 6,
+      "testIdentifierString": "SketchHostTests/testReadOnlyInvalidToolAndRejectedBatchKeepAcceptedPrefix()",
+      "testIdentifierURL": "test://com.apple.xcode/SketchHost/SketchHostTests/SketchHostTests/testReadOnlyInvalidToolAndRejectedBatchKeepAcceptedPrefix",
+      "testName": "testReadOnlyInvalidToolAndRejectedBatchKeepAcceptedPrefix()"
+    }
+  ],
+  "title": "Test - SketchHost",
+  "topInsights": [],
+  "totalTestCount": 7
+}
