@@ -48,10 +48,19 @@ final class SketchCanvas: UIView {
     }
     override func draw(_ rect: CGRect) {
         guard let context = UIGraphicsGetCurrentContext(), scale > 0 else { return }
+        // The current path is not part of CGContext's saved graphics state.
+        let callerPath = context.path
+        context.saveGState(); context.beginPath()
+        defer {
+            context.beginPath(); context.restoreGState()
+            if let callerPath { context.addPath(callerPath) }
+        }
         context.setFillColor(UIColor.white.cgColor); context.fill(bounds)
-        context.saveGState(); context.scaleBy(x: scale, y: scale)
+        context.scaleBy(x: scale, y: scale)
         let paper = CGRect(x: 0, y: 0, width: 595, height: 842); context.clip(to: paper)
+        context.saveGState(); context.beginPath()
         session.background(context, paper)
+        context.beginPath(); context.restoreGState()
         let note = session.notebook
         if cachedRevision != note.changeVersion {
             cached = (0..<Int(note.strokeCount)).map { i in
@@ -73,7 +82,7 @@ final class SketchCanvas: UIView {
             context.addPath(active.cgPath); let tool = session.tools[session.toolIndex]
             context.setStrokeColor(color(tool.argb)); context.setLineWidth(tool.width); context.setLineCap(.round); context.setLineJoin(.round); context.strokePath()
         }
-        context.restoreGState(); accessibilityValue = "\(note.strokeCount)笔"
+        accessibilityValue = "\(note.strokeCount)笔"
     }
     private func points(_ touch: UITouch, _ event: UIEvent?) -> [SketchPoint]? {
         guard scale > 0 else { return nil }

@@ -182,6 +182,40 @@ final class SketchHostTests: XCTestCase {
         XCTAssertEqual(draws, 1); XCTAssertEqual(Array(rgba[0..<4]), [0,255,0,255])
         XCTAssertEqual(host.notebook.totalStrokeCount, 0)
     }
+    @MainActor func testBackgroundMutationKeepsInkVisibleAndRestoresBorrowedCaller() throws {
+        let host = try session { context, paper in
+            context.setFillColor(UIColor.white.cgColor); context.fill(paper)
+            context.move(to: CGPoint(x: 200, y: 200)); context.addLine(to: CGPoint(x: 240, y: 200))
+            context.translateBy(x: 1000, y: 1000)
+            context.clip(to: CGRect(x: 0, y: 0, width: 1, height: 1))
+        }
+        XCTAssertTrue(host.offer(.down, points: [point(100, 1)]).accepted)
+        XCTAssertTrue(host.offer(.up, points: [point(100, 2)]).accepted)
+        let root = host.notebook.snapshot(), view = SketchCanvas(session: host)
+        view.frame = CGRect(x: 0, y: 0, width: 595, height: 842); view.layoutIfNeeded()
+        var rgba = [UInt8](repeating: 0, count: 595 * 842 * 4)
+        try rgba.withUnsafeMutableBytes { bytes in
+            let context = try XCTUnwrap(CGContext(data: bytes.baseAddress, width: 595, height: 842,
+                bitsPerComponent: 8, bytesPerRow: 595 * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+            context.translateBy(x: 0, y: 842); context.scaleBy(x: 1, y: -1) // UIKit's caller coordinates.
+            context.clip(to: CGRect(x: 0, y: 0, width: 500, height: 700)); context.setLineWidth(9)
+            context.move(to: CGPoint(x: 3, y: 4)); context.addLine(to: CGPoint(x: 30, y: 40))
+            let transform = context.ctm, clip = context.boundingBoxOfClipPath
+            let path = try XCTUnwrap(context.path)
+            UIGraphicsPushContext(context); view.draw(view.bounds); UIGraphicsPopContext()
+            XCTAssertEqual(context.ctm, transform); XCTAssertEqual(context.boundingBoxOfClipPath, clip)
+            XCTAssertEqual(context.path?.boundingBox, path.boundingBox)
+            XCTAssertEqual(context.path?.currentPoint, path.currentPoint)
+        }
+        func pixel(_ x: Int, _ y: Int) -> [UInt8] {
+            let offset = (y * 595 + x) * 4; return Array(rgba[offset..<offset + 4])
+        }
+        XCTAssertEqual(pixel(100, 100), [0x25, 0x63, 0xeb, 255])
+        XCTAssertEqual(pixel(220, 200), [255, 255, 255, 255]) // Background's leftover path was not stroked.
+        XCTAssertEqual(pixel(15, 20), [255, 255, 255, 255]) // Caller's path was not stroked as ink.
+        XCTAssertTrue(host.notebook.snapshot() === root); XCTAssertEqual(host.notebook.pointCount(index: 0), 2)
+    }
     @MainActor func testForeignOwnerRefusesBeforeCoreAndImmutableCheckpointEncodesOffOwner() async throws {
         let host = try session()
         XCTAssertTrue(host.offer(.down, points: [point(10, 1)]).accepted)

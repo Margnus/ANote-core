@@ -17,6 +17,7 @@ DEVICE = '7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
 BUNDLE = 'dev.notecore.sample.sketch.ios'
 FRAMEWORK = 'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework'
 EXPECTED = {
+    'testBackgroundMutationKeepsInkVisibleAndRestoresBorrowedCaller()',
     'testSiblingCanvasLifecycleAndLateCallbacksCannotTakeAnotherInput()',
     'testEveryToolAndUnsupportedEditRejectBeforeMutatingCore()',
     'testValidatedCreationAndHostInjectedToolsUseOriginalNotebook()',
