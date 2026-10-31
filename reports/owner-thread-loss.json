@@ -1,0 +1,79 @@
+{
+  "status": "observed-unsupported-owner-loss",
+  "observations": {
+    "owner_terminated": true,
+    "main_terminated": true,
+    "worker_alive": true,
+    "worker_daemon": false,
+    "entries": 2,
+    "charged_bytes": 16,
+    "retained_input_result_identity": true,
+    "computations": 2,
+    "deliveries": 0,
+    "survivor_calls_rejected": 5,
+    "production_state_mutated_by_probe": false
+  },
+  "child_pid": 3847,
+  "child_alive_after_owner_and_main_exit": true,
+  "cleanup": "Parent terminated the entire isolated child process, not a production ACK/release.",
+  "child_returncode": 143,
+  "compile_argv": [
+    "/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/java",
+    "-cp",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar",
+    "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
+    "-no-stdlib",
+    "-no-reflect",
+    "-jvm-target",
+    "17",
+    "-classpath",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar",
+    "-d",
+    "/Users/lixiaofan/StudioProjects/notecore/reports/owner-thread-loss-20261031/probe.jar",
+    "/Users/lixiaofan/StudioProjects/notecore/canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt",
+    "/Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt",
+    "/Users/lixiaofan/StudioProjects/notecore/tools/probes/OwnerThreadLoss.kt"
+  ],
+  "child_argv": [
+    "/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/java",
+    "-cp",
+    "/Users/lixiaofan/StudioProjects/notecore/reports/owner-thread-loss-20261031/probe.jar:/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar",
+    "dev.notecore.probes.OwnerThreadLossKt",
+    "/Users/lixiaofan/StudioProjects/notecore/output/owner-thread-loss-20261031/observation.json"
+  ],
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "7130efcd58b62f36d24d17816da579f39d26d8b45c9e28d28ffad523778a310c",
+    "tools/probes/OwnerThreadLoss.kt": "13b01d398b44fa3bf2c9af611f90ac45be64f521eead5daecc426e71367cfdd5",
+    "tools/verify_owner_thread_loss.py": "448b05643b2c0b3fdbcf27e28f2e49fd20504a78470a9581cf77c7efab23bb85"
+  },
+  "compiler_sha256": {
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar": "9588fa696ac5507af764fd5660df6894185e12704ec1bc3f5cb772af4987f295",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar": "2b1519b427b514d1536c1b425674b03fe914af637924028e9959c6625442df51",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar": "3277ac102ae17aad10a55abec75ff5696c8d109790396434b496e75087854203",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar": "91c0673c22e44b054ae0314d323860ebe1f3aff3f0ebc74fff82c4733dde09be",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar": "9860906a1937490bf5f3b06d2f0e10ef451e65b95b269f22daf68a3d1f5065c5",
+    "/Users/lixiaofan/StudioProjects/notecore/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar": "ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478"
+  },
+  "java_version": "openjdk version \"17.0.14\" 2025-01-21\nOpenJDK Runtime Environment JBR-17.0.14+1-1367.22-nomod (build 17.0.14+1-b1367.22)\nOpenJDK 64-Bit Server VM JBR-17.0.14+1-1367.22-nomod (build 17.0.14+1-b1367.22, mixed mode, sharing)\n",
+  "scope": "Original JVM executor compiled unchanged. Real creator thread and main thread terminated; two accepted immutable inputs/results retained, surviving-thread methods refused, original non-daemon worker alive. Read-only private-field reflection is diagnostic, not a supported recovery port. No Android main-thread death, Swift queue loss, native resource, persisted recovery, takeover implementation or C1 approval.",
+  "evidence_sha256": {
+    "reports/owner-thread-loss-20261031/architecture.json": "3a5321a7e3d2038785f2f5f3d517645059628c38a16e2ca9569a6aff637c80c2",
+    "reports/owner-thread-loss-20261031/child.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/owner-thread-loss-20261031/child.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/owner-thread-loss-20261031/compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/owner-thread-loss-20261031/compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/owner-thread-loss-20261031/observation.json": "578f83e4d15013fd281e6155bfb5327f07fd432b46db8d001003efc56fe9ce6a",
+    "reports/owner-thread-loss-20261031/portability.json": "5cd247fb840ff56d34f3a71f5a10b253505c9f53ca68221a58257183eeb92737",
+    "reports/owner-thread-loss-20261031/probe.jar": "417bc5979688e234b84563722ae5e0f7c69d60634b037659f3c5694306024aaa"
+  },
+  "app_lifetime_source_review": {
+    "source_sha256": {
+      "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "98f16ab6d9610260ec9b985679fd7a8bc70bfba8137816b5b7cdc41056cd724d",
+      "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "f2b8d624959431a0c105ee411d8ede6a762384acbb942d8d4b81b34534324455",
+      "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "f928bdb2cbac30bb898a05edf7e013735b629fa50ba12bcc03a9665d88721e85"
+    },
+    "scope": "Source inspection only. Android Store construction/get require main owner and singleton holds service. Apple Model initializes ownerKeepAlive=self, clears it at explicit retirement, and main-queue progress uses weak Model. No runtime Android main-thread termination or Swift queue destruction proved by the JVM child."
+  }
+}
