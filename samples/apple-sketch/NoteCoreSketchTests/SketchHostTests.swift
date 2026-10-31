@@ -72,13 +72,30 @@ final class SketchHostTests: XCTestCase {
             let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 595, height: 842,
                 bitsPerComponent: 8, bytesPerRow: 595 * 4, space: CGColorSpaceCreateDeviceRGB(),
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            // UIView.draw receives a top-down UIKit context. A raw bitmap context is
+            // bottom-up: establish the caller transform before sampling row y=100.
+            context.translateBy(x: 0, y: 842); context.scaleBy(x: 1, y: -1)
             UIGraphicsPushContext(context); canvas.draw(canvas.bounds); UIGraphicsPopContext()
         }
         let offset = (100 * 595 + 100) * 4
+        var colored = 0, minX = 595, minY = 842, maxX = -1, maxY = -1
+        for y in 0..<842 { for x in 0..<595 {
+            let start = (y * 595 + x) * 4
+            if Array(bytes[start..<start + 4]) == [0x12, 0x56, 0x34, 255] {
+                colored += 1; minX = min(minX, x); minY = min(minY, y); maxX = max(maxX, x); maxY = max(maxY, y)
+            }
+        } }
+        let trace: [String: Any] = ["center_rgba": Array(bytes[offset..<offset + 4]), "colored_count": colored,
+            "colored_bounds": [minX, minY, maxX, maxY], "stroke_count": host.notebook.strokeCount,
+            "point_count": host.notebook.pointCount(index: 0), "point_x": host.notebook.pointX(index: 0, point: 0),
+            "point_y": host.notebook.pointY(index: 0, point: 0), "width": host.notebook.strokeWidth(index: 0),
+            "bounds": [canvas.bounds.width, canvas.bounds.height]]
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: trace, options: [.sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "pixel-coordinate-and-background-isolation"; attachment.lifetime = .keepAlways; add(attachment)
         XCTAssertEqual(Array(bytes[offset..<offset + 4]), [0x12, 0x56, 0x34, 255])
     }
 
-    @MainActor func testResizeAndDetachCancelUnfinishedInputWithoutChangingRoot() {
+    @MainActor func testResizeAndDetachCancelUnfinishedInputWithoutChangingRoot() throws {
         let host = session(), canvas = SketchCanvas(session: host), note = host.notebook
         canvas.frame = CGRect(x: 0, y: 0, width: 595, height: 842); canvas.layoutIfNeeded()
         let root = note.snapshot()
@@ -95,5 +112,20 @@ final class SketchHostTests: XCTestCase {
         canvas.removeFromSuperview()
         XCTAssertFalse(note.hasActiveStroke); XCTAssertEqual(note.inputReservedByteCharge, 0)
         XCTAssertTrue(note.snapshot() === root)
+
+        // Exercise the actual App-host Scene delegate with its original controller/Notebook.
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let delegate = try XCTUnwrap(scene.delegate as? SketchSceneDelegate)
+        let sceneController = try XCTUnwrap(delegate.window?.rootViewController as? SketchController)
+        let owned = sceneController.session.notebook, committed = owned.snapshot()
+        XCTAssertTrue(sceneController.canvas.offer(phase: .down, xs: [50], ys: [60], pressures: [0.5], times: [1]).admitted)
+        XCTAssertTrue(owned.hasActiveStroke); XCTAssertGreaterThan(owned.inputReservedByteCharge, 0)
+        delegate.sceneWillResignActive(scene)
+        XCTAssertFalse(owned.hasActiveStroke); XCTAssertEqual(owned.inputReservedByteCharge, 0)
+        XCTAssertTrue(owned.snapshot() === committed)
+        XCTAssertTrue(sceneController.canvas.offer(phase: .down, xs: [70], ys: [80], pressures: [0.5], times: [2]).admitted)
+        delegate.sceneDidDisconnect(scene)
+        XCTAssertFalse(owned.hasActiveStroke); XCTAssertEqual(owned.inputReservedByteCharge, 0)
+        XCTAssertTrue(owned.snapshot() === committed)
     }
 }

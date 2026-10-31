@@ -1,0 +1,35 @@
+Writing result bundle at path:
+	/Users/lixiaofan/StudioProjects/notecore/build/apple-sketch-local-20261030/before.xcresult
+
+error: the following command failed with exit code 0 but produced no further output
+SwiftCompile normal arm64 /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:140:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+138 |     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+139 |         guard !blocked, let active, touches.contains(active) else { return }
+140 |         ingest(active, event: event, phase: .move)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+141 |     }
+142 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+
+/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:144:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+142 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+143 |         guard !blocked, let active, touches.contains(active) else { return }
+144 |         ingest(active, event: event, phase: .up)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+145 |     }
+146 |     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelUnfinished() }
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+2026-10-30 22:46:24.520 xcodebuild[25487:195965] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:46:30.795 xcodebuild[25487:195965] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:46:30.796 xcodebuild[25487:195965] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:46:30.798 xcodebuild[25487:195965] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:46:56.048 xcodebuild[25487:195965] [MT] IDETestOperationsObserverDebug: 31.684 elapsed -- Testing started completed.
+2026-10-30 22:46:56.049 xcodebuild[25487:195965] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-30 22:46:56.049 xcodebuild[25487:195965] [MT] IDETestOperationsObserverDebug: 31.684 sec, +31.684 sec -- end
+Testing failed:
+	NoteCoreSketch (25646) encountered an error (Early unexpected exit, operation never finished bootstrapping - no restart will be attempted. (Underlying Error: The test runner crashed before establishing connection: NoteCoreSketch))
+
+** TEST FAILED **
+
+Testing started

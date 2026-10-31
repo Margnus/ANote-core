@@ -1,0 +1,51 @@
+{
+  "origin": "Manual transcription of actual CUA Device Hub actions and returned AX/screenshot observations on 2026-10-30; screenshots appeared inline and are not retained as repository files.",
+  "bundle": "dev.notecore.sample.sketch.ios",
+  "ordinary_pid_at_observation": 26462,
+  "ordinary_payload_binding": "ordinary-launch-before-scene-callbacks.json",
+  "automated_event_or_pixel_oracle": false,
+  "observations": [
+    {
+      "action": "Open actual ordinary sample after verified noXCTest install",
+      "result": "内存草图 · 未保存，退出进程后内容消失; 0 笔 · 蓝笔"
+    },
+    {
+      "action": "CUA drag [2170,900] to [2380,980] inside observed canvas",
+      "result": "1 笔 · 蓝笔"
+    },
+    {
+      "action": "Click current AX red-tool button",
+      "result": "1 笔 · 红笔"
+    },
+    {
+      "action": "CUA drag [2170,1080] to [2380,1160]",
+      "result": "2 笔 · 红笔"
+    },
+    {
+      "action": "Click current AX read-only button",
+      "result": "2 笔 · 只读"
+    },
+    {
+      "action": "CUA drag [2180,1240] to [2390,1310]",
+      "result": "AX unchanged: 2 笔 · 只读"
+    },
+    {
+      "action": "Click read-only button to exit mode",
+      "result": "2 笔 · 红笔"
+    },
+    {
+      "action": "Click Undo",
+      "result": "1 笔 · 红笔"
+    },
+    {
+      "action": "Click Redo; inspect returned AX and screenshot",
+      "result": "2 笔 · 红笔; one blue and one red stroke visibly present, no third stroke"
+    }
+  ],
+  "final_state": "2 笔 · 红笔",
+  "limitations": [
+    "Single simulated pointer only; no Pencil, multitouch, rotation, real latency or physical heap claim.",
+    "Memory-only sample; no save or cross-process content persistence claimed."
+  ],
+  "artifact_scope": "Scene connection and pixel-fixture repair ordinary bundle, before explicit sceneWillResignActive/sceneDidDisconnect callbacks were added. Do not inherit these GUI results to the later callback build."
+}

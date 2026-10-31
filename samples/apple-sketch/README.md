@@ -16,3 +16,9 @@ xcodebuild -project samples/apple-sketch/NoteCoreSketch.xcodeproj -scheme NoteCo
 UIKit 合并真实点整批通过原 ApplePreviewInput；不重复追加主触点或消费预测。准入拒绝保持已有前缀，并阻止后续终点提交部分笔，用户可明确取消未完成笔；已完成 pending 只通过原重试入口处理。尺寸、窗口移除、前后台责任调用原取消入口，不能取消已完成 pending。当前为单接触内存样例，无缩放/多指/Pencil 全矩阵或生产渲染成本承诺。
 
 独立 CI `.github/workflows/apple-sketch.yml` 在全新托管 Mac 和唯一 Simulator 构建当前 framework/宿主，执行 5 项 App-host 检查和 1 条普通 UI 链，保留原日志、测试树、截图、源码与二进制指纹。结果以具体运行的报告为准；写入工程或测试代码本身不计编译/运行通过。真机、完整资源生命周期/heap、稳定 SDK 与整体 C1 保持待验。
+
+2026-10-30/31实际修复见[本地分阶段报告](../../reports/apple-sketch-local.json)。旧iOS18.5诊断CI41035025084仍为4通过/1失败：像素用例在原始CGContext未建立UIKit向下坐标，读到白色行；本地实际附件显示正确颜色位于y737…746。只为测试调用者设置UIKit变换后，严格中心RGBA断言保持，目标色88像素移至y95…104；SketchCanvas渲染实现未改。
+
+本地iOS27另实际暴露无Scene生命周期导致的启动trap。当前使用生成的Scene manifest、UIWindowScene/Scene delegate；Scene失活和断开均走原cancelUnfinished，不把已完成pending作为取消释放。原生命周期用例沿实际App-host Scene delegate核对未完成笔取消、输入预留归零、已提交root保持；最终5项宿主全部通过，无跳过。此处直接调用实际delegate回调，不冒充OS前后台事件或物理触笔投递验证。
+
+Scene连接修复后的早期普通包经CUA真实绘制蓝/红两笔、只读拒绝第三笔、撤销1笔/重做2笔，截图中两色可见。新增Scene取消回调后的最终包另有完整普通payload/noXCTest和启动核对；不继承早期包的整条GUI观察。旧CI失败与本地5项、另一[sketch-host-ios](../sketch-host-ios/README.md)的7项证据互不替代；两套样例使用同一bundle ID，在设备上选择安装其中一个，不能称同时并存的消费者。原Preview16文件与完整普通包保持；跨日中断后模拟器已关机，恢复原磁盘并启动新PID，不宣称原进程连续。

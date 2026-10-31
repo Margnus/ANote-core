@@ -1,0 +1,33 @@
+Writing result bundle at path:
+	/Users/lixiaofan/StudioProjects/notecore/build/apple-sketch-local-20261030/scene.xcresult
+
+/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:140:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+138 |     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+139 |         guard !blocked, let active, touches.contains(active) else { return }
+140 |         ingest(active, event: event, phase: .move)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+141 |     }
+142 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+
+/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:144:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+142 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+143 |         guard !blocked, let active, touches.contains(active) else { return }
+144 |         ingest(active, event: event, phase: .up)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+145 |     }
+146 |     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelUnfinished() }
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+2026-10-30 22:48:11.220 xcodebuild[25800:199311] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:48:19.465 xcodebuild[25800:199311] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:48:19.466 xcodebuild[25800:199311] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:48:19.468 xcodebuild[25800:199311] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-10-30 22:48:19.757 xcodebuild[25800:199311] [MT] IDETestOperationsObserverDebug: 8.671 elapsed -- Testing started completed.
+2026-10-30 22:48:19.757 xcodebuild[25800:199311] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-30 22:48:19.757 xcodebuild[25800:199311] [MT] IDETestOperationsObserverDebug: 8.671 sec, +8.671 sec -- end
+Failing tests:
+	SketchHostTests.testActualViewDrawKeepsInkVisibleAfterInjectedBackgroundMutation()
+
+** TEST FAILED **
+
+Testing started

@@ -115,16 +115,32 @@ final class SketchController: UIViewController {
         status.accessibilityIdentifier = "草图状态"
         canvas.setNeedsDisplay()
     }
-    @objc private func suspendInput() { canvas.cancelUnfinished() }
+    @objc fileprivate func suspendInput() { canvas.cancelUnfinished() }
     override func viewWillDisappear(_ animated: Bool) { super.viewWillDisappear(animated); canvas.cancelUnfinished() }
     deinit { NotificationCenter.default.removeObserver(self) }
 }
 
 @main final class SketchApp: UIResponder, UIApplicationDelegate {
+    func application(_ application: UIApplication, configurationForConnecting session: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(name: "Memory Sketch", sessionRole: session.role)
+        configuration.delegateClass = SketchSceneDelegate.self
+        return configuration
+    }
+}
+
+final class SketchSceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = SketchController(); window.makeKeyAndVisible(); self.window = window
-        return true
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
+        guard let scene = scene as? UIWindowScene else { return }
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = SketchController(); self.window = window
+        window.makeKeyAndVisible()
+    }
+    func sceneWillResignActive(_ scene: UIScene) {
+        (window?.rootViewController as? SketchController)?.suspendInput()
+    }
+    func sceneDidDisconnect(_ scene: UIScene) {
+        (window?.rootViewController as? SketchController)?.suspendInput()
     }
 }
