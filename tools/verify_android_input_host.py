@@ -31,8 +31,8 @@ def digest(path):
 
 
 
-def process_checkpoint(args, adb, folder, files, before, bindings):
-    """Stop only isolated test processes after observing original worker bytes; separate confirmed and undelivered owner results."""
+def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner_crash=False):
+    """Stop isolated processes after original worker bytes; optionally verify confirmed main-owner crashes only."""
     assert (args.path_api32 and args.serial == 'emulator-5586' and args.avd == 'NoteCorePath32') or (args.process_checkpoint and args.serial == 'emulator-5554' and args.avd == 'NoteCorePreview')
     scope = str(uuid.uuid4())
     local = folder / ('process-checkpoint-' + scope)
@@ -80,14 +80,31 @@ def process_checkpoint(args, adb, folder, files, before, bindings):
                 (local / marker).write_text(json.dumps(ready, indent=2)+'\n', encoding='utf-8', newline='\n')
                 (local / (phase + '.ncp')).write_bytes(data)
                 assert files() == before
-                adb('shell', 'am', 'force-stop', BUNDLE)
+                if main_owner_crash:
+                    assert not wait_visible, 'Blocked main owner cannot dispatch a shell-induced Java crash'
+                    adb('shell', 'am', 'crash', BUNDLE)
+                    deadline = time.monotonic() + 30
+                    while True:
+                        absent = subprocess.run([args.adb, '-s', args.serial, 'shell', 'pidof', BUNDLE],
+                            cwd=ROOT, capture_output=True, timeout=10)
+                        if absent.returncode == 1 and not absent.stdout.strip():
+                            break
+                        assert time.monotonic() < deadline, 'Main-owner crash did not terminate original process'
+                        time.sleep(.1)
+                    crash = adb('logcat', '-b', 'crash', '-d', '--pid=' + str(ready['pid'])).decode('utf-8')
+                    (local / (phase + '-main-crash.log')).write_text(crash, encoding='utf-8', newline='\n')
+                    assert 'FATAL EXCEPTION: main' in crash and 'shell-induced crash' in crash, crash
+                    assert 'Process: ' + BUNDLE + ', PID: ' + str(ready['pid']) in crash, crash
+                else:
+                    adb('shell', 'am', 'force-stop', BUNDLE)
                 remaining = subprocess.run([args.adb, '-s', args.serial, 'shell', 'pidof', BUNDLE],
                     cwd=ROOT, capture_output=True, timeout=30)
-                assert remaining.returncode == 1 and not remaining.stdout.strip(), 'Old owner process survived force-stop'
+                assert remaining.returncode == 1 and not remaining.stdout.strip(), 'Old owner process survived requested termination'
                 process.wait(timeout=30)
                 assert adb('exec-out', 'run-as', BUNDLE, 'cat', document) == data
                 killed.append({**ready, 'instrumentation_command_returncode':process.returncode,
-                    'process_absent_after_force_stop':True, 'file_unchanged_after_kill':True,
+                    ('process_absent_after_main_owner_crash' if main_owner_crash else 'process_absent_after_force_stop'):True,
+                    'file_unchanged_after_kill':True,
                     'owner_confirmation_received':not wait_visible})
             finally:
                 if process.poll() is None:
@@ -112,6 +129,12 @@ def process_checkpoint(args, adb, folder, files, before, bindings):
     result = {'scope_id':scope, 'killed_processes':list(killed), 'final_reopen':observed,
         'ordinary_ui_verified':False, 'native_pool_or_unsignaled_receipt_verified':False,
         'scope':'Confirmed-write subcase: original isolated Store/worker wrote and confirmed a pending checkpoint before full process force-stop. New PID reopened, committed once and confirmed canonical replacement before a second force-stop. Third PID reopened exact canonical bytes. Synthetic input/owner fault; no manually seeded checkpoint, partial-write kill, power loss or ordinary UI claim. The separate undelivered_completion subcase records visible worker bytes before owner delivery.'}
+    if main_owner_crash:
+        result['scope'] = 'Original Store/worker confirmed pending checkpoint, then platform shell-induced uncaught main exception terminated the process. New PID reopened, committed once and confirmed canonical replacement before a second uncaught main exception. Third PID reopened exact canonical bytes. No blocked-owner/undelivered-completion, partial-write, power-loss, hot takeover or native release claim.'
+        (local / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+        for path in local.iterdir():
+            bindings[path.relative_to(ROOT).as_posix()] = digest(path)
+        return result
     stop_stage('undelivered','undelivered-ready.json',3,2,False,wait_visible=True)
     raw = adb('shell','am','instrument','-w','-r','-e','notecore_case','process_checkpoint_verify_undelivered',
         '-e','process_checkpoint_scope',scope,BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')

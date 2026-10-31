@@ -1,0 +1,49 @@
+{
+  "scope_id": "b83256f0-30f8-42d6-91c2-57a6158f8a54",
+  "killed_processes": [
+    {
+      "pid": 2630,
+      "scope": "b83256f0-30f8-42d6-91c2-57a6158f8a54",
+      "document_sha256": "8e8707a26db0da913fb61575938135b86bc8bd9a03f3414905ef5657e34f6372",
+      "revision": 1,
+      "stroke_count": 0,
+      "pending": true,
+      "owner_not_retired": true,
+      "worker_not_stopped": true,
+      "instrumentation_command_returncode": 0,
+      "process_absent_after_main_owner_crash": true,
+      "file_unchanged_after_kill": true,
+      "owner_confirmation_received": true
+    },
+    {
+      "pid": 3016,
+      "scope": "b83256f0-30f8-42d6-91c2-57a6158f8a54",
+      "document_sha256": "f1ff4d4d49cabbda51a5ab39316b31c7c71c1f5f7eb505ba0b8d37af90f677ea",
+      "revision": 2,
+      "stroke_count": 1,
+      "pending": false,
+      "owner_not_retired": true,
+      "worker_not_stopped": true,
+      "instrumentation_command_returncode": 0,
+      "process_absent_after_main_owner_crash": true,
+      "file_unchanged_after_kill": true,
+      "owner_confirmation_received": true
+    }
+  ],
+  "final_reopen": {
+    "pid": 3348,
+    "scope": "b83256f0-30f8-42d6-91c2-57a6158f8a54",
+    "canonical_sha256": "f1ff4d4d49cabbda51a5ab39316b31c7c71c1f5f7eb505ba0b8d37af90f677ea",
+    "stroke_count": 1,
+    "point_count": 3,
+    "revision": 2,
+    "pending": false,
+    "checkpoint_worker_write_verified": true,
+    "repeated_commit_did_not_duplicate": true,
+    "unconfirmed_io_kill_verified": false,
+    "power_loss_verified": false
+  },
+  "ordinary_ui_verified": false,
+  "native_pool_or_unsignaled_receipt_verified": false,
+  "scope": "Original Store/worker confirmed pending checkpoint, then platform shell-induced uncaught main exception terminated the process. New PID reopened, committed once and confirmed canonical replacement before a second uncaught main exception. Third PID reopened exact canonical bytes. No blocked-owner/undelivered-completion, partial-write, power-loss, hot takeover or native release claim."
+}

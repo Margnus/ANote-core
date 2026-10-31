@@ -4,6 +4,7 @@
 Requires already-built APKs and an already-installed image. No SDK download,
 original-device boot, production API change, or API33 SurfaceControl claim.
 """
+import argparse
 import gzip
 import hashlib
 import json
@@ -38,23 +39,46 @@ def save(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
-def main():
-    RAW.mkdir(exist_ok=False)
+def main(*, main_owner_crash=False):
+    scope_dir = ROOT / 'reports/android-owner-main-crash-api32-20261031' if main_owner_crash else RAW
+    report_path = ROOT / 'reports/android-owner-main-crash-api32.json' if main_owner_crash else ROOT / 'reports/android-app-api32.json'
+    scope_dir.mkdir(exist_ok=False)
     WORK.mkdir(parents=True, exist_ok=False)
     image = SDK / 'system-images/android-32/google_apis/arm64-v8a'
     assert (image / 'package.xml').is_file()
-    stamp = ROOT / 'reports/android-brush-build-inputs.sha256'
+    apk = ROOT / 'android-app/build/outputs/apk/debug/android-app-debug.apk'
+    test = ROOT / 'android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk'
+    provenance = None
+    if main_owner_crash:
+        prior_path = ROOT / 'reports/android-app-api32.json'
+        prior = json.loads(prior_path.read_text(encoding='utf-8'))
+        assert prior['status'] == 'passed'
+        old_raw = ROOT / 'reports/android-app-api32-20261031'
+        retained = old_raw / 'executables.zip'
+        stamp = old_raw / 'build-inputs.sha256'
+        for path in (retained, stamp, old_raw / 'build.log'):
+            assert sha(path) == prior['evidence_sha256'][path.relative_to(ROOT).as_posix()]
+        apk = WORK / 'retained-app.apk'; test = WORK / 'retained-test.apk'
+        with zipfile.ZipFile(retained) as archive:
+            apk.write_bytes(archive.read('app.apk')); test.write_bytes(archive.read('instrumentation.apk'))
+        assert sha(apk) == prior['apk_sha256'] and sha(test) == prior['test_apk_sha256']
+        provenance = {'report': prior_path.relative_to(ROOT).as_posix(), 'sha256': sha(prior_path),
+                      'archive_sha256': sha(retained), 'rebuilt': False}
+        build_log = old_raw / 'build.log'
+    else:
+        stamp = ROOT / 'reports/android-brush-build-inputs.sha256'
+        build_log = ROOT / 'output/api32-app/build.log'
     inputs = dict(line.split('  ', 1)[::-1] for line in stamp.read_text(encoding='utf-8').splitlines())
-    assert all(sha(ROOT / path) == digest for path, digest in inputs.items()), 'Stale build'
-    shutil.copy2(stamp, RAW / 'build-inputs.sha256')
-    shutil.copy2(ROOT / 'output/api32-app/build.log', RAW / 'build.log')
-    shutil.copy2(Path(__file__), RAW / 'executed-runner.py.txt')
+    overrides = {'android-app/build/outputs/apk/debug/android-app-debug.apk': apk,
+                 'android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk': test}
+    assert all(sha(overrides.get(path, ROOT / path)) == digest for path, digest in inputs.items()), 'Stale build'
+    shutil.copy2(stamp, scope_dir / 'build-inputs.sha256')
+    shutil.copy2(build_log, scope_dir / 'build.log')
+    shutil.copy2(Path(__file__), scope_dir / 'executed-runner.py.txt')
     sources = {path: digest for path, digest in inputs.items() if '/build/' not in path}
     sources[Path(__file__).relative_to(ROOT).as_posix()] = sha(Path(__file__))
     sources['tools/verify_android_input_host.py'] = sha(ROOT / 'tools/verify_android_input_host.py')
-    apk = ROOT / 'android-app/build/outputs/apk/debug/android-app-debug.apk'
-    test = ROOT / 'android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk'
-    with zipfile.ZipFile(RAW / 'executables.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(scope_dir / 'executables.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
         archive.write(apk, 'app.apk'); archive.write(test, 'instrumentation.apk')
     original = ROOT / '.android-avd/NoteCorePreview.avd'
 
@@ -66,17 +90,17 @@ def main():
                 for p in sorted(original.rglob('*')) if p.is_file()}
 
     before = original_files(); assert before
-    save(RAW / 'original-before.json', before)
+    save(scope_dir / 'original-before.json', before)
     env = {**os.environ, 'ANDROID_AVD_HOME': str(WORK / 'avds'),
            'ANDROID_USER_HOME': str(WORK / 'user'), 'ANDROID_EMULATOR_HOME': str(WORK / 'user')}
     records = []
 
     def run(command, label, timeout=120):
         result = subprocess.run([str(a) for a in command], capture_output=True, timeout=timeout, env=env, cwd=ROOT)
-        (RAW / (label + '.stdout.log')).write_bytes(result.stdout)
-        (RAW / (label + '.stderr.log')).write_bytes(result.stderr)
+        (scope_dir / (label + '.stdout.log')).write_bytes(result.stdout)
+        (scope_dir / (label + '.stderr.log')).write_bytes(result.stderr)
         records.append({'label': label, 'argv': [str(a) for a in command], 'returncode': result.returncode})
-        save(RAW / 'execution.json', records)
+        save(scope_dir / 'execution.json', records)
         assert result.returncode == 0, (label, result.stderr[-1500:], result.stdout[-1500:])
         return result.stdout
 
@@ -99,12 +123,12 @@ def main():
     config = ''.join(key + ' = ' + value + '\n' for key, value in values.items())
     (avd / 'config.ini').write_text(config, encoding='utf-8')
     (WORK / 'avds' / (AVD + '.ini')).write_text('avd.ini.encoding=UTF-8\npath=' + str(avd) + '\ntarget=android-32\n', encoding='utf-8')
-    (RAW / 'initial-config.ini').write_text(config, encoding='utf-8')
+    (scope_dir / 'initial-config.ini').write_text(config, encoding='utf-8')
     log = (WORK / 'emulator.log').open('wb')
     command = [str(SDK / 'emulator/emulator'), '-avd', AVD, '-port', '5586', '-no-window', '-no-audio',
                '-no-snapshot', '-no-boot-anim', '-gpu', 'swiftshader_indirect', '-memory', '1536', '-cores', '2']
     process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env, cwd=ROOT)
-    save(RAW / 'emulator-process.json', {'pid': process.pid, 'argv': command})
+    save(scope_dir / 'emulator-process.json', {'pid': process.pid, 'argv': command})
     completed = False
     try:
         deadline = time.monotonic() + 480
@@ -135,23 +159,24 @@ def main():
 
         baseline = files()
         observations = {}
-        for case, prefix, checks in [('input_batches', 'input', host.CHECKS),
+        for case, prefix, checks in ([] if main_owner_crash else [('input_batches', 'input', host.CHECKS),
                                      ('storage_retention', 'storage', host.STORAGE_CHECKS),
-                                     ('owner_retirement', 'owner', host.OWNER_CHECKS), ('minimum_api', 'minimum_api', None)]:
+                                     ('owner_retirement', 'owner', host.OWNER_CHECKS), ('minimum_api', 'minimum_api', None)]):
             raw = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', case,
                       host.BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode()
-            (RAW / (case + '.log')).write_text(raw, encoding='utf-8')
+            (scope_dir / (case + '.log')).write_text(raw, encoding='utf-8')
             assert prefix + '_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
             observed = json.loads(re.search(prefix + r'_observations=(\{.*\})', raw).group(1))
             if checks is not None:
                 assert set(observed['checks']) == checks and len(observed['checks']) == len(checks)
             observations[case] = observed
             assert files() == baseline
-        assert observations['minimum_api']['surface_render_bytes'] == 0
-        assert observations['minimum_api']['line_dot_undo_redo_page_pixels']
+        if not main_owner_crash:
+            assert observations['minimum_api']['surface_render_bytes'] == 0
+            assert observations['minimum_api']['line_dot_undo_redo_page_pixels']
         bindings = {}
         checkpoint = host.process_checkpoint(SimpleNamespace(path_api32=True, serial=SERIAL, avd=AVD,
-            adb=str(SDK / 'platform-tools/adb')), adb, RAW, files, baseline, bindings)
+            adb=str(SDK / 'platform-tools/adb')), adb, scope_dir, files, baseline, bindings, main_owner_crash=main_owner_crash)
         assert files() == baseline
         adb('shell', 'am', 'force-stop', host.BUNDLE)
         assert b'Status: ok' in adb('shell', 'am', 'start', '-W', '-n', host.BUNDLE + '/dev.notecore.app.MainActivity')
@@ -162,6 +187,9 @@ def main():
                   'process_checkpoint': checkpoint, 'ordinary_launch_pid': ordinary_pid,
                   'isolated_note_baseline': baseline, 'apk_sha256': sha(apk), 'test_apk_sha256': sha(test),
                   'scope': 'Current original App/Store/View on isolated API32 ARM64. Synthetic callbacks, software Bitmap pixels, explicit owner retirement, confirmed and visible-undelivered writes followed by process force-stop. No ordinary UI gestures, physical stylus/heap, API33 native overlap, partial-write/power-loss, production SQLite or C1 freeze.'}
+        if main_owner_crash:
+            report['scope'] = checkpoint['scope'] + ' Retained unchanged App/instrumentation APKs; no input/storage/owner/pixel matrix rerun.'
+            report['artifact_reuse'] = provenance
         completed = True
     finally:
         if process.poll() is None:
@@ -169,19 +197,21 @@ def main():
             assert identity == AVD
             adb('emu', 'kill'); process.wait(timeout=60)
         log.close()
-        with gzip.open(RAW / 'emulator.log.gz', 'wb') as output:
+        with gzip.open(scope_dir / 'emulator.log.gz', 'wb') as output:
             output.write((WORK / 'emulator.log').read_bytes())
-        after = original_files(); save(RAW / 'original-after.json', after)
+        after = original_files(); save(scope_dir / 'original-after.json', after)
         assert after == before, 'Original AVD changed'
         shutil.rmtree(WORK)
-        save(RAW / 'cleanup.json', {'original_avd_all_bytes_unchanged': True,
+        save(scope_dir / 'cleanup.json', {'original_avd_all_bytes_unchanged': True,
              'temporary_device_removed': not WORK.exists(), 'emulator_returncode': process.returncode,
              'runtime_completed': completed})
     report['source_sha256'] = sources
-    report['evidence_sha256'] = {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(RAW.rglob('*')) if p.is_file()}
-    save(ROOT / 'reports/android-app-api32.json', report)
+    report['evidence_sha256'] = {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(scope_dir.rglob('*')) if p.is_file()}
+    save(report_path, report)
     print('API32 current App contracts passed; isolated device removed', flush=True)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--main-owner-crash', action='store_true', help='Reuse source-bound retained APKs for two confirmed-checkpoint uncaught main exceptions only')
+    main(main_owner_crash=parser.parse_args().main_owner_crash)
