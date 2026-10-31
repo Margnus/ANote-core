@@ -2,6 +2,7 @@
 # Pin source checkout line endings. Verification normalizes source text only; artifacts stay byte exact.
 *.kt text eol=lf
 *.java text eol=lf
+*.c text eol=lf
 *.kts text eol=lf
 *.swift text eol=lf
 *.py text eol=lf
@@ -61,6 +62,7 @@ reports/apple-sketch-local-20261030/*.ips binary
 reports/apple-sketch-local-20261030/*-summary.json binary
 reports/apple-sketch-local-20261030/*-tests.json binary
 reports/apple-sketch-local-20261030/*-attachments/*.json binary
+reports/android-atomic-promote-20261031/**/*.log binary
 
 reports/apple-candidate-ci-40993095695/*.log binary
 reports/apple-candidate-ci-40993095695/*.json binary
