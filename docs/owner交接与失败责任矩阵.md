@@ -2,6 +2,22 @@
 
 本表区分现有行为与尚未支持的交接，不批准稳定SDK、生产存储或C1。原Notebook及App服务仍只有创建线程上的同一个owner；不可变checkpoint交付不转移可变authority。
 
+## 2026-10-31 采用决定：原App的单主owner生命周期配置
+
+依据ENG-04“单写者/worker只读快照/窗口共享提交序列”、ENG-14“幂等关闭/Surface销毁不丢已受理保存”及ENG-07“真实点命令不静默丢弃”，选择现有两端App的以下生命周期配置。它是原集成的支持/拒绝决定，不冻结SDK或C1；[来源审查](../reports/owner-lifetime-profile-review.json)区分原运行证据、当前关键源码一致性和仍未验证内容。
+
+1. **宿主保留唯一且可重新取得的原服务入口。** Android正常Activity只用原`NoteStore.get`单例；Apple App级一个`@StateObject PreviewModel`注入WindowGroup。调用方仍须在原main owner访问。Model自持/worker保留根负责未结状态，不能代替调用方保留服务入口；weak句柄只有在确实保留且对象尚活时才是找回同一Model的路径，不是全局搜索或跨线程许可。
+2. **呈现端和文档/服务分别结束。** View/窗口消失只解除自己的呈现归属；已受理保存、完成pending和原资源回执留在原服务。最后文档退出的pending要原精确checkpoint实际IO确认；全服务退休要先准入保存，再由原owner等ledger、worker条目和native holder各自drain。`beginOwnerRetirement`受理不等于完成；失败后在同一owner显式修复/重试。服务终态不承诺`get`/原Model重新初始化，正常窗口关闭不是全服务退休。
+3. **未知结果不产生新写者或释放许可。** 原owner暂不可调度时，原worker/ledger/holder仍持有状态；只有原owner恢复调度后才能使用任务已有的交付/重试或只读对账入口。不存在通用“查询任意已失联任务结果”的API，不能把retained写成recoverable；结果无查询端口时继续UNKNOWN，不能重跑未知副作用、清charge或另建pool。没有把UI等待join/Future.get作为恢复路径。
+4. **完全丢失入口与线程热迁移明确拒绝。** 所有服务句柄丢失但旧进程仍活，是宿主违反入口持有前置的未退休服务；当前没有自动找回/接管。创建线程终止的JVM执行器保留结果却无法交付，同样不支持热接管。不能靠daemon化、停worker或GC“解决”它；自动停机候选已证明可能使0 ACK状态不可达并被收集。该拒绝不是功能恢复完成，也不批准把底层执行器作为稳定SDK导出。
+5. **旧进程已确认终止后才走独立重建路径。** 原可变Notebook/ledger/worker不跨线程迁移；在已确认旧进程死亡、完整checkpoint读取/能力/额度验证成功后建立唯一新owner。当前Android原包已验可调度main fatal后的已确认pending/canonical重开；可见但零回调的新文件另有force-stop范围。未知旧进程、半写/断电、任意未确认操作与生产日志幂等均不据此批准。
+
+这里没有把“任意线程热迁移”或“无句柄自动查找”增加为ENG-04/14的隐含功能；也没有删除原需求。支持配置的拒绝必须保留已受理责任，不能通过缩小支持面绕过真实点/命令不丢、单写者及原资源回执。若以后确有合法消费者需要另一owner配置，应先提出有可达持有/重连及预算的方案；本轮不建立第二authority、全局registry或旁路执行器。
+
+**证据结论与退出条件：** 原Apple 66项宿主报告包含failed-write/provider两条weak句柄找回同一Model、显式退役与UNKNOWN对账；关键Model/executor/测试源码仍匹配该历史报告。Android API32原包15项owner检查和两次main fatal恢复各按其原范围有效。JVM真实线程退出与全引用丢失GC反例维持“不支持一般热接管”的结论。此决定收口原App的入口持有与生命周期选择，不再扩同类线程/GC/崩溃实验。C1第4项整体仍缺真实长期GPU未signal/厂商释放条件，以及最终SDK对所选支持/拒绝通道的批准；物理总预算/M-1/触笔、其他C1项和DEV-041均保持门禁。需要解决的“可达入口”是原宿主的集成前置，不能泛化为必须实现全局失物查找服务。
+
+## 原行为与证据范围
+
 | 事件 | 当前支持/拒绝 | 内容与资源责任、恢复入口 |
 |---|---|---|
 | 同一owner换View或Activity重建 | 独立双端消费者已验证 | 保持原Session/Notebook/root；明确取消未完成输入，不重建文档authority |
@@ -17,7 +33,7 @@
 | 已受理写入真实IO失败 | 原ledger保留完整快照及retryRequired | 修复目录后调用同一owner的retryRetainedWrites；真实写入完成才结算，随后原worker停止并解除自持 |
 | 外部CGDataProvider跨退休继续持有 | 同一Model/native holder继续计费 | 真实releaseData回调后由原主owner结算；unknown需既有只读reconcile，不重复破坏性释放，不另开pool |
 | 所有外部句柄丢失但主线程仍活 | 不提供自动查找/接管 | 自持保留责任，也会持续占用内存与worker；这是未完成退休的服务，不是可恢复完成。App必须保留服务入口；当前单App级StateObject满足正常生命周期 |
-| owner线程退出、主线程停摆、进程终止 | 不支持内存owner接管 | 自持不能提供进程耐久；Android原文件替换前后两处实际终止/新进程重读见[报告](../reports/android-atomic-cut.json)，Apple原atomic API调用前/返回后旧ACK前两处SIGKILL/新Model重读见[Apple报告](../reports/apple-atomic-cut.json)；不接管原内存owner；内部任意中断/断电和生产回执协议仍待 |
+| owner线程退出、主线程停摆、进程终止 | 不支持内存owner接管；可调度main fatal后的确认checkpoint恢复另有API32实测 | 自持不能提供进程耐久；[当前Android main fatal](../reports/android-owner-main-crash-api32.json)仅覆盖已确认pending/canonical且旧PID消失，不含被阻塞main；Android原文件替换前后两处实际终止/新进程重读见[报告](../reports/android-atomic-cut.json)，Apple原atomic API调用前/返回后旧ACK前两处SIGKILL/新Model重读见[Apple报告](../reports/apple-atomic-cut.json)；不接管原内存owner；内部任意中断/断电和生产回执协议仍待 |
 | mutable Notebook/worker/reader迁移线程或重复Model打开同一目录 | 未定义为受支持交接 | 不通过忽略ownerCheck、复制authority、旁路队列或第二pool实现接管；多窗口/跨线程交接仍属C1未决 |
 
 Apple原Model的服务生命周期以init开始、beginOwnerRetirement受理后实际drain结束。关闭当前文档或失去外部引用均不等于服务退休。长生命周期服务的自持是明确保留责任，会增加未正确退休调用者的保留时间；不承诺自动回收、内存峰值或物理heap结论。

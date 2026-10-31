@@ -1,0 +1,38 @@
+[
+  {
+    "id": "DATA-04",
+    "title": "事务、操作日志与恢复",
+    "priority": "P0",
+    "acceptance": "操作幂等；强杀重开恢复所有已确认保存命令；半条记录丢弃而非破坏已提交内容"
+  },
+  {
+    "id": "ENG-04",
+    "title": "单写者与线程边界",
+    "priority": "P0",
+    "acceptance": "UI路径无runBlocking/join/Future.get；worker只读快照；多个窗口共享文档权威提交序列"
+  },
+  {
+    "id": "ENG-07",
+    "title": "队列背压与计算预算",
+    "priority": "P0",
+    "acceptance": "真实点和命令保序不静默丢弃；预测/视口可合并；worker数量及任务/点缓冲有界并验证饱和"
+  },
+  {
+    "id": "ENG-14",
+    "title": "会话生命周期隔离",
+    "priority": "P0",
+    "acceptance": "session scope与close幂等；surface销毁不丢已接受保存；工具与配置无全局可变共享；重复attach关闭可恢复"
+  },
+  {
+    "id": "ENG-19",
+    "title": "独立组件与第二宿主样例",
+    "priority": "P0",
+    "acceptance": "内存画布和NoteCore样例真机可运行；只读批注/草图宿主验证资源/工具注入；核心不反向导入App"
+  },
+  {
+    "id": "ENG-20",
+    "title": "组件一致性与性能门禁",
+    "priority": "P0",
+    "acceptance": "契约/回放/黄金几何/迟到任务/缓存反例/背压/资源释放测试；同机基线与trace；架构评审先于生产实施"
+  }
+]

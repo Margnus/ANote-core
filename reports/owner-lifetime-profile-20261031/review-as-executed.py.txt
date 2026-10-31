@@ -1,0 +1,67 @@
+from pathlib import Path
+import csv, hashlib, json, shutil, subprocess
+root=Path.cwd(); blueprint=Path('/Users/lixiaofan/StudioProjects/note-app-blueprint-20261014')
+raw=root/'reports/owner-lifetime-profile-20261031';raw.mkdir(exist_ok=False)
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def write(p,v):p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+with (blueprint/'requirements.csv').open(encoding='utf-8-sig',newline='') as f:rows=list(csv.DictReader(f))
+assert len(rows)==129
+ids={'ENG-04','ENG-07','ENG-14','ENG-19','ENG-20','DATA-04'}
+criteria=[{k:r[k] for k in ('id','title','priority','acceptance')} for r in rows if r['id'] in ids]
+assert len(criteria)==6
+write(raw/'requirement-criteria.json',criteria)
+parents={name:json.loads((root/'reports'/name).read_text(encoding='utf-8')) for name in ('ios-host-tests.json','android-app-api32.json','android-owner-main-crash-api32.json','owner-thread-loss.json','owner-thread-stop-review.json','release-handoff.json')}
+apple=parents['ios-host-tests.json'];assert apple['status']=='passed'
+assert apple['test_summary']['passedTests']==66 and apple['test_summary']['failedTests']==0 and apple['test_summary']['skippedTests']==0
+checks=('testOwnerReferenceDropKeepsFailedWriteUntilOriginalRetirement()', 'testOwnerReferenceDropKeepsProviderUntilOriginalRetirement()', 'testOwnerRetirementWritesAcceptedRootThenStopsAndReleasesOwner()', 'testRetiringOwnerKeepsUnknownUntilReadOnlyReleaseReconciliation()')
+assert set(checks)<=set(apple['checks'])
+source={}
+for name,digest in apple['source_and_framework_sha256'].items():
+ if name.startswith(('canvas-core/src/','shared-core/src/','ios-app/NoteCorePreview/','ios-app/NoteCorePreviewTests/')):
+  assert (root/name).is_file() and sha(root/name)==digest,name
+  source[name]=digest
+apple_source_count=len(source);assert apple_source_count==62
+android=parents['android-app-api32.json'];assert android['status']=='passed'
+owner=android['observations']['owner_retirement'];assert len(owner['checks'])==15
+assert owner['abrupt_owner_or_thread_loss_verified'] is False
+for name,digest in android['source_sha256'].items():
+ if name.startswith(('canvas-core/src/','shared-core/src/','android-app/src/')):
+  assert sha(root/name)==digest,name
+  source[name]=digest
+crash=parents['android-owner-main-crash-api32.json'];assert crash['status']=='passed'
+assert crash['artifact_reuse']['rebuilt'] is False
+assert len(crash['process_checkpoint']['killed_processes'])==2
+assert all(x['process_absent_after_main_owner_crash'] for x in crash['process_checkpoint']['killed_processes'])
+assert parents['owner-thread-loss.json']['status']=='observed-unsupported-owner-loss'
+assert parents['owner-thread-stop-review.json']['status']=='rejected-candidate'
+executor='canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt'
+assert sha(root/executor)==parents['owner-thread-loss.json']['source_sha256'][executor]
+source[executor]=sha(root/executor)
+for name in ('docs/owner交接与失败责任矩阵.md','docs/最小预览消费者契约.md','android-app/src/main/AndroidManifest.xml'):
+ source[name]=sha(root/name)
+state_object=root/'ios-app/NoteCorePreview/NoteCorePreviewApp.swift'
+assert '@StateObject private var model = PreviewModel()' in state_object.read_text(encoding='utf-8')
+assert 'store = NoteStore.get(this)' in (root/'android-app/src/main/java/dev/notecore/app/MainActivity.kt').read_text(encoding='utf-8')
+shutil.copy2(Path(__file__),raw/'review-as-executed.py.txt')
+r={'status':'adopted-existing-app-lifetime-profile-c1-incomplete',
+ 'decision':'Use one reachable main-owner App service until explicit original IO/worker/native drain. Reconnect only through the retained original service route. Refuse mutable thread migration and automatic discovery after all handles are lost; neither is an implicit ENG-04/14 feature. Retention does not imply recoverability, and refusal cannot discard accepted responsibility.',
+ 'requirements_blueprint_commit':subprocess.check_output(['git','-C',str(blueprint),'rev-parse','HEAD'],text=True).strip(),
+ 'requirements_criteria_snapshot_sha256':sha(raw/'requirement-criteria.json'),
+ 'support_refusal_decisions':[
+  {'case':'presentation_loss_with_app_root','decision':'same service/Notebook; detach presentation only','basis':'Original App window/input tests and root source review; not arbitrary OS multiwindow acceptance'},
+  {'case':'weak_route_survives_external_strong_reference_loss','decision':'same main-owner Model retry/retire through original weak route','basis':'Two named historical Apple cases; no global lookup or cross-thread permission'},
+  {'case':'explicit_retirement','decision':'admission is not completion; original ledger/worker/native drain before terminal release','basis':'Original Apple/Android checks, ordinary preview ACK is not production DURABLE'},
+  {'case':'owner_temporarily_undispatchable','decision':'retain original responsibility; no timeout or parallel owner; only existing operation ports after dispatch resumes','basis':'Contract constraint; not a generic result-query API or liveness proof'},
+  {'case':'all_service_routes_lost_while_process_alive','decision':'unsupported host lifetime violation; retained service is not recoverable completion','basis':'No new registry introduced; original root obligation remains explicit'},
+  {'case':'creator_thread_terminated_with_surviving_process','decision':'no hot takeover; retained original worker/results/charge remain unresolved','basis':'Real JVM thread-loss counterexample; unsafe auto-stop candidate rejected'},
+  {'case':'whole_old_process_confirmed_dead_after_checkpoint','decision':'validate complete checkpoint then establish one new owner; do not migrate mutable service','basis':'Controlled API32 confirmed main-fatal and separate visible-undelivered force-stop scopes'},
+  {'case':'unknown_old_process_or_native_release','decision':'no new writer/pool, timeout ACK or destructive retry','basis':'Remains unknown; real long-unsignaled/vendor and final SDK approval incomplete'}],
+ 'evidence_reuse':{'runtime_rerun_this_review':False,'apple_historical_checks':list(checks),'apple_bound_sources_equal_current':apple_source_count,'android_historical_owner_checks':15,'framework_binary_revalidated':False,'ordinary_ui_or_physical_verified':False},
+ 'source_sha256':source,
+ 'parent_receipt_sha256':{'reports/'+name:sha(root/'reports'/name) for name in parents},
+ 'remaining_gates':['Final SDK support/refusal entry points and semantic approval','Real long-unsignaled GPU/vendor release conditions','Physical combined peak/M-1/stylus and other C1 gates','Production SQLite/DEV-041 remains prohibited'],
+ 'production_c1_gate_complete':False,'whole_requirements_accepted':0,
+ 'scope':'Contract/adoption review of existing App lifetime only. Existing historical runtime reports retain their package/source scope. No new framework/App build, crash/GC experiment, takeover/registry, stable ABI promise or removal of any of the 129 requirements.'}
+r['evidence_sha256']={p.relative_to(root).as_posix():sha(p) for p in raw.iterdir() if p.is_file()}
+write(root/'reports/owner-lifetime-profile-review.json',r)
+print(json.dumps({'current_source_bindings':len(source),'parent_receipts':len(parents),'support_refusal_decisions':8,'new_runtime_tests':0}))
