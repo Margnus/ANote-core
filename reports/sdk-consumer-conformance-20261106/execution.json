@@ -1,0 +1,145 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-version"
+    ],
+    "label": "xcode-version",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "create",
+      "NoteCoreSDKConformance-20261106",
+      "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    ],
+    "label": "create-device",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "boot",
+      "9DBB7420-5BD1-492B-8BF4-BD223DE37170"
+    ],
+    "label": "boot",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "bootstatus",
+      "9DBB7420-5BD1-492B-8BF4-BD223DE37170",
+      "-b"
+    ],
+    "label": "bootstatus",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-quiet",
+      "-xctestrun",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-consumer-conformance-20261106/DerivedData/Build/Products/SketchHost_iphonesimulator27.1-arm64.xctestrun",
+      "-destination",
+      "platform=iOS Simulator,id=9DBB7420-5BD1-492B-8BF4-BD223DE37170",
+      "-parallel-testing-enabled",
+      "NO",
+      "-resultBundlePath",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-consumer-conformance-20261106/tests.xcresult",
+      "-collect-test-diagnostics",
+      "never",
+      "test-without-building"
+    ],
+    "label": "test",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "summary",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-consumer-conformance-20261106/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "summary",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "tests",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-consumer-conformance-20261106/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "tests",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before-cleanup",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "9DBB7420-5BD1-492B-8BF4-BD223DE37170"
+    ],
+    "label": "shutdown",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "delete",
+      "9DBB7420-5BD1-492B-8BF4-BD223DE37170"
+    ],
+    "label": "delete",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-after",
+    "returncode": 0
+  }
+]

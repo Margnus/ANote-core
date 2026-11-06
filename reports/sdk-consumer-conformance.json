@@ -1,0 +1,886 @@
+{
+  "status": "passed",
+  "tests": 11,
+  "new_public_contract_cases": [
+    "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()",
+    "testPublicPrepareIsObservationAndBridgeRechecksChangedState()"
+  ],
+  "summary": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "9DBB7420-5BD1-492B-8BF4-BD223DE37170",
+          "deviceName": "NoteCoreSDKConformance-20261106",
+          "modelName": "iPhone 18 Pro",
+          "osBuildNumber": "24A434",
+          "osVersion": "27.0",
+          "platform": "iOS Simulator"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 11,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "SketchHost · Built with macOS 27.2",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1793968764.112,
+    "passedTests": 11,
+    "result": "Passed",
+    "runtimeWarnings": [],
+    "skippedTests": 0,
+    "startTime": 1793968703.445,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - SketchHost",
+    "topInsights": [],
+    "totalTestCount": 11
+  },
+  "source_sha256": {
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "4379c026b33b26b106da3759812c628fdf845232b93b00dd3f62fb01d3fd9e63",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushGeometry.kt": "eb9516d210d81e3e994a36831fa0847dfd142120848a92529e52c91bd5f4d918",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "ec8e553a5586b60aedf78fbe3d57aca39a52dd405695a4cb1ab1f2db67ad2108",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "339eff8c0b2e4b3d73b8f24a77c1d440ed08d3038d67d8ac649dd57c89a28f17",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/InputReplay.kt": "aa205b66e186bac192b19a53f6104065d212de9c24fb8c3edb033ea81b3cb930",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/IncrementalSpatialIndexPoc.kt": "219e1e4cc3270f1633c5dbb7d814df967d4dbc5d6c9f86050dfeb034d45882c3",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTileCachePoc.kt": "a9985d79490f0cce2198a591c90ed2e9d7576a8525f83107b0bd696f0b5c5def",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushReductionPoc.kt": "b6d2bfa6bf4e5bf7946e1d711affd9fa52b899a2cf1da33e6c5cced7d7882844",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "6136c2528b6b1f392ac71a21d28282376b0bd482a1da6153bf9ecac638c4b84d",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "1c5418e5b485eb8ff8feed9910286ef0676d0417a0c851e9e1c3d57877644e21",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt": "78314c019511e2e917fca7c3c6d121284d60c9f00593a46d88b47fd992c74b4b",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "55c13cd2680c7f034a61d401ab6f113ebedfc893899762190caffc7a1f94e5f5",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPlan.kt": "58893de61e0924fb3903b5243ea3ce14ce1be7e3c7fdd478602f69e476bf8ddd",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Scene.kt": "0e1d8128114356721f483d9608640c7079f00b4aa9c2380612e04622c14c7318",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/OwnedWork.kt": "17ba896afb42c3a6843bd637009412dca40cd08e9c82022f18fe4a17fbe16213",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "1a400ca096b963410cf51d09fde8cdeea30a6b995a29b51825156d8f25a2e521",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "1dbb3e64c1e13f7b54de69ccff4d87c7c5900ca1ea3a98dc6033337f0ac54215",
+    "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewInput.kt": "7e8f11b251184200402958e10149d502d21994202c6fb675c7ea5252d50be5d6",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryTrashRules.kt": "deaba3b19c148bc0e481745ef8236eddb7695c3035ced60bfd236822654ea276",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibrarySearchRules.kt": "dd05b6803fc638eb5152c2c818043e8291f3c52cbf1eb680097320bef5ec2ef9",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryNoteMoveRules.kt": "dad6cd372805d4aa9325059dcd1978a5740df4768914ccd9f92a5b713c891006",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryBatchRules.kt": "5705b3c9c13de5f39f82ad92049deebb068c6b3640a25dad10a1f640561f55f2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/CanonicalText.kt": "6fc2dcf65933f6da0871d426cd6a38891e80a62dc71d88dc1ac9ccdf3f2ff4ef",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "e9b7b81a185c939b29f627ad03068c0cc7c60b137fac46bd3b48ecd73e6fe1e4",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "4ac2f0d7007755e0f569b05dcd6c028f29583b0672c2a0992357d082a5b1b273",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "2ab9c0d1270881e252c82b79e540091d28f334755eb76490bc468dc8970fcd87",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageDecodeRules.kt": "c7191df444b403ee4331d52ba27d82b104ed0377edcec788dafd1f67db38e4bf",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewCatalogBudget.kt": "d9972bc5c6e9dd21a1fafde2df70560cc5086a1871f7acf55277250691596f64",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "29480992140eb476e1b3a612a2170297bb191342cfbeead550a7b9994353f0aa",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageOrientationRules.kt": "31175c1be9a5c69c972f3d65a804ae953bda007553c18989fb96f2264116d86c",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ReadingPositionRules.kt": "65b413af8495fe47d042838f2bfda88ea9229ad2e650f9282d3e442462acffa0",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfPageGeometryRules.kt": "efe908780ab3f12bf40b0921c7d850aa8aac7ce9580143227cb11c43847510fd",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PageTemplateRules.kt": "dd5fcf1b7d15e7e905fc6e88a1d58774d038bd249da1050d14745ab0b9be280c",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "5cf5b31208809b2cb564aa147f829f20e0b6e6ddca80a20ed15a5b194a111f37",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "fc0a144c100d4011bc623a47c10af9ce5a25305f0e268dc0e070aa7011491d32",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfRenderSelectionRules.kt": "0da5ad0e02467ca2fb5d36b55c72e31ff67046cffe330326f19b3f1a03c4fb94",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "ee91eb84ce06f55520f175fc041701788822b859ebba0abe15b7811c3b3c9181",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentDelta.kt": "0f0a2906607e867df28878f4d3214eebac8e1be0a577fb76cf0a3502aaa5197c",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfPageCatalogRules.kt": "147c8142506d2d27dc3c14fdcc2af82fa435b0379fb109018a6138af7bdd4857",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/ObjectOrderRules.kt": "e6be57bc02c78e0482d060e320fb3fdf0d78529f19a7d031d0ecd878c9648232",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PageBookmarkRules.kt": "0939abb0449d493641ec49c4550bb98643f23eef6cf7c9ce7640895ccf8a8519",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewSaveSnapshot.kt": "51d19b7053371506991c9fb0fdfaab00e851184da5ea22234b462a1489228166",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "cfadc1871fc0a5f3123aca5f73f694ad53ec894ea0f449e8186b8f8e4fdb4a16",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "b38f7c72fa031a723fd94a1417966c52f1f12d43d6a4f7649bcb7839be054afc",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewNotebookOpen.kt": "2dd49c6902aff3050c38c84ab87d82ec7d9236d9748be1ecde6686d525e53015",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "cb5464b9735eb98657f7235ceaf884e459e5c514ef046bc27bac9167b5f38448",
+    "shared-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewSaveLedger.kt": "560a6ad55890003938d9e49271875de434a764cc44e56dc4ea064fd1e2c67b6e",
+    "samples/sketch-host-ios/Sources/SketchHostApp.swift": "4f752330ace61daa6624a580c554965d667e3909b1e1a36195c062858135c87c",
+    "samples/sketch-host-ios/Sources/SketchSession.swift": "27a718cf0e7364cd537e8623fe4ec66c9c86b34541ad5dfbcb8d3c50ac49157e",
+    "samples/sketch-host-ios/Sources/SketchCanvas.swift": "966c5d571aedcb339eee84acbf6bf9f3b5ddc58ab167f4a7f9a7740d9ad30019",
+    "samples/sketch-host-ios/Tests/SketchHostTests.swift": "85e710117fb7f6cb8be67151d99e8419f3b37a44c0e18833df1d631934e2e3c9",
+    "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
+    "settings.gradle.kts": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc",
+    "gradle.properties": "a29e188235a52da45ce914db097aa8f585297256b2fcb469a51048bf88f542b0",
+    "canvas-core/build.gradle.kts": "ac4f2148968181b43b165d52d086f7f48e120ff85289e2e544bf3ec974694709",
+    "shared-core/build.gradle.kts": "a45e630699e51515b27bccbfe6a56e48d6f4c761663d8e6bf91ced6ee770e872",
+    "samples/sketch-host-ios/SketchHost.xcodeproj/project.pbxproj": "aeca4774c96be019e6d8421ac30cae30c8ea814a2397881e095833b68432265d",
+    "samples/sketch-host-ios/SketchHost.xcodeproj/xcshareddata/xcschemes/SketchHost.xcscheme": "8f35d0e4c09a9cbb182a8d0ca10f764edae965d6fb513462cb096040a6bd811a",
+    "tools/verify_sketch_ios_host.py": "6f919f993e77e56ec825cad5d32a40d5ee3c2188c6050e5c1bd4f345c27f1ca9",
+    "reports/android-app-api32-20261031/process-checkpoint-71c676ae-bab8-426b-93d6-3308fa4f2ac9/prepare.ncp": "8e8707a26db0da913fb61575938135b86bc8bd9a03f3414905ef5657e34f6372",
+    "tools/audit_public_boundary.py": "4a7e876d199b657dd165dc260e956c7357a1a78ced49ed7aa4db2ad63ceea8f2",
+    "reports/android-app-api32.json": "a3ecbe680bea512ecfb79757e3f0c86a006e475c42b7c3945268b6dc5a077a92"
+  },
+  "framework_file_sha256": {
+    "Headers/NoteCanvasPrototype.h": "981c11a07040547f5a51ad871e21378b7aaebf3f178ba3770bdb057f478a5311",
+    "Info.plist": "08af0a302c9ffe24f38c581a71f64d700f202a95f7dee441ac7687786abd63b0",
+    "Modules/module.modulemap": "a59802188d1836a93eda67210cafb4d67e99e547814b8e4a2ffffa735376e08d",
+    "NoteCanvasPrototype": "f93641fa7ab383fc37cddf48b47bd991bbec7f602232a16756c8486f2f73b717"
+  },
+  "framework_build": "Observed successful 22-second offline framework build on 2026-11-04; same unchanged Kotlin/build inputs, retained static archive/header used for this 2026-11-06 Swift build/test. Header byte-identical to retained 981c11a0 baseline. No new framework ABI or shared implementation change.",
+  "fixture": {
+    "path": "reports/android-app-api32-20261031/process-checkpoint-71c676ae-bab8-426b-93d6-3308fa4f2ac9/prepare.ncp",
+    "sha256": "8e8707a26db0da913fb61575938135b86bc8bd9a03f3414905ef5657e34f6372",
+    "origin": "Original Android Store/worker pending checkpoint, copied as Base64 only into test source",
+    "embedded_bytes_sha256": "8e8707a26db0da913fb61575938135b86bc8bd9a03f3414905ef5657e34f6372",
+    "parent_report": "reports/android-app-api32.json",
+    "parent_report_sha256": "a3ecbe680bea512ecfb79757e3f0c86a006e475c42b7c3945268b6dc5a077a92"
+  },
+  "preservation": {
+    "original_note_count": 16,
+    "original_app_ids": [
+      "dev.notecore.preview",
+      "dev.notecore.sample.sketch.ios"
+    ],
+    "all_original_payloads_and_notes_unchanged": true,
+    "original_device_remained_shutdown": true,
+    "temporary_device_deleted": true
+  },
+  "scope": "Independent SketchHost public SDK semantic XCTest only: raw prepare counts, no reservation, state recheck, pending identity, test-only Foundation atomic write/read receipt, retained pending retirement and new-session single commit. Same 9 consumer regression cases also ran. No ordinary GUI, production IO/durability, physical stylus/heap, final public SDK approval or C1 freeze.",
+  "c1_gate_complete": false,
+  "whole_requirements_accepted": 0,
+  "evidence_sha256": {
+    "reports/sdk-consumer-conformance-20261106/summary.json": "07b183c3729a80f7caa6361d94c26af4cb62dd9a728bb9043cc56c8f9eb4a696",
+    "reports/sdk-consumer-conformance-20261106/framework.zip": "99e9fb9984647f326771c8364ad100cd2ab77e653d1a01a37f7f608356ee4154",
+    "reports/sdk-consumer-conformance-20261106/shutdown.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/build-for-testing.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/original-before.json": "52f3886e528dcbe0c1c670e65e51e43e79ff1161bbf641a6cb4b791d160cad6d",
+    "reports/sdk-consumer-conformance-20261106/devices-before-cleanup.stdout.log": "762b28cdbb02de481dbfdd43236d34668aae42fcab8fdd00527f10f3d319f599",
+    "reports/sdk-consumer-conformance-20261106/devices-before.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/xcode-version.stdout.log": "ee3fe26035862d2b9653c1a570be3eca4ee5be2815f0ce99ff2d8ffa3399e4c8",
+    "reports/sdk-consumer-conformance-20261106/boot.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/delete.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/device.json": "255f61f9d8e2b8711426848a691076ff6976ab0cfd14e4ecfcb1b51219981f6c",
+    "reports/sdk-consumer-conformance-20261106/test-tree.json": "d5936cc15c87b0b55284b2c235abfc5c4d9cb26ae0f09a2f2148cdb0d8394097",
+    "reports/sdk-consumer-conformance-20261106/devices-after.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/create-device.stdout.log": "f793321f401229e060ed4b3257ab723aeb231d53e33032d335181ae10938b308",
+    "reports/sdk-consumer-conformance-20261106/tests.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/test.stdout.log": "4394c1ffca903bea18659cfd0c7cd150c81049ae8eec99db8ce74611a47d4e2e",
+    "reports/sdk-consumer-conformance-20261106/run-as-executed.py.txt": "52c2e219210b69fc70c0cab4f8bed39a17f85f1ed21d5cd000804ccf98ec3ff8",
+    "reports/sdk-consumer-conformance-20261106/bootstatus.stdout.log": "76dd1bb01ff24fff350253f05b558405d221aa387f449d107adcc645b3e92e34",
+    "reports/sdk-consumer-conformance-20261106/framework-build-20261104.log": "fb2eb2209452da9b0bc9cdaa918adfba957a90673571be8b74f2ef00237b207a",
+    "reports/sdk-consumer-conformance-20261106/summary.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/cleanup.json": "faff9afd9cacb8ba0d6aeed75d5d4acde9de7a37e7ce899516085aa6005c62a5",
+    "reports/sdk-consumer-conformance-20261106/shutdown.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/original-after.json": "52f3886e528dcbe0c1c670e65e51e43e79ff1161bbf641a6cb4b791d160cad6d",
+    "reports/sdk-consumer-conformance-20261106/architecture.json": "3a5321a7e3d2038785f2f5f3d517645059628c38a16e2ca9569a6aff637c80c2",
+    "reports/sdk-consumer-conformance-20261106/devices-before.stdout.log": "5bae0a6d28215ced08b5f1dcbcaf5dd754b793e5e520f6c9fff54d5198bc8b53",
+    "reports/sdk-consumer-conformance-20261106/build-cache-cleanup.json": "3de2a7624e54762bc4c18fc818c264819d50e36cbbba2647062ce22299076be8",
+    "reports/sdk-consumer-conformance-20261106/devices-before-cleanup.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/xcode-version.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/framework-sha256.json": "91647b0340617876906137d4941fe25b5b1b823b1d1cb267fbb6b5a5eb60d02e",
+    "reports/sdk-consumer-conformance-20261106/executables.zip": "eaa6e2ee354b80adb16c2eda7ca39fe1e10bbab2f3d5f88ad89cd31e80fed2ca",
+    "reports/sdk-consumer-conformance-20261106/delete.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/create-device.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/devices-after.stdout.log": "5bae0a6d28215ced08b5f1dcbcaf5dd754b793e5e520f6c9fff54d5198bc8b53",
+    "reports/sdk-consumer-conformance-20261106/boot.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/source-at-start.json": "d92af1d8426bc1db6bbf2d8e2ad7b1c15230e3650718ff079b224e70bfc0831a",
+    "reports/sdk-consumer-conformance-20261106/portability.json": "587b6fab65b9519ece288ff39caa014e6a123eab0ca83baca139091c3058f160",
+    "reports/sdk-consumer-conformance-20261106/summary.stdout.log": "4907a9ae8f426b624f1915eb69522374246715e7929be0e465d8ec87887bf4ce",
+    "reports/sdk-consumer-conformance-20261106/execution.json": "8886644a1ea0c2a9957173fdc7376db939cc0e7dd66b52ae1372e39edae8a727",
+    "reports/sdk-consumer-conformance-20261106/retained-executable-sha256.json": "7826d27da71a3ce00c177dbac1ea635692f51c5b306f01966d730322574985d7",
+    "reports/sdk-consumer-conformance-20261106/tests.stdout.log": "749c91159c31c7d4706a8fca8ca4e31534576da6c4c8b9577872abb85d761e55",
+    "reports/sdk-consumer-conformance-20261106/test.stderr.log": "a4885f035108dd62e20c1e66d503c074ce5f9b328df444632bf0771044568055",
+    "reports/sdk-consumer-conformance-20261106/bootstatus.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/database.sqlite3": "d65f6bfec9d991f176d214ec34c1e5c59412e5abfb370bbdcd6432d532d2907a",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Info.plist": "aeaf320cafb58a7f3ed40b6e55c2525a498adfa301443f2c511e1cccb8673871",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~2mCs1YIeHS3QN5a3_UNt01uItCGF6m0mfBZrs4NtqIbw0dw6pgbGFRjKo7B6ISFWhDwxo71lprdFiU5r9W5Fjw==": "00c985f469afeeda6183b419a18836b03676b85959eb9e867f855c9ff2ff722d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~dGw8UuE0psJVYAz9JLq8eIMJDnFsBzK2TzMCiAzF8PjDnLrvpZzPTTyoOXp5coLsjtaIOFaNGiMPZcUq7GUexA==": "3a057477825714a5e22c077226f5b4e0b2beee878124a049009a148e7f4257fb",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~7IE2K5vaU_-kAOMwWW5nomxGGJy_9KpPq-VM3eNGJz8uRUiScdNAgOtgzuQ7yf5wIe_0-pnLvVpOsyyrfi9IkQ==": "42da50303c59f0d5131e0a5b0511d95d5e795e9355fbc07f9353d1e7e0b22950",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~4VqMqsI5lOfxRppnud6-VDWcNsU8J7VgFCJfW2dXPwOcAkvU-I8Um5yp9n0Zv6nr3VmcxYggaVMDFfR0U_vjKw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~HrEgKMCrjUarhEsDyOAiTiRlc5kj4OQ5Bbgx4LZupOJwIh5XA7xAFPsVAodcQmI01q0iKu4bfOajipY5c_pFsg==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~WFMGWIsqeUNDK7fr1trCVGqXzyRytxU3H04l8GxEEp22Cn7h1vyDezGT5xUx6M69AQTDLJQ4RHNB8WRLqaiEAg==": "323a9ef3e2d3c1f898a9bb45dc67a4cc94ee4bbbd0e67df15f2de669c58eb86a",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~CCb4TIewzhrfTq37_rIuMQ4-Cq7dV_Rd9DJBYl-BBegTf6_sG42Eu2HoebHoseMGdbi5cNmq99kMRcZID1m-Zw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~NQx4L1zLjG2vuorAH-zA2eCn1_DyThYL_srzgzmJBtg3fwAqJdmGVwBHL0MgtvawBvhTBr65AtkOPxvfb-Bikw==": "43f9fc78c3bb515179e56160cb71534afd7c944617106498c951b6333625af1b",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~fgbXxZqXX3j-2wrDjzKfBp21lxO9idTdtsY2yIbMSZnFpbliKYZuvLSEe7f-88rnghcDU6GaqPjsNa-f1pOxFg==": "f972c0a9834d76b867f9c667e94cdb3e4ac4e230401986f49d0ab51b61a9f7a6",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~hHxzrtnrrTE6ZbimK7tvbESdLEE_QW-6X__7tJa-WCMItA1VbqGZQl_3ZVTdfUmMCimsBYBa7sLEuy33QCCwTw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~zyfbJAUV1AuvABYr7d-0qobgAPGnCyNevE4sKcYvStlJr7AV6TTP5ohV1gdMbOFhj7mqTrC5wHWBF-uOlbdbzg==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~7vIpUmpGlxjDP2aBiB5vo6pOO8KAGQce7NYzCN1VAMZu41X_CdUftD1v6GvlDhfMWAjZwE2iWbPXrm7Zkf69ig==": "296315849d6618febf1d30bb06a308ed742852f7a0aa2757cc9116b94b207067",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~n3hFZlOKKonwnenUMM0k-LtuwOhLd6E2_jhlXN2686ULF_KvBq3EhsIp1Cu2zMT_KcV0vKrwx4-JDhb11C_IDw==": "263a34bd84928074bcaf8de828c2cbaf63170104f7b3cbb46b5bad771630ac78",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~LWwEU4Xelvfbzzh2rAA7Opba6k4q6xYgcA3tH2f3ZjyY-XNgPZf0QV8XUzJ1Il3cSaQlE03qRketkUgpFa_b7Q==": "d0ebc12d4d09b0a7f230fda3eb0432ce69914063f93bdef312f973a1676af6b4",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~zyfbJAUV1AuvABYr7d-0qobgAPGnCyNevE4sKcYvStlJr7AV6TTP5ohV1gdMbOFhj7mqTrC5wHWBF-uOlbdbzg==": "ccfa8521ed5968bc39eb3dda837e94e1b499783336a2596d5654082797a50a88",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~7vIpUmpGlxjDP2aBiB5vo6pOO8KAGQce7NYzCN1VAMZu41X_CdUftD1v6GvlDhfMWAjZwE2iWbPXrm7Zkf69ig==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~n3hFZlOKKonwnenUMM0k-LtuwOhLd6E2_jhlXN2686ULF_KvBq3EhsIp1Cu2zMT_KcV0vKrwx4-JDhb11C_IDw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~LWwEU4Xelvfbzzh2rAA7Opba6k4q6xYgcA3tH2f3ZjyY-XNgPZf0QV8XUzJ1Il3cSaQlE03qRketkUgpFa_b7Q==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~hHxzrtnrrTE6ZbimK7tvbESdLEE_QW-6X__7tJa-WCMItA1VbqGZQl_3ZVTdfUmMCimsBYBa7sLEuy33QCCwTw==": "9a39edf2b34f59cb60de4c6516450b0854480da4f8111ed10477d6263fe60eb9",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~fgbXxZqXX3j-2wrDjzKfBp21lxO9idTdtsY2yIbMSZnFpbliKYZuvLSEe7f-88rnghcDU6GaqPjsNa-f1pOxFg==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~CCb4TIewzhrfTq37_rIuMQ4-Cq7dV_Rd9DJBYl-BBegTf6_sG42Eu2HoebHoseMGdbi5cNmq99kMRcZID1m-Zw==": "9e5aac6afa93508a020d25b31cf7862e9968b4d589ca1db13d02d9864135803c",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~NQx4L1zLjG2vuorAH-zA2eCn1_DyThYL_srzgzmJBtg3fwAqJdmGVwBHL0MgtvawBvhTBr65AtkOPxvfb-Bikw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~WFMGWIsqeUNDK7fr1trCVGqXzyRytxU3H04l8GxEEp22Cn7h1vyDezGT5xUx6M69AQTDLJQ4RHNB8WRLqaiEAg==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~4VqMqsI5lOfxRppnud6-VDWcNsU8J7VgFCJfW2dXPwOcAkvU-I8Um5yp9n0Zv6nr3VmcxYggaVMDFfR0U_vjKw==": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~HrEgKMCrjUarhEsDyOAiTiRlc5kj4OQ5Bbgx4LZupOJwIh5XA7xAFPsVAodcQmI01q0iKu4bfOajipY5c_pFsg==": "c55fe483face0e56f6cc2a6f3e240ef4a48a72a7a4cbada036dcba68a33eb793",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~2mCs1YIeHS3QN5a3_UNt01uItCGF6m0mfBZrs4NtqIbw0dw6pgbGFRjKo7B6ISFWhDwxo71lprdFiU5r9W5Fjw==": "b3be451bf0b869e5d94fd6aab83a1faa3f73eba7aead915b2e87f14dc6d32663",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~dGw8UuE0psJVYAz9JLq8eIMJDnFsBzK2TzMCiAzF8PjDnLrvpZzPTTyoOXp5coLsjtaIOFaNGiMPZcUq7GUexA==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~7IE2K5vaU_-kAOMwWW5nomxGGJy_9KpPq-VM3eNGJz8uRUiScdNAgOtgzuQ7yf5wIe_0-pnLvVpOsyyrfi9IkQ==": "0a3e38a7ee2f4a7971fb4853eb1fdbd6acbeae91d43fcf4a6e70f65e3371434d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~FFV418A2zGpUWx8p2vnzUJ1wgdHYsSvhnwmA9FeMYrZHpPKnI8mglG7jzSaZZSKr13NdBdYyBkpEvbqdTKR6uw==": "23105c70a74b940fd92d99863a1078902f609a4e47cbebc382295eb6dfc4e1dd",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~jR0TroqA_ZWzzJdFZbnD1811VC2bFuJVK85nXncNsB5q2awA6IZeFZOQ7oN2uC16B_wgzO7PBZs1C_Pu1R03Lw==": "96c376f20c7fa9ca0c5954f3f75a1cbb0345ba02afa1616a361c2e5424ef5b50",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~bO-WGzE4yH53PXCq89D4YYqa_GQLGEVutimlhsqaxdVdmp3f-W5Y1y8kkMPVlHHZrCn6EwWPv3lcCPy8Ls35Pw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~VCY-oW706ChXGSy7fr6Xngz2YNQNfdgocBKPnKDLWyOyA8hado7NM3Fx0wwv4YBezVPM5wat5FJSmh_eg7Ttfg==": "00b2978e7dd0e3938078d898173e2d28f899ac1c9e2120c8903f3133928b59c4",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~w_W97yw3uXXjJrwNrDXhLk4dmdhrydfAIR0FPN_yaVUGXSU4OqCCAppqO7GI6dzxaM8H6Oy-D6UazHIeYc7q9A==": "d2b6c668bf8388e83023ca8a16120460c67764852c01a33aca3a14658aef15fb",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~cQT6FeyJzDnKewTefHRCu_kmmZrBKPeUyFmAv5GHUImfN9TD9lfTLCwPvFWOsE6bB8hzzMXlNHBKZ6RcZXhCFw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~DEL8UrlhFwoaL95598qJwDE_duc2gL-_Dob_lEx73VDwBcIwnsesGX_FTV5voQI5dz-oz1mO6JQXopv-DL4nUg==": "66063ef7ee846071e8bd47640ac4bd4b6c407c543a8fbf5f4bf92b6342f93a9c",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~8j2rbjH38Lza5XY1WJUaNsocheMZAy0ckLyHsPhU7_WEYS_5aTX2gz0si-HXTxEUvhX8XErgA-HzSbaIyXKrBQ==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~uBV7N05wBimBhNwvI3wqHRd2HPWP13VFyXEstGKEDBIDvSr_gmEsA-8AletKytyDLO--pqTtJHoG09F9VZx_LQ==": "4f7e3c6dfee2013ee809a5b31a8d9d79defbd1ea236e5c27135c2d2575bb6c20",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~SlZlY_FsptrWqsYyP32TNMs-kdOX8b1KZ0QTSz-vCFRjG8oc-KFZKljebe_cyU_GCpCfBmP03s1eHEb_RK-bxA==": "f76d2169369019fc3fbcf9db5f52c47efca01db53da5059eae51d205f4b73d82",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~SlZlY_FsptrWqsYyP32TNMs-kdOX8b1KZ0QTSz-vCFRjG8oc-KFZKljebe_cyU_GCpCfBmP03s1eHEb_RK-bxA==": "fd0b8d99ea44ab60fdc0a889ced45525d6430ad7aa0188ed561e88e286bf214d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~8j2rbjH38Lza5XY1WJUaNsocheMZAy0ckLyHsPhU7_WEYS_5aTX2gz0si-HXTxEUvhX8XErgA-HzSbaIyXKrBQ==": "c4dccc19a8fdec6358c2192d2b29cb24429616e7917cda3adfdee8bad29801e2",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~uBV7N05wBimBhNwvI3wqHRd2HPWP13VFyXEstGKEDBIDvSr_gmEsA-8AletKytyDLO--pqTtJHoG09F9VZx_LQ==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~w_W97yw3uXXjJrwNrDXhLk4dmdhrydfAIR0FPN_yaVUGXSU4OqCCAppqO7GI6dzxaM8H6Oy-D6UazHIeYc7q9A==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~cQT6FeyJzDnKewTefHRCu_kmmZrBKPeUyFmAv5GHUImfN9TD9lfTLCwPvFWOsE6bB8hzzMXlNHBKZ6RcZXhCFw==": "318eb1c2534e508bb0676be37ae8ce386d6a650f0f1b558356cec80ac10cabf9",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~DEL8UrlhFwoaL95598qJwDE_duc2gL-_Dob_lEx73VDwBcIwnsesGX_FTV5voQI5dz-oz1mO6JQXopv-DL4nUg==": "63301362534708befcf18f9f4f854878c9b144a5303e164e94bb1de34d98b4de",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~VCY-oW706ChXGSy7fr6Xngz2YNQNfdgocBKPnKDLWyOyA8hado7NM3Fx0wwv4YBezVPM5wat5FJSmh_eg7Ttfg==": "0adc4e7614951e50cfabbd0bc02f28a24af51a339461f58d4b772e5db1a56a40",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~jR0TroqA_ZWzzJdFZbnD1811VC2bFuJVK85nXncNsB5q2awA6IZeFZOQ7oN2uC16B_wgzO7PBZs1C_Pu1R03Lw==": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/data.0~bO-WGzE4yH53PXCq89D4YYqa_GQLGEVutimlhsqaxdVdmp3f-W5Y1y8kkMPVlHHZrCn6EwWPv3lcCPy8Ls35Pw==": "6f8483c5546068ed5b2fbd0c2d9a88a7794ce7afd66d0adf460a9d693ab5afb8",
+    "reports/sdk-consumer-conformance-20261106/tests.xcresult/Data/refs.0~FFV418A2zGpUWx8p2vnzUJ1wgdHYsSvhnwmA9FeMYrZHpPKnI8mglG7jzSaZZSKr13NdBdYyBkpEvbqdTKR6uw==": "6990fb58069ed3c7a361ca3b1bcd7c38ffbffa9e58ac083274530bca1464017d"
+  },
+  "candidate_method_evidence": [
+    {
+      "objc_name": "NCPDocumentBudgetCompanion",
+      "swift_name": "validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "open(initial:sessionNonce:budget:ownerCheck:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "openRecovery(snapshot:sessionNonce:budget:ownerCheck:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentReader",
+      "swift_name": "read(text:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentReader",
+      "swift_name": "accept(root:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPreviewRecoveryCodec",
+      "swift_name": "read(text:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPApplePreviewInput",
+      "swift_name": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPrepareIsObservationAndBridgeRechecksChangedState()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "edit(request:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "prepareRealBatch(phase:count:)",
+      "declares_nserror": false,
+      "nullable_return": true,
+      "new_direct_swift_cases": [
+        "testPublicPrepareIsObservationAndBridgeRechecksChangedState()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "setReadOnly(value:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPrepareIsObservationAndBridgeRechecksChangedState()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "cancelStroke()",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "retryPendingStroke()",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pendingStroke()",
+      "declares_nserror": false,
+      "nullable_return": true,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "page(index:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "stroke(index:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointCount(index:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointX(index:point:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointY(index:point:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pointPressure(index:point:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "capture()",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "captureRecovery()",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPrepareIsObservationAndBridgeRechecksChangedState()",
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "snapshot()",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPrepareIsObservationAndBridgeRechecksChangedState()",
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "retire()",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPrepareIsObservationAndBridgeRechecksChangedState()",
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "retireAfterRecovery(snapshot:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "encode()",
+      "declares_nserror": true,
+      "nullable_return": true,
+      "new_direct_swift_cases": [
+        "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()"
+      ],
+      "semantic_scope": "New direct cases cover a finite behavioral subset; not full method conformance",
+      "complete_semantic_approval": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "sameContent(other:)",
+      "declares_nserror": false,
+      "nullable_return": false,
+      "new_direct_swift_cases": [],
+      "semantic_scope": "Declaration verified here; any older semantic evidence still needs a separate per-method review",
+      "complete_semantic_approval": false
+    }
+  ],
+  "candidate_properties_declaration_checks": [
+    {
+      "objc_name": "NCPDocumentBudgetCreation",
+      "swift_name": "budget",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPDocumentBudgetCreation",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentRead",
+      "swift_name": "root",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewDocumentRead",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewRecoveryRead",
+      "swift_name": "snapshot",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewRecoveryRead",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewNotebookOpen",
+      "swift_name": "notebook",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewNotebookOpen",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewNotebookOpen",
+      "swift_name": "documentReason",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewEditResult",
+      "swift_name": "accepted",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewEditResult",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewEditResult",
+      "swift_name": "rootRevision",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "disposition",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "acceptedSamples",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "activeSamples",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "admitted",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "failure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "inputReason",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewSessionFailure",
+      "swift_name": "kind",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPreviewSessionFailure",
+      "swift_name": "documentReason",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "root",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "pending",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "version",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "retainedByteCharge",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "encodingWorkByteCharge",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "isReadOnly",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "hasActiveStroke",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "hasPendingStroke",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "lastFailure",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "activeInputOperationId",
+      "class_property": false,
+      "nullable": true,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "inputReservedByteCharge",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "currentPage",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "pageCount",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    },
+    {
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "strokeCount",
+      "class_property": false,
+      "nullable": false,
+      "readonly": true,
+      "declares_nserror": false
+    }
+  ],
+  "host_io_precondition": "retireAfterRecovery only validates root/pending identity; the host must obtain the IO receipt. This test performs Foundation atomic write/read before the valid call. It does not demonstrate an IO receipt check implemented inside Core.",
+  "declaration_reference": {
+    "retained_header": "reports/candidate-public-boundary-20261031/NoteCanvasPrototype.h",
+    "sha256": "981c11a07040547f5a51ad871e21378b7aaebf3f178ba3770bdb057f478a5311",
+    "byte_identical": true,
+    "sdk_abi_frozen": false
+  },
+  "checks": [
+    "testBackgroundMutationKeepsInkVisibleAndRestoresBorrowedCaller()",
+    "testBorrowedBackgroundDrawsActualPixels()",
+    "testCoalescedUIKitAndResizeReplacementKeepCanonicalSession()",
+    "testEveryToolAndUnsupportedEditRejectBeforeMutatingCore()",
+    "testExplicitCancelAndRetirementKeepCompletedInk()",
+    "testForeignOwnerRefusesBeforeCoreAndImmutableCheckpointEncodesOffOwner()",
+    "testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()",
+    "testPublicPrepareIsObservationAndBridgeRechecksChangedState()",
+    "testReadOnlyInvalidToolAndRejectedBatchKeepAcceptedPrefix()",
+    "testSiblingCanvasLifecycleAndLateCallbacksCannotTakeAnotherInput()",
+    "testValidatedCreationAndHostInjectedToolsUseOriginalNotebook()"
+  ],
+  "kotlin_reference_counterparts": [
+    {
+      "source": "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputBudgetTest.kt",
+      "source_sha256": "ec874fa97cafec91b4f37f8dd646c9c6fdd6b22cefeb01cc13e62cbcc26e8722",
+      "source_commit": "c56ecb01b85ffd4dca750c37d8d238bb39381a8f",
+      "named_cases": [
+        "producerOverlapIsReservedBeforePreparationWithoutAcceptingSamplesOrIdentities",
+        "preparationRefusalKeepsPrefixAndSuccessMustBeRecheckedAfterRetirement",
+        "preparationValidatesRawCountsAndRequiresOriginalOwner"
+      ],
+      "historical_xml": [
+        {
+          "path": "reports/merge-20261030/xml/shared-core/jvmTest/TEST-dev.notecore.document.PreviewInputBudgetTest.xml",
+          "sha256": "dd7af1db496c45ab33330828fdcc3f3812983507b0a5f80313c2270e079206eb",
+          "platform": "jvmTest",
+          "historical_suite_count": 8
+        },
+        {
+          "path": "reports/merge-20261030/xml/shared-core/iosSimulatorArm64Test/TEST-dev.notecore.document.PreviewInputBudgetTest.xml",
+          "sha256": "bf449dc016abd2136b883ac2d645313b4481c53fe91a385f4dc9ffff248cbe28",
+          "platform": "iosSimulatorArm64Test",
+          "historical_suite_count": 8
+        }
+      ],
+      "rerun_this_turn": false
+    },
+    {
+      "source": "shared-core/src/commonTest/kotlin/dev/notecore/document/RetiredEditingStateTest.kt",
+      "source_sha256": "0209fe54c87e680863d2465fb5481a78cbc83db6f8e621b34d9413aa6dfb4318",
+      "source_commit": "c56ecb01b85ffd4dca750c37d8d238bb39381a8f",
+      "named_cases": [
+        "failedRecoveryRetirementKeepsEditingAndExactHandoffRetainsPendingForSingleNewOwnerCommit"
+      ],
+      "historical_xml": [
+        {
+          "path": "reports/merge-20261030/xml/shared-core/jvmTest/TEST-dev.notecore.document.RetiredEditingStateTest.xml",
+          "sha256": "ab5181e0f598343b06dbe31adda8a6436e5fc27f749cfb183a7f0a7db6aa24f8",
+          "platform": "jvmTest",
+          "historical_suite_count": 4
+        },
+        {
+          "path": "reports/merge-20261030/xml/shared-core/iosSimulatorArm64Test/TEST-dev.notecore.document.RetiredEditingStateTest.xml",
+          "sha256": "c84cb985e63b0aee368ef0892e8a0c418305483ed36e246cd462687e1c8fd185",
+          "platform": "iosSimulatorArm64Test",
+          "historical_suite_count": 4
+        }
+      ],
+      "rerun_this_turn": false
+    }
+  ],
+  "independent_target_dependencies": {
+    "app_sources": [
+      "Sources/SketchSession.swift",
+      "Sources/SketchCanvas.swift",
+      "Sources/SketchHostApp.swift"
+    ],
+    "linked_framework": [
+      "../../shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework"
+    ],
+    "app_target_dependencies": []
+  },
+  "build_cache_cleanup": {
+    "temporary_derived_data_removed": true,
+    "allocated_kib_before": 107764,
+    "retained_executables_verified": true,
+    "retained_sdk_verified": true,
+    "shared_framework_kept_for_remaining_SDK_work": true
+  }
+}

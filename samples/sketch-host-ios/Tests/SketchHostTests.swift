@@ -4,6 +4,81 @@ import NoteCanvasPrototype
 @testable import SketchHost
 
 final class SketchHostTests: XCTestCase {
+    @MainActor func testPublicPrepareIsObservationAndBridgeRechecksChangedState() throws {
+        let note = try session().notebook, root = note.snapshot()
+        let invalid: [(Int32, PreviewFailureKind)] = [(-1, .invalidInput), (0, .invalidInput),
+                                                     (1025, .inputBatchCapacity), (Int32.max, .inputBatchCapacity)]
+        for (count, kind) in invalid {
+            let refused = try XCTUnwrap(note.prepareRealBatch(phase: .down, count: count))
+            XCTAssertEqual(refused.failure?.kind, kind); XCTAssertEqual(refused.acceptedSamples, 0)
+            XCTAssertTrue(note.snapshot() === root); XCTAssertFalse(note.hasActiveStroke)
+            XCTAssertEqual(note.inputReservedByteCharge, 0)
+        }
+        func offerDown() -> PreviewInputResult {
+            ApplePreviewInput.shared.offer(notebook: note, phase: .down, eventTimeMicros: 1,
+                xs: [10.0].withUnsafeBytes { Data($0) }, ys: [20.0].withUnsafeBytes { Data($0) },
+                pressures: [Float(0.5)].withUnsafeBytes { Data($0) }, times: [Int64(1)].withUnsafeBytes { Data($0) })
+        }
+        for _ in 0..<3 { XCTAssertNil(note.prepareRealBatch(phase: .down, count: 1)) }
+        XCTAssertNil(note.activeInputOperationId); XCTAssertEqual(note.inputReservedByteCharge, 0)
+        XCTAssertTrue(note.setReadOnly(value: true))
+        let readonly = offerDown()
+        XCTAssertEqual(readonly.disposition, .rejected); XCTAssertEqual(readonly.failure?.kind, .readOnly)
+        XCTAssertEqual(readonly.acceptedSamples, 0); XCTAssertTrue(note.snapshot() === root)
+        XCTAssertTrue(note.setReadOnly(value: false)); XCTAssertNil(note.prepareRealBatch(phase: .down, count: 1))
+        let admittedCapture = note.captureRecovery() // Caller retains immutable responsibility before terminal retire.
+        XCTAssertTrue(note.retire())
+        let closed = offerDown()
+        XCTAssertEqual(closed.disposition, .rejected); XCTAssertEqual(closed.failure?.kind, .closed)
+        XCTAssertEqual(closed.acceptedSamples, 0); XCTAssertFalse(note.hasActiveStroke)
+        XCTAssertEqual(note.inputReservedByteCharge, 0); XCTAssertTrue(admittedCapture.root === root)
+    }
+
+    @MainActor func testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt() throws {
+        // Bytes produced by the original Android Store/worker, not a hand-seeded pending command.
+        let bytes = try XCTUnwrap(Data(base64Encoded: "TkNSRUNPVkVSWQkxCkQJcHJvY2Vzcy1yZWNvdmVyeQlwcm9jZXNzIGNoZWNrcG9pbnQJMQkwCTEKOTMJMjA5CTAwNzAwMDcyMDA2ZjAwNjMwMDY1MDA3MzAwNzMwMDJkMDA3MzAwNjUwMDY1MDA2NDAwMmQwMDZmMDA3MDAwMmQwMDMyCk5DUFJFVklFVwkyCkQJcHJvY2Vzcy1yZWNvdmVyeQlwcm9jZXNzIGNoZWNrcG9pbnQJMQkwCTEKRwlwYWdlCWxheWVyCTU5NS4wCTg0Mi4wCUJMQU5LCTAKRU5ECk5DUFJFVklFVwkyCkQJcHJvY2Vzcy1yZWNvdmVyeQkJMQkxCTAKRwlwYWdlCWxheWVyCTU5NS4wCTg0Mi4wCUJMQU5LCTAKUwlwcm9jZXNzLXNlZWQtaW5rLTMJbGF5ZXIJMQlNT05PTElORQkxCS0xNDMzOTUxMwkyLjUJMwkxLjAJMC4wCTAuMAkxLjAJMC4wCTAuMApQCTEuMjUJMi41CTAuMTI1CTcKUAkzLjAJNC4wCTAuNjI1CTkKUAk4LjAJNi4wCTEuMAkxMApFTkQKUkVDT1ZFUlktRU5ECg=="))
+        let text = String(decoding: bytes, as: UTF8.self)
+        let reading = PreviewRecoveryCodec.shared.read(text: text)
+        XCTAssertNil(reading.failure)
+        let checkpoint = try XCTUnwrap(reading.snapshot)
+        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+            journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
+            historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
+        func open(_ value: PagedPreviewSnapshot, nonce: String) throws -> PagedPreviewNotebook {
+            let result = PagedPreviewNotebook.companion.openRecovery(snapshot: value, sessionNonce: nonce,
+                budget: budget, ownerCheck: { precondition(Thread.isMainThread) })
+            XCTAssertNil(result.failure)
+            return try XCTUnwrap(result.notebook)
+        }
+        let note = try open(checkpoint, nonce: "swift-checkpoint")
+        let root = note.snapshot(), pending = try XCTUnwrap(note.pendingStroke())
+        XCTAssertTrue(note.hasPendingStroke); XCTAssertEqual(note.totalStrokeCount, 0)
+        XCTAssertFalse(note.retire()); XCTAssertEqual(note.lastFailure?.kind, .pendingStroke)
+        XCTAssertFalse(note.retireAfterRecovery(snapshot: note.capture()))
+        let foreign = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: text).snapshot)
+        XCTAssertFalse(note.retireAfterRecovery(snapshot: foreign))
+        XCTAssertTrue(note.snapshot() === root); XCTAssertTrue(note.pendingStroke() === pending)
+        let exact = note.captureRecovery()
+        XCTAssertEqual(try exact.encode(), text)
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".ncp")
+        defer { try? FileManager.default.removeItem(at: file) }
+        // Synchronous test fixture IO only; not a product UI storage path or power-loss guarantee.
+        try bytes.write(to: file, options: .atomic)
+        XCTAssertEqual(try Data(contentsOf: file), bytes)
+        XCTAssertTrue(note.retireAfterRecovery(snapshot: exact))
+        XCTAssertTrue(note.hasPendingStroke); XCTAssertFalse(note.retryPendingStroke())
+        XCTAssertEqual(note.lastFailure?.kind, .closed); XCTAssertEqual(try exact.encode(), text)
+        let reopened = try open(exact, nonce: "swift-reopened")
+        XCTAssertTrue(reopened.hasPendingStroke); XCTAssertTrue(reopened.retryPendingStroke())
+        XCTAssertTrue(reopened.retryPendingStroke()); XCTAssertEqual(reopened.totalStrokeCount, 1)
+        XCTAssertEqual(reopened.pointCount(index: 0), 3); XCTAssertEqual(reopened.changeVersion, 2)
+        XCTAssertEqual(try exact.encode(), text)
+        let committed = reopened.captureRecovery(), canonical = try committed.encode()
+        try Data(canonical.utf8).write(to: file, options: .atomic)
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), canonical)
+        XCTAssertTrue(reopened.retire()); XCTAssertEqual(try committed.encode(), canonical)
+    }
+
     private let tools = [SketchTool(label: "blue", argb: Int32(bitPattern: 0xff2563eb), width: 4),
                          SketchTool(label: "red", argb: Int32(bitPattern: 0xffdc2626), width: 7)]
     @MainActor private func session(background: @escaping (CGContext, CGRect) -> Void = { c, r in c.setFillColor(UIColor.white.cgColor); c.fill(r) }) throws -> SketchSession {
