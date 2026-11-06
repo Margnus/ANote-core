@@ -1,0 +1,89 @@
+from pathlib import Path
+import hashlib,json,plistlib,shutil,subprocess,zipfile,sys
+ROOT=Path.cwd(); RAW=ROOT/'reports/sdk-semantic-review-20261106'; RAW.mkdir(exist_ok=False)
+WORK=ROOT/'output/sdk-semantic-review-20261106'; ORIGINAL='7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
+FRAME=ROOT/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def save(p,v):p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+records=[]
+def run(argv,label,timeout=180,allowed=(0,)):
+ r=subprocess.run([str(x) for x in argv],cwd=ROOT,capture_output=True,timeout=timeout)
+ (RAW/(label+'.stdout.log')).write_bytes(r.stdout);(RAW/(label+'.stderr.log')).write_bytes(r.stderr)
+ records.append({'argv':[str(x) for x in argv],'label':label,'returncode':r.returncode});save(RAW/'execution.json',records)
+ assert r.returncode in allowed,(label,r.returncode,r.stderr[-2000:],r.stdout[-2000:])
+ return r.stdout.decode('utf-8')
+def devices(label):return json.loads(run(['xcrun','simctl','list','devices','-j'],label))['devices']
+def find(ds,uid):return next(d for group in ds.values() for d in group if d['udid']==uid)
+def files(folder):return {p.relative_to(folder).as_posix():sha(p) for p in sorted(folder.rglob('*')) if p.is_file()}
+def original():
+ root=Path.home()/'Library/Developer/CoreSimulator/Devices'/ORIGINAL/'data/Containers'; result={'apps':{},'notes':{}}
+ for app in (root/'Bundle/Application').glob('*/*.app'):
+  info=plistlib.loads((app/'Info.plist').read_bytes());bid=info.get('CFBundleIdentifier')
+  if bid in ('dev.notecore.preview','dev.notecore.sample.sketch.ios'):result['apps'][bid]=files(app)
+ for folder in (root/'Data/Application').glob('*'):
+  meta=folder/'.com.apple.mobile_container_manager.metadata.plist'
+  if meta.is_file() and plistlib.loads(meta.read_bytes()).get('MCMMetadataIdentifier')=='dev.notecore.preview':
+   result['notes']={p.name:sha(p) for p in sorted((folder/'Documents/PreviewNotes').glob('*.ncp'))}
+ return result
+before_devices=devices('devices-before');assert find(before_devices,ORIGINAL)['state']=='Shutdown'
+before=original();save(RAW/'original-before.json',before)
+assert before['apps'] and before['notes'],'Inspect original offline app/data baseline before proceeding'
+source=[p for module in ('canvas-core','shared-core') for p in (ROOT/module/'src').rglob('*.kt') if any(part in ('commonMain','iosMain','appleMain','nativeMain') for part in p.parts)]
+source += list((ROOT/'samples/sketch-host-ios').glob('Sources/*.swift'))+list((ROOT/'samples/sketch-host-ios').glob('Tests/*.swift'))
+source += [ROOT/p for p in ('build.gradle.kts','settings.gradle.kts','gradle.properties','canvas-core/build.gradle.kts','shared-core/build.gradle.kts','samples/sketch-host-ios/SketchHost.xcodeproj/project.pbxproj','samples/sketch-host-ios/SketchHost.xcodeproj/xcshareddata/xcschemes/SketchHost.xcscheme','tools/verify_sketch_ios_host.py')]
+fixture=next((ROOT/'reports/android-app-api32-20261031').glob('process-checkpoint-*/prepare.ncp'));source.append(fixture)
+inputs={p.relative_to(ROOT).as_posix():sha(p) for p in source};save(RAW/'source-at-start.json',inputs)
+framework=files(FRAME);save(RAW/'framework-sha256.json',framework)
+prior=json.loads((ROOT/'reports/sdk-consumer-conformance.json').read_text(encoding='utf-8'));assert prior['status']=='passed' and framework==prior['framework_file_sha256']
+assert sha(ROOT/'reports/sdk-consumer-conformance-20261106/framework.zip')==prior['evidence_sha256']['reports/sdk-consumer-conformance-20261106/framework.zip']
+for p,v in prior['source_sha256'].items():
+ if p.startswith(('canvas-core/src/','shared-core/src/')):assert sha(ROOT/p)==v,p
+assert sha(FRAME/'Headers/NoteCanvasPrototype.h')==sha(ROOT/'reports/candidate-public-boundary-20261031/NoteCanvasPrototype.h')
+shutil.copy2(ROOT/'output/sdk-consumer-conformance-20261104/framework-build.log',RAW/'framework-build-20261104.log')
+shutil.copy2(WORK/'build-for-testing.log',RAW/'build-for-testing.log');shutil.copy2(Path(__file__),RAW/'run-as-executed.py.txt')
+run(['xcodebuild','-version'],'xcode-version')
+runtime='com.apple.CoreSimulator.SimRuntime.iOS-27-0';kind='com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro';name='NoteCoreSDKReview-20261106'
+assert not any(d['name']==name for group in before_devices.values() for d in group)
+uid=run(['xcrun','simctl','create',name,kind,runtime],'create-device').strip();save(RAW/'device.json',{'udid':uid,'name':name,'type':kind,'runtime':runtime})
+passed=False;summary={};tree={}
+try:
+ run(['xcrun','simctl','boot',uid],'boot')
+ run(['xcrun','simctl','bootstatus',uid,'-b'],'bootstatus',timeout=300)
+ result=RAW/'tests.xcresult'
+ xctestrun=list((WORK/'DerivedData/Build/Products').glob('*.xctestrun'));assert len(xctestrun)==1
+ run(['xcodebuild','-quiet','-xctestrun',xctestrun[0],'-destination','platform=iOS Simulator,id='+uid,
+      '-parallel-testing-enabled','NO','-resultBundlePath',result,'-collect-test-diagnostics','never','test-without-building'],'test',timeout=600)
+ summary=json.loads(run(['xcrun','xcresulttool','get','test-results','summary','--path',result,'--format','json'],'summary'))
+ tree=json.loads(run(['xcrun','xcresulttool','get','test-results','tests','--path',result,'--format','json'],'tests'))
+ save(RAW/'summary.json',summary);save(RAW/'test-tree.json',tree)
+ assert summary['passedTests']==12 and summary['failedTests']==0 and summary['skippedTests']==0,summary
+ expected={'testPublicReadersRefuseWithoutPartialRootOrCapabilityConversion()','testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()'}
+ text=json.dumps(tree);assert all(name in text for name in expected)
+ with zipfile.ZipFile(RAW/'executables.zip','w',zipfile.ZIP_DEFLATED) as z:
+  for app in (WORK/'DerivedData/Build/Products/Debug-iphonesimulator').glob('*.app'):
+   for p in app.rglob('*'):
+    if p.is_file():z.write(p,app.name+'/'+p.relative_to(app).as_posix())
+  for test in (WORK/'DerivedData/Build/Products/Debug-iphonesimulator').glob('*.xctest'):
+   for p in test.rglob('*'):
+    if p.is_file():z.write(p,test.name+'/'+p.relative_to(test).as_posix())
+ save(RAW/'framework-reuse.json', {'parent_report':'reports/sdk-consumer-conformance.json','parent_report_sha256':sha(ROOT/'reports/sdk-consumer-conformance.json'),'archive':'reports/sdk-consumer-conformance-20261106/framework.zip','archive_sha256':sha(ROOT/'reports/sdk-consumer-conformance-20261106/framework.zip'),'rebuilt':False})
+ passed=True
+finally:
+ current=devices('devices-before-cleanup');d=find(current,uid);assert d['name']==name
+ if d['state']!='Shutdown':run(['xcrun','simctl','shutdown',uid],'shutdown')
+ run(['xcrun','simctl','delete',uid],'delete')
+ after_devices=devices('devices-after');assert not any(d['udid']==uid for group in after_devices.values() for d in group)
+ assert find(after_devices,ORIGINAL)['state']=='Shutdown'
+ after=original();save(RAW/'original-after.json',after);assert after==before,'Original app/notes changed'
+ save(RAW/'cleanup.json',{'temporary_device_deleted':True,'original_device_still_shutdown':True,'original_apps_and_notes_unchanged':True,'test_passed':passed})
+assert files(FRAME)==framework
+assert all(sha(ROOT/p)==v for p,v in inputs.items()),'Build/test inputs changed'
+report={'status':'passed','tests':12,'new_public_contract_cases':sorted(expected),'summary':summary,'source_sha256':inputs,'framework_file_sha256':framework,
+ 'framework_build':'Reused the exact static SDK file set and retained archive from sdk-consumer-conformance.json after matching every bound Core source; no new Native build. Header byte-identical to retained 981c11a0 baseline.',
+ 'fixture':{'path':fixture.relative_to(ROOT).as_posix(),'sha256':sha(fixture),'origin':'Original Android Store/worker pending checkpoint, copied as Base64 only into test source'},
+ 'preservation':{'original_note_count':len(before['notes']),'original_app_ids':sorted(before['apps']),'all_original_payloads_and_notes_unchanged':True,'original_device_remained_shutdown':True,'temporary_device_deleted':True},
+ 'scope':'Independent SketchHost public SDK semantic XCTest only: raw prepare counts, no reservation, state recheck, pending identity, test-only Foundation atomic write/read receipt, retained pending retirement and new-session single commit. Previous 11 consumer cases also ran, with the pending case strengthened for sameContent value equality versus handoff identity. No ordinary GUI, production IO/durability, physical stylus/heap, final public SDK approval or C1 freeze.',
+ 'c1_gate_complete':False,'whole_requirements_accepted':0}
+report['evidence_sha256']={p.relative_to(ROOT).as_posix():sha(p) for p in RAW.rglob('*') if p.is_file()}
+save(ROOT/'reports/sdk-semantic-review.json',report)
+print('12 XCTest cases passed; isolated simulator deleted; original payloads/notes unchanged',flush=True)

@@ -1,0 +1,74 @@
+from pathlib import Path
+import hashlib,json,sys,xml.etree.ElementTree as E
+ROOT=Path.cwd();sys.path.insert(0,str(ROOT/'tools'))
+from audit_public_boundary import inspect_header,check_candidate_channels,check_property_channels,CANDIDATE_PROPERTIES
+from verify_sketch_ios_host import EXPECTED,dependency_check
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+p=ROOT/'reports/sdk-semantic-review.json';r=json.loads(p.read_text(encoding='utf-8'));raw=ROOT/'reports/sdk-semantic-review-20261106'
+prior_path=ROOT/'reports/sdk-consumer-conformance.json';prior=json.loads(prior_path.read_text(encoding='utf-8'))
+legacy_path=ROOT/'reports/ios-host-tests.json';legacy=json.loads(legacy_path.read_text(encoding='utf-8'));legacy_names=set(legacy['checks'])
+assert legacy['status']=='passed' and legacy['test_count']==66
+legacy_sources={k:v for k,v in legacy['source_and_framework_sha256'].items() if k.startswith(('canvas-core/src/','shared-core/src/','ios-app/NoteCorePreview/','ios-app/NoteCorePreviewTests/'))}
+assert len(legacy_sources)==62
+assert all(sha(ROOT/k)==v for k,v in legacy_sources.items())
+r['source_sha256'].update(legacy_sources)
+header=ROOT/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h'
+declarations=inspect_header(header.read_text(encoding='utf-8'));methods=check_candidate_channels(declarations);props=check_property_channels(declarations,CANDIDATE_PROPERTIES)
+assert len(methods)==28 and len(props)==34
+old_rows={(x['objc_name'],x['swift_name']):x for x in prior['candidate_method_evidence']}
+reader='testPublicReadersRefuseWithoutPartialRootOrCapabilityConversion()';pending='testPublicPendingRetirementRequiresExactCheckpointAndHostIOReceipt()'
+legacy_map={
+ ('NCPDocumentBudgetCompanion','validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)'):['testRawBudgetFailuresDoNotTrapAndPreviewStillChecksPolicy()'],
+ ('NCPPagedPreviewNotebookCompanion','createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)'):['testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook()'],
+ ('NCPPagedPreviewNotebookCompanion','open(initial:sessionNonce:budget:ownerCheck:)'):['testValidatedOpeningReturnsTypedFailureAndUsesOriginalNotebook()'],
+ ('NCPPagedPreviewNotebook','edit(request:)'):['testTypedEditModelRejectsInvalidParametersWithoutLosingActiveInk()','testPublicReadingModeBlocksDirectEditsAndKeepsActivePrefix()'],
+ ('NCPPagedPreviewNotebook','page(index:)'):['testPagedSaveCloseAndNewOwnerReadAllPages()'],
+ ('NCPPagedPreviewNotebook','stroke(index:)'):['testCapturedStrokeTraversalRemainsImmutableAfterPageUndoAndRetirement()'],
+ ('NCPPagedPreviewNotebook','pointCount(index:)'):['testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()'],
+ ('NCPPagedPreviewNotebook','pointX(index:point:)'):['testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()'],
+ ('NCPPagedPreviewNotebook','pointY(index:point:)'):['testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()'],
+ ('NCPPagedPreviewNotebook','pointPressure(index:point:)'):['testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()']}
+indirect={('NCPPagedPreviewNotebook','cancelStroke()'):['testExplicitCancelAndRetirementKeepCompletedInk()'],
+ ('NCPPagedPreviewNotebookCompanion','createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)'):['testValidatedCreationAndHostInjectedToolsUseOriginalNotebook()']}
+extra={('NCPPreviewDocumentReader','read(text:)'):[reader],('NCPPreviewDocumentReader','accept(root:)'):[reader],('NCPPreviewRecoveryCodec','read(text:)'):[reader,pending],('NCPPagedPreviewSnapshot','sameContent(other:)'):[pending]}
+rows=[]
+for m in methods:
+ key=(m['objc_name'],m['swift_name']);row=dict(m)
+ row['direct_current_suite_cases']=sorted(set(old_rows[key]['new_direct_swift_cases']+extra.get(key,[])))
+ row['indirect_current_consumer_cases']=indirect.get(key,[])
+ row['historical_swift_app_cases']=legacy_map.get(key,[])
+ assert set(row['direct_current_suite_cases']+row['indirect_current_consumer_cases'])<=EXPECTED
+ assert set(row['historical_swift_app_cases'])<=legacy_names
+ row['historical_cases_source']='ios-app/NoteCorePreviewTests/PagedHostTests.swift' if row['historical_swift_app_cases'] else None
+ row['profile_contract']='Same original serial owner; validated values/known enums and synchronous immutable input. Snapshot comparison/encoding does not transfer save or resource responsibility.'
+ row['unproven_scope']='Finite cases only; not arbitrary Swift misuse, final public type closure, stable ABI or physical thresholds.'
+ if m['swift_name'].startswith(('page(','stroke(','point')):
+  row['profile_contract']='Check current counts and indices on the same owner. Valid-index reads only; invalid indices are programmer preconditions, not promised NSError failures. Captured immutable stroke data may outlive editing.'
+ if key==('NCPPagedPreviewNotebook','retireAfterRecovery(snapshot:)'):
+  row['profile_contract']='Caller must first obtain exact checkpoint IO confirmation. Core checks original root/pending identity only. Deep sameContent equality is insufficient.'
+ if key==('NCPPagedPreviewSnapshot','sameContent(other:)'):
+  row['profile_contract']='Semantic content equality, including pending; equal decoded content is not an owner/IO/retirement receipt. Same revision alone is insufficient.'
+ if key==('NCPPagedPreviewSnapshot','encode()'):
+  row['unproven_scope']='Successful encoding and declared NSError channel reviewed. No universal Throwable/owner failure recovery promise; valid snapshot/value preconditions still apply.'
+ if key==('NCPPagedPreviewNotebook','offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)'):
+  row['kotlin_reference']=prior['kotlin_reference_counterparts'][0]
+  row['indirect_current_consumer_cases']=['testPublicPrepareIsObservationAndBridgeRechecksChangedState()','testCoalescedUIKitAndResizeReplacementKeepCanonicalSession()']
+  row['profile_contract']='Kotlin/Android producer entry and internal callee of the NSData bridge. Swift producers here use ApplePreviewInput; direct Swift Kotlin-array interop is not approved by these tests.'
+  row['unproven_scope']='Final exposure/profile decision for direct Swift Kotlin-array calls remains open; do not equate internal execution with direct FFI conformance.'
+ row['final_sdk_approval']=False
+ assert row['direct_current_suite_cases'] or row['indirect_current_consumer_cases'] or row['historical_swift_app_cases'] or 'kotlin_reference' in row,key
+ rows.append(row)
+tree=json.loads((raw/'test-tree.json').read_text(encoding='utf-8'));flat=json.dumps(tree);assert all(name in flat for name in EXPECTED)
+r['checks']=sorted(EXPECTED);r['net_new_test_cases']=1;r['strengthened_existing_cases']=[pending]
+r['candidate_method_evidence']=rows;r['candidate_properties_declaration_checks']=props
+r['historical_swift_evidence_review']={'receipt':'reports/ios-host-tests.json','sha256':sha(legacy_path),'source_files_equal_current':62,'runtime_rerun':False,'framework_binary_revalidated':False,'scope':'Named historical actual Swift cases reused at their original App/source scope; not a fresh App-host run.'}
+r['parent_receipt_sha256']={'reports/sdk-consumer-conformance.json':sha(prior_path),'reports/ios-host-tests.json':sha(legacy_path)}
+r['declaration_header_sha256']=sha(header);r['independent_target_dependencies']=dependency_check()
+r['scope']+=' New reader cases explicitly check malformed/unsupported typed refusal pairs and no capability conversion. Canonical codec is used solely for trusted unsupported fixture setup; it is not approved as an arbitrary-input read API.'
+r['remaining_specific_gaps']=['Final public type/visibility closure and per-profile signature approval','Direct Swift Kotlin-array entry not exercised; selected Swift producer uses NSData bridge','Programmer owner/index/enum/value/callback preconditions are not arbitrary NSError-safe inputs','No universal encode/unknown exception recovery guarantee','Physical combined peak/M-1/stylus, actual long-unsignaled/vendor release and full C1/DEV-041 remain gated']
+r['source_sha256']['tools/audit_public_boundary.py']=sha(ROOT/'tools/audit_public_boundary.py')
+for k,v in r['source_sha256'].items():assert sha(ROOT/k)==v,k
+(raw/'method-evidence-review-as-executed.py.txt').write_bytes(Path(__file__).read_bytes())
+r['evidence_sha256']={x.relative_to(ROOT).as_posix():sha(x) for x in raw.rglob('*') if x.is_file()}
+p.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print({'suite_cases':12,'method_rows':28,'declaration_properties':34,'current_direct_subset_rows':sum(bool(x['direct_current_suite_cases']) for x in rows),'historical_app_sources_checked':62,'all_rows_have_evidence_disposition':True,'full_sdk_approved':False})

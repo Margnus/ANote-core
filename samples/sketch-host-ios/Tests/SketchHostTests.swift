@@ -56,7 +56,10 @@ final class SketchHostTests: XCTestCase {
         XCTAssertFalse(note.retire()); XCTAssertEqual(note.lastFailure?.kind, .pendingStroke)
         XCTAssertFalse(note.retireAfterRecovery(snapshot: note.capture()))
         let foreign = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: text).snapshot)
-        XCTAssertFalse(note.retireAfterRecovery(snapshot: foreign))
+        XCTAssertTrue(checkpoint.sameContent(other: foreign))
+        XCTAssertTrue(note.captureRecovery().sameContent(other: foreign))
+        XCTAssertFalse(note.capture().sameContent(other: foreign)) // Pending is part of content responsibility.
+        XCTAssertFalse(note.retireAfterRecovery(snapshot: foreign)) // Value equality is not the original handoff identity.
         XCTAssertTrue(note.snapshot() === root); XCTAssertTrue(note.pendingStroke() === pending)
         let exact = note.captureRecovery()
         XCTAssertEqual(try exact.encode(), text)
@@ -74,9 +77,50 @@ final class SketchHostTests: XCTestCase {
         XCTAssertEqual(reopened.pointCount(index: 0), 3); XCTAssertEqual(reopened.changeVersion, 2)
         XCTAssertEqual(try exact.encode(), text)
         let committed = reopened.captureRecovery(), canonical = try committed.encode()
+        let decoded = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: canonical).snapshot)
+        XCTAssertTrue(committed.sameContent(other: decoded))
+        let changedTitle = canonical.replacingOccurrences(of: "process checkpoint", with: "same revision different title")
+        XCTAssertNotEqual(changedTitle, canonical)
+        let other = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: changedTitle).snapshot)
+        XCTAssertEqual(committed.version, other.version)
+        XCTAssertFalse(committed.sameContent(other: other))
+        XCTAssertEqual(try committed.encode(), canonical)
         try Data(canonical.utf8).write(to: file, options: .atomic)
         XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), canonical)
         XCTAssertTrue(reopened.retire()); XCTAssertEqual(try committed.encode(), canonical)
+    }
+
+    @MainActor func testPublicReadersRefuseWithoutPartialRootOrCapabilityConversion() throws {
+        let host = try session(), note = host.notebook
+        XCTAssertTrue(host.offer(.down, points: [point(10, 1)]).accepted)
+        XCTAssertTrue(host.offer(.up, points: [point(20, 2)]).accepted)
+        let captured = note.captureRecovery(), text = try captured.encode(), originalRoot = note.snapshot()
+        let reading = PreviewDocumentReader.shared.read(text: text)
+        XCTAssertNil(reading.failure)
+        let root = try XCTUnwrap(reading.root)
+        let accepted = PreviewDocumentReader.shared.accept(root: root)
+        XCTAssertNil(accepted.failure); XCTAssertTrue(accepted.root === root)
+        for malformed in ["", "NCPREVIEW\t99\n", String(text.dropLast(4)), text + "trailing"] {
+            let refused = PreviewDocumentReader.shared.read(text: malformed)
+            XCTAssertNil(refused.root); XCTAssertEqual(refused.failure, .invalidOrUnsupportedFormat)
+        }
+        let invalidRecovery = PreviewRecoveryCodec.shared.read(text: "NCRECOVERY\t99\n")
+        XCTAssertNil(invalidRecovery.snapshot); XCTAssertEqual(invalidRecovery.failure, .invalidOrUnsupportedFormat)
+        for kind in ["PRESSURE", "HIGHLIGHTER"] {
+            let unsupported = text.replacingOccurrences(of: "MONOLINE", with: kind)
+            XCTAssertNotEqual(unsupported, text)
+            let refused = PreviewDocumentReader.shared.read(text: unsupported)
+            XCTAssertNil(refused.root); XCTAssertEqual(refused.failure, .unsupportedPreviewContent)
+            // Trusted canonical decode creates a valid non-preview fixture, not a recommended raw SDK read path.
+            let retained = try PagedPreviewCodec.shared.decode(text: unsupported)
+            let before = try PagedPreviewCodec.shared.encode(root: retained)
+            let adopted = PreviewDocumentReader.shared.accept(root: retained)
+            XCTAssertNil(adopted.root); XCTAssertEqual(adopted.failure, .unsupportedPreviewContent)
+            XCTAssertEqual(try PagedPreviewCodec.shared.encode(root: retained), before)
+        }
+        XCTAssertTrue(note.snapshot() === originalRoot)
+        XCTAssertEqual(try captured.encode(), text); XCTAssertEqual(note.totalStrokeCount, 1)
+        XCTAssertTrue(note.retire()) // Captured immutable responsibility remains with this test host.
     }
 
     private let tools = [SketchTool(label: "blue", argb: Int32(bitPattern: 0xff2563eb), width: 4),
