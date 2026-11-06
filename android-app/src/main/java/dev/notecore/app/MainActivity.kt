@@ -135,8 +135,12 @@ class MainActivity : Activity() {
         header.addView(button("保存") { store.retryRetainedWrites(); save() })
         header.addView(button("导出") { exportBackup() }); root.addView(header)
         val tools = row()
-        undoButton = button("撤销") { if (note.edit(PreviewEdit.Undo).accepted) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
-        redoButton = button("重做") { if (note.edit(PreviewEdit.Redo).accepted) { canvas?.refreshPage(); save(); updateControls() } else showError(note.lastError) }
+        undoButton = button("撤销") {
+            onEditAccepted(note.edit(PreviewEdit.Undo)) { canvas?.refreshPage(); save(); updateControls() }
+        }
+        redoButton = button("重做") {
+            onEditAccepted(note.edit(PreviewEdit.Redo)) { canvas?.refreshPage(); save(); updateControls() }
+        }
         tools.addView(undoButton); tools.addView(redoButton)
         tools.addView(Switch(this).apply { text = "手指书写"; isChecked = true; setOnCheckedChangeListener { _, enabled -> canvas?.cancelInk(); canvas?.fingerDrawing = enabled } })
         root.addView(tools)
@@ -164,8 +168,10 @@ class MainActivity : Activity() {
     private fun addPageTools(note: PagedPreviewNotebook) {
         val pages = row()
         fun action(content: Boolean = true, edit: () -> PreviewEditResult) {
-            if (edit().accepted) { canvas?.refreshPage(); updateControls(); if (content) save() else store.presentationChanged(note) }
-            else showError(note.lastError)
+            onEditAccepted(edit()) {
+                canvas?.refreshPage(); updateControls()
+                if (content) save() else store.presentationChanged(note)
+            }
         }
         previousPage = button("上一页") { action(false) { note.edit(PreviewEdit.SelectPage(note.page(note.currentPageIndex - 1).id.value)) } }
         nextPage = button("下一页") { action(false) { note.edit(PreviewEdit.SelectPage(note.page(note.currentPageIndex + 1).id.value)) } }
@@ -223,7 +229,7 @@ class MainActivity : Activity() {
         val note = notebook ?: return
         val field = EditText(this).apply { setText(note.title); selectAll(); maxLines = 1 }
         AlertDialog.Builder(this).setTitle("笔记名称").setView(field).setNegativeButton("取消", null).setPositiveButton("完成") { _, _ ->
-            if (note.edit(PreviewEdit.Rename(field.text.toString())).accepted) { updateControls(); save() } else showError(note.lastError)
+            onEditAccepted(note.edit(PreviewEdit.Rename(field.text.toString()))) { updateControls(); save() }
         }.show()
     }
     private fun save(): Boolean {
@@ -284,7 +290,7 @@ class MainActivity : Activity() {
         if (importRequestCode != null) { showError(getString(R.string.import_picker_busy)); return }
         if (exportRequestCode != null) { showError(getString(R.string.export_picker_busy)); return }
         canvas?.cancelInk()
-        if (!note.retryPendingStroke()) { showError(note.lastError); return }
+        if (!note.retryPendingStroke()) { showError(note.lastFailure.previewMessage()); return }
         val admission = store.beginExportPicker(note.capture())
         val code = admission.requestCode
         if (code == null) {
@@ -340,6 +346,9 @@ class MainActivity : Activity() {
                 } else showError(failure ?: "导入失败")
             }
         }
+    }
+    private inline fun onEditAccepted(result: PreviewEditResult, action: () -> Unit) {
+        if (result.accepted) action() else showError(result.failure.previewMessage())
     }
     private fun showError(message: String) {
         if (message.isBlank()) return

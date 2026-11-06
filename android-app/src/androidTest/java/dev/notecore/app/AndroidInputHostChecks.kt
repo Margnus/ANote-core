@@ -129,14 +129,14 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             val before = refused.note.snapshot()
             send(refused.view, MotionEvent.ACTION_DOWN, listOf(p))
             send(refused.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
-            check(refused.note.snapshot() === before && refused.errors.size == 1)
+            check(refused.note.snapshot() === before && refused.errors.single() == "此预览已达到笔迹容量；本笔未提交")
             check(!refused.note.hasActiveStroke && !refused.note.hasPendingStroke)
             check(refused.note.inputReservedByteCharge == 0L)
             val f = fixture(DocumentBudget(inputBytes = 200916)) // exact two-point reservation
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
             check(f.note.inputReservedByteCharge == 200916L)
             send(f.view, MotionEvent.ACTION_MOVE, listOf(p.copy(time = 1001), p.copy(time = 1002)))
-            check(f.errors.size == 1 && !f.note.hasActiveStroke && f.note.strokeCount == 0)
+            check(f.errors.single() == "此预览已达到笔迹容量；本笔未提交" && !f.note.hasActiveStroke && f.note.strokeCount == 0)
             check(f.note.inputReservedByteCharge == 0L) // native adapter explicitly cancels rejected stroke
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1003)))
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1004)))
@@ -152,6 +152,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1001)))
             check(!f.note.hasPendingStroke && !f.note.hasActiveStroke && f.note.totalStrokeCount == 0 && f.errors.size == 1)
             check(f.note.lastFailure?.documentReason == DocumentRejection.HISTORY_CAPACITY)
+            check(f.errors.single() == "当前预览已达到编辑容量，请保留笔记并导出备份；本笔未提交")
             check(f.note.snapshot() === before && f.note.authorityStatus() == status)
             check(f.note.inputReservedByteCharge == 0L && f.note.retire())
             checks.add("history_capacity_refuses_down_without_owning_samples")
@@ -170,6 +171,40 @@ internal class AndroidInputHostChecks(private val host: Activity) {
                 check(f.note.retire())
             }
             checks.add("journal_identity_capacity_refuses_before_real_view_ownership")
+        }
+        run {
+            val f = fixture(); val note = f.note
+            val root = note.snapshot()
+            val samples = (0..3).map { i -> Sample(400f + i * 10, 300f, 1000L + i) }
+            send(f.view, MotionEvent.ACTION_DOWN, samples.take(2))
+            check(note.hasActiveStroke)
+            // Same fault model as PreviewPostAdmissionFaultTest. Runtime quota
+            // revocation is unsupported in product code and injected only here.
+            val memory = note.javaClass.getDeclaredField("memory").apply { isAccessible = true }.get(note)
+            val budget = memory.javaClass.getDeclaredField("budget").apply { isAccessible = true }.get(memory)
+            val quota = budget.javaClass.getDeclaredField("journalBytes").apply { isAccessible = true }
+            val original = quota.getLong(budget)
+            try {
+                quota.setLong(budget, 0)
+                send(f.view, MotionEvent.ACTION_UP, samples.drop(2))
+                check(f.errors.single() == "已完成笔迹尚未提交，已保留，请重试保存" && f.changes[0] == 0)
+                check(!note.hasActiveStroke && note.snapshot() === root && note.totalStrokeCount == 0)
+                check(note.lastFailure?.documentReason == DocumentRejection.JOURNAL_CAPACITY)
+                val pending = checkNotNull(note.pendingStroke())
+                val ink = checkNotNull(note.pendingInk())
+                val checkpoint = note.captureRecovery()
+                check(checkpoint.pending === pending && checkpoint.root === root)
+                check(ink.samples.size == 4 && note.inputReservedByteCharge > 0)
+                send(f.view, MotionEvent.ACTION_UP, samples.drop(2))
+                f.view.cancelInk()
+                check(f.errors.size == 1 && f.changes[0] == 0 && note.pendingStroke() === pending)
+                check(!note.retryPendingStroke() && checkpoint.sameContent(note.captureRecovery()))
+            } finally { quota.setLong(budget, original) }
+            check(note.retryPendingStroke() && note.retryPendingStroke())
+            check(!note.hasPendingStroke && note.inputReservedByteCharge == 0L && note.totalStrokeCount == 1)
+            check(note.pointCount(0) == 4 && note.changeVersion == root.revision + 1)
+            check(note.retire())
+            checks.add("typed_pending_up_retains_exact_command_and_retries_once")
         }
         var oldFloatError: Double; var canonicalError: Double
         run {
@@ -213,7 +248,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             val f = fixture(); val p = Sample(400f, 300f, 1000)
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p))
             send(f.view, MotionEvent.ACTION_MOVE, listOf(p.copy(x = Float.NaN, time = 1001)))
-            check(!f.note.hasActiveStroke && f.note.strokeCount == 0 && f.errors.size == 1)
+            check(!f.note.hasActiveStroke && f.note.strokeCount == 0 && f.errors.single() == "输入数据无效；本笔未提交")
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 1002)))
             check(f.note.strokeCount == 0)
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 1003)))
@@ -237,7 +272,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             val oversized = (0..f.note.inputBatchLimit).map { p.copy(time = 1001L + it) }
             val observed = send(f.view, MotionEvent.ACTION_MOVE, oversized)
             check(observed.size > f.note.inputBatchLimit) // actual SDK history must exercise the admission limit
-            check(!f.note.hasActiveStroke && f.note.totalStrokeCount == 0 && f.errors.single().contains("超限"))
+            check(!f.note.hasActiveStroke && f.note.totalStrokeCount == 0 && f.errors.single() == "输入批次超限；本笔未提交")
             send(f.view, MotionEvent.ACTION_DOWN, listOf(p.copy(time = 3000)))
             send(f.view, MotionEvent.ACTION_UP, listOf(p.copy(time = 3001)))
             check(f.note.strokeCount == 1 && f.note.pointCount(0) == 2 && f.changes[0] == 1)
@@ -247,6 +282,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             .put("canonical_max_error", canonicalError).put("batch_sample_count", 7)
             .put("callback_real_batch_limit", 1024).put("down_history_included", true)
             .put("active_input_reservation_bytes", inputReservation).put("input_reservation_released_after_completion", true)
+            .put("typed_refusal_messages_checked", JSONArray(listOf("preflight_capacity", "history_capacity", "invalid_sample", "producer_limit")))
             .put("all_test_notes_in_memory", true).toString()
     }
 }

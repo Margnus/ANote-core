@@ -15,7 +15,8 @@ CHECKS = {'sibling_surface_preserves_original_input_and_rejects_stale_events', '
           'invalid_native_sample_cancels_and_recovers', 'resize_cancels_and_late_up_preserves_root',
           'callback_batch_limit_explicit_cancel_and_recover', 'document_capacity_refusal_and_undo_recovery',
           'live_byte_refusal_and_undo_recovery', 'input_byte_budget_refusal_cancel_and_recovery',
-          'history_capacity_refuses_down_without_owning_samples', 'journal_identity_capacity_refuses_before_real_view_ownership'}
+          'history_capacity_refuses_down_without_owning_samples', 'journal_identity_capacity_refuses_before_real_view_ownership',
+          'typed_pending_up_retains_exact_command_and_retries_once'}
 STORAGE_CHECKS = {'late_capture_refused_after_latest_ack_without_disk_rollback', 'local_file_identity_refusal_preserves_owner_input_and_io', 'derived_text_capacity_checkpoint_save_and_reopen', 'catalog_capacity_failure_preserves_owner_snapshot', 'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}

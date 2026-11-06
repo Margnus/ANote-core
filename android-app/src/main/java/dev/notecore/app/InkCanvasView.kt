@@ -161,11 +161,11 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     private fun realBatch(event: MotionEvent, index: Int, input: InputTransform, phase: PointerPhase): RealBatch? {
         val history = event.historySize
         if (history < 0 || history >= notebook.inputBatchLimit) {
-            cancelInk(); error("输入批次超限，本笔未提交"); return null
+            rejectInput("输入批次超限"); return null
         }
         val count = history + 1
         notebook.prepareRealBatch(phase, count)?.let {
-            cancelInk(); error(notebook.lastError + "；本笔未提交"); return null
+            rejectInput(it.failure.previewMessage()); return null
         }
         val xs = DoubleArray(count); val ys = DoubleArray(count); val pressures = FloatArray(count); val times = LongArray(count)
         for (i in 0 until count) {
@@ -179,9 +179,13 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         }
         return RealBatch(xs, ys, pressures, times)
     }
+    private fun rejectInput(message: String) {
+        cancelInk()
+        error(message + "；本笔未提交")
+    }
     private fun admit(batch: RealBatch, phase: PointerPhase): PreviewInputResult? {
         val result = batch.offer(notebook, phase)
-        if (!result.admitted) { cancelInk(); error(notebook.lastError + "；本笔未提交"); return null }
+        if (!result.admitted) { rejectInput(result.failure.previewMessage()); return null }
         return result
     }
     private fun appendPath(batch: RealBatch, from: Int = 0) {
@@ -215,9 +219,10 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 if (!stylus && !fingerDrawing) return true
                 val batch = realBatch(event, 0, input, PointerPhase.DOWN) ?: return true
                 val x = batch.xs.first(); val y = batch.ys.first()
-                if (!x.isFinite() || !y.isFinite()) { cancelInk(); error("输入数据无效，本笔未提交"); return true }
+                if (!x.isFinite() || !y.isFinite()) { rejectInput("输入数据无效"); return true }
                 if (x !in 0.0..notebook.currentPage.width || y !in 0.0..notebook.currentPage.height) return true
-                if (!notebook.selectPen(penColor, penWidth)) { error(notebook.lastError); return true }
+                val pen = notebook.edit(PreviewEdit.SelectPen(penColor, penWidth))
+                if (!pen.accepted) { error(pen.failure.previewMessage()); return true }
                 admit(batch, PointerPhase.DOWN) ?: return true
                 inputOperation = notebook.activeInputOperationId
                 activeStylus = stylus; activePointer = event.getPointerId(0); startX = x.toFloat(); startY = y.toFloat(); moved = false
@@ -239,7 +244,11 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                     val result = admit(batch, PointerPhase.UP) ?: return true
                     active = null; inputOperation = null; activePointer = -1; activeStylus = false
                     suppressSequence = event.pointerCount > 1
-                    if (result.disposition == PreviewInputDisposition.COMMITTED) changed() else error(notebook.lastError)
+                    when (result.disposition) {
+                        PreviewInputDisposition.COMMITTED -> changed()
+                        PreviewInputDisposition.PENDING_COMMIT -> error("已完成笔迹尚未提交，已保留，请重试保存")
+                        else -> error(result.failure.previewMessage())
+                    }
                     parent.requestDisallowInterceptTouchEvent(false); performClick()
                 }
             }
