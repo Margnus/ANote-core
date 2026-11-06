@@ -7,6 +7,7 @@ import android.widget.FrameLayout
 import dev.notecore.document.*
 import dev.notecore.canvas.prototype.SceneId
 import dev.notecore.canvas.prototype.LayerId
+import dev.notecore.canvas.prototype.StrokeSamples
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.abs
@@ -46,6 +47,59 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             return observed
         } finally { event.recycle() }
     }
+    // Reuse the JVM post-admission fault model in instrumented builds only.
+    private inline fun <T> withRevokedJournal(note: PagedPreviewNotebook, action: () -> T): T {
+        val memory = note.javaClass.getDeclaredField("memory").apply { isAccessible = true }.get(note)
+        val budget = memory.javaClass.getDeclaredField("budget").apply { isAccessible = true }.get(memory)
+        val quota = budget.javaClass.getDeclaredField("journalBytes").apply { isAccessible = true }
+        val original = quota.getLong(budget)
+        return try {
+            quota.setLong(budget, 0)
+            action()
+        } finally {
+            quota.setLong(budget, original)
+        }
+    }
+
+    fun captureViewPendingForProcess(note: PagedPreviewNotebook): PagedPreviewSnapshot {
+        check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
+        val root = note.snapshot()
+        val messages = mutableListOf<String>()
+        val view = InkCanvasView(host, note, { error("Pending input must not publish a commit") }, { messages.add(it) })
+        FrameLayout(host).addView(view)
+        view.layout(0, 0, 595, 842)
+        check(view.viewport.scale == 1.0 && view.viewport.offsetX == 0.0 && view.viewport.offsetY == 0.0)
+        val points = (0..3).map { Sample(100f + it * 10, 200f + it * 5, 1000L + it, (it + 1) * .125f) }
+        val down = send(view, MotionEvent.ACTION_DOWN, points.take(2))
+        check(down == points.take(2) && note.hasActiveStroke)
+        return withRevokedJournal(note) {
+            val up = send(view, MotionEvent.ACTION_UP, points.drop(2))
+            check(up == points.drop(2))
+            check(messages.single() == "已完成笔迹尚未提交，已保留，请重试保存")
+            check(!note.hasActiveStroke && note.snapshot() === root && note.totalStrokeCount == 0)
+            check(note.lastFailure?.documentReason == DocumentRejection.JOURNAL_CAPACITY)
+            val checkpoint = note.captureRecovery()
+            check(checkpoint.root === root && checkpoint.pending === note.pendingStroke())
+            val ink = checkNotNull(note.pendingInk())
+            checkProcessStroke(ink.samples)
+            check(note.inputReservedByteCharge > 0)
+            send(view, MotionEvent.ACTION_UP, points.drop(2))
+            view.cancelInk()
+            check(messages.size == 1 && note.pendingStroke() === checkpoint.pending)
+            checkpoint
+        }
+    }
+
+    companion object {
+        fun checkProcessStroke(samples: StrokeSamples) {
+            check(samples.size == 4)
+            for (i in 0..3) {
+                check(samples.x(i) == 100.0 + i * 10 && samples.y(i) == 200.0 + i * 5)
+                check(samples.pressure(i) == (i + 1) * .125f && samples.timeMicros(i) == (1000L + i) * 1000)
+            }
+        }
+    }
+
     fun verify(): String {
         check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
         val checks = mutableListOf<String>()
@@ -178,14 +232,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
             val samples = (0..3).map { i -> Sample(400f + i * 10, 300f, 1000L + i) }
             send(f.view, MotionEvent.ACTION_DOWN, samples.take(2))
             check(note.hasActiveStroke)
-            // Same fault model as PreviewPostAdmissionFaultTest. Runtime quota
-            // revocation is unsupported in product code and injected only here.
-            val memory = note.javaClass.getDeclaredField("memory").apply { isAccessible = true }.get(note)
-            val budget = memory.javaClass.getDeclaredField("budget").apply { isAccessible = true }.get(memory)
-            val quota = budget.javaClass.getDeclaredField("journalBytes").apply { isAccessible = true }
-            val original = quota.getLong(budget)
-            try {
-                quota.setLong(budget, 0)
+            withRevokedJournal(note) {
                 send(f.view, MotionEvent.ACTION_UP, samples.drop(2))
                 check(f.errors.single() == "已完成笔迹尚未提交，已保留，请重试保存" && f.changes[0] == 0)
                 check(!note.hasActiveStroke && note.snapshot() === root && note.totalStrokeCount == 0)
@@ -199,7 +246,7 @@ internal class AndroidInputHostChecks(private val host: Activity) {
                 f.view.cancelInk()
                 check(f.errors.size == 1 && f.changes[0] == 0 && note.pendingStroke() === pending)
                 check(!note.retryPendingStroke() && checkpoint.sameContent(note.captureRecovery()))
-            } finally { quota.setLong(budget, original) }
+            }
             check(note.retryPendingStroke() && note.retryPendingStroke())
             check(!note.hasPendingStroke && note.inputReservedByteCharge == 0L && note.totalStrokeCount == 1)
             check(note.pointCount(0) == 4 && note.changeVersion == root.revision + 1)

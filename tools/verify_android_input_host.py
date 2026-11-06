@@ -32,9 +32,11 @@ def digest(path):
 
 
 
-def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner_crash=False):
+def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner_crash=False, view_input=False):
     """Stop isolated processes after original worker bytes; optionally verify confirmed main-owner crashes only."""
     assert (args.path_api32 and args.serial == 'emulator-5586' and args.avd == 'NoteCorePath32') or (args.process_checkpoint and args.serial == 'emulator-5554' and args.avd == 'NoteCorePreview')
+    assert not (view_input and main_owner_crash)
+    input_args = ['-e', 'process_checkpoint_view_input', 'true'] if view_input else []
     scope = str(uuid.uuid4())
     local = folder / ('process-checkpoint-' + scope)
     local.mkdir()
@@ -45,7 +47,7 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
         log = local / (phase + '.log')
         with log.open('wb') as output:
             process = subprocess.Popen([args.adb, '-s', args.serial, 'shell', 'am', 'instrument', '-w', '-r',
-                '-e', 'notecore_case', 'process_checkpoint_' + phase, '-e', 'process_checkpoint_scope', scope,
+                '-e', 'notecore_case', 'process_checkpoint_' + phase, '-e', 'process_checkpoint_scope', scope, *input_args,
                 BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation'], cwd=ROOT, stdout=output, stderr=subprocess.STDOUT)
             try:
                 deadline = time.monotonic() + 60
@@ -58,6 +60,8 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
                         time.sleep(.1)
                 assert ready is not None, 'Checkpoint host did not confirm readiness'
                 assert ready['scope'] == scope and ready['owner_not_retired'] and ready['worker_not_stopped']
+                if view_input:
+                    assert ready['view_input'] and ready['save_receipt_observed'] and not wait_visible
                 assert ready['pending'] == pending
                 assert ready['stroke_count'] == strokes
                 assert ready['revision'] == revision
@@ -114,13 +118,13 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
     stop_stage('prepare','checkpoint-ready.json',1,0,True)
     stop_stage('resume','committed-ready.json',2,1,False)
     raw = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'process_checkpoint_verify',
-        '-e', 'process_checkpoint_scope', scope, BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
+        '-e', 'process_checkpoint_scope', scope, *input_args, BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
     (local / 'verify.log').write_text(raw, encoding='utf-8', newline='\n')
     assert 'process_checkpoint_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
     observed = json.loads(re.search(r'process_checkpoint_observations=(\{.*\})', raw).group(1))
     assert observed['pid'] not in [entry['pid'] for entry in killed]
     assert observed['scope'] == scope and observed['canonical_sha256'] == killed[-1]['document_sha256']
-    assert observed['stroke_count'] == 1 and observed['point_count'] == 3 and observed['revision'] == 2 and not observed['pending']
+    assert observed['stroke_count'] == 1 and observed['point_count'] == (4 if view_input else 3) and observed['revision'] == 2 and not observed['pending']
     assert observed['checkpoint_worker_write_verified'] and observed['repeated_commit_did_not_duplicate']
     assert not observed['unconfirmed_io_kill_verified'] and not observed['power_loss_verified']
     final = adb('exec-out', 'run-as', BUNDLE, 'cat', document)
@@ -130,6 +134,20 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
     result = {'scope_id':scope, 'killed_processes':list(killed), 'final_reopen':observed,
         'ordinary_ui_verified':False, 'native_pool_or_unsignaled_receipt_verified':False,
         'scope':'Confirmed-write subcase: original isolated Store/worker wrote and confirmed a pending checkpoint before full process force-stop. New PID reopened, committed once and confirmed canonical replacement before a second force-stop. Third PID reopened exact canonical bytes. Synthetic input/owner fault; no manually seeded checkpoint, partial-write kill, power loss or ordinary UI claim. The separate undelivered_completion subcase records visible worker bytes before owner delivery.'}
+    if view_input:
+        assert observed['view_input']
+        expected_points = [f'P\t{100.0 + i*10}\t{200.0 + i*5}\t{(i+1)*.125}\t{(1000+i)*1000}' for i in range(4)]
+        for path in ('prepare.ncp', 'resume.ncp', 'confirmed-final.ncp'):
+            rows = (local / path).read_text(encoding='utf-8').splitlines()
+            assert [line for line in rows if line.startswith('P\t')] == expected_points
+        assert (local / 'prepare.ncp').read_bytes().startswith(b'NCRECOVERY\t1\n')
+        assert final.startswith(b'NCPREVIEW\t2\n') and final == (local / 'resume.ncp').read_bytes()
+        result['sample_rows_verified_in_all_three_files'] = expected_points
+        result['scope'] = 'The original Android View handled real synthetic MotionEvent batches. Test-only quota revocation after DOWN caused typed pending UP. The original isolated Store/worker confirmed that exact capture, then two force-stops and a third process proved recovery, single commit, and canonical reopen with all four original samples.'
+        (local/'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+        for path in local.iterdir():
+            bindings[path.relative_to(ROOT).as_posix()] = digest(path)
+        return result
     if main_owner_crash:
         result['scope'] = 'Original Store/worker confirmed pending checkpoint, then platform shell-induced uncaught main exception terminated the process. New PID reopened, committed once and confirmed canonical replacement before a second uncaught main exception. Third PID reopened exact canonical bytes. No blocked-owner/undelivered-completion, partial-write, power-loss, hot takeover or native release claim.'
         (local / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')

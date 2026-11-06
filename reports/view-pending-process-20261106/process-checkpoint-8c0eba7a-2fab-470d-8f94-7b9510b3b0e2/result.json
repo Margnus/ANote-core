@@ -1,0 +1,60 @@
+{
+  "scope_id": "8c0eba7a-2fab-470d-8f94-7b9510b3b0e2",
+  "killed_processes": [
+    {
+      "pid": 2903,
+      "scope": "8c0eba7a-2fab-470d-8f94-7b9510b3b0e2",
+      "document_sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+      "revision": 1,
+      "stroke_count": 0,
+      "pending": true,
+      "owner_not_retired": true,
+      "worker_not_stopped": true,
+      "view_input": true,
+      "save_receipt_observed": true,
+      "instrumentation_command_returncode": 0,
+      "process_absent_after_force_stop": true,
+      "file_unchanged_after_kill": true,
+      "owner_confirmation_received": true
+    },
+    {
+      "pid": 3169,
+      "scope": "8c0eba7a-2fab-470d-8f94-7b9510b3b0e2",
+      "document_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+      "revision": 2,
+      "stroke_count": 1,
+      "pending": false,
+      "owner_not_retired": true,
+      "worker_not_stopped": true,
+      "view_input": true,
+      "save_receipt_observed": true,
+      "instrumentation_command_returncode": 0,
+      "process_absent_after_force_stop": true,
+      "file_unchanged_after_kill": true,
+      "owner_confirmation_received": true
+    }
+  ],
+  "final_reopen": {
+    "pid": 3394,
+    "scope": "8c0eba7a-2fab-470d-8f94-7b9510b3b0e2",
+    "canonical_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+    "stroke_count": 1,
+    "point_count": 4,
+    "view_input": true,
+    "revision": 2,
+    "pending": false,
+    "checkpoint_worker_write_verified": true,
+    "repeated_commit_did_not_duplicate": true,
+    "unconfirmed_io_kill_verified": false,
+    "power_loss_verified": false
+  },
+  "ordinary_ui_verified": false,
+  "native_pool_or_unsignaled_receipt_verified": false,
+  "scope": "The original Android View handled real synthetic MotionEvent batches. Test-only quota revocation after DOWN caused typed pending UP. The original isolated Store/worker confirmed that exact capture, then two force-stops and a third process proved recovery, single commit, and canonical reopen with all four original samples.",
+  "sample_rows_verified_in_all_three_files": [
+    "P\t100.0\t200.0\t0.125\t1000000",
+    "P\t110.0\t205.0\t0.25\t1001000",
+    "P\t120.0\t210.0\t0.375\t1002000",
+    "P\t130.0\t215.0\t0.5\t1003000"
+  ]
+}

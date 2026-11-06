@@ -28,6 +28,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var storageRetentionOnly = false
     private var processCheckpointCase: String? = null
     private var processCheckpointScope = ""
+    private var processCheckpointViewInput = false
     private var minimumApiOnly = false
     private var budgetOverlapOnly = false
     private var ownerRetirementOnly = false
@@ -53,6 +54,7 @@ class ViewportInstrumentation : Instrumentation() {
         if (arguments?.getString("notecore_case") == "pdf_inherited") pdfFixture = "inherited-geometry.pdf"
         processCheckpointCase = arguments?.getString("notecore_case")?.takeIf { it.startsWith("process_checkpoint_") }
         processCheckpointScope = arguments?.getString("process_checkpoint_scope") ?: ""
+        processCheckpointViewInput = arguments?.getString("process_checkpoint_view_input") == "true"
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
@@ -108,7 +110,7 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             processCheckpointCase?.let { phase ->
-                result.putString("process_checkpoint_observations",PendingRecoveryHostChecks(this,host).processCheckpoint(phase,processCheckpointScope))
+                result.putString("process_checkpoint_observations",PendingRecoveryHostChecks(this,host).processCheckpoint(phase, processCheckpointScope, processCheckpointViewInput))
                 result.putString("process_checkpoint_status","passed"); finish(Activity.RESULT_OK,result); return
             }
             if (budgetOverlapOnly) {

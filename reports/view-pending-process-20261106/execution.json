@@ -1,0 +1,892 @@
+[
+  {
+    "label": "devices-before",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "devices"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0001",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.boot.qemu.avd_name"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0002",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.build.version.sdk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0003",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.product.cpu.abi"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0004",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.build.fingerprint"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0005",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.build.version.sdk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0006",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.product.cpu.abi"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0007",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pm",
+      "list",
+      "packages",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0008",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "install",
+      "-r",
+      "/Users/lixiaofan/StudioProjects/notecore/android-app/build/outputs/apk/debug/android-app-debug.apk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0009",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "install",
+      "-r",
+      "/Users/lixiaofan/StudioProjects/notecore/android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0010",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pm",
+      "path",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0011",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "cat",
+      "/data/app/~~09IDWBgxvIBGPUfWD12Mdw==/dev.notecore.preview-MfObvOaLriF53BnxLzQC-w==/base.apk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0012",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pm",
+      "path",
+      "dev.notecore.preview.test"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0013",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "cat",
+      "/data/app/~~f8RbMsTY53YUBBpnIiXLBg==/dev.notecore.preview.test-dHemma5_d73k3FMVfDublw==/base.apk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0014",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "start",
+      "-W",
+      "-n",
+      "dev.notecore.preview/dev.notecore.app.MainActivity"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0015",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "ls",
+      "files/preview-notes"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0016",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "instrument",
+      "-w",
+      "-r",
+      "-e",
+      "notecore_case",
+      "input_batches",
+      "dev.notecore.preview.test/dev.notecore.app.ViewportInstrumentation"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0017",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "ls",
+      "files/preview-notes"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0018",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0019",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0020",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0021",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0022",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0023",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0024",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0025",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0026",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0027",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0028",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0029",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0030",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0031",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/checkpoint-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0032",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pidof",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0033",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/document/process-recovery.ncp"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0034",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pidof",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0035",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "ls",
+      "files/preview-notes"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0036",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "force-stop",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0037",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/document/process-recovery.ncp"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0038",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0039",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0040",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0041",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0042",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0043",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0044",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0045",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0046",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0047",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0048",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/committed-ready.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0049",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pidof",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0050",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/document/process-recovery.ncp"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0051",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pidof",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0052",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "ls",
+      "files/preview-notes"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0053",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "force-stop",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0054",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/document/process-recovery.ncp"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0055",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "instrument",
+      "-w",
+      "-r",
+      "-e",
+      "notecore_case",
+      "process_checkpoint_verify",
+      "-e",
+      "process_checkpoint_scope",
+      "8c0eba7a-2fab-470d-8f94-7b9510b3b0e2",
+      "-e",
+      "process_checkpoint_view_input",
+      "true",
+      "dev.notecore.preview.test/dev.notecore.app.ViewportInstrumentation"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0056",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "run-as",
+      "dev.notecore.preview",
+      "cat",
+      "cache/process-recovery-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/document/process-recovery.ncp"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0057",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "ls",
+      "files/preview-notes"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0058",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "ls",
+      "files/preview-notes"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0059",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "force-stop",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0060",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "start",
+      "-W",
+      "-n",
+      "dev.notecore.preview/dev.notecore.app.MainActivity"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0061",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "run-as",
+      "dev.notecore.preview",
+      "ls",
+      "files/preview-notes"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0062",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pidof",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0063",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "uninstall",
+      "dev.notecore.preview.test"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0064",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "uninstall",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0065",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "emu",
+      "kill"
+    ],
+    "returncode": 0
+  }
+]
