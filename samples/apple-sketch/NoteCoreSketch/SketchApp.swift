@@ -7,6 +7,22 @@ struct SketchTool {
     let width: Double
 }
 
+func sketchFailureMessage(_ kind: PreviewFailureKind?) -> String {
+    switch kind {
+    case .closed: return "此草图会话已关闭"
+    case .pendingStroke: return "上一笔尚未提交，请先重试"
+    case .activeStroke: return "请先完成当前笔画"
+    case .readOnly: return "只读模式不能修改草图"
+    case .historyEmpty: return "没有可撤销或重做的操作"
+    case .capacity, .documentRejected: return "操作未完成，原内容仍保留"
+    case .inputBatchCapacity: return "输入批次超限"
+    case .invalidInput: return "输入数据无效"
+    case .noActiveStroke: return "没有进行中的笔画"
+    case .identityExhausted: return "此草图会话编号已耗尽"
+    default: return "当前操作无法完成"
+    }
+}
+
 /// Host policy only. The original notebook remains the sole document authority.
 final class SketchSession {
     let notebook: PagedPreviewNotebook
@@ -70,7 +86,8 @@ final class SketchController: UIViewController {
         actions.axis = .horizontal; actions.distribution = .fillEqually
         for (index, tool) in session.tools.enumerated() {
             actions.addArrangedSubview(button(tool.title) { [weak self] in
-                guard let self else { return }; self.update(self.session.selectTool(index))
+                guard let self else { return }
+                self.refresh(self.session.selectTool(index) ? "" : "当前无法切换画笔")
             })
         }
         actions.addArrangedSubview(button("只读") { [weak self] in
@@ -78,10 +95,10 @@ final class SketchController: UIViewController {
             self.update(self.session.notebook.setReadOnly(value: !self.session.notebook.isReadOnly))
         })
         actions.addArrangedSubview(button("撤销") { [weak self] in
-            guard let self else { return }; self.update(self.session.notebook.edit(request: PreviewEditUndo.shared).accepted)
+            guard let self else { return }; self.update(self.session.notebook.edit(request: PreviewEditUndo.shared))
         })
         actions.addArrangedSubview(button("重做") { [weak self] in
-            guard let self else { return }; self.update(self.session.notebook.edit(request: PreviewEditRedo.shared).accepted)
+            guard let self else { return }; self.update(self.session.notebook.edit(request: PreviewEditRedo.shared))
         })
         let recovery = UIStackView()
         recovery.distribution = .fillEqually
@@ -109,7 +126,12 @@ final class SketchController: UIViewController {
         button.addAction(UIAction { _ in action() }, for: .touchUpInside)
         return button
     }
-    private func update(_ accepted: Bool) { refresh(accepted ? "" : session.notebook.lastError) }
+    private func update(_ accepted: Bool) {
+        refresh(accepted ? "" : sketchFailureMessage(session.notebook.lastFailure?.kind))
+    }
+    private func update(_ result: PreviewEditResult) {
+        refresh(result.accepted ? "" : sketchFailureMessage(result.failure?.kind))
+    }
     private func refresh(_ message: String) {
         status.text = "\(session.notebook.strokeCount) 笔 · \(session.notebook.isReadOnly ? "只读" : session.tools[session.toolIndex].title) \(message)"
         status.accessibilityIdentifier = "草图状态"

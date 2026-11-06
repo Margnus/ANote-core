@@ -1,0 +1,87 @@
+from pathlib import Path
+import hashlib
+import json
+import xml.etree.ElementTree as ET
+from zipfile import ZipFile
+
+raw=Path('reports/sdk-pending-display-20261106')
+work=Path('output/sdk-pending-display')
+def load(name):
+    return json.loads((raw/name).read_text(encoding='utf-8'))
+def sha(path):
+    with path.open('rb') as f:
+        return hashlib.file_digest(f,'sha256').hexdigest()
+def write(path,value):
+    path.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+initial=load('cleanup.json')
+cleanup=load('retry-cleanup.json')
+assert initial['temporary_device_deleted'] and initial['original_apps_and_notes_unchanged'] and not initial['test_passed']
+assert cleanup['test_passed'] and cleanup['temporary_device_deleted'] and cleanup['original_apps_and_notes_unchanged']
+failed=load('NoteCoreSketch-shared-device-failure/summary.json')
+assert failed['passedTests']==5 and failed['failedTests']==1
+assert failed['testFailures'][0]['failureText']=='XCTUnwrap failed: expected non-nil value of type "SketchSceneDelegate"'
+assert load('device.json')['udid']!=load('retry-device.json')['udid']
+assert len(load('original-before.json')['notes'])==16 and len(load('original-before.json')['apps'])==2
+assert load('architecture.json')['status']==load('portability.json')['status']=='passed'
+jvm={k:sum(int(ET.parse(p).getroot().get(k,'0')) for p in (raw/'shared-core-jvm-xml').glob('TEST-*.xml'))
+     for k in ('tests','failures','errors','skipped')}
+assert jvm=={'tests':350,'failures':0,'errors':0,'skipped':0},jvm
+swift={}
+for name,target,count in (('SketchHost','SketchHostTests',12),('NoteCoreSketch','NoteCoreSketchTests',6)):
+    summary=load(name+'/summary.json')
+    swift[name]={k:summary[k] for k in ('passedTests','failedTests','skippedTests')}
+    assert swift[name]=={'passedTests':count,'failedTests':0,'skippedTests':0}
+    with ZipFile(raw/name/'executables.zip') as z:
+        assert z.testzip() is None
+        assert any(p.endswith('.xctest/'+target) for p in z.namelist())
+with ZipFile(raw/'framework.zip') as z:
+    assert z.testzip() is None
+    assert {n:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist()}==load('framework-sha256.json')
+    assert z.read('Headers/NoteCanvasPrototype.h')==(raw/'NoteCanvasPrototype.h').read_bytes()
+
+graph=load('graph.json')
+assert (graph['selected_types'],graph['declared_types'],graph['all_members_reachable_types'])==(49,261,78)
+assert graph['types']['NCPPreviewPendingInk']['classification']=='selected_signature_or_value'
+assert all(graph['types'][n]['classification']!='selected_signature_or_value'
+           for n in ('NCPDocumentCommandCanvas','NCPCanvasCommand','NCPCanvasCommandAddStroke','NCPStrokeTarget'))
+assert graph['header_sha256']==sha(raw/'NoteCanvasPrototype.h')
+assert load('header-guards.json')['actual_header_candidate_properties']==35
+sources=load('source-at-runtime-start.json')
+assert all(sha(Path(p))==v for p,v in sources.items())
+parents=('reports/sdk-array-visibility.json','reports/sdk-array-visibility-20261106/NoteCanvasPrototype.h',
+         'reports/sdk-type-closure.json','reports/sdk-semantic-review.json',
+         'reports/android-app-api32-20261031/process-checkpoint-71c676ae-bab8-426b-93d6-3308fa4f2ac9/prepare.ncp')
+write(raw/'build-commands.json',{
+ 'gradle':{'offline':True,'apple_and_android_enabled':True,'local_kotlin_native':'2.2.21',
+           'tasks':[':shared-core:linkDebugFrameworkIosSimulatorArm64',':shared-core:jvmTest',':android-app:assembleDebug']},
+ 'xcode':[{'project':path,'scheme':scheme,'action':action,'destination':'generic/platform=iOS Simulator',
+           'derived_data':str((work/scheme).resolve()),'CODE_SIGNING_ALLOWED':'NO'} for path,scheme,action in (
+    ('samples/sketch-host-ios/SketchHost.xcodeproj','SketchHost','build-for-testing'),
+    ('samples/apple-sketch/NoteCoreSketch.xcodeproj','NoteCoreSketch','build-for-testing'),
+    ('ios-app/NoteCorePreview.xcodeproj','NoteCorePreview','build'))],
+ 'strict_projection_typechecks':[
+    {'module':name,'sources':[str(p) for p in sorted(Path(src).glob('*.swift'))],
+     'target':'arm64-apple-ios18.0-simulator','flags':['-typecheck','-F',str(work/'strict')],
+     'exit':0} for name,src in (
+       ('SketchHost','samples/sketch-host-ios/Sources'),('NoteCoreSketch','samples/apple-sketch/NoteCoreSketch'))]})
+report={
+ 'schema':'preview-pending-display-1','status':'passed',
+ 'changes':{
+     'pending_display':'Owner-side nullable PreviewPendingInk holding existing immutable samples and brush. Current-page read only. No sample buffer copy, command reconstruction or ownership transfer.',
+     'saved_identity':'Raw checkpoint pending/root references and original retry/retire/save implementation remain the App persistence contract.',
+     'uikit_status':'Input/preflight refusals and edit results supply typed failure kinds. Mode/retry Boolean APIs read the immediate typed failure. Host validation supplies its own messages.'},
+ 'verification':{
+     'sketch_host_simulator_suites':swift,'shared_core_jvm':jvm,'android_debug_build':True,'original_ios_app_build':True,
+     'strict_projected_header_both_sample_sources_typecheck':True,
+     'added_header_declarations_only':True,'physical_device_executed':False,
+     'uikit_initial_shared_device':{'passed':5,'failed':1,'failure':'Original scene delegate missing after testing a different app with the same bundle ID',
+       'retry':'Tested the existing build on a fresh simulator dedicated to the UIKit suite. Same installed bundle ID is consistent with the observed scene fixture conflict.'}},
+ 'candidate_types':{'previous':53,'current':49,'full_compiler_declarations':261,'reviewed_methods':27,'reviewed_properties':35},
+ 'preservation':{'original_simulator_shutdown':True,'notes_preserved':16,'apps_preserved':2,'temporary_devices_deleted':2},
+ 'source_sha256':sources,'parent_receipt_sha256':{p:sha(Path(p)) for p in parents},
+ 'evidence_sha256':{str(p):sha(p) for p in sorted(raw.rglob('*')) if p.is_file()},
+ 'sdk_frozen':False,'c1_complete':False,'dev_041_released':False,'whole_requirements_accepted':0,
+ 'scope':'Actual original framework build and two isolated Swift sample unit suites. The projected header is a typecheck input. The App retains raw checkpoint identity and compatibility members. Simulator input rejection uses direct synthetic UIKit callbacks. Android and the original iOS App scope is build only. Logical charge invariants do not establish physical heap or storage durability.'}
+write(Path('reports/sdk-pending-display.json'),report)
+print(swift,len(sources)+len(report['parent_receipt_sha256'])+len(report['evidence_sha256']))

@@ -37,9 +37,6 @@ VALUE_MEMBERS = {
     'NCPLayerId': ('value',),
     'NCPDocumentRoot': ('id', 'title', 'revision', 'pageCount'),
     'NCPPagedPreviewSnapshot': ('documentId', 'title'),
-    'NCPDocumentCommandCanvas': ('command',),
-    'NCPCanvasCommandAddStroke': ('samples', 'target'),
-    'NCPStrokeTarget': ('brush',),
     'NCPStrokeObject': ('samples', 'brush', 'transform'),
     'NCPStrokeSamples': ('size', 'x(index:)', 'y(index:)', 'pressure(index:)', 'timeMicros(index:)'),
     'NCPBrushSpec': ('argb', 'width'),
@@ -131,10 +128,9 @@ def audit(header):
     selected = selected_members(declarations)
     roots = set(CANDIDATE_METHODS) | set(CANDIDATE_PROPERTIES)
     # Protocol conformance is one-way in the generated declaration. The
-    # consumer must construct edit variants and downcast the pending command.
+    # consumer must construct the typed edit variants.
     consumer_edges = {
         'NCPPreviewEdit': [('<typed request construction>', name) for name in sorted(EDIT_VARIANTS)],
-        'NCPCanvasCommand': [('<pending display downcast>', 'NCPCanvasCommandAddStroke')],
     }
     for protocol, edges in consumer_edges.items():
         assert all('<'+protocol+'>' in declarations[target]['inheritance'] for _, target in edges)
@@ -165,7 +161,7 @@ def audit(header):
     }
 
 
-def projected_header(header, report, include_legacy_error=False):
+def projected_header(header, report):
     """Compiler probe only. Preserve selected declarations in a copy of the real header."""
     pattern = re.compile(
         r'((?:^__attribute__[^\n]*\n)*^@(interface|protocol) (NCP\w+)([^;\n]*)\n)(.*?)^@end',
@@ -180,8 +176,6 @@ def projected_header(header, report, include_legacy_error=False):
         if 'selected_path' not in item:
             return ''
         allowed = set(item['selected_members'])
-        if include_legacy_error and name == 'NCPPagedPreviewNotebook':
-            allowed.add('lastError')
         lines = []
         for line in body.splitlines(keepends=True):
             if line.startswith(('- (', '+ (', '@property ')) and 'unavailable' not in line:
@@ -200,22 +194,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('header', type=Path)
     parser.add_argument('--projected-header', type=Path)
-    parser.add_argument('--include-legacy-error', action='store_true',
-                        help='Also retain the older NoteCoreSketch status label accessor in the probe header')
     args = parser.parse_args()
-    if args.include_legacy_error and args.projected_header is None:
-        parser.error('--include-legacy-error requires --projected-header')
     if args.projected_header and args.projected_header.resolve() == args.header.resolve():
         parser.error('projected header must be written to a different path')
     header = args.header.read_bytes()
     result = audit(header.decode('utf-8'))
     result['header_sha256'] = hashlib.sha256(header).hexdigest()
     if args.projected_header:
-        projection = projected_header(header.decode('utf-8'), result, args.include_legacy_error)
+        projection = projected_header(header.decode('utf-8'), result)
         expected = {name: set(item['selected_members']) for name, item in result['types'].items()
                     if 'selected_path' in item}
-        if args.include_legacy_error:
-            expected['NCPPagedPreviewNotebook'].add('lastError')
         actual = {name: set(item['members']) for name, item in parse_header(projection).items()}
         assert actual == expected, 'Projected declarations differ from selected profile'
         args.projected_header.write_text(projection, encoding='utf-8')

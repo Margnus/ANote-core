@@ -399,6 +399,12 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (!commit(command)) return false
         pending = null; return true
     }
+    /** Read-only display of completed ink on the selected page. Shares immutable sample/brush values. */
+    fun pendingInk(): PreviewPendingInk? {
+        ownerCheck()
+        val command = pending?.takeIf { it.pageId == selected }?.command as? CanvasCommand.AddStroke ?: return null
+        return PreviewPendingInk(command.samples, command.target.brush)
+    }
     /** Immutable completed command remains here after capacity failure; cancel/selection cannot discard it. */
     fun pendingStroke(): DocumentCommand.Canvas? { ownerCheck(); return pending }
     /** Host calls only after immutable snapshot admission. Pending completed ink prevents retirement. */
@@ -479,6 +485,9 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             DocumentRoot.empty(SceneId(documentId), title, PageDescriptor(PageId("$sessionNonce-page-0"), LayerId("$sessionNonce-layer-0"), 595.0, 842.0)), sessionNonce)
     }
 }
+
+/** Drawing data only. Checkpoint capture and retirement still use the original pending command. */
+class PreviewPendingInk internal constructor(val samples: StrokeSamples, val brush: BrushSpec)
 
 /** Immutable original save input. Recovery does not advance the committed document revision. */
 class PagedPreviewSnapshot internal constructor(val root: DocumentRoot, val pending: DocumentCommand.Canvas? = null) : PreviewSaveSnapshot {

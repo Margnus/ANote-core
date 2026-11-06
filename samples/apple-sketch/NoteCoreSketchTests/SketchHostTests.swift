@@ -27,6 +27,29 @@ final class SketchHostTests: XCTestCase {
         XCTAssertEqual(note.strokeWidth(index: 0), host.tools[1].width)
     }
 
+    @MainActor func testRejectedRealMoveDisplaysTypedFailureAndKeepsPrefix() {
+        let host = session(), note = host.notebook, canvas = SketchCanvas(session: host)
+        canvas.frame = CGRect(x: 0, y: 0, width: 595, height: 842)
+        canvas.layoutIfNeeded()
+        let touch = StatusProbeTouch()
+        var message = ""
+        canvas.changed = { message = $0 }
+        canvas.touchesBegan([touch], with: nil)
+        let operation = note.activeInputOperationId
+        XCTAssertNotNil(operation)
+        let charge = note.inputReservedByteCharge
+        let root = note.snapshot()
+        touch.seconds = 0.5 // Older than the accepted DOWN. The core rejects the entire batch.
+        canvas.touchesMoved([touch], with: nil)
+        XCTAssertEqual(note.lastFailure?.kind, .invalidInput)
+        XCTAssertEqual(message, "输入数据无效；原前缀保留，可取消未完成笔")
+        XCTAssertEqual(note.activeInputOperationId, operation)
+        XCTAssertEqual(note.inputReservedByteCharge, charge)
+        XCTAssertTrue(note.snapshot() === root)
+        canvas.cancelUnfinished()
+        XCTAssertFalse(note.hasActiveStroke)
+    }
+
     @MainActor func testOriginalBatchBridgePreservesAllRealPointsAndHistory() {
         let host = session(), canvas = SketchCanvas(session: host), note = host.notebook
         XCTAssertTrue(canvas.offer(phase: .down, xs: [1, 2], ys: [3, 4], pressures: [0.2, 0.4], times: [7, 8]).admitted)
@@ -128,4 +151,13 @@ final class SketchHostTests: XCTestCase {
         XCTAssertFalse(owned.hasActiveStroke); XCTAssertEqual(owned.inputReservedByteCharge, 0)
         XCTAssertTrue(owned.snapshot() === committed)
     }
+}
+
+
+private final class StatusProbeTouch: UITouch {
+    var seconds = 1.0
+    override var timestamp: TimeInterval { seconds }
+    override var force: CGFloat { 0.5 }
+    override var maximumPossibleForce: CGFloat { 1 }
+    override func location(in view: UIView?) -> CGPoint { CGPoint(x: 10, y: 20) }
 }

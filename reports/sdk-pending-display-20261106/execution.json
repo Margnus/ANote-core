@@ -1,0 +1,166 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-version"
+    ],
+    "label": "xcode-version",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "create",
+      "NoteCoreSDKPendingDisplay-20261106",
+      "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    ],
+    "label": "create-device",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "boot",
+      "EEC87815-358C-477A-8059-A916B3F5323C"
+    ],
+    "label": "boot",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "bootstatus",
+      "EEC87815-358C-477A-8059-A916B3F5323C",
+      "-b"
+    ],
+    "label": "bootstatus",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-quiet",
+      "-xctestrun",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-pending-display/SketchHost/Build/Products/SketchHost_iphonesimulator27.1-arm64.xctestrun",
+      "-destination",
+      "platform=iOS Simulator,id=EEC87815-358C-477A-8059-A916B3F5323C",
+      "-parallel-testing-enabled",
+      "NO",
+      "-only-testing:SketchHostTests",
+      "-resultBundlePath",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-pending-display-20261106/SketchHost/tests.xcresult",
+      "-collect-test-diagnostics",
+      "never",
+      "test-without-building"
+    ],
+    "label": "SketchHost-test",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "summary",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-pending-display-20261106/SketchHost/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "SketchHost-summary",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "tests",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-pending-display-20261106/SketchHost/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "SketchHost-tests",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-quiet",
+      "-xctestrun",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-pending-display/NoteCoreSketch/Build/Products/NoteCoreSketch_iphonesimulator27.1-arm64.xctestrun",
+      "-destination",
+      "platform=iOS Simulator,id=EEC87815-358C-477A-8059-A916B3F5323C",
+      "-parallel-testing-enabled",
+      "NO",
+      "-only-testing:NoteCoreSketchTests",
+      "-resultBundlePath",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-pending-display-20261106/NoteCoreSketch/tests.xcresult",
+      "-collect-test-diagnostics",
+      "never",
+      "test-without-building"
+    ],
+    "label": "NoteCoreSketch-test",
+    "returncode": 65
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before-cleanup",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "EEC87815-358C-477A-8059-A916B3F5323C"
+    ],
+    "label": "shutdown",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "delete",
+      "EEC87815-358C-477A-8059-A916B3F5323C"
+    ],
+    "label": "delete",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-after",
+    "returncode": 0
+  }
+]

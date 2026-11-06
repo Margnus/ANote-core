@@ -1,0 +1,2899 @@
+{
+  "structural_methods": 27,
+  "structural_properties": 35,
+  "roots": [
+    "NCPApplePreviewInput",
+    "NCPDocumentBudgetCompanion",
+    "NCPDocumentBudgetCreation",
+    "NCPPagedPreviewNotebook",
+    "NCPPagedPreviewNotebookCompanion",
+    "NCPPagedPreviewSnapshot",
+    "NCPPreviewDocumentRead",
+    "NCPPreviewDocumentReader",
+    "NCPPreviewEditResult",
+    "NCPPreviewInputResult",
+    "NCPPreviewNotebookOpen",
+    "NCPPreviewPendingInk",
+    "NCPPreviewRecoveryCodec",
+    "NCPPreviewRecoveryRead",
+    "NCPPreviewSessionFailure"
+  ],
+  "declared_types": 261,
+  "selected_types": 49,
+  "all_members_reachable_types": 78,
+  "outside_full_graph_types": 183,
+  "types": {
+    "NCPAdmissionRejection": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPAdmissionResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPAdmissionResultAdmitted": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPAdmissionResult",
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPAdmissionResultExisting": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPAdmissionResult",
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPAdmissionResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPAdmissionResult",
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPAffine2D": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "a": "@property (readonly) double a __attribute__((swift_name(\"a\")));",
+        "b": "@property (readonly) double b __attribute__((swift_name(\"b\")));",
+        "c": "@property (readonly) double c __attribute__((swift_name(\"c\")));",
+        "d": "@property (readonly) double d __attribute__((swift_name(\"d\")));",
+        "tx": "@property (readonly) double tx __attribute__((swift_name(\"tx\")));",
+        "ty": "@property (readonly) double ty __attribute__((swift_name(\"ty\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "stroke(index:)",
+          "to": "NCPStrokeObject"
+        },
+        {
+          "from": "NCPStrokeObject",
+          "member": "transform",
+          "to": "NCPAffine2D"
+        }
+      ]
+    },
+    "NCPAppleBrushJobExperiment": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPAppleBrushOwnerExperiment": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPAppleBrushReaderExperiment": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPAppleBrushResultExperiment": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPApplePreviewInput": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)": "- (NCPPreviewInputResult *)offerNotebook:(NCPPagedPreviewNotebook *)notebook phase:(NCPPointerPhase *)phase eventTimeMicros:(int64_t)eventTimeMicros xs:(NSData *)xs ys:(NSData *)ys pressures:(NSData *)pressures times:(NSData *)times __attribute__((swift_name(\"offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)\")));",
+        "shared": "@property (class, readonly, getter=shared) NCPApplePreviewInput *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": []
+    },
+    "NCPBase": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [],
+      "selected_members": {},
+      "selected_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "<inheritance>",
+          "to": "NCPBase"
+        }
+      ]
+    },
+    "NCPBoolean": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {}
+    },
+    "NCPBoundsD": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "stroke(index:)",
+          "to": "NCPStrokeObject"
+        },
+        {
+          "from": "NCPStrokeObject",
+          "member": "bounds()",
+          "to": "NCPBoundsD"
+        }
+      ]
+    },
+    "NCPBrushBlendMode": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushFillRule": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushGeometry": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushGeometryBudget": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushGeometryBuilder": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushGeometryRejection": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushGeometryResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPBrushGeometryResultReady": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPBrushGeometryResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushGeometryResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPBrushGeometryResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushKind": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "brush",
+          "to": "NCPBrushSpec"
+        },
+        {
+          "from": "NCPBrushSpec",
+          "member": "doCopy(kind:algorithmVersion:width:argb:)",
+          "to": "NCPBrushKind"
+        }
+      ]
+    },
+    "NCPBrushPathPlan": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushPathPlanResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPBrushPathPlanResultReady": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPBrushPathPlanResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushPathPlanResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPBrushPathPlanResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushPathPlanner": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushPathPrecision": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushPathRejection": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPBrushSpec": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "argb": "@property (readonly) int32_t argb __attribute__((swift_name(\"argb\")));",
+        "width": "@property (readonly) double width __attribute__((swift_name(\"width\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "brush",
+          "to": "NCPBrushSpec"
+        }
+      ]
+    },
+    "NCPByte": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {}
+    },
+    "NCPCacheAdmission": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPCacheAdmissionInvalidWeight": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCacheAdmission"
+      ],
+      "selected_members": {}
+    },
+    "NCPCacheAdmissionStored": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCacheAdmission"
+      ],
+      "selected_members": {}
+    },
+    "NCPCacheAdmissionTooLarge": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCacheAdmission"
+      ],
+      "selected_members": {}
+    },
+    "NCPCanvasCommand": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "pendingStroke()",
+          "to": "NCPDocumentCommandCanvas"
+        },
+        {
+          "from": "NCPDocumentCommandCanvas",
+          "member": "command",
+          "to": "NCPCanvasCommand"
+        }
+      ]
+    },
+    "NCPCanvasCommandAddStroke": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCanvasCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPCanvasCommandDeleteStroke": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCanvasCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPCanvasCommandTransformStroke": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCanvasCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPCommandId": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "authorityStatus()",
+          "to": "NCPDocumentAuthorityStatus"
+        },
+        {
+          "from": "NCPDocumentAuthorityStatus",
+          "member": "doCopy(liveByteCharge:journalByteCharge:identityByteCharge:operationCount:pageCount:objectCount:undoCount:redoCount:historyByteCharge:nextUndoOperationId:nextRedoOperationId:evictedHistoryCount:)",
+          "to": "NCPCommandId"
+        }
+      ]
+    },
+    "NCPCommitReceipt": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPCommitResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPCommitResultAccepted": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCommitResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPCommitResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPCommitResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPCompletedInput": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPCompletionUpdate": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPDispatchResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPDispatchResultAttemptNumbersExhausted": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDispatchResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPDispatchResultBlocked": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDispatchResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPDispatchResultBusy": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDispatchResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPDispatchResultNoWork": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDispatchResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPDispatchResultReady": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDispatchResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPDispatchResultRetryRequired": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDispatchResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPDisplacedEntry": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentAuthorityStatus": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "authorityStatus()",
+          "to": "NCPDocumentAuthorityStatus"
+        }
+      ]
+    },
+    "NCPDocumentBudget": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "companion": "@property (class, readonly, getter=companion) NCPDocumentBudgetCompanion *companion __attribute__((swift_name(\"companion\")));",
+        "init(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)": "- (instancetype)initWithMaxPages:(int32_t)maxPages maxObjects:(int32_t)maxObjects liveBytes:(int64_t)liveBytes journalEntries:(int32_t)journalEntries journalBytes:(int64_t)journalBytes identityBytes:(int64_t)identityBytes historyEntries:(int32_t)historyEntries historyBytes:(int64_t)historyBytes inputBytes:(int64_t)inputBytes __attribute__((swift_name(\"init(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)\"))) __attribute__((objc_designated_initializer));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPDocumentBudgetCreation",
+          "member": "budget",
+          "to": "NCPDocumentBudget"
+        }
+      ]
+    },
+    "NCPDocumentBudgetCompanion": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)": "- (NCPDocumentBudgetCreation *)validatedMaxPages:(int32_t)maxPages maxObjects:(int32_t)maxObjects liveBytes:(int64_t)liveBytes journalEntries:(int32_t)journalEntries journalBytes:(int64_t)journalBytes identityBytes:(int64_t)identityBytes historyEntries:(int32_t)historyEntries historyBytes:(int64_t)historyBytes inputBytes:(int64_t)inputBytes __attribute__((swift_name(\"validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)\")));"
+      },
+      "selected_path": []
+    },
+    "NCPDocumentBudgetCreation": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "budget": "@property (readonly) NCPDocumentBudget * _Nullable budget __attribute__((swift_name(\"budget\")));",
+        "failure": "@property (readonly) NCPDocumentBudgetFailure * _Nullable failure __attribute__((swift_name(\"failure\")));"
+      },
+      "selected_path": []
+    },
+    "NCPDocumentBudgetFailure": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "entries": "@property (class, readonly) NSArray<NCPDocumentBudgetFailure *> *entries __attribute__((swift_name(\"entries\")));",
+        "historyBytes": "@property (class, readonly) NCPDocumentBudgetFailure *historyBytes __attribute__((swift_name(\"historyBytes\")));",
+        "historyEntries": "@property (class, readonly) NCPDocumentBudgetFailure *historyEntries __attribute__((swift_name(\"historyEntries\")));",
+        "identityBytes": "@property (class, readonly) NCPDocumentBudgetFailure *identityBytes __attribute__((swift_name(\"identityBytes\")));",
+        "inputBytes": "@property (class, readonly) NCPDocumentBudgetFailure *inputBytes __attribute__((swift_name(\"inputBytes\")));",
+        "journalBytes": "@property (class, readonly) NCPDocumentBudgetFailure *journalBytes __attribute__((swift_name(\"journalBytes\")));",
+        "journalEntries": "@property (class, readonly) NCPDocumentBudgetFailure *journalEntries __attribute__((swift_name(\"journalEntries\")));",
+        "liveBytes": "@property (class, readonly) NCPDocumentBudgetFailure *liveBytes __attribute__((swift_name(\"liveBytes\")));",
+        "maxObjects": "@property (class, readonly) NCPDocumentBudgetFailure *maxObjects __attribute__((swift_name(\"maxObjects\")));",
+        "maxPages": "@property (class, readonly) NCPDocumentBudgetFailure *maxPages __attribute__((swift_name(\"maxPages\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPDocumentBudgetCreation",
+          "member": "failure",
+          "to": "NCPDocumentBudgetFailure"
+        }
+      ]
+    },
+    "NCPDocumentCloseCoordinator": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentClosePhase": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCloseStatus": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommand": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "pendingStroke()",
+          "to": "NCPDocumentCommandCanvas"
+        },
+        {
+          "from": "NCPDocumentCommandCanvas",
+          "member": "<inheritance>",
+          "to": "NCPDocumentCommand"
+        }
+      ]
+    },
+    "NCPDocumentCommandCanvas": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "pendingStroke()",
+          "to": "NCPDocumentCommandCanvas"
+        }
+      ]
+    },
+    "NCPDocumentCommandCopyPage": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandDeletePage": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandInsertPage": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandMovePage": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandPreparedCanvas": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandRedo": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandRename": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandSetPaper": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommandUndo": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommand"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommit": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPDocumentCommitAccepted": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommit"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentCommitRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPDocumentCommit"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentReceipt": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPDocumentRejection": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "closed": "@property (class, readonly) NCPDocumentRejection *closed __attribute__((swift_name(\"closed\")));",
+        "entries": "@property (class, readonly) NSArray<NCPDocumentRejection *> *entries __attribute__((swift_name(\"entries\")));",
+        "historyCapacity": "@property (class, readonly) NCPDocumentRejection *historyCapacity __attribute__((swift_name(\"historyCapacity\")));",
+        "historyConflict": "@property (class, readonly) NCPDocumentRejection *historyConflict __attribute__((swift_name(\"historyConflict\")));",
+        "historyEmpty": "@property (class, readonly) NCPDocumentRejection *historyEmpty __attribute__((swift_name(\"historyEmpty\")));",
+        "historyTarget": "@property (class, readonly) NCPDocumentRejection *historyTarget __attribute__((swift_name(\"historyTarget\")));",
+        "identityCapacity": "@property (class, readonly) NCPDocumentRejection *identityCapacity __attribute__((swift_name(\"identityCapacity\")));",
+        "invalidIdentity": "@property (class, readonly) NCPDocumentRejection *invalidIdentity __attribute__((swift_name(\"invalidIdentity\")));",
+        "invalidPage": "@property (class, readonly) NCPDocumentRejection *invalidPage __attribute__((swift_name(\"invalidPage\")));",
+        "invalidTitle": "@property (class, readonly) NCPDocumentRejection *invalidTitle __attribute__((swift_name(\"invalidTitle\")));",
+        "journalCapacity": "@property (class, readonly) NCPDocumentRejection *journalCapacity __attribute__((swift_name(\"journalCapacity\")));",
+        "liveByteCapacity": "@property (class, readonly) NCPDocumentRejection *liveByteCapacity __attribute__((swift_name(\"liveByteCapacity\")));",
+        "missingPage": "@property (class, readonly) NCPDocumentRejection *missingPage __attribute__((swift_name(\"missingPage\")));",
+        "noChange": "@property (class, readonly) NCPDocumentRejection *noChange __attribute__((swift_name(\"noChange\")));",
+        "objectCapacity": "@property (class, readonly) NCPDocumentRejection *objectCapacity __attribute__((swift_name(\"objectCapacity\")));",
+        "pageCapacity": "@property (class, readonly) NCPDocumentRejection *pageCapacity __attribute__((swift_name(\"pageCapacity\")));",
+        "reusedIdentity": "@property (class, readonly) NCPDocumentRejection *reusedIdentity __attribute__((swift_name(\"reusedIdentity\")));",
+        "reusedOperationId": "@property (class, readonly) NCPDocumentRejection *reusedOperationId __attribute__((swift_name(\"reusedOperationId\")));",
+        "revisionExhausted": "@property (class, readonly) NCPDocumentRejection *revisionExhausted __attribute__((swift_name(\"revisionExhausted\")));",
+        "sceneRejected": "@property (class, readonly) NCPDocumentRejection *sceneRejected __attribute__((swift_name(\"sceneRejected\")));",
+        "stalePage": "@property (class, readonly) NCPDocumentRejection *stalePage __attribute__((swift_name(\"stalePage\")));",
+        "staleRoot": "@property (class, readonly) NCPDocumentRejection *staleRoot __attribute__((swift_name(\"staleRoot\")));",
+        "theCopyMapping": "@property (class, readonly) NCPDocumentRejection *theCopyMapping __attribute__((swift_name(\"theCopyMapping\")));",
+        "wrongDocument": "@property (class, readonly) NCPDocumentRejection *wrongDocument __attribute__((swift_name(\"wrongDocument\")));",
+        "wrongLayer": "@property (class, readonly) NCPDocumentRejection *wrongLayer __attribute__((swift_name(\"wrongLayer\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewNotebookOpen",
+          "member": "documentReason",
+          "to": "NCPDocumentRejection"
+        }
+      ]
+    },
+    "NCPDocumentRoot": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "id": "@property (readonly) NCPSceneId *id __attribute__((swift_name(\"id\")));",
+        "pageCount": "@property (readonly) int32_t pageCount __attribute__((swift_name(\"pageCount\")));",
+        "revision": "@property (readonly) int64_t revision __attribute__((swift_name(\"revision\")));",
+        "title": "@property (readonly) NSString *title __attribute__((swift_name(\"title\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "snapshot()",
+          "to": "NCPDocumentRoot"
+        }
+      ]
+    },
+    "NCPDocumentRootCompanion": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "init(initial:sessionNonce:budget:ownerCheck:)",
+          "to": "NCPDocumentRoot"
+        },
+        {
+          "from": "NCPDocumentRoot",
+          "member": "companion",
+          "to": "NCPDocumentRootCompanion"
+        }
+      ]
+    },
+    "NCPDocumentSession": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPDouble": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinDoubleArray"
+        },
+        {
+          "from": "NCPKotlinDoubleArray",
+          "member": "init(size:init:)",
+          "to": "NCPDouble"
+        }
+      ]
+    },
+    "NCPDurability": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPFloat": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinFloatArray"
+        },
+        {
+          "from": "NCPKotlinFloatArray",
+          "member": "init(size:init:)",
+          "to": "NCPFloat"
+        }
+      ]
+    },
+    "NCPFramePublicationGate": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPFrameToken": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPGeometryCacheKey": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputBatch": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputRejection": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "capacity": "@property (class, readonly) NCPInputRejection *capacity __attribute__((swift_name(\"capacity\")));",
+        "closed": "@property (class, readonly) NCPInputRejection *closed __attribute__((swift_name(\"closed\")));",
+        "entries": "@property (class, readonly) NSArray<NCPInputRejection *> *entries __attribute__((swift_name(\"entries\")));",
+        "eventOrder": "@property (class, readonly) NCPInputRejection *eventOrder __attribute__((swift_name(\"eventOrder\")));",
+        "invalidBatch": "@property (class, readonly) NCPInputRejection *invalidBatch __attribute__((swift_name(\"invalidBatch\")));",
+        "noActivePointer": "@property (class, readonly) NCPInputRejection *noActivePointer __attribute__((swift_name(\"noActivePointer\")));",
+        "pointerBusy": "@property (class, readonly) NCPInputRejection *pointerBusy __attribute__((swift_name(\"pointerBusy\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewInputResult",
+          "member": "inputReason",
+          "to": "NCPInputRejection"
+        }
+      ]
+    },
+    "NCPInputReplaySession": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputReplaySessionCompanion": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPInputResultCancelled": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPInputResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputResultCompleted": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPInputResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputResultIgnoredNavigation": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPInputResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputResultPreview": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPInputResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPInputResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPInputSample": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPInt": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        },
+        {
+          "from": "NCPPointerPhase",
+          "member": "values()",
+          "to": "NCPKotlinArray"
+        },
+        {
+          "from": "NCPKotlinArray",
+          "member": "init(size:init:)",
+          "to": "NCPInt"
+        }
+      ]
+    },
+    "NCPKotlinArray": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        },
+        {
+          "from": "NCPPointerPhase",
+          "member": "values()",
+          "to": "NCPKotlinArray"
+        }
+      ]
+    },
+    "NCPKotlinComparable": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [],
+      "selected_members": {},
+      "selected_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        },
+        {
+          "from": "NCPPointerPhase",
+          "member": "<inheritance>",
+          "to": "NCPKotlinEnum"
+        },
+        {
+          "from": "NCPKotlinEnum",
+          "member": "<inheritance>",
+          "to": "NCPKotlinComparable"
+        }
+      ]
+    },
+    "NCPKotlinDoubleArray": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinDoubleArray"
+        }
+      ]
+    },
+    "NCPKotlinDoubleIterator": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPKotlinIterator"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinDoubleArray"
+        },
+        {
+          "from": "NCPKotlinDoubleArray",
+          "member": "iterator()",
+          "to": "NCPKotlinDoubleIterator"
+        }
+      ]
+    },
+    "NCPKotlinEnum": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPKotlinComparable"
+      ],
+      "selected_members": {},
+      "selected_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        },
+        {
+          "from": "NCPPointerPhase",
+          "member": "<inheritance>",
+          "to": "NCPKotlinEnum"
+        }
+      ]
+    },
+    "NCPKotlinEnumCompanion": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        },
+        {
+          "from": "NCPPointerPhase",
+          "member": "<inheritance>",
+          "to": "NCPKotlinEnum"
+        },
+        {
+          "from": "NCPKotlinEnum",
+          "member": "companion",
+          "to": "NCPKotlinEnumCompanion"
+        }
+      ]
+    },
+    "NCPKotlinException": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinThrowable"
+      ],
+      "selected_members": {}
+    },
+    "NCPKotlinFloatArray": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinFloatArray"
+        }
+      ]
+    },
+    "NCPKotlinFloatIterator": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPKotlinIterator"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinFloatArray"
+        },
+        {
+          "from": "NCPKotlinFloatArray",
+          "member": "iterator()",
+          "to": "NCPKotlinFloatIterator"
+        }
+      ]
+    },
+    "NCPKotlinIllegalArgumentException": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinRuntimeException"
+      ],
+      "selected_members": {}
+    },
+    "NCPKotlinIterator": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        },
+        {
+          "from": "NCPPointerPhase",
+          "member": "values()",
+          "to": "NCPKotlinArray"
+        },
+        {
+          "from": "NCPKotlinArray",
+          "member": "iterator()",
+          "to": "NCPKotlinIterator"
+        }
+      ]
+    },
+    "NCPKotlinLongArray": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinLongArray"
+        }
+      ]
+    },
+    "NCPKotlinLongIterator": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPKotlinIterator"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinLongArray"
+        },
+        {
+          "from": "NCPKotlinLongArray",
+          "member": "iterator()",
+          "to": "NCPKotlinLongIterator"
+        }
+      ]
+    },
+    "NCPKotlinPair": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPKotlinRuntimeException": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinException"
+      ],
+      "selected_members": {}
+    },
+    "NCPKotlinThrowable": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPLayerId": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "value": "@property (readonly) NSString *value __attribute__((swift_name(\"value\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "currentPage",
+          "to": "NCPPageDescriptor"
+        },
+        {
+          "from": "NCPPageDescriptor",
+          "member": "layerId",
+          "to": "NCPLayerId"
+        }
+      ]
+    },
+    "NCPLeaseReturn": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPLong": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinLongArray"
+        },
+        {
+          "from": "NCPKotlinLongArray",
+          "member": "init(size:init:)",
+          "to": "NCPLong"
+        }
+      ]
+    },
+    "NCPMemoryDocumentAuthority": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPMemorySceneCoordinator": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPMutableDictionary": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPMutableSet": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPNumber": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        },
+        {
+          "from": "NCPPointerPhase",
+          "member": "values()",
+          "to": "NCPKotlinArray"
+        },
+        {
+          "from": "NCPKotlinArray",
+          "member": "init(size:init:)",
+          "to": "NCPInt"
+        },
+        {
+          "from": "NCPInt",
+          "member": "<inheritance>",
+          "to": "NCPNumber"
+        }
+      ]
+    },
+    "NCPObjectChange": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPObjectId": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "stroke(index:)",
+          "to": "NCPStrokeObject"
+        },
+        {
+          "from": "NCPStrokeObject",
+          "member": "doCopy(id:objectRevision:layerId:brush:samples:transform:)",
+          "to": "NCPObjectId"
+        }
+      ]
+    },
+    "NCPOwnedWorkStage": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPOwnedWorkSummary": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPOwnerExecutorStatus": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPOwnerWorkTicket": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPageDescriptor": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "contentRevision": "@property (readonly) int64_t contentRevision __attribute__((swift_name(\"contentRevision\")));",
+        "height": "@property (readonly) double height __attribute__((swift_name(\"height\")));",
+        "id": "@property (readonly) NCPPageId *id __attribute__((swift_name(\"id\")));",
+        "layerId": "@property (readonly) NCPLayerId *layerId __attribute__((swift_name(\"layerId\")));",
+        "paper": "@property (readonly) NCPPaperKind *paper __attribute__((swift_name(\"paper\")));",
+        "width": "@property (readonly) double width __attribute__((swift_name(\"width\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "currentPage",
+          "to": "NCPPageDescriptor"
+        }
+      ]
+    },
+    "NCPPageId": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "value": "@property (readonly) NSString *value __attribute__((swift_name(\"value\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "currentPage",
+          "to": "NCPPageDescriptor"
+        },
+        {
+          "from": "NCPPageDescriptor",
+          "member": "id",
+          "to": "NCPPageId"
+        }
+      ]
+    },
+    "NCPPagedPreviewCodec": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPagedPreviewHeader": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewRecoveryCodec",
+          "member": "header(text:)",
+          "to": "NCPPagedPreviewHeader"
+        }
+      ]
+    },
+    "NCPPagedPreviewNotebook": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "activeInputOperationId": "@property (readonly) NSString * _Nullable activeInputOperationId __attribute__((swift_name(\"activeInputOperationId\")));",
+        "cancelStroke()": "- (void)cancelStroke __attribute__((swift_name(\"cancelStroke()\")));",
+        "capture()": "- (NCPPagedPreviewSnapshot *)capture __attribute__((swift_name(\"capture()\")));",
+        "captureRecovery()": "- (NCPPagedPreviewSnapshot *)captureRecovery __attribute__((swift_name(\"captureRecovery()\")));",
+        "changeVersion": "@property (readonly) int64_t changeVersion __attribute__((swift_name(\"changeVersion\")));",
+        "companion": "@property (class, readonly, getter=companion) NCPPagedPreviewNotebookCompanion *companion __attribute__((swift_name(\"companion\")));",
+        "currentPage": "@property (readonly) NCPPageDescriptor *currentPage __attribute__((swift_name(\"currentPage\")));",
+        "edit(request:)": "- (NCPPreviewEditResult *)editRequest:(id<NCPPreviewEdit>)request __attribute__((swift_name(\"edit(request:)\")));",
+        "hasActiveStroke": "@property (readonly) BOOL hasActiveStroke __attribute__((swift_name(\"hasActiveStroke\")));",
+        "hasPendingStroke": "@property (readonly) BOOL hasPendingStroke __attribute__((swift_name(\"hasPendingStroke\")));",
+        "inputBatchLimit": "@property (readonly) int32_t inputBatchLimit __attribute__((swift_name(\"inputBatchLimit\")));",
+        "inputReservedByteCharge": "@property (readonly) int64_t inputReservedByteCharge __attribute__((swift_name(\"inputReservedByteCharge\")));",
+        "isReadOnly": "@property (readonly) BOOL isReadOnly __attribute__((swift_name(\"isReadOnly\")));",
+        "lastFailure": "@property (readonly) NCPPreviewSessionFailure * _Nullable lastFailure __attribute__((swift_name(\"lastFailure\")));",
+        "page(index:)": "- (NCPPageDescriptor *)pageIndex:(int32_t)index __attribute__((swift_name(\"page(index:)\")));",
+        "pageCount": "@property (readonly) int32_t pageCount __attribute__((swift_name(\"pageCount\")));",
+        "pendingInk()": "- (NCPPreviewPendingInk * _Nullable)pendingInk __attribute__((swift_name(\"pendingInk()\")));",
+        "pointCount(index:)": "- (int32_t)pointCountIndex:(int32_t)index __attribute__((swift_name(\"pointCount(index:)\")));",
+        "pointPressure(index:point:)": "- (float)pointPressureIndex:(int32_t)index point:(int32_t)point __attribute__((swift_name(\"pointPressure(index:point:)\")));",
+        "pointX(index:point:)": "- (double)pointXIndex:(int32_t)index point:(int32_t)point __attribute__((swift_name(\"pointX(index:point:)\")));",
+        "pointY(index:point:)": "- (double)pointYIndex:(int32_t)index point:(int32_t)point __attribute__((swift_name(\"pointY(index:point:)\")));",
+        "prepareRealBatch(phase:count:)": "- (NCPPreviewInputResult * _Nullable)prepareRealBatchPhase:(NCPPointerPhase *)phase count:(int32_t)count __attribute__((swift_name(\"prepareRealBatch(phase:count:)\")));",
+        "retire()": "- (BOOL)retire __attribute__((swift_name(\"retire()\")));",
+        "retireAfterRecovery(snapshot:)": "- (BOOL)retireAfterRecoverySnapshot:(NCPPagedPreviewSnapshot *)snapshot __attribute__((swift_name(\"retireAfterRecovery(snapshot:)\")));",
+        "retryPendingStroke()": "- (BOOL)retryPendingStroke __attribute__((swift_name(\"retryPendingStroke()\")));",
+        "setReadOnly(value:)": "- (BOOL)setReadOnlyValue:(BOOL)value __attribute__((swift_name(\"setReadOnly(value:)\")));",
+        "snapshot()": "- (NCPDocumentRoot *)snapshot __attribute__((swift_name(\"snapshot()\")));",
+        "stroke(index:)": "- (NCPStrokeObject *)strokeIndex:(int32_t)index __attribute__((swift_name(\"stroke(index:)\")));",
+        "strokeCount": "@property (readonly) int32_t strokeCount __attribute__((swift_name(\"strokeCount\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPagedPreviewNotebookCompanion": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)": "- (NCPPreviewNotebookOpen *)createValidatedDocumentId:(NSString *)documentId title:(NSString *)title sessionNonce:(NSString *)sessionNonce width:(double)width height:(double)height paper:(NCPPaperKind *)paper budget:(NCPDocumentBudget *)budget ownerCheck:(void (^)(void))ownerCheck __attribute__((swift_name(\"createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)\")));",
+        "open(initial:sessionNonce:budget:ownerCheck:)": "- (NCPPreviewNotebookOpen *)openInitial:(NCPDocumentRoot *)initial sessionNonce:(NSString *)sessionNonce budget:(NCPDocumentBudget *)budget ownerCheck:(void (^)(void))ownerCheck __attribute__((swift_name(\"open(initial:sessionNonce:budget:ownerCheck:)\")));",
+        "openRecovery(snapshot:sessionNonce:budget:ownerCheck:)": "- (NCPPreviewNotebookOpen *)openRecoverySnapshot:(NCPPagedPreviewSnapshot *)snapshot sessionNonce:(NSString *)sessionNonce budget:(NCPDocumentBudget *)budget ownerCheck:(void (^)(void))ownerCheck __attribute__((swift_name(\"openRecovery(snapshot:sessionNonce:budget:ownerCheck:)\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPagedPreviewSnapshot": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewSaveSnapshot"
+      ],
+      "selected_members": {
+        "documentId": "@property (readonly) NSString *documentId __attribute__((swift_name(\"documentId\")));",
+        "encode()": "- (NSString * _Nullable)encodeAndReturnError:(NSError * _Nullable * _Nullable)error __attribute__((swift_name(\"encode()\")));",
+        "encodingWorkByteCharge": "@property (readonly) int64_t encodingWorkByteCharge __attribute__((swift_name(\"encodingWorkByteCharge\")));",
+        "retainedByteCharge": "@property (readonly) int64_t retainedByteCharge __attribute__((swift_name(\"retainedByteCharge\")));",
+        "root": "@property (readonly) NCPDocumentRoot *root __attribute__((swift_name(\"root\")));",
+        "sameContent(other:)": "- (BOOL)sameContentOther:(id<NCPPreviewSaveSnapshot>)other __attribute__((swift_name(\"sameContent(other:)\")));",
+        "title": "@property (readonly) NSString *title __attribute__((swift_name(\"title\")));",
+        "version": "@property (readonly) int64_t version __attribute__((swift_name(\"version\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPagedPreviewSnapshotCompanion": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewSnapshot",
+          "member": "companion",
+          "to": "NCPPagedPreviewSnapshotCompanion"
+        }
+      ]
+    },
+    "NCPPaperKind": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "blank": "@property (class, readonly) NCPPaperKind *blank __attribute__((swift_name(\"blank\")));",
+        "dots": "@property (class, readonly) NCPPaperKind *dots __attribute__((swift_name(\"dots\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPaperKind *> *entries __attribute__((swift_name(\"entries\")));",
+        "grid": "@property (class, readonly) NCPPaperKind *grid __attribute__((swift_name(\"grid\")));",
+        "ruled": "@property (class, readonly) NCPPaperKind *ruled __attribute__((swift_name(\"ruled\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebookCompanion",
+          "member": "createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)",
+          "to": "NCPPaperKind"
+        }
+      ]
+    },
+    "NCPPointD": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "stroke(index:)",
+          "to": "NCPStrokeObject"
+        },
+        {
+          "from": "NCPStrokeObject",
+          "member": "doCopy(id:objectRevision:layerId:brush:samples:transform:)",
+          "to": "NCPAffine2D"
+        },
+        {
+          "from": "NCPAffine2D",
+          "member": "map(point:)",
+          "to": "NCPPointD"
+        }
+      ]
+    },
+    "NCPPointerPhase": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "cancel": "@property (class, readonly) NCPPointerPhase *cancel __attribute__((swift_name(\"cancel\")));",
+        "down": "@property (class, readonly) NCPPointerPhase *down __attribute__((swift_name(\"down\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPointerPhase *> *entries __attribute__((swift_name(\"entries\")));",
+        "move": "@property (class, readonly) NCPPointerPhase *move __attribute__((swift_name(\"move\")));",
+        "up": "@property (class, readonly) NCPPointerPhase *up __attribute__((swift_name(\"up\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPApplePreviewInput",
+          "member": "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)",
+          "to": "NCPPointerPhase"
+        }
+      ]
+    },
+    "NCPPointerTool": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPPrepareResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPPrepareResultPrepared": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPrepareResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPPrepareResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPrepareResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewCatalogBudget": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewDocumentRead": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "failure": "@property (readonly) NCPPreviewReadFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "root": "@property (readonly) NCPDocumentRoot * _Nullable root __attribute__((swift_name(\"root\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewDocumentReader": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "accept(root:)": "- (NCPPreviewDocumentRead *)acceptRoot:(NCPDocumentRoot *)root __attribute__((swift_name(\"accept(root:)\")));",
+        "read(text:)": "- (NCPPreviewDocumentRead *)readText:(NSString *)text __attribute__((swift_name(\"read(text:)\")));",
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewDocumentReader *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewEdit": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [],
+      "selected_members": {},
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        }
+      ]
+    },
+    "NCPPreviewEditCopyPage": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditCopyPage *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditCopyPage"
+        }
+      ]
+    },
+    "NCPPreviewEditDeletePage": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditDeletePage *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditDeletePage"
+        }
+      ]
+    },
+    "NCPPreviewEditInsertPage": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditInsertPage *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditInsertPage"
+        }
+      ]
+    },
+    "NCPPreviewEditMovePage": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "init(beforePageId:)": "- (instancetype)initWithBeforePageId:(NSString * _Nullable)beforePageId __attribute__((swift_name(\"init(beforePageId:)\"))) __attribute__((objc_designated_initializer));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditMovePage"
+        }
+      ]
+    },
+    "NCPPreviewEditRedo": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditRedo *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditRedo"
+        }
+      ]
+    },
+    "NCPPreviewEditRename": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "init(title:)": "- (instancetype)initWithTitle:(NSString *)title __attribute__((swift_name(\"init(title:)\"))) __attribute__((objc_designated_initializer));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditRename"
+        }
+      ]
+    },
+    "NCPPreviewEditResult": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "accepted": "@property (readonly) BOOL accepted __attribute__((swift_name(\"accepted\")));",
+        "failure": "@property (readonly) NCPPreviewSessionFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "rootRevision": "@property (readonly) int64_t rootRevision __attribute__((swift_name(\"rootRevision\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewEditSelectPage": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "init(pageId:)": "- (instancetype)initWithPageId:(NSString *)pageId __attribute__((swift_name(\"init(pageId:)\"))) __attribute__((objc_designated_initializer));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditSelectPage"
+        }
+      ]
+    },
+    "NCPPreviewEditSelectPen": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "init(argb:width:)": "- (instancetype)initWithArgb:(int32_t)argb width:(double)width __attribute__((swift_name(\"init(argb:width:)\"))) __attribute__((objc_designated_initializer));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditSelectPen"
+        }
+      ]
+    },
+    "NCPPreviewEditSetPaper": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "init(width:height:paper:)": "- (instancetype)initWithWidth:(double)width height:(double)height paper:(NCPPaperKind *)paper __attribute__((swift_name(\"init(width:height:paper:)\"))) __attribute__((objc_designated_initializer));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditSetPaper"
+        }
+      ]
+    },
+    "NCPPreviewEditUndo": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPPreviewEdit"
+      ],
+      "selected_members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditUndo *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "edit(request:)",
+          "to": "NCPPreviewEdit"
+        },
+        {
+          "from": "NCPPreviewEdit",
+          "member": "<typed request construction>",
+          "to": "NCPPreviewEditUndo"
+        }
+      ]
+    },
+    "NCPPreviewFailureKind": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "activeStroke": "@property (class, readonly) NCPPreviewFailureKind *activeStroke __attribute__((swift_name(\"activeStroke\")));",
+        "capacity": "@property (class, readonly) NCPPreviewFailureKind *capacity __attribute__((swift_name(\"capacity\")));",
+        "closed": "@property (class, readonly) NCPPreviewFailureKind *closed __attribute__((swift_name(\"closed\")));",
+        "documentRejected": "@property (class, readonly) NCPPreviewFailureKind *documentRejected __attribute__((swift_name(\"documentRejected\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewFailureKind *> *entries __attribute__((swift_name(\"entries\")));",
+        "historyEmpty": "@property (class, readonly) NCPPreviewFailureKind *historyEmpty __attribute__((swift_name(\"historyEmpty\")));",
+        "identityExhausted": "@property (class, readonly) NCPPreviewFailureKind *identityExhausted __attribute__((swift_name(\"identityExhausted\")));",
+        "inputBatchCapacity": "@property (class, readonly) NCPPreviewFailureKind *inputBatchCapacity __attribute__((swift_name(\"inputBatchCapacity\")));",
+        "invalidArgument": "@property (class, readonly) NCPPreviewFailureKind *invalidArgument __attribute__((swift_name(\"invalidArgument\")));",
+        "invalidInput": "@property (class, readonly) NCPPreviewFailureKind *invalidInput __attribute__((swift_name(\"invalidInput\")));",
+        "missingPage": "@property (class, readonly) NCPPreviewFailureKind *missingPage __attribute__((swift_name(\"missingPage\")));",
+        "noActiveStroke": "@property (class, readonly) NCPPreviewFailureKind *noActiveStroke __attribute__((swift_name(\"noActiveStroke\")));",
+        "pendingStroke": "@property (class, readonly) NCPPreviewFailureKind *pendingStroke __attribute__((swift_name(\"pendingStroke\")));",
+        "readOnly": "@property (class, readonly) NCPPreviewFailureKind *readOnly __attribute__((swift_name(\"readOnly\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewSessionFailure",
+          "member": "kind",
+          "to": "NCPPreviewFailureKind"
+        }
+      ]
+    },
+    "NCPPreviewInputDisposition": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "accepted": "@property (class, readonly) NCPPreviewInputDisposition *accepted __attribute__((swift_name(\"accepted\")));",
+        "cancelled": "@property (class, readonly) NCPPreviewInputDisposition *cancelled __attribute__((swift_name(\"cancelled\")));",
+        "committed": "@property (class, readonly) NCPPreviewInputDisposition *committed __attribute__((swift_name(\"committed\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewInputDisposition *> *entries __attribute__((swift_name(\"entries\")));",
+        "pendingCommit": "@property (class, readonly) NCPPreviewInputDisposition *pendingCommit __attribute__((swift_name(\"pendingCommit\")));",
+        "rejected": "@property (class, readonly) NCPPreviewInputDisposition *rejected __attribute__((swift_name(\"rejected\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewInputResult",
+          "member": "disposition",
+          "to": "NCPPreviewInputDisposition"
+        }
+      ]
+    },
+    "NCPPreviewInputResult": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "acceptedSamples": "@property (readonly) int32_t acceptedSamples __attribute__((swift_name(\"acceptedSamples\")));",
+        "activeSamples": "@property (readonly) int32_t activeSamples __attribute__((swift_name(\"activeSamples\")));",
+        "admitted": "@property (readonly) BOOL admitted __attribute__((swift_name(\"admitted\")));",
+        "disposition": "@property (readonly) NCPPreviewInputDisposition *disposition __attribute__((swift_name(\"disposition\")));",
+        "failure": "@property (readonly) NCPPreviewSessionFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "inputReason": "@property (readonly) NCPInputRejection * _Nullable inputReason __attribute__((swift_name(\"inputReason\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewNotebookOpen": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "documentReason": "@property (readonly) NCPDocumentRejection * _Nullable documentReason __attribute__((swift_name(\"documentReason\")));",
+        "failure": "@property (readonly) NCPPreviewOpenFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "notebook": "@property (readonly) NCPPagedPreviewNotebook * _Nullable notebook __attribute__((swift_name(\"notebook\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewOpenFailure": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "documentCapacity": "@property (class, readonly) NCPPreviewOpenFailure *documentCapacity __attribute__((swift_name(\"documentCapacity\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewOpenFailure *> *entries __attribute__((swift_name(\"entries\")));",
+        "inputCapacity": "@property (class, readonly) NCPPreviewOpenFailure *inputCapacity __attribute__((swift_name(\"inputCapacity\")));",
+        "invalidContent": "@property (class, readonly) NCPPreviewOpenFailure *invalidContent __attribute__((swift_name(\"invalidContent\")));",
+        "invalidDocumentId": "@property (class, readonly) NCPPreviewOpenFailure *invalidDocumentId __attribute__((swift_name(\"invalidDocumentId\")));",
+        "invalidPage": "@property (class, readonly) NCPPreviewOpenFailure *invalidPage __attribute__((swift_name(\"invalidPage\")));",
+        "invalidSessionNonce": "@property (class, readonly) NCPPreviewOpenFailure *invalidSessionNonce __attribute__((swift_name(\"invalidSessionNonce\")));",
+        "invalidTitle": "@property (class, readonly) NCPPreviewOpenFailure *invalidTitle __attribute__((swift_name(\"invalidTitle\")));",
+        "unsupportedBudget": "@property (class, readonly) NCPPreviewOpenFailure *unsupportedBudget __attribute__((swift_name(\"unsupportedBudget\")));",
+        "unsupportedContent": "@property (class, readonly) NCPPreviewOpenFailure *unsupportedContent __attribute__((swift_name(\"unsupportedContent\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewNotebookOpen",
+          "member": "failure",
+          "to": "NCPPreviewOpenFailure"
+        }
+      ]
+    },
+    "NCPPreviewPendingInk": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "brush": "@property (readonly) NCPBrushSpec *brush __attribute__((swift_name(\"brush\")));",
+        "samples": "@property (readonly) NCPStrokeSamples *samples __attribute__((swift_name(\"samples\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewReadFailure": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {
+        "characterCapacity": "@property (class, readonly) NCPPreviewReadFailure *characterCapacity __attribute__((swift_name(\"characterCapacity\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewReadFailure *> *entries __attribute__((swift_name(\"entries\")));",
+        "invalidOrUnsupportedFormat": "@property (class, readonly) NCPPreviewReadFailure *invalidOrUnsupportedFormat __attribute__((swift_name(\"invalidOrUnsupportedFormat\")));",
+        "unsupportedPreviewContent": "@property (class, readonly) NCPPreviewReadFailure *unsupportedPreviewContent __attribute__((swift_name(\"unsupportedPreviewContent\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewDocumentRead",
+          "member": "failure",
+          "to": "NCPPreviewReadFailure"
+        }
+      ]
+    },
+    "NCPPreviewRecoveryCodec": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "read(text:)": "- (NCPPreviewRecoveryRead *)readText:(NSString *)text __attribute__((swift_name(\"read(text:)\")));",
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewRecoveryCodec *shared __attribute__((swift_name(\"shared\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewRecoveryRead": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "failure": "@property (readonly) NCPPreviewReadFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "snapshot": "@property (readonly) NCPPagedPreviewSnapshot * _Nullable snapshot __attribute__((swift_name(\"snapshot\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewSaveAdmission": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewSaveAttempt": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewSaveLedger": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewSaveSnapshot": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [],
+      "selected_members": {},
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewSnapshot",
+          "member": "<inheritance>",
+          "to": "NCPPreviewSaveSnapshot"
+        }
+      ]
+    },
+    "NCPPreviewSaveState": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewSessionFailure": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "documentReason": "@property (readonly) NCPDocumentRejection * _Nullable documentReason __attribute__((swift_name(\"documentReason\")));",
+        "kind": "@property (readonly) NCPPreviewFailureKind *kind __attribute__((swift_name(\"kind\")));"
+      },
+      "selected_path": []
+    },
+    "NCPPreviewViewport": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewWriteAdmission": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPPreviewWriteDisposition": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPRecoveryOffer": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPRecoveryPayload": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPRecoveryPayloadBlocked": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPRecoveryPayload"
+      ],
+      "selected_members": {}
+    },
+    "NCPRecoveryPayloadConfirmed": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPRecoveryPayload"
+      ],
+      "selected_members": {}
+    },
+    "NCPRecoveryPayloadPending": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPRecoveryPayload"
+      ],
+      "selected_members": {}
+    },
+    "NCPRejection": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPReservationFailure": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPReservationResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPReservationResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPReservationResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPReservationResultReserved": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPReservationResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceBorrow": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPResourceBorrowBorrowed": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourceBorrow"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceBorrowClosed": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourceBorrow"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceBorrowLeaseLimit": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourceBorrow"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceBorrowMissing": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourceBorrow"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceCompletion": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceDrainStatus": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceHandle": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceLane": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceLease": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceLeasePool": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourcePublication": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPResourcePublicationAlreadyOwned": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourcePublication"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourcePublicationResident": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourcePublication"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourcePublicationRetired": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourcePublication"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourcePublicationRetiredAfterClose": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourcePublication"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourcePublicationStaleReservation": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourcePublication"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourcePublicationUnsettledReservation": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourcePublication"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceReleaseDispatch": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPResourceReleaseDispatchIdle": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourceReleaseDispatch"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceReleaseDispatchReady": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourceReleaseDispatch"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceReleaseDispatchWrongLane": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPResourceReleaseDispatch"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceReleaseOutcome": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceReleaseTicket": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPResourceReservation": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPResultDisposition": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPResultDrain": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPSceneApplication": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPSceneApplicationApplied": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSceneApplication"
+      ],
+      "selected_members": {}
+    },
+    "NCPSceneApplicationRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSceneApplication"
+      ],
+      "selected_members": {}
+    },
+    "NCPSceneId": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "snapshot()",
+          "to": "NCPDocumentRoot"
+        },
+        {
+          "from": "NCPDocumentRoot",
+          "member": "id",
+          "to": "NCPSceneId"
+        }
+      ]
+    },
+    "NCPScenePatch": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPSceneReducer": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPSceneSnapshot": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "init(initial:sessionNonce:budget:ownerCheck:)",
+          "to": "NCPDocumentRoot"
+        },
+        {
+          "from": "NCPDocumentRoot",
+          "member": "scene",
+          "to": "NCPSceneSnapshot"
+        }
+      ]
+    },
+    "NCPSceneSnapshotCompanion": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "init(initial:sessionNonce:budget:ownerCheck:)",
+          "to": "NCPDocumentRoot"
+        },
+        {
+          "from": "NCPDocumentRoot",
+          "member": "scene",
+          "to": "NCPSceneSnapshot"
+        },
+        {
+          "from": "NCPSceneSnapshot",
+          "member": "companion",
+          "to": "NCPSceneSnapshotCompanion"
+        }
+      ]
+    },
+    "NCPSessionInputFailure": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPSessionInputResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPSessionInputResultConsumed": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSessionInputResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPSessionInputResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSessionInputResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPSessionOpenFailure": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPSessionOpenResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPSessionOpenResultOpened": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSessionOpenResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPSessionOpenResultRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSessionOpenResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPSessionStop": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPShort": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {}
+    },
+    "NCPStrokeObject": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "brush": "@property (readonly) NCPBrushSpec *brush __attribute__((swift_name(\"brush\")));",
+        "samples": "@property (readonly) NCPStrokeSamples *samples __attribute__((swift_name(\"samples\")));",
+        "transform": "@property (readonly) NCPAffine2D *transform __attribute__((swift_name(\"transform\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "stroke(index:)",
+          "to": "NCPStrokeObject"
+        }
+      ]
+    },
+    "NCPStrokeSamples": {
+      "classification": "selected_signature_or_value",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {
+        "pressure(index:)": "- (float)pressureIndex:(int32_t)index __attribute__((swift_name(\"pressure(index:)\")));",
+        "size": "@property (readonly) int32_t size __attribute__((swift_name(\"size\")));",
+        "timeMicros(index:)": "- (int64_t)timeMicrosIndex:(int32_t)index __attribute__((swift_name(\"timeMicros(index:)\")));",
+        "x(index:)": "- (double)xIndex:(int32_t)index __attribute__((swift_name(\"x(index:)\")));",
+        "y(index:)": "- (double)yIndex:(int32_t)index __attribute__((swift_name(\"y(index:)\")));"
+      },
+      "selected_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        }
+      ]
+    },
+    "NCPStrokeSamplesCompanion": {
+      "classification": "reachable_only_via_other_members",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {},
+      "full_path": [
+        {
+          "from": "NCPPreviewPendingInk",
+          "member": "samples",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        }
+      ]
+    },
+    "NCPStrokeSubmission": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPStrokeSubmissionQueue": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPStrokeTarget": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPSubmissionAttempt": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPSubmissionState": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPSubmissionStateBlocked": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSubmissionState"
+      ],
+      "selected_members": {}
+    },
+    "NCPSubmissionStateConfirmed": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSubmissionState"
+      ],
+      "selected_members": {}
+    },
+    "NCPSubmissionStateInFlight": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSubmissionState"
+      ],
+      "selected_members": {}
+    },
+    "NCPSubmissionStateQueued": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSubmissionState"
+      ],
+      "selected_members": {}
+    },
+    "NCPSubmissionStateRetryRequired": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPSubmissionState"
+      ],
+      "selected_members": {}
+    },
+    "NCPSubmissionSummary": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPUByte": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {}
+    },
+    "NCPUInt": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {}
+    },
+    "NCPULong": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {}
+    },
+    "NCPUShort": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPNumber"
+      ],
+      "selected_members": {}
+    },
+    "NCPWeightedLruCache": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase"
+      ],
+      "selected_members": {}
+    },
+    "NCPWorkAdmission": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPWorkAdmissionAccepted": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPWorkAdmission"
+      ],
+      "selected_members": {}
+    },
+    "NCPWorkAdmissionFailure": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPKotlinEnum"
+      ],
+      "selected_members": {}
+    },
+    "NCPWorkAdmissionRejected": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPWorkAdmission"
+      ],
+      "selected_members": {}
+    },
+    "NCPWorkResult": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [],
+      "selected_members": {}
+    },
+    "NCPWorkResultNotExecuted": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPWorkResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPWorkResultOutcomeUnknown": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPWorkResult"
+      ],
+      "selected_members": {}
+    },
+    "NCPWorkResultSucceeded": {
+      "classification": "outside_candidate_signature_graph",
+      "inheritance_references": [
+        "NCPBase",
+        "NCPWorkResult"
+      ],
+      "selected_members": {}
+    }
+  },
+  "header_sha256": "9847deaacbb72441e97e10f0cfce2829f00c86c6fd2971e2b1fe38a4f0385f43"
+}

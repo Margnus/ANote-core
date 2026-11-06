@@ -1,0 +1,146 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-version"
+    ],
+    "label": "xcode-version",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "create",
+      "NoteCoreSDKUIKitOnly-20261106",
+      "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    ],
+    "label": "create-device",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "boot",
+      "82503A1F-2A69-4C17-8451-03094A26357E"
+    ],
+    "label": "boot",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "bootstatus",
+      "82503A1F-2A69-4C17-8451-03094A26357E",
+      "-b"
+    ],
+    "label": "bootstatus",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-quiet",
+      "-xctestrun",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-pending-display/NoteCoreSketch/Build/Products/NoteCoreSketch_iphonesimulator27.1-arm64.xctestrun",
+      "-destination",
+      "platform=iOS Simulator,id=82503A1F-2A69-4C17-8451-03094A26357E",
+      "-parallel-testing-enabled",
+      "NO",
+      "-only-testing:NoteCoreSketchTests",
+      "-resultBundlePath",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-pending-display-20261106/NoteCoreSketch/tests.xcresult",
+      "-collect-test-diagnostics",
+      "never",
+      "test-without-building"
+    ],
+    "label": "NoteCoreSketch-test",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "summary",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-pending-display-20261106/NoteCoreSketch/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "NoteCoreSketch-summary",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "tests",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-pending-display-20261106/NoteCoreSketch/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "NoteCoreSketch-tests",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before-cleanup",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "82503A1F-2A69-4C17-8451-03094A26357E"
+    ],
+    "label": "shutdown",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "delete",
+      "82503A1F-2A69-4C17-8451-03094A26357E"
+    ],
+    "label": "delete",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-after",
+    "returncode": 0
+  }
+]

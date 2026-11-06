@@ -1,0 +1,69 @@
+{
+  "gradle": {
+    "offline": true,
+    "apple_and_android_enabled": true,
+    "local_kotlin_native": "2.2.21",
+    "tasks": [
+      ":shared-core:linkDebugFrameworkIosSimulatorArm64",
+      ":shared-core:jvmTest",
+      ":android-app:assembleDebug"
+    ]
+  },
+  "xcode": [
+    {
+      "project": "samples/sketch-host-ios/SketchHost.xcodeproj",
+      "scheme": "SketchHost",
+      "action": "build-for-testing",
+      "destination": "generic/platform=iOS Simulator",
+      "derived_data": "/Users/lixiaofan/StudioProjects/notecore/output/sdk-pending-display/SketchHost",
+      "CODE_SIGNING_ALLOWED": "NO"
+    },
+    {
+      "project": "samples/apple-sketch/NoteCoreSketch.xcodeproj",
+      "scheme": "NoteCoreSketch",
+      "action": "build-for-testing",
+      "destination": "generic/platform=iOS Simulator",
+      "derived_data": "/Users/lixiaofan/StudioProjects/notecore/output/sdk-pending-display/NoteCoreSketch",
+      "CODE_SIGNING_ALLOWED": "NO"
+    },
+    {
+      "project": "ios-app/NoteCorePreview.xcodeproj",
+      "scheme": "NoteCorePreview",
+      "action": "build",
+      "destination": "generic/platform=iOS Simulator",
+      "derived_data": "/Users/lixiaofan/StudioProjects/notecore/output/sdk-pending-display/NoteCorePreview",
+      "CODE_SIGNING_ALLOWED": "NO"
+    }
+  ],
+  "strict_projection_typechecks": [
+    {
+      "module": "SketchHost",
+      "sources": [
+        "samples/sketch-host-ios/Sources/SketchCanvas.swift",
+        "samples/sketch-host-ios/Sources/SketchHostApp.swift",
+        "samples/sketch-host-ios/Sources/SketchSession.swift"
+      ],
+      "target": "arm64-apple-ios18.0-simulator",
+      "flags": [
+        "-typecheck",
+        "-F",
+        "output/sdk-pending-display/strict"
+      ],
+      "exit": 0
+    },
+    {
+      "module": "NoteCoreSketch",
+      "sources": [
+        "samples/apple-sketch/NoteCoreSketch/SketchApp.swift",
+        "samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift"
+      ],
+      "target": "arm64-apple-ios18.0-simulator",
+      "flags": [
+        "-typecheck",
+        "-F",
+        "output/sdk-pending-display/strict"
+      ],
+      "exit": 0
+    }
+  ]
+}

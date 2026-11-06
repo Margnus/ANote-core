@@ -1,0 +1,68 @@
+{
+  "schema": "candidate-public-boundary-guards-1",
+  "status": "passed",
+  "actual_header_candidate_methods": 27,
+  "actual_header_candidate_properties": 35,
+  "changed_headers_rejected": [
+    {
+      "case": "missing_recovery_entry",
+      "objc_name": "NCPPagedPreviewNotebookCompanion",
+      "swift_name": "openRecovery(snapshot:sessionNonce:budget:ownerCheck:)",
+      "reason": "('Missing/duplicate candidate method', 'NCPPagedPreviewNotebookCompanion', 'openRecovery(snapshot:sessionNonce:budget:ownerCheck:)')"
+    },
+    {
+      "case": "prepare_loses_nullable_return",
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "prepareRealBatch(phase:count:)",
+      "reason": "('Changed candidate nullable return', 'NCPPagedPreviewNotebook', 'prepareRealBatch(phase:count:)')"
+    },
+    {
+      "case": "capture_switches_to_nserror",
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "captureRecovery()",
+      "reason": "('Changed candidate NSError channel', 'NCPPagedPreviewNotebook', 'captureRecovery()')"
+    },
+    {
+      "case": "open_result_loses_nullable_notebook",
+      "objc_name": "NCPPreviewNotebookOpen",
+      "swift_name": "notebook",
+      "reason": "('Changed reviewed property shape', 'NCPPreviewNotebookOpen', 'notebook')"
+    },
+    {
+      "case": "failure_becomes_mutable",
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "failure",
+      "reason": "('Changed reviewed property qualifiers', 'NCPPreviewInputResult', 'failure')"
+    },
+    {
+      "case": "failure_becomes_class_global",
+      "objc_name": "NCPPreviewInputResult",
+      "swift_name": "failure",
+      "reason": "('Changed reviewed property shape', 'NCPPreviewInputResult', 'failure')"
+    },
+    {
+      "case": "encode_loses_nserror_channel",
+      "objc_name": "NCPPagedPreviewSnapshot",
+      "swift_name": "encode()",
+      "reason": "('Changed candidate NSError channel', 'NCPPagedPreviewSnapshot', 'encode()')"
+    },
+    {
+      "case": "previous_real_header_exposes_raw_array",
+      "objc_name": "NCPPagedPreviewNotebook",
+      "swift_name": "offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)",
+      "reason": "Raw Kotlin array entry exported from NCPPagedPreviewNotebook"
+    }
+  ],
+  "actual_header_unchanged": true,
+  "retained_header_sha256": {
+    "reports/candidate-public-boundary-20261031/NoteCanvasPrototype.h": "981c11a07040547f5a51ad871e21378b7aaebf3f178ba3770bdb057f478a5311"
+  },
+  "source_and_header_sha256": {
+    "tools/verify_candidate_boundary.py": "192dfd637d8b32931f82a8b6d2724fa5b63c71a24f6a6070422300ae16b2bbad",
+    "tools/audit_public_boundary.py": "090f036488ec0ff2b237666578d23cd76f3890a7c7a5f8c599a8b861656e81b6",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "9847deaacbb72441e97e10f0cfce2829f00c86c6fd2971e2b1fe38a4f0385f43"
+  },
+  "scope": "Structural guard mutations of in-memory copies of a real source-bound compiler header. No compiler, Native execution, semantic failure/owner/index conformance, full ABI type layout or SDK freeze claim.",
+  "c1_complete": false,
+  "whole_requirement_accepted": false
+}

@@ -1,0 +1,17 @@
+samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:144:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+142 |     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+143 |         guard !blocked, let active, touches.contains(active) else { return }
+144 |         ingest(active, event: event, phase: .move)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+145 |     }
+146 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+
+samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:148:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+146 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+147 |         guard !blocked, let active, touches.contains(active) else { return }
+148 |         ingest(active, event: event, phase: .up)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+149 |     }
+150 |     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelUnfinished() }
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>

@@ -75,9 +75,9 @@ final class SketchCanvas: UIView {
             context.setStrokeColor(stroke.color); context.setLineWidth(stroke.width); context.setLineCap(.round); context.setLineJoin(.round)
             context.strokePath(); context.restoreGState()
         }
-        if let pending = note.pendingStroke()?.command as? CanvasCommandAddStroke {
-            context.addPath(path(pending.samples)); context.setStrokeColor(color(pending.target.brush.argb))
-            context.setLineWidth(pending.target.brush.width); context.setLineCap(.round); context.setLineJoin(.round); context.strokePath()
+        if let pending = note.pendingInk() {
+            context.addPath(path(pending.samples)); context.setStrokeColor(color(pending.brush.argb))
+            context.setLineWidth(pending.brush.width); context.setLineCap(.round); context.setLineJoin(.round); context.strokePath()
         } else if ownsInput, let active {
             context.addPath(active.cgPath); let tool = session.tools[session.toolIndex]
             context.setStrokeColor(color(tool.argb)); context.setLineWidth(tool.width); context.setLineCap(.round); context.setLineJoin(.round); context.strokePath()

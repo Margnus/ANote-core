@@ -102,8 +102,11 @@ final class SketchCanvas: UIView {
     private func ingest(_ touch: UITouch, event: UIEvent?, phase: PointerPhase) -> Bool {
         let coalesced = event?.coalescedTouches(for: touch)
         let real = coalesced?.isEmpty == false ? coalesced! : [touch]
-        guard scale.isFinite, scale > 0, real.count <= Int(note.inputBatchLimit),
-              note.prepareRealBatch(phase: phase, count: Int32(real.count)) == nil else { block(); return false }
+        guard scale.isFinite, scale > 0 else { block("画布当前无法接收输入"); return false }
+        guard real.count <= Int(note.inputBatchLimit) else { block(sketchFailureMessage(.inputBatchCapacity)); return false }
+        if let refusal = note.prepareRealBatch(phase: phase, count: Int32(real.count)) {
+            block(sketchFailureMessage(refusal.failure?.kind)); return false
+        }
         let snapshotScale = scale
         var xs: [Double] = [], ys: [Double] = [], pressures: [Float] = [], times: [Int64] = []
         for sample in real {
@@ -111,7 +114,7 @@ final class SketchCanvas: UIView {
             let x = Double(location.x / snapshotScale), y = Double(location.y / snapshotScale)
             let time = sample.timestamp * 1_000_000
             guard x.isFinite, y.isFinite, time.isFinite, time >= 0, time < Double(Int64.max),
-                  sample.force.isFinite, sample.maximumPossibleForce.isFinite else { block(); return false }
+                  sample.force.isFinite, sample.maximumPossibleForce.isFinite else { block(sketchFailureMessage(.invalidInput)); return false }
             xs.append(x); ys.append(y); times.append(Int64(time))
             pressures.append(sample.maximumPossibleForce > 0 ? Float(max(0, min(1, sample.force / sample.maximumPossibleForce))) : 0.5)
         }
@@ -120,15 +123,16 @@ final class SketchCanvas: UIView {
                   (0...note.currentPage.height).contains(y) else { return false }
         }
         let result = offer(phase: phase, xs: xs, ys: ys, pressures: pressures, times: times)
-        guard result.admitted else { block(); return false }
+        guard result.admitted else { block(sketchFailureMessage(result.failure?.kind)); return false }
         if phase == .up {
             active = nil; transient.removeAll(keepingCapacity: false)
         } else { transient += zip(xs, ys).map { CGPoint(x: $0.0, y: $0.1) } }
         changed(result.disposition == .pendingCommit ? "已完成笔待重试" : "")
         setNeedsDisplay(); return true
     }
-    private func block() {
-        blocked = true; changed(note.lastError + "；原前缀保留，可取消未完成笔")
+    private func block(_ message: String) {
+        blocked = true
+        changed(note.hasActiveStroke ? message + "；原前缀保留，可取消未完成笔" : message)
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard !blocked, !note.isReadOnly, active == nil, !note.hasPendingStroke,
