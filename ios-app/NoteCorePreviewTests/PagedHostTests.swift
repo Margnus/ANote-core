@@ -906,9 +906,11 @@ final class PagedHostTests: XCTestCase {
         XCTAssertTrue(note.beginStroke(x: 1, y: 2, pressure: 0.5, timeMicros: 1))
         model.applyEdit(PreviewEditSetPaper(width: .nan, height: 500, paper: .grid))
         XCTAssertEqual(note.lastFailure?.kind, PreviewFailureKind.invalidArgument)
+        XCTAssertEqual(model.status, "操作参数无效，请检查后重试")
         XCTAssertTrue(note.hasActiveStroke); XCTAssertTrue(note.snapshot() === before)
         model.applyEdit(PreviewEditUndo.shared)
         XCTAssertEqual(note.lastFailure?.kind, PreviewFailureKind.historyEmpty); XCTAssertTrue(note.hasActiveStroke)
+        XCTAssertEqual(model.status, "没有可撤销或重做的操作")
         let invalidId = note.edit(request: PreviewEditSelectPage(pageId: ""))
         XCTAssertFalse(invalidId.accepted); XCTAssertEqual(invalidId.failure?.kind, PreviewFailureKind.invalidArgument)
         XCTAssertTrue(note.endStroke(x: 3, y: 4, pressure: 0.6, timeMicros: 2)); XCTAssertEqual(note.pointCount(index: 0), 2)
@@ -1015,7 +1017,7 @@ final class PagedHostTests: XCTestCase {
                 XCTAssertEqual(before.samples, after.samples)
             }
         }
-        model.editPage(content: false) { $0.selectPage(id: $0.page(index: 2).id) }
+        model.applyEdit(PreviewEditSelectPage(pageId: note.page(index: 2).id.value), content: false)
         model.prepareExport(); try await eventually("whole root export ready") { !model.transferBusy }
         let exported = try XCTUnwrap(model.exportDocument)
         XCTAssertEqual(String(decoding: exported.data, as: UTF8.self), try note.capture().encode())
@@ -1065,15 +1067,15 @@ final class PagedHostTests: XCTestCase {
         let model = PreviewModel(directory: dir); model.create()
         let note = try XCTUnwrap(model.current), id = note.documentId
         draw(note); model.changed(); let first = note.currentPageId
-        model.editPage { $0.insertPage() }; XCTAssertEqual(note.pageCount, 2)
+        model.applyEdit(PreviewEditInsertPage.shared); XCTAssertEqual(note.pageCount, 2)
         XCTAssertTrue(note.selectPen(argb: Int32(bitPattern: 0xff3568be), width: 5))
         draw(note, x: 200); model.changed()
         let beforeSelection = note.snapshot()
-        model.editPage(content: false) { $0.selectPage(id: first) }
+        model.applyEdit(PreviewEditSelectPage(pageId: first.value), content: false)
         XCTAssertTrue(note.snapshot() === beforeSelection)
-        model.editPage { $0.doCopyCurrentPage() }; XCTAssertEqual(note.totalStrokeCount, 3)
-        model.editPage { $0.deleteCurrentPage() }; XCTAssertEqual(note.totalStrokeCount, 2)
-        model.editPage { $0.undo() }; XCTAssertEqual(note.totalStrokeCount, 3)
+        model.applyEdit(PreviewEditCopyPage.shared); XCTAssertEqual(note.totalStrokeCount, 3)
+        model.applyEdit(PreviewEditDeletePage.shared); XCTAssertEqual(note.totalStrokeCount, 2)
+        model.applyEdit(PreviewEditUndo.shared); XCTAssertEqual(note.totalStrokeCount, 3)
         let encoded = try note.capture().encode(), file = dir.appendingPathComponent(id + ".ncp")
         try await eventually("full root written") { (try? String(contentsOf: file, encoding: .utf8)) == encoded && model.status.hasPrefix("已保存") }
         model.close(); XCTAssertNil(model.current)
@@ -1085,7 +1087,7 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(restored.pageCount, 3); XCTAssertEqual(restored.totalStrokeCount, 3)
         XCTAssertFalse(restored.canUndo)
         for index in 0..<restored.pageCount {
-            reopened.editPage(content: false) { $0.selectPage(id: $0.page(index: index).id) }
+            reopened.applyEdit(PreviewEditSelectPage(pageId: restored.page(index: index).id.value), content: false)
             XCTAssertEqual(restored.strokeCount, 1)
         }
         reopened.close()
@@ -1103,7 +1105,7 @@ final class PagedHostTests: XCTestCase {
         XCTAssertTrue(model.save()); model.flushForBackground(); model.close()
         XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), original)
         model.open("legacy-corner"); try await eventually("v1 reopens") { model.current != nil }
-        model.editPage { $0.insertPage() }
+        model.applyEdit(PreviewEditInsertPage.shared)
         let expected = try XCTUnwrap(model.current).capture().encode()
         try await eventually("first edit writes v2") { (try? String(contentsOf: file, encoding: .utf8)) == expected }
         let root = try PagedPreviewCodec.shared.decode(text: expected)
@@ -1306,7 +1308,10 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(samples.timeMicros(index: 1024), 1_000_000)
         let before = try note.capture().encode()
         event.real = (0..<1025).map { SyntheticInkTouch(Double($0 % 199), 2) }
+        var status = ""
+        view.failed = { status = $0 }
         view.touchesBegan([main], with: event)
+        XCTAssertEqual(status, "输入批次超限；本笔未提交")
         XCTAssertFalse(note.hasActiveStroke); XCTAssertEqual(try note.capture().encode(), before)
         event.real = nil; main.seconds = 3
         view.touchesBegan([main], with: event); main.seconds = 4
@@ -1329,7 +1334,7 @@ final class PagedHostTests: XCTestCase {
     }
     @MainActor func testInvalidTerminalValuesRejectWholeUnfinishedStrokeAndRecover() throws {
         let view = try inputView(), note = view.note
-        var failures = 0; view.failed = { _ in failures += 1 }
+        var failures: [String] = []; view.failed = { failures.append($0) }
         let invalid = [Double.nan, Double.infinity, -1, Double(Int64.max) / 1_000_000]
         for value in invalid {
             let main = SyntheticInkTouch(10, 0.001), event = SyntheticInkEvent()
@@ -1350,7 +1355,7 @@ final class PagedHostTests: XCTestCase {
             view.touchesEnded([main], with: event)
             XCTAssertFalse(note.hasActiveStroke); XCTAssertFalse(view.hasInk); XCTAssertEqual(note.strokeCount, 0)
         }
-        XCTAssertEqual(failures, invalid.count + 5)
+        XCTAssertEqual(failures, Array(repeating: "输入数据无效；本笔未提交", count: invalid.count + 5))
         let main = SyntheticInkTouch(40, 0.004)
         view.touchesBegan([main], with: nil); main.seconds = 0.005
         view.touchesEnded([main], with: nil)

@@ -511,7 +511,7 @@ final class PreviewModel: ObservableObject {
             }
         }
         note.cancelStroke()
-        guard note.retryPendingStroke() else { status = note.lastError; return }
+        guard note.retryPendingStroke() else { status = previewFailureMessage(note.lastFailure); return }
         let ticket = UUID()
         exportEditor = editor; exportRequest = ticket; exportCancelled = false
         transferBusy = true; status = "正在准备备份…"
@@ -654,12 +654,10 @@ final class PreviewModel: ObservableObject {
     }
     func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
     func applyEdit(_ request: PreviewEdit, content: Bool = true) {
-        editPage(content: content) { $0.edit(request: request).accepted }
-    }
-    func editPage(content: Bool = true, _ edit: (PagedPreviewNotebook) -> Bool) {
         guard let note = current else { return }
-        guard edit(note) else { status = note.lastError; return }
-        revision = note.changeVersion // Published even when only the selected PageId changes.
+        let result = note.edit(request: request)
+        guard result.accepted else { status = previewFailureMessage(result.failure); return }
+        revision = result.rootRevision // Published even when only the selected PageId changes.
         if content { save() }
     }
 }

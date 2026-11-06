@@ -1,0 +1,192 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "--show-sdk-path"
+    ],
+    "label": "swift-sdk",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-typed-app/ModuleCache-sim",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-typed-app/baseline",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-typed-app-20261106/Probe.swift"
+    ],
+    "label": "swift-old-string-visible",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-typed-app/ModuleCache-sim",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-typed-app-20261106/Probe.swift"
+    ],
+    "label": "swift-new-string-hidden",
+    "returncode": 1
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-version"
+    ],
+    "label": "xcode-version",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "create",
+      "NoteCoreSDKTypedApp-20261106",
+      "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    ],
+    "label": "create-device",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "boot",
+      "B86EB853-8DA3-4DE4-BB61-7B447B75E553"
+    ],
+    "label": "boot",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "bootstatus",
+      "B86EB853-8DA3-4DE4-BB61-7B447B75E553",
+      "-b"
+    ],
+    "label": "bootstatus",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-quiet",
+      "-xctestrun",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-typed-app/DerivedData/Build/Products/NoteCorePreview_iphonesimulator27.1-arm64.xctestrun",
+      "-destination",
+      "platform=iOS Simulator,id=B86EB853-8DA3-4DE4-BB61-7B447B75E553",
+      "-parallel-testing-enabled",
+      "NO",
+      "-only-testing:NoteCorePreviewTests",
+      "-resultBundlePath",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-typed-app-20261106/tests.xcresult",
+      "-collect-test-diagnostics",
+      "never",
+      "test-without-building"
+    ],
+    "label": "test",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "summary",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-typed-app-20261106/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "summary",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "tests",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-typed-app-20261106/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "tests",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before-cleanup",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "B86EB853-8DA3-4DE4-BB61-7B447B75E553"
+    ],
+    "label": "shutdown",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "delete",
+      "B86EB853-8DA3-4DE4-BB61-7B447B75E553"
+    ],
+    "label": "delete",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-after",
+    "returncode": 0
+  }
+]

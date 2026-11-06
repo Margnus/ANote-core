@@ -1,0 +1,328 @@
+sandbox-exec: sandbox_apply: Operation not permitted
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:769:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+767 |         _window = StateObject(wrappedValue: window ?? PreviewWindowState(model: model))
+768 |     }
+769 |     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+770 |     @State private var width: Double = 2.5
+771 |     @State private var finger = true
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:770:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+768 |     }
+769 |     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
+770 |     @State private var width: Double = 2.5
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+771 |     @State private var finger = true
+772 |     @State private var renaming = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:771:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+769 |     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
+770 |     @State private var width: Double = 2.5
+771 |     @State private var finger = true
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+772 |     @State private var renaming = false
+773 |     @State private var title = ""
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:772:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+770 |     @State private var width: Double = 2.5
+771 |     @State private var finger = true
+772 |     @State private var renaming = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+773 |     @State private var title = ""
+774 |     @State private var importing = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:773:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+771 |     @State private var finger = true
+772 |     @State private var renaming = false
+773 |     @State private var title = ""
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+774 |     @State private var importing = false
+775 |     @State private var exporting = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:774:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+772 |     @State private var renaming = false
+773 |     @State private var title = ""
+774 |     @State private var importing = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+775 |     @State private var exporting = false
+776 |     @State private var exportingRequest: UUID?
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:775:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+773 |     @State private var title = ""
+774 |     @State private var importing = false
+775 |     @State private var exporting = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+776 |     @State private var exportingRequest: UUID?
+777 |     @State private var deletingPage = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:776:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+774 |     @State private var importing = false
+775 |     @State private var exporting = false
+776 |     @State private var exportingRequest: UUID?
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+777 |     @State private var deletingPage = false
+778 |     @State private var viewportRequest = 0
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:777:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+775 |     @State private var exporting = false
+776 |     @State private var exportingRequest: UUID?
+777 |     @State private var deletingPage = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+778 |     @State private var viewportRequest = 0
+779 |     @State private var viewportRatio = 0.0
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:778:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+776 |     @State private var exportingRequest: UUID?
+777 |     @State private var deletingPage = false
+778 |     @State private var viewportRequest = 0
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+779 |     @State private var viewportRatio = 0.0
+780 |     var body: some View {
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:779:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+777 |     @State private var deletingPage = false
+778 |     @State private var viewportRequest = 0
+779 |     @State private var viewportRatio = 0.0
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+780 |     var body: some View {
+781 |         let exportAtRender = exportingRequest
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:769:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+767 |         _window = StateObject(wrappedValue: window ?? PreviewWindowState(model: model))
+768 |     }
+769 |     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+770 |     @State private var width: Double = 2.5
+771 |     @State private var finger = true
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:770:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+768 |     }
+769 |     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
+770 |     @State private var width: Double = 2.5
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+771 |     @State private var finger = true
+772 |     @State private var renaming = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:771:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+769 |     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
+770 |     @State private var width: Double = 2.5
+771 |     @State private var finger = true
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+772 |     @State private var renaming = false
+773 |     @State private var title = ""
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:772:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+770 |     @State private var width: Double = 2.5
+771 |     @State private var finger = true
+772 |     @State private var renaming = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+773 |     @State private var title = ""
+774 |     @State private var importing = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:773:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+771 |     @State private var finger = true
+772 |     @State private var renaming = false
+773 |     @State private var title = ""
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+774 |     @State private var importing = false
+775 |     @State private var exporting = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:774:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+772 |     @State private var renaming = false
+773 |     @State private var title = ""
+774 |     @State private var importing = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+775 |     @State private var exporting = false
+776 |     @State private var exportingRequest: UUID?
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:775:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+773 |     @State private var title = ""
+774 |     @State private var importing = false
+775 |     @State private var exporting = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+776 |     @State private var exportingRequest: UUID?
+777 |     @State private var deletingPage = false
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:776:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+774 |     @State private var importing = false
+775 |     @State private var exporting = false
+776 |     @State private var exportingRequest: UUID?
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+777 |     @State private var deletingPage = false
+778 |     @State private var viewportRequest = 0
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:777:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+775 |     @State private var exporting = false
+776 |     @State private var exportingRequest: UUID?
+777 |     @State private var deletingPage = false
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+778 |     @State private var viewportRequest = 0
+779 |     @State private var viewportRatio = 0.0
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:778:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+776 |     @State private var exportingRequest: UUID?
+777 |     @State private var deletingPage = false
+778 |     @State private var viewportRequest = 0
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+779 |     @State private var viewportRatio = 0.0
+780 |     var body: some View {
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:779:24: error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+777 |     @State private var deletingPage = false
+778 |     @State private var viewportRequest = 0
+779 |     @State private var viewportRatio = 0.0
+    |                        `- error: external macro implementation type 'SwiftUIMacros.StateMacro' could not be found for macro 'State()'; '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server' produced malformed response
+780 |     var body: some View {
+781 |         let exportAtRender = exportingRequest
+
+SwiftUI.State:1:145: note: 'State()' declared here
+1 | @attached(accessor, names: named(init), named(get), named(set)) @attached(peer, names: prefixed(`_`), prefixed(__), prefixed(`$`)) public macro State() = #externalMacro(module: "SwiftUIMacros", type: "StateMacro")
+  |                                                                                                                                                 `- note: 'State()' declared here
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:795:64: error: cannot find '$finger' in scope
+793 |                         Button("撤销") { model.applyEdit(PreviewEditUndo.shared) }.disabled(!note.canUndo)
+794 |                         Button("重做") { model.applyEdit(PreviewEditRedo.shared) }.disabled(!note.canRedo)
+795 |                         Spacer(); Toggle("手指书写", isOn: $finger).fixedSize()
+    |                                                        `- error: cannot find '$finger' in scope
+796 |                     }.padding(.horizontal)
+797 |                     ScrollView(.horizontal, showsIndicators: false) {
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:868:45: error: cannot find '$renaming' in scope
+866 |             }
+867 |         }
+868 |         .alert("笔记名称", isPresented: $renaming) {
+    |                                     `- error: cannot find '$renaming' in scope
+869 |             TextField("名称", text: $title)
+870 |             Button("取消", role: .cancel) { }
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:869:39: error: cannot find '$title' in scope
+867 |         }
+868 |         .alert("笔记名称", isPresented: $renaming) {
+869 |             TextField("名称", text: $title)
+    |                                   `- error: cannot find '$title' in scope
+870 |             Button("取消", role: .cancel) { }
+871 |             Button("完成") { model.applyEdit(PreviewEditRename(title: title)) }
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:873:51: error: cannot find '$deletingPage' in scope
+871 |             Button("完成") { model.applyEdit(PreviewEditRename(title: title)) }
+872 |         }
+873 |         .alert("删除当前页？", isPresented: $deletingPage) {
+    |                                       `- error: cannot find '$deletingPage' in scope
+874 |             Button("取消", role: .cancel) { }
+875 |             Button("删除", role: .destructive) { model.applyEdit(PreviewEditDeletePage.shared) }
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:882:36: error: cannot find '$exporting' in scope
+880 |             if ready && window.ownsExport { exportingRequest = window.exportRequest; exporting = true }
+881 |         }
+882 |         .fileExporter(isPresented: $exporting, document: model.exportDocument, contentType: .data,
+    |                                    `- error: cannot find '$exporting' in scope
+883 |             defaultFilename: "NoteCore-backup.ncp") { result in
+884 |                 guard let ticket = exportAtRender, window.isExportRequest(ticket) else { return }
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:892:36: error: cannot find '$importing' in scope
+890 |             }
+891 |         .onChange(of: exporting) { _, showing in if !showing, let ticket = exportAtRender { window.finishExport(request: ticket) } }
+892 |         .fileImporter(isPresented: $importing, allowedContentTypes: [.data]) { result in
+    |                                    `- error: cannot find '$importing' in scope
+893 |             switch result {
+894 |             case .success(let url): window.importCopy(url)
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:788:68: error: cannot assign to property: 'self' is immutable
+786 |                         Button("返回") { window.leave() }
+787 |                         Spacer()
+788 |                         Button(note.title) { window.cancelInput(); title = note.title; renaming = true }.font(.headline).lineLimit(1).accessibilityIdentifier("note-title")
+    |                                                                    `- error: cannot assign to property: 'self' is immutable
+789 |                         Spacer(); Button("保存") { model.retryRetainedWrites(); model.save() }
+790 |                         Button("导出") { window.prepareExport() }.disabled(model.transferBusy)
+
+ios-app/NoteCorePreview/NoteCorePreviewApp.swift:880:45: error: cannot assign to property: 'self' is immutable
+878 |         .onDisappear { window.disappear() }
+879 |         .onChange(of: model.exportDocument != nil) { _, ready in
+880 |             if ready && window.ownsExport { exportingRequest = window.exportRequest; exporting = true }
+    |                                             `- error: cannot assign to property: 'self' is immutable
+881 |         }
+882 |         .fileExporter(isPresented: $exporting, document: model.exportDocument, contentType: .data,

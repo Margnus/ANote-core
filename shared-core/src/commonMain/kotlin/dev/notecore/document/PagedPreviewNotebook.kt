@@ -52,6 +52,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     val currentPage: PageDescriptor get() = root().findPage(selected)!!
     val totalStrokeCount: Int get() = root().scene.objectCount
     val strokeCount: Int get() = visible().size
+    @OptIn(ExperimentalObjCRefinement::class)
+    @HiddenFromObjC
     val lastError: String get() { ownerCheck(); return error }
     val lastFailure: PreviewSessionFailure? get() { ownerCheck(); return failure }
     val hasActiveStroke: Boolean get() { ownerCheck(); return input != null }

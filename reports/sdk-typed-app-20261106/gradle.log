@@ -1,0 +1,185 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :canvas-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, iosArm64Main, iosMain, iosSimulatorArm64Main, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+[32m[1mSolution:[0m[0m
+[32m[3mPlease keep dependsOn edges only from one group and remove the others. [0m[0m
+
+
+> Configure project :shared-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':shared-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, iosArm64Main, iosMain, iosSimulatorArm64Main]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+Kotlin Source Set 'androidInstrumentedTest' can't depend on 'commonTest' as they are from different Source Set Trees.
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove this dependency edge.[0m[0m
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :canvas-core:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :shared-core:compileKotlinIosSimulatorArm64
+> Task :shared-core:linkDebugFrameworkIosSimulatorArm64
+> Task :canvas-core:compileKotlinIosArm64
+> Task :shared-core:compileKotlinIosArm64
+> Task :shared-core:linkDebugFrameworkIosArm64
+> Task :canvas-core:compileKotlinJvm UP-TO-DATE
+> Task :canvas-core:compileJvmMainJava NO-SOURCE
+> Task :canvas-core:jvmProcessResources NO-SOURCE
+> Task :canvas-core:processJvmMainResources SKIPPED
+> Task :canvas-core:jvmMainClasses UP-TO-DATE
+> Task :canvas-core:jvmJar UP-TO-DATE
+> Task :shared-core:jvmProcessResources NO-SOURCE
+> Task :shared-core:processJvmMainResources SKIPPED
+> Task :shared-core:jvmTestProcessResources NO-SOURCE
+> Task :shared-core:processJvmTestResources SKIPPED
+> Task :android-app:preBuild UP-TO-DATE
+> Task :android-app:preDebugBuild UP-TO-DATE
+> Task :android-app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :android-app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preDebugBuild UP-TO-DATE
+> Task :canvas-core:writeDebugAarMetadata UP-TO-DATE
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preDebugBuild UP-TO-DATE
+> Task :shared-core:writeDebugAarMetadata UP-TO-DATE
+> Task :android-app:checkDebugAarMetadata UP-TO-DATE
+> Task :android-app:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResources UP-TO-DATE
+> Task :canvas-core:packageDebugResources UP-TO-DATE
+> Task :shared-core:generateDebugResValues UP-TO-DATE
+> Task :shared-core:generateDebugResources UP-TO-DATE
+> Task :shared-core:packageDebugResources UP-TO-DATE
+> Task :android-app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :android-app:generateDebugResources UP-TO-DATE
+> Task :android-app:mergeDebugResources UP-TO-DATE
+> Task :android-app:packageDebugResources UP-TO-DATE
+> Task :android-app:parseDebugLocalResources UP-TO-DATE
+> Task :android-app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android-app:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:processDebugManifest UP-TO-DATE
+> Task :shared-core:extractDeepLinksDebug UP-TO-DATE
+> Task :shared-core:processDebugManifest UP-TO-DATE
+> Task :android-app:processDebugMainManifest UP-TO-DATE
+> Task :android-app:processDebugManifest UP-TO-DATE
+> Task :android-app:processDebugManifestForPackage UP-TO-DATE
+> Task :canvas-core:compileDebugLibraryResources UP-TO-DATE
+> Task :canvas-core:parseDebugLocalResources UP-TO-DATE
+> Task :canvas-core:generateDebugRFile UP-TO-DATE
+> Task :shared-core:compileDebugLibraryResources UP-TO-DATE
+> Task :shared-core:parseDebugLocalResources UP-TO-DATE
+> Task :shared-core:generateDebugRFile UP-TO-DATE
+> Task :android-app:processDebugResources UP-TO-DATE
+> Task :canvas-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :shared-core:compileDebugKotlinAndroid
+> Task :shared-core:javaPreCompileDebug UP-TO-DATE
+> Task :shared-core:compileKotlinJvm
+> Task :shared-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :shared-core:compileJvmMainJava NO-SOURCE
+> Task :shared-core:jvmMainClasses
+> Task :shared-core:jvmJar
+> Task :shared-core:bundleLibCompileToJarDebug
+
+> Task :android-app:compileDebugKotlin
+w: file:///Users/lixiaofan/StudioProjects/notecore/android-app/src/main/java/dev/notecore/app/MainActivity.kt:45:20 'fun setDecorFitsSystemWindows(p0: Boolean): Unit' is deprecated. Deprecated in Java.
+w: file:///Users/lixiaofan/StudioProjects/notecore/android-app/src/main/java/dev/notecore/app/MainActivity.kt:349:83 'fun onBackPressed(): Unit' is deprecated. Deprecated in Java.
+
+> Task :android-app:javaPreCompileDebug UP-TO-DATE
+> Task :android-app:compileDebugJavaWithJavac NO-SOURCE
+> Task :android-app:mergeDebugShaders UP-TO-DATE
+> Task :android-app:compileDebugShaders NO-SOURCE
+> Task :android-app:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugShaders UP-TO-DATE
+> Task :canvas-core:compileDebugShaders NO-SOURCE
+> Task :canvas-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugShaders UP-TO-DATE
+> Task :shared-core:compileDebugShaders NO-SOURCE
+> Task :shared-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:generateDebugAssets UP-TO-DATE
+> Task :shared-core:mergeDebugAssets UP-TO-DATE
+> Task :android-app:mergeDebugAssets UP-TO-DATE
+> Task :android-app:compressDebugAssets UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToJarDebug
+> Task :canvas-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :android-app:desugarDebugFileDependencies UP-TO-DATE
+> Task :android-app:dexBuilderDebug UP-TO-DATE
+> Task :android-app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :android-app:processDebugJavaRes UP-TO-DATE
+> Task :canvas-core:processDebugJavaRes UP-TO-DATE
+> Task :shared-core:processDebugJavaRes UP-TO-DATE
+> Task :android-app:mergeDebugJavaResource UP-TO-DATE
+> Task :android-app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :android-app:mergeExtDexDebug UP-TO-DATE
+> Task :shared-core:bundleLibRuntimeToDirDebug
+> Task :canvas-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :android-app:mergeLibDexDebug
+> Task :android-app:mergeProjectDexDebug UP-TO-DATE
+> Task :android-app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugNativeLibs NO-SOURCE
+> Task :canvas-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :shared-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :shared-core:mergeDebugNativeLibs NO-SOURCE
+> Task :shared-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :android-app:mergeDebugNativeLibs NO-SOURCE
+> Task :android-app:stripDebugDebugSymbols NO-SOURCE
+> Task :android-app:validateSigningDebug UP-TO-DATE
+> Task :android-app:writeDebugAppMetadata UP-TO-DATE
+> Task :android-app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :android-app:packageDebug
+> Task :android-app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :android-app:assembleDebug
+> Task :shared-core:compileTestKotlinJvm
+> Task :shared-core:compileJvmTestJava NO-SOURCE
+> Task :shared-core:jvmTestClasses
+> Task :shared-core:jvmTest
+
+[Incubating] Problems report is available at: file:///Users/lixiaofan/StudioProjects/notecore/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 47s
+87 actionable tasks: 18 executed, 69 up-to-date

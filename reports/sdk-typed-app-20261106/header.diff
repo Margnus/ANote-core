@@ -1,0 +1,10 @@
+--- reports/sdk-pending-display-20261106/NoteCanvasPrototype.h	2026-11-06 21:42:37
++++ shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h	2026-11-06 21:51:50
+@@ -2984,7 +2984,6 @@
+ /** Input ownership only; document/history/save/render budgets remain separate. */
+ @property (readonly) int64_t inputReservedByteCharge __attribute__((swift_name("inputReservedByteCharge")));
+ @property (readonly) BOOL isReadOnly __attribute__((swift_name("isReadOnly")));
+-@property (readonly) NSString *lastError __attribute__((swift_name("lastError")));
+ @property (readonly) NCPPreviewSessionFailure * _Nullable lastFailure __attribute__((swift_name("lastFailure")));
+ @property (readonly) int32_t pageCount __attribute__((swift_name("pageCount")));
+ @property (readonly) int32_t strokeCount __attribute__((swift_name("strokeCount")));

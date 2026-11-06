@@ -51,21 +51,31 @@ def main():
             rejected.append({'case': name, 'objc_name': declaration, 'swift_name': member, 'reason': str(error)})
         else:
             raise AssertionError(('Unsafe candidate declaration change accepted', name))
-    retained = ROOT/'reports/candidate-public-boundary-20261031/NoteCanvasPrototype.h'
-    try:
-        check(retained.read_text(encoding='utf-8'))
-    except AssertionError as error:
-        assert 'Raw Kotlin array entry exported' in str(error), str(error)
-        rejected.append({'case': 'previous_real_header_exposes_raw_array', 'objc_name': 'NCPPagedPreviewNotebook',
-                         'swift_name': 'offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)', 'reason': str(error)})
-    else:
-        raise AssertionError('Previous raw-array export accepted')
+    historical = (
+        ('reports/candidate-public-boundary-20261031/NoteCanvasPrototype.h',
+         'previous_real_header_exposes_raw_array', 'offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)',
+         'Raw Kotlin array entry exported'),
+        ('reports/sdk-pending-display-20261106/NoteCanvasPrototype.h',
+         'previous_real_header_exposes_legacy_error', 'lastError', 'Legacy error string exported'),
+    )
+    retained = {}
+    for relative, name, member, expected in historical:
+        header = ROOT/relative
+        try:
+            check(header.read_text(encoding='utf-8'))
+        except AssertionError as error:
+            assert expected in str(error), str(error)
+            rejected.append({'case': name, 'objc_name': 'NCPPagedPreviewNotebook',
+                             'swift_name': member, 'reason': str(error)})
+        else:
+            raise AssertionError(('Historical unsafe export accepted', name))
+        retained[relative] = sha(header)
     assert sha(path) == before
     source = [Path(__file__), ROOT/'tools/audit_public_boundary.py', path]
     report = {'schema': 'candidate-public-boundary-guards-1', 'status': 'passed',
               'actual_header_candidate_methods': len(methods), 'actual_header_candidate_properties': len(properties),
               'changed_headers_rejected': rejected, 'actual_header_unchanged': True,
-              'retained_header_sha256': {retained.relative_to(ROOT).as_posix(): sha(retained)},
+              'retained_header_sha256': retained,
               'source_and_header_sha256': {p.relative_to(ROOT).as_posix(): sha(p) for p in source},
               'scope': 'Structural guard mutations of in-memory copies of a real source-bound compiler header. No compiler, Native execution, semantic failure/owner/index conformance, full ABI type layout or SDK freeze claim.',
               'c1_complete': False, 'whole_requirement_accepted': False}

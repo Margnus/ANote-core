@@ -2,6 +2,30 @@ import SwiftUI
 import UIKit
 import NoteCanvasPrototype
 
+func previewFailureMessage(_ failure: PreviewSessionFailure?) -> String {
+    switch failure?.kind {
+    case .closed: return "此会话已关闭，请重新打开笔记"
+    case .pendingStroke: return "上一笔尚未提交，请先重试保存"
+    case .activeStroke: return "请先完成当前笔画"
+    case .invalidArgument: return "操作参数无效，请检查后重试"
+    case .missingPage: return "页面不存在"
+    case .capacity: return "此预览已达到笔迹容量"
+    case .identityExhausted: return "此会话编号已耗尽，请保留笔记并导出备份"
+    case .historyEmpty: return "没有可撤销或重做的操作"
+    case .documentRejected:
+        switch failure?.documentReason {
+        case .journalCapacity, .historyCapacity, .liveByteCapacity, .identityCapacity, .objectCapacity, .pageCapacity:
+            return "当前预览已达到编辑容量，请保留笔记并导出备份"
+        default: return "操作未完成，原内容仍保留，请重试"
+        }
+    case .noActiveStroke: return "没有进行中的笔画"
+    case .invalidInput: return "输入数据无效"
+    case .inputBatchCapacity: return "输入批次超限"
+    case .readOnly: return "阅读模式不能修改笔记"
+    default: return "当前操作无法完成"
+    }
+}
+
 struct NativeInkCanvas: UIViewRepresentable {
     let note: PagedPreviewNotebook
     let renderModel: PreviewModel
@@ -205,20 +229,21 @@ final class InkUIView: UIView {
         c.restoreGState()
     }
     private struct RealSample { let point: CGPoint; let pressure: Float; let time: Int64 }
-    private var inputPreparationError: String?
+    private enum RealBatch {
+        case ready([RealSample])
+        case refused(String)
+    }
     /// UIKit's coalesced array includes a copy of the main touch. Copy values immediately;
     /// never append the main touch again, retain auxiliary UITouchs or ingest predictions.
-    private func realSamples(_ touch: UITouch, event: UIEvent?, phase: PointerPhase) -> [RealSample]? {
-        inputPreparationError = nil
+    private func realSamples(_ touch: UITouch, event: UIEvent?, phase: PointerPhase) -> RealBatch {
         let auxiliary = event?.coalescedTouches(for: touch)
         let touches = auxiliary?.isEmpty == false ? auxiliary! : [touch]
-        guard touches.count <= Int(note.inputBatchLimit) else { return nil }
-        if note.prepareRealBatch(phase: phase, count: Int32(touches.count)) != nil {
-            inputPreparationError = note.lastError
-            return nil
+        guard touches.count <= Int(note.inputBatchLimit) else { return .refused("输入批次超限") }
+        if let refusal = note.prepareRealBatch(phase: phase, count: Int32(touches.count)) {
+            return .refused(previewFailureMessage(refusal.failure))
         }
         let transform = (scale: scale, x: offsetX, y: offsetY)
-        guard transform.scale.isFinite, transform.scale > 0 else { return nil }
+        guard transform.scale.isFinite, transform.scale > 0 else { return .refused("画布当前无法接收输入") }
         var samples: [RealSample] = []; samples.reserveCapacity(touches.count)
         for item in touches {
             let raw = item.location(in: self)
@@ -228,11 +253,11 @@ final class InkUIView: UIView {
             // Double(Int64.max) rounds UP to 2^63. Strict '<' prevents a trapping conversion.
             guard point.x.isFinite, point.y.isFinite, abs(point.x) <= 1e9, abs(point.y) <= 1e9,
                   seconds.isFinite, seconds >= 0, micros.isFinite, micros < Double(Int64.max),
-                  force.isFinite, maximum.isFinite else { return nil }
+                  force.isFinite, maximum.isFinite else { return .refused("输入数据无效") }
             let pressure: Float = maximum > 0 ? Float(max(0, min(1, force / maximum))) : 0.5
             samples.append(RealSample(point: point, pressure: pressure, time: Int64(micros)))
         }
-        return samples
+        return .ready(samples)
     }
     /// Fill one bounded native buffer directly; no mapped scalar array survives beside Data.
     private func scalarData<T>(_ samples: [RealSample], value: (RealSample) -> T) -> Data {
@@ -254,10 +279,15 @@ final class InkUIView: UIView {
             xs: scalarData(samples) { Double($0.point.x) }, ys: scalarData(samples) { Double($0.point.y) },
             pressures: scalarData(samples) { $0.pressure }, times: scalarData(samples) { $0.time })
     }
-    private func rejectInput() {
-        let message = inputPreparationError ?? "输入数据无效"
-        inputPreparationError = nil
-        cancelInk(); failed(message + "；本笔未提交")
+    private func preparedSamples(_ touch: UITouch, event: UIEvent?, phase: PointerPhase) -> [RealSample]? {
+        switch realSamples(touch, event: event, phase: phase) {
+        case .ready(let samples): return samples
+        case .refused(let message): rejectInput(message); return nil
+        }
+    }
+    private func rejectInput(_ message: String) {
+        cancelInk()
+        failed(message + "；本笔未提交")
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard scale > 0, !suppressSequence else { return }
@@ -270,11 +300,13 @@ final class InkUIView: UIView {
         }
         guard active == nil, let touch = touches.first(where: { $0.type == .pencil || ($0.type == .direct && fingerDrawing) }) else { return }
         guard !note.hasActiveStroke else { failed("其他画布正在输入，请完成后重试"); return }
-        guard let samples = realSamples(touch, event: event, phase: .down), let first = samples.first else { rejectInput(); return }
+        guard let samples = preparedSamples(touch, event: event, phase: .down), let first = samples.first else { return }
         let p = first.point
         guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
-        guard note.selectPen(argb: penColor, width: penWidth) else { failed(note.lastError); return }
-        guard offerReal(samples, phase: .down).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
+        let pen = note.edit(request: PreviewEditSelectPen(argb: penColor, width: penWidth))
+        guard pen.accepted else { failed(previewFailureMessage(pen.failure)); return }
+        let result = offerReal(samples, phase: .down)
+        guard result.admitted else { rejectInput(previewFailureMessage(result.failure)); return }
         inputOperation = note.activeInputOperationId
         inputWindow?.acceptedInput(from: self)
         active = touch; path = UIBezierPath(); path?.lineCapStyle = .round; path?.lineJoinStyle = .round
@@ -286,8 +318,9 @@ final class InkUIView: UIView {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if navigating { navigate(fingers(event), moving: true); return }
         guard !suppressSequence, let active = active, touches.contains(active), ownsInput else { return }
-        guard let samples = realSamples(active, event: event, phase: .move) else { rejectInput(); return }
-        guard offerReal(samples, phase: .move).admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
+        guard let samples = preparedSamples(active, event: event, phase: .move) else { return }
+        let result = offerReal(samples, phase: .move)
+        guard result.admitted else { rejectInput(previewFailureMessage(result.failure)); return }
         for sample in samples {
             path?.addLine(to: sample.point)
         }
@@ -301,11 +334,16 @@ final class InkUIView: UIView {
         }
         if suppressSequence { if remaining.isEmpty { suppressSequence = false }; return }
         guard let active = active, touches.contains(active), ownsInput else { return }
-        guard let samples = realSamples(active, event: event, phase: .up), !samples.isEmpty else { rejectInput(); return }
+        guard let samples = preparedSamples(active, event: event, phase: .up) else { return }
         let result = offerReal(samples, phase: .up)
-        guard result.admitted else { cancelInk(); failed(note.lastError + "；本笔未提交"); return }
+        guard result.admitted else { rejectInput(previewFailureMessage(result.failure)); return }
         self.active = nil; inputOperation = nil; path = nil; suppressSequence = !remaining.isEmpty
-        if result.disposition == .committed { changed() } else { failed(note.lastError) }; setNeedsDisplay()
+        switch result.disposition {
+        case .committed: changed()
+        case .pendingCommit: failed("已完成笔迹尚未提交，已保留，请重试保存")
+        default: failed(previewFailureMessage(result.failure))
+        }
+        setNeedsDisplay()
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelInk() }
     func cancelInk() {

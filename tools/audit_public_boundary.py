@@ -148,6 +148,8 @@ def check_candidate_channels(declarations):
     assert notebook is not None, ('Missing candidate type', 'NCPPagedPreviewNotebook')
     assert not any(method['swift_name'].startswith('offerRealBatch(') for method in notebook['methods']), (
         'Raw Kotlin array entry exported from NCPPagedPreviewNotebook')
+    assert not any(prop['swift_name'] == 'lastError' for prop in notebook['properties']), (
+        'Legacy error string exported from NCPPagedPreviewNotebook')
     checked = []
     for name, members in CANDIDATE_METHODS.items():
         assert name in by_name, ('Missing candidate type', name)
