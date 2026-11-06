@@ -1,0 +1,161 @@
+{
+  "schema": "preview-sdk-type-closure-1",
+  "status": "passed",
+  "baseline_commit": "b69432d4c0f9b358b95ff593bddb6d3d407250f4",
+  "compiler_header": "reports/sdk-array-visibility-20261106/NoteCanvasPrototype.h",
+  "compiler_header_sha256": "4b9d5735a47d6c1898a8c0e2f3eb963c1045aaa4203589355b7984c36639aadc",
+  "graph": "reports/sdk-type-closure-20261106/audit-strict.stdout.log",
+  "counts": {
+    "structural_method_seeds": 27,
+    "structural_property_seeds": 34,
+    "selected_types": 53,
+    "only_via_other_members": 26,
+    "outside_candidate_graph": 181,
+    "all_header_types": 260
+  },
+  "decisions": [
+    {
+      "id": "selected-value-surface",
+      "decision": "use_as_preview_review_profile",
+      "evidence": "Real compiler header, selected member closure, and unchanged SketchHost source typecheck against a projected copy.",
+      "constraint": "Candidate members include trusted fixed-budget initialization, edit variant construction and enum cases. Constructor and owner preconditions still apply."
+    },
+    {
+      "id": "pending-stroke-rendering",
+      "decision": "retain_current_read_dependency",
+      "path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "pendingStroke()",
+          "to": "NCPDocumentCommandCanvas"
+        },
+        {
+          "from": "NCPDocumentCommandCanvas",
+          "member": "command",
+          "to": "NCPCanvasCommand"
+        },
+        {
+          "from": "NCPCanvasCommand",
+          "member": "<pending display downcast>",
+          "to": "NCPCanvasCommandAddStroke"
+        }
+      ],
+      "source": "samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "evidence": "reports/sdk-type-closure-20261106/sketch-pending-type-removed.stderr.log",
+      "constraint": "Existing host downcasts pending display data. Keep original pending identity for checkpoint/retirement. Hiding the command requires replacing only the read projection first."
+    },
+    {
+      "id": "legacy-error-label",
+      "decision": "preserve_one_compatibility_member_for_uikit_sample",
+      "source": [
+        "samples/apple-sketch/NoteCoreSketch/SketchApp.swift",
+        "samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift"
+      ],
+      "evidence": "reports/sdk-type-closure-20261106/apple-strict.stderr.log",
+      "constraint": "Adding only lastError makes the current UIKit sample typecheck. It remains a compatibility accessor while the sample still consumes the text."
+    },
+    {
+      "id": "application-only-render-and-save",
+      "decision": "keep_original_application_ports_separate_from_recommended_profile",
+      "source": [
+        "ios-app/NoteCorePreview/NoteCorePreviewApp.swift",
+        "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift"
+      ],
+      "evidence": "reports/sdk-type-closure-20261106/app-ports-strict.stderr.log",
+      "constraint": "Full header probe sees four AppleBrush experiment types and PreviewSaveLedger. These are live original App integration dependencies. Candidate graph absence cannot authorize their removal from the shared App framework."
+    },
+    {
+      "id": "legacy-reachable-array-construction",
+      "decision": "exclude_from_candidate_member_selection",
+      "path": [
+        {
+          "from": "NCPPagedPreviewNotebook",
+          "member": "stroke(index:)",
+          "to": "NCPStrokeObject"
+        },
+        {
+          "from": "NCPStrokeObject",
+          "member": "doCopy(id:objectRevision:layerId:brush:samples:transform:)",
+          "to": "NCPStrokeSamples"
+        },
+        {
+          "from": "NCPStrokeSamples",
+          "member": "companion",
+          "to": "NCPStrokeSamplesCompanion"
+        },
+        {
+          "from": "NCPStrokeSamplesCompanion",
+          "member": "doCopyOf(xs:ys:pressures:timesMicros:)",
+          "to": "NCPKotlinDoubleArray"
+        }
+      ],
+      "constraint": "Kotlin array types remain exported by other full members such as StrokeSamples companion construction. Their continued presence does not re-expose Notebook.offerRealBatch."
+    }
+  ],
+  "verification": {
+    "typechecks": 6,
+    "expected_successes": 3,
+    "expected_compile_refusals": 3,
+    "built_a_new_framework": false,
+    "linked_projected_framework": false,
+    "runtime_reexecuted": false,
+    "production_source_changed": false
+  },
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "3ced040df07d4346fb928f50290bfef05838b51409a32a05c6e5deb7691213ea",
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "4379c026b33b26b106da3759812c628fdf845232b93b00dd3f62fb01d3fd9e63",
+    "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "f2b8d624959431a0c105ee411d8ede6a762384acbb942d8d4b81b34534324455",
+    "samples/apple-sketch/NoteCoreSketch/SketchApp.swift": "4c55fb0138b80cf7e7205a2ed9f8acce65e95e085890fd5652aeac43e3478434",
+    "samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift": "61fa2b104a55ac1e9f71cb04169e41dcb9d283ef145323abba478e8dddd8e62a",
+    "samples/sketch-host-ios/Sources/SketchCanvas.swift": "966c5d571aedcb339eee84acbf6bf9f3b5ddc58ab167f4a7f9a7740d9ad30019",
+    "samples/sketch-host-ios/Sources/SketchHostApp.swift": "4f752330ace61daa6624a580c554965d667e3909b1e1a36195c062858135c87c",
+    "samples/sketch-host-ios/Sources/SketchSession.swift": "27a718cf0e7364cd537e8623fe4ec66c9c86b34541ad5dfbcb8d3c50ac49157e",
+    "shared-core/build.gradle.kts": "a45e630699e51515b27bccbfe6a56e48d6f4c761663d8e6bf91ced6ee770e872",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "b9985218e98f32276f62515f6805ef24a5654efc34524f36069fd932da18c9bd",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "5cf5b31208809b2cb564aa147f829f20e0b6e6ddca80a20ed15a5b194a111f37",
+    "tools/audit_public_boundary.py": "a7c5613ca4de37c3d20cd035de5ff5b834a71c40cb0dc1bbd6c645b651052b9e",
+    "tools/audit_sdk_type_closure.py": "4b0eacc802ca1444c2bd41a032f9a180b4cec0e9705e03c4866e5ac18cb25bec"
+  },
+  "parent_receipt_sha256": {
+    "reports/sdk-array-visibility.json": "1d1e227ea2e2d1f2db4f4f2654f88f84a0d638e745b1107f0428972558d84306",
+    "reports/sdk-array-visibility-20261106/NoteCanvasPrototype.h": "4b9d5735a47d6c1898a8c0e2f3eb963c1045aaa4203589355b7984c36639aadc",
+    "reports/sdk-array-visibility-20261106/build-preview.log": "856cc3f99022fd8e8c9a71c720fed3b973f596498285ddcb7eb332e664965ef1"
+  },
+  "evidence_sha256": {
+    "reports/sdk-type-closure-20261106/AppPorts.swift": "71e44a256489e0bf37e591e1edfbda5903e5ce4f396cc100e36abddfa3de5781",
+    "reports/sdk-type-closure-20261106/app-ports-full.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/app-ports-full.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/app-ports-strict.stderr.log": "9dc69a3aba4a5144da8062aef1c444c7780317581d65e349f346af48c34383ea",
+    "reports/sdk-type-closure-20261106/app-ports-strict.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/apple-legacy.stderr.log": "b5047538ba6af91a9de222a96a98e06952fbf6a9b551dc72ceb9f3aa6a00f7c4",
+    "reports/sdk-type-closure-20261106/apple-legacy.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/apple-strict.stderr.log": "9e0cad305c78d581ee88807a47796d77591e56b54c857953aae5788dfd6baf93",
+    "reports/sdk-type-closure-20261106/apple-strict.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/architecture.json": "e109e57462c6169afff535d27858b91fd7d779498ae1f2bf9e89f332ef980933",
+    "reports/sdk-type-closure-20261106/audit-legacy.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/audit-legacy.stdout.log": "84156ccc01f4b61fa1222881b5eeb49a2408a00198c0810031a71cc606b186a0",
+    "reports/sdk-type-closure-20261106/audit-strict.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/audit-strict.stdout.log": "84156ccc01f4b61fa1222881b5eeb49a2408a00198c0810031a71cc606b186a0",
+    "reports/sdk-type-closure-20261106/commands.json": "d18ee17397c6eb71ba0af3d3f2e7e65f747188b61ceaafd03b0bf896d1427a39",
+    "reports/sdk-type-closure-20261106/legacy.h": "cf7eb8161936e605a9126cf89f2c0844c5987244569de2cdebdb31f0ed96b961",
+    "reports/sdk-type-closure-20261106/module.modulemap": "a59802188d1836a93eda67210cafb4d67e99e547814b8e4a2ffffa735376e08d",
+    "reports/sdk-type-closure-20261106/pending-missing.h": "a48ee43f04fc60ed9e27c7fcd12ce9ac22bdd77bdcc18696f7fe9611ddb540f9",
+    "reports/sdk-type-closure-20261106/portable-inputs.json": "2573d198342bc45a8a35afbdfdd070d59b09d98977cac6f81a98b8221a49b52f",
+    "reports/sdk-type-closure-20261106/run-as-executed.py.txt": "e3afe78f5786322fdcee055491b7de3feb3a03b8d36b241c25081684f4239055",
+    "reports/sdk-type-closure-20261106/sdk.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/sdk.stdout.log": "fc0e1f390e49274ccc3b9484c8af9047f9e78868439ada0261b8fcda80a25990",
+    "reports/sdk-type-closure-20261106/sketch-pending-type-removed.stderr.log": "82fba62da5cad122a6cdf3ce0d4ad82b3310ffb2cbc1ff36f4dcc1b6eee3e6a1",
+    "reports/sdk-type-closure-20261106/sketch-pending-type-removed.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/sketch-strict.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/sketch-strict.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/sdk-type-closure-20261106/strict.h": "4b069a2cfb8c36717cb7d5c8143583efacc09174d742e3898bb4645233845a46",
+    "reports/sdk-type-closure-20261106/swift-version.stderr.log": "bbc8b176d3c74d4c5a7fd00b40280f98168e116d5272273bfe8e71407625540e",
+    "reports/sdk-type-closure-20261106/swift-version.stdout.log": "6209827dfa6db08f6ba1c23dd8d13562cad113e739cfa8b072f9cb387cbc4b29"
+  },
+  "sdk_frozen": false,
+  "c1_complete": false,
+  "dev_041_released": false,
+  "whole_requirements_accepted": 0,
+  "scope": "Current ARM64 simulator Objective-C generated type declarations and Swift typechecks on projected header copies. The graph follows NCP references, inheritance and two explicit consumer edges. It is not a binary symbol map, API/ABI compatibility result, final Kotlin/Android profile or evidence for native release or physical budgets."
+}

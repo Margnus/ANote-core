@@ -1,0 +1,7 @@
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchCanvas.swift:78:60: error: cannot find type 'CanvasCommandAddStroke' in scope
+ 76 |             context.strokePath(); context.restoreGState()
+ 77 |         }
+ 78 |         if let pending = note.pendingStroke()?.command as? CanvasCommandAddStroke {
+    |                                                            `- error: cannot find type 'CanvasCommandAddStroke' in scope
+ 79 |             context.addPath(path(pending.samples)); context.setStrokeColor(color(pending.target.brush.argb))
+ 80 |             context.setLineWidth(pending.target.brush.width); context.setLineCap(.round); context.setLineJoin(.round); context.strokePath()

@@ -1,0 +1,88 @@
+from pathlib import Path
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+
+root=Path.cwd()
+work=root/'output/sdk-type-closure'
+raw=root/'reports/sdk-type-closure-20261106'
+raw.mkdir(exist_ok=False)
+records=[]
+
+def save(path,value):
+    path.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+def run(label, argv, expected=0, diagnostic=None):
+    argv=[str(x) for x in argv]
+    proc=subprocess.run(argv,check=False,capture_output=True,cwd=root)
+    (raw/(label+'.stdout.log')).write_bytes(proc.stdout)
+    (raw/(label+'.stderr.log')).write_bytes(proc.stderr)
+    records.append({'label':label,'argv':argv,'returncode':proc.returncode,'expected':expected,'diagnostic':diagnostic})
+    save(raw/'commands.json',records)
+    assert proc.returncode==expected,(label,proc.stderr.decode('utf-8'))
+    if diagnostic:
+        assert diagnostic in proc.stderr.decode('utf-8'),(label,proc.stderr.decode('utf-8'))
+    return proc.stdout
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+old=root/'reports/sdk-array-visibility-20261106/NoteCanvasPrototype.h'
+live=root/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework'
+assert old.read_bytes()==(live/'Headers/NoteCanvasPrototype.h').read_bytes()
+def make_framework(name):
+    f=work/name/'NoteCanvasPrototype.framework'
+    (f/'Headers').mkdir(parents=True,exist_ok=True)
+    (f/'Modules').mkdir(exist_ok=True)
+    shutil.copy2(live/'Modules/module.modulemap',f/'Modules/module.modulemap')
+    return f
+
+base=[sys.executable,'tools/audit_sdk_type_closure.py',old]
+strict=make_framework('strict')
+legacy=make_framework('legacy')
+for name,f,opts in [('strict',strict,[]),('legacy',legacy,['--include-legacy-error'])]:
+    result=run('audit-'+name,[*base,'--projected-header',f/'Headers/NoteCanvasPrototype.h',*opts])
+    shutil.copy2(f/'Headers/NoteCanvasPrototype.h',raw/(name+'.h'))
+assert (raw/'audit-strict.stdout.log').read_bytes()==(raw/'audit-legacy.stdout.log').read_bytes()
+a=(raw/'strict.h').read_text(encoding='utf-8')
+b=(raw/'legacy.h').read_text(encoding='utf-8')
+lines=[line for line in b.splitlines(keepends=True) if 'swift_name("lastError")' in line]
+assert len(lines)==1 and b.replace(lines[0],'',1)==a
+
+pending=make_framework('pending-missing')
+edited,count=re.subn(r'(?:^__attribute__[^\n]*\n)*^@interface NCPCanvasCommandAddStroke\s[^\n]*\n.*?^@end',
+                      '',a,flags=re.M|re.S)
+assert count==1
+(pending/'Headers/NoteCanvasPrototype.h').write_text(edited,encoding='utf-8')
+shutil.copy2(pending/'Headers/NoteCanvasPrototype.h',raw/'pending-missing.h')
+shutil.copy2(live/'Modules/module.modulemap',raw/'module.modulemap')
+shutil.copy2(Path(__file__),raw/'run-as-executed.py.txt')
+
+sdk=run('sdk',['xcrun','--sdk','iphonesimulator','--show-sdk-path']).decode('utf-8').strip()
+run('swift-version',['xcrun','swiftc','--version'])
+swift=['xcrun','swiftc','-typecheck','-sdk',sdk,'-target','arm64-apple-ios18.0-simulator',
+       '-module-cache-path',work/'ModuleCache']
+sketch=sorted((root/'samples/sketch-host-ios/Sources').glob('*.swift'))
+apple=sorted((root/'samples/apple-sketch/NoteCoreSketch').glob('*.swift'))
+run('sketch-strict',[*swift,'-F',strict.parent,'-module-name','SketchHost',*sketch])
+run('apple-strict',[*swift,'-F',strict.parent,'-module-name','NoteCoreSketch',*apple],
+    expected=1,diagnostic="has no member 'lastError'")
+run('apple-legacy',[*swift,'-F',legacy.parent,'-module-name','NoteCoreSketch',*apple])
+run('sketch-pending-type-removed',[*swift,'-F',pending.parent,'-module-name','SketchHost',*sketch],
+    expected=1,diagnostic="cannot find type 'CanvasCommandAddStroke' in scope")
+
+app_probe=raw/'AppPorts.swift'
+app_probe.write_text('import NoteCanvasPrototype\n'
+    'func appPorts(_: AppleBrushOwnerExperiment, _: AppleBrushJobExperiment, '
+    '_: AppleBrushReaderExperiment, _: AppleBrushResultExperiment, _: PreviewSaveLedger) {}\n',
+    encoding='utf-8')
+run('app-ports-full',[*swift,'-F',live.parent,app_probe])
+run('app-ports-strict',[*swift,'-F',strict.parent,app_probe],expected=1,
+    diagnostic="cannot find type 'AppleBrushOwnerExperiment' in scope")
+for name in ('AppleBrushJobExperiment','AppleBrushReaderExperiment','AppleBrushResultExperiment','PreviewSaveLedger'):
+    assert f"cannot find type '{name}' in scope" in (raw/'app-ports-strict.stderr.log').read_text(encoding='utf-8')
+assert sha(old)==sha(live/'Headers/NoteCanvasPrototype.h')
+print('Six Swift typechecks matched expectations.')

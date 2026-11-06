@@ -1,0 +1,186 @@
+[
+  {
+    "label": "audit-strict",
+    "argv": [
+      "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+      "tools/audit_sdk_type_closure.py",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-array-visibility-20261106/NoteCanvasPrototype.h",
+      "--projected-header",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/strict/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "diagnostic": null
+  },
+  {
+    "label": "audit-legacy",
+    "argv": [
+      "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+      "tools/audit_sdk_type_closure.py",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-array-visibility-20261106/NoteCanvasPrototype.h",
+      "--projected-header",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/legacy/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h",
+      "--include-legacy-error"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "diagnostic": null
+  },
+  {
+    "label": "sdk",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "--show-sdk-path"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "diagnostic": null
+  },
+  {
+    "label": "swift-version",
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "--version"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "diagnostic": null
+  },
+  {
+    "label": "sketch-strict",
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/ModuleCache",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/strict",
+      "-module-name",
+      "SketchHost",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchHostApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchSession.swift"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "diagnostic": null
+  },
+  {
+    "label": "apple-strict",
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/ModuleCache",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/strict",
+      "-module-name",
+      "NoteCoreSketch",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift"
+    ],
+    "returncode": 1,
+    "expected": 1,
+    "diagnostic": "has no member 'lastError'"
+  },
+  {
+    "label": "apple-legacy",
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/ModuleCache",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/legacy",
+      "-module-name",
+      "NoteCoreSketch",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "diagnostic": null
+  },
+  {
+    "label": "sketch-pending-type-removed",
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/ModuleCache",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/pending-missing",
+      "-module-name",
+      "SketchHost",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchHostApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchSession.swift"
+    ],
+    "returncode": 1,
+    "expected": 1,
+    "diagnostic": "cannot find type 'CanvasCommandAddStroke' in scope"
+  },
+  {
+    "label": "app-ports-full",
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/ModuleCache",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-type-closure-20261106/AppPorts.swift"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "diagnostic": null
+  },
+  {
+    "label": "app-ports-strict",
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/ModuleCache",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-type-closure/strict",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-type-closure-20261106/AppPorts.swift"
+    ],
+    "returncode": 1,
+    "expected": 1,
+    "diagnostic": "cannot find type 'AppleBrushOwnerExperiment' in scope"
+  }
+]

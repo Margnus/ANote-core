@@ -1,0 +1,7 @@
+/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchApp.swift:112:86: error: value of type 'PagedPreviewNotebook' has no member 'lastError'
+110 |         return button
+111 |     }
+112 |     private func update(_ accepted: Bool) { refresh(accepted ? "" : session.notebook.lastError) }
+    |                                                                                      `- error: value of type 'PagedPreviewNotebook' has no member 'lastError'
+113 |     private func refresh(_ message: String) {
+114 |         status.text = "\(session.notebook.strokeCount) 笔 · \(session.notebook.isReadOnly ? "只读" : session.tools[session.toolIndex].title) \(message)"
