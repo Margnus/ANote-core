@@ -1,0 +1,62 @@
+{
+  "gradle": {
+    "environment": {
+      "JAVA_HOME": "/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home",
+      "GRADLE_USER_HOME": "<repo>/.gradle-user-home",
+      "KONAN_DATA_DIR": "<repo>/.konan"
+    },
+    "argv": [
+      "./gradlew",
+      "--offline",
+      "--no-daemon",
+      "-PenableAppleTargets=true",
+      "-PenableAndroidTargets=true",
+      "-Pkotlin.native.home=<repo>/.konan/kotlin-native-prebuilt-macos-aarch64-2.2.21",
+      ":shared-core:linkDebugFrameworkIosSimulatorArm64",
+      ":shared-core:jvmTest",
+      ":android-app:assembleDebug"
+    ]
+  },
+  "xcode": [
+    [
+      "xcodebuild",
+      "-project",
+      "samples/sketch-host-ios/SketchHost.xcodeproj",
+      "-scheme",
+      "SketchHost",
+      "-destination",
+      "generic/platform=iOS Simulator",
+      "-derivedDataPath",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData",
+      "CODE_SIGNING_ALLOWED=NO",
+      "build-for-testing"
+    ],
+    [
+      "xcodebuild",
+      "-project",
+      "ios-app/NoteCorePreview.xcodeproj",
+      "-scheme",
+      "NoteCorePreview",
+      "-destination",
+      "generic/platform=iOS Simulator",
+      "-derivedDataPath",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-preview",
+      "CODE_SIGNING_ALLOWED=NO",
+      "build"
+    ],
+    [
+      "xcodebuild",
+      "-project",
+      "samples/apple-sketch/NoteCoreSketch.xcodeproj",
+      "-scheme",
+      "NoteCoreSketch",
+      "-destination",
+      "generic/platform=iOS Simulator",
+      "-derivedDataPath",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple",
+      "CODE_SIGNING_ALLOWED=NO",
+      "build"
+    ]
+  ],
+  "cwd": "/Users/lixiaofan/StudioProjects/notecore"
+}

@@ -1,0 +1,187 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "--show-sdk-path"
+    ],
+    "label": "swift-sdk",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/baseline",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-array-visibility-20261106/Probe.swift"
+    ],
+    "label": "swift-old-array-visible",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "swiftc",
+      "-typecheck",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-array-visibility-20261106/Probe.swift"
+    ],
+    "label": "swift-new-array-hidden",
+    "returncode": 1
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-version"
+    ],
+    "label": "xcode-version",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "create",
+      "NoteCoreSDKArrayVisibility-20261106",
+      "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    ],
+    "label": "create-device",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "boot",
+      "46219062-796E-4D8E-ABBD-ABB68055D6AB"
+    ],
+    "label": "boot",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "bootstatus",
+      "46219062-796E-4D8E-ABBD-ABB68055D6AB",
+      "-b"
+    ],
+    "label": "bootstatus",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-quiet",
+      "-xctestrun",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData/Build/Products/SketchHost_iphonesimulator27.1-arm64.xctestrun",
+      "-destination",
+      "platform=iOS Simulator,id=46219062-796E-4D8E-ABBD-ABB68055D6AB",
+      "-parallel-testing-enabled",
+      "NO",
+      "-resultBundlePath",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-array-visibility-20261106/tests.xcresult",
+      "-collect-test-diagnostics",
+      "never",
+      "test-without-building"
+    ],
+    "label": "test",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "summary",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-array-visibility-20261106/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "summary",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "tests",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/sdk-array-visibility-20261106/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "tests",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before-cleanup",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "46219062-796E-4D8E-ABBD-ABB68055D6AB"
+    ],
+    "label": "shutdown",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "delete",
+      "46219062-796E-4D8E-ABBD-ABB68055D6AB"
+    ],
+    "label": "delete",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-after",
+    "returncode": 0
+  }
+]

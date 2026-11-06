@@ -1,0 +1,409 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project samples/apple-sketch/NoteCoreSketch.xcodeproj -scheme NoteCoreSketch -destination "generic/platform=iOS Simulator" -derivedDataPath /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple CODE_SIGNING_ALLOWED=NO build
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'NoteCoreSketch' in project 'NoteCoreSketch' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 35e047052a6368fc86fdc8a9f1e455f4
+Build description path: /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/XCBuildData/35e047052a6368fc86fdc8a9f1e455f4.xcbuilddata
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/CompilationCache.noindex
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/CompilationCache.noindex
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKStatCaches.noindex/iphonesimulator27.1-24A94232-35d3147121984ba087c28d913653d626.sdkstatcache
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKStatCaches.noindex/iphonesimulator27.1-24A94232-35d3147121984ba087c28d913653d626.sdkstatcache
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/PrecompiledHeaders
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/PrecompiledHeaders
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+
+CreateBuildDirectory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    builtin-create-build-directory /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch-0decbcf04c8af675519b969d4485a23d-VFS-iphonesimulator/all-product-headers.yaml
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch.xcodeproj
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch-0decbcf04c8af675519b969d4485a23d-VFS-iphonesimulator/all-product-headers.yaml
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.hmap (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.hmap
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/empty-NoteCoreSketch.plist (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/empty-NoteCoreSketch.plist
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.DependencyStaticMetadataFileList (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.DependencyMetadataFileList (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_const_extract_protocols.json (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftFileList (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftFileList
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftConstValuesFileList (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.LinkFileList (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.LinkFileList
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-OutputFileMap.json (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-project-headers.hmap (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-project-headers.hmap
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-own-target-headers.hmap (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-generated-files.hmap (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-generated-files.hmap
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-all-target-headers.hmap (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-all-non-framework-target-headers.hmap (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-DebugDylibPath-normal-arm64.txt (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-DebugDylibInstallName-normal-arm64.txt (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    write-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-DebugDylibInstallName-normal-arm64.txt
+
+MkDir /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    /bin/mkdir -p /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app
+
+ProcessInfoPlistFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Info.plist /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/empty-NoteCoreSketch.plist (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-infoPlistUtility /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/empty-NoteCoreSketch.plist -producttype com.apple.product-type.application -genpkginfo /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Info.plist
+
+Ld /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/__preview.dylib normal (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -Os -Xlinker -no_warn_duplicate_libraries -L/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework -install_name @rpath/NoteCoreSketch.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_dependency_info.dat -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/__preview.dylib
+
+SwiftDriver NoteCoreSketch normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NoteCoreSketch -Onone @/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Index.noindex/DataStore -swift-version 5 -I /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F /Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKStatCaches.noindex/iphonesimulator27.1-24A94232-35d3147121984ba087c28d913653d626.sdkstatcache -output-file-map /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex -sdk-module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_const_extract_protocols.json -Xcc -iquote -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-generated-files.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-own-target-headers.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-all-target-headers.hmap -Xcc -iquote -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-project-headers.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources-normal/arm64 -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources/arm64 -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-Swift.h -working-directory /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_AvailabilityInternal-4BJQWFJCUXRHKO0Y0982FDZT8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/SwiftShims-4SD11E0OWCGCA2MHT71ELEZWB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_float-SKFXC4H3CIVD1I5X3J26A0XG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_stdbool-4B7UJZVJKLG2A4APL9YRBQD5G.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/DeveloperToolsSupport-2MI68BO92QTTITERQ8BTD6SSK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_stdarg-5PS0ZT7YK6ANNFYJR9UE2VQZ5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/ptrauth-3U8UN5S5SLNXLLA5NK1N5PQPV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/ptrcheck-1SCYVYE4EC7X25LGVTBFMG1HJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_stddef-9OY0DNDN38D7YVBW95ZP8WLOI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_SwiftConcurrencyShims-DBQNABMKZ77237HL3NIIQYIHW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_DarwinFoundation1-6SSBY8JX0S73I9RUYZST182PZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_limits-IC659E84QL4NJVXUPLWPRKYD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_DarwinFoundation2-34M6QFOFOMXKTXDNCH8H1Q3PD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_stdint-A0VNCT3RIKGKXNXK2QGSVIW10.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_tgmath-4HM7OO0Z29X5809XYDXVOU8R1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/sys_types-BP20Y2UBU4UCCJ6K8TBL47D4Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/string_h-7ZEVSXTIHAO73SSW1DZGH4FQI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_DarwinFoundation3-A8N0WOMJZCM6EZK21E8N95OS9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_stdatomic-62AR07CRH0XXTSV0NQV26DM70.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_intrinsics-77M8Y392DGS5QRZIVTGWLVW3Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_Builtin_inttypes-EQRZ5ZRSBC38HT7IE4ACXN0XY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Darwin-3YNNOP9WA0RWNWNMMVQ9W84IB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/simd-2YZC1MADIYZHYTZ9SU7UYA1PP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/ObjectiveC-36XBJXPUT983JC7O32R8QWAYK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/MachO-4TXMF58SDPAW67TNHLAATM6BQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/os_object-2FSRTR2ITQYZ2972UPHN1HRNO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/os_workgroup-DBQCF4LCJ1PIXWU485MS3LC44.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Spatial-ECNCJ1HSU8906OGYRCUQ2O5FO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Dispatch-7G366X1ELPRCQS1GWMWQAKE9T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreFoundation-ER87GW39MTT8H7PE8SI2RO1CV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/XPC-8QB6A3KEW7HVUZ0QXMWRQ06CL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/os-61NTAR1CZTXII243OXB1JGMHY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Security-AO2YGVRP25EXTMXX90AIJB2FX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreGraphics-47XWTG8SNQL7S0Q8I966XKFC7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CFNetwork-32QJDLLF5VZV899FW5OPX70PE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Foundation-5SNUIQEMDIR7JKJCZ7K14C95Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreText-1FCMRRUM8GL2HDYTUYELQXMAI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/ImageIO-7DVWS1X5Y4NKHINFYO709895X.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Accessibility-1WE0EPM5QK8NY4Y90B790PYUL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/UIUtilities-6F3CSSZF1J5SMUW1LE59TE6FG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/NoteCanvasPrototype-31QHMN8EIC9RNI50TD9QCGHHP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Symbols-CSB3O0LRVIGBC0GWYZ4CJ05OO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreTransferable-BXOY1B8PFXKM8SEERI61YJLV2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/IOSurface-14YL9LTDQIQU79SXH9CNGSDVU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/DataDetection-EY61NSJNP2H3FSZ4X59D1P1XI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/_LocationEssentials-6Y31QMHCN6Z4TBHUYFBJIHR75.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/OpenGLES-84K9AMRNVHPA0KHT8V60QZL9T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/FileProvider-134J3321LAB58SB057JLT5LBE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/UserNotifications-BMWB23X4TXXPUX41OVEIWJP3C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/OSLog-7CBTTTNKUC6XEYP3CFEPYKGX9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/UniformTypeIdentifiers-CYOS196QFGERHFNJUTF911AT9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreLocation-291V0MMTVKGAB3J5MI3CMSWLB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/Metal-3B7V58TSMFIZO14NJVBDXM9YI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreMotion-A9C6XLWXJ3WB2LDXBM0TU8Z2Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreVideo-2Z3107NICYX2LQ7LCV4YCR4CY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/CoreImage-2PJ6AZID3Q8ZTM8R5QB80X5M9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/QuartzCore-DPDHK7LKYBBBQIEVDTZ99GJJ4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/SwiftUICore-9C9AJZQCGWA125F719ZDTJJK1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules/UIKit-73MHP3PK11IFWZVJM6FK5CPGO.pcm
+
+SwiftCompile normal arm64 Compiling\ SketchApp.swift /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchApp.swift (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+
+SwiftCompile normal arm64 /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchApp.swift (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-SwiftPerFileCompile SketchApp.swift
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ NoteCoreSketch (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+
+SwiftCompile normal arm64 (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    
+
+SwiftCompile normal arm64 Compiling\ SketchCanvas.swift /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:140:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+138 |     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+139 |         guard !blocked, let active, touches.contains(active) else { return }
+140 |         ingest(active, event: event, phase: .move)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+141 |     }
+142 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+
+/Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift:144:9: warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+142 |     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+143 |         guard !blocked, let active, touches.contains(active) else { return }
+144 |         ingest(active, event: event, phase: .up)
+    |         `- warning: result of call to 'ingest(_:event:phase:)' is unused [#NoUsage]
+145 |     }
+146 |     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelUnfinished() }
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+
+SwiftCompile normal arm64 /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-SwiftPerFileCompile SketchCanvas.swift
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for NoteCoreSketch (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+
+SwiftDriver\ Compilation\ Requirements NoteCoreSketch normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NoteCoreSketch -Onone @/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Index.noindex/DataStore -swift-version 5 -I /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F /Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKStatCaches.noindex/iphonesimulator27.1-24A94232-35d3147121984ba087c28d913653d626.sdkstatcache -output-file-map /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex -sdk-module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_const_extract_protocols.json -Xcc -iquote -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-generated-files.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-own-target-headers.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-all-target-headers.hmap -Xcc -iquote -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-project-headers.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources-normal/arm64 -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources/arm64 -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-Swift.h -working-directory /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources/NoteCoreSketch-Swift.h /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-Swift.h (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-swiftHeaderTool -arch arm64 /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-Swift.h -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources/NoteCoreSketch-Swift.h
+
+Copy /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/arm64-apple-ios-simulator.swiftdoc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftdoc (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftdoc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftmodule (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftmodule /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/arm64-apple-ios-simulator.abi.json /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.abi.json (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.abi.json /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftsourceinfo (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftsourceinfo /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling SketchCanvas.swift (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SketchApp.swift (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+
+SwiftDriver\ Compilation NoteCoreSketch normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NoteCoreSketch -Onone @/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Index.noindex/DataStore -swift-version 5 -I /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F /Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKStatCaches.noindex/iphonesimulator27.1-24A94232-35d3147121984ba087c28d913653d626.sdkstatcache -output-file-map /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex -sdk-module-cache-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_const_extract_protocols.json -Xcc -iquote -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-generated-files.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-own-target-headers.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-all-target-headers.hmap -Xcc -iquote -Xcc /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-project-headers.hmap -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources-normal/arm64 -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources/arm64 -Xcc -I/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch-Swift.h -working-directory /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch.debug.dylib normal (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -Os -Xlinker -no_warn_duplicate_libraries -L/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework -filelist /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.LinkFileList -install_name @rpath/NoteCoreSketch.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_lto.o -rdynamic -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.swiftmodule -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -framework NoteCanvasPrototype -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch.debug.dylib
+
+ConstructStubExecutorLinkFileList /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-ExecutorLinkFileList-normal-arm64.txt (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    construct-stub-executor-link-file-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+
+GenerateDSYMFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app.dSYM /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch.debug.dylib (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Users/lixiaofan/Library/Java/JavaVirtualMachines/corretto-1.8.0_462/Contents/Home/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/opt/homebrew/bin:/Users/lixiaofan/work/flutter/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/lixiaofan/.codex/tmp/arg0-macos/codex-arg0QKtCTT:/Users/lixiaofan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/usr/local/lib/npm/bin:/Users/lixiaofan/.opencode/bin:/Users/lixiaofan/.sdkman/candidates/java/current/bin:/Users/lixiaofan/development/flutter/bin:/platform-tools:/Users/lixiaofan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch.debug.dylib -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app.dSYM
+
+Ld /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch normal (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -Os -Xlinker -no_warn_duplicate_libraries -L/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F/Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator -F/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework -Xlinker -rpath -Xlinker @executable_path -rdynamic -Xlinker -objc_abi_version -Xlinker 2 -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch-ExecutorLinkFileList-normal-arm64.txt /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch.debug.dylib -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch
+
+GenerateDSYMFile /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app.dSYM /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Users/lixiaofan/Library/Java/JavaVirtualMachines/corretto-1.8.0_462/Contents/Home/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/opt/homebrew/bin:/Users/lixiaofan/work/flutter/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/lixiaofan/.codex/tmp/arg0-macos/codex-arg0QKtCTT:/Users/lixiaofan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/usr/local/lib/npm/bin:/Users/lixiaofan/.opencode/bin:/Users/lixiaofan/.sdkman/candidates/java/current/bin:/Users/lixiaofan/development/flutter/bin:/platform-tools:/Users/lixiaofan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil -q /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch -o /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app.dSYM
+
+CopySwiftLibs /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch.debug.dylib --scan-folder /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Frameworks --scan-folder /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/PlugIns --scan-folder /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/SystemExtensions --scan-folder /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Extensions --scan-folder /Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+ExtractAppIntentsMetadata (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name NoteCoreSketch --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk --xcode-version 27A9275 --platform-family iOS --deployment-target 17.0 --bundle-identifier dev.notecore.sample.sketch.ios --output /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app --target-triple arm64-apple-ios17.0-simulator --binary-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/NoteCoreSketch --dependency-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch_dependency_info.dat --stringsdata-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftFileList --metadata-file-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.DependencyMetadataFileList --static-metadata-file-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.DependencyStaticMetadataFileList --swift-const-vals-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/Objects-normal/arm64/NoteCoreSketch.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-11-06 21:30:25.301 appintentsmetadataprocessor[7608:106026] Starting appintentsmetadataprocessor export
+2026-11-06 21:30:25.302 appintentsmetadataprocessor[7608:106026] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+AppIntentsSSUTraining (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Info.plist --temp-dir-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/ssu --bundle-id dev.notecore.sample.sketch.ios --product-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app --extracted-metadata-path /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Metadata.appintents --metadata-file-list /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/NoteCoreSketch.build/Debug-iphonesimulator/NoteCoreSketch.build/NoteCoreSketch.DependencyMetadataFileList --source-file /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app/Info.plist --archive-ssu-assets
+2026-11-06 21:30:25.322 appintentsnltrainingprocessor[7609:106031] Parsing options for appintentsnltrainingprocessor
+2026-11-06 21:30:25.322 appintentsnltrainingprocessor[7609:106031] Starting AppIntents SSU YAML Generation
+2026-11-06 21:30:25.323 appintentsnltrainingprocessor[7609:106031] No AppShortcuts found - Skipping.
+
+RegisterExecutionPolicyException /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-RegisterExecutionPolicyException /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app
+
+Validate /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    builtin-validationUtility /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app (in target 'NoteCoreSketch' from project 'NoteCoreSketch')
+    cd /Users/lixiaofan/StudioProjects/notecore/samples/apple-sketch
+    /usr/bin/touch -c /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Products/Debug-iphonesimulator/NoteCoreSketch.app
+
+PruneExplicitPrecompiledModules /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/lixiaofan/StudioProjects/notecore/output/sdk-array-visibility/DerivedData-apple/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+** BUILD SUCCEEDED **
+

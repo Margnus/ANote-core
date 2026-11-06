@@ -55,7 +55,6 @@ CANDIDATE_METHODS = {
     'NCPApplePreviewInput': {'offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)': (False, False)},
     'NCPPagedPreviewNotebook': {
         'edit(request:)': (False, False), 'prepareRealBatch(phase:count:)': (False, True),
-        'offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)': (False, False),
         'setReadOnly(value:)': (False, False), 'cancelStroke()': (False, False),
         'retryPendingStroke()': (False, False), 'pendingStroke()': (False, True),
         'page(index:)': (False, False), 'stroke(index:)': (False, False),
@@ -144,6 +143,10 @@ def check_property_channels(declarations, expected=PROPERTY_CHANNELS):
 
 def check_candidate_channels(declarations):
     by_name = {item['objc_name']: item for item in declarations}
+    notebook = by_name.get('NCPPagedPreviewNotebook')
+    assert notebook is not None, ('Missing candidate type', 'NCPPagedPreviewNotebook')
+    assert not any(method['swift_name'].startswith('offerRealBatch(') for method in notebook['methods']), (
+        'Raw Kotlin array entry exported from NCPPagedPreviewNotebook')
     checked = []
     for name, members in CANDIDATE_METHODS.items():
         assert name in by_name, ('Missing candidate type', name)

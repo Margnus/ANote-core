@@ -1,0 +1,12 @@
+--- reports/candidate-public-boundary-20261031/NoteCanvasPrototype.h	2026-10-31 11:34:05
++++ shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h	2026-11-06 21:29:06
+@@ -2924,9 +2924,6 @@
+ - (BOOL)endStrokeX:(double)x y:(double)y pressure:(float)pressure timeMicros:(int64_t)timeMicros __attribute__((swift_name("endStroke(x:y:pressure:timeMicros:)")));
+ - (BOOL)insertPage __attribute__((swift_name("insertPage()")));
+ - (BOOL)moveCurrentPageBefore:(NCPPageId * _Nullable)before __attribute__((swift_name("moveCurrentPage(before:)")));
+-
+-/** Raw buffers are read synchronously and never retained; callers must not mutate during this call. */
+-- (NCPPreviewInputResult *)offerRealBatchPhase:(NCPPointerPhase *)phase eventTimeMicros:(int64_t)eventTimeMicros xs:(NCPKotlinDoubleArray *)xs ys:(NCPKotlinDoubleArray *)ys pressures:(NCPKotlinFloatArray *)pressures times:(NCPKotlinLongArray *)times __attribute__((swift_name("offerRealBatch(phase:eventTimeMicros:xs:ys:pressures:times:)")));
+ - (NCPPageDescriptor *)pageIndex:(int32_t)index __attribute__((swift_name("page(index:)")));
+ 
+ /** Immutable completed command remains here after capacity failure; cancel/selection cannot discard it. */

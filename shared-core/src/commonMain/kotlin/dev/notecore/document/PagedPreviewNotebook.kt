@@ -1,6 +1,8 @@
 package dev.notecore.document
 
 import dev.notecore.canvas.prototype.*
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 
 /** UI-owner preview session. Exactly one authority; selected-page projection is a read-only cache. */
 class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(initial: DocumentRoot, private val sessionNonce: String,
@@ -271,6 +273,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         return null
     }
     /** Raw buffers are read synchronously and never retained; callers must not mutate during this call. */
+    @OptIn(ExperimentalObjCRefinement::class)
+    @HiddenFromObjC
     fun offerRealBatch(phase: PointerPhase, eventTimeMicros: Long, xs: DoubleArray, ys: DoubleArray,
                        pressures: FloatArray, times: LongArray): PreviewInputResult {
         prepareRealBatch(phase, xs.size)?.let { return it }

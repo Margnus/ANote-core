@@ -1,0 +1,80 @@
+from pathlib import Path
+import hashlib
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+from zipfile import ZipFile
+
+raw=Path('reports/sdk-array-visibility-20261106')
+work=Path('output/sdk-array-visibility')
+def sha(p):
+    with p.open('rb') as f:
+        return hashlib.file_digest(f,'sha256').hexdigest()
+def read(p):
+    return json.loads(p.read_text(encoding='utf-8'))
+def write(p,value):
+    p.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+summary=read(raw/'summary.json')
+guards=read(raw/'header-guards.json')
+cleanup=read(raw/'cleanup.json')
+assert (summary['passedTests'],summary['failedTests'],summary['skippedTests'])==(12,0,0)
+assert guards['actual_header_candidate_methods']==27 and guards['actual_header_candidate_properties']==34
+assert cleanup['temporary_device_deleted'] and cleanup['original_apps_and_notes_unchanged']
+assert len(read(raw/'original-before.json')['notes'])==16
+xml=list((raw/'shared-core-jvm-xml').glob('TEST-*.xml'))
+assert xml
+counts={k:sum(int(ET.parse(p).getroot().get(k,'0')) for p in xml) for k in ('tests','failures','errors','skipped')}
+assert counts['tests'] and not any(counts[k] for k in ('failures','errors','skipped')),counts
+with ZipFile(raw/'executables.zip') as z:
+    assert z.testzip() is None
+    assert any(name.endswith('/SketchHostTests') for name in z.namelist())
+with ZipFile(raw/'framework.zip') as z:
+    assert z.testzip() is None
+    assert z.read('Headers/NoteCanvasPrototype.h')==(raw/'NoteCanvasPrototype.h').read_bytes()
+
+check_results={}
+for check in ('check_architecture','verify_portable_inputs'):
+    r=subprocess.run(['python3','tools/'+check+'.py'],capture_output=True,check=True)
+    assert json.loads(r.stdout)['status']=='passed'
+    (raw/(check+'.json')).write_bytes(r.stdout)
+    check_results[check]='passed'
+write(raw/'build-commands.json',{
+    'gradle':{
+        'environment':{'JAVA_HOME':'/Users/lixiaofan/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home',
+            'GRADLE_USER_HOME':'<repo>/.gradle-user-home','KONAN_DATA_DIR':'<repo>/.konan'},
+        'argv':['./gradlew','--offline','--no-daemon','-PenableAppleTargets=true','-PenableAndroidTargets=true',
+            '-Pkotlin.native.home=<repo>/.konan/kotlin-native-prebuilt-macos-aarch64-2.2.21',
+            ':shared-core:linkDebugFrameworkIosSimulatorArm64',':shared-core:jvmTest',':android-app:assembleDebug']},
+    'xcode':[['xcodebuild','-project',project,'-scheme',scheme,'-destination','generic/platform=iOS Simulator',
+        '-derivedDataPath',str((work/dd).resolve()),'CODE_SIGNING_ALLOWED=NO',action] for project,scheme,dd,action in (
+        ('samples/sketch-host-ios/SketchHost.xcodeproj','SketchHost','DerivedData','build-for-testing'),
+        ('ios-app/NoteCorePreview.xcodeproj','NoteCorePreview','DerivedData-preview','build'),
+        ('samples/apple-sketch/NoteCoreSketch.xcodeproj','NoteCoreSketch','DerivedData-apple','build'))],
+    'cwd':str(Path.cwd())})
+parent_paths=['reports/sdk-semantic-review.json','reports/sdk-consumer-conformance.json',
+              'reports/sdk-consumer-conformance-20261106/framework.zip',
+              'reports/candidate-public-boundary-20261031/NoteCanvasPrototype.h']
+report={
+    'schema':'preview-swift-array-visibility-1','status':'passed','decision':'adopt_one_preview_export_removal',
+    'change':{'removed_objc_swift_member':'PagedPreviewNotebook.offerRealBatch',
+        'method_implementation_and_kotlin_visibility_preserved':True,
+        'swift_producers':['NoteCorePreview','NoteCoreSketch','SketchHost'],
+        'swift_input':'ApplePreviewInput.shared.offer with NSData and PagedPreviewNotebook.prepareRealBatch',
+        'other_header_bytes_equal':True,'selected_methods':27,'selected_properties':34,
+        'guards_rejected':len(guards['changed_headers_rejected'])},
+    'verification':{'swift_typecheck_old_positive_new_missing_member':True,'swift_builds':3,
+        'isolated_sketchhost_xctest_passed':12,'xctest_failures':0,'xctest_skips':0,
+        'shared_core_jvm':counts,'android_debug_build':True,'android_runtime_executed':False,
+        'other_swift_hosts_runtime_executed':False,**check_results},
+    'preservation':{'original_simulator_shutdown':True,'notes_preserved':16,'apps_preserved':2,'temporary_device_deleted':True},
+    'source_sha256':read(raw/'source-at-runtime-start.json'),
+    'framework_file_sha256':read(raw/'framework-sha256.json'),
+    'parent_receipt_sha256':{p:sha(Path(p)) for p in parent_paths},
+    'evidence_sha256':{str(p):sha(p) for p in sorted(raw.rglob('*')) if p.is_file()},
+    'final_sdk_type_closure_verified':False,'physical_device_verified':False,'c1_complete':False,
+    'dev_041_released':False,'whole_requirements_accepted':0,
+    'scope':'Single raw Kotlin primitive-array method removed from the preview Objective-C/Swift export. Three Swift consumers compiled. SketchHost tests exercised the NSData path and existing semantic contracts on a temporary iOS simulator. Shared-core JVM regression and Android debug build establish Kotlin caller continuity. Remaining generated types, production durability, full failure conformance and the physical gates require separate evidence.'}
+assert all(sha(Path(p))==h for p,h in report['source_sha256'].items())
+write(Path('reports/sdk-array-visibility.json'),report)
+print(counts,len(report['source_sha256']),len(report['evidence_sha256']),len(parent_paths))
