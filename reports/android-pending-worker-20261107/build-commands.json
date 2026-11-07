@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "./gradlew",
+    "--offline",
+    "--no-daemon",
+    "-PenableAndroidTargets=true",
+    ":android-app:assembleDebug",
+    ":android-app:assembleDebugAndroidTest"
+  ],
+  "jdk": "jbr-17.0.14",
+  "gradle_user_home": "<repo>/.gradle-user-home",
+  "konan_data_dir": "<repo>/.konan"
+}

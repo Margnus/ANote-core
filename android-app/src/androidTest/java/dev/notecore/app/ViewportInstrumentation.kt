@@ -27,6 +27,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var titleOnly = false
     private var editOnly = false
     private var storageRetentionOnly = false
+    private var pendingWorkBudgetOnly = false
     private var processCheckpointCase: String? = null
     private var processCheckpointScope = ""
     private var processCheckpointViewInput = false
@@ -59,6 +60,7 @@ class ViewportInstrumentation : Instrumentation() {
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
+        pendingWorkBudgetOnly = arguments?.getString("notecore_case") == "pending_work_budget"
         editOnly = arguments?.getString("notecore_case") == "preview_edit"
         titleOnly = arguments?.getString("notecore_case") == "title_contract"
         inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
@@ -102,6 +104,11 @@ class ViewportInstrumentation : Instrumentation() {
                 return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (pendingWorkBudgetOnly) {
+                result.putString("pending_work_budget", PendingRecoveryHostChecks(this, host).verifyWorkBudget())
+                result.putString("pending_work_budget_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             atomicCutAction?.let { action ->
                 val checks = AtomicCutHostChecks(this, host, checkNotNull(atomicCutIdentity), checkNotNull(atomicCutBoundary))
                 when (action) {

@@ -6,6 +6,11 @@ import android.os.SystemClock
 import dev.notecore.document.*
 import dev.notecore.canvas.prototype.*
 import java.io.File
+import java.security.MessageDigest
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import org.json.JSONObject
 
 /** Original Store, ledger, worker and atomic IO; synthetic files confined to a fresh cache directory. */
 internal class PendingRecoveryHostChecks(private val test: Instrumentation, private val host: Activity) {
@@ -15,6 +20,127 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
         var done = false
         while (!done && SystemClock.uptimeMillis() < end) { main { done = predicate() }; if (!done) SystemClock.sleep(20) }
         check(done) { message }
+    }
+    fun verifyWorkBudget(): String {
+        val directory = File(host.cacheDir, "pending-work-budget-${java.util.UUID.randomUUID()}")
+        check(directory.mkdir())
+        val file = File(directory, "process-recovery.ncp")
+        val occupied = CountDownLatch(1); val releaseOccupancy = CountDownLatch(1)
+        val writeEntered = CountDownLatch(1); val releaseWrite = CountDownLatch(1)
+        val writes = AtomicInteger()
+        lateinit var store: NoteStore; lateinit var worker: BoundedOwnerExecutor
+        var cleanupStore: NoteStore? = null
+        lateinit var note: PagedPreviewNotebook; lateinit var checkpoint: PagedPreviewSnapshot
+        var occupancyAck = false; var pendingAck = 0; var canonicalAck = 0
+        val inputBytes = 2248L
+        val workLimit = 256L * 1024 * 1024
+        try {
+            main {
+                store = NoteStore.isolated(host, directory, observeWriteBoundary = { boundary ->
+                    if (boundary == PreviewWriteBoundary.SYNCED_BEFORE_REPLACE && writes.incrementAndGet() == 1) {
+                        writeEntered.countDown()
+                        check(releaseWrite.await(12, TimeUnit.SECONDS))
+                    }
+                })
+                cleanupStore = store
+                worker = NoteStore::class.java.getDeclaredField("executor").apply { isAccessible = true }
+                    .get(store) as BoundedOwnerExecutor
+                val root = DocumentRoot.empty(SceneId("process-recovery"), "base",
+                    PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0))
+                note = PagedPreviewNotebook(root, "process-seed", ownerCheck = worker::checkOwnerThread)
+                store.attachActive(note)
+                check(note.rename("process checkpoint"))
+                checkpoint = AndroidInputHostChecks(host).captureViewPendingForProcess(note)
+                check(note.inputReservedByteCharge == inputBytes)
+                check(checkpoint.retainedByteCharge == 3038L && checkpoint.encodingWorkByteCharge == 64990L)
+            }
+            val baseBytes = PagedPreviewSnapshot.fromRoot(checkpoint.root).encode()
+            file.writeText(baseBytes, Charsets.UTF_8)
+            eventually("Initial owner work did not drain") { worker.status().entries.isEmpty() }
+            val needed = checkpoint.encodingWorkByteCharge
+            val reservation = workLimit - needed + 1
+            main {
+                val occupancy = worker.submit(reservation, {
+                    occupied.countDown()
+                    check(releaseOccupancy.await(12, TimeUnit.SECONDS))
+                }) { result ->
+                    check(result is WorkResult.Succeeded)
+                    occupancyAck = true
+                    ResultDisposition.ACKNOWLEDGED
+                } as WorkAdmission.Accepted
+                check(worker.submit(needed, { error("Over-budget work ran") }) { ResultDisposition.ACKNOWLEDGED } ==
+                    WorkAdmission.Rejected(WorkAdmissionFailure.BYTE_CAPACITY))
+                check(store.save(checkpoint) { revision, error ->
+                    check(revision == checkpoint.version && error == null); pendingAck++
+                })
+                val waiting = store.saveStates().single()
+                check(waiting.snapshot === checkpoint && !waiting.inFlight && !waiting.retryRequired)
+                check(worker.status().entries.single().ticket === occupancy.ticket && worker.status().chargedBytes == reservation)
+                check(!store.releaseActive(note) && store.beginOwnerRetirement() == StoreRetirementRequest.INPUT_PENDING)
+                check(note.snapshot() === checkpoint.root && note.pendingStroke() === checkpoint.pending)
+            }
+            check(occupied.await(5, TimeUnit.SECONDS))
+            check(writes.get() == 0 && file.readText(Charsets.UTF_8) == baseBytes)
+            releaseOccupancy.countDown()
+            check(writeEntered.await(8, TimeUnit.SECONDS)) { "Worker ACK did not pump the retained checkpoint" }
+            main {
+                val running = store.saveStates().single()
+                check(occupancyAck && pendingAck == 0 && running.snapshot === checkpoint && running.inFlight)
+                check(worker.status().entries.size == 1 && worker.status().chargedBytes == needed)
+                check(!store.releaseActive(note))
+            }
+            check(file.readText(Charsets.UTF_8) == baseBytes)
+            releaseWrite.countDown()
+            eventually("Exact pending write did not confirm") {
+                pendingAck == 1 && store.saveStates().isEmpty() && worker.status().chargedBytes == 0L &&
+                    store.editorPresentation(note).phase == EditorSavePhase.RECOVERY_SAVED
+            }
+            val pendingBytes = file.readBytes()
+            check(pendingBytes.contentEquals(checkpoint.encode().toByteArray(Charsets.UTF_8)) && writes.get() == 1)
+            main {
+                check(store.releaseActive(note) && !note.retryPendingStroke())
+                check(store.beginOwnerRetirement() == StoreRetirementRequest.STARTED)
+            }
+            eventually("Original owner did not retire") { store.ownerRetirementStatus().phase == StoreOwnerPhase.RETIRED }
+            var opened = false
+            main {
+                store = NoteStore.isolated(host, directory, documentBudget = DocumentBudget(inputBytes = inputBytes))
+                cleanupStore = store
+                store.open(checkpoint.documentId) { value, error ->
+                    check(error == null)
+                    note = store.adopt(checkNotNull(value))
+                    check(note.hasPendingStroke && note.inputReservedByteCharge == inputBytes)
+                    check(note.captureRecovery().encode().toByteArray(Charsets.UTF_8).contentEquals(pendingBytes))
+                    check(note.retryPendingStroke() && note.retryPendingStroke())
+                    check(note.totalStrokeCount == 1 && note.changeVersion == 2L && note.inputReservedByteCharge == 0L)
+                    AndroidInputHostChecks.checkProcessStroke(note.stroke(0).samples)
+                    opened = true
+                    check(store.save(note.captureRecovery()) { _, failure -> check(failure == null); canonicalAck++ })
+                }
+            }
+            eventually("New owner did not confirm canonical retry") {
+                opened && canonicalAck == 1 && store.saveStates().isEmpty() && store.editorPresentation(note).phase == EditorSavePhase.SAVED
+            }
+            val canonicalBytes = file.readBytes()
+            val canonical = PreviewRecoveryCodec.decode(canonicalBytes.toString(Charsets.UTF_8))
+            check(canonical.pending == null && canonical.version == 2L && canonical.root.scene.objectCount == 1)
+            main {
+                check(store.releaseActive(note))
+                check(store.beginOwnerRetirement() == StoreRetirementRequest.STARTED)
+            }
+            eventually("New owner did not retire") { store.ownerRetirementStatus().phase == StoreOwnerPhase.RETIRED }
+            check(directory.deleteRecursively())
+            fun sha(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+            return JSONObject().put("worker_budget", workLimit).put("available_when_blocked", needed - 1)
+                .put("encoding_charge", needed).put("retained_charge", checkpoint.retainedByteCharge)
+                .put("input_charge", inputBytes).put("pending_sha256", sha(pendingBytes))
+                .put("canonical_sha256", sha(canonicalBytes)).put("pending_ack", pendingAck).put("canonical_ack", canonicalAck)
+                .put("revision", canonical.version).put("strokes", 1).put("points", 4).toString()
+        } finally {
+            releaseOccupancy.countDown()
+            releaseWrite.countDown()
+            main { cleanupStore?.stopTestBackend() }
+        }
     }
     fun verify() {
         val dir = File(host.cacheDir, "pending-recovery-${java.util.UUID.randomUUID()}")
