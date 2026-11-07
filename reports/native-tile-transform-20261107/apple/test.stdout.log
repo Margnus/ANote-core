@@ -1,0 +1,30 @@
+[==========] Running 4 tests from 26 test cases.
+[----------] Global test environment set-up.
+[----------] 4 tests from dev.notecore.canvas.prototype.BrushTileCGImageTest
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCGImageTest.premultipliedImageCompositesOriginalMarkerColorAndSingleAlpha
+NOTECORE_NATIVE_IMAGE {"color_pixels":2048,"payload_bytes":8192,"image_row_bytes":256,"output_row_bytes":256,"conversion_elapsed_ns":1360458,"copy_create_elapsed_ns":19693834,"draw_elapsed_ns":770375,"release_call_elapsed_ns":54125}
+[       OK ] dev.notecore.canvas.prototype.BrushTileCGImageTest.premultipliedImageCompositesOriginalMarkerColorAndSingleAlpha (953 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCGImageTest.transformedTilePresentationObservesMinificationAndRotationBoundaries
+NOTECORE_TRANSFORMED_TILE {"case":"uniform_minify","brush":"MONOLINE","visible_pixels":784,"gutter_0_max":9,"gutter_0_pixels":12,"gutter_1_max":0,"gutter_1_pixels":0,"gutter_2_max":0,"gutter_2_pixels":0,"whole_reference_1_vs_2_max":0}
+NOTECORE_TRANSFORMED_TILE {"case":"uniform_minify","brush":"PRESSURE","visible_pixels":683,"gutter_0_max":6,"gutter_0_pixels":5,"gutter_1_max":0,"gutter_1_pixels":0,"gutter_2_max":0,"gutter_2_pixels":0,"whole_reference_1_vs_2_max":0}
+NOTECORE_TRANSFORMED_TILE {"case":"uniform_minify","brush":"HIGHLIGHTER","visible_pixels":776,"gutter_0_max":3,"gutter_0_pixels":10,"gutter_1_max":0,"gutter_1_pixels":0,"gutter_2_max":0,"gutter_2_pixels":0,"whole_reference_1_vs_2_max":0}
+NOTECORE_TRANSFORMED_TILE {"case":"anisotropic_minify","brush":"MONOLINE","visible_pixels":1031,"gutter_0_max":39,"gutter_0_pixels":6,"gutter_1_max":0,"gutter_1_pixels":0,"gutter_2_max":0,"gutter_2_pixels":0,"whole_reference_1_vs_2_max":0}
+NOTECORE_TRANSFORMED_TILE {"case":"anisotropic_minify","brush":"PRESSURE","visible_pixels":893,"gutter_0_max":0,"gutter_0_pixels":0,"gutter_1_max":0,"gutter_1_pixels":0,"gutter_2_max":0,"gutter_2_pixels":0,"whole_reference_1_vs_2_max":0}
+NOTECORE_TRANSFORMED_TILE {"case":"anisotropic_minify","brush":"HIGHLIGHTER","visible_pixels":1027,"gutter_0_max":9,"gutter_0_pixels":4,"gutter_1_max":0,"gutter_1_pixels":0,"gutter_2_max":0,"gutter_2_pixels":0,"whole_reference_1_vs_2_max":0}
+NOTECORE_TRANSFORMED_TILE {"case":"rotate_minify_aa_off","brush":"MONOLINE","visible_pixels":832,"gutter_0_max":153,"gutter_0_pixels":62,"gutter_1_max":58,"gutter_1_pixels":33,"gutter_2_max":59,"gutter_2_pixels":34,"whole_reference_1_vs_2_max":42}
+NOTECORE_TRANSFORMED_TILE {"case":"rotate_minify_aa_off","brush":"PRESSURE","visible_pixels":720,"gutter_0_max":132,"gutter_0_pixels":46,"gutter_1_max":70,"gutter_1_pixels":27,"gutter_2_max":64,"gutter_2_pixels":28,"whole_reference_1_vs_2_max":42}
+NOTECORE_TRANSFORMED_TILE {"case":"rotate_minify_aa_off","brush":"HIGHLIGHTER","visible_pixels":827,"gutter_0_max":42,"gutter_0_pixels":59,"gutter_1_max":41,"gutter_1_pixels":33,"gutter_2_max":41,"gutter_2_pixels":33,"whole_reference_1_vs_2_max":11}
+NOTECORE_TRANSFORMED_TILE {"case":"rotate_minify_aa_on","brush":"MONOLINE","visible_pixels":822,"gutter_0_max":111,"gutter_0_pixels":105,"gutter_1_max":40,"gutter_1_pixels":41,"gutter_2_max":40,"gutter_2_pixels":42,"whole_reference_1_vs_2_max":10}
+NOTECORE_TRANSFORMED_TILE {"case":"rotate_minify_aa_on","brush":"PRESSURE","visible_pixels":711,"gutter_0_max":111,"gutter_0_pixels":90,"gutter_1_max":40,"gutter_1_pixels":32,"gutter_2_max":40,"gutter_2_pixels":32,"whole_reference_1_vs_2_max":10}
+NOTECORE_TRANSFORMED_TILE {"case":"rotate_minify_aa_on","brush":"HIGHLIGHTER","visible_pixels":816,"gutter_0_max":27,"gutter_0_pixels":99,"gutter_1_max":3,"gutter_1_pixels":36,"gutter_2_max":3,"gutter_2_pixels":30,"whole_reference_1_vs_2_max":2}
+[       OK ] dev.notecore.canvas.prototype.BrushTileCGImageTest.transformedTilePresentationObservesMinificationAndRotationBoundaries (29826 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCGImageTest.adjacentNearestScaledImagesMatchWholeImage
+[       OK ] dev.notecore.canvas.prototype.BrushTileCGImageTest.adjacentNearestScaledImagesMatchWholeImage (596 ms)
+[ RUN      ] dev.notecore.canvas.prototype.BrushTileCGImageTest.filteredTilesUseTrueNeighborBorderAndClipToNonoverlappingCore
+NOTECORE_NATIVE_IMAGE {"filter_cases":6,"max_channel_delta":0,"unpadded_channel_differences":199}
+[       OK ] dev.notecore.canvas.prototype.BrushTileCGImageTest.filteredTilesUseTrueNeighborBorderAndClipToNonoverlappingCore (3640 ms)
+[----------] 4 tests from dev.notecore.canvas.prototype.BrushTileCGImageTest (35017 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test cases ran. (35017 ms total)
+[  PASSED  ] 4 tests.

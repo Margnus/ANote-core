@@ -1,0 +1,170 @@
+[
+  {
+    "label": "devices-before",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "devices"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0001",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.boot.qemu.avd_name"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0002",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.build.version.sdk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0003",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.product.cpu.abi"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0004",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.build.fingerprint"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0005",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.build.version.sdk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0006",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "getprop",
+      "ro.product.cpu.abi"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0007",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pm",
+      "list",
+      "packages",
+      "dev.notecore.canvas.poc.test"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0008",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "install",
+      "-r",
+      "/Users/lixiaofan/StudioProjects/notecore/canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0009",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "pm",
+      "path",
+      "dev.notecore.canvas.poc.test"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0010",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "exec-out",
+      "cat",
+      "/data/app/~~EIlWNF7ZDMZzjmanHiZXeg==/dev.notecore.canvas.poc.test-jFYkZnmf4LDVXAG3f9fqIg==/base.apk"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0011",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "shell",
+      "am",
+      "instrument",
+      "-w",
+      "-r",
+      "dev.notecore.canvas.poc.test/dev.notecore.canvas.prototype.CoreBrushInstrumentation"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0012",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "uninstall",
+      "dev.notecore.canvas.poc.test"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "adb-0013",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5586",
+      "emu",
+      "kill"
+    ],
+    "returncode": 0
+  }
+]

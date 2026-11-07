@@ -1,0 +1,478 @@
+{
+  "status": "measured_with_supported_and_rejected_cases",
+  "c1_scope": "DEV-036/C1 geometry, AA and software presentation capability only",
+  "source_manifest_scope": "Current test source and Gradle input hashes checked after runtime against the recorded snapshot. Build log and independently hashed executable archives retained.",
+  "method": {
+    "output_extent": [
+      112,
+      96
+    ],
+    "image_core": [
+      64,
+      32
+    ],
+    "tile_cores": [
+      [
+        32,
+        32
+      ],
+      [
+        32,
+        32
+      ]
+    ],
+    "source": "Same three shared premultiplied RGBA8 brush fixtures on both backends, with true neighboring grid samples for gutters.",
+    "comparison": "Unsigned per-channel absolute difference over the full output within each backend. One and two gutters use a whole image with the same gutter. No-gutter tiles use the one-gutter whole image as a control.",
+    "tolerance_max_channel": 1,
+    "axis_clip": "Disjoint integer device scissor from pixel-center ownership, source sample positions preserved.",
+    "rotated_clip": "Independent transformed local core clips, CoreGraphics ShouldAntialias flag and Android Paint.isAntiAlias (Canvas clip policy unchanged).",
+    "filter": "Android software Canvas filterBitmap and CoreGraphics low interpolation.",
+    "whole_reference_control": "Whole-image one-gutter vs two-gutter differences detect sensitivity that exists even without a split. Rotated full-frame differences cannot all be assigned to the interior seam."
+  },
+  "observations": {
+    "android": {
+      "environment": {
+        "ro.build.fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+        "ro.build.version.sdk": "32",
+        "ro.product.cpu.abi": "arm64-v8a"
+      },
+      "test_apk_sha256": "c50c851cca3a6943ccfe3c836598f22952d95a6bc937de71d9a5e84936e87371",
+      "tests": 146,
+      "transformed": [
+        {
+          "case": "uniform_minify",
+          "brush": "MONOLINE",
+          "visible_pixels": 808,
+          "gutter_0_max": 28,
+          "gutter_0_pixels": 12,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "uniform_minify",
+          "brush": "PRESSURE",
+          "visible_pixels": 711,
+          "gutter_0_max": 28,
+          "gutter_0_pixels": 13,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "uniform_minify",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 800,
+          "gutter_0_max": 7,
+          "gutter_0_pixels": 12,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "anisotropic_minify",
+          "brush": "MONOLINE",
+          "visible_pixels": 1045,
+          "gutter_0_max": 58,
+          "gutter_0_pixels": 4,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "anisotropic_minify",
+          "brush": "PRESSURE",
+          "visible_pixels": 908,
+          "gutter_0_max": 58,
+          "gutter_0_pixels": 4,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "anisotropic_minify",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 1043,
+          "gutter_0_max": 15,
+          "gutter_0_pixels": 4,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "rotate_minify_aa_off",
+          "brush": "MONOLINE",
+          "visible_pixels": 791,
+          "gutter_0_max": 23,
+          "gutter_0_pixels": 9,
+          "gutter_1_max": 3,
+          "gutter_1_pixels": 1,
+          "gutter_2_max": 3,
+          "gutter_2_pixels": 1,
+          "whole_reference_1_vs_2_max": 9
+        },
+        {
+          "case": "rotate_minify_aa_off",
+          "brush": "PRESSURE",
+          "visible_pixels": 697,
+          "gutter_0_max": 11,
+          "gutter_0_pixels": 8,
+          "gutter_1_max": 3,
+          "gutter_1_pixels": 1,
+          "gutter_2_max": 3,
+          "gutter_2_pixels": 1,
+          "whole_reference_1_vs_2_max": 4
+        },
+        {
+          "case": "rotate_minify_aa_off",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 786,
+          "gutter_0_max": 6,
+          "gutter_0_pixels": 9,
+          "gutter_1_max": 1,
+          "gutter_1_pixels": 1,
+          "gutter_2_max": 1,
+          "gutter_2_pixels": 1,
+          "whole_reference_1_vs_2_max": 2
+        },
+        {
+          "case": "rotate_minify_aa_on",
+          "brush": "MONOLINE",
+          "visible_pixels": 791,
+          "gutter_0_max": 89,
+          "gutter_0_pixels": 64,
+          "gutter_1_max": 3,
+          "gutter_1_pixels": 1,
+          "gutter_2_max": 3,
+          "gutter_2_pixels": 1,
+          "whole_reference_1_vs_2_max": 9
+        },
+        {
+          "case": "rotate_minify_aa_on",
+          "brush": "PRESSURE",
+          "visible_pixels": 697,
+          "gutter_0_max": 89,
+          "gutter_0_pixels": 54,
+          "gutter_1_max": 3,
+          "gutter_1_pixels": 1,
+          "gutter_2_max": 3,
+          "gutter_2_pixels": 1,
+          "whole_reference_1_vs_2_max": 4
+        },
+        {
+          "case": "rotate_minify_aa_on",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 786,
+          "gutter_0_max": 23,
+          "gutter_0_pixels": 61,
+          "gutter_1_max": 1,
+          "gutter_1_pixels": 1,
+          "gutter_2_max": 1,
+          "gutter_2_pixels": 1,
+          "whole_reference_1_vs_2_max": 2
+        }
+      ],
+      "aa_control": "Paint.isAntiAlias; software Canvas clipRect policy unchanged"
+    },
+    "apple": {
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+      "device_type": "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "binary_sha256": "c6118360e7863e270cfc5ec6b3ee4b7f4bd0d1fb9ea53765c82d48a51c24b4f7",
+      "tests": [
+        "dev.notecore.canvas.prototype.BrushTileCGImageTest.premultipliedImageCompositesOriginalMarkerColorAndSingleAlpha",
+        "dev.notecore.canvas.prototype.BrushTileCGImageTest.transformedTilePresentationObservesMinificationAndRotationBoundaries",
+        "dev.notecore.canvas.prototype.BrushTileCGImageTest.adjacentNearestScaledImagesMatchWholeImage",
+        "dev.notecore.canvas.prototype.BrushTileCGImageTest.filteredTilesUseTrueNeighborBorderAndClipToNonoverlappingCore"
+      ],
+      "transformed": [
+        {
+          "case": "uniform_minify",
+          "brush": "MONOLINE",
+          "visible_pixels": 784,
+          "gutter_0_max": 9,
+          "gutter_0_pixels": 12,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "uniform_minify",
+          "brush": "PRESSURE",
+          "visible_pixels": 683,
+          "gutter_0_max": 6,
+          "gutter_0_pixels": 5,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "uniform_minify",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 776,
+          "gutter_0_max": 3,
+          "gutter_0_pixels": 10,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "anisotropic_minify",
+          "brush": "MONOLINE",
+          "visible_pixels": 1031,
+          "gutter_0_max": 39,
+          "gutter_0_pixels": 6,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "anisotropic_minify",
+          "brush": "PRESSURE",
+          "visible_pixels": 893,
+          "gutter_0_max": 0,
+          "gutter_0_pixels": 0,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "anisotropic_minify",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 1027,
+          "gutter_0_max": 9,
+          "gutter_0_pixels": 4,
+          "gutter_1_max": 0,
+          "gutter_1_pixels": 0,
+          "gutter_2_max": 0,
+          "gutter_2_pixels": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        {
+          "case": "rotate_minify_aa_off",
+          "brush": "MONOLINE",
+          "visible_pixels": 832,
+          "gutter_0_max": 153,
+          "gutter_0_pixels": 62,
+          "gutter_1_max": 58,
+          "gutter_1_pixels": 33,
+          "gutter_2_max": 59,
+          "gutter_2_pixels": 34,
+          "whole_reference_1_vs_2_max": 42
+        },
+        {
+          "case": "rotate_minify_aa_off",
+          "brush": "PRESSURE",
+          "visible_pixels": 720,
+          "gutter_0_max": 132,
+          "gutter_0_pixels": 46,
+          "gutter_1_max": 70,
+          "gutter_1_pixels": 27,
+          "gutter_2_max": 64,
+          "gutter_2_pixels": 28,
+          "whole_reference_1_vs_2_max": 42
+        },
+        {
+          "case": "rotate_minify_aa_off",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 827,
+          "gutter_0_max": 42,
+          "gutter_0_pixels": 59,
+          "gutter_1_max": 41,
+          "gutter_1_pixels": 33,
+          "gutter_2_max": 41,
+          "gutter_2_pixels": 33,
+          "whole_reference_1_vs_2_max": 11
+        },
+        {
+          "case": "rotate_minify_aa_on",
+          "brush": "MONOLINE",
+          "visible_pixels": 822,
+          "gutter_0_max": 111,
+          "gutter_0_pixels": 105,
+          "gutter_1_max": 40,
+          "gutter_1_pixels": 41,
+          "gutter_2_max": 40,
+          "gutter_2_pixels": 42,
+          "whole_reference_1_vs_2_max": 10
+        },
+        {
+          "case": "rotate_minify_aa_on",
+          "brush": "PRESSURE",
+          "visible_pixels": 711,
+          "gutter_0_max": 111,
+          "gutter_0_pixels": 90,
+          "gutter_1_max": 40,
+          "gutter_1_pixels": 32,
+          "gutter_2_max": 40,
+          "gutter_2_pixels": 32,
+          "whole_reference_1_vs_2_max": 10
+        },
+        {
+          "case": "rotate_minify_aa_on",
+          "brush": "HIGHLIGHTER",
+          "visible_pixels": 816,
+          "gutter_0_max": 27,
+          "gutter_0_pixels": 99,
+          "gutter_1_max": 3,
+          "gutter_1_pixels": 36,
+          "gutter_2_max": 3,
+          "gutter_2_pixels": 30,
+          "whole_reference_1_vs_2_max": 2
+        }
+      ],
+      "aa_control": "CoreGraphics ShouldAntialias context flag"
+    }
+  },
+  "cases": {
+    "uniform_minify": {
+      "decision": "retain_bounded_software_candidate",
+      "max_across_brushes": {
+        "android": {
+          "gutter_0_max": 28,
+          "gutter_1_max": 0,
+          "gutter_2_max": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        "apple": {
+          "gutter_0_max": 9,
+          "gutter_1_max": 0,
+          "gutter_2_max": 0,
+          "whole_reference_1_vs_2_max": 0
+        }
+      }
+    },
+    "anisotropic_minify": {
+      "decision": "retain_bounded_software_candidate",
+      "max_across_brushes": {
+        "android": {
+          "gutter_0_max": 58,
+          "gutter_1_max": 0,
+          "gutter_2_max": 0,
+          "whole_reference_1_vs_2_max": 0
+        },
+        "apple": {
+          "gutter_0_max": 39,
+          "gutter_1_max": 0,
+          "gutter_2_max": 0,
+          "whole_reference_1_vs_2_max": 0
+        }
+      }
+    },
+    "rotate_minify_aa_off": {
+      "decision": "reject_tested_local_clip",
+      "max_across_brushes": {
+        "android": {
+          "gutter_0_max": 23,
+          "gutter_1_max": 3,
+          "gutter_2_max": 3,
+          "whole_reference_1_vs_2_max": 9
+        },
+        "apple": {
+          "gutter_0_max": 153,
+          "gutter_1_max": 70,
+          "gutter_2_max": 64,
+          "whole_reference_1_vs_2_max": 42
+        }
+      }
+    },
+    "rotate_minify_aa_on": {
+      "decision": "reject_tested_local_clip",
+      "max_across_brushes": {
+        "android": {
+          "gutter_0_max": 89,
+          "gutter_1_max": 3,
+          "gutter_2_max": 3,
+          "whole_reference_1_vs_2_max": 9
+        },
+        "apple": {
+          "gutter_0_max": 111,
+          "gutter_1_max": 40,
+          "gutter_2_max": 40,
+          "whole_reference_1_vs_2_max": 10
+        }
+      }
+    }
+  },
+  "decision": "Retain one real neighbor pixel as a bounded candidate for the two tested positive axis-aligned scale matrices on these software backends. Reject the tested rotated local clip as a common candidate with either AA setting and either tested gutter. Keep the whole-image reference as an investigation control; any replacement needs its own bounded admission and transform evidence.",
+  "not_covered": [
+    "arbitrary transforms and sampling kernels",
+    "production App renderer or GPU path",
+    "physical M-1, heap, active stylus and P99",
+    "full C1 or DEV-041 release"
+  ],
+  "cleanup": {
+    "android": {
+      "original_avd_all_bytes_unchanged": true,
+      "temporary_device_removed": true,
+      "emulator_returncode": 0,
+      "runtime_completed": true
+    },
+    "apple": {
+      "temporary_device_deleted": true,
+      "original_device_still_shutdown": true,
+      "original_apps_and_notes_unchanged": true,
+      "test_passed": true
+    }
+  },
+  "artifact_sha256": {
+    "android/adb-0001.stdout.log": "bf294bb1bca828677535001c73f15f52b80342d0669407eb3101545330b1c4f8",
+    "android/adb-0002.stdout.log": "2115cdb6bfcfb008eb2bab2bb79347cb064a48e4e7c4115ccbe4469c787bb6c4",
+    "android/adb-0003.stdout.log": "7f10c3cd4593d1d6ded27d658e7c05216011c955c200aac551caad0c979d4d90",
+    "android/adb-0004.stdout.log": "c522bc88554283839ffd330352feb2b4de6aadcf16563dad0c1abdb40942a652",
+    "android/adb-0005.stdout.log": "2115cdb6bfcfb008eb2bab2bb79347cb064a48e4e7c4115ccbe4469c787bb6c4",
+    "android/adb-0006.stdout.log": "7f10c3cd4593d1d6ded27d658e7c05216011c955c200aac551caad0c979d4d90",
+    "android/adb-0008.stdout.log": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "android/adb-0009.stdout.log": "43dae21810afd763cac237b85a3f53aa03b0a35d2bc725b952f72fef32b1fb47",
+    "android/adb-0012.stdout.log": "7fc0023a6402c7bd7abd98bb3e580968de4833eed07d88d1cc8d70819d69c7a0",
+    "android/adb-0013.stdout.log": "c8688fc34ee1d36f2e975dad0607555ba84d8951ccb39e69b7ab7a5d159ec81f",
+    "android/cleanup.json": "2e23fc12cea460e45e8ddeeccd7e7825abcb3e71bbf1c0659630692bb9b38f57",
+    "android/devices-before.stderr.log": "d84aaa3222b49c6dfc6c07666347890c6ad2ff255b911fa83525c5814e54963c",
+    "android/devices-before.stdout.log": "36f15c2fe32964a6fbe902e914a47739d4e6304b0d3e812bf08096ff0419b7ae",
+    "android/emulator-process.json": "9a88c7d179ea75c1575bdb073bc0a6cdfee7e807ca521bcf74fa6baa6a77457d",
+    "android/emulator.log.gz": "12f18f51e1f153c3133493dec480a8f5a8f123f9e9d6bac195670005640f5850",
+    "android/execution.json": "b35ed0784bd35440b01bafd202b2282850beed0509c55fc7ed45a191c88c1e61",
+    "android/initial-config.ini": "fe71c2f5a6cd59217871e739f2fa50256382f5b38d2014c8844b20210a0531a3",
+    "android/instrumentation.log": "8bdc1822fdf77b5b2fa43bdab68c49fac161ab26635d472fb9a980a6c116f24b",
+    "android/observations.json": "7d1b1d03fe91fb7c34abe67992f6e20bfd648794206d7d7d4c5d49ad3cb0a6cf",
+    "android/original-after.json": "528c563e57b3f8be9707ab355490f0868de79442945229c8865132fcbf8ff9e8",
+    "android/original-before.json": "528c563e57b3f8be9707ab355490f0868de79442945229c8865132fcbf8ff9e8",
+    "android/runner-as-executed.py.txt": "d0b47fd61ea02e85a504abf8c3e3b48186a27ef232c280ce1e22a28ac7ad95b6",
+    "android/test-apk.zip": "03c4745cc2563f095c91608591d5fd7b50a1f536552e91d4d23596d38d02b178",
+    "apple/bootstatus.stdout.log": "cd01297e3395c550cea3a88dd8975d27fdf2ba57fe9168535691a68bf807a4a7",
+    "apple/cleanup.json": "faff9afd9cacb8ba0d6aeed75d5d4acde9de7a37e7ce899516085aa6005c62a5",
+    "apple/create-device.stdout.log": "04323383d490689620cf6c3917dda7065895aa8874cc86e8bb29f82776d61ce2",
+    "apple/device.json": "572cd644181c27f51fdaa9f1c0cadabeb1239df4ea31c1dc3265122279deafbb",
+    "apple/execution.json": "73ed4eeba60a306bb45a4d12fb95dc5064f311a4a4f08281d76d96d385f48969",
+    "apple/native-test.zip": "b74a7e9c2117e04b6e3e02bce230d75d3ba5a4d03dc87b57b4c7839bfcf90b25",
+    "apple/observations.json": "46edec88ed48a52e39476feaadff604580cf7e1b5a0b9c1920d90b0adda8ec6f",
+    "apple/original-after.json": "52f3886e528dcbe0c1c670e65e51e43e79ff1161bbf641a6cb4b791d160cad6d",
+    "apple/original-before.json": "52f3886e528dcbe0c1c670e65e51e43e79ff1161bbf641a6cb4b791d160cad6d",
+    "apple/runner-as-executed.py.txt": "ac8711cd65ac5435c1ac03d5ae5b69e6af60b86bf5007bb45ff40f314a2807eb",
+    "apple/test.stdout.log": "8a41e27434f9b646640d14a27284b7fb530526a7e7d9b977803f13505320ee01",
+    "apple/xcode-version.stdout.log": "ee3fe26035862d2b9653c1a570be3eca4ee5be2815f0ce99ff2d8ffa3399e4c8",
+    "build.log": "3542e11cd2d638c5cb7f82c92d0b5368f5ff6683cf16ec8765dbef792bcaf1dd",
+    "source-and-build.json": "5213d74e95dc8a67ef80ed19a89996de5b7ab5b3e2fb0fa2bf7aede66649ae58"
+  }
+}

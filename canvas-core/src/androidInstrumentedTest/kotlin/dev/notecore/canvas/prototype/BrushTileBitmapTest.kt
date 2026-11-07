@@ -3,6 +3,7 @@ package dev.notecore.canvas.prototype
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
@@ -141,6 +142,56 @@ class BrushTileBitmapTest {
             val raw = ByteBuffer.allocate(output.byteCount); output.copyPixelsToBuffer(raw)
             return raw.array()
         } finally { output.recycle(); cache.close(); check(cache.isDrained) }
+    }
+
+    private fun transformed(catalog: ChunkedBrushPoc, transform: BrushTileTransformFixture.Case,
+        split: Boolean, gutter: Int): ByteArray {
+        val f = BrushTileImageFixture
+        val cache = BrushTileCachePoc(65536, 131072)
+        val output = Bitmap.createBitmap(BrushTileTransformFixture.width, BrushTileTransformFixture.height, Bitmap.Config.ARGB_8888)
+        try {
+            output.eraseColor(Color.TRANSPARENT)
+            val canvas = Canvas(output)
+            val paint = Paint().also { it.isFilterBitmap = true; it.isAntiAlias = transform.antialias }
+            val m = transform.matrix
+            val matrix = Matrix().apply {
+                setValues(floatArrayOf(m.a.toFloat(), m.c.toFloat(), m.tx.toFloat(),
+                    m.b.toFloat(), m.d.toFloat(), m.ty.toFloat(), 0f, 0f, 1f))
+            }
+            for (side in 0 until if (split) 2 else 1) {
+                val left = side * 32
+                val core = if (split) f.grid.copy(origin = PointD(0.25 + left * 0.5, 8.0), width = 32) else f.grid
+                val reader = f.reader(cache, catalog, checkNotNull(core.withGutter(gutter)))
+                try {
+                    val image = rgbaBitmap(reader)
+                    try {
+                        val save = canvas.save()
+                        if (transform.axisAligned) {
+                            val c = transform.deviceClip(left, core.width, core.height)
+                            canvas.clipRect(c.left.toFloat(), c.top.toFloat(), c.right.toFloat(), c.bottom.toFloat())
+                        }
+                        canvas.concat(matrix)
+                        if (!transform.axisAligned)
+                            canvas.clipRect(left.toFloat(), 0f, (left + core.width).toFloat(), core.height.toFloat())
+                        canvas.drawBitmap(image, null, RectF((left - gutter).toFloat(), -gutter.toFloat(),
+                            (left + core.width + gutter).toFloat(), (core.height + gutter).toFloat()), paint)
+                        canvas.restoreToCount(save)
+                    } finally { image.recycle() }
+                } finally { cache.returnReader(reader) }
+            }
+            val bytes = ByteBuffer.allocate(output.byteCount)
+            output.copyPixelsToBuffer(bytes)
+            return bytes.array()
+        } finally { output.recycle(); cache.close(); check(cache.isDrained) }
+    }
+
+    @Test fun transformedTilePresentationObservesMinificationAndRotationBoundaries() {
+        for (case in BrushTileTransformFixture.cases) for (kind in BrushKind.entries) {
+            val catalog = BrushTileImageFixture.catalog(kind)
+            observations.add(BrushTileTransformFixture.observe(case, kind) { split, gutter ->
+                transformed(catalog, case, split, gutter)
+            })
+        }
     }
 
     @Test fun filteredTilesUseTrueNeighborBorderAndClipToNonoverlappingCore() {

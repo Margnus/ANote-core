@@ -102,6 +102,50 @@ class BrushTileCGImageTest {
             return bytes(output, 144, 80)
         } finally { CGContextRelease(output); cache.close(); check(cache.isDrained) }
     }
+    private fun transformed(catalog: ChunkedBrushPoc, transform: BrushTileTransformFixture.Case,
+        split: Boolean, gutter: Int): ByteArray {
+        val output = context(BrushTileTransformFixture.width, BrushTileTransformFixture.height)
+        val cache = BrushTileCachePoc(65536, 131072)
+        try {
+            CGContextClearRect(output, CGRectMake(0.0, 0.0, BrushTileTransformFixture.width.toDouble(), BrushTileTransformFixture.height.toDouble()))
+            CGContextSetShouldAntialias(output, transform.antialias)
+            CGContextSetInterpolationQuality(output, kCGInterpolationLow)
+            val m = transform.matrix
+            for (side in 0 until if (split) 2 else 1) {
+                val left = side * 32
+                val core = if (split) f.grid.copy(origin = PointD(0.25 + left * 0.5, 8.0), width = 32) else f.grid
+                val reader = f.reader(cache, catalog, checkNotNull(core.withGutter(gutter)))
+                try {
+                    val source = image(pixels(reader))
+                    try {
+                        CGContextSaveGState(output)
+                        if (transform.axisAligned) {
+                            val c = transform.deviceClip(left, core.width, core.height)
+                            CGContextClipToRect(output, CGRectMake(c.left, c.top, c.right - c.left, c.bottom - c.top))
+                        }
+                        CGContextConcatCTM(output, CGAffineTransformMake(m.a, m.b, m.c, m.d, m.tx, m.ty))
+                        if (!transform.axisAligned)
+                            CGContextClipToRect(output, CGRectMake(left.toDouble(), 0.0, core.width.toDouble(), core.height.toDouble()))
+                        CGContextDrawImage(output, CGRectMake((left - gutter).toDouble(), -gutter.toDouble(),
+                            (core.width + 2 * gutter).toDouble(), (core.height + 2 * gutter).toDouble()), source)
+                        CGContextRestoreGState(output)
+                    } finally { CGImageRelease(source) }
+                } finally { cache.returnReader(reader) }
+            }
+            return bytes(output, BrushTileTransformFixture.width, BrushTileTransformFixture.height)
+        } finally { CGContextRelease(output); cache.close(); check(cache.isDrained) }
+    }
+
+    @Test fun transformedTilePresentationObservesMinificationAndRotationBoundaries() {
+        for (case in BrushTileTransformFixture.cases) for (kind in BrushKind.entries) {
+            val catalog = f.catalog(kind)
+            val observation = BrushTileTransformFixture.observe(case, kind) { split, gutter ->
+                transformed(catalog, case, split, gutter)
+            }
+            println("NOTECORE_TRANSFORMED_TILE $observation")
+        }
+    }
+
     @Test fun adjacentNearestScaledImagesMatchWholeImage() {
         val c = f.catalog()
         val whole = scaled(c, false, 0, 2.0, false); val parts = scaled(c, true, 0, 2.0, false)

@@ -1,0 +1,127 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :canvas-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, iosArm64Main, iosMain, iosSimulatorArm64Main, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+[32m[1mSolution:[0m[0m
+[32m[3mPlease keep dependsOn edges only from one group and remove the others. [0m[0m
+
+
+> Configure project :shared-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':shared-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, iosArm64Main, iosMain, iosSimulatorArm64Main]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+Kotlin Source Set 'androidInstrumentedTest' can't depend on 'commonTest' as they are from different Source Set Trees.
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove this dependency edge.[0m[0m
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :canvas-core:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :canvas-core:iosSimulatorArm64ProcessResources NO-SOURCE
+> Task :canvas-core:iosSimulatorArm64MainKlibrary UP-TO-DATE
+> Task :canvas-core:compileTestKotlinIosSimulatorArm64
+> Task :canvas-core:linkDebugTestIosSimulatorArm64
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preDebugBuild UP-TO-DATE
+> Task :canvas-core:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResources UP-TO-DATE
+> Task :canvas-core:packageDebugResources UP-TO-DATE
+> Task :canvas-core:parseDebugLocalResources UP-TO-DATE
+> Task :canvas-core:generateDebugRFile UP-TO-DATE
+> Task :canvas-core:compileDebugKotlinAndroid UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :canvas-core:preDebugAndroidTestBuild UP-TO-DATE
+> Task :canvas-core:writeDebugAarMetadata UP-TO-DATE
+> Task :canvas-core:compileDebugLibraryResources UP-TO-DATE
+> Task :canvas-core:generateDebugAndroidTestResValues
+> Task :canvas-core:checkDebugAndroidTestAarMetadata
+> Task :canvas-core:mapDebugAndroidTestSourceSetPaths
+> Task :canvas-core:generateDebugAndroidTestResources
+> Task :canvas-core:mergeDebugAndroidTestResources
+> Task :canvas-core:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:processDebugManifest UP-TO-DATE
+> Task :canvas-core:processDebugAndroidTestManifest
+> Task :canvas-core:javaPreCompileDebugAndroidTest
+> Task :canvas-core:mergeDebugAndroidTestShaders
+> Task :canvas-core:compileDebugAndroidTestShaders NO-SOURCE
+> Task :canvas-core:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugShaders UP-TO-DATE
+> Task :canvas-core:compileDebugShaders NO-SOURCE
+> Task :canvas-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestAssets
+> Task :canvas-core:compressDebugAndroidTestAssets
+> Task :canvas-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :canvas-core:desugarDebugAndroidTestFileDependencies
+> Task :canvas-core:processDebugJavaRes UP-TO-DATE
+> Task :canvas-core:checkDebugAndroidTestDuplicateClasses
+> Task :canvas-core:processDebugAndroidTestResources
+> Task :canvas-core:mergeExtDexDebugAndroidTest
+> Task :canvas-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :canvas-core:mergeLibDexDebugAndroidTest
+> Task :canvas-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugNativeLibs NO-SOURCE
+> Task :canvas-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestJniLibFolders
+> Task :canvas-core:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :canvas-core:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :canvas-core:validateSigningDebugAndroidTest
+> Task :canvas-core:writeDebugAndroidTestSigningConfigVersions
+
+> Task :canvas-core:compileDebugAndroidTestKotlinAndroid
+w: file:///Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidTest/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPocTest.kt:68:50 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidTest/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPocTest.kt:70:69 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :canvas-core:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :canvas-core:dexBuilderDebugAndroidTest
+> Task :canvas-core:mergeDebugAndroidTestGlobalSynthetics
+> Task :canvas-core:processDebugAndroidTestJavaRes
+> Task :canvas-core:mergeProjectDexDebugAndroidTest
+> Task :canvas-core:mergeDebugAndroidTestJavaResource
+> Task :canvas-core:packageDebugAndroidTest
+> Task :canvas-core:createDebugAndroidTestApkListingFileRedirect
+> Task :canvas-core:assembleDebugAndroidTest
+
+[Incubating] Problems report is available at: file:///Users/lixiaofan/StudioProjects/notecore/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 25s
+50 actionable tasks: 29 executed, 21 up-to-date
