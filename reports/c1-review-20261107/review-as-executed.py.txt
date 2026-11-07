@@ -1,0 +1,165 @@
+from pathlib import Path
+import hashlib
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+ROOT = Path.cwd()
+BLUE = ROOT.parent / 'note-app-blueprint-20261014'
+raw = Path('reports/c1-review-20261107')
+raw.mkdir(exist_ok=True)
+
+def git(*args, cwd=ROOT):
+    return subprocess.check_output(['git', *args], cwd=cwd)
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+def load(path):
+    return json.loads(path.read_text(encoding='utf-8'))
+
+def save(path, value):
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+def report(name):
+    return load(Path('reports') / (name + '.json'))
+
+groups = {
+    'logical_budget': ('apple-worker-checkpoint-budget','cross-platform-view-checkpoint','view-pending-process',
+        'owner-budget-overlap','android-budget-overlap'),
+    'geometry_index': ('canonical-point-query','incremental-spatial-index','brush-oracle-numeric',
+        'preview-float-capability','parallel-merge-20261030','spatial-index-poc','brush-path-costs'),
+    'consumers': ('sdk-typed-app','sdk-typed-android','sdk-pending-display','sdk-semantic-review','sdk-type-closure'),
+    'owner_handoff': ('owner-lifetime-profile-review','android-owner-main-crash-api32','view-pending-process',
+        'android-atomic-cut','apple-atomic-cut'),
+    'platform_storage': ('sqlite-platform-capabilities','pdf-platform-capabilities','resource-promote-platform',
+        'android-atomic-promote-api32','sdk-typed-android'),
+    'physical': ('c1-current-facts-20261028',),
+}
+names = sorted({n for reports in groups.values() for n in reports} | {'c1-evidence-audit'})
+reviewed = {}
+for name in names:
+    path = 'reports/' + name + '.json'
+    authored = git('log','-1','--format=%H','--',path).decode().strip()
+    data = Path(path).read_bytes()
+    assert git('show',authored+':'+path)==data, path
+    info = json.loads(data)
+    binding = {}
+    for key in ('source_sha256','source_and_artifact_sha256','source_and_evidence_sha256',
+                'source_and_retained_evidence_sha256','evidence_sha256','parent_receipt_sha256'):
+        binding.update(info.get(key, {}))
+    counts = dict(matched=0, changed=0, missing=0)
+    examples = []
+    for source, expected in sorted(binding.items()):
+        candidate=Path(source)
+        state = ('missing' if not candidate.is_file() else
+                 'matched' if sha(candidate.read_bytes())==expected else 'changed')
+        counts[state] += 1
+        if state!='matched' and len(examples)<5:
+            examples.append({'path':source,'state':state})
+    reviewed[name] = {'report':path,'commit':authored,'sha256':sha(data),
+        'original_status':info.get('status'),'current_path_binding_counts':counts,
+        'first_differences':examples}
+
+# Match the recent product-consumer inputs independently of test/runner changes.
+def exact_product(name, prefixes):
+    sources = {p:h for p,h in report(name)['source_sha256'].items() if p.startswith(prefixes)}
+    assert sources and all(sha(Path(p).read_bytes()) == h for p,h in sources.items()), name
+    return len(sources)
+
+app_receipts = {
+    'apple_worker_app_sources':exact_product('apple-worker-checkpoint-budget',
+        ('ios-app/NoteCorePreview/','shared-core/src/commonMain/','shared-core/src/iosMain/','canvas-core/src/commonMain/','canvas-core/src/iosMain/')),
+    'android_app_sources':exact_product('view-pending-process',
+        ('android-app/src/main/','shared-core/src/commonMain/','canvas-core/src/commonMain/',
+         'canvas-core/src/jvmAndAndroidMain/','canvas-core/src/androidMain/')),
+}
+worker=report('apple-worker-checkpoint-budget')
+assert worker['logical_budgets']['available_while_occupied_bytes']+1==worker['logical_budgets']['checkpoint_encoding_work_bytes']==64990
+cross=report('cross-platform-view-checkpoint')
+assert cross['admission']['below_limit_bytes']+1==cross['admission']['exact_limit_bytes']==2248
+chain=report('view-pending-process')['process_checkpoint']
+assert len(chain['sample_rows_verified_in_all_three_files'])==4
+assert len(chain['killed_processes'])==2 and all(row['owner_confirmation_received'] for row in chain['killed_processes'])
+assert chain['final_reopen']['revision']==2 and chain['final_reopen']['stroke_count']==1 and chain['final_reopen']['point_count']==4
+assert report('sdk-typed-app')['sdk_frozen'] is False
+assert report('sdk-pending-display')['candidate_types']['current']==49
+assert report('sqlite-platform-capabilities')['ordinary_app_storage_integration_verified'] is False
+assert report('sqlite-platform-capabilities')['physical_device_or_power_loss_verified'] is False
+assert report('pdf-platform-capabilities')['ordinary_app_pdf_integration_verified'] is False
+assert report('c1-current-facts-20261028')['collector_preflight']['m1_accepted'] is False
+merge=report('parallel-merge-20261030')['source_and_evidence_sha256']
+# The merge receipt binds XML, but does not enumerate common geometry sources.
+# Compare the producing commit tree with the current tree separately.
+geom_commit=reviewed['parallel-merge-20261030']['commit']
+geom_dirs=('canvas-core/src/commonMain','canvas-core/src/commonTest')
+current_files=git('ls-files','-z','--',*geom_dirs).decode().strip('\0').split('\0')
+prior_files=git('ls-tree','-r','-z','--name-only',geom_commit,'--',*geom_dirs).decode().strip('\0').split('\0')
+assert current_files and set(current_files)==set(prior_files)
+geom_sources={p:sha(git('show',geom_commit+':'+p)) for p in current_files}
+assert all(sha(Path(p).read_bytes())==h for p,h in geom_sources.items())
+geometry_xml={}
+for target in ('jvmTest','iosSimulatorArm64Test'):
+    for test in ('BrushGeometryTest','BrushPathPlanTest','IncrementalSpatialIndexPocTest'):
+        p=Path('reports/merge-20261030/xml/canvas-core') / target / ('TEST-dev.notecore.canvas.prototype.'+test+'.xml')
+        assert sha(p.read_bytes())==merge[p.as_posix()]
+        tree=ET.parse(p).getroot()
+        assert int(tree.attrib['tests'])>0 and all(int(tree.get(k,'0'))==0 for k in ('failures','errors','skipped'))
+        geometry_xml[p.as_posix()]={'sha256':merge[p.as_posix()],'passed':int(tree.attrib['tests'])}
+
+decisions = [
+    ('logical_budget','adopt_preview_logical_subscope',
+     'Same checkpoint exact input charge and one-byte worker backpressure. Existing native-reader overlap is scoped to its original build.',
+     'Physical overlapping peak and target threshold. Reuse completed logical scenarios unless a new defect is identified.'),
+    ('geometry_index','adopt_monoline_preview_and_bounded_reference_candidates',
+     'Current geometry sources match the JVM/Native baseline. Mixed reference brush queries, revision binding and all-or-refusal exist. Runtime production selection remains open.',
+     'Compare current ordered canonical workload through bounded whole-stroke and delta candidates with build/query/update and admission counts. Keep AA and physical performance as separate required evidence.'),
+    ('consumers','adopt_typed_preview_profiles',
+     '49 selected Swift types in the projected profile, retained App-specific ports, typed original Android and Apple consumers.',
+     'Review separate Apple and Kotlin publish profiles and stable dependency/owner/precondition closure. Current declarations and host subsets do not establish a released SDK.'),
+    ('owner_handoff','adopt_confirmed_process_recovery_and_existing_main_owner_profile',
+     'Original same-pending recovery across three Android PIDs and Apple same-process new Model, selected IO cut cases, explicit original owner hold and drain.',
+     'Long-unsignaled real native release and vendor behavior. No live foreign-owner takeover without a supported contract.'),
+    ('platform_storage','adopt_isolated_primitive_facts_only',
+     'API32 original software fallback, isolated SQLite/PDF evidence, Android no-replace probe and rejected hard-link route in its tested domain.',
+     'Current supported platform/backend matrix and real physical failure behavior. Production persistence and resource integration remain gated.'),
+    ('physical','await_original_physical_gate',
+     'Existing collector smoke was an emulator preflight. User previously reported no physical device available.',
+     'Active stylus Android tablet and Pencil iPad, clock/input/presentation, peak heap and required workloads. No substitute inference from the simulator.'),
+]
+gates=[{'id':i,'key':key,'decision':decision,'evidence':evidence,'reports':list(groups[key]),
+        'required_remaining':remaining,'complete':False}
+       for i,(key,decision,evidence,remaining) in enumerate(decisions,1)]
+manifest=load(Path('fixtures/scale/manifest.json'))
+ready_fixtures={}
+for profile in manifest['profiles']:
+    if profile['id'] not in ('S2-ink-dense-page','S9-ink-long-stroke'):
+        continue
+    p=Path('.generated-fixtures/scale')/profile['file']
+    assert sha(p.read_bytes())==profile['sha256']
+    ready_fixtures[profile['id']]={'path':p.as_posix(),'sha256':profile['sha256'],'bytes':p.stat().st_size}
+assert len(ready_fixtures)==2
+legacy=report('c1-evidence-audit')
+result={
+    'schema':'c1-evidence-review-20261107-1','status':'reviewed_incomplete',
+    'core_base':git('rev-parse','HEAD').decode().strip(),'blueprint_base':git('rev-parse','HEAD',cwd=BLUE).decode().strip(),
+    'gates':gates,'referenced_reports':reviewed,'exact_current_product_sources':app_receipts,
+    'geometry_commit_comparison':{'producing_commit':geom_commit,'sources_matched':len(geom_sources),
+      'method':'Current common source tree compared with producing commit. The merge report itself binds XML, not these common source hashes.'},
+    'retained_geometry_runtime_xml':geometry_xml,
+    'legacy_audit':{'original_status':legacy['status'],'original_errors':len(legacy['errors']),
+                    'rewritten':False,'interpretation':'Historical source/artifact drift retains the original result and its limitations.'},
+    'next_local_action':{'gate':2,
+        'work':'Compare current canonical dense-page geometry/index candidate costs and bounded refusal outcomes against the same ordered workload. Resolve which candidate merits future device comparison; do not promote an App backend.',
+        'current_benchmark':'runSpatialIndexPoc measures AABB broad phase and full rebuild only; retained baseline does not compare canonical delta/exact hits.',
+        'fixture_manifest_sha256':sha(Path('fixtures/scale/manifest.json').read_bytes()),
+        'ready_fixtures':ready_fixtures,
+        'acceptance':'Use a fixed ordered subset within the preview envelope for canonical exact-hit and edit comparison, and a separate oversized case for typed refusal. Report build/query/update, touched samples and peak declared bytes per candidate. Desktop timing cannot select physical thresholds.'},
+    'new_app_or_platform_execution':False,'physical_device_verified':False,
+    'c1_complete':False,'dev_041_released':False,'whole_requirements_accepted':0,
+}
+save(raw/'geometry-commit-source-sha256.json',geom_sources)
+(raw/'review-as-executed.py.txt').write_bytes(Path(__file__).read_bytes())
+result['review_artifact_sha256'] = {p.as_posix():sha(p.read_bytes()) for p in sorted(raw.iterdir())}
+save(Path('reports/c1-review-20261107.json'),result)
+print(len(reviewed),'pinned reports',len(geom_sources),'current geometry sources',app_receipts,len(geometry_xml),'XMLs')

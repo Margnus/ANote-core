@@ -1,0 +1,911 @@
+{
+  "schema": "c1-evidence-review-20261107-1",
+  "status": "reviewed_incomplete",
+  "core_base": "7f72fd72302e988ca598c8e0abb547a50558da86",
+  "blueprint_base": "a114ab3d21b80952b234c836878299c36820fe54",
+  "gates": [
+    {
+      "id": 1,
+      "key": "logical_budget",
+      "decision": "adopt_preview_logical_subscope",
+      "evidence": "Same checkpoint exact input charge and one-byte worker backpressure. Existing native-reader overlap is scoped to its original build.",
+      "reports": [
+        "apple-worker-checkpoint-budget",
+        "cross-platform-view-checkpoint",
+        "view-pending-process",
+        "owner-budget-overlap",
+        "android-budget-overlap"
+      ],
+      "required_remaining": "Physical overlapping peak and target threshold. Reuse completed logical scenarios unless a new defect is identified.",
+      "complete": false
+    },
+    {
+      "id": 2,
+      "key": "geometry_index",
+      "decision": "adopt_monoline_preview_and_bounded_reference_candidates",
+      "evidence": "Current geometry sources match the JVM/Native baseline. Mixed reference brush queries, revision binding and all-or-refusal exist. Runtime production selection remains open.",
+      "reports": [
+        "canonical-point-query",
+        "incremental-spatial-index",
+        "brush-oracle-numeric",
+        "preview-float-capability",
+        "parallel-merge-20261030",
+        "spatial-index-poc",
+        "brush-path-costs"
+      ],
+      "required_remaining": "Compare current ordered canonical workload through bounded whole-stroke and delta candidates with build/query/update and admission counts. Keep AA and physical performance as separate required evidence.",
+      "complete": false
+    },
+    {
+      "id": 3,
+      "key": "consumers",
+      "decision": "adopt_typed_preview_profiles",
+      "evidence": "49 selected Swift types in the projected profile, retained App-specific ports, typed original Android and Apple consumers.",
+      "reports": [
+        "sdk-typed-app",
+        "sdk-typed-android",
+        "sdk-pending-display",
+        "sdk-semantic-review",
+        "sdk-type-closure"
+      ],
+      "required_remaining": "Review separate Apple and Kotlin publish profiles and stable dependency/owner/precondition closure. Current declarations and host subsets do not establish a released SDK.",
+      "complete": false
+    },
+    {
+      "id": 4,
+      "key": "owner_handoff",
+      "decision": "adopt_confirmed_process_recovery_and_existing_main_owner_profile",
+      "evidence": "Original same-pending recovery across three Android PIDs and Apple same-process new Model, selected IO cut cases, explicit original owner hold and drain.",
+      "reports": [
+        "owner-lifetime-profile-review",
+        "android-owner-main-crash-api32",
+        "view-pending-process",
+        "android-atomic-cut",
+        "apple-atomic-cut"
+      ],
+      "required_remaining": "Long-unsignaled real native release and vendor behavior. No live foreign-owner takeover without a supported contract.",
+      "complete": false
+    },
+    {
+      "id": 5,
+      "key": "platform_storage",
+      "decision": "adopt_isolated_primitive_facts_only",
+      "evidence": "API32 original software fallback, isolated SQLite/PDF evidence, Android no-replace probe and rejected hard-link route in its tested domain.",
+      "reports": [
+        "sqlite-platform-capabilities",
+        "pdf-platform-capabilities",
+        "resource-promote-platform",
+        "android-atomic-promote-api32",
+        "sdk-typed-android"
+      ],
+      "required_remaining": "Current supported platform/backend matrix and real physical failure behavior. Production persistence and resource integration remain gated.",
+      "complete": false
+    },
+    {
+      "id": 6,
+      "key": "physical",
+      "decision": "await_original_physical_gate",
+      "evidence": "Existing collector smoke was an emulator preflight. User previously reported no physical device available.",
+      "reports": [
+        "c1-current-facts-20261028"
+      ],
+      "required_remaining": "Active stylus Android tablet and Pencil iPad, clock/input/presentation, peak heap and required workloads. No substitute inference from the simulator.",
+      "complete": false
+    }
+  ],
+  "referenced_reports": {
+    "android-atomic-cut": {
+      "report": "reports/android-atomic-cut.json",
+      "commit": "4e4724af3854c7667d57d56401428773f1123ee1",
+      "sha256": "05af0406efee3c0ce056911c704632f5c0c4217061fd7372c2a48f74373a3a57",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 68,
+        "changed": 26,
+        "missing": 14
+      },
+      "first_differences": [
+        {
+          "path": "android-app/build.gradle.kts",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/reports/lint-results-debug.xml",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "android-atomic-promote-api32": {
+      "report": "reports/android-atomic-promote-api32.json",
+      "commit": "47f966adb338daa27408384383428144dcc4eaf4",
+      "sha256": "073f2d0dfb68c3829c518bc542c463aeb3fd798a6e5023adca2856f5a9114c60",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 88,
+        "changed": 0,
+        "missing": 0
+      },
+      "first_differences": []
+    },
+    "android-budget-overlap": {
+      "report": "reports/android-budget-overlap.json",
+      "commit": "6777aa350acad24bdace4cac6b7e4ea300d29da4",
+      "sha256": "a83acceeb54ba8e80b2d700f7995409599d295ab2fee1a9b9cf18ab499e2124f",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 78,
+        "changed": 28,
+        "missing": 8
+      },
+      "first_differences": [
+        {
+          "path": "android-app/build.gradle.kts",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/reports/lint-results-debug.xml",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/test-results/testDebugUnitTest/TEST-dev.notecore.app.BoundedPreviewReadTest.xml",
+          "state": "changed"
+        }
+      ]
+    },
+    "android-owner-main-crash-api32": {
+      "report": "reports/android-owner-main-crash-api32.json",
+      "commit": "2a5e20ebb9d2db1571d6aff59f81212d9697ad6a",
+      "sha256": "14fb317e8a8f42ea04124a1408f1bb0d0549e914430611079b7c9f1cbd8f1182",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 265,
+        "changed": 7,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/MainActivity.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "apple-atomic-cut": {
+      "report": "reports/apple-atomic-cut.json",
+      "commit": "4e4724af3854c7667d57d56401428773f1123ee1",
+      "sha256": "d3464cf178398fd7043a6bb7e69ce7eb68fb176f504f92d6022010f75c5dc563",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 51,
+        "changed": 20,
+        "missing": 23
+      },
+      "first_differences": [
+        {
+          "path": "build/apple-atomic-cut/afterAtomicWrite/base-before-kill.ncp",
+          "state": "missing"
+        },
+        {
+          "path": "build/apple-atomic-cut/afterAtomicWrite/observation.json",
+          "state": "missing"
+        },
+        {
+          "path": "build/apple-atomic-cut/afterAtomicWrite/old.ncp",
+          "state": "missing"
+        },
+        {
+          "path": "build/apple-atomic-cut/afterAtomicWrite/pending.ncp",
+          "state": "missing"
+        },
+        {
+          "path": "build/apple-atomic-cut/afterAtomicWrite/prepare.log",
+          "state": "missing"
+        }
+      ]
+    },
+    "apple-worker-checkpoint-budget": {
+      "report": "reports/apple-worker-checkpoint-budget.json",
+      "commit": "7f72fd72302e988ca598c8e0abb547a50558da86",
+      "sha256": "7039afc2e7ee116c230784f1176dab5b37791ce1201b452bed493a7a92c44b2f",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 454,
+        "changed": 0,
+        "missing": 0
+      },
+      "first_differences": []
+    },
+    "brush-oracle-numeric": {
+      "report": "reports/brush-oracle-numeric.json",
+      "commit": "f596f2dc89cfef1dfcbe1cda29b944a4a5f2d70b",
+      "sha256": "7b6355894bff4564002087ebdd8cdfb477514e4c0d51e2b3590f70d7135d4924",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 1,
+        "changed": 5,
+        "missing": 7
+      },
+      "first_differences": [
+        {
+          "path": "build/brush-oracle-numeric/before-fix-bindings.json",
+          "state": "missing"
+        },
+        {
+          "path": "build/brush-oracle-numeric/before-fix.log",
+          "state": "missing"
+        },
+        {
+          "path": "build/brush-oracle-numeric/before-fix.xml",
+          "state": "missing"
+        },
+        {
+          "path": "build/brush-oracle-numeric/build.log",
+          "state": "missing"
+        },
+        {
+          "path": "build/brush-oracle-numeric/original-after.json",
+          "state": "missing"
+        }
+      ]
+    },
+    "brush-path-costs": {
+      "report": "reports/brush-path-costs.json",
+      "commit": "966a6bceca1c84da9c6abe24fd0e28db442dab5c",
+      "sha256": "4cea2e0c3d4eca28a454bfe4fcc9ee2df94732bd8a74d94d82d2e966decfd825",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 3,
+        "changed": 3,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "canvas-core/build.gradle.kts",
+          "state": "changed"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt",
+          "state": "changed"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "c1-current-facts-20261028": {
+      "report": "reports/c1-current-facts-20261028.json",
+      "commit": "a82bdaa6be50dbaa9084818cf276a4417afd658e",
+      "sha256": "76c0bede66424449441d6de3775fed20824dbe09d68c61e579a9d99b9cca6b53",
+      "original_status": "partial",
+      "current_path_binding_counts": {
+        "matched": 4,
+        "changed": 6,
+        "missing": 2
+      },
+      "first_differences": [
+        {
+          "path": "build/remote-sync-20261028/m1-default-refusal/snapshot.json",
+          "state": "missing"
+        },
+        {
+          "path": "build/remote-sync-20261028/m1-preflight/snapshot.json",
+          "state": "missing"
+        },
+        {
+          "path": "docs/C1未决事项.md",
+          "state": "changed"
+        },
+        {
+          "path": "reports/android-input-host-tests.json",
+          "state": "changed"
+        },
+        {
+          "path": "reports/c1-evidence-audit.json",
+          "state": "changed"
+        }
+      ]
+    },
+    "c1-evidence-audit": {
+      "report": "reports/c1-evidence-audit.json",
+      "commit": "2f43982c33e966cc7e486b3bdf97cddcfb0ec6e4",
+      "sha256": "2c494ee8c7c09dba006e0bffa9f6b40dd224b5184fb7bd7ada5ba1e43f2bd93c",
+      "original_status": "failed",
+      "current_path_binding_counts": {
+        "matched": 0,
+        "changed": 0,
+        "missing": 0
+      },
+      "first_differences": []
+    },
+    "canonical-point-query": {
+      "report": "reports/canonical-point-query.json",
+      "commit": "2242dc14614b5f4c54f06c4a33ecbdc439ed44af",
+      "sha256": "9044e1fe7b529154e538bf40850bad9ddeea9deb22edb71d5c18e6021e46b00d",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 2,
+        "changed": 4,
+        "missing": 4
+      },
+      "first_differences": [
+        {
+          "path": "build/canonical-point-query/build.log",
+          "state": "missing"
+        },
+        {
+          "path": "build/canonical-point-query/original-after.json",
+          "state": "missing"
+        },
+        {
+          "path": "build/canonical-point-query/original-before.json",
+          "state": "missing"
+        },
+        {
+          "path": "canvas-core/build/android-brush-tests/run.log",
+          "state": "changed"
+        },
+        {
+          "path": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
+          "state": "missing"
+        }
+      ]
+    },
+    "cross-platform-view-checkpoint": {
+      "report": "reports/cross-platform-view-checkpoint.json",
+      "commit": "df3d1f277e44906cdb0a74d440433e1451e1eba5",
+      "sha256": "339a2ad29d4f1387d94aba204d97021eb14f0faccfb94fb6b37db7af3fcfa17e",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 450,
+        "changed": 1,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+          "state": "changed"
+        }
+      ]
+    },
+    "incremental-spatial-index": {
+      "report": "reports/incremental-spatial-index.json",
+      "commit": "4ea561006228f1d2f56d8d99c6473f12a7b17719",
+      "sha256": "a74abb03cd7d58f90322e68c3e2d78dbc0ce2241ca653672634b5da92bc792c3",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 111,
+        "changed": 56,
+        "missing": 2
+      },
+      "first_differences": [
+        {
+          "path": "canvas-core/build/android-brush-tests/run.log",
+          "state": "changed"
+        },
+        {
+          "path": "canvas-core/build/apple-brush-tests/run.log",
+          "state": "changed"
+        },
+        {
+          "path": "canvas-core/build/bin/iosSimulatorArm64/debugTest/test.kexe",
+          "state": "missing"
+        },
+        {
+          "path": "canvas-core/build/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk",
+          "state": "missing"
+        },
+        {
+          "path": "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.xml",
+          "state": "changed"
+        }
+      ]
+    },
+    "owner-budget-overlap": {
+      "report": "reports/owner-budget-overlap.json",
+      "commit": "6777aa350acad24bdace4cac6b7e4ea300d29da4",
+      "sha256": "05da04203efbbd39d9c3a4bb750348ddbc8ba2f91fdd6c68013a09c296570f5f",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 55,
+        "changed": 15,
+        "missing": 9
+      },
+      "first_differences": [
+        {
+          "path": "build/android-budget-overlap/ios-host.log",
+          "state": "missing"
+        },
+        {
+          "path": "build/android-budget-overlap/ios-original-files.json",
+          "state": "missing"
+        },
+        {
+          "path": "build/android-budget-overlap/ios-restore.log",
+          "state": "missing"
+        },
+        {
+          "path": "build/owner-budget-overlap/first-details.json",
+          "state": "missing"
+        },
+        {
+          "path": "build/owner-budget-overlap/first-summary.json",
+          "state": "missing"
+        }
+      ]
+    },
+    "owner-lifetime-profile-review": {
+      "report": "reports/owner-lifetime-profile-review.json",
+      "commit": "448b6be0e6906f1fbfbb18f4a499d4de56c90888",
+      "sha256": "a28f3ffbf5195d4c9aaea0816f5b5fc3fe1382c399e37d02005c490ffb8b7f70",
+      "original_status": "adopted-existing-app-lifetime-profile-c1-incomplete",
+      "current_path_binding_counts": {
+        "matched": 117,
+        "changed": 9,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/MainActivity.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "parallel-merge-20261030": {
+      "report": "reports/parallel-merge-20261030.json",
+      "commit": "c56ecb01b85ffd4dca750c37d8d238bb39381a8f",
+      "sha256": "3244456e8aff3dba3a6d660073a6269ecfe3e1cba072852aab520001c370e6d4",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 197,
+        "changed": 3,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt",
+          "state": "changed"
+        },
+        {
+          "path": "ios-app/NoteCorePreview/NoteCorePreviewApp.swift",
+          "state": "changed"
+        },
+        {
+          "path": "ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+          "state": "changed"
+        }
+      ]
+    },
+    "pdf-platform-capabilities": {
+      "report": "reports/pdf-platform-capabilities.json",
+      "commit": "4ea561006228f1d2f56d8d99c6473f12a7b17719",
+      "sha256": "6342d7b59815a72748e7c5a28233e01e1c3d7b746b420c060b2e3f40b479fec0",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 42,
+        "changed": 37,
+        "missing": 24
+      },
+      "first_differences": [
+        {
+          "path": "android-app/build.gradle.kts",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/CanonicalTitleHostChecks.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "preview-float-capability": {
+      "report": "reports/preview-float-capability.json",
+      "commit": "865d7c3b1e171aacb0d899647a62d100fd071af0",
+      "sha256": "c4cf40451e162c0ace78f9d0406a95988067c6071c698f0ad7b243ac5914a29b",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 1,
+        "changed": 5,
+        "missing": 10
+      },
+      "first_differences": [
+        {
+          "path": "build/preview-construction/before-fix-notebook.kt",
+          "state": "missing"
+        },
+        {
+          "path": "build/preview-construction/before-fix.log",
+          "state": "missing"
+        },
+        {
+          "path": "build/preview-construction/before-fix.xml",
+          "state": "missing"
+        },
+        {
+          "path": "build/preview-construction/build-android.log",
+          "state": "missing"
+        },
+        {
+          "path": "build/preview-construction/original-after.json",
+          "state": "missing"
+        }
+      ]
+    },
+    "resource-promote-platform": {
+      "report": "reports/resource-promote-platform.json",
+      "commit": "4faad67e9fc2d480464ca06dc5ce009ecf9ce902",
+      "sha256": "9226c5c13747035d69977189b1a6f9e6cc43ea1640c797328fa1689c3457010f",
+      "original_status": "completed_with_android_rejection",
+      "current_path_binding_counts": {
+        "matched": 154,
+        "changed": 0,
+        "missing": 0
+      },
+      "first_differences": []
+    },
+    "sdk-pending-display": {
+      "report": "reports/sdk-pending-display.json",
+      "commit": "8d6e3ee4e7a106752882b084c4766bbc0ced9ae5",
+      "sha256": "c943c9583871a5e7ef66b45e32e0abc2d0bd4cbe47996a296b8366eabf1443f6",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 502,
+        "changed": 10,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/MainActivity.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "sdk-semantic-review": {
+      "report": "reports/sdk-semantic-review.json",
+      "commit": "87def84af73b9b1284917d94f3190efa69c83937",
+      "sha256": "2121d48f5d53e02f4cd880e7a3757513736f28b4501fb5ceec8ca186cab2e04b",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 167,
+        "changed": 7,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "ios-app/NoteCorePreview/NativeInkCanvas.swift",
+          "state": "changed"
+        },
+        {
+          "path": "ios-app/NoteCorePreview/NoteCorePreviewApp.swift",
+          "state": "changed"
+        },
+        {
+          "path": "ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+          "state": "changed"
+        },
+        {
+          "path": "samples/sketch-host-ios/Sources/SketchCanvas.swift",
+          "state": "changed"
+        },
+        {
+          "path": "samples/sketch-host-ios/Tests/SketchHostTests.swift",
+          "state": "changed"
+        }
+      ]
+    },
+    "sdk-type-closure": {
+      "report": "reports/sdk-type-closure.json",
+      "commit": "ee09e888c79ad6bafe56a30806425c1a17ea7d79",
+      "sha256": "0690e30f8c650f0da49f4b0a2ee6341df541decf31fe4cecb675c3ccfbe6634a",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 39,
+        "changed": 7,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "ios-app/NoteCorePreview/NoteCorePreviewApp.swift",
+          "state": "changed"
+        },
+        {
+          "path": "samples/apple-sketch/NoteCoreSketch/SketchApp.swift",
+          "state": "changed"
+        },
+        {
+          "path": "samples/apple-sketch/NoteCoreSketch/SketchCanvas.swift",
+          "state": "changed"
+        },
+        {
+          "path": "samples/sketch-host-ios/Sources/SketchCanvas.swift",
+          "state": "changed"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "sdk-typed-android": {
+      "report": "reports/sdk-typed-android.json",
+      "commit": "46e54a4dff967160d86dd2352477b4c00b3ce35f",
+      "sha256": "b6fe38aa82cfd58774ca77ff430f709e53d1d32ef3df7b0abced1c6f1716c62e",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 323,
+        "changed": 4,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt",
+          "state": "changed"
+        },
+        {
+          "path": "tools/verify_android_input_host.py",
+          "state": "changed"
+        }
+      ]
+    },
+    "sdk-typed-app": {
+      "report": "reports/sdk-typed-app.json",
+      "commit": "f4b6f2bb14ddff659a2ec869d0c365b13dcbbf1b",
+      "sha256": "a7ccdab9c3472f9a5660ae19c1a98a70d4ceb1093d032a8a5a30013610c37cb7",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 505,
+        "changed": 7,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/MainActivity.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "spatial-index-poc": {
+      "report": "reports/spatial-index-poc.json",
+      "commit": "966a6bceca1c84da9c6abe24fd0e28db442dab5c",
+      "sha256": "ce3aa90cdc94a4b142698cce0559d6e611d0f6bd6d7373f8f92b2198eb3810e0",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 2,
+        "changed": 3,
+        "missing": 0
+      },
+      "first_differences": [
+        {
+          "path": "canvas-core/build.gradle.kts",
+          "state": "changed"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt",
+          "state": "changed"
+        },
+        {
+          "path": "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SpatialIndexPoc.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "sqlite-platform-capabilities": {
+      "report": "reports/sqlite-platform-capabilities.json",
+      "commit": "4ea561006228f1d2f56d8d99c6473f12a7b17719",
+      "sha256": "60eef9fc49db85342d045d4eeaca05f67c4a499e38e4afa74c7a6b617d11514c",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 35,
+        "changed": 35,
+        "missing": 5
+      },
+      "first_differences": [
+        {
+          "path": "android-app/build.gradle.kts",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/build/outputs/apk/debug/android-app-debug.apk",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt",
+          "state": "changed"
+        },
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/CanonicalTitleHostChecks.kt",
+          "state": "changed"
+        }
+      ]
+    },
+    "view-pending-process": {
+      "report": "reports/view-pending-process.json",
+      "commit": "9c19d12e73d4c4afbc77740d583b69668f82a257",
+      "sha256": "06d436a619a2ab6f63729b7ee8178f80046cd640cfccfe0f04a62b13fe180f97",
+      "original_status": "passed",
+      "current_path_binding_counts": {
+        "matched": 279,
+        "changed": 0,
+        "missing": 0
+      },
+      "first_differences": []
+    }
+  },
+  "exact_current_product_sources": {
+    "apple_worker_app_sources": 60,
+    "android_app_sources": 69
+  },
+  "geometry_commit_comparison": {
+    "producing_commit": "c56ecb01b85ffd4dca750c37d8d238bb39381a8f",
+    "sources_matched": 47,
+    "method": "Current common source tree compared with producing commit. The merge report itself binds XML, not these common source hashes."
+  },
+  "retained_geometry_runtime_xml": {
+    "reports/merge-20261030/xml/canvas-core/jvmTest/TEST-dev.notecore.canvas.prototype.BrushGeometryTest.xml": {
+      "sha256": "a16601732fdf1be7e382a3782ff8e33d49567dd90ddf800f5940dbc3ed936980",
+      "passed": 12
+    },
+    "reports/merge-20261030/xml/canvas-core/jvmTest/TEST-dev.notecore.canvas.prototype.BrushPathPlanTest.xml": {
+      "sha256": "1a0dba2568f1ebd06574b622752832911f3b9f0a0208c46336e4f353e22d24fa",
+      "passed": 7
+    },
+    "reports/merge-20261030/xml/canvas-core/jvmTest/TEST-dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.xml": {
+      "sha256": "739b2a68b0965d09d4198d52df528202460e6eca6817be1ac9e1730e5650235f",
+      "passed": 13
+    },
+    "reports/merge-20261030/xml/canvas-core/iosSimulatorArm64Test/TEST-dev.notecore.canvas.prototype.BrushGeometryTest.xml": {
+      "sha256": "6a3fb2bfb512c90889407d2a83190057f8d47a1f65ea03cb781938840ecee9a0",
+      "passed": 12
+    },
+    "reports/merge-20261030/xml/canvas-core/iosSimulatorArm64Test/TEST-dev.notecore.canvas.prototype.BrushPathPlanTest.xml": {
+      "sha256": "85c52ad47ca0c8edfa6690fc5fd0342dfbba189b96ba012cc4d5e719bd11112e",
+      "passed": 7
+    },
+    "reports/merge-20261030/xml/canvas-core/iosSimulatorArm64Test/TEST-dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.xml": {
+      "sha256": "ff140c386cc73cdff69e6760f8164740ffc0c74bb98ec62185631f8766607f76",
+      "passed": 13
+    }
+  },
+  "legacy_audit": {
+    "original_status": "failed",
+    "original_errors": 51,
+    "rewritten": false,
+    "interpretation": "Historical source/artifact drift retains the original result and its limitations."
+  },
+  "next_local_action": {
+    "gate": 2,
+    "work": "Compare current canonical dense-page geometry/index candidate costs and bounded refusal outcomes against the same ordered workload. Resolve which candidate merits future device comparison; do not promote an App backend.",
+    "current_benchmark": "runSpatialIndexPoc measures AABB broad phase and full rebuild only; retained baseline does not compare canonical delta/exact hits.",
+    "fixture_manifest_sha256": "6f8f33488894ea52701603f294b2b5a8b2035cf5a5260c87f3eb82926e2330e6",
+    "ready_fixtures": {
+      "S2-ink-dense-page": {
+        "path": ".generated-fixtures/scale/S2-ink-dense-page.bin",
+        "sha256": "22eea352e0ded47f34cabc0c8b543de0126a658377a6ea286cf60130a17c6725",
+        "bytes": 28000016
+      },
+      "S9-ink-long-stroke": {
+        "path": ".generated-fixtures/scale/S9-ink-long-stroke.bin",
+        "sha256": "49e5298371b35f407815f66e14839522dca2201df654094ed4de675e732c65a2",
+        "bytes": 2800016
+      }
+    },
+    "acceptance": "Use a fixed ordered subset within the preview envelope for canonical exact-hit and edit comparison, and a separate oversized case for typed refusal. Report build/query/update, touched samples and peak declared bytes per candidate. Desktop timing cannot select physical thresholds."
+  },
+  "new_app_or_platform_execution": false,
+  "physical_device_verified": false,
+  "c1_complete": false,
+  "dev_041_released": false,
+  "whole_requirements_accepted": 0,
+  "review_artifact_sha256": {
+    "reports/c1-review-20261107/architecture.json": "e109e57462c6169afff535d27858b91fd7d779498ae1f2bf9e89f332ef980933",
+    "reports/c1-review-20261107/geometry-commit-source-sha256.json": "72054d149416a535034b2f90dcd6ff03944135ed4ef3faaedb6047d184127f8c",
+    "reports/c1-review-20261107/portability.json": "7692b3b0fbd099bb73b386c80dc39a3bd88fa496eef95b399e65532468d515b6",
+    "reports/c1-review-20261107/review-as-executed.py.txt": "476263b914e8962861f19a482a36a1a73aa9a36d626c7986398a2990836ddb46"
+  }
+}
