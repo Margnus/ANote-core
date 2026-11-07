@@ -434,7 +434,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         fun openRecovery(snapshot: PagedPreviewSnapshot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
                          ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
             ownerCheck()
-            if (snapshot.pending?.let { PreviewRecoveryCodec.pendingCharge(it) > budget.inputBytes } == true)
+            if (exceedsRecoveryInputBudget(snapshot, budget))
                 return PreviewNotebookOpen(null, PreviewOpenFailure.INPUT_CAPACITY)
             val opened = open(snapshot.root, sessionNonce, budget, ownerCheck)
             val note = opened.notebook ?: return opened
@@ -443,6 +443,20 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                 note.selected = command.pageId
             }
             return opened
+        }
+        internal fun exceedsRecoveryInputBudget(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): Boolean =
+            snapshot.pending?.let { PreviewRecoveryCodec.pendingCharge(it) > budget.inputBytes } == true
+
+        internal fun checkOpenContentAndBudget(initial: DocumentRoot, budget: DocumentBudget): PreviewNotebookOpen? {
+            if (budget.maxPages > PagedPreviewCodec.MAX_PAGES || budget.maxObjects > PagedPreviewCodec.MAX_OBJECTS || budget.liveBytes > 8L * 1024 * 1024)
+                return PreviewNotebookOpen(null, PreviewOpenFailure.UNSUPPORTED_BUDGET)
+            val read = PreviewDocumentReader.accept(initial)
+            if (read.failure != null) return PreviewNotebookOpen(null, when (read.failure) {
+                PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT -> PreviewOpenFailure.UNSUPPORTED_CONTENT
+                else -> PreviewOpenFailure.INVALID_CONTENT
+            })
+            val capacity = MemoryDocumentAuthority.initialCapacityFailure(initial, budget)
+            return capacity?.let { PreviewNotebookOpen(null, PreviewOpenFailure.DOCUMENT_CAPACITY, it) }
         }
         private fun validSessionNonce(value: String) = value.length in 1..48 &&
             value.all { it.isLetterOrDigit() && it.code < 128 || it == '-' }
@@ -454,15 +468,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                  ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
             ownerCheck()
             if (!validSessionNonce(sessionNonce)) return PreviewNotebookOpen(null, PreviewOpenFailure.INVALID_SESSION_NONCE)
-            if (budget.maxPages > PagedPreviewCodec.MAX_PAGES || budget.maxObjects > PagedPreviewCodec.MAX_OBJECTS || budget.liveBytes > 8L * 1024 * 1024)
-                return PreviewNotebookOpen(null, PreviewOpenFailure.UNSUPPORTED_BUDGET)
-            val read = PreviewDocumentReader.accept(initial)
-            if (read.failure != null) return PreviewNotebookOpen(null, when (read.failure) {
-                PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT -> PreviewOpenFailure.UNSUPPORTED_CONTENT
-                else -> PreviewOpenFailure.INVALID_CONTENT
-            })
-            val capacity = MemoryDocumentAuthority.initialCapacityFailure(initial, budget)
-            if (capacity != null) return PreviewNotebookOpen(null, PreviewOpenFailure.DOCUMENT_CAPACITY, capacity)
+            checkOpenContentAndBudget(initial, budget)?.let { return it }
             return PreviewNotebookOpen(PagedPreviewNotebook(initial, sessionNonce, budget, ownerCheck), null)
         }
         /** Raw creation parameters are validated before canonical value constructors or mutable authority.

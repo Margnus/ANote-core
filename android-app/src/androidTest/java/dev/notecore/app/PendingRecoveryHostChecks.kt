@@ -21,6 +21,70 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
         while (!done && SystemClock.uptimeMillis() < end) { main { done = predicate() }; if (!done) SystemClock.sleep(20) }
         check(done) { message }
     }
+    fun verifyOpenBudget(pending: ByteArray): String {
+        val directory = File(host.cacheDir, "recovery-open-budget-${java.util.UUID.randomUUID()}")
+        check(directory.mkdir())
+        val checkpoint = PreviewRecoveryCodec.decode(pending.toString(Charsets.UTF_8))
+        val file = File(directory, "${checkpoint.documentId}.ncp")
+        file.writeBytes(pending)
+        lateinit var store: NoteStore
+        lateinit var old: PagedPreviewNotebook
+        lateinit var original: DocumentRoot
+        lateinit var twoPages: PagedPreviewSnapshot
+        main {
+            store = NoteStore.isolated(host, directory, documentBudget = DocumentBudget(maxPages = 1, inputBytes = 2247))
+            old = store.create()
+            check(old.rename("Existing unsaved document"))
+            original = old.snapshot()
+            val source = PagedPreviewNotebook.create("two-pages", "Two pages", "source")
+            check(source.insertPage())
+            twoPages = source.capture()
+            check(source.retire())
+        }
+        val oldFile = File(directory, "${original.id.value}.ncp")
+        val pageFile = File(directory, "${twoPages.documentId}.ncp")
+        val pageBytes = twoPages.encode().toByteArray(Charsets.UTF_8)
+        pageFile.writeBytes(pageBytes)
+        try {
+            for ((id, expected) in listOf(checkpoint.documentId to PreviewOpenFailure.INPUT_CAPACITY,
+                twoPages.documentId to PreviewOpenFailure.DOCUMENT_CAPACITY)) {
+                var refused = false
+                main {
+                    store.open(id) { opened, error ->
+                        check(error == null)
+                        val adoption = store.adoptForEditor(checkNotNull(opened))
+                        check(adoption.notebook == null && adoption.failure == expected)
+                        check(store.activeDocumentId == old.documentId && old.snapshot() === original)
+                        check(store.saveStates().isEmpty() && store.editorPresentation(old).phase == EditorSavePhase.UNSAVED)
+                        refused = true
+                    }
+                }
+                eventually("Budget refusal did not reach the original owner") { refused }
+                check(!oldFile.exists() && file.readBytes().contentEquals(pending) && pageFile.readBytes().contentEquals(pageBytes))
+            }
+            var canonicalSaved = false
+            main {
+                store.stopTestBackend()
+                store = NoteStore.isolated(host, directory, documentBudget = DocumentBudget(inputBytes = 2248))
+                store.open(checkpoint.documentId) { opened, error ->
+                    check(error == null)
+                    val adoption = store.adoptForEditor(checkNotNull(opened))
+                    check(adoption.failure == null)
+                    val note = checkNotNull(adoption.notebook)
+                    check(note.inputReservedByteCharge == 2248L && note.captureRecovery().encode().toByteArray(Charsets.UTF_8).contentEquals(pending))
+                    check(note.retryPendingStroke() && note.retryPendingStroke() && note.totalStrokeCount == 1 && note.changeVersion == 2L)
+                    AndroidInputHostChecks.checkProcessStroke(note.stroke(0).samples)
+                    check(store.save(note.captureRecovery()) { _, failure -> check(failure == null); canonicalSaved = true })
+                }
+            }
+            eventually("Exact-budget recovery did not confirm canonical save") { canonicalSaved && store.saveStates().isEmpty() }
+            fun sha(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+            return JSONObject().put("input_rejected", 2247).put("exact_input_admitted", 2248)
+                .put("document_capacity_refused", true).put("prior_owner_preserved", true)
+                .put("prior_unsaved_file_absent", true).put("pending_sha256", sha(pending))
+                .put("canonical_sha256", sha(file.readBytes())).toString()
+        } finally { main { store.stopTestBackend() }; directory.deleteRecursively() }
+    }
     fun verifyWorkBudget(): String {
         val directory = File(host.cacheDir, "pending-work-budget-${java.util.UUID.randomUUID()}")
         check(directory.mkdir())

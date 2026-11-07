@@ -119,9 +119,10 @@ class MainActivity : Activity() {
         root.removeAllViews(); root.addView(text("正在打开…").apply { setPadding(dp(24), dp(24), 0, 0) })
         store.open(id) { note, failure ->
             if (generation != viewGeneration || isFinishing || isDestroyed) return@open
-            val adopted = note?.let(store::adoptForEditor)
+            val adoption = note?.let(store::adoptForEditor)
+            val adopted = adoption?.notebook
             if (adopted != null) { editor(adopted); failure?.let(::showError) }
-            else { library(); showError(failure ?: "其他窗口正在编辑，或原笔记尚待保存，请重试") }
+            else { library(); showError(adoption?.failure?.adoptionMessage() ?: failure ?: "其他窗口正在编辑，或原笔记尚待保存，请重试") }
         }
     }
     private fun editor(note: PagedPreviewNotebook) {
@@ -340,12 +341,18 @@ class MainActivity : Activity() {
             store.importCopy(uri) { note, failure ->
                 if (isFinishing || isDestroyed || generation != viewGeneration) return@importCopy
                 if (note != null) {
-                    val session = store.adoptForEditor(note)
+                    val adoption = store.adoptForEditor(note)
+                    val session = adoption.notebook
                     if (session != null) { editor(session); status?.text = getString(R.string.imported, session.totalStrokeCount) }
-                    else { library(); showError("备份已导入为新笔记，可返回列表查看") }
+                    else { library(); showError(adoption.failure?.adoptionMessage() ?: "备份已导入为新笔记，可返回列表查看") }
                 } else showError(failure ?: "导入失败")
             }
         }
+    }
+    private fun PreviewOpenFailure.adoptionMessage(): String = when (this) {
+        PreviewOpenFailure.INPUT_CAPACITY -> "未提交笔迹超过当前恢复容量，原文件仍保留"
+        PreviewOpenFailure.DOCUMENT_CAPACITY -> "笔记超过当前编辑容量，原文件仍保留"
+        else -> "当前预览无法打开此笔记，原文件仍保留"
     }
     private inline fun onEditAccepted(result: PreviewEditResult, action: () -> Unit) {
         if (result.accepted) action() else showError(result.failure.previewMessage())

@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""Verify recovery open budget refusal and owner preservation on an isolated API32 image."""
+import base64
+import gzip
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import time
+import zipfile
+
+import sys
+
+ROOT = Path.cwd()
+sys.path.insert(0, str(ROOT / "tools"))
+from verify_android_input_host import BUNDLE, CHECKS
+
+SDK = Path('/Users/lixiaofan/Library/Android/sdk')
+PHASE = sys.argv[1]
+assert PHASE in ('baseline', 'fixed')
+RAW = ROOT / 'output/recovery-open-budget' / PHASE
+BUILD = ROOT / 'output/recovery-open-budget'
+WORK = BUILD / 'device'
+SERIAL = 'emulator-5586'
+AVD = 'NoteCoreRecoveryOpen32'
+
+
+def sha(path):
+    result = hashlib.sha256()
+    with path.open('rb') as stream:
+        while chunk := stream.read(1024 * 1024):
+            result.update(chunk)
+    return result.hexdigest()
+
+
+def save(path, value):
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+
+def main():
+    scope_dir = RAW
+    report_path = RAW / 'receipt.json'
+    scope_dir.mkdir(exist_ok=False)
+    WORK.mkdir(parents=True, exist_ok=False)
+    image = SDK / 'system-images/android-32/google_apis/arm64-v8a'
+    assert (image / 'package.xml').is_file()
+    apk = BUILD / (PHASE+'-app.apk')
+    test = BUILD / (PHASE+'-test.apk')
+    stamp = BUILD / (PHASE+'-source.json')
+    build_log = BUILD / (PHASE+'-build.log')
+    sources = json.loads(stamp.read_text(encoding='utf-8'))
+    assert PHASE == 'baseline' or all(sha(ROOT / path) == digest for path, digest in sources.items())
+    assert 'BUILD SUCCESSFUL' in build_log.read_text(encoding='utf-8')
+    apk_digest, test_digest = sha(apk), sha(test)
+    shutil.copy2(stamp, scope_dir / 'source-before.json')
+    shutil.copy2(build_log, scope_dir / 'build.log')
+    shutil.copy2(Path(__file__), scope_dir / 'executed-runner.py.txt')
+    for path in ('tools/verify_android_input_host.py', 'tools/check_architecture.py', 'tools/verify_portable_inputs.py'):
+        sources[path] = sha(ROOT / path)
+    for check in ('check_architecture', 'verify_portable_inputs'):
+        result = subprocess.check_output([sys.executable, 'tools/'+check+'.py'], cwd=ROOT)
+        assert json.loads(result)['status'] == 'passed'
+        (scope_dir / (check+'.json')).write_bytes(result)
+    save(scope_dir / 'build-commands.json', {
+        'argv':['./gradlew','--offline','--no-daemon','-PenableAndroidTargets=true',':android-app:assembleDebug',':android-app:assembleDebugAndroidTest'],
+        'jdk':'jbr-17.0.14','gradle_user_home':'<repo>/.gradle-user-home','konan_data_dir':'<repo>/.konan'})
+    with zipfile.ZipFile(scope_dir / 'executables.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+        archive.write(apk, 'app.apk'); archive.write(test, 'instrumentation.apk')
+    original = ROOT / '.android-avd/NoteCorePreview.avd'
+
+    def original_files():
+        processes = subprocess.check_output(['ps', '-axo', 'command='], text=True)
+        assert not any('qemu-system' in row and ('NoteCorePreview' in row or str(original) in row)
+                       for row in processes.splitlines()), 'Original device must stay stopped'
+        return {p.relative_to(original).as_posix(): {'bytes': p.stat().st_size, 'sha256': sha(p)}
+                for p in sorted(original.rglob('*')) if p.is_file()}
+
+    before = original_files(); assert before
+    save(scope_dir / 'original-before.json', before)
+    env = {**os.environ, 'ANDROID_AVD_HOME': str(WORK / 'avds'),
+           'ANDROID_USER_HOME': str(WORK / 'user'), 'ANDROID_EMULATOR_HOME': str(WORK / 'user')}
+    records = []
+
+    def run(command, label, timeout=210):
+        result = subprocess.run([str(a) for a in command], capture_output=True, timeout=timeout, env=env, cwd=ROOT)
+        if 'exec-out' not in command:
+            (scope_dir / (label + '.stdout.log')).write_bytes(result.stdout)
+        (scope_dir / (label + '.stderr.log')).write_bytes(result.stderr)
+        records.append({'label': label, 'argv': [str(a) for a in command], 'returncode': result.returncode})
+        save(scope_dir / 'execution.json', records)
+        assert result.returncode == 0, (label, result.stderr[-1500:], result.stdout[-1500:])
+        return result.stdout
+
+    count = 0
+
+    def adb(*args):
+        nonlocal count
+        count += 1
+        return run([SDK / 'platform-tools/adb', '-s', SERIAL, *args], 'adb-%04d' % count)
+
+    assert SERIAL not in run([SDK / 'platform-tools/adb', 'devices'], 'devices-before').decode()
+    assert shutil.disk_usage(ROOT).free > 8 * 2**30, 'Insufficient room for temporary device'
+    avd = WORK / 'avds' / (AVD + '.avd'); avd.mkdir(parents=True)
+    (WORK / 'user').mkdir()
+    values = dict(line.split('=', 1) for line in (original / 'config.ini').read_text(encoding='utf-8').splitlines() if '=' in line)
+    values = {key.strip(): value.strip() for key, value in values.items()}
+    values.update({'AvdId': AVD, 'avd.ini.displayname': AVD, 'image.sysdir.1': str(image) + '/',
+                   'tag.id': 'google_apis', 'tag.display': 'Google APIs', 'PlayStore.enabled': 'false',
+                   'hw.cpu.ncore': '2', 'hw.ramSize': '2048', 'disk.dataPartition.size': '6442450944'})
+    config = ''.join(key + ' = ' + value + '\n' for key, value in values.items())
+    (avd / 'config.ini').write_text(config, encoding='utf-8')
+    (WORK / 'avds' / (AVD + '.ini')).write_text('avd.ini.encoding=UTF-8\npath=' + str(avd) + '\ntarget=android-32\n', encoding='utf-8')
+    (scope_dir / 'initial-config.ini').write_text(config, encoding='utf-8')
+    log = (WORK / 'emulator.log').open('wb')
+    command = [str(SDK / 'emulator/emulator'), '-avd', AVD, '-port', '5586', '-no-window', '-no-audio',
+               '-no-snapshot', '-no-boot-anim', '-gpu', 'swiftshader_indirect', '-memory', '2048', '-cores', '2']
+    process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env, cwd=ROOT)
+    save(scope_dir / 'emulator-process.json', {'pid': process.pid, 'argv': command})
+    completed = False
+    try:
+        deadline = time.monotonic() + 480
+        while True:
+            assert process.poll() is None, 'Emulator exited; inspect log'
+            probe = subprocess.run([str(SDK / 'platform-tools/adb'), '-s', SERIAL, 'shell', 'getprop', 'sys.boot_completed'], capture_output=True, timeout=20)
+            if probe.returncode == 0 and probe.stdout.strip() == b'1':
+                break
+            assert time.monotonic() < deadline, 'Boot observation deadline; inspect this PID'
+            time.sleep(2)
+        assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode().strip() == AVD
+        assert adb('shell', 'getprop', 'ro.build.version.sdk').strip() == b'32'
+        assert adb('shell', 'getprop', 'ro.product.cpu.abi').strip() == b'arm64-v8a'
+        environment = {key: adb('shell', 'getprop', key).decode().strip() for key in
+                       ('ro.build.fingerprint', 'ro.build.version.sdk', 'ro.product.cpu.abi')}
+        assert not adb('shell', 'pm', 'list', 'packages', BUNDLE).strip()
+        adb('install', '-r', str(apk)); adb('install', '-r', str(test))
+        for package, local in ((BUNDLE, apk), (BUNDLE + '.test', test)):
+            remote = adb('shell', 'pm', 'path', package).decode().strip().removeprefix('package:')
+            assert remote.startswith('/data/app/') and remote.endswith('/base.apk')
+            assert hashlib.sha256(adb('exec-out', 'cat', remote)).hexdigest() == sha(local)
+        adb('shell','input','keyevent','KEYCODE_WAKEUP')
+        adb('shell','wm','dismiss-keyguard')
+        assert b'Status: ok' in adb('shell', 'am', 'start', '-W', '-n', BUNDLE + '/dev.notecore.app.MainActivity')
+
+        def files():
+            names = adb('shell', 'run-as', BUNDLE, 'ls', 'files/preview-notes').decode().splitlines()
+            return {name: hashlib.sha256(adb('exec-out', 'run-as', BUNDLE, 'cat', 'files/preview-notes/' + name)).hexdigest()
+                    for name in names if re.fullmatch(r'[a-zA-Z0-9-]+\.ncp', name)}
+
+        baseline = files()
+        parent = json.loads((ROOT/'reports/view-pending-process.json').read_text(encoding='utf-8'))
+        assert (apk_digest == parent['apk_sha256']) == (PHASE == 'baseline')
+        fixture, = (ROOT/'reports/view-pending-process-20261106').glob('process-checkpoint-*/prepare.ncp')
+        canonical = fixture.with_name('confirmed-final.ncp')
+        fixture_hashes = {p.relative_to(ROOT).as_posix(): sha(p) for p in (fixture, canonical)}
+        assert all(parent['evidence_sha256'][name] == digest for name,digest in fixture_hashes.items())
+        def instrument(case, *extras):
+            raw = adb('shell','am','instrument','-w','-r','-e','notecore_case',case,*extras,
+                      BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode()
+            (scope_dir/(case+'.log')).write_text(raw,encoding='utf-8')
+            return raw
+
+        raw = instrument('recovery_open_budget','-e','recovery_open_base64',base64.b64encode(fixture.read_bytes()).decode('ascii'))
+        if PHASE == 'baseline':
+            assert 'preserved=false' in raw and 'Unsupported preview adoption: INPUT_CAPACITY' in raw,raw
+            assert 'recovery_open_budget_status=passed' not in raw
+            observed={'prior_owner_preserved':False,'exception':'Unsupported preview adoption: INPUT_CAPACITY'}
+        else:
+            assert 'recovery_open_budget_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw,raw
+            observed=json.loads(re.search(r'recovery_open_budget=(\{.*\})',raw)[1])
+            assert observed=={'input_rejected':2247,'exact_input_admitted':2248,'document_capacity_refused':True,
+                              'prior_owner_preserved':True,'prior_unsaved_file_absent':True,
+                              'pending_sha256':sha(fixture),'canonical_sha256':sha(canonical)}, observed
+            inputs=instrument('input_batches')
+            assert 'input_status=passed' in inputs and 'INSTRUMENTATION_CODE: -1' in inputs,inputs
+            assert set(json.loads(re.search(r'input_observations=(\{.*\})',inputs)[1])['checks'])==CHECKS
+            owners=instrument('owner_retirement')
+            assert 'owner_status=passed' in owners and 'INSTRUMENTATION_CODE: -1' in owners,owners
+        assert files() == baseline
+        adb('uninstall',BUNDLE+'.test'); adb('uninstall',BUNDLE)
+        report = {'status':'reproduced' if PHASE=='baseline' else 'passed','environment':environment,'host_observations':observed,
+                  'fixture_sha256':fixture_hashes,'apk_sha256':apk_digest,'test_apk_sha256':test_digest,'isolated_note_baseline':baseline}
+        assert sha(apk) == apk_digest and sha(test) == test_digest
+        completed = True
+    finally:
+        if process.poll() is None:
+            identity = subprocess.run([SDK / 'platform-tools/adb', '-s', SERIAL, 'shell', 'getprop',
+                                       'ro.boot.qemu.avd_name'], capture_output=True, timeout=15).stdout.decode().strip()
+            if identity == AVD:
+                adb('emu', 'kill')
+            else:
+                process.terminate()
+            try:
+                process.wait(timeout=60)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=20)
+        log.close()
+        with gzip.open(scope_dir / 'emulator.log.gz', 'wb') as output:
+            output.write((WORK / 'emulator.log').read_bytes())
+        after = original_files(); save(scope_dir / 'original-after.json', after)
+        assert after == before, 'Original AVD changed'
+        shutil.rmtree(WORK)
+        save(scope_dir / 'cleanup.json', {'original_avd_all_bytes_unchanged': True,
+             'temporary_device_removed': not WORK.exists(), 'emulator_returncode': process.returncode,
+             'runtime_completed': completed})
+    report['source_sha256'] = sources
+    parents = ('reports/view-pending-process.json','reports/apple-worker-checkpoint-budget.json','reports/sdk-typed-android.json')
+    report['parent_receipt_sha256'] = {p: sha(ROOT / p) for p in parents}
+    report['evidence_sha256'] = {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(scope_dir.rglob('*')) if p.is_file()}
+    save(report_path, report)
+    print('API32 recovery open observation completed; isolated device removed', flush=True)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,7 @@
+INSTRUMENTATION_RESULT: failure=java.lang.IllegalStateException: Expected refusal preserving prior owner; preserved=false, exception=java.lang.IllegalStateException: Unsupported preview adoption: INPUT_CAPACITY/null
+	at dev.notecore.app.PendingRecoveryHostChecks.verifyOpenBudget(PendingRecoveryHostChecks.kt:54)
+	at dev.notecore.app.ViewportInstrumentation.onStart(ViewportInstrumentation.kt:113)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2278)
+
+INSTRUMENTATION_RESULT: viewport_status=failed
+INSTRUMENTATION_CODE: 0

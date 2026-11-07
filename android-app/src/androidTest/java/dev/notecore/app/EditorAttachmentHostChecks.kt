@@ -39,7 +39,7 @@ internal class EditorAttachmentHostChecks(private val test: Instrumentation, pri
                 var refused = false
                 store.open("different") { value, error -> check(value == null && error != null); refused = true }
                 check(refused && store.activeDocumentId == note.documentId)
-                check(store.adoptForEditor(OpenedDocument(note.snapshot(), false)) === note)
+                check(store.adoptForEditor(OpenedDocument(note.snapshot(), false)).notebook === note)
                 check(note.beginStroke(1.0, 2.0, .5f, 1)) // B is still writing when A leaves.
                 check(store.leaveEditor(note, "A") == EditorDeparture.DETACHED)
                 check(note.hasActiveStroke && store.editorCount == 1)
@@ -56,7 +56,7 @@ internal class EditorAttachmentHostChecks(private val test: Instrumentation, pri
             check(File(directory, "$documentId.ncp").readText(Charsets.UTF_8) == expected)
             var reopened = false
             main { store.open(note.documentId) { opened, error ->
-                check(error == null); note = checkNotNull(store.adoptForEditor(checkNotNull(opened)))
+                check(error == null); note = checkNotNull(store.adoptForEditor(checkNotNull(opened)).notebook)
                 check(note.capture().encode() == expected); reopened = true
             } }
             eventually("Shared editor root did not reopen") { reopened }
@@ -118,7 +118,7 @@ internal class EditorAttachmentHostChecks(private val test: Instrumentation, pri
         }
         var read = false
         main { store.open("pending-editor") { opened, error ->
-            check(error == null); note = checkNotNull(store.adoptForEditor(checkNotNull(opened)))
+            check(error == null); note = checkNotNull(store.adoptForEditor(checkNotNull(opened)).notebook)
             check(note.hasPendingStroke && note.captureRecovery().sameContent(checkpoint))
             check(note.retryPendingStroke() && note.retryPendingStroke())
             check(note.totalStrokeCount == 1 && note.pointCount(0) == 3)

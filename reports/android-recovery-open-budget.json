@@ -1,0 +1,145 @@
+{
+  "status": "reproduced_and_fixed",
+  "scope": "Actual Android preview Store reader/adoption/worker in isolated ARM64 API32. Capacity refusal now occurs before the old authority can be saved or retired.",
+  "baseline_core": "04ad0864d998d3094027e8c39215255e38ac8e58",
+  "phases": {
+    "baseline": {
+      "status": "reproduced",
+      "environment": {
+        "ro.build.fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+        "ro.build.version.sdk": "32",
+        "ro.product.cpu.abi": "arm64-v8a"
+      },
+      "host_observations": {
+        "prior_owner_preserved": false,
+        "exception": "Unsupported preview adoption: INPUT_CAPACITY"
+      },
+      "apk_sha256": "587d3eb86262aa716f8fc704358056a601cc4e8c6970ad5159bf65b9f09d6a39",
+      "test_apk_sha256": "1edc18851c013a3bbc97da37a343b840419da2b6fb943fbd0572c427858ccd83",
+      "isolated_note_baseline": {},
+      "cleanup": {
+        "original_avd_all_bytes_unchanged": true,
+        "temporary_device_removed": true,
+        "emulator_returncode": 0,
+        "runtime_completed": true
+      },
+      "source_and_build_manifest_sha256": "d03b5a2c13fdaba5069083d354d904830f3d4536a1e638d5a7bfb2d75792cf13"
+    },
+    "fixed": {
+      "status": "passed",
+      "environment": {
+        "ro.build.fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+        "ro.build.version.sdk": "32",
+        "ro.product.cpu.abi": "arm64-v8a"
+      },
+      "host_observations": {
+        "input_rejected": 2247,
+        "exact_input_admitted": 2248,
+        "document_capacity_refused": true,
+        "prior_owner_preserved": true,
+        "prior_unsaved_file_absent": true,
+        "pending_sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+        "canonical_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+      },
+      "apk_sha256": "371636feaba4141b219533b17bae42965afa981e443d3649cf5024d1f59b05ac",
+      "test_apk_sha256": "5b802bb170a5d2c4243f2f4eed2a65d30a507676ad4d35a896dd2654c49f00c4",
+      "isolated_note_baseline": {},
+      "cleanup": {
+        "original_avd_all_bytes_unchanged": true,
+        "temporary_device_removed": true,
+        "emulator_returncode": 0,
+        "runtime_completed": true
+      },
+      "source_and_build_manifest_sha256": "bf05420bfcd6080bb5f4cbdc22c9c3e7ff7a33c9248f6f3513e00d26be2573c0"
+    }
+  },
+  "fixture_sha256": {
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+  },
+  "decision": "Use a pure preview admission check before changing owners. Reuse the common preview input, content and document capacity rules through an Android-only bridge. Install a new mutable notebook only after the original owner permits departure.",
+  "ui_scope": "MainActivity maps typed input/document capacity failures to separate messages. The runtime test calls the original reader and editor-adoption entry in an isolated host; no ordinary UI gesture assertion.",
+  "build_commands": {
+    "baseline": [
+      ":android-app:assembleDebug",
+      ":android-app:assembleDebugAndroidTest"
+    ],
+    "fixed": [
+      ":android-app:assembleDebug",
+      ":android-app:assembleDebugAndroidTest",
+      ":shared-core:jvmTest",
+      ":shared-core:linkReleaseFrameworkIosSimulatorArm64"
+    ],
+    "offline": true,
+    "android_targets": true,
+    "fixed_apple_targets": true
+  },
+  "regressions": {
+    "input_batches": [
+      "sibling_surface_preserves_original_input_and_rejects_stale_events",
+      "document_capacity_refusal_and_undo_recovery",
+      "live_byte_refusal_and_undo_recovery",
+      "input_byte_budget_refusal_cancel_and_recovery",
+      "history_capacity_refuses_down_without_owning_samples",
+      "journal_identity_capacity_refuses_before_real_view_ownership",
+      "typed_pending_up_retains_exact_command_and_retries_once",
+      "double_scene_mapping_before_float_path",
+      "history_terminal_order_equal_time_and_undo",
+      "invalid_native_sample_cancels_and_recovers",
+      "resize_cancels_and_late_up_preserves_root",
+      "callback_batch_limit_explicit_cancel_and_recover"
+    ],
+    "owner_retirement": [
+      "wrong_thread_store_creation_and_lookup_refused",
+      "invalid_store_configuration_does_not_start_worker",
+      "unadmitted_release_refuses_before_retiring_authority",
+      "wrong_thread_retirement_rejected",
+      "accepted_root_saved_before_terminal_worker_stop",
+      "failed_root_retained_until_explicit_retry",
+      "active_input_and_picker_refuse_without_loss",
+      "pending_read_and_delivery_refuse_retirement",
+      "full_ledger_retry_frees_slot_before_retirement",
+      "shared_editor_detach_capacity_and_reopen",
+      "pending_editor_failure_retry_original_recovery",
+      "actual_activity_shared_editor_departure",
+      "editor_original_ledger_old_ack_failure_and_retry",
+      "editor_stopped_backend_feedback",
+      "actual_activity_shared_presentation_update"
+    ]
+  },
+  "shared_core_jvm": {
+    "tests": 350,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "apple_simulator_framework_header_sha256": "bb049076a061edd44d4551a137bf2cc7ed1920c81dd9c0e6e59cf4c4368c02be",
+  "apple_simulator_framework_header_unchanged": true,
+  "gate": "No change to full C1, physical M-1/heap/stylus, DEV-041 or production storage gates.",
+  "evidence_sha256": {
+    "baseline/build.log": "dfdc67e18cc5bb5761d0b136ab7ddac2f0de15b81c7290e0fb97fd9c12a4bcf3",
+    "baseline/cleanup.json": "2e23fc12cea460e45e8ddeeccd7e7825abcb3e71bbf1c0659630692bb9b38f57",
+    "baseline/executables.zip": "947702f385baefeaf71e5658e7b5de3de7d5a163281ff95ce1ae4929832415ef",
+    "baseline/executed-runner.py.txt": "6950f201bb8140f1342f4bac0be33ac082dc1c45d5567e8166c9c37c527d1dea",
+    "baseline/execution.json": "f7c09b36571828d0b22e1f50b16e65cdf678e960643c7d7d1cf486e91a34f654",
+    "baseline/original-after.json": "528c563e57b3f8be9707ab355490f0868de79442945229c8865132fcbf8ff9e8",
+    "baseline/original-before.json": "528c563e57b3f8be9707ab355490f0868de79442945229c8865132fcbf8ff9e8",
+    "baseline/recovery_open_budget.log": "9e825982fad147f572248e5aa964027dd52150fa9479dbfd6f0506b570d445f2",
+    "baseline/source-before.json": "d03b5a2c13fdaba5069083d354d904830f3d4536a1e638d5a7bfb2d75792cf13",
+    "fixed/NoteCanvasPrototype.h": "bb049076a061edd44d4551a137bf2cc7ed1920c81dd9c0e6e59cf4c4368c02be",
+    "fixed/build.log": "fbb9882f49f7e0d9acbc6ff8dadb56ccdf105d1884031b6e1c7a00b5bb1be1ec",
+    "fixed/check_architecture.json": "e109e57462c6169afff535d27858b91fd7d779498ae1f2bf9e89f332ef980933",
+    "fixed/cleanup.json": "2e23fc12cea460e45e8ddeeccd7e7825abcb3e71bbf1c0659630692bb9b38f57",
+    "fixed/executables.zip": "57f3986a7dbb58deae4a54ed002056837b100d9a2495ecd70b97eb5e19effb99",
+    "fixed/executed-runner.py.txt": "6950f201bb8140f1342f4bac0be33ac082dc1c45d5567e8166c9c37c527d1dea",
+    "fixed/execution.json": "59c329b527561f8e9930e58e3ad9ae910ffba27837996fbe52ff7241f816cbd9",
+    "fixed/input_batches.log": "77ca392d07aa67aa12be4ce71c239e341ec3930aae42f4caa444031068891dc3",
+    "fixed/original-after.json": "528c563e57b3f8be9707ab355490f0868de79442945229c8865132fcbf8ff9e8",
+    "fixed/original-before.json": "528c563e57b3f8be9707ab355490f0868de79442945229c8865132fcbf8ff9e8",
+    "fixed/owner_retirement.log": "867704d2bc824a2c0ac55bae738261ad00a75b647c8576fce5a2bcf800c1181e",
+    "fixed/recovery_open_budget.log": "d1e7b5e7b22d313ffde0878c04d1b3d5c45acb2d22c46db46411765164d6b4df",
+    "fixed/shared-core-jvm-xml.zip": "b0483ea99f66f58d7ba2e9e0e2d09a4ce48c04fca86786aca7a4859a69e0291b",
+    "fixed/source-before.json": "bf05420bfcd6080bb5f4cbdc22c9c3e7ff7a33c9248f6f3513e00d26be2573c0",
+    "fixed/verify_portable_inputs.json": "7692b3b0fbd099bb73b386c80dc39a3bd88fa496eef95b399e65532468d515b6"
+  }
+}

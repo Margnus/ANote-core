@@ -27,6 +27,7 @@ internal enum class EditorSavePhase { UNSAVED, SAVING, RETRY_REQUIRED, BACKEND_U
 /** Derived from the original preview file ACK/ledger; never a production DURABLE receipt. */
 internal data class EditorPresentation(val documentId: String, val revision: Long, val savedRevision: Long?,
     val pageId: String, val strokeCount: Int, val activeInput: Boolean, val phase: EditorSavePhase)
+internal data class EditorAdoption(val notebook: PagedPreviewNotebook?, val failure: PreviewOpenFailure? = null)
 
 data class OpenedDocument(val root: DocumentRoot, val persisted: Boolean, val recovery: PagedPreviewSnapshot = PagedPreviewSnapshot.fromRoot(root))
 
@@ -237,10 +238,15 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         return saveOwned(note.captureRecovery()) && releaseActive(note)
     }
     internal fun createForEditor(): PagedPreviewNotebook? = if (prepareEditorDocument(null)) create() else null
-    internal fun adoptForEditor(opened: OpenedDocument): PagedPreviewNotebook? {
+    internal fun adoptForEditor(opened: OpenedDocument): EditorAdoption {
         executor.checkOwnerThread()
-        if (opened.root !== opened.recovery.root) return null
-        return if (prepareEditorDocument(opened.root.id.value)) adopt(opened) else null
+        if (ownerRetiring || opened.root !== opened.recovery.root) return EditorAdoption(null)
+        activeNotebook?.let {
+            if (it.documentId == opened.recovery.documentId) return EditorAdoption(it)
+            if (editors.isNotEmpty() || it.hasActiveStroke) return EditorAdoption(null)
+        }
+        previewEditorAdmissionFailure(opened.recovery, previewBudget())?.let { return EditorAdoption(null, it) }
+        return EditorAdoption(if (prepareEditorDocument(opened.recovery.documentId)) adopt(opened) else null)
     }
     internal fun releaseActive(note: PagedPreviewNotebook, lostEndpoint: Boolean = false): Boolean {
         executor.checkOwnerThread(); check(activeNotebook === note)
