@@ -1,0 +1,146 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-version"
+    ],
+    "label": "xcode-version",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "create",
+      "NoteCoreAppleWorkerCheckpoint-20261107",
+      "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    ],
+    "label": "create-device",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "boot",
+      "FCC13012-1765-4B0A-B0B0-B5EA963F39E6"
+    ],
+    "label": "boot",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "bootstatus",
+      "FCC13012-1765-4B0A-B0B0-B5EA963F39E6",
+      "-b"
+    ],
+    "label": "bootstatus",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcodebuild",
+      "-quiet",
+      "-xctestrun",
+      "/Users/lixiaofan/StudioProjects/notecore/output/apple-worker-checkpoint-budget/DerivedData/Build/Products/NoteCorePreview_iphonesimulator27.1-arm64.xctestrun",
+      "-destination",
+      "platform=iOS Simulator,id=FCC13012-1765-4B0A-B0B0-B5EA963F39E6",
+      "-parallel-testing-enabled",
+      "NO",
+      "-only-testing:NoteCorePreviewTests",
+      "-resultBundlePath",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/apple-worker-checkpoint-budget-20261107/tests.xcresult",
+      "-collect-test-diagnostics",
+      "never",
+      "test-without-building"
+    ],
+    "label": "test",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "summary",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/apple-worker-checkpoint-budget-20261107/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "summary",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "xcresulttool",
+      "get",
+      "test-results",
+      "tests",
+      "--path",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/apple-worker-checkpoint-budget-20261107/tests.xcresult",
+      "--format",
+      "json"
+    ],
+    "label": "tests",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before-cleanup",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "FCC13012-1765-4B0A-B0B0-B5EA963F39E6"
+    ],
+    "label": "shutdown",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "delete",
+      "FCC13012-1765-4B0A-B0B0-B5EA963F39E6"
+    ],
+    "label": "delete",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-after",
+    "returncode": 0
+  }
+]

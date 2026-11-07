@@ -1,0 +1,60 @@
+from pathlib import Path
+import hashlib
+import json
+from zipfile import ZipFile
+
+raw=Path('reports/apple-worker-checkpoint-budget-20261107')
+work=Path('output/apple-worker-checkpoint-budget')
+def load(name):
+    return json.loads((raw/name).read_text(encoding='utf-8'))
+def sha(path):
+    with path.open('rb') as f:
+        return hashlib.file_digest(f,'sha256').hexdigest()
+def write(path,value):
+    path.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+summary=load('summary.json')
+assert (summary['passedTests'],summary['failedTests'],summary['skippedTests'])==(68,0,0)
+cleanup=load('cleanup.json')
+assert cleanup['test_passed'] and cleanup['temporary_device_deleted'] and cleanup['original_apps_and_notes_unchanged']
+assert len(load('original-before.json')['notes'])==16 and len(load('original-before.json')['apps'])==2
+assert load('architecture.json')['status']==load('portability.json')['status']=='passed'
+with ZipFile(raw/'executables.zip') as z:
+    assert z.testzip() is None and any(n.endswith('.xctest/NoteCorePreviewTests') for n in z.namelist())
+parent=load('framework-reuse.json')
+assert not parent['rebuilt'] and sha(Path(parent['archive']))==parent['sha256']
+sources=load('source-at-runtime-start.json')
+sources.update({p:sha(Path(p)) for p in ('tools/check_architecture.py','tools/verify_portable_inputs.py')})
+assert all(sha(Path(p))==v for p,v in sources.items())
+witnesses=load('android-fixture-bindings.json')
+assert len(witnesses)==2 and all(sha(Path(p))==v['sha256'] for p,v in witnesses.items())
+parent_paths=['reports/sdk-typed-app.json',parent['archive'],'reports/view-pending-process.json',
+              'reports/cross-platform-view-checkpoint.json',*witnesses]
+write(raw/'build-command.json',{
+ 'argv':['xcodebuild','-project','ios-app/NoteCorePreview.xcodeproj','-scheme','NoteCorePreview',
+        '-destination','generic/platform=iOS Simulator','-derivedDataPath',str((work/'DerivedData').resolve()),
+        'CODE_SIGNING_ALLOWED=NO','build-for-testing'],
+ 'framework_rebuilt':False})
+report={
+ 'schema':'apple-original-worker-checkpoint-backpressure-1','status':'passed',
+ 'fixture_bindings':witnesses,
+ 'logical_budgets':{
+     'worker_total_bytes':268435456,'retained_checkpoint_bytes':3038,'input_pending_bytes':2248,
+     'checkpoint_encoding_work_bytes':64990,'temporary_reservation_bytes':268370467,
+     'available_while_occupied_bytes':64989,'physical_allocation_equivalent':False},
+ 'evidence_chain':{
+     'admission':'Original ledger retains one exact checkpoint with no flight or failure. Worker has one unrelated declared reservation. Existing base file bytes remain unchanged and close keeps the original Notebook.',
+     'worker_ack':'Releasing and acknowledging that reservation invokes the original automatic pump. The same snapshot moves into flight exactly once and charges 64990 bytes before atomic write.',
+     'pending_confirmed':'After actual write and owner confirmation, ledger and worker charges reach zero, pending file equals original Android worker bytes, and original pending owner retires.',
+     'canonical_reopen':'New Apple Model reads that file, commits one four-point stroke at revision two, and confirms canonical bytes equal to Android.'},
+ 'verification':{'isolated_original_app_xctest':68,'failures':0,'skips':0,
+                 'framework_reused_without_native_rebuild':True,'production_source_changed':False,
+                 'physical_device_executed':False},
+ 'preservation':{'original_simulator_shutdown':True,'notes_preserved':16,'apps_preserved':2,'temporary_device_deleted':True},
+ 'source_sha256':sources,'parent_receipt_sha256':{p:sha(Path(p)) for p in parent_paths},
+ 'evidence_sha256':{str(p):sha(p) for p in sorted(raw.rglob('*')) if p.is_file()},
+ 'sdk_frozen':False,'c1_complete':False,'dev_041_released':False,'whole_requirements_accepted':0,
+ 'scope':'An isolated original iOS App model, ledger and worker. A test-only logical charge produces temporary one-byte backpressure. The real worker and IO confirm original pending and canonical files. A new Model in the same process reopens. Physical heap, permanent oversize policy, power loss, native release and full C1 remain separate.'
+}
+write(Path('reports/apple-worker-checkpoint-budget.json'),report)
+print(len(sources)+len(report['parent_receipt_sha256'])+len(report['evidence_sha256']))

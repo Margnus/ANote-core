@@ -501,10 +501,15 @@ final class PagedHostTests: XCTestCase {
             XCTAssertNil(refused.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), corrupt)
         }
     }
-    @MainActor func testAndroidViewWorkerCheckpointBudgetAndOriginalAppleSave() async throws {
+    private func androidViewWorkerFiles() throws -> (pending: Data, canonical: Data) {
         // Byte-for-byte artifacts from the Android View -> NoteStore -> process recovery run.
         let pendingBytes = try XCTUnwrap(Data(base64Encoded: "TkNSRUNPVkVSWQkxCkQJcHJvY2Vzcy1yZWNvdmVyeQlwcm9jZXNzIGNoZWNrcG9pbnQJMQkwCTEKOTMJMjY0CTAwNzAwMDcyMDA2ZjAwNjMwMDY1MDA3MzAwNzMwMDJkMDA3MzAwNjUwMDY1MDA2NDAwMmQwMDZmMDA3MDAwMmQwMDMyCk5DUFJFVklFVwkyCkQJcHJvY2Vzcy1yZWNvdmVyeQlwcm9jZXNzIGNoZWNrcG9pbnQJMQkwCTEKRwlwYWdlCWxheWVyCTU5NS4wCTg0Mi4wCUJMQU5LCTAKRU5ECk5DUFJFVklFVwkyCkQJcHJvY2Vzcy1yZWNvdmVyeQkJMQkxCTAKRwlwYWdlCWxheWVyCTU5NS4wCTg0Mi4wCUJMQU5LCTAKUwlwcm9jZXNzLXNlZWQtaW5rLTMJbGF5ZXIJMQlNT05PTElORQkxCS0xNDMzOTUxMwkyLjUJNAkxLjAJMC4wCTAuMAkxLjAJMC4wCTAuMApQCTEwMC4wCTIwMC4wCTAuMTI1CTEwMDAwMDAKUAkxMTAuMAkyMDUuMAkwLjI1CTEwMDEwMDAKUAkxMjAuMAkyMTAuMAkwLjM3NQkxMDAyMDAwClAJMTMwLjAJMjE1LjAJMC41CTEwMDMwMDAKRU5EClJFQ09WRVJZLUVORAo="))
         let canonicalBytes = try XCTUnwrap(Data(base64Encoded: "TkNQUkVWSUVXCTIKRAlwcm9jZXNzLXJlY292ZXJ5CXByb2Nlc3MgY2hlY2twb2ludAkxCTEJMgpHCXBhZ2UJbGF5ZXIJNTk1LjAJODQyLjAJQkxBTksJMgpTCXByb2Nlc3Mtc2VlZC1pbmstMwlsYXllcgkxCU1PTk9MSU5FCTEJLTE0MzM5NTEzCTIuNQk0CTEuMAkwLjAJMC4wCTEuMAkwLjAJMC4wClAJMTAwLjAJMjAwLjAJMC4xMjUJMTAwMDAwMApQCTExMC4wCTIwNS4wCTAuMjUJMTAwMTAwMApQCTEyMC4wCTIxMC4wCTAuMzc1CTEwMDIwMDAKUAkxMzAuMAkyMTUuMAkwLjUJMTAwMzAwMApFTkQK"))
+        return (pendingBytes, canonicalBytes)
+    }
+
+    @MainActor func testAndroidViewWorkerCheckpointBudgetAndOriginalAppleSave() async throws {
+        let (pendingBytes, canonicalBytes) = try androidViewWorkerFiles()
         let dir = directory()
         defer { try? FileManager.default.removeItem(at: dir) }
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -576,6 +581,110 @@ final class PagedHostTests: XCTestCase {
         reopened.close(); XCTAssertNil(reopened.current)
         XCTAssertEqual(reopened.beginOwnerRetirement(), .started)
         try await eventually("new reader drains") { reopened.ownerRetirementStatus.phase == .retired }
+    }
+
+    @MainActor func testAndroidViewCheckpointWaitsForExactAppleWorkerBudgetBeforeWrite() async throws {
+        let (pendingBytes, canonicalBytes) = try androidViewWorkerFiles()
+        let checkpoint = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: String(decoding: pendingBytes, as: UTF8.self)).snapshot)
+        XCTAssertEqual(checkpoint.retainedByteCharge, 3038)
+        XCTAssertEqual(checkpoint.encodingWorkByteCharge, 64990)
+        let dir = directory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let id = checkpoint.documentId, file = dir.appendingPathComponent(id + ".ncp")
+        let base = try PagedPreviewSnapshot.companion.fromRoot(root: checkpoint.root)
+        let baseBytes = Data(try base.encode().utf8)
+        try baseBytes.write(to: file)
+
+        let releaseOccupancy = DispatchSemaphore(value: 0), occupancyEntered = DispatchSemaphore(value: 0)
+        let releaseWrite = DispatchSemaphore(value: 0), writeEntered = DispatchSemaphore(value: 0)
+        defer { releaseOccupancy.signal(); releaseWrite.signal() }
+        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+            journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
+            historyEntries: 128, historyBytes: 0, inputBytes: 2248)
+        let model = PreviewModel(directory: dir, documentBudget: budget, observeWriteBoundary: { boundary in
+            if boundary == .beforeAtomicWrite {
+                writeEntered.signal()
+                releaseWrite.wait()
+            }
+        })
+        try model.adopt(checkpoint.root, persisted: false, recovery: checkpoint)
+        let note = try XCTUnwrap(model.current)
+        let fields = Mirror(reflecting: model)
+        let ledger = try XCTUnwrap(fields.descendant("ledger") as? PreviewSaveLedger)
+        let worker = try XCTUnwrap(fields.descendant("$__lazy_storage_$_executor") as? AppleBoundedOwnerExecutor)
+        let limit = try XCTUnwrap(fields.descendant("storageWorkBytes") as? Int64)
+        try await eventually("initial catalog leaves the original worker empty") { (try? worker.status().entries.isEmpty) == true }
+
+        // Reserve declared bytes in the actual worker. This probe does not allocate an equivalent payload.
+        let reservation = limit - checkpoint.encodingWorkByteCharge + 1
+        let admitted = try worker.submit(input: (), chargedBytes: reservation, compute: { _ in
+            occupancyEntered.signal()
+            releaseOccupancy.wait()
+            return true
+        }, receive: { _, result in
+            if case .succeeded(true) = result { return .acknowledged }
+            XCTFail("Occupancy probe did not complete"); return .acknowledged
+        })
+        guard case .accepted(let occupancy) = admitted else { return XCTFail("Expected occupancy reservation") }
+        var holding = false
+        try await eventually("original worker holds one test reservation") {
+            if !holding { holding = occupancyEntered.wait(timeout: .now()) == .success }
+            return holding
+        }
+        XCTAssertEqual(try worker.status().chargedBytes, reservation)
+        XCTAssertEqual(limit - (try worker.status().chargedBytes), checkpoint.encodingWorkByteCharge - 1)
+        XCTAssertTrue(model.save())
+        let waiting = try XCTUnwrap(ledger.states().first)
+        XCTAssertEqual(ledger.states().count, 1); XCTAssertEqual(ledger.chargedBytes, 3038)
+        XCTAssertFalse(waiting.inFlight); XCTAssertFalse(waiting.retryRequired)
+        XCTAssertTrue(waiting.snapshot.sameContent(other: checkpoint))
+        XCTAssertTrue(note.snapshot() === checkpoint.root); XCTAssertTrue(note.pendingStroke() === checkpoint.pending)
+        XCTAssertEqual(try worker.status().entries.count, 1)
+        XCTAssertTrue(try worker.status().entries[0].ticket === occupancy)
+        XCTAssertEqual(writeEntered.wait(timeout: .now()), .timedOut)
+        XCTAssertEqual(try Data(contentsOf: file), baseBytes)
+        model.close()
+        XCTAssertTrue(model.current === note)
+        XCTAssertTrue(ledger.latest(documentId: id) === waiting.snapshot)
+
+        releaseOccupancy.signal() // Actual ACK invokes the Model pump without a second save request.
+        var writing = false
+        try await eventually("exact retained write starts after worker ACK") {
+            if !writing { writing = writeEntered.wait(timeout: .now()) == .success }
+            return writing
+        }
+        let running = try XCTUnwrap(ledger.states().first)
+        XCTAssertTrue(running.inFlight); XCTAssertTrue(running.snapshot === waiting.snapshot)
+        XCTAssertEqual(try worker.status().chargedBytes, checkpoint.encodingWorkByteCharge)
+        XCTAssertEqual(try worker.status().entries.count, 1)
+        XCTAssertEqual(try Data(contentsOf: file), baseBytes)
+        releaseWrite.signal()
+        try await eventually("original write confirms recovery before retirement") {
+            model.status == "未提交笔迹已保存为恢复记录，请重试提交" &&
+                ledger.states().isEmpty && (try? worker.status().chargedBytes) == 0
+        }
+        XCTAssertEqual(try Data(contentsOf: file), pendingBytes)
+        XCTAssertTrue(note.pendingStroke() === checkpoint.pending)
+        model.close(); XCTAssertNil(model.current)
+        XCTAssertFalse(note.retryPendingStroke())
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("original worker drains") { model.ownerRetirementStatus.phase == .retired }
+
+        let reopened = PreviewModel(directory: dir)
+        reopened.open(id)
+        try await eventually("new owner opens worker checkpoint") { reopened.current?.hasPendingStroke == true }
+        let restored = try XCTUnwrap(reopened.current)
+        XCTAssertTrue(reopened.save())
+        try await eventually("new owner confirms canonical save") {
+            reopened.status.hasPrefix("已保存") && reopened.ownerRetirementStatus.pendingWrites == 0
+        }
+        XCTAssertTrue(restored.retryPendingStroke()); XCTAssertEqual(restored.changeVersion, 2)
+        XCTAssertEqual(restored.totalStrokeCount, 1); XCTAssertEqual(restored.pointCount(index: 0), 4)
+        XCTAssertEqual(try Data(contentsOf: file), canonicalBytes)
+        reopened.close(); XCTAssertNil(reopened.current)
+        XCTAssertEqual(reopened.beginOwnerRetirement(), .started)
+        try await eventually("replacement worker drains") { reopened.ownerRetirementStatus.phase == .retired }
     }
 
     @MainActor func testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown() async throws {
