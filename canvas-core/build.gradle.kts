@@ -120,3 +120,14 @@ tasks.register<JavaExec>("runBrushTileCacheCosts") {
     mainClass.set("dev.notecore.canvas.prototype.BrushTileCacheCosts")
     args(rootProject.projectDir.absolutePath)
 }
+
+tasks.register<JavaExec>("runCanonicalIndexBenchmark") {
+    group = "verification"
+    description = "Compare existing exact and broad-phase index candidates on canonical reference ink."
+    dependsOn("jvmTestClasses", generateScaleFixtures)
+    val testCompilation = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(testCompilation.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.canvas.prototype.CanonicalIndexBenchmark")
+    args(rootProject.projectDir.absolutePath, rootProject.file("output/canonical-index-benchmark/result.json").absolutePath)
+    doFirst { rootProject.file("output/canonical-index-benchmark").mkdirs() }
+}

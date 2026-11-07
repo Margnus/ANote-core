@@ -1,0 +1,267 @@
+{
+    "status": "passed",
+    "schema": "canonical-index-candidate-cost-1",
+    "scope": "Desktop JVM reference geometry. Grid is broad phase only. STR rebuild and delta share exact kernel. Exact timings include the actual queryPoint call and result list. Independent broad parity and canonical ordering run outside timing.",
+    "java": "17.0.14+1-b1367.22",
+    "arch": "aarch64",
+    "fixtures": {
+        "S2-ink-dense-page": "22eea352e0ded47f34cabc0c8b543de0126a658377a6ea286cf60130a17c6725",
+        "S9-ink-long-stroke": "49e5298371b35f407815f66e14839522dca2201df654094ed4de675e732c65a2"
+    },
+    "dense_strokes": 1800,
+    "long_stroke_prefix_points": 10000,
+    "queries_per_stage": 71,
+    "long_stroke_exact_anchor_hits_per_stage": 3,
+    "oracle": "Direct canonical-order scan using common geometry, independent of index; no AA/render oracle.",
+    "rows": [
+        {
+            "stage": "initial",
+            "revision": 0,
+            "objects": 1801,
+            "rebuild_source_samples": 190000,
+            "delta_changed_sample_budget": 0,
+            "delta_validates_old_object_metadata": 0,
+            "rebuild_bounds": 1801,
+            "delta_bounds": 1801,
+            "delta_overlay": 0,
+            "delta_tombstones": 0,
+            "delta_old_new_bound_scalar_upper_bytes": 0,
+            "grid_references": 4146,
+            "grid_overflow": 0,
+            "grid_entry_tests": 10990,
+            "rebuild_query_work": {
+                "entry_tests": 9104,
+                "node_tests": 3679,
+                "candidates": 2217,
+                "source_samples": 420100,
+                "hits": 394
+            },
+            "delta_query_work": {
+                "entry_tests": 9104,
+                "node_tests": 3679,
+                "candidates": 2217,
+                "source_samples": 420100,
+                "hits": 394
+            },
+            "rebuild_ns": [
+                1663416,
+                1339541,
+                897000
+            ],
+            "delta_update_ns": [],
+            "rebuild_query_ns": [
+                3628792,
+                3393709,
+                3372167
+            ],
+            "delta_query_ns": [
+                3500292,
+                3672000,
+                3325750
+            ],
+            "grid_broad_only_ns": [
+                651500,
+                682583,
+                385750
+            ],
+            "grid_broad_only_update_ns": []
+        },
+        {
+            "stage": "move",
+            "revision": 1,
+            "objects": 1801,
+            "rebuild_source_samples": 190000,
+            "delta_changed_sample_budget": 3200,
+            "delta_validates_old_object_metadata": 1801,
+            "rebuild_bounds": 1801,
+            "delta_bounds": 1817,
+            "delta_overlay": 16,
+            "delta_tombstones": 0,
+            "delta_old_new_bound_scalar_upper_bytes": 115776,
+            "grid_references": 4155,
+            "grid_overflow": 0,
+            "grid_entry_tests": 9980,
+            "rebuild_query_work": {
+                "entry_tests": 8848,
+                "node_tests": 3679,
+                "candidates": 1882,
+                "source_samples": 391600,
+                "hits": 322
+            },
+            "delta_query_work": {
+                "entry_tests": 9373,
+                "node_tests": 3679,
+                "candidates": 1882,
+                "source_samples": 391600,
+                "hits": 322
+            },
+            "rebuild_ns": [
+                2055042,
+                1580958,
+                1019042
+            ],
+            "delta_update_ns": [
+                140083,
+                155833,
+                80333
+            ],
+            "rebuild_query_ns": [
+                3292750,
+                3219417,
+                3040875
+            ],
+            "delta_query_ns": [
+                3334833,
+                3110292,
+                3208209
+            ],
+            "grid_broad_only_ns": [
+                601791,
+                460166,
+                250541
+            ],
+            "grid_broad_only_update_ns": [
+                29583,
+                57667,
+                67667
+            ]
+        },
+        {
+            "stage": "delete",
+            "revision": 2,
+            "objects": 1785,
+            "rebuild_source_samples": 188400,
+            "delta_changed_sample_budget": 1600,
+            "delta_validates_old_object_metadata": 1801,
+            "rebuild_bounds": 1785,
+            "delta_bounds": 1817,
+            "delta_overlay": 32,
+            "delta_tombstones": 16,
+            "delta_old_new_bound_scalar_upper_bytes": 116288,
+            "grid_references": 4127,
+            "grid_overflow": 0,
+            "grid_entry_tests": 8940,
+            "rebuild_query_work": {
+                "entry_tests": 7931,
+                "node_tests": 3610,
+                "candidates": 1429,
+                "source_samples": 351800,
+                "hits": 229
+            },
+            "delta_query_work": {
+                "entry_tests": 8610,
+                "node_tests": 3679,
+                "candidates": 1429,
+                "source_samples": 351800,
+                "hits": 229
+            },
+            "rebuild_ns": [
+                1424709,
+                1418166,
+                958333
+            ],
+            "delta_update_ns": [
+                204166,
+                124875,
+                67791
+            ],
+            "rebuild_query_ns": [
+                2967291,
+                2699166,
+                2670667
+            ],
+            "delta_query_ns": [
+                2877291,
+                2947333,
+                2759709
+            ],
+            "grid_broad_only_ns": [
+                532625,
+                523208,
+                217875
+            ],
+            "grid_broad_only_update_ns": [
+                21458,
+                82375,
+                11417
+            ]
+        },
+        {
+            "stage": "restore",
+            "revision": 3,
+            "objects": 1801,
+            "rebuild_source_samples": 190000,
+            "delta_changed_sample_budget": 1600,
+            "delta_validates_old_object_metadata": 1785,
+            "rebuild_bounds": 1801,
+            "delta_bounds": 1833,
+            "delta_overlay": 32,
+            "delta_tombstones": 0,
+            "delta_old_new_bound_scalar_upper_bytes": 116800,
+            "grid_references": 4155,
+            "grid_overflow": 0,
+            "grid_entry_tests": 9980,
+            "rebuild_query_work": {
+                "entry_tests": 8848,
+                "node_tests": 3679,
+                "candidates": 1882,
+                "source_samples": 391600,
+                "hits": 322
+            },
+            "delta_query_work": {
+                "entry_tests": 9746,
+                "node_tests": 3679,
+                "candidates": 1882,
+                "source_samples": 391600,
+                "hits": 322
+            },
+            "rebuild_ns": [
+                1594709,
+                2206916,
+                937167
+            ],
+            "delta_update_ns": [
+                145291,
+                135833,
+                62916
+            ],
+            "rebuild_query_ns": [
+                3312666,
+                3081250,
+                3062083
+            ],
+            "delta_query_ns": [
+                3321792,
+                3049834,
+                3150583
+            ],
+            "grid_broad_only_ns": [
+                544416,
+                434625,
+                234750
+            ],
+            "grid_broad_only_update_ns": [
+                28708,
+                38125,
+                16500
+            ]
+        }
+    ],
+    "warmup_rounds": 2,
+    "measured_rounds": 3,
+    "grid_broad_only_build_ns": [
+        1137083,
+        1340625,
+        2814208
+    ],
+    "refusals": [
+        "oversized_source_sample-budget",
+        "delta_one_below_sample-budget",
+        "exact_query_sample-budget",
+        "exact_query_hit-budget",
+        "stale_revision",
+        "overlay_compaction-required"
+    ],
+    "physical_device_verified": false,
+    "c1_complete": false
+}
