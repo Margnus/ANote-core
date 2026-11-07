@@ -1,0 +1,9 @@
+AndroidInternal.kt:3:38: error: cannot access 'class BrushRenderOwnerPoc : Any': it is internal in file.
+import dev.notecore.canvas.prototype.BrushRenderOwnerPoc
+                                     ^^^^^^^^^^^^^^^^^^^
+AndroidInternal.kt:5:17: error: 'public' function exposes its 'internal' parameter type 'BrushRenderOwnerPoc'.
+fun renderOwner(value: BrushRenderOwnerPoc): Any = value
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AndroidInternal.kt:5:24: error: cannot access 'class BrushRenderOwnerPoc : Any': it is internal in file.
+fun renderOwner(value: BrushRenderOwnerPoc): Any = value
+                       ^^^^^^^^^^^^^^^^^^^

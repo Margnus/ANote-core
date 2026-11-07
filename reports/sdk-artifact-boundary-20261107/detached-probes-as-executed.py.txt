@@ -1,0 +1,130 @@
+from pathlib import Path
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+import zipfile
+
+ROOT = Path.cwd()
+WORK = ROOT / 'output/sdk-artifact-boundary'
+RAW = ROOT / 'reports/sdk-artifact-boundary-20261107' / sys.argv[1]
+RAW.mkdir(parents=True, exist_ok=True)
+COMMANDS = []
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def run(label, args, expected=0):
+    args = [str(a) for a in args]
+    result = subprocess.run(args, cwd=WORK, capture_output=True, timeout=240)
+    COMMANDS.append({'label': label, 'argv': args, 'status': result.returncode})
+    (RAW/'commands.json').write_text(json.dumps(COMMANDS, indent=2)+'\n', encoding='utf-8')
+    (RAW/(label+'.log')).write_bytes(result.stdout + result.stderr)
+    assert result.returncode == expected, (label, result.returncode, result.stderr[-4000:].decode())
+    return (result.stdout + result.stderr).decode()
+
+def save(name, value):
+    (RAW/name).write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8')
+
+def android():
+    sdk = Path.home()/'Library/Android/sdk/platforms/android-36/android.jar'
+    java = Path.home()/'Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/java'
+    cache = ROOT/'.gradle-user-home/caches/modules-2/files-2.1'
+    def jar(group, name, version):
+        paths = list((cache/group/name/version).glob('*/'+name+'-'+version+'.jar'))
+        assert len(paths) == 1, paths
+        return paths[0]
+    stdlib = jar('org.jetbrains.kotlin','kotlin-stdlib','2.2.21')
+    jars = [stdlib, *(jar('org.jetbrains.kotlin', 'kotlin-'+name, '2.2.21') for name in
+            ('compiler-embeddable', 'daemon-embeddable', 'script-runtime')),
+            jar('org.jetbrains.kotlin','kotlin-reflect','1.6.10'),
+            jar('org.jetbrains.kotlinx','kotlinx-coroutines-core-jvm','1.8.0'),
+            jar('org.jetbrains','annotations','13.0')]
+    def cp(paths):
+        return os.pathsep.join(str(p) for p in paths)
+    compiler = [java, '-cp', cp(jars), 'org.jetbrains.kotlin.cli.jvm.K2JVMCompiler',
+                '-no-stdlib', '-no-reflect', '-jvm-target', '17']
+    classes = {}
+    artifacts = {}
+    for module in ('shared-core','canvas-core'):
+        aar = ROOT/module/'build/outputs/aar'/(module+'-release.aar')
+        shutil.copy2(aar,RAW/aar.name)
+        with zipfile.ZipFile(aar) as z:
+            manifest = z.read('AndroidManifest.xml').decode()
+            assert 'android:minSdkVersion="26"' in manifest, manifest
+            target = WORK/(module+'-release-classes.jar')
+            target.write_bytes(z.read('classes.jar'))
+            classes[module] = target
+            artifacts[module] = {'aar_sha256':sha(aar),'classes_sha256':sha(target),'entries':z.namelist()}
+            (RAW/(module+'-manifest.xml')).write_text(manifest,encoding='utf-8')
+    shared, canvas = classes.values()
+    both = [shared,canvas,stdlib,sdk]
+    sample = sorted((ROOT/'samples/sketch-host/src/main').rglob('*.kt'))
+    assert sample
+    def compile(label, paths, classpath, flags=(), expected=0):
+        return run(label, [*compiler, '-cp', cp(classpath), '-d', WORK/(label+'.jar'), *flags, *paths], expected)
+    assert 'PointerPhase' in compile('sample-shared-only',sample,[shared,stdlib,sdk],expected=1)
+    compile('sample-two-aars',sample,both)
+    consumer = WORK/'RecoveryConsumer.kt'
+    compile('recovery-consumer',[consumer],both)
+    root = ROOT/'reports/view-pending-process-20261106'
+    checkpoint, = root.glob('process-checkpoint-*/prepare.ncp')
+    expected = checkpoint.with_name('confirmed-final.ncp')
+    original = json.loads((ROOT/'reports/view-pending-process.json').read_text())['evidence_sha256']
+    for p in (checkpoint,expected):
+        assert sha(p) == original[p.relative_to(ROOT).as_posix()]
+    runtime = run('recovery-run',[java,'-cp',cp([WORK/'recovery-consumer.jar',shared,canvas,stdlib]),
+        'dev.notecore.probe.RecoveryConsumerKt',checkpoint,expected])
+    assert 'both checkpoint byte sequences matched' in runtime
+    ports = WORK/'AndroidPorts.kt'
+    refusal = compile('render-opt-in-refusal',[ports],both,expected=1)
+    assert 'Unfrozen NoteCore preview adapter; not a production SDK'.lower() in refusal.lower(), refusal
+    compile('ports-with-opt-in',[ports],both,['-opt-in=dev.notecore.canvas.prototype.ExperimentalAndroidInkFrame'])
+    refusal = compile('internal-render-refusal',[WORK/'AndroidInternal.kt'],both,expected=1)
+    assert 'BrushRenderOwnerPoc' in refusal and 'internal' in refusal, refusal
+    for source in (consumer,ports,WORK/'AndroidInternal.kt'):
+        shutil.copy2(source,RAW/source.name)
+    save('artifacts.json',{'aar':artifacts,'source_files':{p.relative_to(ROOT).as_posix():sha(p) for p in sample},
+        'checkpoint_files':{p.relative_to(ROOT).as_posix():sha(p) for p in (checkpoint,expected)},
+        'compiler_dependencies':{p.name:sha(p) for p in jars},'android_jar_sha256':sha(sdk)})
+
+def apple():
+    sample = sorted((ROOT/'samples/sketch-host-ios/Sources').glob('*.swift'))
+    ports = WORK/'ApplePorts.swift'
+    shutil.copy2(ports,RAW/ports.name)
+    artifacts = {}
+    for kind, sdk_name, triple in (('iosArm64','iphoneos','arm64-apple-ios18.0'),
+                              ('iosSimulatorArm64','iphonesimulator','arm64-apple-ios18.0-simulator')):
+        framework = ROOT/'shared-core/build/bin'/kind/'releaseFramework/NoteCanvasPrototype.framework'
+        binary = framework/'NoteCanvasPrototype'
+        header = framework/'Headers/NoteCanvasPrototype.h'
+        shutil.copy2(header,RAW/(kind+'.h'))
+        shutil.copy2(framework/'Modules/module.modulemap', RAW/(kind+'.modulemap'))
+        projected = WORK/('projected-'+kind)/framework.name
+        shutil.copytree(framework/'Headers',projected/'Headers',dirs_exist_ok=True)
+        shutil.copytree(framework/'Modules',projected/'Modules',dirs_exist_ok=True)
+        audit = run(kind+'-audit',[sys.executable,ROOT/'tools/audit_sdk_type_closure.py',header,
+            '--projected-header',projected/'Headers/NoteCanvasPrototype.h'])
+        shutil.copy2(projected/'Headers/NoteCanvasPrototype.h',RAW/(kind+'-projected.h'))
+        sdk = run(kind+'-sdk',['xcrun','--sdk',sdk_name,'--show-sdk-path']).strip()
+        swift = ['xcrun','--sdk',sdk_name,'swiftc','-sdk',sdk,'-target',triple,
+                 '-module-cache-path',WORK/('swift-cache-'+kind),'-module-name','DetachedSketch']
+        consumer = WORK/(kind+'-linked')
+        run(kind+'-sample-link',[*swift,'-F',framework.parent,'-emit-executable',*sample,'-o',consumer])
+        run(kind+'-full-ports',[*swift,'-F',framework.parent,'-typecheck',ports])
+        run(kind+'-projected-sample',[*swift,'-F',projected.parent,'-typecheck',*sample])
+        refusal = run(kind+'-projected-ports',[*swift,'-F',projected.parent,'-typecheck',ports],expected=1)
+        assert 'cannot find type' in refusal and 'PreviewSaveLedger' in refusal and 'AppleBrushOwnerExperiment' in refusal
+        with zipfile.ZipFile(RAW/(kind+'-framework.zip'),'w',zipfile.ZIP_DEFLATED) as archive:
+            for p in sorted(framework.rglob('*')):
+                if p.is_file():
+                    archive.write(p,p.relative_to(framework.parent))
+        artifacts[kind] = {'binary_sha256':sha(binary),'header_sha256':sha(header),
+            'linked_sample_sha256':sha(consumer),'projected_header_sha256':sha(projected/'Headers/NoteCanvasPrototype.h')}
+    assert artifacts['iosArm64']['header_sha256']==artifacts['iosSimulatorArm64']['header_sha256']
+    save('artifacts.json',{'frameworks':artifacts,'source_files':{p.relative_to(ROOT).as_posix():sha(p) for p in sample}})
+
+if __name__ == '__main__':
+    {'android':android,'apple':apple}[sys.argv[1]]()

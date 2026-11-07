@@ -1,0 +1,153 @@
+[
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "--show-sdk-path"
+    ],
+    "label": "sdk",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosSimulatorArm64",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/projected-iosSimulatorArm64",
+      "-typecheck",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/RecoveryConsumer.swift"
+    ],
+    "label": "projected-recovery",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosSimulatorArm64",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/releaseFramework",
+      "-emit-executable",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/RecoveryConsumer.swift",
+      "-o",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/release-recovery-consumer"
+    ],
+    "label": "link-recovery",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "create",
+      "NoteCoreReleaseConsumer-20261107",
+      "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    ],
+    "label": "create-device",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "boot",
+      "D0D508AF-0229-44C7-ADEA-18C9E44ECCCA"
+    ],
+    "label": "boot",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "bootstatus",
+      "D0D508AF-0229-44C7-ADEA-18C9E44ECCCA",
+      "-b"
+    ],
+    "label": "bootstatus",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "spawn",
+      "D0D508AF-0229-44C7-ADEA-18C9E44ECCCA",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/release-recovery-consumer",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp",
+      "/Users/lixiaofan/StudioProjects/notecore/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp"
+    ],
+    "label": "runtime",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-before-cleanup",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "D0D508AF-0229-44C7-ADEA-18C9E44ECCCA"
+    ],
+    "label": "shutdown",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "delete",
+      "D0D508AF-0229-44C7-ADEA-18C9E44ECCCA"
+    ],
+    "label": "delete",
+    "returncode": 0
+  },
+  {
+    "argv": [
+      "xcrun",
+      "simctl",
+      "list",
+      "devices",
+      "-j"
+    ],
+    "label": "devices-after",
+    "returncode": 0
+  }
+]

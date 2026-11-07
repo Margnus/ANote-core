@@ -1,0 +1,232 @@
+[
+  {
+    "label": "iosArm64-audit",
+    "argv": [
+      "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+      "/Users/lixiaofan/StudioProjects/notecore/tools/audit_sdk_type_closure.py",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h",
+      "--projected-header",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/projected-iosArm64/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosArm64-sdk",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphoneos",
+      "--show-sdk-path"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosArm64-sample-link",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphoneos",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosArm64/releaseFramework",
+      "-emit-executable",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchHostApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchSession.swift",
+      "-o",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/iosArm64-linked"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosArm64-full-ports",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphoneos",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosArm64/releaseFramework",
+      "-typecheck",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/ApplePorts.swift"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosArm64-projected-sample",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphoneos",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/projected-iosArm64",
+      "-typecheck",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchHostApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchSession.swift"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosArm64-projected-ports",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphoneos",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/projected-iosArm64",
+      "-typecheck",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/ApplePorts.swift"
+    ],
+    "status": 1
+  },
+  {
+    "label": "iosSimulatorArm64-audit",
+    "argv": [
+      "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+      "/Users/lixiaofan/StudioProjects/notecore/tools/audit_sdk_type_closure.py",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h",
+      "--projected-header",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/projected-iosSimulatorArm64/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosSimulatorArm64-sdk",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "--show-sdk-path"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosSimulatorArm64-sample-link",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosSimulatorArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/releaseFramework",
+      "-emit-executable",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchHostApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchSession.swift",
+      "-o",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/iosSimulatorArm64-linked"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosSimulatorArm64-full-ports",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosSimulatorArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/shared-core/build/bin/iosSimulatorArm64/releaseFramework",
+      "-typecheck",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/ApplePorts.swift"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosSimulatorArm64-projected-sample",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosSimulatorArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/projected-iosSimulatorArm64",
+      "-typecheck",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchCanvas.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchHostApp.swift",
+      "/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host-ios/Sources/SketchSession.swift"
+    ],
+    "status": 0
+  },
+  {
+    "label": "iosSimulatorArm64-projected-ports",
+    "argv": [
+      "xcrun",
+      "--sdk",
+      "iphonesimulator",
+      "swiftc",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk",
+      "-target",
+      "arm64-apple-ios18.0-simulator",
+      "-module-cache-path",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/swift-cache-iosSimulatorArm64",
+      "-module-name",
+      "DetachedSketch",
+      "-F",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/projected-iosSimulatorArm64",
+      "-typecheck",
+      "/Users/lixiaofan/StudioProjects/notecore/output/sdk-artifact-boundary/ApplePorts.swift"
+    ],
+    "status": 1
+  }
+]

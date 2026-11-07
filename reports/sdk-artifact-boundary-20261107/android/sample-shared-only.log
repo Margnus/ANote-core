@@ -1,0 +1,60 @@
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:11:28: error: unresolved reference 'prototype'.
+import dev.notecore.canvas.prototype.PointerPhase
+                           ^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:35:31: error: cannot access class 'StrokeObject'. Check your module classpath for missing or conflicting dependencies.
+            val stroke = note.stroke(i); val samples = stroke.samples
+                              ^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:35:56: error: cannot access class 'StrokeObject'. Check your module classpath for missing or conflicting dependencies.
+            val stroke = note.stroke(i); val samples = stroke.samples
+                                                       ^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:35:63: error: unresolved reference 'samples'.
+            val stroke = note.stroke(i); val samples = stroke.samples
+                                                              ^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:43:29: error: cannot access class 'StrokeObject'. Check your module classpath for missing or conflicting dependencies.
+            val transform = stroke.transform
+                            ^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:43:36: error: unresolved reference 'transform'.
+            val transform = stroke.transform
+                                   ^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:46:49: error: cannot access class 'StrokeObject'. Check your module classpath for missing or conflicting dependencies.
+            paths += RenderStroke(path, matrix, stroke.brush.argb, stroke.brush.width.toFloat(), x, y, dot)
+                                                ^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:46:56: error: unresolved reference 'brush'.
+            paths += RenderStroke(path, matrix, stroke.brush.argb, stroke.brush.width.toFloat(), x, y, dot)
+                                                       ^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:46:68: error: cannot access class 'StrokeObject'. Check your module classpath for missing or conflicting dependencies.
+            paths += RenderStroke(path, matrix, stroke.brush.argb, stroke.brush.width.toFloat(), x, y, dot)
+                                                                   ^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:46:75: error: unresolved reference 'brush'.
+            paths += RenderStroke(path, matrix, stroke.brush.argb, stroke.brush.width.toFloat(), x, y, dot)
+                                                                          ^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:82:40: error: unresolved reference 'PointerPhase'.
+            MotionEvent.ACTION_DOWN -> PointerPhase.DOWN
+                                       ^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:83:40: error: unresolved reference 'PointerPhase'.
+            MotionEvent.ACTION_MOVE -> PointerPhase.MOVE
+                                       ^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:84:69: error: unresolved reference 'PointerPhase'.
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> PointerPhase.UP
+                                                                    ^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:87:34: error: unresolved reference 'PointerPhase'.
+        val index = if (phase == PointerPhase.DOWN) 0 else event.findPointerIndex(pointer)
+                                 ^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:88:36: error: unresolved reference 'PointerPhase'.
+        if (index < 0 || (phase == PointerPhase.UP && index != event.actionIndex)) return true
+                                   ^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:92:18: error: cannot access class 'PointerPhase'. Check your module classpath for missing or conflicting dependencies.
+        if (note.prepareRealBatch(phase, count) != null) { blockInput(); return true }
+                 ^^^^^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:102:22: error: unresolved reference 'PointerPhase'.
+        if (phase == PointerPhase.DOWN && (xs[0] !in 0.0..note.currentPage.width || ys[0] !in 0.0..note.currentPage.height)) return false
+                     ^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:103:27: error: cannot access class 'PointerPhase'. Check your module classpath for missing or conflicting dependencies.
+        val result = note.offerRealBatch(phase, times.last(), xs, ys, pressures, times)
+                          ^^^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:105:22: error: unresolved reference 'PointerPhase'.
+        if (phase == PointerPhase.DOWN) {
+                     ^^^^^^^^^^^^
+/Users/lixiaofan/StudioProjects/notecore/samples/sketch-host/src/main/java/dev/notecore/sample/sketch/SketchView.kt:113:22: error: unresolved reference 'PointerPhase'.
+        if (phase == PointerPhase.UP) {
+                     ^^^^^^^^^^^^

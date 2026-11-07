@@ -1,0 +1,74 @@
+from pathlib import Path
+import hashlib,json,plistlib,shutil,subprocess,zipfile,sys
+ROOT=Path.cwd(); RAW=ROOT/'reports/sdk-artifact-boundary-20261107/apple-runtime'; RAW.mkdir(parents=True,exist_ok=False)
+WORK=ROOT/'output/sdk-artifact-boundary'; ORIGINAL='7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
+FRAME=ROOT/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def save(p,v):p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+records=[]
+def run(argv,label,timeout=180,allowed=(0,)):
+ r=subprocess.run([str(x) for x in argv],cwd=ROOT,capture_output=True,timeout=timeout)
+ (RAW/(label+'.stdout.log')).write_bytes(r.stdout);(RAW/(label+'.stderr.log')).write_bytes(r.stderr)
+ records.append({'argv':[str(x) for x in argv],'label':label,'returncode':r.returncode});save(RAW/'execution.json',records)
+ assert r.returncode in allowed,(label,r.returncode,r.stderr[-2000:],r.stdout[-2000:])
+ return r.stdout.decode('utf-8')
+def devices(label):return json.loads(run(['xcrun','simctl','list','devices','-j'],label))['devices']
+def find(ds,uid):return next(d for group in ds.values() for d in group if d['udid']==uid)
+def files(folder):return {p.relative_to(folder).as_posix():sha(p) for p in sorted(folder.rglob('*')) if p.is_file()}
+def original():
+ root=Path.home()/'Library/Developer/CoreSimulator/Devices'/ORIGINAL/'data/Containers'; result={'apps':{},'notes':{}}
+ for app in (root/'Bundle/Application').glob('*/*.app'):
+  info=plistlib.loads((app/'Info.plist').read_bytes());bid=info.get('CFBundleIdentifier')
+  if bid in ('dev.notecore.preview','dev.notecore.sample.sketch.ios'):result['apps'][bid]=files(app)
+ for folder in (root/'Data/Application').glob('*'):
+  meta=folder/'.com.apple.mobile_container_manager.metadata.plist'
+  if meta.is_file() and plistlib.loads(meta.read_bytes()).get('MCMMetadataIdentifier')=='dev.notecore.preview':
+   result['notes']={p.name:sha(p) for p in sorted((folder/'Documents/PreviewNotes').glob('*.ncp'))}
+ return result
+before_devices=devices('devices-before');assert find(before_devices,ORIGINAL)['state']=='Shutdown'
+before=original();save(RAW/'original-before.json',before)
+assert set(before['apps'])=={'dev.notecore.preview','dev.notecore.sample.sketch.ios'} and len(before['notes'])==16,'Inspect original offline app/data baseline before proceeding'
+framework=ROOT/'shared-core/build/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework'
+source=WORK/'RecoveryConsumer.swift'
+projected=WORK/'projected-iosSimulatorArm64'
+checkpoint,=(ROOT/'reports/view-pending-process-20261106').glob('process-checkpoint-*/prepare.ncp')
+canonical=checkpoint.with_name('confirmed-final.ncp')
+original_report=json.loads((ROOT/'reports/view-pending-process.json').read_text())['evidence_sha256']
+for p in (checkpoint,canonical):
+ assert sha(p)==original_report[p.relative_to(ROOT).as_posix()]
+framework_sha=sha(framework/'NoteCanvasPrototype')
+assert framework_sha==json.loads((RAW.parent/'apple/artifacts.json').read_text())['frameworks']['iosSimulatorArm64']['binary_sha256']
+shutil.copy2(source,RAW/source.name)
+shutil.copy2(Path(__file__),RAW/'runner-as-executed.py.txt')
+sdk=run(['xcrun','--sdk','iphonesimulator','--show-sdk-path'],'sdk').strip()
+swift=['xcrun','--sdk','iphonesimulator','swiftc','-sdk',sdk,'-target','arm64-apple-ios18.0-simulator',
+       '-module-cache-path',WORK/'swift-cache-iosSimulatorArm64']
+binary=WORK/'release-recovery-consumer'
+run([*swift,'-F',projected,'-typecheck',source],'projected-recovery')
+run([*swift,'-F',framework.parent,'-emit-executable',source,'-o',binary],'link-recovery')
+binary_sha=sha(binary)
+with zipfile.ZipFile(RAW/'recovery-consumer.zip','w',zipfile.ZIP_DEFLATED) as z:
+ z.write(binary,binary.name)
+runtime='com.apple.CoreSimulator.SimRuntime.iOS-27-0';kind='com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro';name='NoteCoreReleaseConsumer-20261107'
+assert not any(d['name']==name for group in before_devices.values() for d in group)
+uid=run(['xcrun','simctl','create',name,kind,runtime],'create-device').strip();save(RAW/'device.json',{'udid':uid,'name':name,'type':kind,'runtime':runtime})
+passed=False;summary={};tree={}
+try:
+ run(['xcrun','simctl','boot',uid],'boot')
+ run(['xcrun','simctl','bootstatus',uid,'-b'],'bootstatus',timeout=300)
+ output=run(['xcrun','simctl','spawn',uid,binary,checkpoint,canonical],'runtime',timeout=120)
+ assert 'both checkpoint byte sequences matched' in output,output
+ save(RAW/'observations.json',{'runtime':runtime,'device_type':kind,'binary_sha256':binary_sha,
+      'framework_sha256':framework_sha,'checkpoint_sha256':sha(checkpoint),'canonical_sha256':sha(canonical),
+      'recovery_budget_denied':2247,'recovery_budget_admitted':2248,'strokes':1,'points':4,'revision':2})
+ passed=True
+finally:
+ current=devices('devices-before-cleanup');d=find(current,uid);assert d['name']==name
+ if d['state']!='Shutdown':run(['xcrun','simctl','shutdown',uid],'shutdown')
+ run(['xcrun','simctl','delete',uid],'delete')
+ after_devices=devices('devices-after');assert not any(d['udid']==uid for group in after_devices.values() for d in group)
+ assert find(after_devices,ORIGINAL)['state']=='Shutdown'
+ after=original();save(RAW/'original-after.json',after);assert after==before,'Original app/notes changed'
+ save(RAW/'cleanup.json',{'temporary_device_deleted':True,'original_device_still_shutdown':True,'original_apps_and_notes_unchanged':True,'test_passed':passed})
+assert sha(binary)==binary_sha
+print('Apple release consumer recovered exact bytes; disposable simulator removed',flush=True)

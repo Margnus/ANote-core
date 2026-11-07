@@ -1,0 +1,131 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :canvas-core
+w: ⚠️ Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, iosArm64Main, iosMain, iosSimulatorArm64Main, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: ⚠️ Invalid Source Set Dependency Across Trees
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+Solution: Please keep dependsOn edges only from one group and remove the others.
+
+
+> Configure project :shared-core
+w: ⚠️ Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':shared-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, iosArm64Main, iosMain, iosSimulatorArm64Main]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: ⚠️ Invalid Source Set Dependency Across Trees
+Kotlin Source Set 'androidInstrumentedTest' can't depend on 'commonTest' as they are from different Source Set Trees.
+Solution: Please remove this dependency edge.
+
+
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preReleaseBuild UP-TO-DATE
+> Task :shared-core:mergeReleaseJniLibFolders
+> Task :shared-core:mergeReleaseNativeLibs NO-SOURCE
+> Task :shared-core:stripReleaseDebugSymbols NO-SOURCE
+> Task :shared-core:generateReleaseResValues
+> Task :shared-core:copyReleaseJniLibsProjectAndLocalJars
+> Task :shared-core:extractDeepLinksForAarRelease
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preReleaseBuild UP-TO-DATE
+> Task :canvas-core:generateReleaseResValues
+> Task :canvas-core:generateReleaseResources
+> Task :canvas-core:packageReleaseResources
+> Task :canvas-core:javaPreCompileRelease
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:generateReleaseResources
+> Task :shared-core:packageReleaseResources
+> Task :canvas-core:parseReleaseLocalResources
+> Task :shared-core:parseReleaseLocalResources
+> Task :shared-core:generateReleaseRFile
+> Task :canvas-core:generateReleaseRFile
+> Task :shared-core:mergeReleaseShaders
+> Task :shared-core:compileReleaseShaders NO-SOURCE
+> Task :shared-core:generateReleaseAssets UP-TO-DATE
+> Task :shared-core:releaseAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:mergeReleaseAssets
+> Task :shared-core:javaPreCompileRelease
+> Task :shared-core:prepareLintJarForPublish
+> Task :shared-core:prepareReleaseArtProfile
+> Task :shared-core:processReleaseManifest
+> Task :shared-core:writeReleaseAarMetadata
+> Task :canvas-core:mergeReleaseJniLibFolders
+> Task :canvas-core:mergeReleaseNativeLibs NO-SOURCE
+> Task :canvas-core:stripReleaseDebugSymbols NO-SOURCE
+> Task :canvas-core:copyReleaseJniLibsProjectAndLocalJars
+> Task :canvas-core:extractDeepLinksForAarRelease
+> Task :canvas-core:mergeReleaseShaders
+> Task :canvas-core:compileReleaseShaders NO-SOURCE
+> Task :canvas-core:generateReleaseAssets UP-TO-DATE
+> Task :canvas-core:releaseAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:mergeReleaseAssets
+> Task :canvas-core:prepareLintJarForPublish
+> Task :canvas-core:prepareReleaseArtProfile
+> Task :canvas-core:processReleaseManifest
+> Task :canvas-core:writeReleaseAarMetadata
+> Task :canvas-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :canvas-core:compileKotlinIosArm64 UP-TO-DATE
+> Task :shared-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :shared-core:compileKotlinIosArm64 UP-TO-DATE
+
+> Task :canvas-core:compileReleaseKotlinAndroid
+w: file:///Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt:172:121 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt:172:132 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :shared-core:linkReleaseFrameworkIosArm64
+> Task :canvas-core:compileReleaseJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibCompileToJarRelease
+> Task :canvas-core:extractReleaseAnnotations
+> Task :canvas-core:mergeReleaseGeneratedProguardFiles
+> Task :canvas-core:mergeReleaseConsumerProguardFiles
+> Task :canvas-core:processReleaseJavaRes
+> Task :canvas-core:mergeReleaseJavaResource
+> Task :canvas-core:syncReleaseLibJars
+> Task :canvas-core:bundleReleaseAar
+> Task :canvas-core:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :shared-core:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :shared-core:compileReleaseKotlinAndroid
+> Task :shared-core:linkReleaseFrameworkIosSimulatorArm64
+> Task :shared-core:extractReleaseAnnotations
+> Task :shared-core:compileReleaseJavaWithJavac NO-SOURCE
+> Task :shared-core:mergeReleaseGeneratedProguardFiles
+> Task :shared-core:mergeReleaseConsumerProguardFiles
+> Task :shared-core:processReleaseJavaRes
+> Task :shared-core:mergeReleaseJavaResource
+> Task :shared-core:syncReleaseLibJars
+> Task :shared-core:bundleReleaseAar
+
+[Incubating] Problems report is available at: file:///Users/lixiaofan/StudioProjects/notecore/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 1s
+57 actionable tasks: 51 executed, 6 up-to-date
