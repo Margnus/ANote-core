@@ -22,6 +22,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var brushPathOnly = false
     private var renderTargetOnly = false
     private var surfaceFramesOnly = false
+    private var surfaceRecovery: Pair<String, String>? = null
     private var inputBatchesOnly = false
     private var titleOnly = false
     private var editOnly = false
@@ -64,6 +65,11 @@ class ViewportInstrumentation : Instrumentation() {
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
         renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
         surfaceFramesOnly = arguments?.getString("notecore_case") == "surface_frames"
+        if (surfaceFramesOnly) {
+            val pending = arguments?.getString("surface_pending_base64")
+            val canonical = arguments?.getString("surface_canonical_base64")
+            if (pending != null && canonical != null) surfaceRecovery = pending to canonical
+        }
         super.onCreate(arguments); start()
     }
     override fun onStart() {
@@ -164,7 +170,11 @@ class ViewportInstrumentation : Instrumentation() {
                 finish(Activity.RESULT_OK, result); return
             }
             if (surfaceFramesOnly) {
-                result.putString("surface_frames",SurfaceFrameHostChecks(this,host).verify())
+                val recovery = surfaceRecovery?.let { (pending, canonical) ->
+                    fun decode(value: String) = android.util.Base64.decode(value, android.util.Base64.DEFAULT).toString(Charsets.UTF_8)
+                    decode(pending) to decode(canonical)
+                }
+                result.putString("surface_frames", SurfaceFrameHostChecks(this, host).verify(recovery))
                 result.putString("surface_status","passed")
                 result.putInt("surface_pid",android.os.Process.myPid())
                 finish(Activity.RESULT_OK,result); return

@@ -69,3 +69,12 @@ PreviewWindowState只持固定UUID、受限documentId/请求意图、原已受�
 新activeInputOperationId只在原input存在时返回原strokeCommand.value，拒绝不变，取消/完成/退休为空，后续DOWN身份不同。View只保留自己DOWN受理后的身份引用，所有校验与续写在原主owner同步进行，没有另建token序列、authority或队列。它不是内容revision、跨线程许可、持久化回执，也不保证平台字符串桥接/活动Path的物理heap额度。App级显式cancelStroke仍可取消当前输入，pending已完成命令的责任不变。
 
 双端原View的合成UIKit/MotionEvent回调证明输入隔离；这不等于系统同时向多个窗口投递触摸、完整窗口导航/配置隔离、所有surface渲染释放或真机触笔验收。来源与原件保护见[报告](../reports/surface-input.json)。
+
+
+## 2026-11-07 API36 原 App 在原生结算等待期间保存待提交笔迹
+
+API36 ARM64 隔离模拟器运行原 `InkSurfaceHost`、`InkCanvasView`、`NoteStore` 和 SurfaceControl。原宿主用例继续验证像素、fallback、有效 fence 观测及释放回执。新分支在实际释放回执后通过仪器暂缓 owner 结算，旧帧仍计费 48,906,240 字节，未释放，未提前发布新帧。
+
+用原 Android worker 产出的同一份四点 checkpoint，由原 Store 接管为待写入副本。输入保留责任为 2248 字节，确认前禁止退出 active owner。旧帧仍计费期间，原 worker 先确认 pending 文件，状态为 `RECOVERY_SAVED`，再确认重复 retry 后的一笔四点、revision 2 规范文件，状态为 `SAVED`。两份磁盘文件都与原证据同字节，输入责任归零。放开旧帧结算后只关闭一次，随后新帧恢复发布。
+
+生产 APK 与 API32 软件 Path 及三进程恢复报告逐字节相同。本轮只改仪器测试，普通进程只验证启动，原 AVD 24 文件哈希一致。API26–32 的选择来自源码，运行证据限定 API32；API35 沿用历史包范围，API36 采用本轮原宿主证据。逻辑结算等待与真机长期未 signal 的 fence 分开记录。完整 C1、真机 M-1/heap/触笔和厂商释放仍是 DEV-041 前置。见[API36报告](../reports/api36-pending-native.json)。

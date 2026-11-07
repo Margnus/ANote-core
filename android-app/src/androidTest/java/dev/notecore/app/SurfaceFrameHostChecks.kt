@@ -10,6 +10,7 @@ import android.view.MotionEvent
 import android.view.View
 import dev.notecore.document.PagedPreviewNotebook
 import dev.notecore.document.PaperKind
+import dev.notecore.document.PreviewRecoveryCodec
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -80,7 +81,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Detached compositor reader did not return") { !store.inkOwnerRetained && store.inkChargedBytes == 0L }
         main { store.stopTestBackend() }
     }
-    fun verify(): String {
+    fun verify(recoveryFiles: Pair<String, String>? = null): String {
         check(android.os.Build.VERSION.SDK_INT >= 33)
         setup()
         eventually("Original app hierarchy never scheduled a complete SurfaceControl frame") { store.inkFramePublications > 0 }
@@ -379,12 +380,19 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         val ambiguousFallback = screenPixel()
         check(kotlin.math.abs(Color.blue(ambiguousFallback)-191)<=4) { "Ambiguous handoff lost complete Path fallback" }
         var savedWhileDeferred = false
+        val recovered = recoveryFiles?.let { PreviewRecoveryCodec.decode(it.first) }
         main {
             releaseAdmitted()
-            note = store.create()
+            note = if (recovered == null) store.create() else store.adopt(OpenedDocument(recovered.root, false, recovered))
             view = InkCanvasView(host,note,{}, { error(it) })
             host.setContentView(InkSurfaceHost(view,store))
-            check(store.save(note.capture()) { _, error -> check(error==null); savedWhileDeferred = true })
+            if (recovered != null) {
+                check(note.hasPendingStroke && note.inputReservedByteCharge == 2248L)
+                check(note.changeVersion == 1L && note.totalStrokeCount == 0 && note.pendingInk()?.samples?.size == 4)
+                check(!store.releaseActive(note))
+                check(note.captureRecovery().encode() == checkNotNull(recoveryFiles).first)
+            }
+            check(store.save(note.captureRecovery()) { _, error -> check(error==null); savedWhileDeferred = true })
         }
         eventually("Deferred release blocked original shared storage worker") { savedWhileDeferred }
         SystemClock.sleep(150) // Delayed owner settlement, not an emulated unsignaled GPU fence.
@@ -395,6 +403,27 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         val nextFallback = screenPixel()
         check(Color.red(nextFallback)>245 && Color.green(nextFallback)>245 && Color.blue(nextFallback)>245) {
             "New document did not retain complete fallback while old pool was held"
+        }
+        if (recoveryFiles != null) {
+            val file = File(directory, "${checkNotNull(recovered).documentId}.ncp")
+            check(file.readText(Charsets.UTF_8) == recoveryFiles.first)
+            var canonicalSaved = false
+            main {
+                check(store.editorPresentation(note).phase == EditorSavePhase.RECOVERY_SAVED)
+                check(store.inkChargedBytes == handoffHeld && nativeCloses == 0)
+                check(note.retryPendingStroke() && note.retryPendingStroke())
+                check(note.changeVersion == 2L && note.totalStrokeCount == 1 && note.pointCount(0) == 4)
+                check(!note.hasPendingStroke && note.inputReservedByteCharge == 0L)
+                check(store.save(note.captureRecovery()) { _, error -> check(error == null); canonicalSaved = true })
+            }
+            eventually("Canonical retry did not save while the original native receipt was held") {
+                canonicalSaved && store.editorPresentation(note).phase == EditorSavePhase.SAVED
+            }
+            check(file.readText(Charsets.UTF_8) == recoveryFiles.second)
+            main {
+                check(store.inkChargedBytes == handoffHeld && store.inkOwnerRetained)
+                check(store.inkFramePublications == 0 && handoffs == 1 && nativeCloses == 0)
+            }
         }
         main { allowSettlement = true }
         eventually("Real release proof did not recover handoff and unblock the new document frame") {
@@ -519,6 +548,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Read-only reconciliation did not finish owner retirement") {
             reconciledRetirement && store.ownerRetirementStatus().workerStopped && store.inkChargedBytes == 0L
         }
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"pending_fallback_first_argb\":$pendingFallbackFirstPixel,\"pending_fallback_observations\":$pendingFallbackObservations,\"startup_no_transient_blank_verified\":false,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"queued_draw_removal_lost_endpoint_without_draw\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"pending_fallback_first_argb\":$pendingFallbackFirstPixel,\"pending_fallback_observations\":$pendingFallbackObservations,\"startup_no_transient_blank_verified\":false,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"queued_draw_removal_lost_endpoint_without_draw\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"pending_and_canonical_saved_during_deferred_release\":${recoveryFiles != null},\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }
