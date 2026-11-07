@@ -1,0 +1,61 @@
+from pathlib import Path
+import hashlib
+import json
+from zipfile import ZipFile
+
+raw=Path('reports/cross-platform-view-checkpoint-20261107')
+work=Path('output/cross-platform-view-checkpoint')
+def load(name):
+    return json.loads((raw/name).read_text(encoding='utf-8'))
+def sha(path):
+    with path.open('rb') as f:
+        return hashlib.file_digest(f,'sha256').hexdigest()
+def write(path,value):
+    path.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+summary=load('summary.json')
+assert (summary['passedTests'],summary['failedTests'],summary['skippedTests'])==(67,0,0)
+cleanup=load('cleanup.json')
+assert cleanup['test_passed'] and cleanup['temporary_device_deleted'] and cleanup['original_apps_and_notes_unchanged']
+assert len(load('original-before.json')['notes'])==16 and len(load('original-before.json')['apps'])==2
+assert load('architecture.json')['status']==load('portability.json')['status']=='passed'
+with ZipFile(raw/'executables.zip') as z:
+    assert z.testzip() is None and any(n.endswith('.xctest/NoteCorePreviewTests') for n in z.namelist())
+parent=load('framework-reuse.json')
+assert not parent['rebuilt'] and sha(Path(parent['archive']))==parent['sha256']
+sources=load('source-at-runtime-start.json')
+sources.update({p:sha(Path(p)) for p in ('tools/check_architecture.py','tools/verify_portable_inputs.py')})
+assert all(sha(Path(p))==v for p,v in sources.items())
+witnesses=load('android-fixture-bindings.json')
+assert len(witnesses)==2 and all(sha(Path(p))==v['sha256'] for p,v in witnesses.items())
+parent_paths=['reports/sdk-typed-app.json',parent['archive'],'reports/view-pending-process.json',*witnesses]
+write(raw/'build-command.json',{
+ 'argv':['xcodebuild','-project','ios-app/NoteCorePreview.xcodeproj','-scheme','NoteCorePreview',
+        '-destination','generic/platform=iOS Simulator','-derivedDataPath',str((work/'DerivedData').resolve()),
+        'CODE_SIGNING_ALLOWED=NO','build-for-testing'],
+ 'framework_rebuilt':False})
+report={
+ 'schema':'android-view-checkpoint-apple-admission-1','status':'passed',
+ 'android_source':'Original API32 Android View input and NoteStore worker, confirmed before force-stop in view-pending-process.json.',
+ 'fixture_bindings':witnesses,
+ 'admission':{
+  'below_limit_bytes':2247,'exact_limit_bytes':2248,'retained_pending_charge_bytes':2248,
+  'charge_basis':{'metadata_bytes':2048,'identity_utf16_units':44,'bytes_per_utf16_unit':2,'samples':4,'bytes_per_sample':28},
+  'below_limit':'Original Apple Model refuses adoption with typed input capacity feedback. The previously open committed note and the Android source bytes remain unchanged.',
+  'exact_limit':'Original Apple file reader/Model opens all four original samples as a single pending command without committing; re-encoded checkpoint is byte-identical.'},
+ 'save_recovery':{
+   'original_worker_receipt':'Apple Model save commits once and original worker emits confirmed canonical file.',
+   'android_canonical_byte_match':True,'second_retry_idempotent':True,'new_apple_owner_reopen':True,
+   'final_strokes':1,'final_points':4,'final_revision':2,'final_pending':False,
+   'apple_process_killed':False},
+ 'verification':{'isolated_original_app_xctest':67,'failures':0,'skips':0,
+                 'framework_reused_without_native_rebuild':True,'product_changes':'Original iOS App maps typed adoption capacity to specific feedback.',
+                 'physical_device_executed':False},
+ 'preservation':{'original_simulator_shutdown':True,'notes_preserved':16,'apps_preserved':2,'temporary_device_deleted':True},
+ 'source_sha256':sources,'parent_receipt_sha256':{p:sha(Path(p)) for p in parent_paths},
+ 'evidence_sha256':{str(p):sha(p) for p in sorted(raw.rglob('*')) if p.is_file()},
+ 'sdk_frozen':False,'c1_complete':False,'dev_041_released':False,'whole_requirements_accepted':0,
+ 'scope':'Cross-platform preview checkpoint bytes from Android View/worker through Apple original file read, budget admission, save and fresh Model in the same iOS simulator process. The prior Android parent records actual process termination; the Apple run covers logical admission and confirmed writes. Physical heap, power-loss durability, native release and final SDK require separate evidence.'
+}
+write(Path('reports/cross-platform-view-checkpoint.json'),report)
+print(len(sources)+len(report['parent_receipt_sha256'])+len(report['evidence_sha256']))

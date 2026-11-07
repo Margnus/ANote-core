@@ -501,6 +501,83 @@ final class PagedHostTests: XCTestCase {
             XCTAssertNil(refused.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), corrupt)
         }
     }
+    @MainActor func testAndroidViewWorkerCheckpointBudgetAndOriginalAppleSave() async throws {
+        // Byte-for-byte artifacts from the Android View -> NoteStore -> process recovery run.
+        let pendingBytes = try XCTUnwrap(Data(base64Encoded: "TkNSRUNPVkVSWQkxCkQJcHJvY2Vzcy1yZWNvdmVyeQlwcm9jZXNzIGNoZWNrcG9pbnQJMQkwCTEKOTMJMjY0CTAwNzAwMDcyMDA2ZjAwNjMwMDY1MDA3MzAwNzMwMDJkMDA3MzAwNjUwMDY1MDA2NDAwMmQwMDZmMDA3MDAwMmQwMDMyCk5DUFJFVklFVwkyCkQJcHJvY2Vzcy1yZWNvdmVyeQlwcm9jZXNzIGNoZWNrcG9pbnQJMQkwCTEKRwlwYWdlCWxheWVyCTU5NS4wCTg0Mi4wCUJMQU5LCTAKRU5ECk5DUFJFVklFVwkyCkQJcHJvY2Vzcy1yZWNvdmVyeQkJMQkxCTAKRwlwYWdlCWxheWVyCTU5NS4wCTg0Mi4wCUJMQU5LCTAKUwlwcm9jZXNzLXNlZWQtaW5rLTMJbGF5ZXIJMQlNT05PTElORQkxCS0xNDMzOTUxMwkyLjUJNAkxLjAJMC4wCTAuMAkxLjAJMC4wCTAuMApQCTEwMC4wCTIwMC4wCTAuMTI1CTEwMDAwMDAKUAkxMTAuMAkyMDUuMAkwLjI1CTEwMDEwMDAKUAkxMjAuMAkyMTAuMAkwLjM3NQkxMDAyMDAwClAJMTMwLjAJMjE1LjAJMC41CTEwMDMwMDAKRU5EClJFQ09WRVJZLUVORAo="))
+        let canonicalBytes = try XCTUnwrap(Data(base64Encoded: "TkNQUkVWSUVXCTIKRAlwcm9jZXNzLXJlY292ZXJ5CXByb2Nlc3MgY2hlY2twb2ludAkxCTEJMgpHCXBhZ2UJbGF5ZXIJNTk1LjAJODQyLjAJQkxBTksJMgpTCXByb2Nlc3Mtc2VlZC1pbmstMwlsYXllcgkxCU1PTk9MSU5FCTEJLTE0MzM5NTEzCTIuNQk0CTEuMAkwLjAJMC4wCTEuMAkwLjAJMC4wClAJMTAwLjAJMjAwLjAJMC4xMjUJMTAwMDAwMApQCTExMC4wCTIwNS4wCTAuMjUJMTAwMTAwMApQCTEyMC4wCTIxMC4wCTAuMzc1CTEwMDIwMDAKUAkxMzAuMAkyMTUuMAkwLjUJMTAwMzAwMApFTkQK"))
+        let dir = directory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let id = "process-recovery", file = dir.appendingPathComponent(id + ".ncp")
+        try pendingBytes.write(to: file)
+        // Original retained command: 2048 metadata bytes, 44 UTF-16 units and 4*28 sample bytes.
+        let charge: Int64 = 2248
+        func budget(_ input: Int64) throws -> DocumentBudget {
+            let creation = DocumentBudget.companion.validated(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+                journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
+                historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: input)
+            XCTAssertNil(creation.failure)
+            return try XCTUnwrap(creation.budget)
+        }
+        let refused = PreviewModel(directory: dir, documentBudget: try budget(charge - 1))
+        refused.create()
+        let original = try XCTUnwrap(refused.current), root = original.snapshot()
+        try await eventually("original empty note is confirmed") { refused.status.hasPrefix("已保存") }
+        var accepted = false
+        refused.openForEditor(id) { _ in accepted = true }
+        try await eventually("pending input budget refusal reaches the owner") {
+            refused.status == "未提交笔迹超过当前恢复容量，原文件仍保留"
+        }
+        XCTAssertFalse(accepted)
+        XCTAssertTrue(refused.current === original); XCTAssertTrue(original.snapshot() === root)
+        XCTAssertEqual(refused.ownerRetirementStatus.pendingWrites, 0)
+        XCTAssertEqual(try Data(contentsOf: file), pendingBytes)
+        refused.close(); XCTAssertNil(refused.current)
+        XCTAssertEqual(refused.beginOwnerRetirement(), .started)
+        try await eventually("refused reader drains") { refused.ownerRetirementStatus.phase == .retired }
+
+        let exact = PreviewModel(directory: dir, documentBudget: try budget(charge))
+        exact.open(id)
+        try await eventually("exact budget admits the complete checkpoint") { exact.current?.hasPendingStroke == true }
+        let note = try XCTUnwrap(exact.current), captured = note.captureRecovery()
+        XCTAssertEqual(note.inputReservedByteCharge, charge); XCTAssertEqual(note.changeVersion, 1)
+        XCTAssertEqual(note.totalStrokeCount, 0)
+        XCTAssertEqual(Data(try captured.encode().utf8), pendingBytes)
+        let samples = try XCTUnwrap(note.pendingInk()).samples
+        XCTAssertEqual(samples.size, 4)
+        for i in Int32(0)..<4 {
+            XCTAssertEqual(samples.x(index: i), 100 + Double(i) * 10)
+            XCTAssertEqual(samples.y(index: i), 200 + Double(i) * 5)
+            XCTAssertEqual(samples.pressure(index: i), (Float(i) + 1) * 0.125)
+            XCTAssertEqual(samples.timeMicros(index: i), (1000 + Int64(i)) * 1000)
+        }
+        XCTAssertEqual(try Data(contentsOf: file), pendingBytes)
+        XCTAssertTrue(exact.save())
+        try await eventually("Apple confirms original worker canonical bytes") {
+            exact.status.hasPrefix("已保存") && exact.ownerRetirementStatus.pendingWrites == 0
+        }
+        XCTAssertEqual(try Data(contentsOf: file), canonicalBytes)
+        XCTAssertTrue(note.retryPendingStroke()); XCTAssertTrue(exact.save())
+        XCTAssertFalse(note.hasPendingStroke); XCTAssertEqual(note.inputReservedByteCharge, 0)
+        XCTAssertEqual(note.totalStrokeCount, 1); XCTAssertEqual(note.changeVersion, 2)
+        XCTAssertTrue(note.stroke(index: 0).samples === samples)
+        XCTAssertEqual(try Data(contentsOf: file), canonicalBytes)
+        exact.close(); XCTAssertNil(exact.current)
+        XCTAssertEqual(exact.beginOwnerRetirement(), .started)
+        try await eventually("writer drains") { exact.ownerRetirementStatus.phase == .retired }
+
+        let reopened = PreviewModel(directory: dir)
+        reopened.open(id)
+        try await eventually("new Apple owner opens canonical bytes") { reopened.current != nil }
+        let committed = try XCTUnwrap(reopened.current)
+        XCTAssertFalse(committed.hasPendingStroke)
+        XCTAssertEqual(committed.totalStrokeCount, 1); XCTAssertEqual(committed.pointCount(index: 0), 4)
+        XCTAssertEqual(Data(try committed.capture().encode().utf8), canonicalBytes)
+        reopened.close(); XCTAssertNil(reopened.current)
+        XCTAssertEqual(reopened.beginOwnerRetirement(), .started)
+        try await eventually("new reader drains") { reopened.ownerRetirementStatus.phase == .retired }
+    }
+
     @MainActor func testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

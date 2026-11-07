@@ -17,6 +17,17 @@ private enum PreparedCatalog { case complete([LocalNote]), capacity }
 
 private enum PreparedExport { case ready(PreviewBackup), capacity }
 
+private enum NotebookAdoptionFailure: Error {
+    case inputCapacity, documentCapacity
+
+    var message: String {
+        switch self {
+        case .inputCapacity: return "未提交笔迹超过当前恢复容量，原文件仍保留"
+        case .documentCapacity: return "笔记超过当前编辑容量，原文件仍保留"
+        }
+    }
+}
+
 struct LocalNote: Identifiable { let id: String; let title: String; let date: Date }
 enum PreviewOwnerRetirementRequest { case started, alreadyRetiring, retired, inputPending, transferPending, saveRejected, windowPending }
 enum PreviewEditorDeparture { case detached, documentClosed, retryRequired, stale }
@@ -334,7 +345,13 @@ final class PreviewModel: ObservableObject {
         guard checkpoint.root === root else { throw CocoaError(.fileReadCorruptFile) }
         let opening = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: UUID().uuidString, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
-        guard let notebook = opening.notebook else { throw CocoaError(.fileReadCorruptFile) }
+        guard let notebook = opening.notebook else {
+            switch opening.failure {
+            case .inputCapacity: throw NotebookAdoptionFailure.inputCapacity
+            case .documentCapacity: throw NotebookAdoptionFailure.documentCapacity
+            default: throw CocoaError(.fileReadCorruptFile)
+            }
+        }
         return notebook
     }
     private func installNotebook(_ notebook: PagedPreviewNotebook, root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot?) {
@@ -494,6 +511,7 @@ final class PreviewModel: ObservableObject {
                     if self.current != nil { self.retireCurrent() }
                     self.installNotebook(notebook, root: captured.root, persisted: retained == nil, recovery: captured)
                 }
+                catch let failure as NotebookAdoptionFailure { self.status = failure.message; return }
                 catch { self.status = "打开失败，原文件仍保留"; return }
                 let note = self.current!
                 self.status = note.hasPendingStroke ? "已恢复未提交笔迹，请点击保存重试提交" : (retained == nil ? "已打开 · \(note.totalStrokeCount) 笔" : "有更改尚未保存，请重试保存")
