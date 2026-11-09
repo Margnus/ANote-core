@@ -89,3 +89,5 @@ internal TextPayloadDraft将上述确认文本/完整UTF16样式范围/逻辑框
 采用这份内容校验作为下一原对象增量的输入边界并结束本有限校验工作，Native编译/语义仍须其自身CI。尚未实现规范文本对象、codec、原子编辑/undo、资源、geometry/hit-test/显示导出或双端IME。OBJ01/02仍未开发/待验收，不能据值对象测试晋升；实际接入出口和原门禁保持上文要求。
 
 原Scene对象族、模块迁移方向、命令/delta、兼容拒绝与完整双端增量的具体接入路线见[文本对象原链路接入设计](文本对象原链路接入设计.md)。当前internal候选所在shared-core不能成为canvas-core的反向依赖。
+
+2026-11-09同一6项内容约束在实际API35 ART独立library-test APK通过，原5笔记保持，且原默认50项宿主选择回归通过；见[ART报告](../reports/text-payload-art/report.json)及其source-binding。只采用值校验的平台子范围；当前Apple/Native下载504失败保留，不用ART代替IME、字体渲染或持久化验收。
