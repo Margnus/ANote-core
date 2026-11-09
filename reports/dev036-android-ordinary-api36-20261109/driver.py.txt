@@ -1,0 +1,113 @@
+import os, subprocess as sp, time, shutil, hashlib, json, tempfile, re
+from pathlib import Path
+from xml.etree import ElementTree as ET
+from PIL import Image
+sdk=Path.home()/'Library/Android/sdk'; adbexe=sdk/'platform-tools/adb'
+out=Path(tempfile.mkdtemp(prefix='notecore-dev036-api36-')); print(out,flush=True)
+root=Path.cwd(); original=root/'.android-avd/NoteCorePreview.avd'
+avdname='NoteCoreDev036Ordinary36'; serial='emulator-5586'; bundle='dev.notecore.preview'
+def sha(p):
+    with p.open('rb') as f: return hashlib.file_digest(f,'sha256').hexdigest()
+def state(): return {p.relative_to(original).as_posix():sha(p) for p in original.rglob('*') if p.is_file()}
+def put(name,data): (out/name).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+assert serial not in sp.check_output([adbexe,'devices']).decode()
+assert not any('qemu-system' in s and 'NoteCorePreview' in s for s in sp.check_output(['ps','-axo','command='],text=True).splitlines())
+before=state(); assert before
+apk=root/'output/recovery-open-budget-20261109/fixed-app.apk'
+expected=json.loads((root/'reports/apple-recovery-open-budget-20261109.json').read_text())['android_api32']['apk_sha256']
+assert sha(apk)==expected
+avds=out/'avds'; avd=avds/(avdname+'.avd'); avd.mkdir(parents=True); user=out/'user'; user.mkdir()
+conf=dict(tuple(s.strip() for s in line.split('=',1)) for line in (original/'config.ini').read_text().splitlines() if '=' in line)
+conf.update({'AvdId':avdname,'avd.ini.displayname':avdname,'image.sysdir.1':str(sdk/'system-images/android-36/google_apis_playstore/arm64-v8a')+'/',
+'tag.id':'google_apis_playstore','tag.display':'Google Play','PlayStore.enabled':'false','hw.cpu.ncore':'2','hw.ramSize':'2048','disk.dataPartition.size':'6442450944'})
+(avd/'config.ini').write_text(''.join(f'{k} = {v}\n' for k,v in conf.items()))
+(avds/(avdname+'.ini')).write_text(f'avd.ini.encoding=UTF-8\npath={avd}\ntarget=android-36\n')
+env={**os.environ,'ANDROID_AVD_HOME':str(avds),'ANDROID_USER_HOME':str(user),'ANDROID_EMULATOR_HOME':str(user)}
+def adb(*args): return sp.check_output([adbexe,'-s',serial,*map(str,args)],timeout=40,stderr=sp.PIPE)
+def sh(*args): return adb('shell',*args).decode().strip()
+def wait(fn,timeout=35):
+    deadline=time.monotonic()+timeout
+    while time.monotonic()<deadline:
+        try:
+            result=fn()
+            if isinstance(result, ET.Element) or result:return result
+        except sp.CalledProcessError: pass
+        time.sleep(1)
+    raise AssertionError('wait expired')
+def xml():
+    sh('uiautomator','dump','/sdcard/dev036.xml')
+    return ET.fromstring(adb('exec-out','cat','/sdcard/dev036.xml'))
+def locate(field,prefix):
+    return next((n for n in xml().iter('node') if n.get(field,'').startswith(prefix) and n.get('package')==bundle),None)
+def bounds(n): return tuple(map(int,re.findall(r'\d+',n.get('bounds'))))
+def tap(text):
+    l,t,r,b=bounds(wait(lambda:locate('text',text)))
+    sh('input','tap',(l+r)//2,(t+b)//2)
+def logs(pid): return adb('logcat','-d','--pid='+pid,'-v','threadtime','-s','NoteCoreRender:D','*:S').decode()
+def pid(): return sh('pidof',bundle)
+def screen(name):
+    p=out/(name+'.png'); p.write_bytes(adb('exec-out','screencap','-p')); return p
+def notes():return sh('run-as',bundle,'find','files','-name','*.ncp').replace('files/preview-notes/','').splitlines()
+def document(name): return adb('exec-out','run-as',bundle,'cat','files/preview-notes/'+name)
+with (out/'emulator.log').open('wb') as log:
+ p=sp.Popen([sdk/'emulator/emulator','-avd',avdname,'-port','5586','-no-window','-no-audio','-no-snapshot','-no-boot-anim','-gpu','swiftshader_indirect','-memory','2048','-cores','2'],env=env,stdout=log,stderr=sp.STDOUT)
+try:
+ wait(lambda:p.poll() is None and sh('getprop','sys.boot_completed')=='1',260)
+ assert sh('getprop','ro.boot.qemu.avd_name')==avdname
+ properties={k:sh('getprop',k) for k in ('ro.build.version.sdk','ro.product.cpu.abi','ro.build.fingerprint')}
+ assert properties['ro.build.version.sdk']=='36' and properties['ro.product.cpu.abi']=='arm64-v8a'
+ print(properties,flush=True)
+ assert 'Success' in adb('install',apk).decode()
+ remote=sh('pm','path',bundle).removeprefix('package:')
+ assert hashlib.sha256(adb('exec-out','cat',remote)).hexdigest()==expected
+ assert bundle+'.test' not in sh('pm','list','packages',bundle)
+ sh('input','keyevent','KEYCODE_WAKEUP'); sh('wm','dismiss-keyguard')
+ assert 'Status: ok' in sh('am','start','-W','-n',bundle+'/dev.notecore.app.MainActivity')
+ first=pid(); assert first and not notes()
+ tap('新建')
+ box=bounds(wait(lambda:locate('content-desc','手写画布')))
+ wait(lambda:'frame-scheduled' in logs(first))
+ blank=screen('blank')
+ l,t,r,b=box; x1=l+(r-l)*38//100; y=t+(b-t)*45//100; x2=l+(r-l)*62//100
+ sh('input','swipe',x1,y,x2,y+40,500)
+ wait(lambda:locate('content-desc','手写画布，1笔'))
+ tap('保存')
+ name,=wait(notes); saved=wait(lambda: (data if b'\nS\t' in (data:=document(name)) else None))
+ (out/'saved.ncp').write_bytes(saved)
+ wait(lambda:logs(first).count('frame-scheduled')>=2)
+ drawn=screen('drawn')
+ sf=sh('dumpsys','SurfaceFlinger','--list')
+ layers=[s for s in sf.splitlines() if 'NoteCore-static-ink' in s]; assert layers
+ (out/'surface-layers.txt').write_text('\n'.join(layers)+'\n')
+ tap('返回')
+ wait(lambda:logs(first).strip().endswith('owner-drained charged=0'))
+ assert document(name)==saved
+ sh('am','force-stop',bundle)
+ assert 'Status: ok' in sh('am','start','-W','-n',bundle+'/dev.notecore.app.MainActivity')
+ second=pid(); assert first!=second and second
+ tap('未命名笔记')
+ wait(lambda:locate('content-desc','手写画布，1笔'))
+ wait(lambda:'frame-scheduled' in logs(second))
+ reopened=screen('reopened')
+ tap('返回'); wait(lambda:logs(second).strip().endswith('owner-drained charged=0'))
+ assert document(name)==saved
+ for i in (first,second):
+    trace=logs(i)
+    (out/f'render-{i}.txt').write_text(trace)
+    assert trace.count('frame-scheduled') and trace.count('release-receipt') and trace.count('source-released') and trace.strip().endswith('owner-drained charged=0')
+ crop=(x1-12,y-12,x2+12,y+52)
+ masks=[]
+ for image in (blank,drawn,reopened):
+    masks.append([max(pixel)<145 for pixel in Image.open(image).convert('RGB').crop(crop).getdata()])
+ assert sum(masks[0])==0 and sum(masks[1])>30 and sum(masks[2])>30
+ assert sum(a and b for a,b in zip(masks[1],masks[2])) / sum(a or b for a,b in zip(masks[1],masks[2])) > .95
+ put('observations.json',{'apk_sha256':expected,'platform':properties,'pids':[int(first),int(second)],'crop':crop,'dark_pixel_counts':list(map(sum,masks)),'saved_sha256':hashlib.sha256(saved).hexdigest()})
+ print('Ordinary input, saved reopen, compositor and retirement checks passed',flush=True)
+finally:
+ if p.poll() is None:
+    p.terminate()
+    try:p.wait(timeout=20)
+    except sp.TimeoutExpired:p.kill();p.wait()
+ shutil.rmtree(avds);shutil.rmtree(user)
+ assert state()==before
+ put('cleanup.json',{'isolated_avd_removed':True,'original_avd_files_unchanged':len(before)})

@@ -1,0 +1,77 @@
+{
+  "status": "passed",
+  "core": "d38561957d8c058adefdd5f415dd2ac49062da60",
+  "date": "2026-11-09",
+  "scope": "Ordinary debug App only, API36 ARM64 simulator. ADB system input, SurfaceControl schedule logs, SurfaceFlinger layer and compositor screenshots, save/normal close and completed-write force-stop/reopen. No independent presentation fence or physical heap, vendor, stylus, or power-loss result.",
+  "apk_sha256": "1d81ff3f3411c3df5890c237a6219f977cd9eb446491b3b5ef798faea9650705",
+  "platform": {
+    "ro.build.version.sdk": "36",
+    "ro.product.cpu.abi": "arm64-v8a",
+    "ro.build.fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys"
+  },
+  "pids": [
+    2029,
+    4055
+  ],
+  "crop": [
+    405,
+    1288,
+    674,
+    1352
+  ],
+  "dark_pixel_counts": [
+    0,
+    604,
+    604
+  ],
+  "saved_sha256": "167308d090f1d10810d3655d611f78a2b3cb39a6da3db07d6cb74636cbe0b0bb",
+  "render_epochs": [
+    {
+      "pid": 2029,
+      "event_counts": {
+        "frame-scheduled": 2,
+        "release-receipt": 2,
+        "source-released": 2,
+        "owner-drained": 2
+      },
+      "max_scheduled_logical_bytes": 19487104
+    },
+    {
+      "pid": 4055,
+      "event_counts": {
+        "frame-scheduled": 1,
+        "release-receipt": 1,
+        "source-released": 1,
+        "owner-drained": 1
+      },
+      "max_scheduled_logical_bytes": 19487104
+    }
+  ],
+  "canonical_pages": 1,
+  "canonical_strokes": 1,
+  "canonical_point_rows": 41,
+  "matched_build_source_inputs": 218,
+  "build_source_manifest_sha256": "cc758b43091ed0664ca8ef1fbabc804927aa6ac5e11471bd5b36638acb289834",
+  "cleanup": {
+    "isolated_avd_removed": true,
+    "original_avd_files_unchanged": 24
+  },
+  "fixture_attempts_before_ordinary_run": [
+    "pm path absent-package exit code mishandled",
+    "UIAutomator XML leaf element truthiness caused tap wait to expire"
+  ],
+  "c1_complete": false,
+  "dev041_gate_open": false,
+  "evidence_sha256": {
+    "reports/dev036-android-ordinary-api36-20261109/blank.png": "63a3a4f10acde1192f153be6fd2a2e4911f5a5776565766b31b09354f11b240a",
+    "reports/dev036-android-ordinary-api36-20261109/cleanup.json": "b032d29310d3b5b1c3cafa90d90d193db4d961b3ca6fe687489b07b1fc3fa7ce",
+    "reports/dev036-android-ordinary-api36-20261109/drawn.png": "5d435e674e7bb377af0810ce421ecc70e1499e185af0b3ffcc9ee43972bdf7d2",
+    "reports/dev036-android-ordinary-api36-20261109/driver.py.txt": "abf31c943757c25926763e22b34b9eaca7215299dd70528bc3e8e05a848a55e4",
+    "reports/dev036-android-ordinary-api36-20261109/observations.json": "442c3b1390b4ddd21801676a0a19e86b990d026103bb1197bb22e602a9964c80",
+    "reports/dev036-android-ordinary-api36-20261109/render-2029.txt": "0eeb1ef68956c75c6a1c1cc83d0496c20a73f4b1d2e1ca61512e6b41cb77c1e7",
+    "reports/dev036-android-ordinary-api36-20261109/render-4055.txt": "7bdc81946f624fcad396afed6e3b2b24f15ede3916b34940e8a672a9ec03f057",
+    "reports/dev036-android-ordinary-api36-20261109/reopened.png": "8ceeb0d7cf435e04fe454ded0d092f42ee1a5c082eb8545b829f00b0192dd43f",
+    "reports/dev036-android-ordinary-api36-20261109/saved.ncp": "167308d090f1d10810d3655d611f78a2b3cb39a6da3db07d6cb74636cbe0b0bb",
+    "reports/dev036-android-ordinary-api36-20261109/surface-layers.txt": "7cc160e6858cd2c47548428fd40d8f5a775a61da2b02dc1155823781289c6d96"
+  }
+}
