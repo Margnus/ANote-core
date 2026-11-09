@@ -20,6 +20,7 @@ class DocumentOrderInstrumentation : Instrumentation() {
                 "document-order" -> arrayOf(ObjectOrderRulesTest::class.java, ObjectOrderAuthorityTest::class.java,
                     DocumentHistoryTest::class.java, DocumentAuthorityTest::class.java, RetiredEditingStateTest::class.java)
                 "text-payload" -> arrayOf(TextPayloadDraftTest::class.java)
+                "document-reader" -> arrayOf(PreviewDocumentReaderTest::class.java, PreviewRecoveryReaderTest::class.java)
                 else -> error("Unknown document test suite: $suite")
             }
             val result = JUnitCore.runClasses(*selected)

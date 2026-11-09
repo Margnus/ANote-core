@@ -23,9 +23,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--adb', required=True)
     parser.add_argument('--output', default='build/document-order-art')
-    parser.add_argument('--suite', choices=('document-order', 'text-payload'), default='document-order')
+    parser.add_argument('--suite', choices=('document-order', 'text-payload', 'document-reader'), default='document-order')
     args = parser.parse_args()
-    suites = SUITES if args.suite == 'document-order' else ('TextPayloadDraftTest',)
+    suites = {'document-order': SUITES, 'text-payload': ('TextPayloadDraftTest',),
+              'document-reader': ('PreviewDocumentReaderTest', 'PreviewRecoveryReaderTest')}[args.suite]
     out = ROOT/args.output
     out.mkdir(parents=True, exist_ok=False)  # Never overwrite a previous baseline or build/run evidence.
     def adb(*command):

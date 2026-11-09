@@ -25,7 +25,7 @@ data class Affine2D(
     val c: Double = 0.0, val d: Double = 1.0,
     val tx: Double = 0.0, val ty: Double = 0.0,
 ) {
-    init { require(listOf(a, b, c, d, tx, ty).all { it.isFinite() }) }
+    init { require(a.isFinite() && b.isFinite() && c.isFinite() && d.isFinite() && tx.isFinite() && ty.isFinite()) }
 
     fun map(point: PointD) = PointD(a * point.x + c * point.y + tx, b * point.x + d * point.y + ty)
 
