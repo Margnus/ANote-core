@@ -1,0 +1,33 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :canvas-core
+w: ⚠️ Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[iosArm64Main, iosMain, iosSimulatorArm64Main, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:downloadKotlinNativeDistribution
+> Task :canvas-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :canvas-core:compileKotlinIosArm64
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :shared-core:compileKotlinIosArm64
+
+> Task :shared-core:linkDebugFrameworkIosArm64
+w: The number of threads 4 is more than the number of processors 3
+
+[Incubating] Problems report is available at: file:///Users/runner/work/ANote-core/ANote-core/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 2m 7s
+7 actionable tasks: 5 executed, 2 up-to-date
