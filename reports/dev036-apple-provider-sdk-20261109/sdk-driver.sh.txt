@@ -1,0 +1,37 @@
+#!/bin/bash
+set -euo pipefail
+cd /Users/lixiaofan/StudioProjects/notecore
+out="$(mktemp -d /tmp/notecore-dev036-sdk.XXXXXX)"
+echo "$out"
+cat >"$out/AppPorts.swift" <<'SWIFT'
+import NoteCanvasPrototype
+
+func checkTarget(_ checkpoint: PagedPreviewSnapshot, _ budget: DocumentBudget) -> PreviewOpenFailure? {
+    ApplePreviewEditorAdmission.shared.failure(snapshot: checkpoint, budget: budget)
+}
+func savePort(_ value: PreviewSaveLedger) -> PreviewSaveLedger { value }
+func renderPort(_ value: AppleBrushOwnerExperiment) -> AppleBrushOwnerExperiment { value }
+SWIFT
+for kind in iosArm64 iosSimulatorArm64; do
+  if [[ "$kind" == iosArm64 ]]; then sdk=iphoneos; target=arm64-apple-ios17.0
+  else sdk=iphonesimulator; target=arm64-apple-ios17.0-simulator; fi
+  full="$PWD/shared-core/build/bin/$kind/releaseFramework"
+  fw="$full/NoteCanvasPrototype.framework"
+  tmp="$out/$kind"
+  proj="$tmp/NoteCanvasPrototype.framework"
+  mkdir -p "$proj/Headers" "$proj/Modules"
+  cp "$fw/Modules/module.modulemap" "$proj/Modules/"
+  python3 tools/audit_sdk_type_closure.py "$fw/Headers/NoteCanvasPrototype.h" \
+    --projected-header "$proj/Headers/NoteCanvasPrototype.h" > "$tmp/closure.json"
+  sdk_path="$(xcrun --sdk "$sdk" --show-sdk-path)"
+  swift=(xcrun --sdk "$sdk" swiftc -sdk "$sdk_path" -target "$target" -module-cache-path "$tmp/cache" -module-name DetachedSketch)
+  "${swift[@]}" -F "$full" -emit-executable samples/sketch-host-ios/Sources/*.swift -o "$tmp/DetachedSketch" > "$tmp/full-consumer.log" 2>&1
+  "${swift[@]}" -F "$full" -typecheck "$out/AppPorts.swift" > "$tmp/full-ports.log" 2>&1
+  "${swift[@]}" -F "$tmp" -typecheck samples/sketch-host-ios/Sources/*.swift > "$tmp/projected-consumer.log" 2>&1
+  if "${swift[@]}" -F "$tmp" -typecheck "$out/AppPorts.swift" > "$tmp/projected-ports.log" 2>&1; then exit 2; fi
+  for symbol in ApplePreviewEditorAdmission PreviewSaveLedger AppleBrushOwnerExperiment; do
+    rg "cannot find .*'$symbol' in scope" "$tmp/projected-ports.log"
+  done
+  shasum -a 256 "$fw/Headers/NoteCanvasPrototype.h" "$fw/NoteCanvasPrototype" "$proj/Headers/NoteCanvasPrototype.h" "$tmp/DetachedSketch" > "$tmp/artifacts.sha256"
+done
+cmp shared-core/build/bin/{iosArm64,iosSimulatorArm64}/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h

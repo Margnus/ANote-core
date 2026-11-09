@@ -1,0 +1,39 @@
+#!/bin/bash
+set -euo pipefail
+cd /Users/lixiaofan/StudioProjects/notecore
+out="$(mktemp -d /tmp/notecore-dev036-provider.XXXXXX)"
+echo "$out"
+dd=/tmp/notecore-01a1c0b0-fixed/DerivedData
+app="$dd/Build/Products/Debug-iphonesimulator/NoteCorePreview.app"
+actual="$(shasum -a 256 "$app/NoteCorePreview" | cut -d' ' -f1)"
+expected="$(python3 -c 'import json; print(json.load(open("reports/apple-recovery-open-budget-20261109.json"))["fixed"]["app_executable_sha256"])')"
+test "$actual" = "$expected"
+echo "$actual" > "$out/app.sha256"
+device="$(xcrun simctl create 'NoteCore DEV036 provider evidence' com.apple.CoreSimulator.SimDeviceType.iPad-Air-11-inch-M4 com.apple.CoreSimulator.SimRuntime.iOS-27-0)"
+cleanup() {
+  if [[ -n "${job:-}" ]] && kill -0 "$job" 2>/dev/null; then kill -TERM "$job" || :; fi
+  xcrun simctl shutdown "$device" || :
+  xcrun simctl delete "$device"
+}
+trap cleanup EXIT
+echo "$device" > "$out/device.txt"
+xcrun simctl boot "$device"
+xcrun simctl bootstatus "$device" -b > "$out/boot.log"
+xcodebuild -project ios-app/NoteCorePreview.xcodeproj -scheme NoteCorePreview -configuration Debug \
+  -destination "platform=iOS Simulator,id=$device" -parallel-testing-enabled NO -collect-test-diagnostics never \
+  -derivedDataPath "$dd" CODE_SIGNING_ALLOWED=NO -only-testing:NoteCorePreviewUITests test-without-building \
+  > "$out/xcodebuild.log" 2>&1 &
+job=$!
+for ((i=0;i<240;i++)); do
+  if rg -q "testTwoPageInkHistoryBackgroundSaveAndProcessReopen\]' passed" "$out/xcodebuild.log"; then break; fi
+  kill -0 "$job" 2>/dev/null || break
+  sleep 2
+done
+rg "testTwoPageInkHistoryBackgroundSaveAndProcessReopen\]' (passed|failed)" "$out/xcodebuild.log"
+data="$(xcrun simctl get_app_container "$device" dev.notecore.preview data)"
+find "$data/Documents" -type f -name '*.ncp' -exec cp {} "$out/ordinary.ncp" \;
+installed="$(xcrun simctl get_app_container "$device" dev.notecore.preview app)"
+test "$(shasum -a 256 "$installed/NoteCorePreview" | cut -d' ' -f1)" = "$expected"
+xcrun simctl spawn "$device" log show --last 30m --info --style ndjson \
+  --predicate 'process == "NoteCorePreview" AND eventMessage BEGINSWITH "NOTECORE_RENDER "' > "$out/render.ndjson"
+wc -l "$out/render.ndjson"

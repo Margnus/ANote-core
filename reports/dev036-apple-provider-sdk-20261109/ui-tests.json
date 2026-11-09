@@ -1,0 +1,59 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "92B34063-6EB3-443D-B639-81FB807703EC",
+      "deviceName" : "NoteCore DEV036 provider evidence",
+      "modelName" : "iPad Air 11-inch (M4)",
+      "osBuildNumber" : "24A434",
+      "osVersion" : "27.0",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "children" : [
+                    {
+                      "name" : "Update the Info.plist: Support for all orientations will soon be required.",
+                      "nodeType" : "Runtime Warning"
+                    }
+                  ],
+                  "duration" : "1分钟39秒",
+                  "durationInSeconds" : 99.807098031044,
+                  "name" : "testTwoPageInkHistoryBackgroundSaveAndProcessReopen()",
+                  "nodeIdentifier" : "PreviewJourneyUITests/testTwoPageInkHistoryBackgroundSaveAndProcessReopen()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewUITests/PreviewJourneyUITests/testTwoPageInkHistoryBackgroundSaveAndProcessReopen",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PreviewJourneyUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewUITests/PreviewJourneyUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "NoteCorePreviewUITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "NoteCorePreview",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

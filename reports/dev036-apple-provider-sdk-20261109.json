@@ -1,0 +1,107 @@
+{
+  "status": "passed",
+  "core": "8203b943687e551e16d8ad8f890cf194e7a69400",
+  "date": "2026-11-09",
+  "ordinary_preview": {
+    "environment": "ARM64 iPad Air 11-inch (M4), iOS 27.0 Simulator, Xcode 27.1",
+    "debug_executable_sha256": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
+    "ui_test_passed": 1,
+    "strokes_per_page": [
+      2,
+      1
+    ],
+    "render_epochs": [
+      {
+        "pid": 6965,
+        "events": 46,
+        "presented": 14,
+        "source_releases": 14,
+        "owner_settlements": 14,
+        "last_event": "NOTECORE_RENDER owner-drained charged=0",
+        "presented_dimensions": [
+          "w=1592 h=1167",
+          "w=1592 h=1801"
+        ],
+        "peak_frame_logical_charge": 34406304
+      },
+      {
+        "pid": 7267,
+        "events": 7,
+        "presented": 2,
+        "source_releases": 2,
+        "owner_settlements": 2,
+        "last_event": "NOTECORE_RENDER owner-drained charged=0",
+        "presented_dimensions": [
+          "w=1592 h=1801"
+        ],
+        "peak_frame_logical_charge": 34406304
+      }
+    ],
+    "scope": "Existing ordinary UI test, actual DEBUG UIKit presentation and PID-specific provider release and owner settlement. Logical charge from logged frames only; no per-frame identity pairing or physical heap measure."
+  },
+  "apple_sdk": {
+    "targets": {
+      "iosArm64": {
+        "full_header_sha256": "b680d02f7271fb26a8fbfa404211bc1994e86475907364c0b40876ee2733e92f",
+        "binary_sha256": "072baa8319ea684a4336d302e8eb950be4708a07a9c3c7754b92bd9d4993fa15",
+        "projected_header_sha256": "ebd76bba27d3e136c0bba285e140187c83d3f952063b3a6d87d636edc10747f8",
+        "linked_sketch_sha256": "98302d0597249ea577d1965c5b55b45ead336cd5665467e6f005841b59764188",
+        "full_consumer_linked": true,
+        "full_app_ports_typechecked": true,
+        "projected_consumer_typechecked": true,
+        "projected_app_ports_refused": [
+          "ApplePreviewEditorAdmission",
+          "PreviewSaveLedger",
+          "AppleBrushOwnerExperiment"
+        ],
+        "selected_types": 49,
+        "declared_types": 262
+      },
+      "iosSimulatorArm64": {
+        "full_header_sha256": "b680d02f7271fb26a8fbfa404211bc1994e86475907364c0b40876ee2733e92f",
+        "binary_sha256": "123a0d6497fdd442e704c10738808921afed883ee1b70cbfb9f70cc7717a95b2",
+        "projected_header_sha256": "ebd76bba27d3e136c0bba285e140187c83d3f952063b3a6d87d636edc10747f8",
+        "linked_sketch_sha256": "c2eca4bc6bd6dfb1b5355844eb873752af85d7da3d3d3242e895ca122c9f1309",
+        "full_consumer_linked": true,
+        "full_app_ports_typechecked": true,
+        "projected_consumer_typechecked": true,
+        "projected_app_ports_refused": [
+          "ApplePreviewEditorAdmission",
+          "PreviewSaveLedger",
+          "AppleBrushOwnerExperiment"
+        ],
+        "selected_types": 49,
+        "declared_types": 262
+      }
+    },
+    "parsed_export_difference_from_nov07": [
+      "+ NCPApplePreviewEditorAdmission"
+    ],
+    "scope": "External Swift link/typecheck against actual local release frameworks and typecheck against a projected header. Full frameworks still expose App ports; no public distribution or ABI freeze.",
+    "diagnostics": "Retained compiler error lines; source excerpts omitted."
+  },
+  "source_sha256": {
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "87c6701113b07a98d250ac2b5c198a8a282229d0c4875527a90bc8af563de32b",
+    "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "2cfe22f596bd2da0b85d315b90d32a762c6bda11bb004578765dea83724ba102",
+    "ios-app/NoteCorePreviewUITests/PreviewJourneyUITests.swift": "f178d8f39d4a664a22b5e7289915d65eb11f7e78a622e76934dc4a67ea7314ed",
+    "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewEditorAdmission.kt": "dd2fa3b7f0718b000cbd7c6f290754e6dd97582ae10b71af49367575532117f2",
+    "tools/audit_sdk_type_closure.py": "58be2a1ea4436eaca90c5f4794de79b48d9a471b915ad5ee08b61e96ebf7532d",
+    "tools/verify_ios_preview_ui.py": "d9754a51034c7bc106634372b673dcf73167cfd0da99730784710c88b558aab2",
+    "samples/sketch-host-ios/Sources/SketchCanvas.swift": "0d0e7653db5a88f91a63a989a0a22ffdb754fa68eba35de2a8df7998d904d9b2",
+    "samples/sketch-host-ios/Sources/SketchHostApp.swift": "4f752330ace61daa6624a580c554965d667e3909b1e1a36195c062858135c87c",
+    "samples/sketch-host-ios/Sources/SketchSession.swift": "27a718cf0e7364cd537e8623fe4ec66c9c86b34541ad5dfbcb8d3c50ac49157e"
+  },
+  "evidence_sha256": {
+    "reports/dev036-apple-provider-sdk-20261109/AppPorts.swift": "ada7fecb0d3abc13bad01c9638851d58cfcbe03d2e9c4efc88bd615f9bce69f8",
+    "reports/dev036-apple-provider-sdk-20261109/iosArm64-projected-ports.txt": "9dfb34273446b4d6bd03179741eeeb8a05022fd18c45ded0a2ac0c95ad21776f",
+    "reports/dev036-apple-provider-sdk-20261109/iosSimulatorArm64-projected-ports.txt": "9dfb34273446b4d6bd03179741eeeb8a05022fd18c45ded0a2ac0c95ad21776f",
+    "reports/dev036-apple-provider-sdk-20261109/ordinary.ncp": "636016f46c4d7c0aed2943da41f39e588b52eb7b3075f169126e0ee3e1d350cc",
+    "reports/dev036-apple-provider-sdk-20261109/provider-driver.sh.txt": "5448ffdef419d6c927cdc79575f46a081784aeef6ed0c274d9ad7d9d2d5c3fee",
+    "reports/dev036-apple-provider-sdk-20261109/render.ndjson": "3b90aa02f4c7ac5bf85520590c05d2334f89ce0bb49ed0f74f972a297e09ad19",
+    "reports/dev036-apple-provider-sdk-20261109/sdk-driver.sh.txt": "3a87d70b6a6d6cd9fbcf1863a553a7bd79602231e3b576d87d2366285876754b",
+    "reports/dev036-apple-provider-sdk-20261109/ui-summary.json": "a1595b506d0922fe6273989502cdd1b03bc0a46742885fe8b9d13a2d5e34ca4f",
+    "reports/dev036-apple-provider-sdk-20261109/ui-tests.json": "122f14811455231c1486a8f5b7c24333178bde3c2dd0882dcddb6e5015c49507"
+  },
+  "c1_complete": false,
+  "dev041_gate_open": false
+}
