@@ -87,3 +87,5 @@ internal TextPayloadDraft将上述确认文本/完整UTF16样式范围/逻辑框
 6项共同反例/预算/所有权测试通过，JVM577零失败；任务执行/UP-TO-DATE范围及源码指纹见[报告](../reports/text-payload-draft/report.json)。草案version1、字体请求128 UTF16单位限制及logicalByteCharge仅内部准入候选，不是冻结schema/heap或产品上限。调用者必须提供已确认文字与调用期间稳定的run列表；校验器无法区分任意String是否还在IME composing。
 
 采用这份内容校验作为下一原对象增量的输入边界并结束本有限校验工作，Native编译/语义仍须其自身CI。尚未实现规范文本对象、codec、原子编辑/undo、资源、geometry/hit-test/显示导出或双端IME。OBJ01/02仍未开发/待验收，不能据值对象测试晋升；实际接入出口和原门禁保持上文要求。
+
+原Scene对象族、模块迁移方向、命令/delta、兼容拒绝与完整双端增量的具体接入路线见[文本对象原链路接入设计](文本对象原链路接入设计.md)。当前internal候选所在shared-core不能成为canvas-core的反向依赖。
