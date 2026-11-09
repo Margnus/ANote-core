@@ -1,0 +1,24 @@
+{
+  "status": "jvm_passed_native_pending",
+  "new_checks": [
+    "mixedUnicodeAndCompleteStylesArePreservedWithoutNormalizationOrFontResolution[jvm]",
+    "gapsOverlapsReversedEmptyAndOutOfRangeRunsNeverUseImplicitDefaults[jvm]",
+    "exactLogicalBudgetAdmitsAndEachSmallerCapacityRefusesWholeInput[jvm]",
+    "unknownVersionInvalidBoxAndInvalidStylesHaveExplicitRefusal[jvm]",
+    "malformedUnicodeAndSplitSurrogateRangeAreRejectedWithoutPartialPayload[jvm]",
+    "callerListMutationCannotChangeAcceptedPayloadAndEmptyTextKeepsInsertionStyle[jvm]"
+  ],
+  "total_jvm_tests": 577,
+  "scope": "Internal immutable draft text payload validation only; no scene object, codec, command/history, resource/font resolution, IME, App or storage consumer. Does not identify composing text. Logical budget is not heap or a product limit.",
+  "task_reuse": "First valid build executed shared-core tests; final comment-only source build reused test bytecode/results. canvas-core tests UP-TO-DATE in both. Initial invocation before either log failed before tests because PYTHON_BIN was unset; final process used C:/Python314/python.exe.",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/TextPayloadDraft.kt": "978c52c8a0c5091b1459556fc9d9cd5016081cce343147a6d813dc7cc8797ac3",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/TextPayloadDraftTest.kt": "c1467829c08ddc02293098464be467336cadf20153dbee9f4105c161e3853d9e",
+    "shared-core/build.gradle.kts": "ef9b922340160e25545884239b3c5adb29c1b1f862bff1737171432d63bb0de2"
+  },
+  "evidence_sha256": {
+    "build.log": "13a43359471437ba0cbb12d6d8eaaede60e3668565a17697c69d0b3668217700",
+    "confirmed-source-build.log": "e764bcc4cfa690827c5ba10e610fd050a79bb7ae201acacef87ce7d33afe5a17",
+    "new-tests.xml": "3d3a4122b80e37d4d6b4082da619eb6819040b5e48fb9935956e586d0d67413d"
+  }
+}

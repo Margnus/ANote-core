@@ -79,3 +79,11 @@ Android 已有实际字体样本证明 hasGlyph=true 不能证明采用了指定
 下一次实现应在同一对象增量内完成：原 payload/codec 版本与未知版本拒绝、geometry/bounds/index/hit-test、原 authority 原子替换/undo、资源引用、屏幕与导出，以及双端 TextOverlayPort。先用上述代理对/组合字符反例和版本冲突验证原子性；再以 Android/iOS 实际中英文 IME、选区、复制粘贴、手势互斥、拒绝保草稿、后台/关闭重开验证消费者，分别记录范围。
 
 只有原对象链路消费了该内容，并通过适用的持久化/资源/平台验证，才进入原需求验收。若正式对象协议选择不同索引单位，必须提供无损双向映射与同一反例证据后调整此设计，不能只改字段名或按 glyph 计数规避问题。
+
+## 2026-11-09内部载荷校验落地
+
+internal TextPayloadDraft将上述确认文本/完整UTF16样式范围/逻辑框约束落实为不可变值候选。工厂先校验版本、容量、Unicode、框/样式及完整覆盖，再复制调用者列表；不提供编辑命令或第二authority。空文本只保留插入默认样式，字体请求只是未解析字符串，不能作为字体授权/资源存在证明。未知草案版本明确拒绝，现有scene/codec仍不消费此值。
+
+6项共同反例/预算/所有权测试通过，JVM577零失败；任务执行/UP-TO-DATE范围及源码指纹见[报告](../reports/text-payload-draft/report.json)。草案version1、字体请求128 UTF16单位限制及logicalByteCharge仅内部准入候选，不是冻结schema/heap或产品上限。调用者必须提供已确认文字与调用期间稳定的run列表；校验器无法区分任意String是否还在IME composing。
+
+采用这份内容校验作为下一原对象增量的输入边界并结束本有限校验工作，Native编译/语义仍须其自身CI。尚未实现规范文本对象、codec、原子编辑/undo、资源、geometry/hit-test/显示导出或双端IME。OBJ01/02仍未开发/待验收，不能据值对象测试晋升；实际接入出口和原门禁保持上文要求。

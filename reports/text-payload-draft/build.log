@@ -1,0 +1,53 @@
+
+> Configure project :canvas-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution:
+Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+
+> Task :verifyFixtureCatalog
+{"status": "passed", "scale_profiles": 3, "synthetic_scale_points": 1200000, "resource_commit_abrupt_cases": 5, "resource_commit_integrity_cases": 3, "resource_commit_cancellation_cases": 5, "legacy_framing_refusals": 8, "resource_gc_rule_cases": 18, "resource_gc_reservation_cases": 6, "resource_gc_query_mutations_rejected": 6, "capture_contract_checks": 43, "capture_origin": "synthetic", "legacy_source_files": 15, "legacy_anchors": 12, "scope": "catalog hashes and selected cross-schema facts; no migration/legacy runtime/device validation"}
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:compileKotlinJvm UP-TO-DATE
+> Task :canvas-core:compileJvmMainJava NO-SOURCE
+> Task :canvas-core:jvmProcessResources NO-SOURCE
+> Task :canvas-core:processJvmMainResources SKIPPED
+> Task :canvas-core:jvmMainClasses UP-TO-DATE
+> Task :canvas-core:jvmJar UP-TO-DATE
+> Task :canvas-core:compileTestKotlinJvm UP-TO-DATE
+> Task :canvas-core:compileJvmTestJava NO-SOURCE
+> Task :canvas-core:generateScaleFixtures UP-TO-DATE
+> Task :canvas-core:jvmTestProcessResources UP-TO-DATE
+> Task :canvas-core:processJvmTestResources SKIPPED
+> Task :canvas-core:jvmTestClasses UP-TO-DATE
+> Task :canvas-core:jvmTest UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:jvmProcessResources NO-SOURCE
+> Task :shared-core:processJvmMainResources SKIPPED
+> Task :shared-core:jvmTestProcessResources NO-SOURCE
+> Task :shared-core:processJvmTestResources SKIPPED
+> Task :shared-core:compileKotlinJvm
+> Task :shared-core:compileJvmMainJava NO-SOURCE
+> Task :shared-core:jvmMainClasses
+> Task :shared-core:jvmJar
+> Task :shared-core:compileTestKotlinJvm
+> Task :shared-core:compileJvmTestJava NO-SOURCE
+> Task :shared-core:jvmTestClasses
+> Task :shared-core:jvmTest
+> Task :verifyPrototype
+
+[Incubating] Problems report is available at: file:///D:/work/StudioProjects/ANote-core/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 39s
+14 actionable tasks: 8 executed, 6 up-to-date
