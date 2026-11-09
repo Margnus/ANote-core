@@ -70,6 +70,8 @@ Android 已有实际字体样本证明 hasGlyph=true 不能证明采用了指定
 - 文本链接、回收状态、editType、无界 offset、背景、padding/边框等原字段超出初始基本文本范围。不能因为新版首发只支持基本样式就静默丢弃它们后报告无损迁移；应按蓝图旧数据迁移政策显式保留、降级或报告不支持。
 - 创建者注释明确 width/height/textSize 使用数据坐标而非 View 像素。实际坐标/offset/旋转消费者仍须独立核对，不能只凭注释乘一次屏幕 scale 或把位置和变换叠加两次。
 
+当前本地 drawpanellibv2 默认 artifact 配置指向 DrawPanel-debug.aar。另对这个确切文件静态检查 TextViewUtil 字节码，完整 AAR/classes.jar/类摘要及工具命令见[独立AAR核验](../reports/legacy-text-aar-contract.json)：setAlignment 调用 LEFT/CENTER/RIGHT 对应的 setGravity；setRowSpace 实际调用 `setLineSpacing(0f, rowSpace / 10f)`。因此 rowSpace 不能直接当成逻辑坐标里的额外行距点数。范围列表按输入顺序遍历并检查非负 start/end、end不超过Editable.length，但这不证明重叠样式优先级或非法范围运行结果。未执行Gradle解析/旧APK，未证明本地AAR就是已安装包，也未声称与其他drawpanel源码等价；没有复制发布AAR或完整反编译输出。
+
 采用决定：基础 TextPayload 设计与完整旧格式转换分开；当前不实现或宣布有损转换成功。下一次迁移映射必须取得合法旧文本实例和实际范围/布局消费者证据，保持源文件，再验证往返/保真报告。本次未构建、运行或修改旧工程。
 
 本设计不新增内容 authority、后台队列、文件、公开 API 或普通 App 文本入口。后续生产接入仍需 M-1/C1 与正式资源事务前置；不把该文件登记为 OBJ-01/OBJ-02 实现或验收通过。
