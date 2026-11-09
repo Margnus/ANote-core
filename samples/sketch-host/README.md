@@ -12,6 +12,6 @@
 
 实际专用模拟器仪器复验入口 `tools/run_sketch_host.py` 先记录现场 NoteCore 原包及笔记集合/hash，再安装独立样例/仪器包并比较原件。可指定 `--adb <SDK>/platform-tools/adb --serial emulator-5580 --avd NoteCoreWindows`；默认设备为原 NoteCorePreview / emulator-5554，只允许这两个既有专用 AVD。使用 `--case-directory build/<本轮目录>` 保留不同版本证据，不能覆盖旧baseline来冒称保持，也不套用另一设备的文件数。`tools/verify_sketch_host.py` 保留原API36、66文件及CUA观察的历史固定包核验范围，不能用于宣称新包或本机API35普通UI通过。最初普通CUA证据见 `reports/second-host-android.json`，当前producer子范围单列 `reports/producer-input-budget.json`；本轮无普通UI或真机证据。
 
-只采用为 ENG-19 的可运行 Android 第二消费者子范围；MONOLINE、固定单页、普通 canonical Path。背景回调只借用本帧 Canvas，不得保留 Canvas/Activity。规范 Path/Matrix 按 root revision 缓存，活动 Path 只是派生呈现。没有第二文档模型、worker 或原生图像池。未冻结 SDK，真机、完整资源生命周期/heap/触笔、Apple 样例及 C1 仍待验。
+只采用为 ENG-19 的可运行 Android 第二消费者子范围；MONOLINE、普通 canonical Path，界面初始为单页。背景回调只借用本帧 Canvas，不得保留 Canvas/Activity。规范 Path/Matrix 按 root revision 与当前 pageId 共同缓存，活动 Path 只是派生呈现。没有第二文档模型、worker 或原生图像池。未冻结 SDK，真机、完整资源生命周期/heap/触笔及 C1 仍待验。独立[Apple 样例](../apple-sketch/README.md)已完成固定64a4d32的Simulator宿主/普通UI子范围，见[核验](../../reports/apple-sketch-ci-42574496078/verification.json)；设备构建与真机运行按其自身证据另验。
 
 当前样例直接使用 `PagedPreviewNotebook.createValidated` 返回的原会话，显式传主线程 ownerCheck；没有临时 Notebook → snapshot → 第二次 adopt。DocumentBudget/enum 是已验证值；宿主依旧对 owner 实现负责，不将默认空检查解释为线程安全。
