@@ -1,0 +1,27 @@
+{
+  "status": "source_contract_inspected",
+  "source_project": "jnotesv2gp overseas",
+  "source_commit": "675fabc3b55197a01979fbbc556874d876512860",
+  "inputs": [
+    {
+      "path": "biz_base_db/src/main/java/com/jideos/biz_base_db/bean/DragEditTexter.kt",
+      "sha256": "a389f82d17fb73502d5c0b2dc2320ae44736ef6b7e9f55cfb0ef570d35e9523e",
+      "git_blob_sha256": "abd5b805205ee0848421b306786e03483a06deb8ec7443f1d4d20d9e79b5ca6c",
+      "working_tree_matches_git_or_exact_crlf": true
+    },
+    {
+      "path": "module_main/src/main/java/com/jideos/module_main/common/biz/DragEditTexterCreater.kt",
+      "sha256": "cbd40e4e92521aed9651ddb34233e98a277d5e447c80a33c46903138728d4c3f",
+      "git_blob_sha256": "0fb0f2dd402ab9a6a8baa5660dd8d8303d8392ffb8a0404bc6cf09d60bd11959",
+      "working_tree_matches_git_or_exact_crlf": true
+    }
+  ],
+  "findings": [
+    "Global text style coexists with six independent style range lists; precedence is not established by the data class.",
+    "alignment field serializes as t8 with alternate name lineSpace, while rowSpace serializes as t7; alias names cannot establish semantic equivalence.",
+    "Text links, recycle state, editType, unbounded offsets, padding/border/background fields exceed initial basic text scope.",
+    "Creator comments require width/height/textSize in data coordinates, not view pixels. Actual source transform consumers remain unverified."
+  ],
+  "decision": "Keep basic text design separate from lossless legacy migration. Do not flatten overlapping style lists or rename aliases by intuition; unsupported content requires explicit preservation/degradation reporting.",
+  "scope": "Two source files inspected read-only and bound to current Git bytes. No user note/DB fixture, runtime span precedence, import/export, platform IME or migration acceptance. No old project build or modification."
+}

@@ -60,6 +60,17 @@ Android 已有实际字体样本证明 hasGlyph=true 不能证明采用了指定
 
 ## 实现出口与退出条件
 
+### 旧源码映射的限制
+
+只读检查当前海外 jnotesv2gp 提交 `675fabc3b55197a01979fbbc556874d876512860` 的 DragEditTexter 和 DragEditTexterCreater，两份原件与固定 Git 字节或精确 CRLF 检出一致，摘要及范围见[源结构核验](../reports/legacy-text-source-contract.json)。这不是原 Mac 国内源码或任何旧笔记数据的验证结果，不继承旧迁移证据。
+
+- 数据类同时保留全局 textColor/textSize/typeface/isBold 等字段及 underline/bold/italic/color/fontSize/typefaceData 六份范围列表。不能把独立列表直接拼成规范的完整、无重叠 runs；必须先验证实际应用次序、默认样式、越界/重叠处理及旧实例，再生成确定的有效样式分段。
+- `rowSpace` 的编码键为 `t7`；`alignment` 编码键为 `t8`，但 alternate 是 `lineSpace`。这明确否决“字段别名就是语义”的映射方式；读取哪个别名不等于采用其字面含义。尚未确认旧运行时语义或所有历史版本。
+- 文本链接、回收状态、editType、无界 offset、背景、padding/边框等原字段超出初始基本文本范围。不能因为新版首发只支持基本样式就静默丢弃它们后报告无损迁移；应按蓝图旧数据迁移政策显式保留、降级或报告不支持。
+- 创建者注释明确 width/height/textSize 使用数据坐标而非 View 像素。实际坐标/offset/旋转消费者仍须独立核对，不能只凭注释乘一次屏幕 scale 或把位置和变换叠加两次。
+
+采用决定：基础 TextPayload 设计与完整旧格式转换分开；当前不实现或宣布有损转换成功。下一次迁移映射必须取得合法旧文本实例和实际范围/布局消费者证据，保持源文件，再验证往返/保真报告。本次未构建、运行或修改旧工程。
+
 本设计不新增内容 authority、后台队列、文件、公开 API 或普通 App 文本入口。后续生产接入仍需 M-1/C1 与正式资源事务前置；不把该文件登记为 OBJ-01/OBJ-02 实现或验收通过。
 
 下一次实现应在同一对象增量内完成：原 payload/codec 版本与未知版本拒绝、geometry/bounds/index/hit-test、原 authority 原子替换/undo、资源引用、屏幕与导出，以及双端 TextOverlayPort。先用上述代理对/组合字符反例和版本冲突验证原子性；再以 Android/iOS 实际中英文 IME、选区、复制粘贴、手势互斥、拒绝保草稿、后台/关闭重开验证消费者，分别记录范围。
