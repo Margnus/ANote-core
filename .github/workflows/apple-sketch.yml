@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/apple-sketch.yml'
       - 'ci/verify_apple_sketch.py'
+      - 'ci/gradle_download_retry.py'
+      - 'ci/test_gradle_download_retry.py'
       - 'samples/apple-sketch/**'
       - 'canvas-core/src/commonMain/**'
       - 'canvas-core/src/iosMain/**'
@@ -41,6 +43,8 @@ jobs:
           test -x "$JAVA_HOME_17_arm64/bin/java"
           echo "JAVA_HOME=$JAVA_HOME_17_arm64" >> "$GITHUB_ENV"
           echo "$JAVA_HOME_17_arm64/bin" >> "$GITHUB_PATH"
+      - name: Verify bounded download retry
+        run: python3 -m unittest discover -s ci -p test_gradle_download_retry.py
       - name: Verify independent UIKit sketch
         run: python3 ci/verify_apple_sketch.py
       - name: Retain evidence, including failures

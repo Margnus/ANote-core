@@ -8,6 +8,7 @@ import plistlib
 import re
 import subprocess
 import uuid
+from gradle_download_retry import run_gradle
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'build/apple-sketch'
@@ -23,7 +24,8 @@ def inputs():
     for module in ('canvas-core', 'shared-core'):
         for source_set in ('commonMain', 'iosMain'):
             paths.update((ROOT/module/'src'/source_set).rglob('*.kt'))
-    paths.update(ROOT/p for p in ('ci/verify_apple_sketch.py', '.github/workflows/apple-sketch.yml',
+    paths.update(ROOT/p for p in ('ci/verify_apple_sketch.py', 'ci/gradle_download_retry.py',
+        'ci/test_gradle_download_retry.py', '.github/workflows/apple-sketch.yml',
         'build.gradle.kts', 'settings.gradle.kts', 'gradle.properties', 'canvas-core/build.gradle.kts',
         'shared-core/build.gradle.kts', 'gradlew', 'gradle/wrapper/gradle-wrapper.properties',
         'gradle/wrapper/gradle-wrapper.jar'))
@@ -52,6 +54,9 @@ def main():
 
     def run(label, args, timeout):
         print(label, flush=True)
+        if any(Path(arg).name == 'gradlew' for arg in args[:2]):
+            run_gradle(args, ROOT, OUTPUT/(label+'.log'), timeout)
+            return
         with (OUTPUT/(label+'.log')).open('w', encoding='utf-8', newline='\n') as log:
             subprocess.run(args, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=timeout)
 

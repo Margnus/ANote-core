@@ -1,0 +1,20 @@
+{
+  "status": "local_unit_checks_passed",
+  "tests": 5,
+  "checks": [
+    "test_transient_download_retries_same_command_and_keeps_both_logs",
+    "test_persistent_download_stops_after_two_attempts",
+    "test_compile_or_test_failure_does_not_retry_even_with_http_text",
+    "test_nontransient_http_and_plain_failure_are_not_retried",
+    "test_timeout_keeps_partial_log_and_does_not_retry"
+  ],
+  "source_sha256": {
+    "ci/gradle_download_retry.py": "9618bccb2ed05dd54e169f34666b00e529d25b4584d05f3707c02957504ae7b3",
+    "ci/test_gradle_download_retry.py": "119825c9b7a6a74dd49ad2439554935f595bf607b2961589c59863750132bbe9",
+    "ci/verify_apple_candidate.py": "790974dc583eea904e47c9f91205e2de5242e506001f235623a2806776d8db65",
+    "ci/verify_apple_sketch.py": "782de1e3d044956bbd397fbedbaf40cf832991d7ca57ede65320b8b39721bc2f",
+    ".github/workflows/apple-candidate.yml": "b3838c91b33657967b839af5eb9628f75049384add8efd5c8b8b5036fb15eb82",
+    ".github/workflows/apple-sketch.yml": "f4d3308681e8920267f9654d860e91bd2a5ae6d02533e86d918b7e82ab0a4624"
+  },
+  "scope": "Mock subprocess unit checks and Python syntax/portable checks. Same command, at most two attempts sharing original timeout; every attempt retained. No actual remote retry/download or Apple build verified yet."
+}
