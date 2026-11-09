@@ -75,6 +75,10 @@ final class SketchHostTests: XCTestCase {
             let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 595, height: 842,
                 bitsPerComponent: 8, bytesPerRow: 595 * 4, space: CGColorSpaceCreateDeviceRGB(),
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            // draw(_:) receives UIKit's top-down user space. Raw bitmap rows run
+            // opposite to the default CGContext user space (also see PagedHostTests).
+            context.translateBy(x: 0, y: 842)
+            context.scaleBy(x: 1, y: -1)
             UIGraphicsPushContext(context); canvas.draw(canvas.bounds); UIGraphicsPopContext()
         }
         let offset = (100 * 595 + 100) * 4
@@ -91,6 +95,8 @@ final class SketchHostTests: XCTestCase {
         }
         XCTAssertEqual(Array(bytes[offset..<offset + 4]), [0x12, 0x56, 0x34, 255],
             "raster colored=\(colored) bounds=\(minX),\(minY)..\(maxX),\(maxY) page=\(host.notebook.currentPage.width)x\(host.notebook.currentPage.height) view=\(canvas.bounds)")
+        let mirroredOffset = ((842 - 1 - 100) * 595 + 100) * 4
+        XCTAssertEqual(Array(bytes[mirroredOffset..<mirroredOffset + 4]), [255, 255, 255, 255])
     }
 
     @MainActor func testResizeAndDetachCancelUnfinishedInputWithoutChangingRoot() {
