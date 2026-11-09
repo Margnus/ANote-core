@@ -9,7 +9,16 @@ ENG-19 的 UIKit 第二消费者，独立包 `dev.notecore.sample.sketch.ios`。
 xcodebuild -project samples/apple-sketch/NoteCoreSketch.xcodeproj -scheme NoteCoreSketch -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M4)' CODE_SIGNING_ALLOWED=NO build
 ```
 
-也可用 Xcode 打开该工程，选择已有 Simulator 运行。当前 framework 路径是 `iosSimulatorArm64/debugFramework`，本样例尚未提供真机签名或设备 framework 切换；不把模拟器编译等同真机可运行验收。
+也可用 Xcode 打开该工程，选择已有 Simulator 运行。工程按 SDK 选择 `iosSimulatorArm64/debugFramework` 或 `iosArm64/debugFramework`，App 与宿主测试继承同一 `NOTECORE_FRAMEWORK_DIR`，不修改 framework 内容。
+
+设备编译使用已有 Kotlin device target：
+
+```sh
+./gradlew -PenableAppleTargets=true :shared-core:linkDebugFrameworkIosArm64
+xcodebuild -project samples/apple-sketch/NoteCoreSketch.xcodeproj -scheme NoteCoreSketch -configuration Debug -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+```
+
+上述命令仅无签名编译，不安装、不发布。实际设备运行需要在 Xcode 为个人环境选择签名 Team 和设备；仓库不写入 Team/证书。CI 单独记录设备二进制的平台与 SHA，不把设备编译或模拟器运行等同真机可运行验收。Release 配置目前同样链接未冻结的 debug framework，不用于发布。
 
 工具列表与借用的 CGContext 背景由宿主注入。Notebook 是唯一文档 authority，直接复用原只读/活动/pending/撤销与重做语义。只读是可显式切换的编辑模式，不是宿主 ACL。背景不得保留 CGContext；调用边界恢复变换、裁剪与当前 path。规范 MONOLINE 样本按原对象变换绘制，无新笔刷、内容模型、调度器或资源账本。
 

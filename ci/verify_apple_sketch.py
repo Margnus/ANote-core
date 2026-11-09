@@ -117,6 +117,25 @@ def main():
         symbols = capture('nm', str(app/'NoteCoreSketch'))
         assert 'PreviewModel' not in symbols and 'PreviewFileIO' not in symbols
         report['preview_app_symbols_absent'] = True
+        # Build the same independent consumer against the existing device target.
+        # This is unsigned compilation only, never installation or physical acceptance.
+        report['stage'] = 'device-build'
+        run('framework-device', ['./gradlew', '--no-daemon', '--console=plain', '-PenableAppleTargets=true',
+            ':shared-core:linkDebugFrameworkIosArm64'], 1500)
+        device_framework = ROOT/'shared-core/build/bin/iosArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype'
+        run('device-build', ['xcodebuild', '-quiet', '-project', str(project.parent), '-scheme', 'NoteCoreSketch',
+            '-configuration', 'Debug', '-sdk', 'iphoneos', '-destination', 'generic/platform=iOS',
+            '-derivedDataPath', str(OUTPUT/'device-xcode'), 'CODE_SIGNING_ALLOWED=NO', 'build'], 900)
+        device_app = OUTPUT/'device-xcode/Build/Products/Debug-iphoneos/NoteCoreSketch.app'
+        device_binary = device_app/'NoteCoreSketch'
+        device_platform = capture('xcrun', 'vtool', '-show-build', str(device_binary))
+        assert re.search(r'platform\s+IOS\b', device_platform), device_platform
+        device_info = plistlib.loads((device_app/'Info.plist').read_bytes())
+        assert device_info['CFBundleIdentifier'] == 'dev.notecore.sample.sketch.ios'
+        assert device_info['CFBundleSupportedPlatforms'] == ['iPhoneOS']
+        report['unsigned_device_build'] = {'framework_sha256': sha(device_framework),
+            'app_binary_sha256': sha(device_binary), 'platform': device_platform,
+            'installed': False, 'physical_device_verified': False}
         container = Path(capture('xcrun', 'simctl', 'get_app_container', device, 'dev.notecore.sample.sketch.ios', 'data').strip())
         report['documents_files'] = [str(p.relative_to(container)) for p in (container/'Documents').rglob('*') if p.is_file()]
         assert report['documents_files'] == []
@@ -128,7 +147,7 @@ def main():
     finally:
         report['evidence_sha256'] = {p.relative_to(OUTPUT).as_posix(): sha(p) for p in OUTPUT.rglob('*')
             if p.is_file() and (p.suffix in ('.json', '.log', '.png')) and p.name != 'report.json'
-            and not any(part in ('xcode', 'host.xcresult', 'ui.xcresult') for part in p.relative_to(OUTPUT).parts)}
+            and not any(part in ('xcode', 'device-xcode', 'host.xcresult', 'ui.xcresult') for part in p.relative_to(OUTPUT).parts)}
         (OUTPUT/'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
 
