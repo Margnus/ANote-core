@@ -66,7 +66,10 @@ final class SketchHostTests: XCTestCase {
         let canvas = SketchCanvas(session: host)
         canvas.frame = CGRect(x: 0, y: 0, width: 595, height: 842); canvas.layoutIfNeeded()
         XCTAssertTrue(canvas.offer(phase: .down, xs: [100], ys: [100], pressures: [0.5], times: [1]).admitted)
-        XCTAssertTrue(canvas.offer(phase: .up, xs: [100], ys: [100], pressures: [0.5], times: [2]).admitted)
+        XCTAssertEqual(canvas.offer(phase: .up, xs: [100], ys: [100], pressures: [0.5], times: [2]).disposition, .committed)
+        XCTAssertEqual(host.notebook.strokeCount, 1)
+        XCTAssertEqual(host.notebook.pointX(index: 0, point: 0), 100)
+        XCTAssertEqual(host.notebook.pointY(index: 0, point: 0), 100)
         var bytes = [UInt8](repeating: 0, count: 595 * 842 * 4)
         try bytes.withUnsafeMutableBytes { buffer in
             let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 595, height: 842,
@@ -75,7 +78,19 @@ final class SketchHostTests: XCTestCase {
             UIGraphicsPushContext(context); canvas.draw(canvas.bounds); UIGraphicsPopContext()
         }
         let offset = (100 * 595 + 100) * 4
-        XCTAssertEqual(Array(bytes[offset..<offset + 4]), [0x12, 0x56, 0x34, 255])
+        // Preserve the exact oracle; report the actual raster footprint before choosing a fix.
+        var minX = 595, minY = 842, maxX = -1, maxY = -1, colored = 0
+        for y in 0..<842 {
+            for x in 0..<595 {
+                let i = (y * 595 + x) * 4
+                if bytes[i + 3] > 0 && (bytes[i] < 240 || bytes[i + 1] < 240 || bytes[i + 2] < 240) {
+                    minX = min(minX, x); minY = min(minY, y)
+                    maxX = max(maxX, x); maxY = max(maxY, y); colored += 1
+                }
+            }
+        }
+        XCTAssertEqual(Array(bytes[offset..<offset + 4]), [0x12, 0x56, 0x34, 255],
+            "raster colored=\(colored) bounds=\(minX),\(minY)..\(maxX),\(maxY) page=\(host.notebook.currentPage.width)x\(host.notebook.currentPage.height) view=\(canvas.bounds)")
     }
 
     @MainActor func testResizeAndDetachCancelUnfinishedInputWithoutChangingRoot() {
