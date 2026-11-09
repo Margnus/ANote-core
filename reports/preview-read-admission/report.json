@@ -1,0 +1,36 @@
+{
+  "status": "jvm_allocation_regression_passed_art_semantics_passed_native_pending",
+  "baseline_commit": "d240921a8cfa2a5f7e834662c8cc2f9517077851",
+  "before_source_binding": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "exact",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "exact"
+  },
+  "allocation_bytes": {
+    "before": {
+      "empty": 232,
+      "dense": 3400232
+    },
+    "after": {
+      "empty": 232,
+      "dense": 320232
+    }
+  },
+  "unchanged_test_source_sha256": "5d314db778736b98e7a8a273cd0445cead92e7108e65cf74853e1904260a4d3f",
+  "scope": "Actual JVM ThreadMXBean cumulative allocation for one accept call on immutable 5000-stroke root; unchanged 1MiB dense-minus-empty regression envelope. No physical heap, peak live bytes, latency or C1 claim. Existing 7+5 Reader/RecoveryReader semantics passed separately on API35 ART, five original notes preserved.",
+  "after_source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Geometry.kt": "da63bc70a4a5d4d5f551c840cca64935aa906cbc4640e87ce2b82256e7e44adf",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "c02a5f602b122f5d810ba8f0128c3f51d4ded077068deee123d74675e6a4836c",
+    "shared-core/src/jvmTest/kotlin/dev/notecore/document/PreviewReadAllocationTest.kt": "5d314db778736b98e7a8a273cd0445cead92e7108e65cf74853e1904260a4d3f"
+  },
+  "evidence_sha256": {
+    "after-build.log": "64e046d3e619f7b09c9a2abba2fea6b748ce04cf66fcbd50cc7473b9f027fe2f",
+    "after-tests.xml": "3b514bb2429c19411184a452bd760ecc893d527ca8146b74a88d2712fbe46f00",
+    "before-build.log": "d9fb4396a0458d8d522ef7e7595f891e6f2ffd019c629edc8e3d30c6c2888cfe",
+    "before-source.json": "da079e7397ea9ba430b6b7a3088f3e3d5f44439248d566a73657597b668e5f89",
+    "before-tests.xml": "c2a321806aae6b04c928d938cc94a0a8c716507886be2f85d7b3d2d20ada2a80",
+    "final-source-build.log": "2649ddc2e20637f0b9b8d9196f5697cb634f7db6318aaa2563f680e5342ff8c7"
+  },
+  "collected_jvm_tests": 578,
+  "task_execution": "Production-fix build executed canvas/shared JVM tests. Final Android test-selector source stamp build reused those results; no duplicate execution claim.",
+  "jvm_aggregate_sha256": "1f68e189dab3b64ed9558e34c32331585b781f5c9878431c08c5dd054ad44d0a"
+}

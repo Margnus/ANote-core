@@ -34,3 +34,11 @@
 第二项是主机临时文件IO，未实现或验收生产原子替换、平台断电耐久或Android/Apple owner接管。普通正文测试的内存移交也不是磁盘耐久回执。Thread/FutureTask仅用于测试消费者，不是新App后台worker。
 
 以下均未由本次验证：原owner/线程突然消失且尚未导出checkpoint、未完成输入的自动恢复、实时迁移可变会话、并发写者、UI/Store/worker/native资源pool跨线程迁移、Native/Swift内存模型、普通GUI、物理GPU未signal、断电。缺少旧owner退休与宿主责任交接时，不能把这条协作路径当自动接管授权。完整C1、M-1、ENG整项验收和DEV-041生产存储门禁保持。
+
+## 2026-11-09：实际Kotlin/Native协作交接采用
+
+固定45b7252/CI42578022860实际通过新增DocumentOwnerNativeTest两项：NSThread外线程snapshot/captureRecovery/edit/输入拒绝且原owner可继续；旧owner捕获后在原线程退休、CLOSED/journal0，NSCondition同步并等待NSThread.isFinished()后才开启新owner。新openRecovery保留同一不可变root/原笔迹对象与编码，新历史独立；新笔只进入新root，旧checkpoint不变。测试线程及同步只存在于iosSimulatorArm64Test，不是App生产调度器。
+
+采用原内存协作交接契约的Native子范围。canvas211/shared320含新2项、Swift50/普通UI1通过，160固定Git输入/16产物/ZIP及两页2+1笔文件、4截图核验见[回执](../reports/apple-owner-native-ci-42578022860/verification.json)。原47031c5因isFinished误写属性而编译失败的证据保持，不计其测试执行。当前Apple容器原为空，不证明非空旧文件保护。
+
+本次没有IO/完成pending的Native跨线程文件恢复、突然丢失owner、活跃会话迁移或并行写者；旧owner明确退休与线程结束仍是本测试前置。原Swift/普通UI回归不等于App接入跨线程交接。这个有限Native出口收口，不扩相似线程排列；物理M-1/完整C1/ENG整项/生产SQLite与113条原验收保持。

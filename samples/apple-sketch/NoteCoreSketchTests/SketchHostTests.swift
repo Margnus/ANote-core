@@ -89,7 +89,10 @@ final class SketchHostTests: XCTestCase {
         let canvas = SketchCanvas(session: host)
         canvas.frame = CGRect(x: 0, y: 0, width: 595, height: 842); canvas.layoutIfNeeded()
         XCTAssertTrue(canvas.offer(phase: .down, xs: [100], ys: [100], pressures: [0.5], times: [1]).admitted)
-        XCTAssertTrue(canvas.offer(phase: .up, xs: [100], ys: [100], pressures: [0.5], times: [2]).admitted)
+        XCTAssertEqual(canvas.offer(phase: .up, xs: [100], ys: [100], pressures: [0.5], times: [2]).disposition, .committed)
+        XCTAssertEqual(host.notebook.strokeCount, 1)
+        XCTAssertEqual(host.notebook.pointX(index: 0, point: 0), 100)
+        XCTAssertEqual(host.notebook.pointY(index: 0, point: 0), 100)
         var bytes = [UInt8](repeating: 0, count: 595 * 842 * 4)
         try bytes.withUnsafeMutableBytes { buffer in
             let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 595, height: 842,
@@ -116,6 +119,8 @@ final class SketchHostTests: XCTestCase {
         let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: trace, options: [.sortedKeys]), uniformTypeIdentifier: "public.json")
         attachment.name = "pixel-coordinate-and-background-isolation"; attachment.lifetime = .keepAlways; add(attachment)
         XCTAssertEqual(Array(bytes[offset..<offset + 4]), [0x12, 0x56, 0x34, 255])
+        let mirroredOffset = ((842 - 1 - 100) * 595 + 100) * 4
+        XCTAssertEqual(Array(bytes[mirroredOffset..<mirroredOffset + 4]), [255, 255, 255, 255])
     }
 
     @MainActor func testResizeAndDetachCancelUnfinishedInputWithoutChangingRoot() throws {

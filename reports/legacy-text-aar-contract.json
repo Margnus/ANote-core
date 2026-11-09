@@ -1,0 +1,19 @@
+{
+  "status": "local_aar_bytecode_inspected",
+  "aar_path": "jnotesv2gp/drawpanellibv2/DrawPanel-debug.aar",
+  "aar_sha256": "ffdc0b920afaed89ac7375c8b587aef9e7efc0f9d544fbdc03bd9f2884413373",
+  "classes_jar_sha256": "59e18cce318abe0dbc0e6f282eb29d9487815e36c1e76c216346a66545e60bf5",
+  "class_path": "com/jideos/drawpanel/tools/drag_edit_text/TextViewUtil.class",
+  "class_sha256": "d0c30ef42dbb37eb31777f82e4b8a9f477d6a4185b87490955728113bc9f3293",
+  "recipe_sha256": "f266edf0abc0e3551a7e7a8c9da732248f7792505b0411048f416b2fd4324172",
+  "inspection_command": "JDK17 javap -J-Dfile.encoding=UTF-8 -J-Dsun.stdout.encoding=UTF-8 -c -p -classpath <extracted classes.jar> com.jideos.drawpanel.tools.drag_edit_text.TextViewUtil",
+  "javap_utf8_sha256": "d041732ead9699ed6c24074df89f1f8504186980175a56fd134ef9f0ebc5e275",
+  "findings": [
+    "Current local default artifact recipe names DrawPanel-debug.aar; current source modules reference drawpanellibv2. No Gradle resolution or installed App equivalence verified.",
+    "setAlignment compares LEFT/CENTER/RIGHT enum ordinals and calls TextView.setGravity with 3/1/5 respectively.",
+    "setRowSpace calls TextView.setLineSpacing(0f, rowSpace / 10f); it is a multiplier, not a raw point-valued line gap.",
+    "setTextViewSpan iterates the supplied list and checks nonnegative start/end and end <= Editable.length before type dispatch. This does not establish overlap precedence or invalid-range runtime outcome."
+  ],
+  "decision": "Preserve alignment and row-space as distinct semantics; never map rowSpace directly to logical point gap. Runtime overlap/old instance fidelity still requires actual Android consumers.",
+  "scope": "Static bytecode of this exact local AAR only, independent of other drawpanel sources. No source/AAR equivalence, APK, Android execution, user-note sample or migration acceptance. Source/AAR read-only; extracted jar and javap kept in Core build, not committed."
+}

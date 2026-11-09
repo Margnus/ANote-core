@@ -9,6 +9,7 @@ import re
 import subprocess
 import sys
 import uuid
+from gradle_download_retry import run_gradle
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'build/apple-candidate'
@@ -31,7 +32,8 @@ def inputs():
         'ios-app/NoteCorePreview.xcodeproj/project.pbxproj',
         'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',
         'gradlew', 'gradle/wrapper/gradle-wrapper.properties', 'gradle/wrapper/gradle-wrapper.jar',
-        '.github/workflows/apple-candidate.yml', 'ci/verify_apple_candidate.py', 'tools/verify_ios_host.py'))
+        '.github/workflows/apple-candidate.yml', 'ci/verify_apple_candidate.py', 'ci/gradle_download_retry.py',
+        'ci/test_gradle_download_retry.py', 'tools/verify_ios_host.py'))
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(paths)}
 
 
@@ -67,6 +69,9 @@ def main():
     def run(label, command, timeout):
         path = OUTPUT / (label + '.log')
         print(label, flush=True)
+        if any(Path(arg).name == 'gradlew' for arg in command[:2]):
+            run_gradle(command, ROOT, path, timeout)
+            return path.read_text(encoding='utf-8')
         with path.open('w', encoding='utf-8', newline='\n') as log:
             subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
                            timeout=timeout, check=True)

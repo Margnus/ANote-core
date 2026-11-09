@@ -13,6 +13,7 @@ class PreviewDocumentRead internal constructor(val root: DocumentRoot?, val fail
  * Invalid interchange is a typed refusal; platform IO/owner/programmer failures are not caught here.
  */
 object PreviewDocumentReader {
+    private fun supportedCoefficient(value: Double) = value.isFinite() && abs(value) <= 1e12
     fun read(text: String): PreviewDocumentRead {
         if (text.length > PagedPreviewCodec.MAX_CHARACTERS)
             return PreviewDocumentRead(null, PreviewReadFailure.CHARACTER_CAPACITY)
@@ -28,14 +29,15 @@ object PreviewDocumentReader {
         root.scene.forEachObject { stroke ->
             val m = stroke.transform
             if (stroke.brush.kind != BrushKind.MONOLINE || stroke.brush.algorithmVersion != 1 ||
-                listOf(m.a, m.b, m.c, m.d, m.tx, m.ty).any { !it.isFinite() || abs(it) > 1e12 })
+                !supportedCoefficient(m.a) || !supportedCoefficient(m.b) || !supportedCoefficient(m.c) ||
+                !supportedCoefficient(m.d) || !supportedCoefficient(m.tx) || !supportedCoefficient(m.ty))
                 { supported = false; return@forEachObject }
             // Common preview capability includes the original Android Float Path/Matrix consumer.
             // Preserve canonical doubles; refuse zero-radius/hairline or singular derived geometry.
             if (stroke.brush.width.toFloat() / 2f <= 0f ||
                 Affine2D(m.a.toFloat().toDouble(), m.b.toFloat().toDouble(),
                     m.c.toFloat().toDouble(), m.d.toFloat().toDouble(),
-                    m.tx.toFloat().toDouble(), m.ty.toFloat().toDouble()).inverseOrNull() == null)
+                    m.tx.toFloat().toDouble(), m.ty.toFloat().toDouble()).hasInverse().not())
                 supported = false
         }
         return if (supported) PreviewDocumentRead(root, null)
