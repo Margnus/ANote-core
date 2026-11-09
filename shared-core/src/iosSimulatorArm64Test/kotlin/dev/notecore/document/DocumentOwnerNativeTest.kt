@@ -37,8 +37,8 @@ class DocumentOwnerNativeTest {
             while (!done) check(condition.waitUntilDate(NSDate(timeIntervalSinceReferenceDate = deadline)))
             checkNotNull(outcome)
         } finally { condition.unlock() }
-        while (!worker.isFinished && NSDate().timeIntervalSinceReferenceDate < deadline) usleep(1000u)
-        assertTrue(worker.isFinished, "Previous owner thread must finish before a new owner starts")
+        while (!worker.isFinished() && NSDate().timeIntervalSinceReferenceDate < deadline) usleep(1000u)
+        assertTrue(worker.isFinished(), "Previous owner thread must finish before a new owner starts")
         return result.getOrThrow()
     }
 
