@@ -20,6 +20,14 @@ private enum PreparedExport { case ready(PreviewBackup), capacity }
 private enum NotebookAdoptionFailure: Error {
     case inputCapacity, documentCapacity
 
+    static func error(for failure: PreviewOpenFailure?) -> Error {
+        switch failure {
+        case .inputCapacity: return Self.inputCapacity
+        case .documentCapacity: return Self.documentCapacity
+        default: return CocoaError(.fileReadCorruptFile)
+        }
+    }
+
     var message: String {
         switch self {
         case .inputCapacity: return "未提交笔迹超过当前恢复容量，原文件仍保留"
@@ -345,13 +353,7 @@ final class PreviewModel: ObservableObject {
         guard checkpoint.root === root else { throw CocoaError(.fileReadCorruptFile) }
         let opening = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: UUID().uuidString, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
-        guard let notebook = opening.notebook else {
-            switch opening.failure {
-            case .inputCapacity: throw NotebookAdoptionFailure.inputCapacity
-            case .documentCapacity: throw NotebookAdoptionFailure.documentCapacity
-            default: throw CocoaError(.fileReadCorruptFile)
-            }
-        }
+        guard let notebook = opening.notebook else { throw NotebookAdoptionFailure.error(for: opening.failure) }
         return notebook
     }
     private func installNotebook(_ notebook: PagedPreviewNotebook, root: DocumentRoot, persisted: Bool, recovery: PagedPreviewSnapshot?) {
@@ -500,13 +502,19 @@ final class PreviewModel: ObservableObject {
                 case .opened(let snapshot): captured = snapshot
                 case .refused(let failure): self.status = failure.message; return
                 }
-                // Keep the idle original owner through read/capacity failure. Prepare its exact
-                // save responsibility before constructing one candidate for the different document.
                 guard self.editors.isEmpty, (!replacingIdle || (!self.transferBusy && self.exportDocument == nil)),
-                      self.prepareCurrentClose(cancelInput: false) else {
+                      self.current?.hasActiveStroke != true else {
                     self.status = "其他窗口正在编辑，或原笔记尚待保存，请完成后重试"; return
                 }
                 do {
+                    // Saving can commit the current pending stroke. Check target admission before that side effect.
+                    if self.current != nil,
+                       let failure = ApplePreviewEditorAdmission.shared.failure(snapshot: captured, budget: self.previewBudget) {
+                        throw NotebookAdoptionFailure.error(for: failure)
+                    }
+                    guard self.prepareCurrentClose(cancelInput: false) else {
+                        self.status = "其他窗口正在编辑，或原笔记尚待保存，请完成后重试"; return
+                    }
                     let notebook = try self.prepareNotebook(captured.root, recovery: captured)
                     if self.current != nil { self.retireCurrent() }
                     self.installNotebook(notebook, root: captured.root, persisted: retained == nil, recovery: captured)

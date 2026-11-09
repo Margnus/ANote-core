@@ -508,6 +508,52 @@ final class PagedHostTests: XCTestCase {
         return (pendingBytes, canonicalBytes)
     }
 
+    @MainActor func testRefusedRecoveryOpenPreservesUnsavedOriginalPending() async throws {
+        let (pending, _) = try androidViewWorkerFiles()
+        let dir = directory()
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let target = dir.appendingPathComponent("process-recovery.ncp")
+        try pending.write(to: target)
+        let budget = try XCTUnwrap(DocumentBudget.companion.validated(maxPages: 128, maxObjects: 5000,
+            liveBytes: 8 * 1024 * 1024, journalEntries: 4096, journalBytes: 32 * 1024 * 1024,
+            identityBytes: 4 * 1024 * 1024, historyEntries: 128, historyBytes: 8 * 1024 * 1024,
+            inputBytes: 2247).budget)
+        let original = try windowCheckpoint()
+        let originalFile = dir.appendingPathComponent(original.documentId + ".ncp")
+        let writeStarted = DispatchSemaphore(value: 0)
+        let model = PreviewModel(directory: dir, documentBudget: budget, observeWriteBoundary: { boundary in
+            if boundary == .beforeAtomicWrite { writeStarted.signal() }
+        })
+        try model.adopt(original.root, persisted: false, recovery: original)
+        let note = try XCTUnwrap(model.current)
+        let charge = note.inputReservedByteCharge
+        XCTAssertGreaterThan(charge, 0)
+        var opened = false
+        model.openForEditor("process-recovery") { _ in opened = true }
+        try await eventually("oversized target refused") {
+            model.status == "未提交笔迹超过当前恢复容量，原文件仍保留"
+        }
+        XCTAssertFalse(opened)
+        XCTAssertTrue(model.current === note)
+        XCTAssertTrue(note.snapshot() === original.root, "Rejected open changed the original root")
+        XCTAssertTrue(note.pendingStroke() === original.pending, "Rejected open consumed original pending")
+        XCTAssertEqual(note.inputReservedByteCharge, charge)
+        XCTAssertEqual(model.ownerRetirementStatus.pendingWrites, 0)
+        XCTAssertEqual(writeStarted.wait(timeout: .now()), .timedOut, "Rejected open started original IO")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: originalFile.path))
+        XCTAssertEqual(try Data(contentsOf: target), pending)
+        // A subsequent explicit save still commits the original stroke once.
+        XCTAssertTrue(model.save())
+        try await eventually("original explicit save confirms") {
+            model.ownerRetirementStatus.pendingWrites == 0 && model.status.hasPrefix("已保存")
+        }
+        XCTAssertEqual(note.totalStrokeCount, 1)
+        model.close()
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("original owner retires after explicit save") { model.ownerRetirementStatus.phase == .retired }
+    }
+
     @MainActor func testAndroidViewWorkerCheckpointBudgetAndOriginalAppleSave() async throws {
         let (pendingBytes, canonicalBytes) = try androidViewWorkerFiles()
         let dir = directory()

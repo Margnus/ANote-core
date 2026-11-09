@@ -1,0 +1,111 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "52409BE3-0487-4CB5-983E-0A3A759984A2",
+      "deviceName" : "NoteCore 01a1c0b0 baseline",
+      "modelName" : "iPad Air 11-inch (M4)",
+      "osBuildNumber" : "24A434",
+      "osVersion" : "27.0",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "children" : [
+                    {
+                      "name" : "XCTAssertTrue failed - Rejected open changed the original root",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                        "lineNumber" : 539
+                      }
+                    },
+                    {
+                      "name" : "XCTAssertTrue failed - Rejected open consumed original pending",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                        "lineNumber" : 540
+                      }
+                    },
+                    {
+                      "name" : "XCTAssertEqual failed: (\"0\") is not equal to (\"2196\")",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                        "lineNumber" : 541
+                      }
+                    },
+                    {
+                      "name" : "XCTAssertEqual failed: (\"1\") is not equal to (\"0\")",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                        "lineNumber" : 542
+                      }
+                    },
+                    {
+                      "name" : "XCTAssertEqual failed: (\"success\") is not equal to (\"timedOut\") - Rejected open started original IO",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                        "lineNumber" : 543
+                      }
+                    },
+                    {
+                      "name" : "XCTAssertFalse failed",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                        "lineNumber" : 544
+                      }
+                    },
+                    {
+                      "name" : "Thread running at User-interactive quality-of-service class waiting on a lower QoS thread running at Default quality-of-service class. Investigate ways to avoid priority inversions",
+                      "nodeType" : "Runtime Warning",
+                      "sourceLocation" : {
+                        "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                        "lineNumber" : 543
+                      }
+                    }
+                  ],
+                  "duration" : "0.48s",
+                  "durationInSeconds" : 0.4753209352493286,
+                  "name" : "testRefusedRecoveryOpenPreservesUnsavedOriginalPending()",
+                  "nodeIdentifier" : "PagedHostTests/testRefusedRecoveryOpenPreservesUnsavedOriginalPending()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testRefusedRecoveryOpenPreservesUnsavedOriginalPending",
+                  "nodeType" : "Test Case",
+                  "result" : "Failed"
+                }
+              ],
+              "name" : "PagedHostTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests",
+              "nodeType" : "Test Suite",
+              "result" : "Failed"
+            }
+          ],
+          "name" : "NoteCorePreviewTests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Failed"
+        }
+      ],
+      "name" : "NoteCorePreview",
+      "nodeType" : "Test Plan",
+      "result" : "Failed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

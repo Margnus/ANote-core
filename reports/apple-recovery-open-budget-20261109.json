@@ -1,0 +1,171 @@
+{
+  "status": "reproduced_and_fixed",
+  "date": "2026-11-09",
+  "scope": "Apple preview App-host recovery-open admission and original pending preservation; Android parity on the same checkpoint is reported separately below.",
+  "baseline_core": "a2111a0af50ef40fa8a55940105e668482e50a9a",
+  "environment": "ARM64 iPad Air 11-inch (M4), iOS 27.0 Simulator, Xcode 27.1",
+  "fixture": {
+    "source": "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp",
+    "sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "input_budget_bytes": 2247,
+    "original_pending_charge_bytes": 2196,
+    "target_pending_charge_bytes": 2248
+  },
+  "baseline": {
+    "result": "Failed",
+    "passedTests": 0,
+    "failedTests": 1,
+    "skippedTests": 0,
+    "failed_assertions": [
+      "original immutable root identity changed",
+      "original pending command consumed",
+      "original input charge became zero",
+      "one original write retained",
+      "original write boundary reached",
+      "original file created"
+    ],
+    "app_executable_sha256": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83"
+  },
+  "fixed": {
+    "result": "Passed",
+    "passedTests": 69,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "regression": "PagedHostTests/testRefusedRecoveryOpenPreservesUnsavedOriginalPending",
+    "original_state_preserved": true,
+    "explicit_save_commits_once_and_retires_owner": true,
+    "app_executable_sha256": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83"
+  },
+  "jvm": {
+    "tests": 591,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "shared_ios_simulator_native": {
+    "tests": 339,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_jvm_host": {
+    "tests": 35,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "source_sha256": {
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "87c6701113b07a98d250ac2b5c198a8a282229d0c4875527a90bc8af563de32b",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "0101972189097386bb02ffd0a6e13a1c1163d76774ff0da3473ade8e38b3fd4e",
+    "ios-app/NoteCorePreviewUITests/PreviewJourneyUITests.swift": "f178d8f39d4a664a22b5e7289915d65eb11f7e78a622e76934dc4a67ea7314ed",
+    "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "c400782174697878c9dd9a53c4a14d9f91c41b39cede184668d2911c132e86fa",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "bba25cda21da4e74eb8f0b3b8f044d2e11453034cd5ceb4093132e919e5722c5",
+    "shared-core/src/iosMain/kotlin/dev/notecore/document/ApplePreviewEditorAdmission.kt": "dd2fa3b7f0718b000cbd7c6f290754e6dd97582ae10b71af49367575532117f2",
+    "shared-core/src/androidMain/kotlin/dev/notecore/document/PreviewEditorAdmission.kt": "857b623ed037a213532d8f6eb6a0f18ae4b6bf7c950d3e50918d175ba6e92413",
+    "samples/apple-sketch/NoteCoreSketchTests/SketchHostTests.swift": "e273da8c6574d68c8d4555a052bc8323245e33fa0360147ef589cf46bec199b5"
+  },
+  "limits": [
+    "No physical M-1, Pencil/stylus, heap or vendor release measurement.",
+    "No power-loss or production SQLite acceptance.",
+    "C1 and DEV-041 remain gated."
+  ],
+  "ordinary_ui": {
+    "result": "Test case and suite passed in xcodebuild log",
+    "xcresult_exported": false,
+    "finalization": "Interrupted only the stalled xcodebuild archive step after the XCTest suite finished and the synthetic note was copied.",
+    "same_app_executable_sha256": "dfd06def389977a530890e17b9596382fe856f54078652ed51f02ac41fe8ba83",
+    "canonical_strokes_per_page": [
+      2,
+      1
+    ]
+  },
+  "independent_apple_sketch_host": {
+    "result": "Passed",
+    "passedTests": 6,
+    "failedTests": 0,
+    "skippedTests": 0
+  },
+  "android_api32": {
+    "status": "passed",
+    "environment": {
+      "ro.build.fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "ro.build.version.sdk": "32",
+      "ro.product.cpu.abi": "arm64-v8a"
+    },
+    "host_observations": {
+      "input_rejected": 2247,
+      "exact_input_admitted": 2248,
+      "document_capacity_refused": true,
+      "prior_owner_preserved": true,
+      "prior_unsaved_file_absent": true,
+      "pending_sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+      "canonical_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+    },
+    "fixture_sha256": {
+      "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+      "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+    },
+    "apk_sha256": "1d81ff3f3411c3df5890c237a6219f977cd9eb446491b3b5ef798faea9650705",
+    "test_apk_sha256": "5b802bb170a5d2c4243f2f4eed2a65d30a507676ad4d35a896dd2654c49f00c4",
+    "isolated_note_baseline": {},
+    "additional_host_checks": {
+      "input_batches": [
+        "sibling_surface_preserves_original_input_and_rejects_stale_events",
+        "document_capacity_refusal_and_undo_recovery",
+        "live_byte_refusal_and_undo_recovery",
+        "input_byte_budget_refusal_cancel_and_recovery",
+        "history_capacity_refuses_down_without_owning_samples",
+        "journal_identity_capacity_refuses_before_real_view_ownership",
+        "typed_pending_up_retains_exact_command_and_retries_once",
+        "double_scene_mapping_before_float_path",
+        "history_terminal_order_equal_time_and_undo",
+        "invalid_native_sample_cancels_and_recovers",
+        "resize_cancels_and_late_up_preserves_root",
+        "callback_batch_limit_explicit_cancel_and_recover"
+      ],
+      "owner_retirement": [
+        "wrong_thread_store_creation_and_lookup_refused",
+        "invalid_store_configuration_does_not_start_worker",
+        "unadmitted_release_refuses_before_retiring_authority",
+        "wrong_thread_retirement_rejected",
+        "accepted_root_saved_before_terminal_worker_stop",
+        "failed_root_retained_until_explicit_retry",
+        "active_input_and_picker_refuse_without_loss",
+        "pending_read_and_delivery_refuse_retirement",
+        "full_ledger_retry_frees_slot_before_retirement",
+        "shared_editor_detach_capacity_and_reopen",
+        "pending_editor_failure_retry_original_recovery",
+        "actual_activity_shared_editor_departure",
+        "editor_original_ledger_old_ack_failure_and_retry",
+        "editor_stopped_backend_feedback",
+        "actual_activity_shared_presentation_update"
+      ]
+    },
+    "cleanup": {
+      "original_avd_all_bytes_unchanged": true,
+      "temporary_device_removed": true,
+      "emulator_returncode": 0,
+      "runtime_completed": true
+    },
+    "runtime_scope": "Actual instrumented App host and worker on isolated API32; ordinary Activity startup only.",
+    "run_evidence_sha256": {
+      "build.log": "31c4a6639f0b002d43b290d11b484dc55ebc3dad9d57d0863d276f949fac3c05",
+      "executed-runner.py.txt": "66a7d3158423524d310e23bb615c65b5d9999fc52a2c37315be2ec9501664379",
+      "source-before.json": "cc758b43091ed0664ca8ef1fbabc804927aa6ac5e11471bd5b36638acb289834"
+    }
+  },
+  "evidence_sha256": {
+    "reports/apple-recovery-open-budget-20261109/android-api32.json": "7ee24958d28cd242a38916589d977811687e3e972c1dda034d9c6e68cdc15a9f",
+    "reports/apple-recovery-open-budget-20261109/android-input_batches.txt": "77ca392d07aa67aa12be4ce71c239e341ec3930aae42f4caa444031068891dc3",
+    "reports/apple-recovery-open-budget-20261109/android-owner_retirement.txt": "867704d2bc824a2c0ac55bae738261ad00a75b647c8576fce5a2bcf800c1181e",
+    "reports/apple-recovery-open-budget-20261109/android-recovery_open_budget.txt": "d1e7b5e7b22d313ffde0878c04d1b3d5c45acb2d22c46db46411765164d6b4df",
+    "reports/apple-recovery-open-budget-20261109/baseline-summary.json": "2e1a71204d25e6acbc1ff12fda3fbdfdd128dfeb2b18ed6cd93407bf30412499",
+    "reports/apple-recovery-open-budget-20261109/baseline-tests.json": "70c19ffd6dd48d226c10949169d468aaba63817f7c9687569d3d629f48028d61",
+    "reports/apple-recovery-open-budget-20261109/fixed-summary.json": "e45a357dce502745514abe8d4750c71cd942ed6cd97db57d24b8127e127bb1cc",
+    "reports/apple-recovery-open-budget-20261109/fixed-tests.json": "83b0464572c25d1e6ae6f39a9bed35d70978232389b015f04cbc535cc44995c5",
+    "reports/apple-recovery-open-budget-20261109/ordinary-ui-note.ncp": "027608daec7f9c01c620805555175d3f66b972d950718304a34093557efbf9be",
+    "reports/apple-recovery-open-budget-20261109/ordinary-ui-xcodebuild.txt": "670d9e8dca2a464f24887248cd3f42e45ba1de69b39e75354cbcb04f5dbe480c",
+    "reports/apple-recovery-open-budget-20261109/sketch-summary.json": "df264096eb13f1c83e5998eef6271e81c7428964b66e4c937d059bec846d1772",
+    "reports/apple-recovery-open-budget-20261109/sketch-tests.json": "c98bbbf026f91466e175372984e44cc647b6bfd17d52b3afa0eafbb83e6fec6f"
+  }
+}

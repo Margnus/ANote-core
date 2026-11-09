@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "environment": {
+    "ro.build.fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+    "ro.build.version.sdk": "32",
+    "ro.product.cpu.abi": "arm64-v8a"
+  },
+  "host_observations": {
+    "input_rejected": 2247,
+    "exact_input_admitted": 2248,
+    "document_capacity_refused": true,
+    "prior_owner_preserved": true,
+    "prior_unsaved_file_absent": true,
+    "pending_sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "canonical_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+  },
+  "fixture_sha256": {
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+  },
+  "apk_sha256": "1d81ff3f3411c3df5890c237a6219f977cd9eb446491b3b5ef798faea9650705",
+  "test_apk_sha256": "5b802bb170a5d2c4243f2f4eed2a65d30a507676ad4d35a896dd2654c49f00c4",
+  "isolated_note_baseline": {},
+  "additional_host_checks": {
+    "input_batches": [
+      "sibling_surface_preserves_original_input_and_rejects_stale_events",
+      "document_capacity_refusal_and_undo_recovery",
+      "live_byte_refusal_and_undo_recovery",
+      "input_byte_budget_refusal_cancel_and_recovery",
+      "history_capacity_refuses_down_without_owning_samples",
+      "journal_identity_capacity_refuses_before_real_view_ownership",
+      "typed_pending_up_retains_exact_command_and_retries_once",
+      "double_scene_mapping_before_float_path",
+      "history_terminal_order_equal_time_and_undo",
+      "invalid_native_sample_cancels_and_recovers",
+      "resize_cancels_and_late_up_preserves_root",
+      "callback_batch_limit_explicit_cancel_and_recover"
+    ],
+    "owner_retirement": [
+      "wrong_thread_store_creation_and_lookup_refused",
+      "invalid_store_configuration_does_not_start_worker",
+      "unadmitted_release_refuses_before_retiring_authority",
+      "wrong_thread_retirement_rejected",
+      "accepted_root_saved_before_terminal_worker_stop",
+      "failed_root_retained_until_explicit_retry",
+      "active_input_and_picker_refuse_without_loss",
+      "pending_read_and_delivery_refuse_retirement",
+      "full_ledger_retry_frees_slot_before_retirement",
+      "shared_editor_detach_capacity_and_reopen",
+      "pending_editor_failure_retry_original_recovery",
+      "actual_activity_shared_editor_departure",
+      "editor_original_ledger_old_ack_failure_and_retry",
+      "editor_stopped_backend_feedback",
+      "actual_activity_shared_presentation_update"
+    ]
+  },
+  "cleanup": {
+    "original_avd_all_bytes_unchanged": true,
+    "temporary_device_removed": true,
+    "emulator_returncode": 0,
+    "runtime_completed": true
+  },
+  "runtime_scope": "Actual instrumented App host and worker on isolated API32; ordinary Activity startup only.",
+  "run_evidence_sha256": {
+    "build.log": "31c4a6639f0b002d43b290d11b484dc55ebc3dad9d57d0863d276f949fac3c05",
+    "executed-runner.py.txt": "66a7d3158423524d310e23bb615c65b5d9999fc52a2c37315be2ec9501664379",
+    "source-before.json": "cc758b43091ed0664ca8ef1fbabc804927aa6ac5e11471bd5b36638acb289834"
+  }
+}

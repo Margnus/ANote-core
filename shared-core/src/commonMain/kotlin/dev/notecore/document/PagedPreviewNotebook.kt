@@ -447,6 +447,11 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         internal fun exceedsRecoveryInputBudget(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): Boolean =
             snapshot.pending?.let { PreviewRecoveryCodec.pendingCharge(it) > budget.inputBytes } == true
 
+        internal fun recoveryAdmissionFailure(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): PreviewOpenFailure? {
+            if (exceedsRecoveryInputBudget(snapshot, budget)) return PreviewOpenFailure.INPUT_CAPACITY
+            return checkOpenContentAndBudget(snapshot.root, budget)?.failure
+        }
+
         internal fun checkOpenContentAndBudget(initial: DocumentRoot, budget: DocumentBudget): PreviewNotebookOpen? {
             if (budget.maxPages > PagedPreviewCodec.MAX_PAGES || budget.maxObjects > PagedPreviewCodec.MAX_OBJECTS || budget.liveBytes > 8L * 1024 * 1024)
                 return PreviewNotebookOpen(null, PreviewOpenFailure.UNSUPPORTED_BUDGET)

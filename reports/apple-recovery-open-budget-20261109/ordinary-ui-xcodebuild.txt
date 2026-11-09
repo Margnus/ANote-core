@@ -1,0 +1,13 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project ios-app/NoteCorePreview.xcodeproj -scheme NoteCorePreview -configuration Debug -destination "platform=iOS Simulator,id=549C7426-DBD4-448F-A8EB-DE70129BDA53" -parallel-testing-enabled NO -derivedDataPath /tmp/notecore-01a1c0b0-fixed/DerivedData -resultBundlePath /tmp/notecore-01a1c0b0-ordinary-ui/result.xcresult CODE_SIGNING_ALLOWED=NO "-only-testing:NoteCorePreviewUITests" test-without-building
+Test Case '-[NoteCorePreviewUITests.PreviewJourneyUITests testTwoPageInkHistoryBackgroundSaveAndProcessReopen]' started.
+<unknown>:0: warning: -[NoteCorePreviewUITests.PreviewJourneyUITests testTwoPageInkHistoryBackgroundSaveAndProcessReopen] : Update the Info.plist: Support for all orientations will soon be required.
+    t =   110.18s Added attachment named 'saved-three-strokes'
+    t =   141.22s Added attachment named 'process-reopened-page-two'
+Test Case '-[NoteCorePreviewUITests.PreviewJourneyUITests testTwoPageInkHistoryBackgroundSaveAndProcessReopen]' passed (155.967 seconds).
+Test Suite 'PreviewJourneyUITests' passed at 2026-11-09 22:35:07.994.
+	 Executed 1 test, with 0 failures (0 unexpected) in 155.967 (155.975) seconds
+Test Suite 'NoteCorePreviewUITests.xctest' passed at 2026-11-09 22:35:07.995.
+	 Executed 1 test, with 0 failures (0 unexpected) in 155.967 (155.976) seconds
+Test Suite 'All tests' passed at 2026-11-09 22:35:07.995.
+	 Executed 1 test, with 0 failures (0 unexpected) in 155.967 (155.978) seconds
