@@ -62,9 +62,10 @@ Android 已有实际字体样本证明 hasGlyph=true 不能证明采用了指定
 
 ### 旧源码映射的限制
 
-只读检查当前海外 jnotesv2gp 提交 `675fabc3b55197a01979fbbc556874d876512860` 的 DragEditTexter 和 DragEditTexterCreater，两份原件与固定 Git 字节或精确 CRLF 检出一致，摘要及范围见[源结构核验](../reports/legacy-text-source-contract.json)。这不是原 Mac 国内源码或任何旧笔记数据的验证结果，不继承旧迁移证据。
+只读检查当前海外 jnotesv2gp 提交 `675fabc3b55197a01979fbbc556874d876512860` 的 DragEditTexter 和 DragEditTexterCreater，三份原件（含下述 PageFragment）与固定 Git 字节或精确 CRLF 检出一致，摘要及范围见[源结构核验](../reports/legacy-text-source-contract.json)。这不是原 Mac 国内源码或任何旧笔记数据的验证结果，不继承旧迁移证据。
 
 - 数据类同时保留全局 textColor/textSize/typeface/isBold 等字段及 underline/bold/italic/color/fontSize/typefaceData 六份范围列表。不能把独立列表直接拼成规范的完整、无重叠 runs；必须先验证实际应用次序、默认样式、越界/重叠处理及旧实例，再生成确定的有效样式分段。
+- 进一步核对同一提交的 PageFragment 实际创建调用：先设置 textContent、全局字号/颜色，再依次应用 color、fontSize、typefaceData（经 FontFamilyFactory）、underline、bold、italic，最后分别调用 setAlignment(alignment) 与 setRowSpace(rowSpace)。这补齐源级调用顺序及两个字段的独立消费者，不能推导 TextViewUtil 内部重叠/裁剪语义或当前打包二进制等价；没有拿另一个 drawpanel 源仓冒充实际依赖。
 - `rowSpace` 的编码键为 `t7`；`alignment` 编码键为 `t8`，但 alternate 是 `lineSpace`。这明确否决“字段别名就是语义”的映射方式；读取哪个别名不等于采用其字面含义。尚未确认旧运行时语义或所有历史版本。
 - 文本链接、回收状态、editType、无界 offset、背景、padding/边框等原字段超出初始基本文本范围。不能因为新版首发只支持基本样式就静默丢弃它们后报告无损迁移；应按蓝图旧数据迁移政策显式保留、降级或报告不支持。
 - 创建者注释明确 width/height/textSize 使用数据坐标而非 View 像素。实际坐标/offset/旋转消费者仍须独立核对，不能只凭注释乘一次屏幕 scale 或把位置和变换叠加两次。

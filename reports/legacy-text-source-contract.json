@@ -14,14 +14,21 @@
       "sha256": "cbd40e4e92521aed9651ddb34233e98a277d5e447c80a33c46903138728d4c3f",
       "git_blob_sha256": "0fb0f2dd402ab9a6a8baa5660dd8d8303d8392ffb8a0404bc6cf09d60bd11959",
       "working_tree_matches_git_or_exact_crlf": true
+    },
+    {
+      "path": "module_main/src/main/java/com/jideos/module_main/common/PageFragment.kt",
+      "sha256": "931085c965ddc3ce10b1966b051c84ef3ddca287a4d3075418a626fb3d8c39e9",
+      "git_blob_sha256": "a7dcb3f8498793bf96662a5c2e487242d8cf807c6bf79627d5c0e50b94a2b0d5",
+      "working_tree_matches_git_or_exact_crlf": true
     }
   ],
   "findings": [
     "Global text style coexists with six independent style range lists; precedence is not established by the data class.",
     "alignment field serializes as t8 with alternate name lineSpace, while rowSpace serializes as t7; alias names cannot establish semantic equivalence.",
     "Text links, recycle state, editType, unbounded offsets, padding/border/background fields exceed initial basic text scope.",
-    "Creator comments require width/height/textSize in data coordinates, not view pixels. Actual source transform consumers remain unverified."
+    "Creator comments require width/height/textSize in data coordinates, not view pixels. Actual source transform consumers remain unverified.",
+    "PageFragment applies textContent and global size/color, then range lists color, fontSize, typefaceData, underline, bold, italic; finally setAlignment(alignment) and setRowSpace(rowSpace). This is source call order, not verified TextViewUtil span precedence or packaged binary equivalence."
   ],
   "decision": "Keep basic text design separate from lossless legacy migration. Do not flatten overlapping style lists or rename aliases by intuition; unsupported content requires explicit preservation/degradation reporting.",
-  "scope": "Two source files inspected read-only and bound to current Git bytes. No user note/DB fixture, runtime span precedence, import/export, platform IME or migration acceptance. No old project build or modification."
+  "scope": "Three source files inspected read-only and bound to current Git bytes. PageFragment call order verified; TextViewUtil implementation/overlap semantics and source-to-packaged-binary equivalence not established. No user note/DB fixture, runtime, import/export, IME or migration acceptance. No old project build or modification."
 }
