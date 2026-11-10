@@ -7,6 +7,7 @@ data class PagedPreviewHeader(val documentId: String, val title: String, val pag
 
 /** Unfrozen bounded preview interchange. No filesystem, mutable authority, history or durable receipts. */
 object PagedPreviewCodec {
+    internal const val MAX_HEADER_CHARACTERS = 4096
     const val MAX_PAGES = 128
     const val MAX_OBJECTS = 5000
     const val MAX_POINTS = 200_000
@@ -27,7 +28,7 @@ object PagedPreviewCodec {
     /** Bounded metadata only. Callers must decode the whole document before trusting its body. */
     @Throws(IllegalArgumentException::class)
     fun header(text: String): PagedPreviewHeader {
-        require(text.length <= 4096)
+        require(text.length <= MAX_HEADER_CHARACTERS)
         val cursor = Rows(text)
         return when (cursor.row(2)) {
             listOf("NCPREVIEW", "1") -> LegacyPreviewReader.header(text)

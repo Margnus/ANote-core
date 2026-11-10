@@ -103,6 +103,10 @@ object PreviewRecoveryCodec {
     }
     /** Metadata is advisory only; full decoding is mandatory before opening. */
     @Throws(IllegalArgumentException::class)
-    fun header(text: String): PagedPreviewHeader = PagedPreviewCodec.header(
-        if (text.startsWith(MAGIC)) "NCPREVIEW\t2\n" + text.substring(MAGIC.length) else text)
+    fun header(text: String): PagedPreviewHeader {
+        if (!text.startsWith(MAGIC)) return PagedPreviewCodec.header(text)
+        val previewMagic = "NCPREVIEW\t2\n"
+        require(text.length - MAGIC.length <= PagedPreviewCodec.MAX_HEADER_CHARACTERS - previewMagic.length)
+        return PagedPreviewCodec.header(previewMagic + text.substring(MAGIC.length))
+    }
 }
