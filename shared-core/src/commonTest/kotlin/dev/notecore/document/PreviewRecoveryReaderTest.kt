@@ -36,6 +36,13 @@ class PreviewRecoveryReaderTest {
     }
     @Test fun malformedOrOverCapacityInputNeverReturnsPartialBaseAndLaterReadStillWorks() {
         val original = checkpoint(); val text = original.encode()
+        val header = text.lineSequence().take(2).joinToString("\n") + "\n"
+        val previewHeader = "NCPREVIEW\t2\n" + header.substringAfter('\n')
+        val padding = "x".repeat(4096 - previewHeader.length)
+        assertEquals(original.documentId, PreviewRecoveryCodec.header(header + padding).documentId)
+        assertEquals(original.documentId, PreviewRecoveryCodec.header(previewHeader + padding).documentId)
+        assertFailsWith<IllegalArgumentException> { PreviewRecoveryCodec.header(header + padding + "x") }
+        assertFailsWith<IllegalArgumentException> { PreviewRecoveryCodec.header(previewHeader + padding + "x") }
         val rows = text.split('\n', limit = 4); val frame = rows[2].split('\t')
         val signed = rows[0] + "\n" + rows[1] + "\n" + frame[0] + "\t" + frame[1] + "\t-001" + frame[2].drop(4) + "\n" + rows[3]
         for (bad in listOf("", text.dropLast(1), text+"extra", text.replace("NCRECOVERY\t1", "NCRECOVERY\t9"), signed))
