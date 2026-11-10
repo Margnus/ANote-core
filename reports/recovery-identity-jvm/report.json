@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "baseline_commit": "c76b48423b25c5674d0bddb8e828ab52b1cef70b",
+  "scope": "Existing recovery reader joint identity refusal: valid isolated payloads, duplicate object, foreign document, changed page geometry; not App or whole requirement acceptance",
+  "jvm_shared_core": {
+    "tests": 345,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "affected_class_tests": 6,
+  "source_sha256": {
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewRecoveryReaderTest.kt": "0546a36965252754fb96d4fc997735ba948b467368d4288da969c01546bee249",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "4d36d821bae7d7d6424c7375ce352765c2c47f8bb586b60d4d1afe85b58b4c2e",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "73fbe2d7fd9673ca2499a781f73978083a7a83debf1a3a4ee50924c9d10c8b6c"
+  },
+  "evidence_sha256": {
+    "build.log": "7985688624ba14ab2aa58d3408964dead37c3f15c72f5e885e25f53933ff202f",
+    "TEST-dev.notecore.document.PreviewRecoveryReaderTest.xml": "df2fccc562df56c1c789c6725965514e0e8780215d0848eb33c32ce4dfb407a2"
+  },
+  "art": "../recovery-identity-art/report.json",
+  "apple_current_candidate_verified": false,
+  "c1_passed": false,
+  "requirement_accepted": false
+}

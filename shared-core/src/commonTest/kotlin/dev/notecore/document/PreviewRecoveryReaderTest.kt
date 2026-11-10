@@ -76,4 +76,33 @@ class PreviewRecoveryReaderTest {
         assertNotNull(PreviewRecoveryCodec.read(original).snapshot)
     }
 
+    @Test fun separatelyValidPayloadsCannotSpliceForeignOrDuplicatePendingIntoBase() {
+        val original = checkpoint(true)
+        val text = original.encode()
+        val rows = text.split('\n', limit = 4)
+        val frame = rows[2].split('\t')
+        val baseText = rows[3].take(frame[0].toInt())
+        val inkText = rows[3].drop(frame[0].toInt()).take(frame[1].toInt())
+        val base = assertNotNull(PreviewDocumentReader.read(baseText).root)
+        val ink = assertNotNull(PreviewDocumentReader.read(inkText).root)
+        fun envelope(changed: String) = rows[0]+"\n"+rows[1]+"\n"+
+            baseText.length+"\t"+changed.length+"\t"+frame[2]+"\n"+baseText+changed+"RECOVERY-END\n"
+        val objectRow = inkText.lineSequence().first { it.startsWith("S\t") }.split('\t')
+        val duplicateRow = objectRow.toMutableList().also { it[1] = base.scene.objects().single().id.value }.joinToString("\t")
+        val metadata = inkText.lineSequence().drop(1).first().split('\t')
+        val foreignMetadata = metadata.toMutableList().also { it[1] = "foreign-document" }.joinToString("\t")
+        val pageRow = inkText.lineSequence().first { it.startsWith("G\t") }.split('\t')
+        val changedPage = pageRow.toMutableList().also { it[3] = (ink.page(0).width + 1.0).toString() }.joinToString("\t")
+        for (changed in listOf(inkText.replace(objectRow.joinToString("\t"), duplicateRow),
+            inkText.replace(metadata.joinToString("\t"), foreignMetadata),
+            inkText.replace(pageRow.joinToString("\t"), changedPage))) {
+            // Each component is a valid supported document; only their joint identity is invalid.
+            assertNotNull(PreviewDocumentReader.read(changed).root)
+            refused(envelope(changed), PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT)
+            assertFailsWith<IllegalArgumentException> { PreviewRecoveryCodec.decode(envelope(changed)) }
+            assertTrue(original.sameContent(assertNotNull(PreviewRecoveryCodec.read(text).snapshot)))
+        }
+        assertEquals(text, original.encode())
+    }
+
 }
