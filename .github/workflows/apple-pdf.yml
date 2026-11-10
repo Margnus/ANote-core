@@ -8,6 +8,8 @@ on:
       - '.github/workflows/apple-pdf.yml'
       - 'ci/collect_apple_pdf.py'
       - 'tools/probes/PdfCapabilityProbe.swift'
+      - 'tools/verify_apple_pdf_metadata.py'
+      - 'tools/generate_pdf_password_fixture.py'
       - 'android-app/src/androidTest/assets/pdf/**'
 
 permissions:

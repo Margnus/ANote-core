@@ -30,6 +30,7 @@ public final class PdfCapabilityProbe {
         return bitmap;
     }
     public static void main(String[] args) throws Exception {
+        if (args.length == 2 && args[1].equals("--password")) { passwordOnly(new File(args[0]).getCanonicalFile()); return; }
         check(args.length == 1);
         File root = new File(args[0]).getCanonicalFile();
         check(root.getPath().contains("/cache/pdf-capability-"));
@@ -116,5 +117,35 @@ public final class PdfCapabilityProbe {
             .put("large_page_count",500).put("large_render_requests",requested)
             .put("public_outline_api_verified",false).put("in_progress_render_cancellation_verified",false);
         System.out.println("NOTECORE_PDF "+result);
+    }
+    private static void passwordOnly(File root) throws Exception {
+        check(root.getPath().contains("/cache/pdf-capability-"));
+        File encrypted = new File(root,"password-aes256.pdf");
+        boolean missing = false, wrong = false;
+        try (PdfRenderer ignored = open(encrypted,null)) { }
+        catch (SecurityException expected) { missing = true; }
+        try (PdfRenderer ignored = open(encrypted,"wrong-fixture-password")) { }
+        catch (SecurityException expected) { wrong = true; }
+        check(missing && wrong);
+        JSONArray pages = new JSONArray();
+        try (PdfRenderer plain = open(new File(root,"crop-rotations.pdf"),null);
+             PdfRenderer unlocked = open(encrypted,"notecore-fixture")) {
+            check(plain.getPageCount()==4 && unlocked.getPageCount()==4);
+            for (int i=0;i<4;i++) {
+                try (PdfRenderer.Page a=plain.openPage(i); PdfRenderer.Page b=unlocked.openPage(i)) {
+                    Bitmap before=render(a,new File(root,"password-plain-"+i+".png"));
+                    try {
+                        Bitmap after=render(b,new File(root,"password-aes256-"+i+".png"));
+                        try {
+                            check(before.sameAs(after));
+                            pages.put(new JSONObject().put("index",i).put("width",b.getWidth())
+                                .put("height",b.getHeight()).put("pixels_equal",true));
+                        } finally { after.recycle(); }
+                    } finally { before.recycle(); }
+                }
+            }
+        }
+        System.out.println("NOTECORE_PDF_PASSWORD "+new JSONObject().put("missing_refused",missing)
+            .put("wrong_refused",wrong).put("correct_rendered",true).put("pages",pages));
     }
 }

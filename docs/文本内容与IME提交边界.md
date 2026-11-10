@@ -91,3 +91,7 @@ internal TextPayloadDraft将上述确认文本/完整UTF16样式范围/逻辑框
 原Scene对象族、模块迁移方向、命令/delta、兼容拒绝与完整双端增量的具体接入路线见[文本对象原链路接入设计](文本对象原链路接入设计.md)。当前internal候选所在shared-core不能成为canvas-core的反向依赖。
 
 2026-11-09同一6项内容约束在实际API35 ART独立library-test APK通过，原5笔记保持，且原默认50项宿主选择回归通过；见[ART报告](../reports/text-payload-art/report.json)及其source-binding。只采用值校验的平台子范围；当前Apple/Native下载504失败保留，不用ART代替IME、字体渲染或持久化验收。
+
+## 2026-11-10：内部载荷Native实际补验
+
+固定5590f80/CI42747669654实际shared Native327中包含TextPayloadDraftTest原6项；canvas211、Swift50、普通UI1也通过，源/产物/ZIP及4截图核验见[回执](../reports/apple-recovery-ci-42747669654/verification.json)。采用内容候选的Native运行语义并收口，原值校验在JVM/ART/Native各自来源齐备；Swift/App回归不代表普通App已消费该internal载荷或实现IME。OBJ01/02仍未开发/待验收，原对象/codec/命令/资源/显示导出与双端IME完整增量及M-1/C1前置保持。

@@ -1,0 +1,44 @@
+{
+  "status": "passed",
+  "baseline_commit": "48ebcd524ccaafd1243d5c26b7368116777584db",
+  "before": {
+    "tests": 15,
+    "failures": 2
+  },
+  "after_jvm": {
+    "tests": 589,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "after_affected_tests": {
+    "TEST-dev.notecore.canvas.prototype.BrushPathPocTest": 6,
+    "TEST-dev.notecore.canvas.prototype.ChunkedBrushPocTest": 9
+  },
+  "test_sources_unchanged_before_after": true,
+  "execution": "Both JVM modules actually executed after fix; final source-stamp build UP-TO-DATE, not counted as a new execution",
+  "art_test_count": 148,
+  "notes_preserved": 5,
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPoc.kt": "35df901a9a8ac504a445d3dd973ec3806a2618a78e9feb03a6e71e04b23d7d88",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "1c5418e5b485eb8ff8feed9910286ef0676d0417a0c851e9e1c3d57877644e21",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushPathPocTest.kt": "d23798f77527e18ef59aef85b5a26f61a8e64c842c36d89fc9f94fc55cd54cb9",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPocTest.kt": "c5fb29c7a4cb73167ece3bf542398b6ebd4ff73f41f30059ca606282bd123c6d"
+  },
+  "evidence_sha256": {
+    "after/architecture.json": "bba65a7672592bd6003e7a52823e668ef433d154ddbb82f332bf87982950ad2e",
+    "after/build.log": "d3a1e51dd7a0aaa4c11a35c83538be6566daadfc0a4824be605ed7832107e1e9",
+    "after/final-source-build.log": "c96780d9a23c8bd7841b6a887dc70a6ba006147c2a93a54ec56d860ff21ae20c",
+    "after/portable.json": "bb29b095ea63d5c2d0066b2afa409a66bd4c83a71a3eeaa07cd5b91df8f661ae",
+    "after/TEST-dev.notecore.canvas.prototype.BrushPathPocTest.xml": "6224ef5878df582e5e7cfb58176f07e1adfb3f4565e826fad8bf0a39cb5b1c2d",
+    "after/TEST-dev.notecore.canvas.prototype.ChunkedBrushPocTest.xml": "982ec5a67cde82f0b1aae9e75d6f376702c531c50265a7fd723d640e5279909d",
+    "before/build.log": "9f3d77d9d990e028178b78cede3661c02aae9fc99b005fbda22c1bc4095d2ee2",
+    "before/source.json": "a274189d6508ff71cc3d3457f1dc4cd2137a191cdce8816a60f2520052ef97cd",
+    "before/TEST-dev.notecore.canvas.prototype.BrushPathPocTest.xml": "f7a698308e813f64161712ce25ee7a2ef7620a7b81ba2f78411920236d18896c",
+    "before/TEST-dev.notecore.canvas.prototype.ChunkedBrushPocTest.xml": "5146c92b14b32a1f9ebcc44e8a33012505ef492aad9cb0a86fb8a56d0e4d82f1"
+  },
+  "scope": "Original derived-path and chunk-mask numerical refusal fix; no canonical sample/algorithm/App/physical acceptance",
+  "native_verified": false,
+  "c1_complete": false,
+  "requirement_accepted": false
+}

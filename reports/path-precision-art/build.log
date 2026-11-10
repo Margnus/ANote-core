@@ -1,0 +1,121 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :canvas-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: Invalid Source Set Dependency Across Trees
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+Solution: Please keep dependsOn edges only from one group and remove the others.
+
+
+> Configure project :shared-core
+w: Default Kotlin Hierarchy Template Not Applied Correctly
+The Default Kotlin Hierarchy Template was not applied to 'project ':shared-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+Solution: Please remove the dependsOn-calls or disable the default template.
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+w: Invalid Source Set Dependency Across Trees
+Kotlin Source Set 'androidInstrumentedTest' can't depend on 'commonTest' as they are from different Source Set Trees.
+Solution: Please remove this dependency edge.
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preDebugBuild UP-TO-DATE
+> Task :canvas-core:generateDebugResValues UP-TO-DATE
+> Task :canvas-core:generateDebugResources UP-TO-DATE
+> Task :canvas-core:packageDebugResources UP-TO-DATE
+> Task :canvas-core:parseDebugLocalResources UP-TO-DATE
+> Task :canvas-core:generateDebugRFile UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebug UP-TO-DATE
+> Task :canvas-core:preDebugAndroidTestBuild UP-TO-DATE
+> Task :canvas-core:writeDebugAarMetadata UP-TO-DATE
+> Task :canvas-core:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :canvas-core:compileDebugLibraryResources UP-TO-DATE
+> Task :canvas-core:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :canvas-core:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :canvas-core:generateDebugAndroidTestResources UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :canvas-core:extractDeepLinksDebug UP-TO-DATE
+> Task :canvas-core:processDebugManifest UP-TO-DATE
+> Task :canvas-core:processDebugAndroidTestManifest UP-TO-DATE
+> Task :canvas-core:processDebugAndroidTestResources UP-TO-DATE
+> Task :canvas-core:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :canvas-core:compileDebugAndroidTestShaders NO-SOURCE
+> Task :canvas-core:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugShaders UP-TO-DATE
+> Task :canvas-core:compileDebugShaders NO-SOURCE
+> Task :canvas-core:debugAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:generateDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAssets UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :canvas-core:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :canvas-core:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :canvas-core:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :canvas-core:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :canvas-core:mergeDebugJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugNativeLibs NO-SOURCE
+> Task :canvas-core:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :canvas-core:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :canvas-core:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :canvas-core:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+
+> Task :canvas-core:compileDebugKotlinAndroid
+w: file:///D:/work/StudioProjects/ANote-core/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt:172:121 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///D:/work/StudioProjects/ANote-core/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt:172:132 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :canvas-core:compileDebugJavaWithJavac NO-SOURCE
+> Task :canvas-core:bundleLibRuntimeToJarDebug
+> Task :canvas-core:bundleLibCompileToJarDebug
+> Task :canvas-core:processDebugJavaRes UP-TO-DATE
+> Task :canvas-core:bundleLibRuntimeToDirDebug
+> Task :canvas-core:mergeLibDexDebugAndroidTest
+
+> Task :canvas-core:compileDebugAndroidTestKotlinAndroid
+w: file:///D:/work/StudioProjects/ANote-core/canvas-core/src/jvmAndAndroidTest/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPocTest.kt:68:50 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///D:/work/StudioProjects/ANote-core/canvas-core/src/jvmAndAndroidTest/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPocTest.kt:70:69 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :canvas-core:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :canvas-core:dexBuilderDebugAndroidTest
+> Task :canvas-core:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :canvas-core:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :canvas-core:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :canvas-core:mergeProjectDexDebugAndroidTest
+> Task :canvas-core:packageDebugAndroidTest
+> Task :canvas-core:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :canvas-core:assembleDebugAndroidTest
+
+[Incubating] Problems report is available at: file:///D:/work/StudioProjects/ANote-core/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 41s
+46 actionable tasks: 10 executed, 36 up-to-date

@@ -2,10 +2,12 @@ package dev.notecore.library
 
 import dev.notecore.document.hasValidUnicode
 
-internal data class LibraryTrashNote(val noteId: String, val originalFolderId: String?, val deletedAtMillis: Long)
-internal data class LibraryTrashSnapshot(val active: LibraryFolderSnapshot, val trash: List<LibraryTrashNote>)
+internal data class LibraryTrashNote(val noteId: String, val originalFolderId: String?, val deletedAtMillis: Long,
+    val folderGroupId: String? = null)
+internal data class LibraryTrashSnapshot(val active: LibraryFolderSnapshot, val trash: List<LibraryTrashNote>,
+    val folderGroups: List<LibraryTrashedFolderGroup> = emptyList())
 internal enum class LibraryTrashRejection {
-    INVALID_TRASH, ALREADY_TRASHED, NOT_FOUND, NOT_TRASHED, INVALID_TIME, SCOPE_CHANGED,
+    INVALID_TRASH, ALREADY_TRASHED, NOT_FOUND, NOT_TRASHED, INVALID_TIME, SCOPE_CHANGED, GROUPED_NOTE,
 }
 internal data class LibraryTrashPatch(
     val spaceId: String, val expectedRevision: Long,
@@ -17,7 +19,8 @@ internal data class LibraryTrashPlan(
     val rejection: LibraryTrashRejection? = null, val snapshotRejection: LibraryFolderRejection? = null,
 )
 /** UI must display this exact scope and obtain explicit confirmation before submitting it. */
-internal data class LibraryEmptyTrashScope(val spaceId: String, val expectedRevision: Long, val rows: List<LibraryTrashNote>)
+internal data class LibraryEmptyTrashScope(val spaceId: String, val expectedRevision: Long, val rows: List<LibraryTrashNote>,
+    val folderGroups: List<LibraryTrashedFolderGroup> = emptyList())
 internal data class LibraryEmptyTrashPlan(
     val scope: LibraryEmptyTrashScope? = null,
     val rejection: LibraryTrashRejection? = null, val snapshotRejection: LibraryFolderRejection? = null,
@@ -28,14 +31,21 @@ internal object LibraryTrashRules {
     fun snapshotError(s: LibraryTrashSnapshot, space: String, revision: Long): LibraryFolderRejection? {
         LibraryFolderRules.validateSnapshot(s.active, space, revision)?.let { return it }
         if (s.trash.size > LibraryFolderRules.MAX_NOTES - s.active.notes.size) return LibraryFolderRejection.CAPACITY
+        var folders = s.active.folders.size.toLong()
+        if (s.folderGroups.size > LibraryFolderRules.MAX_FOLDERS) return LibraryFolderRejection.CAPACITY
+        for (group in s.folderGroups) {
+            folders += group.folders.size
+            if (folders > LibraryFolderRules.MAX_FOLDERS) return LibraryFolderRejection.CAPACITY
+        }
         return null
     }
     fun invalidTrash(s: LibraryTrashSnapshot): Boolean {
         val activeIds = s.active.notes.map { it.noteId }.toSet()
         return s.trash.map { it.noteId }.toSet().size != s.trash.size || s.trash.any {
             !validId(it.noteId) || it.noteId in activeIds || it.deletedAtMillis < 0 ||
-                (it.originalFolderId != null && !validId(it.originalFolderId))
-        }
+                (it.originalFolderId != null && !validId(it.originalFolderId)) ||
+                (it.folderGroupId != null && !validId(it.folderGroupId))
+        } || LibraryFolderTrashRules.invalidGroups(s)
     }
 
     fun recycle(s: LibraryTrashSnapshot, space: String, revision: Long,
@@ -55,6 +65,7 @@ internal object LibraryTrashRules {
         if (invalidTrash(s)) return LibraryTrashPlan(rejection = LibraryTrashRejection.INVALID_TRASH)
         val before = s.trash.singleOrNull { it.noteId == noteId }
             ?: return LibraryTrashPlan(rejection = LibraryTrashRejection.NOT_TRASHED)
+        if (before.folderGroupId != null) return LibraryTrashPlan(rejection = LibraryTrashRejection.GROUPED_NOTE)
         val folder = before.originalFolderId?.takeIf { id -> s.active.folders.any { it.id == id } }
         return LibraryTrashPlan(patch = LibraryTrashPatch(space, revision, null,
             LibraryNoteLocation(before.noteId, folder), before, null))
@@ -63,7 +74,8 @@ internal object LibraryTrashRules {
     fun inspectEmpty(s: LibraryTrashSnapshot, space: String, revision: Long): LibraryEmptyTrashPlan {
         snapshotError(s, space, revision)?.let { return LibraryEmptyTrashPlan(snapshotRejection = it) }
         if (invalidTrash(s)) return LibraryEmptyTrashPlan(rejection = LibraryTrashRejection.INVALID_TRASH)
-        return LibraryEmptyTrashPlan(scope = LibraryEmptyTrashScope(space, revision, s.trash.sortedBy { it.noteId }))
+        return LibraryEmptyTrashPlan(scope = LibraryEmptyTrashScope(space, revision, s.trash.sortedBy { it.noteId },
+            s.folderGroups.sortedBy { it.rootId }.map { it.copy(folders = it.folders.sortedBy { row -> row.id }, noteIds = it.noteIds.sorted()) }))
     }
 
     /** Removes only the enumerated metadata references; grants no file/resource deletion rights. */

@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "baseline_commit": "5590f803495df7d6eb85a5c220f3e80c9a17d23d",
+  "user_policy": "Whole subtree and its active notes enter trash together, restored together",
+  "scope": "Internal non-production metadata plans in original trash snapshot; no App/SQLite/IO or whole requirement acceptance",
+  "jvm": {
+    "tests": 586,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "execution": "shared-core 352 actually executed; canvas-core 234 reused UP-TO-DATE",
+  "affected_tests": {
+    "TEST-dev.notecore.library.LibraryBatchRulesTest": 9,
+    "TEST-dev.notecore.library.LibraryFolderTrashRulesTest": 7,
+    "TEST-dev.notecore.library.LibraryTrashRulesTest": 10
+  },
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryBatchRules.kt": "5705b3c9c13de5f39f82ad92049deebb068c6b3640a25dad10a1f640561f55f2",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderTrashRules.kt": "4d6841db43d8615ebedc8754c708b78a0165f13c2a9157bc3fd0b8fa7a06e37e",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryNoteMoveRules.kt": "dad6cd372805d4aa9325059dcd1978a5740df4768914ccd9f92a5b713c891006",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibrarySearchRules.kt": "dd05b6803fc638eb5152c2c818043e8291f3c52cbf1eb680097320bef5ec2ef9",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryTrashRules.kt": "99ca8f2def5c0062c5e85ba6cc40158a1dbb7027f3acf35cf110f007e751a5df",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryBatchRulesTest.kt": "b78592abed3fe727ff15ceb1d3bff190606a438bfb99a1f409496e2dbcce03cd",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryFolderRulesTest.kt": "4dcdb35a198a491953a6967f168111e22ad27a6379217691d567fbd05790ed50",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryFolderTrashRulesTest.kt": "c8167a1a0ca8a23a91fce51a8d420f1eec0e3b4a7e2d7fabc26e97a90ca7445a",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryNoteMoveRulesTest.kt": "65b690ae054e602767ba8a23b76ac2029dc1c466bbeebe898ca7f1001bbf699f",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibrarySearchRulesTest.kt": "cc6394abd417814de950f45e5c28ca922ae0de6b7a89e6a8976880a2db9b0b80",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryTrashRulesTest.kt": "fe6688f5180aa034dafc12e4599a35dccf096068e4a6ad9b1fd9375d9c7eca77",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryViewRulesTest.kt": "00393cc49dc487513c7633ce6d19759f3ddcf6dc5c2a1de032a25933c79b0306"
+  },
+  "evidence_sha256": {
+    "architecture.json": "bba65a7672592bd6003e7a52823e668ef433d154ddbb82f332bf87982950ad2e",
+    "build.log": "4d380b423ae18b0a8d59bd6f28d258751f5c31de039c77d01aa17a162360ca81",
+    "portable.json": "5671cd55edff8680ecdc697f1e3b4302d3d533917c695a552dbf4d20bfa023cc",
+    "TEST-dev.notecore.library.LibraryBatchRulesTest.xml": "b33edcfbd17d81d5510d274cc4c2a5b505fd64a8041a298314ca71d30e6dcc7a",
+    "TEST-dev.notecore.library.LibraryFolderTrashRulesTest.xml": "8983b225a416884493d9155d3947f511b7ccb66851dc63b8f861b84a2ceef6f1",
+    "TEST-dev.notecore.library.LibraryTrashRulesTest.xml": "d543120fc5b99f967ca85cdd7a2e733f96cfd61d5c72feec596c9e2219153647"
+  },
+  "art": "../folder-trash-art/report.json",
+  "apple_current_candidate_verified": false,
+  "c1_passed": false,
+  "production_storage_connected": false,
+  "requirement_accepted": false
+}

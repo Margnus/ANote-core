@@ -1,0 +1,64 @@
+import hashlib,json,os,re,shutil,subprocess as sp,tempfile,time
+from pathlib import Path
+start=time.monotonic()
+root=Path.cwd(); sdk=Path.home()/'Library/Android/sdk'; adbexe=sdk/'platform-tools/adb'
+original=root/'.android-avd/NoteCorePreview.avd'
+out=Path(tempfile.mkdtemp(prefix='notecore-resume-art-')); print(out,flush=True)
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def original_state():
+    return {p.relative_to(original).as_posix():sha(p) for p in original.rglob('*') if p.is_file()}
+def record(name,data):(out/name).write_text(json.dumps(data,indent=2)+'\n')
+serial='emulator-5586'; name='NoteCoreMergeNov10'
+assert serial not in sp.check_output([adbexe,'devices']).decode()
+assert not any('qemu-system' in s and 'NoteCorePreview' in s for s in sp.check_output(['ps','-axo','command='],text=True).splitlines())
+before=original_state()
+avds=out/'avds'; avd=avds/(name+'.avd'); avd.mkdir(parents=True)
+user=out/'user'; user.mkdir()
+image=sdk/'system-images/android-32/google_apis/arm64-v8a'
+conf=dict(tuple(x.strip() for x in line.split('=',1)) for line in (original/'config.ini').read_text().splitlines() if '=' in line)
+conf.update({'AvdId':name,'avd.ini.displayname':name,'image.sysdir.1':str(image)+'/', 'tag.id':'google_apis','tag.display':'Google APIs','PlayStore.enabled':'false','hw.cpu.ncore':'2','hw.ramSize':'2048','disk.dataPartition.size':'6442450944'})
+(avd/'config.ini').write_text(''.join(f'{k} = {v}\n' for k,v in conf.items()))
+(avds/(name+'.ini')).write_text(f'avd.ini.encoding=UTF-8\npath={avd}\ntarget=android-32\n')
+env={**os.environ,'ANDROID_AVD_HOME':str(avds),'ANDROID_USER_HOME':str(user),'ANDROID_EMULATOR_HOME':str(user)}
+def adb(*args):
+    return sp.check_output([adbexe,'-s',serial,*map(str,args)],timeout=100,stderr=sp.PIPE)
+def getprop(name):return adb('shell','getprop',name).decode().strip()
+with (out/'emulator.log').open('wb') as log:
+    p=sp.Popen([sdk/'emulator/emulator','-avd',name,'-port','5586','-no-window','-no-audio','-no-snapshot','-no-boot-anim','-gpu','swiftshader_indirect','-memory','2048','-cores','2'],env=env,stdout=log,stderr=sp.STDOUT)
+try:
+    for _ in range(180):
+        assert p.poll() is None
+        try:
+            if getprop('sys.boot_completed')=='1':break
+        except sp.CalledProcessError:pass
+        time.sleep(2)
+    else:raise AssertionError('boot deadline')
+    assert getprop('ro.boot.qemu.avd_name')==name and getprop('ro.build.version.sdk')=='32'
+    platform={k:getprop(k) for k in ('ro.build.version.sdk','ro.product.cpu.abi','ro.build.fingerprint')}
+    while not Path('/tmp/notecore-resume-collect.json').exists():
+        time.sleep(2)
+        assert p.poll() is None
+        assert time.monotonic()-start < 380
+    results={}
+    for module,pkg,runner,extras,key,count in [
+        ('canvas-core','dev.notecore.canvas.poc.test','dev.notecore.canvas.prototype.CoreBrushInstrumentation',[],'common_brush',149),
+        ('shared-core','dev.notecore.document.poc.test','dev.notecore.document.DocumentOrderInstrumentation',['-e','suite','document-reader'],'document',13),
+    ]:
+        path=root/module/'build/outputs/apk/androidTest/debug'
+        info=json.loads((path/'output-metadata.json').read_text()); assert info['applicationId']==pkg
+        apk=path/info['elements'][0]['outputFile']; digest=sha(apk)
+        assert b'Success' in adb('install',apk)
+        remote=adb('shell','pm','path',pkg).decode().strip().removeprefix('package:')
+        assert hashlib.sha256(adb('exec-out','cat',remote)).hexdigest()==digest
+        raw=adb('shell','am','instrument','-w','-r',*extras,pkg+'/'+runner)
+        (out/(module+'.log')).write_bytes(raw)
+        assert all(s.encode() in raw for s in (f'{key}_tests={count}',f'{key}_status=passed',f'{key}_ignored=0','INSTRUMENTATION_CODE: -1')),raw.decode()[-3000:]
+        results[module]={'tests':count,'apk_sha256':digest}
+    record('result.json',{'platform':platform,'results':results})
+finally:
+    p.terminate()
+    try:p.wait(timeout=20)
+    except sp.TimeoutExpired:p.kill();p.wait()
+    shutil.rmtree(avds);shutil.rmtree(user)
+    assert original_state()==before
+    record('cleanup.json',{'isolated_avd_removed':True,'original_avd_files_unchanged':len(before)})

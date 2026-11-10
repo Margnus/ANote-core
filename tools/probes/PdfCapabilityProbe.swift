@@ -128,4 +128,32 @@ func metadataMain() throws {
     let data = try JSONSerialization.data(withJSONObject: ["files": files, "scope": "Read-only CoreGraphics metadata and rendering observations; pixel/source verification is separate; no shared runtime adapter or App integration."], options: [.sortedKeys])
     FileHandle.standardOutput.write(Data("NOTECORE_PDF_METADATA ".utf8) + data + Data("\n".utf8))
 }
-do { if CommandLine.arguments.count == 3 { try metadataMain() } else { try main() } } catch {fputs("Synthetic PDF probe failed: \(error)\n",stderr);exit(2)}
+func passwordMain() throws {
+    let root = URL(fileURLWithPath: CommandLine.arguments[1]).standardizedFileURL
+    try require(root.path.contains("/build/pdf-capability-"))
+    let encrypted = try open(root.appendingPathComponent("password-aes256.pdf"))
+    try require(encrypted.isEncrypted && !encrypted.isUnlocked)
+    try require(encrypted.page(at: 1) == nil)
+    let wrong = "wrong-fixture-password".withCString { encrypted.unlockWithPassword($0) }
+    try require(!wrong && !encrypted.isUnlocked)
+    try require(encrypted.page(at: 1) == nil)
+    let correct = "notecore-fixture".withCString { encrypted.unlockWithPassword($0) }
+    try require(correct && encrypted.isUnlocked && encrypted.numberOfPages == 4)
+    let plain = try open(root.appendingPathComponent("crop-rotations.pdf"))
+    var pages = [[String: Any]]()
+    for index in 0..<4 {
+        guard let a = plain.page(at: index+1), let b = encrypted.page(at: index+1) else { throw ProbeFailure.invariant }
+        let before = try render(a, root.appendingPathComponent("password-plain-\(index).png"))
+        let after = try render(b, root.appendingPathComponent("password-aes256-\(index).png"))
+        try require(before == after)
+        pages.append(["index": index, "pixels_equal": true])
+    }
+    let data = try JSONSerialization.data(withJSONObject: ["missing_refused": true, "wrong_refused": true,
+        "correct_rendered": true, "pages": pages], options: [.sortedKeys])
+    FileHandle.standardOutput.write(Data("NOTECORE_PDF_PASSWORD ".utf8) + data + Data("\n".utf8))
+}
+do {
+    if CommandLine.arguments.count == 3 && CommandLine.arguments[2] == "--password" { try passwordMain() }
+    else if CommandLine.arguments.count == 3 { try metadataMain() }
+    else { try main() }
+} catch {fputs("Synthetic PDF probe failed: \(error)\n",stderr);exit(2)}

@@ -23,10 +23,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--adb', required=True)
     parser.add_argument('--output', default='build/document-order-art')
-    parser.add_argument('--suite', choices=('document-order', 'text-payload', 'document-reader'), default='document-order')
+    parser.add_argument('--suite', choices=('document-order', 'text-payload', 'document-reader', 'folder-trash'), default='document-order')
     args = parser.parse_args()
     suites = {'document-order': SUITES, 'text-payload': ('TextPayloadDraftTest',),
-              'document-reader': ('PreviewDocumentReaderTest', 'PreviewRecoveryReaderTest')}[args.suite]
+              'document-reader': ('PreviewDocumentReaderTest', 'PreviewRecoveryReaderTest'),
+              'folder-trash': ('LibraryFolderTrashRulesTest', 'LibraryTrashRulesTest', 'LibraryBatchRulesTest')}[args.suite]
     out = ROOT/args.output
     out.mkdir(parents=True, exist_ok=False)  # Never overwrite a previous baseline or build/run evidence.
     def adb(*command):
@@ -67,8 +68,9 @@ def main():
     (out/'run.log').write_bytes(raw)
     after = notes()
     (out/'preview-notes-after.json').write_text(json.dumps(after, indent=2)+'\n', encoding='utf-8', newline='\n')
+    test_package = 'library' if args.suite == 'folder-trash' else 'document'
     counts = {name: len(re.findall(r'@Test\s+fun\s+\w+\s*\(',
-        (ROOT/'shared-core/src/commonTest/kotlin/dev/notecore/document'/f'{name}.kt').read_text(encoding='utf-8'))) for name in suites}
+        (ROOT/'shared-core/src/commonTest/kotlin/dev/notecore'/test_package/f'{name}.kt').read_text(encoding='utf-8'))) for name in suites}
     output = raw.decode('utf-8')
     assert 'document_status=passed' in output and f'document_tests={sum(counts.values())}' in output and 'document_ignored=0' in output, output
     assert f'document_suite={args.suite}' in output, output

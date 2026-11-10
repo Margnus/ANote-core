@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "git_binding": "staged task inputs plus unchanged index, CRLF normalization explicit",
+  "byte_exact": [
+    "android-app/src/androidTest/java/dev/notecore/app/probes/PdfCapabilityProbe.java",
+    "android-app/src/androidTest/assets/pdf/crop-rotations.pdf",
+    "android-app/src/androidTest/assets/pdf/password-aes256.pdf",
+    "android-app/src/androidTest/assets/pdf/password-manifest.json",
+    "fixtures/pdf/recipe.json",
+    "tools/verify_pdf_password_art.py",
+    "tools/generate_pdf_password_fixture.py",
+    "android-app/build.gradle.kts",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "gradle.properties"
+  ],
+  "crlf_only": [],
+  "evidence_sha256": {
+    "architecture.json": "bba65a7672592bd6003e7a52823e668ef433d154ddbb82f332bf87982950ad2e",
+    "build.log": "9b2a32d657d9c6535d7e774d822c2bf512d786fde7846a11c2e40b98a9db1c8a",
+    "install.log": "c4aa470acafcf8576c15b0f0b5ae7e852d1ec5413372d0e6a9272e788e1306d3",
+    "password-aes256-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "password-aes256-1.png": "8c6ac8911be51635674ba678724225716dec0bac12a5222d9486ed20d7fab73c",
+    "password-aes256-2.png": "641ca08d48386808702524cba94fcc8e510abcde645808466ee4adc7e16ed789",
+    "password-aes256-3.png": "504ddaf8aa360d656958bbb02d4297dc8731e6582b98e0698cbd26ecf7607fe6",
+    "password-plain-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "password-plain-1.png": "8c6ac8911be51635674ba678724225716dec0bac12a5222d9486ed20d7fab73c",
+    "password-plain-2.png": "641ca08d48386808702524cba94fcc8e510abcde645808466ee4adc7e16ed789",
+    "password-plain-3.png": "504ddaf8aa360d656958bbb02d4297dc8731e6582b98e0698cbd26ecf7607fe6",
+    "portable.json": "9e61e50b63920b04519c71f79f6b867b8579e87e586a92d40b7740963b325c23",
+    "report.json": "1142b4705dcb21e5e1002ad16c0fd64a3f91f62d5b3017958a3aea550b352253",
+    "run.log": "367d5e97163c09d5ab931cb031f802daa2f10c00b73ba1854ff6488bf2631ac6"
+  },
+  "visual_review": "Host Poppler first page and actual ART four AES pages viewed",
+  "scope": "Actual isolated ART system renderer synthetic sample; no App/physical/production storage acceptance"
+}

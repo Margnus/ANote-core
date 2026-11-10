@@ -57,6 +57,7 @@ internal class BrushPathPoc private constructor(
             var vertices = 0L; var contours = 0
             for (i in 0 until samples.size) {
                 if (i % 256 == 0 && cancelled()) return BrushPathBuild.Cancelled
+                if (radius(i) == 0.0) return BrushPathBuild.Rejected("radius-underflow")
                 val n = sides(i)
                 if (n > 4096) return BrushPathBuild.Rejected("tolerance-budget")
                 val x = transform.a * samples.x(i) + transform.c * samples.y(i) + transform.tx
@@ -70,16 +71,46 @@ internal class BrushPathPoc private constructor(
             if (cancelled()) return BrushPathBuild.Cancelled
             val xy = DoubleArray(vertices.toInt() * 2); val offsets = IntArray(contours + 1)
             var cursor = 0; var contour = 0
+            var orientation = 0
             fun point(x: Double, y: Double) {
                 xy[cursor * 2] = transform.a * x + transform.c * y + transform.tx
                 xy[cursor * 2 + 1] = transform.b * x + transform.d * y + transform.ty
                 cursor++
+            }
+            fun contourProblem(): String? {
+                val start = offsets[contour - 1]
+                val x0 = xy[start * 2]; val y0 = xy[start * 2 + 1]
+                var scale = 0.0
+                for (i in start until cursor) {
+                    if (i % 256 == 0 && cancelled()) return "cancelled"
+                    val next = if (i + 1 == cursor) start else i + 1
+                    val x = xy[i * 2]; val y = xy[i * 2 + 1]
+                    if (!x.isFinite() || !y.isFinite() || x == xy[next * 2] && y == xy[next * 2 + 1])
+                        return "coordinate-precision"
+                    scale = maxOf(scale, abs(x - x0), abs(y - y0))
+                }
+                if (scale == 0.0) return "coordinate-precision"
+                // Translate AND scale before area products: tiny representable contours must not
+                // be mistaken for zero area when squared coordinates underflow.
+                var area = 0.0
+                for (i in start until cursor) {
+                    if (i % 256 == 0 && cancelled()) return "cancelled"
+                    val next = if (i + 1 == cursor) start else i + 1
+                    area += ((xy[i * 2] - x0) / scale) * ((xy[next * 2 + 1] - y0) / scale) -
+                        ((xy[next * 2] - x0) / scale) * ((xy[i * 2 + 1] - y0) / scale)
+                }
+                if (!area.isFinite() || area == 0.0) return "coordinate-precision"
+                val sign = if (area > 0.0) 1 else -1
+                if (orientation != 0 && orientation != sign) return "coordinate-precision"
+                orientation = sign
+                return null
             }
             for (i in 0 until samples.size) {
                 if (i % 256 == 0 && cancelled()) return BrushPathBuild.Cancelled
                 offsets[contour++] = cursor
                 val x = samples.x(i); val y = samples.y(i); val r = radius(i); val n = sides(i)
                 repeat(n) { j -> val angle = 2 * PI * j / n; point(x + r * cos(angle), y + r * sin(angle)) }
+                contourProblem()?.let { return if (it == "cancelled") BrushPathBuild.Cancelled else BrushPathBuild.Rejected(it) }
                 if (i > 0 && bridge(i)) {
                     offsets[contour++] = cursor
                     val ax = samples.x(i - 1); val ay = samples.y(i - 1); val ar = radius(i - 1)
@@ -90,6 +121,7 @@ internal class BrushPathPoc private constructor(
                     val mx = slope * ux + side * uy; val my = slope * uy - side * ux
                     point(ax + nx * ar, ay + ny * ar); point(ax + mx * ar, ay + my * ar)
                     point(x + mx * r, y + my * r); point(x + nx * r, y + ny * r)
+                    contourProblem()?.let { return if (it == "cancelled") BrushPathBuild.Cancelled else BrushPathBuild.Rejected(it) }
                 }
             }
             if (cancelled()) return BrushPathBuild.Cancelled

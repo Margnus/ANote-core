@@ -1,0 +1,56 @@
+{
+  "status": "passed",
+  "date": "2026-11-10",
+  "parents": [
+    "db9a1bd3765a8317de370d94e4f4863474e3b8f3",
+    "c9dbf026d66582162bf93f3491f1c50e10794884"
+  ],
+  "jvm_contract_tests": {
+    "tests": 603,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_app_debug_compiled": true,
+  "art": {
+    "platform": {
+      "ro.build.version.sdk": "32",
+      "ro.product.cpu.abi": "arm64-v8a",
+      "ro.build.fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys"
+    },
+    "results": {
+      "canvas-core": {
+        "tests": 149,
+        "apk_sha256": "4ca92def0f0db1e4b752db0636ad8b3b198e7408f63443bbef46d402654cf6bc"
+      },
+      "shared-core": {
+        "tests": 13,
+        "apk_sha256": "7cc2dccda199ba499617201cf3d73b86ebecf45683ef04234ff7ef97608e92b3"
+      }
+    }
+  },
+  "cleanup": {
+    "isolated_avd_removed": true,
+    "original_avd_files_unchanged": 24
+  },
+  "pdf_verifier_replay": {
+    "run_id": "42752132299",
+    "metadata_pages": 12,
+    "image_checks": 24,
+    "aes256_r6_password_verified": true,
+    "scope": "Replay of retained Apple evidence in a temporary copy; no new Apple runtime."
+  },
+  "scope": "Merged checkout. Android API32 ARM64 isolated library instrumentation and reference JVM suites. No ordinary UI, physical M-1, heap, stylus or full C1 acceptance.",
+  "sha256": {
+    "reports/merge-20261110-art/canvas-core.log": "a9ff80f7808dd88fd85c7487ad2ebc3748c77fc16cd804a1daa8c4bf04894abd",
+    "reports/merge-20261110-art/cleanup.json": "b032d29310d3b5b1c3cafa90d90d193db4d961b3ca6fe687489b07b1fc3fa7ce",
+    "reports/merge-20261110-art/driver.py.txt": "99cb4736880863ed77aac1fdcade7fe7d19565ff3d56d7d55232f05538b6cd83",
+    "reports/merge-20261110-art/result.json": "4e984de7add3c153a87927e4cb6e70b54e975a98cb9b11b198803987f1656152",
+    "reports/merge-20261110-art/shared-core.log": "e6fb80c785bf0b8c2ed7ba0194be3fb3d035f96685de43794f923655b6fe66b6",
+    "reports/verification.json": "e12e7a306e4cd331e2b8c51e374338c5ed97c700c5747f2f33727337ad3fb0bc",
+    "reports/gradle-verification.sha256": "fcfb0227530d87b4086a74a52f02c5f86aa0dfe96050fbf5c49a095b42952385",
+    "tools/verify_apple_pdf_ci.py": "a510880ec1d0d022d0b2d994de4e7f28f89d2daa20c01d5e0d22938206209989"
+  },
+  "c1_complete": false,
+  "dev041_gate_open": false
+}

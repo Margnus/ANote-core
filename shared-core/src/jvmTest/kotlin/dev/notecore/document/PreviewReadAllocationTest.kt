@@ -33,4 +33,18 @@ class PreviewReadAllocationTest {
         assertSame(objects.last(), dense.scene.find(objects.last().id))
         assertSame(samples, dense.scene.find(objects.first().id)!!.samples)
     }
+    @Test fun oversizedRecoveryHeaderIsRejectedWithoutCopyingBody() {
+        val meter = assertIs<com.sun.management.ThreadMXBean>(java.lang.management.ManagementFactory.getThreadMXBean())
+        assertTrue(meter.isThreadAllocatedMemorySupported); meter.isThreadAllocatedMemoryEnabled = true
+        val input = "NCRECOVERY\t1\n" + "x".repeat(2 * 1024 * 1024)
+        fun reject() { assertFailsWith<IllegalArgumentException> { PreviewRecoveryCodec.header(input) } }
+        repeat(8) { reject() }
+        val allocated = (1..3).minOf {
+            val before = meter.getThreadAllocatedBytes(Thread.currentThread().id)
+            reject()
+            meter.getThreadAllocatedBytes(Thread.currentThread().id) - before
+        }
+        println("preview-recovery-header rejectedBytes=$allocated")
+        assertTrue(allocated < 64 * 1024, "Rejected header copied body: $allocated bytes")
+    }
 }
