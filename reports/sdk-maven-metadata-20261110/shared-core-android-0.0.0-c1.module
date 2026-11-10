@@ -1,0 +1,142 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../shared-core/0.0.0-c1/shared-core-0.0.0-c1.module",
+    "group": "dev.notecore.probe",
+    "module": "shared-core",
+    "version": "0.0.0-c1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "dev.notecore.probe",
+          "module": "canvas-core",
+          "version": {
+            "requires": "0.0.0-c1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "shared-core-release.aar",
+          "url": "shared-core-android-0.0.0-c1.aar",
+          "size": 443688,
+          "sha512": "c074b2e31c1dc8d583c6e9379c9c211eebe2401307bb94427a49f8e1d75aca168cb91769e0ee0e414c736d0631ab26d6605b5b0c84bef84d739096229c30ab2c",
+          "sha256": "970ad368c387f29f8a383ca712a185a12453bf29c4c29925d20c63f30991f234",
+          "sha1": "e30be183d1a62d3264703a430036f5102bcfc17e",
+          "md5": "93b90db283a6ced933d7b5cc20fed4f3"
+        }
+      ]
+    },
+    {
+      "name": "releaseRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "dev.notecore.probe",
+          "module": "canvas-core",
+          "version": {
+            "requires": "0.0.0-c1"
+          },
+          "excludes": [
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-stdlib-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-annotations-common"
+            }
+          ]
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          },
+          "excludes": [
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-stdlib-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-annotations-common"
+            }
+          ]
+        }
+      ],
+      "files": [
+        {
+          "name": "shared-core-release.aar",
+          "url": "shared-core-android-0.0.0-c1.aar",
+          "size": 443688,
+          "sha512": "c074b2e31c1dc8d583c6e9379c9c211eebe2401307bb94427a49f8e1d75aca168cb91769e0ee0e414c736d0631ab26d6605b5b0c84bef84d739096229c30ab2c",
+          "sha256": "970ad368c387f29f8a383ca712a185a12453bf29c4c29925d20c63f30991f234",
+          "sha1": "e30be183d1a62d3264703a430036f5102bcfc17e",
+          "md5": "93b90db283a6ced933d7b5cc20fed4f3"
+        }
+      ]
+    },
+    {
+      "name": "releaseSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "files": [
+        {
+          "name": "shared-core-android-0.0.0-c1-sources.jar",
+          "url": "shared-core-android-0.0.0-c1-sources.jar",
+          "size": 63638,
+          "sha512": "8eca5635d5e35c807ce45b6489ae3d980b945490e629d6ff4a07ef043066b7c3e7d8cb88219793df34f45b6ab3211f919acaabde8a6c12638ee9beb19bdd1b87",
+          "sha256": "75c7606fe63c14c4e18b88f92cabc6aa3dbe406ab9ddda8710183fecfeaae85a",
+          "sha1": "62a661c3eed98b66d471ba2d384ce1fba9a6d713",
+          "md5": "4e75482928b0f1e5c7a597eb194f2f67"
+        }
+      ]
+    }
+  ]
+}

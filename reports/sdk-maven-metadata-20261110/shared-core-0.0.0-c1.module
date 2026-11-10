@@ -1,0 +1,174 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "dev.notecore.probe",
+    "module": "shared-core",
+    "version": "0.0.0-c1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14"
+    }
+  },
+  "variants": [
+    {
+      "name": "metadataApiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-metadata",
+        "org.jetbrains.kotlin.platform.type": "common"
+      },
+      "dependencies": [
+        {
+          "group": "dev.notecore.probe",
+          "module": "canvas-core",
+          "version": {
+            "requires": "0.0.0-c1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "shared-core-metadata-0.0.0-c1.jar",
+          "url": "shared-core-0.0.0-c1.jar",
+          "size": 714,
+          "sha512": "c6cf4de0e4f5026da07893d08178408a3c3f0040305f97e447fae0d7bf304967f9677585a08de220cbd2e21a629e2724613883549117e97f590604744fa30e57",
+          "sha256": "826da67d55b95c40826dd12d41254cc01f7cc436c0239e3ef9fa029247fd54eb",
+          "sha1": "f8bd16af972c0cce85b264e579df97ac19ffc005",
+          "md5": "e4e97b51ff333b86cb0055808046d9da"
+        }
+      ]
+    },
+    {
+      "name": "metadataSourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.platform.type": "common"
+      },
+      "files": [
+        {
+          "name": "shared-core-kotlin-0.0.0-c1-sources.jar",
+          "url": "shared-core-0.0.0-c1-sources.jar",
+          "size": 62761,
+          "sha512": "3c16a8cfa3f6a01c82f8e72769fc82caa4f0916c76fad368e3e7e4caaecd2dffc1cd3c9751f099a0e280c853561ff61ba59d0ee39db836ff66c9b32fd1d8b848",
+          "sha256": "4430a63ce3d0729a2beec4f59377fcc5d0fa107c99dfe0f3e4f12f9ce5f991cc",
+          "sha1": "a3feade213cb369036b17ea71e811c1d2bcecd6a",
+          "md5": "aa4dcdf52d355baa7f77da4b446f3996"
+        }
+      ]
+    },
+    {
+      "name": "releaseApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "available-at": {
+        "url": "../../shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.module",
+        "group": "dev.notecore.probe",
+        "module": "shared-core-android",
+        "version": "0.0.0-c1"
+      }
+    },
+    {
+      "name": "releaseRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "available-at": {
+        "url": "../../shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.module",
+        "group": "dev.notecore.probe",
+        "module": "shared-core-android",
+        "version": "0.0.0-c1"
+      }
+    },
+    {
+      "name": "releaseSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "available-at": {
+        "url": "../../shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.module",
+        "group": "dev.notecore.probe",
+        "module": "shared-core-android",
+        "version": "0.0.0-c1"
+      }
+    },
+    {
+      "name": "jvmApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "available-at": {
+        "url": "../../shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1.module",
+        "group": "dev.notecore.probe",
+        "module": "shared-core-jvm",
+        "version": "0.0.0-c1"
+      }
+    },
+    {
+      "name": "jvmRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "available-at": {
+        "url": "../../shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1.module",
+        "group": "dev.notecore.probe",
+        "module": "shared-core-jvm",
+        "version": "0.0.0-c1"
+      }
+    },
+    {
+      "name": "jvmSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "available-at": {
+        "url": "../../shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1.module",
+        "group": "dev.notecore.probe",
+        "module": "shared-core-jvm",
+        "version": "0.0.0-c1"
+      }
+    }
+  ]
+}

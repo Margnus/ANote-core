@@ -1,0 +1,14 @@
+dev.notecore.probe:canvas-core:0.0.0-c1
+  Variant releaseRuntimeElements-published:
+    | org.jetbrains.kotlin.platform.type              | androidJvm   | androidJvm   |
+dev.notecore.probe:canvas-core:0.0.0-c1
+\--- dev.notecore.probe:shared-core-android:0.0.0-c1
+     \--- dev.notecore.probe:shared-core:0.0.0-c1
+dev.notecore.probe:canvas-core-android:0.0.0-c1
+  Variant releaseRuntimeElements-published:
+    | org.jetbrains.kotlin.platform.type              | androidJvm   | androidJvm   |
+dev.notecore.probe:canvas-core-android:0.0.0-c1
+\--- dev.notecore.probe:canvas-core:0.0.0-c1
+     \--- dev.notecore.probe:shared-core-android:0.0.0-c1
+          \--- dev.notecore.probe:shared-core:0.0.0-c1
+BUILD SUCCESSFUL in 3s

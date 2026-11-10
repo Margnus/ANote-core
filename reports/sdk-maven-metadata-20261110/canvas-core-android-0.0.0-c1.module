@@ -1,0 +1,114 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../canvas-core/0.0.0-c1/canvas-core-0.0.0-c1.module",
+    "group": "dev.notecore.probe",
+    "module": "canvas-core",
+    "version": "0.0.0-c1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "canvas-core-release.aar",
+          "url": "canvas-core-android-0.0.0-c1.aar",
+          "size": 479464,
+          "sha512": "85b57db7a0a0c4375685a9c1279d29f4038f80d0b34e69cf62f0e70f8bd03923519ee9bb87e4f1ad20af8627ddb186d1cff153afec5fd114270f82bbe192d95f",
+          "sha256": "b74c2e1063d3349dc9fe3f4d2f3474d85bcfee29faeb776503e9c422eecd1969",
+          "sha1": "9e2f430781865afd254929b7db4c6954dc3bc931",
+          "md5": "1b43cd0be978a36f2ed3154a9e1b5f33"
+        }
+      ]
+    },
+    {
+      "name": "releaseRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          },
+          "excludes": [
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-stdlib-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-annotations-common"
+            }
+          ]
+        }
+      ],
+      "files": [
+        {
+          "name": "canvas-core-release.aar",
+          "url": "canvas-core-android-0.0.0-c1.aar",
+          "size": 479464,
+          "sha512": "85b57db7a0a0c4375685a9c1279d29f4038f80d0b34e69cf62f0e70f8bd03923519ee9bb87e4f1ad20af8627ddb186d1cff153afec5fd114270f82bbe192d95f",
+          "sha256": "b74c2e1063d3349dc9fe3f4d2f3474d85bcfee29faeb776503e9c422eecd1969",
+          "sha1": "9e2f430781865afd254929b7db4c6954dc3bc931",
+          "md5": "1b43cd0be978a36f2ed3154a9e1b5f33"
+        }
+      ]
+    },
+    {
+      "name": "releaseSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "files": [
+        {
+          "name": "canvas-core-android-0.0.0-c1-sources.jar",
+          "url": "canvas-core-android-0.0.0-c1-sources.jar",
+          "size": 68809,
+          "sha512": "eaaaa2c70384b5997a6e9812fdcdf3f278de86c68238f6c94c0a145338e4a4107479793f75ce519dce4925a7dcc9b2a61ae932a1e0ad94b25d56b4e1f4cd1800",
+          "sha256": "00d41bb877f6974673a7809c5fe0aaa511a09f39803585bcf99ae34e8cbbae37",
+          "sha1": "870d4e9203d05767a10f3b8eaf264369df8d44f5",
+          "md5": "03618e5319e4a2489ceeaa2c27f720b9"
+        }
+      ]
+    }
+  ]
+}
