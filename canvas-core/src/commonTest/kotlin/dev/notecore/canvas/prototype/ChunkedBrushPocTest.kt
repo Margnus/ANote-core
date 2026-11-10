@@ -11,6 +11,19 @@ class ChunkedBrushPocTest {
     private fun catalog(stroke: StrokeObject, segments: Int = 4) =
         assertIs<ChunkedBrushBuild.Ready>(ChunkedBrushPoc.build(frame, stroke, segments)).catalog
 
+    @Test fun collapsedPathRefusesOriginalMaskInsteadOfPublishingTransparentSuccess() {
+        val original = stroke(doubleArrayOf(1e9), doubleArrayOf(1e9)).copy(
+            brush = BrushSpec(BrushKind.MONOLINE, 1, 1e-8, -1))
+        val oracle = assertIs<BrushEnvelopeBuild.Ready>(BrushEnvelopePoc.build(original.samples, original.brush)).envelope
+        assertTrue(oracle.containsScene(PointD(1e9, 1e9)))
+        val grid = BrushTileGridPoc(PointD(1e9 - 0.00005, 1e9 - 0.00005), 1, 1,
+            pixelSize = 0.0001, samplesPerAxis = 1)
+        val result = catalog(original).render(frame, grid)
+        assertEquals("coordinate-precision", assertIs<BrushTileBuild.Rejected>(result).reason)
+        assertEquals(1e9, original.samples.x(0)); assertEquals(1, original.samples.size)
+        assertEquals(1e-8, original.brush.width)
+    }
+
     @Test fun sharedEndpointsCoverEveryOriginalEdgeExactlyOnceAndSinglePointWorks() {
         val s = stroke(DoubleArray(18) { it.toDouble() })
         val c = catalog(s)

@@ -82,4 +82,34 @@ class BrushPathPocTest {
         assertEquals(512, input.size)
         assertIs<BrushPathBuild.Ready>(BrushPathPoc.build(input, brush))
     }
+
+    @Test fun unrepresentablePositiveWidthNeverPublishesCollapsedContours() {
+        val input = StrokeSamples.copyOf(doubleArrayOf(0.0), doubleArrayOf(0.0), floatArrayOf(0f), longArrayOf(1))
+        for ((width, kind) in listOf(Double.MIN_VALUE to BrushKind.MONOLINE, 1e-323 to BrushKind.PRESSURE)) {
+            val result = BrushPathPoc.build(input, BrushSpec(kind, 1, width, -1))
+            assertEquals("radius-underflow", assertIs<BrushPathBuild.Rejected>(result).reason)
+        }
+        val distant = StrokeSamples.copyOf(doubleArrayOf(1e9), doubleArrayOf(1e9), floatArrayOf(1f), longArrayOf(1))
+        assertEquals("coordinate-precision", assertIs<BrushPathBuild.Rejected>(BrushPathPoc.build(distant,
+            BrushSpec(BrushKind.MONOLINE, 1, 1e-8, -1))).reason)
+        assertEquals(1e9, distant.x(0)); assertEquals(1e9, distant.y(0)); assertEquals(1, distant.size)
+    }
+
+    @Test fun representableTinyAndDistantContoursStillPublishWithoutChangingInput() {
+        // Squaring this radius underflows: validation must use a scaled local area, not raw shoelace products.
+        for ((origin, width) in listOf(0.0 to 1e-200, 1e9 to 0.125)) {
+            val input = StrokeSamples.copyOf(doubleArrayOf(origin), doubleArrayOf(origin), floatArrayOf(1f), longArrayOf(1))
+            for (transform in listOf(Affine2D(), Affine2D(a = -1.0, c = 0.25))) {
+                val path = assertIs<BrushPathBuild.Ready>(BrushPathPoc.build(input,
+                    BrushSpec(BrushKind.MONOLINE, 1, width, -1), transform)).path
+                assertEquals(1, path.contourCount)
+                for (i in 0 until path.vertexCount) {
+                    val next = (i + 1) % path.vertexCount
+                    assertTrue(path.x(i).isFinite() && path.y(i).isFinite())
+                    assertTrue(path.x(i) != path.x(next) || path.y(i) != path.y(next))
+                }
+            }
+            assertEquals(origin, input.x(0)); assertEquals(origin, input.y(0))
+        }
+    }
 }
