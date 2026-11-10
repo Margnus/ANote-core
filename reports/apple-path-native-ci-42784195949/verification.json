@@ -1,0 +1,27 @@
+{
+  "status": "artifact_binding_verified",
+  "execution_status": "passed",
+  "commit": "0441dbc1c95c09795488ad131ad74be271bc580e",
+  "run_id": 42784195949,
+  "archive_sha256": "c18eddf0cce43759ba585b30690efe6974b487a6b6a1a676c8f278705ef6d166",
+  "pinned_git_inputs_verified": 166,
+  "artifact_hashes_verified": 17,
+  "native_tests": {
+    "canvas-core": 214,
+    "shared-core": 334
+  },
+  "new_numerical_checks_verified": [
+    "dev.notecore.canvas.prototype.BrushPathPocTest.representableTinyAndDistantContoursStillPublishWithoutChangingInput",
+    "dev.notecore.canvas.prototype.BrushPathPocTest.unrepresentablePositiveWidthNeverPublishesCollapsedContours",
+    "dev.notecore.canvas.prototype.ChunkedBrushPocTest.collapsedPathRefusesOriginalMaskInsteadOfPublishingTransparentSuccess"
+  ],
+  "app_host_tests": 50,
+  "ordinary_ui_tests": 1,
+  "saved_pages": 2,
+  "saved_strokes_per_page": [
+    2,
+    1
+  ],
+  "scope": "Actual pinned-source Native including three numerical refusal/control tests and original Swift/ordinary UI regression. Apple container initially empty. No physical cost/heap, complete hit/AA/mixed object, C1 or production storage acceptance.",
+  "screenshots_reviewed": 4
+}
