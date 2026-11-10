@@ -4,6 +4,9 @@ import android.app.Activity
 import android.app.Instrumentation
 import android.os.Bundle
 import org.junit.runner.JUnitCore
+import dev.notecore.library.LibraryFolderTrashRulesTest
+import dev.notecore.library.LibraryTrashRulesTest
+import dev.notecore.library.LibraryBatchRulesTest
 
 /** Isolated library-test host; consumes the original common tests, never the user's preview data. */
 class DocumentOrderInstrumentation : Instrumentation() {
@@ -21,6 +24,8 @@ class DocumentOrderInstrumentation : Instrumentation() {
                     DocumentHistoryTest::class.java, DocumentAuthorityTest::class.java, RetiredEditingStateTest::class.java)
                 "text-payload" -> arrayOf(TextPayloadDraftTest::class.java)
                 "document-reader" -> arrayOf(PreviewDocumentReaderTest::class.java, PreviewRecoveryReaderTest::class.java)
+                "folder-trash" -> arrayOf(LibraryFolderTrashRulesTest::class.java, LibraryTrashRulesTest::class.java,
+                    LibraryBatchRulesTest::class.java)
                 else -> error("Unknown document test suite: $suite")
             }
             val result = JUnitCore.runClasses(*selected)

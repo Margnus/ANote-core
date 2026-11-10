@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "common_source_files": 54,
+  "imports_checked": 47,
+  "errors": [],
+  "modules": [
+    "canvas-core",
+    "shared-core"
+  ],
+  "project_dependency_direction": "shared-core -> canvas-core only",
+  "independent_sketch_host_project_dependencies": [
+    ":shared-core"
+  ],
+  "independent_apple_sketch_imports": [
+    "NoteCanvasPrototype",
+    "NoteCoreSketch",
+    "UIKit",
+    "XCTest"
+  ],
+  "retired_single_page_stack_absent": true,
+  "scope": "commonMain imports and direct project dependencies; not a transitive bytecode audit"
+}
