@@ -21,3 +21,9 @@ Apple 沿原 `apple-pdf.yml` 与 `collect_apple_pdf.py`，在原独立 simulator
 ## 复验入口
 
 使用捆绑 PDF Python（含 pypdf/cryptography/Pillow），先运行 `tools/generate_pdf_password_fixture.py` 只读验证固定件。按已有 JAVA_HOME/ANDROID_HOME/GRADLE_USER_HOME 执行 `-PenableAndroidTargets=true :android-app:assembleDebugAndroidTest`，再运行 `tools/verify_pdf_password_art.py --adb <adb绝对路径> --output <新的证据目录>`；目录必须未存在，拒绝覆盖历史结果。该工具只允许原5590/API35 AVD，不能用于任意用户设备。Apple 由既有隔离 CI 入口实际编译和执行。
+
+## Apple实际结论与采用决定
+
+固定8cd2976/CI42752132299在独立iOS Simulator上实际通过原CoreGraphics probe：无口令及错口令仍锁定、取页返回nil；正确口令四页可读取、与同平台明文全像素一致，独立色锚点/尺寸通过。原三份PDF的12页元数据/24图像检查也通过。12项固定Git输入、28产物及ZIP摘要核验，4张新AES页面已查看，见[像素结果](../reports/apple-pdf-password-ci-42752132299/verification.json)和[绑定回执](../reports/apple-pdf-password-ci-42752132299/artifact-binding.json)。这不是iOS密码UI、任意现代加密PDF、实际用户文件或物理设备证明。
+
+采用该固定AES-256/R6样本在Android系统PdfRenderer与Apple CoreGraphics的密码/内容能力，本有限缺口收口；停止扩相似算法样本。后续按真实engine capability和资源/任务owner边界接原PDF纵切，验证密码UI/不保存明文/取消重试/低空间/原件保护/保存导出。PDF05未开发/待验收以及M-1/C1/生产前置保持。
