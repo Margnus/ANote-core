@@ -1,0 +1,83 @@
+{
+  "status": "passed",
+  "platform": "Actual API35 ART system PdfRenderer, original app_process probe",
+  "source_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/probes/PdfCapabilityProbe.java": "159d9c3ba39ff0b133639b68f5565f1140102c54f228cb78358ce3cc1aa9c4a4",
+    "android-app/src/androidTest/assets/pdf/crop-rotations.pdf": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+    "android-app/src/androidTest/assets/pdf/password-aes256.pdf": "8301dc8f6450e09e2854a0917f1ae190a057a3996bd736f9719d660e56104565",
+    "android-app/src/androidTest/assets/pdf/password-manifest.json": "a352d441896d22ab7b8f1b5e84ad89ce664dd788986eae88b19d67c912321595",
+    "fixtures/pdf/recipe.json": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8",
+    "tools/verify_pdf_password_art.py": "8f27c279bd4c7239ac7b2536461ea09a2f9d3d2bc967f031d6cd16219f99efa4",
+    "tools/generate_pdf_password_fixture.py": "95c6efafe248e2b1952bb7f4d3ca867854580b985654f4162be9ed2d81174712",
+    "android-app/build.gradle.kts": "44e78f16a6a495f95e16d5841b491f311ec91a33809f79b298d6870f2383c6a0",
+    "build.gradle.kts": "0cba4a0b35cee14e651258c4f2acf55091f7844d883627695f4c33b78969406e",
+    "settings.gradle.kts": "455400ab5a41a3662c5e7ce81f1de9d2dc776d0f5c9e0f50a7193341b349a1fc",
+    "gradle.properties": "a29e188235a52da45ce914db097aa8f585297256b2fcb469a51048bf88f542b0"
+  },
+  "observations": {
+    "missing_refused": true,
+    "wrong_refused": true,
+    "correct_rendered": true,
+    "pages": [
+      {
+        "index": 0,
+        "width": 300,
+        "height": 180,
+        "pixels_equal": true
+      },
+      {
+        "index": 1,
+        "width": 180,
+        "height": 300,
+        "pixels_equal": true
+      },
+      {
+        "index": 2,
+        "width": 300,
+        "height": 180,
+        "pixels_equal": true
+      },
+      {
+        "index": 3,
+        "width": 180,
+        "height": 300,
+        "pixels_equal": true
+      }
+    ]
+  },
+  "test_apk_sha256": "c312c99ee0a98a3ff21b309cc81e8f36e25ecae8b3dba66b9afe922dcb84c201",
+  "installed_test_apk_verified": true,
+  "preview_apk_sha256_unchanged": "3e9733dee5a699b2829394a8872c9179013010b34ed7db47a547b62641d4587c",
+  "notes_before": {
+    "files/preview-notes/4f2b3e5e-ff4e-44be-81b1-2930fa3dd9b0.ncp": "29475acf8cf31c5f9af724d0d318d059c756885c8ee5dd809362d63e7fe04a4a",
+    "files/preview-notes/00b74f72-faf2-4bda-bd28-62cd4ceed060.ncp": "fc2c49286b260239e4008fcf3af251ef3394b1c93ce94d382a9fc8452c65261a",
+    "files/preview-notes/8552d3d1-714c-4bd3-bc86-e522a52741b0.ncp": "7bda02c1fc7a69f89b32ed9aceb374e028cca87b547febb3c225da4943cfb150",
+    "files/preview-notes/f743ab19-790b-4ccb-8604-60ee539e4dbc.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0",
+    "files/preview-notes/e4048328-74d8-4ce3-9eb5-ad763214e032.ncp": "21e6fe2c6c81d179872ab3af2369d95417d63d244404599016d111b2a73b63a1"
+  },
+  "notes_after": {
+    "files/preview-notes/4f2b3e5e-ff4e-44be-81b1-2930fa3dd9b0.ncp": "29475acf8cf31c5f9af724d0d318d059c756885c8ee5dd809362d63e7fe04a4a",
+    "files/preview-notes/00b74f72-faf2-4bda-bd28-62cd4ceed060.ncp": "fc2c49286b260239e4008fcf3af251ef3394b1c93ce94d382a9fc8452c65261a",
+    "files/preview-notes/8552d3d1-714c-4bd3-bc86-e522a52741b0.ncp": "7bda02c1fc7a69f89b32ed9aceb374e028cca87b547febb3c225da4943cfb150",
+    "files/preview-notes/f743ab19-790b-4ccb-8604-60ee539e4dbc.ncp": "df4449e415c3a59236ff7c87ee19560d75ec2fc3f60de5cc1a0293442bcbc3c0",
+    "files/preview-notes/e4048328-74d8-4ce3-9eb5-ad763214e032.ncp": "21e6fe2c6c81d179872ab3af2369d95417d63d244404599016d111b2a73b63a1"
+  },
+  "independent_color_anchors_checked": 32,
+  "source_files_unchanged": true,
+  "evidence_sha256": {
+    "install.log": "c4aa470acafcf8576c15b0f0b5ae7e852d1ec5413372d0e6a9272e788e1306d3",
+    "password-aes256-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "password-aes256-1.png": "8c6ac8911be51635674ba678724225716dec0bac12a5222d9486ed20d7fab73c",
+    "password-aes256-2.png": "641ca08d48386808702524cba94fcc8e510abcde645808466ee4adc7e16ed789",
+    "password-aes256-3.png": "504ddaf8aa360d656958bbb02d4297dc8731e6582b98e0698cbd26ecf7607fe6",
+    "password-plain-0.png": "762ac5d28758126e39441c2ddc429af9f695bbe549b59f3e78c9496062d7e8de",
+    "password-plain-1.png": "8c6ac8911be51635674ba678724225716dec0bac12a5222d9486ed20d7fab73c",
+    "password-plain-2.png": "641ca08d48386808702524cba94fcc8e510abcde645808466ee4adc7e16ed789",
+    "password-plain-3.png": "504ddaf8aa360d656958bbb02d4297dc8731e6582b98e0698cbd26ecf7607fe6",
+    "run.log": "367d5e97163c09d5ab931cb031f802daa2f10c00b73ba1854ff6488bf2631ac6"
+  },
+  "scope": "One synthetic AES-256 R6 PDF: missing/wrong password refusal, correct four-page rendering identical to same-engine plaintext and independent color anchors. No password UI/persistence, App PDF or production resource/task acceptance.",
+  "physical_verified": false,
+  "c1_complete": false,
+  "requirement_accepted": false
+}

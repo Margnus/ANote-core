@@ -25,6 +25,9 @@ def main():
     inputs = [SOURCE, 'ci/collect_apple_pdf.py', '.github/workflows/apple-pdf.yml',
               'fixtures/pdf/recipe.json', 'android-app/src/androidTest/assets/pdf/metadata-manifest.json']
     inputs += ['android-app/src/androidTest/assets/pdf/' + name for name in NAMES]
+    inputs += ['android-app/src/androidTest/assets/pdf/password-aes256.pdf',
+               'android-app/src/androidTest/assets/pdf/password-manifest.json', 'tools/generate_pdf_password_fixture.py',
+               'tools/verify_apple_pdf_metadata.py']
     before = {p: sha(ROOT / p) for p in inputs}
     report = {'status': 'running', 'stage': 'environment', 'source_sha256': before,
               'pixel_verification_complete': False, 'app_integration': False, 'c1_complete': False}
@@ -77,6 +80,17 @@ def main():
         for path in root.glob('*.png'):
             shutil.copyfile(path, OUTPUT / path.name)
         assert len(list(OUTPUT.glob('*.png'))) == 16
+        shutil.copyfile(ROOT / 'android-app/src/androidTest/assets/pdf/password-aes256.pdf', root / 'password-aes256.pdf')
+        report['stage'] = 'modern_password_observations'
+        text = run('password', ['xcrun', 'simctl', 'spawn', device, str(binary), str(root), '--password'], 120)
+        lines = [line.removeprefix('NOTECORE_PDF_PASSWORD ') for line in text.splitlines()
+                 if line.startswith('NOTECORE_PDF_PASSWORD ')]
+        assert len(lines) == 1
+        report['password_observations'] = json.loads(lines[0])
+        assert sha(root / 'password-aes256.pdf') == before['android-app/src/androidTest/assets/pdf/password-aes256.pdf']
+        for path in root.glob('password-*.png'):
+            shutil.copyfile(path, OUTPUT / path.name)
+        assert len(list(OUTPUT.glob('password-*.png'))) == 8
         assert before == {p: sha(ROOT / p) for p in inputs}
         report.update(status='collected_pending_pixel_verification', stage='complete')
     except BaseException as error:

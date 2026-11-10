@@ -79,6 +79,28 @@ def main():
                                         'expected_size': size, 'anchors_match': matched, 'pixels': pixels})
             checks.append(entry)
     passed = all(c['metadata_matches_source'] and all(i['anchors_match'] for i in c['images']) for c in checks)
+    password_verified = False
+    encrypted_path = prefix + 'password-aes256.pdf'
+    if encrypted_path in report['source_sha256']:
+        password = report['password_observations']
+        assert all(password[k] for k in ('missing_refused', 'wrong_refused', 'correct_rendered'))
+        assert len(password['pages']) == 4
+        manifest = json.loads(source(prefix + 'password-manifest.json'))
+        encrypted = source(encrypted_path)
+        assert sha(encrypted) == manifest['aes256_sha256'] and sha(original) == manifest['source_sha256']
+        reader = PdfReader(io.BytesIO(encrypted))
+        assert reader.trailer['/Encrypt']['/R'] == 6 and reader.decrypt(manifest['password']) != 0
+        assert len(reader.pages) == 4
+        for index, observed in enumerate(password['pages']):
+            assert observed['index'] == index and observed['pixels_equal']
+            a = Image.open(folder / f'password-plain-{index}.png').convert('RGBA')
+            b = Image.open(folder / f'password-aes256-{index}.png').convert('RGBA')
+            expected = recipe['expected_pages'][index]
+            assert a.size == b.size == (expected['width'], expected['height']) and a.tobytes() == b.tobytes()
+            for xy, color in zip(expected['marker_xy'], recipe['marker_rgb']):
+                pixel = b.getpixel(tuple(xy))
+                assert pixel[3] == 255 and max(abs(pixel[i] - color[i]) for i in range(3)) <= 2
+        password_verified = True
     result = {'status': 'passed' if passed else 'completed_with_capability_limit', 'commit': report['commit'],
               'run_id': report['run_id'], 'source_and_retained_hashes_verified': True,
               'inherited_leaf_keys_absent_and_content_streams_unchanged': True,
@@ -86,6 +108,7 @@ def main():
               'verifier_sha256': sha(Path(__file__).read_bytes()), 'pages': checks,
               'scope': 'Actual isolated iOS simulator CoreGraphics metadata/rendering for original three fixed PDFs. No shared runtime adapter, App import/annotation/export, owner/cancellation or physical acceptance.',
               'app_integration': False, 'c1_complete': False, 'goal_complete': False}
+    result['aes256_r6_password_verified'] = password_verified
     (folder / 'verification.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(json.dumps({'status': result['status'], 'pages': len(checks), 'metadata_passed': sum(c['metadata_matches_source'] for c in checks),
                       'image_checks_passed': sum(i['anchors_match'] for c in checks for i in c['images'])}))
