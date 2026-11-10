@@ -1,5 +1,9 @@
 # 当前Android独立环境验证
 
+## 2026-11-10：当前源码旧API回退子矩阵
+
+原输入10/Store11/owner9及Path线段/点笔/undo/redo/选页像素在新的Core内API26/32独立数据环境实际通过，当前App/仪器APK、104输入（95精确/9仅CRLF）及固定合成笔记保持已核验；普通进程启动与两张稳定资料库截图另列，不是普通UI全旅程。旧AVD/旧报告不写不继承。采用与剩余门禁见[旧API回退验证](当前Android旧API回退验证.md)，不据此关闭物理M-1/完整C1或生产存储前置。
+
 ## 2026-10-29：当前SurfaceControl与普通PID释放
 
 沿有限C1第4/5项，起点bba0017；验收卡目标为当前同一InkCanvasView/NoteStore/worker/SurfaceControl实际回执/未知责任/退休，不另建Surface demo，并补独立普通PID关闭后释放日志。先核对96项源码/构建输入，再以原`surface_frames`入口运行，五份正式文件前后保持；普通App随后独立启动并打开已保存笔记，返回资料库后须观察原source释放与owner drain，正式文件保持。不把软件gate或模拟器回执当真机长期GPU未signal/heap。
