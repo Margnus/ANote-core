@@ -25,6 +25,7 @@ EXPECTED = {
     'testSavedIdentitySkipsUnchangedIOButChangedFailureRemainsRetryable()',
     'testPendingExportKeepsFirstCapturedContentUntilConsumerClearsIt()',
     'testLateExportCannotPresentBackupAfterLeavingItsNote()',
+    'testReleasingExportBudgetResumesWaitingSave()',
     'testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()',
     'testTypedEditModelRejectsInvalidParametersWithoutLosingActiveInk()',
     'testAuthorityConstructionFailureIsRecoverableInSwift()',

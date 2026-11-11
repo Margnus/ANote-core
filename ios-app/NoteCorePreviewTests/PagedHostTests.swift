@@ -329,6 +329,30 @@ final class PagedHostTests: XCTestCase {
         try await eventually("post-export root saved") { model.status.hasPrefix("已保存") }
         model.close()
     }
+    @MainActor func testReleasingExportBudgetResumesWaitingSave() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let limit = 2 * 1024 * 1024
+        let model = PreviewModel(directory: dir, storageWorkBytes: Int64(limit))
+        model.create()
+        let note = try XCTUnwrap(model.current)
+        let file = dir.appendingPathComponent(note.documentId + ".ncp")
+        try await eventually("initial note saved") { model.ownerRetirementStatus.pendingWrites == 0 }
+        let original = try Data(contentsOf: file)
+        // A synthetic panel payload occupies the exact test budget without a huge note fixture.
+        model.exportDocument = PreviewBackup(data: Data(count: limit))
+        XCTAssertTrue(note.rename(value: "Waiting for export budget"))
+        let edited = try note.capture().encode()
+        XCTAssertTrue(model.save())
+        XCTAssertEqual(model.ownerRetirementStatus.pendingWrites, 1)
+        XCTAssertEqual(model.ownerRetirementStatus.inFlightWrites, 0)
+        XCTAssertEqual(model.ownerRetirementStatus.retryRequired, 0)
+        XCTAssertEqual(try Data(contentsOf: file), original)
+        model.exportDocument = nil
+        try await eventually("export release redispatches the save") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), edited)
+        XCTAssertTrue(model.status.hasPrefix("已保存"))
+        model.close()
+    }
     @MainActor func testLateExportCannotPresentBackupAfterLeavingItsNote() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         let model = PreviewModel(directory: dir)

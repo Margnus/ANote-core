@@ -19,6 +19,7 @@ enum PreviewOwnerPhase { case active, retiring, retired }
 struct PreviewOwnerRetirementStatus {
     let phase: PreviewOwnerPhase
     let pendingWrites: Int
+    let inFlightWrites: Int
     let retryRequired: Int
     let renderBytes: Int64
     let workerStopped: Bool
@@ -41,7 +42,7 @@ final class PreviewModel: ObservableObject {
     private let inkReleaseBoundary: (Bool) throws -> Void
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024,
         ownerCheck: { precondition(Thread.isMainThread) })
-    private let storageWorkBytes: Int64 = 256 * 1024 * 1024
+    private let storageWorkBytes: Int64
     var exportReservedBytes: Int64 { Int64(exportDocument?.data.count ?? 0) }
     // Identity-only saved shortcut; the authority/ledger own content while it is needed.
     private weak var savedRoot: DocumentRoot?
@@ -61,7 +62,8 @@ final class PreviewModel: ObservableObject {
         precondition(Thread.isMainThread)
         let saves = ledger.states()
         return PreviewOwnerRetirementStatus(phase: ownerRetired ? .retired : ownerRetiring ? .retiring : .active,
-            pendingWrites: saves.count, retryRequired: saves.filter { $0.retryRequired }.count,
+            pendingWrites: saves.count, inFlightWrites: saves.filter { $0.inFlight }.count,
+            retryRequired: saves.filter { $0.retryRequired }.count,
             renderBytes: inkChargedBytes, workerStopped: (try! executor.status()).workerStopped)
     }
     @discardableResult func beginOwnerRetirement(
@@ -260,8 +262,10 @@ final class PreviewModel: ObservableObject {
     }
     private let beforeOpenRead: () throws -> Void
     init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
-         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, beforeOpenRead: @escaping () throws -> Void = {}) {
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil,
+         storageWorkBytes: Int64 = 256 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}) {
         precondition(Thread.isMainThread)
+        self.storageWorkBytes = storageWorkBytes
         self.beforeOpenRead = beforeOpenRead
         self.documentBudget = documentBudget
         self.beforeInkCompute = beforeInkCompute; self.inkReleaseBoundary = inkReleaseBoundary
