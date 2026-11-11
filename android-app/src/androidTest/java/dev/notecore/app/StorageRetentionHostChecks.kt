@@ -2,6 +2,7 @@ package dev.notecore.app
 
 import android.app.Activity
 import android.app.Instrumentation
+import android.net.Uri
 import android.os.SystemClock
 import dev.notecore.document.*
 import java.io.File
@@ -149,6 +150,31 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             }
             eventually("The retained edit did not reopen from disk") { recovered }
             checks.add("staging_conflict_preserves_original_then_retries_and_reopens")
+            val savedBytes = canonical.readBytes()
+            val invalidDestination = File(directory, "blocked-export")
+            check(invalidDestination.mkdir())
+            val destinationMarker = File(invalidDestination, "keep").apply { writeText("keep destination") }
+            var exportFailed = false
+            main {
+                store.export(Uri.fromFile(invalidDestination), retained) { error ->
+                    check(!error.isNullOrEmpty()) { "Unwritable backup target reported success" }
+                    exportFailed = true
+                }
+            }
+            eventually("Export failure did not reach the original callback") { exportFailed }
+            check(destinationMarker.readText() == "keep destination" && canonical.readBytes().contentEquals(savedBytes))
+            val destination = File(directory, "backup-output")
+            var exported = false
+            main {
+                store.export(Uri.fromFile(destination), retained) { error ->
+                    check(error == null)
+                    exported = true
+                }
+            }
+            eventually("Retry did not export the original capture") { exported }
+            check(destination.readBytes().contentEquals(savedBytes) && canonical.readBytes().contentEquals(savedBytes))
+            main { check(note.capture().sameContent(retained) && store.saveStates().isEmpty()) }
+            checks.add("export_target_failure_preserves_note_and_allows_retry")
             main {
                 val first = note.capture()
                 val firstRequest = store.beginExportPicker(first)
