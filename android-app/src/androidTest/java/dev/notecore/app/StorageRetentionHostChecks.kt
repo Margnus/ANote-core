@@ -83,6 +83,24 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             eventually("Repair did not save the retained root") { completed && store.saveStates().isEmpty() }
             check(File(directory, "${changed.documentId}.ncp").readText(Charsets.UTF_8) == changed.encode())
             checks.add("repair_retries_exact_root")
+            val canonical = File(directory, "${changed.documentId}.ncp")
+            val backup = File(directory, canonical.name + ".bak")
+            check(canonical.renameTo(backup))
+            val unrelated = (0 until 2000).map { File(directory, "unrelated-$it.ncp") } +
+                File(directory, "unrelated-backup.ncp.bak")
+            unrelated.forEach { check(it.mkdir()) }
+            var catalogChecked = false
+            var catalogError: String? = null
+            var summaries = emptyList<NoteSummary>()
+            main { store.list { result, error -> summaries = result; catalogError = error; catalogChecked = true } }
+            eventually("Catalog did not return") { catalogChecked }
+            check(catalogError == null && summaries.singleOrNull()?.id == changed.documentId) {
+                "Unrelated directories hid the saved note: $catalogError"
+            }
+            check(summaries.single().title == changed.title)
+            check(canonical.readText(Charsets.UTF_8) == changed.encode() && !backup.exists())
+            check(unrelated.all { it.isDirectory })
+            checks.add("catalog_ignores_directories_and_recovers_legacy_backup")
             main {
                 val first = note.capture()
                 val firstRequest = store.beginExportPicker(first)

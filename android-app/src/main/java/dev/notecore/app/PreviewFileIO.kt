@@ -11,6 +11,7 @@ import java.nio.charset.CharacterCodingException
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.util.UUID
 
 /** Platform-local read result; no mutable document or secondary storage ownership. */
@@ -98,11 +99,12 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         Files.newDirectoryStream(directory.toPath()).use { stream ->
             for (path in stream) {
                 val name = path.fileName.toString()
-                if (name.endsWith(".ncp") || name.endsWith(".ncp.bak")) {
-                    val id = name.removeSuffix(".bak").removeSuffix(".ncp")
-                    if (id.matches(Regex("[a-zA-Z0-9-]{1,128}"))) ids.add(id)
-                    require(ids.size <= 2000) { "Preview catalog capacity; paged production catalog required" }
-                }
+                if (!name.endsWith(".ncp") && !name.endsWith(".ncp.bak")) continue
+                val id = name.removeSuffix(".bak").removeSuffix(".ncp")
+                if (!id.matches(Regex("[a-zA-Z0-9-]{1,128}")) ||
+                    !Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) continue
+                ids.add(id)
+                require(ids.size <= 2000) { "Preview catalog capacity; paged production catalog required" }
             }
         }
         return ids.map { id -> NoteSummary(id, runCatching { readHeader(id).title }.getOrDefault("待恢复的笔记"), file(id).lastModified()) }
