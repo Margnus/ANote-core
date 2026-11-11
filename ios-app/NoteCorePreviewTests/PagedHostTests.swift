@@ -314,6 +314,10 @@ final class PagedHostTests: XCTestCase {
         let first = try XCTUnwrap(model.exportDocument?.data)
         XCTAssertEqual(String(data: first, encoding: .utf8), original)
         model.prepareExport(); XCTAssertEqual(model.exportDocument?.data, first)
+        model.importCopy(try androidFixture())
+        XCTAssertFalse(model.transferBusy)
+        XCTAssertEqual(model.exportDocument?.data, first)
+        XCTAssertTrue(model.current === note)
         model.exportDocument = nil // Same ownership release as exporter cancellation/completion.
         model.prepareExport()
         let later = try note.capture().encode()

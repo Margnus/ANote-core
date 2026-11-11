@@ -383,7 +383,7 @@ final class PreviewModel: ObservableObject {
         }
     }
     func importCopy(_ url: URL) {
-        guard !ownerRetiring, !transferBusy else { return }
+        guard !ownerRetiring, !transferBusy, exportDocument == nil else { return }
         transferBusy = true; status = "正在校验并导入…"
         let scoped = url.startAccessingSecurityScopedResource()
         let id = UUID().uuidString, navigation = navigationEpoch
@@ -597,7 +597,7 @@ struct PreviewRoot: View {
                     List {
                         Section {
                             Button("新建笔记") { model.create() }
-                            Button("导入备份") { importing = true }.disabled(model.transferBusy)
+                            Button("导入备份") { importing = true }.disabled(model.transferBusy || model.exportDocument != nil)
                         }
                         Section("本机笔记") {
                             ForEach(model.notes) { note in
