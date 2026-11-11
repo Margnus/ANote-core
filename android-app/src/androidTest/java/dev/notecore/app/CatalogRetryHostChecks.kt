@@ -8,8 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ListView
+import android.widget.TextView
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,6 +20,9 @@ internal object CatalogRetryHostChecks {
     fun verify(test: Instrumentation): String {
         val context = test.targetContext
         val directory = File(context.cacheDir, "catalog-retry-${UUID.randomUUID()}")
+        val movedDirectory = File(directory.path + "-moved")
+        val workerEntered = CountDownLatch(1)
+        val releaseWorker = CountDownLatch(1)
         val fixture = "NCPREVIEW\t2\nD\tretry-note\tRecovered note\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         val storeField = NoteStore::class.java.getDeclaredField("instance").apply { isAccessible = true }
         lateinit var store: NoteStore
@@ -25,7 +31,10 @@ internal object CatalogRetryHostChecks {
         directory.writeText("blocked catalog")
         test.runOnMainSync {
             priorStore = storeField.get(null)
-            store = NoteStore.isolated(context, directory)
+            store = NoteStore.isolated(context, directory, beforeOpenRead = {
+                workerEntered.countDown()
+                check(releaseWorker.await(8, TimeUnit.SECONDS))
+            })
             storeField.set(null, store)
         }
         try {
@@ -51,14 +60,53 @@ internal object CatalogRetryHostChecks {
                     descendants(root).filterIsInstance<Button>().none { it.text == retryTitle && it.isShown }
             }
             check(file.readText() == fixture)
-            return JSONObject().put("checks", JSONArray(listOf("activity_retry_displays_repaired_catalog"))).toString()
+            check(directory.renameTo(movedDirectory))
+            directory.writeText("blocked save")
+            test.runOnMainSync { store.open("hold-read-worker") { _, _ -> } }
+            check(workerEntered.await(8, TimeUnit.SECONDS))
+            var activeId = ""
+            val savingText = host.getString(R.string.saving, 0)
+            test.runOnMainSync {
+                check(descendants(root).filterIsInstance<Button>().single { it.text == "新建笔记" }.performClick())
+                activeId = checkNotNull(store.activeDocumentId)
+                check(descendants(root).filterIsInstance<TextView>().any { it.text == savingText })
+                store.open(activeId) { opened, error ->
+                    check(error == null)
+                    check(store.adopt(checkNotNull(opened)).rename("Newer in-memory content"))
+                }
+            }
+            releaseWorker.countDown()
+            await(test, "Failed save did not reach the ledger") {
+                store.saveStates().singleOrNull()?.retryRequired == true
+            }
+            test.runOnMainSync {
+                check(descendants(root).filterIsInstance<TextView>().any { it.text == savingText }) {
+                    "An old failure replaced the newer editor status"
+                }
+            }
+            check(directory.readText() == "blocked save")
+            check(directory.delete() && movedDirectory.renameTo(directory))
+            test.runOnMainSync {
+                check(descendants(root).filterIsInstance<Button>().single { it.text == "保存" }.performClick())
+            }
+            await(test, "Current editor could not save after repair") {
+                store.saveStates().isEmpty() &&
+                    descendants(root).filterIsInstance<TextView>().any { it.text == host.getString(R.string.saved, 0) }
+            }
+            check(File(directory, "$activeId.ncp").readText().contains("Newer in-memory content"))
+            check(file.readText() == fixture)
+            return JSONObject().put("checks", JSONArray(listOf(
+                "activity_retry_displays_repaired_catalog", "activity_ignores_stale_save_failure"
+            ))).toString()
         } finally {
+            releaseWorker.countDown()
             test.runOnMainSync {
                 activity?.finish()
                 storeField.set(null, priorStore)
                 store.stopTestBackend()
             }
             directory.deleteRecursively()
+            movedDirectory.deleteRecursively()
         }
     }
 
