@@ -482,12 +482,32 @@ final class PagedHostTests: XCTestCase {
         let url = inputs.appendingPathComponent("unsupported.ncp"); try Data(unsupported.utf8).write(to: url)
         let model = PreviewModel(directory: dir); model.importCopy(url)
         try await eventually("unsupported brush returns failure") { !model.transferBusy }
-        XCTAssertNil(model.current); XCTAssertTrue(model.status.hasPrefix("导入失败"))
+        XCTAssertNil(model.current); XCTAssertEqual(model.status, "导入失败：当前预览不支持此笔记内容，原文件已保留")
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), unsupported)
         XCTAssertTrue(try PreviewFileIO.catalog(dir).isEmpty)
         let corrupt = inputs.appendingPathComponent("bad-utf.ncp"); try Data([0xff]).write(to: corrupt)
         model.importCopy(corrupt); try await eventually("bad UTF returns failure") { !model.transferBusy }
         XCTAssertNil(model.current); XCTAssertEqual(try Data(contentsOf: corrupt), Data([0xff]))
+        XCTAssertEqual(model.status, "导入失败：笔记文本编码无效，原文件已保留")
+        let invalid = inputs.appendingPathComponent("invalid.ncp")
+        let invalidBytes = Data("NCPREVIEW\t999\n".utf8)
+        try invalidBytes.write(to: invalid)
+        model.importCopy(invalid); try await eventually("unknown version returns failure") { !model.transferBusy }
+        XCTAssertEqual(model.status, "导入失败：笔记格式无效或版本不支持，原文件已保留")
+        XCTAssertEqual(try Data(contentsOf: invalid), invalidBytes)
+        let oversized = inputs.appendingPathComponent("oversized.ncp")
+        try Data().write(to: oversized)
+        let size = PreviewFileIO.maxReadBytes + 1
+        let handle = try FileHandle(forWritingTo: oversized)
+        try handle.truncate(atOffset: UInt64(size))
+        try handle.close()
+        model.importCopy(oversized); try await eventually("byte limit returns failure") { !model.transferBusy }
+        XCTAssertEqual(model.status, "导入失败：笔记文件超过预览读取容量，原文件已保留")
+        XCTAssertEqual(try oversized.resourceValues(forKeys: [.fileSizeKey]).fileSize, size)
+        let missing = inputs.appendingPathComponent("missing.ncp")
+        model.importCopy(missing); try await eventually("missing source returns failure") { !model.transferBusy }
+        XCTAssertEqual(model.status, "导入失败：笔记文件读取失败，请检查文件后重试")
+        XCTAssertNil(model.current)
         XCTAssertTrue(try PreviewFileIO.catalog(dir).isEmpty)
     }
     @MainActor func testLateImportCannotReplaceNewActiveOwner() async throws {

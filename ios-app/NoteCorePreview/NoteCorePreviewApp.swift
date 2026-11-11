@@ -292,15 +292,6 @@ final class PreviewModel: ObservableObject {
         savedPending = savedRoot != nil ? recovery?.pending : nil
         revision = root.revision
     }
-    private static func readPreview(_ encoded: String) throws -> DocumentRoot {
-        let read = PreviewDocumentReader.shared.read(text: encoded)
-        guard let root = read.root else { throw CocoaError(.fileReadCorruptFile) }
-        return root
-    }
-    private static func validateRenderable(_ root: DocumentRoot) throws {
-        guard PreviewDocumentReader.shared.accept(root: root).failure == nil
-        else { throw CocoaError(.fileReadUnsupportedScheme) }
-    }
     func create() {
         precondition(Thread.isMainThread)
         guard !ownerRetiring, current == nil else { return }
@@ -394,10 +385,13 @@ final class PreviewModel: ObservableObject {
         transferBusy = true; status = "正在校验并导入…"
         let scoped = url.startAccessingSecurityScopedResource()
         let id = UUID().uuidString, navigation = navigationEpoch
-        request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: PagedPreviewCodec.shared.maximumDecodingWorkByteCharge(), compute: { input in
+        request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: PagedPreviewCodec.shared.maximumDecodingWorkByteCharge(), compute: { input -> Result<DocumentRoot, LocalReadFailure> in
             defer { if input.1 { input.0.stopAccessingSecurityScopedResource() } }
-            let encoded = try PreviewFileIO.readUTF8(input.0)
-            let source = try Self.readPreview(encoded)
+            let source: DocumentRoot
+            switch try PreviewFileIO.readImport(input.0) {
+            case .success(let root): source = root
+            case .failure(let reason): return .failure(reason)
+            }
             let pages = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.id, PageId(value: UUID().uuidString)) })
             let layers = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.layerId, LayerId(value: UUID().uuidString)) })
             let objects = Dictionary(uniqueKeysWithValues: source.scene.objects().map { ($0.id, ObjectId(value: UUID().uuidString)) })
@@ -405,14 +399,14 @@ final class PreviewModel: ObservableObject {
                 pageIds: pages, layerIds: layers, objectIds: objects)
             guard !FileManager.default.fileExists(atPath: input.2.path) else { throw CocoaError(.fileWriteFileExists) }
             try PreviewFileIO.writeUTF8(PagedPreviewCodec.shared.encode(root: root), to: input.2)
-            return root
+            return .success(root)
         }, rejected: {
             if scoped { url.stopAccessingSecurityScopedResource() }
             transferBusy = false; status = "后台队列繁忙，请重新导入"
         }) { result in
             self.transferBusy = false
             switch result {
-            case .succeeded(let root):
+            case .succeeded(.success(let root)):
                 if self.current == nil && self.navigationEpoch == navigation {
                     self.navigationEpoch += 1
                     do { try self.adopt(root, persisted: true) }
@@ -421,7 +415,8 @@ final class PreviewModel: ObservableObject {
                     self.status = "已导入为新笔记 · \(note.totalStrokeCount) 笔"
                 } else { self.status = "备份已导入为新笔记，可返回列表查看" }
                 self.refresh()
-            case .outcomeUnknown: self.status = "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖"
+            case .succeeded(.failure(let reason)): self.status = "导入失败：\(reason.message)"
+            case .outcomeUnknown: self.status = "导入结果暂无法确认，请先返回列表查看"
             }
         }
     }

@@ -1,8 +1,16 @@
 import Foundation
 import NoteCanvasPrototype
 
-enum LocalReadFailure {
+enum LocalReadFailure: Error {
     case invalidFormat, unsupportedContent, characterCapacity, byteCapacity, invalidUTF8, wrongDocument, ioFailure
+    init(_ reason: PreviewReadFailure) {
+        switch reason {
+        case .characterCapacity: self = .characterCapacity
+        case .unsupportedPreviewContent: self = .unsupportedContent
+        case .invalidOrUnsupportedFormat: self = .invalidFormat
+        default: preconditionFailure("Unknown content refusal")
+        }
+    }
     var message: String {
         switch self {
         case .invalidFormat: return "笔记格式无效或版本不支持，原文件已保留"
@@ -39,12 +47,7 @@ enum PreviewFileIO {
     static func acceptRecovery(_ snapshot: PagedPreviewSnapshot, documentId: String) -> LocalRecoveryRead {
         let content = PreviewDocumentReader.shared.accept(root: snapshot.root)
         if let reason = content.failure {
-            switch reason {
-            case .characterCapacity: return .refused(.characterCapacity)
-            case .unsupportedPreviewContent: return .refused(.unsupportedContent)
-            case .invalidOrUnsupportedFormat: return .refused(.invalidFormat)
-            default: preconditionFailure("Unknown content refusal")
-            }
+            return .refused(LocalReadFailure(reason))
         }
         guard snapshot.documentId == documentId else { return .refused(.wrongDocument) }
         return .opened(snapshot)
@@ -54,12 +57,8 @@ enum PreviewFileIO {
             try beforeRead()
             let reading = try PreviewRecoveryCodec.shared.read(text: readUTF8(url))
             guard let snapshot = reading.snapshot else {
-                switch reading.failure {
-                case .characterCapacity: return .refused(.characterCapacity)
-                case .unsupportedPreviewContent: return .refused(.unsupportedContent)
-                case .invalidOrUnsupportedFormat: return .refused(.invalidFormat)
-                default: preconditionFailure("Reader returned neither snapshot nor a known failure")
-                }
+                guard let reason = reading.failure else { preconditionFailure("Reader returned neither snapshot nor failure") }
+                return .refused(LocalReadFailure(reason))
             }
             guard snapshot.documentId == documentId else { return .refused(.wrongDocument) }
             return .opened(snapshot)
@@ -67,6 +66,18 @@ enum PreviewFileIO {
           catch TextReadRefusal.invalidUTF8 { return .refused(.invalidUTF8) }
           catch let error as NSError where error.domain == NSCocoaErrorDomain || error.domain == NSPOSIXErrorDomain {
             return .refused(.ioFailure)
+        }
+    }
+    static func readImport(_ url: URL) throws -> Result<DocumentRoot, LocalReadFailure> {
+        do {
+            let reading = try PreviewDocumentReader.shared.read(text: readUTF8(url))
+            if let root = reading.root { return .success(root) }
+            guard let reason = reading.failure else { preconditionFailure("Reader returned neither root nor failure") }
+            return .failure(LocalReadFailure(reason))
+        } catch TextReadRefusal.byteCapacity { return .failure(.byteCapacity) }
+          catch TextReadRefusal.invalidUTF8 { return .failure(.invalidUTF8) }
+          catch let error as NSError where error.domain == NSCocoaErrorDomain || error.domain == NSPOSIXErrorDomain {
+            return .failure(.ioFailure)
         }
     }
     static func readHeaderUTF8(_ url: URL) throws -> String {
