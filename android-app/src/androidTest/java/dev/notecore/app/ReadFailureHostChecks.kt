@@ -99,6 +99,15 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             await { done }
         }
         try {
+            file.writeText(valid, Charsets.UTF_8)
+            val backupDirectory = File(directory, "$id.ncp.bak")
+            check(backupDirectory.mkdir())
+            val marker = File(backupDirectory, "keep").apply { writeText("unrelated directory") }
+            refuse(LocalReadFailure.IO_FAILURE.message)
+            check(file.isFile && file.readText() == valid && marker.readText() == "unrelated directory") {
+                "Atomic recovery changed the original note or unrelated directory"
+            }
+            check(marker.delete() && backupDirectory.delete())
             for ((bytes,reason) in listOf("bad format".toByteArray() to LocalReadFailure.INVALID_FORMAT,
                 valid.replace(id,"other-note").toByteArray() to LocalReadFailure.WRONG_DOCUMENT,
                 byteArrayOf(0xc3.toByte(),0x28) to LocalReadFailure.INVALID_UTF8,

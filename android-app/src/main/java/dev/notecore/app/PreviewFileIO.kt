@@ -12,6 +12,8 @@ import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
 import java.nio.file.LinkOption
+import java.nio.file.NoSuchFileException
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.UUID
 
 /** Platform-local read result; no mutable document or secondary storage ownership. */
@@ -46,11 +48,26 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         require(id.matches(Regex("[a-zA-Z0-9-]{1,128}")))
         return File(directory, "$id.ncp")
     }
+    private fun atomicFile(id: String): AtomicFile {
+        val base = file(id)
+        // AtomicFile may rename or delete these entries during both reads and writes.
+        for (suffix in listOf("", ".bak", ".new")) {
+            val path = File(directory, base.name + suffix).toPath()
+            val attributes = try {
+                Files.readAttributes(path, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
+            } catch (_: NoSuchFileException) {
+                continue
+            }
+            if (!attributes.isRegularFile) throw IOException("Unexpected preview storage entry")
+        }
+        return AtomicFile(base)
+    }
     fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
+        val atomic = atomicFile(snapshot.documentId)
         val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
         val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
-        val atomic = AtomicFile(file(snapshot.documentId)); val stream = atomic.startWrite()
+        val stream = atomic.startWrite()
         try { stream.write(bytes); stream.fd.sync(); atomic.finishWrite(stream) }
         catch (error: Throwable) { atomic.failWrite(stream); throw error }
         // AtomicFile.finishWrite can only log a failed rename. Verify through its serialized read path.
@@ -109,7 +126,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         }
         return ids.map { id -> NoteSummary(id, runCatching { readHeader(id).title }.getOrDefault("待恢复的笔记"), file(id).lastModified()) }
     }
-    private fun readHeader(id: String): PagedPreviewHeader = AtomicFile(file(id)).openRead().use { stream ->
+    private fun readHeader(id: String): PagedPreviewHeader = atomicFile(id).openRead().use { stream ->
         val input = stream.buffered(256); val bytes = java.io.ByteArrayOutputStream(1024); var newlines = 0
         while (newlines < 2) {
             val value = input.read(); require(value >= 0 && bytes.size() < 4096) { "Invalid catalog header" }
@@ -122,7 +139,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     fun read(id: String): DocumentRoot = readRecovery(id).let {
         require(it.pending == null) { "Pending recovery requires the original owner" }; it.root
     }
-    fun readRecovery(id: String): PagedPreviewSnapshot = AtomicFile(file(id)).openRead().use { stream ->
+    fun readRecovery(id: String): PagedPreviewSnapshot = atomicFile(id).openRead().use { stream ->
         if (stream.channel.size() > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
         val text = try { decode(readBoundedPreviewBytes(stream)) } catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
         val result = PreviewRecoveryCodec.read(text)
