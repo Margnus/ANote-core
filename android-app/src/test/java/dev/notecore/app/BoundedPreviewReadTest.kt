@@ -67,6 +67,25 @@ class BoundedPreviewReadTest {
         assertEquals("BYTE_CAPACITY", refusal.message)
     }
 
+    @Test fun sizedReadAtCapacityDistinguishesEofFromOneExtraByte() {
+        val cap = PagedPreviewCodec.MAX_UTF8_BYTES
+        fun measuredFile(extra: Int) = object : InputStream() {
+            var remaining = cap
+            override fun read(): Int = extra
+            override fun read(b: ByteArray, off: Int, len: Int): Int {
+                val count = minOf(remaining, len, 8192)
+                b.fill(0x5a, off, off + count)
+                remaining -= count
+                return count
+            }
+        }
+        val exact = readSizedPreviewBytes(measuredFile(-1), cap)
+        assertEquals(cap, exact.size)
+        assertEquals(0x5a.toByte(), exact.last())
+        val refusal = assertFailsWith<IllegalArgumentException> { readSizedPreviewBytes(measuredFile(0), cap) }
+        assertEquals("BYTE_CAPACITY", refusal.message)
+    }
+
     @Test fun originalReadExceptionIsPropagatedWithoutRetryOrPartialSuccess() {
         val failure = IOException("provider failed")
         val input = object : InputStream() {
