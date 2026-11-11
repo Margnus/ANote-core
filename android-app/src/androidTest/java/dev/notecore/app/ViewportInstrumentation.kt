@@ -26,6 +26,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var titleOnly = false
     private var editOnly = false
     private var storageRetentionOnly = false
+    private var catalogRetryOnly = false
     private var processCheckpointCase: String? = null
     private var processCheckpointScope = ""
     private var minimumApiOnly = false
@@ -48,6 +49,7 @@ class ViewportInstrumentation : Instrumentation() {
         minimumApiOnly = arguments?.getString("notecore_case") == "minimum_api"
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
+        catalogRetryOnly = arguments?.getString("notecore_case") == "catalog_retry"
         editOnly = arguments?.getString("notecore_case") == "preview_edit"
         titleOnly = arguments?.getString("notecore_case") == "title_contract"
         inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
@@ -84,6 +86,11 @@ class ViewportInstrumentation : Instrumentation() {
                 result.putString("brush_path_status", "passed")
                 finish(Activity.RESULT_OK, result)
                 return
+            }
+            if (catalogRetryOnly) {
+                result.putString("catalog_retry_observations", CatalogRetryHostChecks.verify(this))
+                result.putString("catalog_retry_status", "passed")
+                finish(Activity.RESULT_OK, result); return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             processCheckpointCase?.let { phase ->

@@ -84,7 +84,8 @@ def main():
     (out / 'notes-before.json').write_text(json.dumps(before, indent=2) + '\n', encoding='utf-8', newline='\n')
     observed = {}
     for case, prefix, expected in [('input_batches', 'input', CHECKS), ('storage_retention', 'storage', STORAGE_CHECKS),
-                                   ('owner_retirement', 'owner', OWNER_CHECKS), ('minimum_api', 'minimum_api', None)]:
+                                   ('owner_retirement', 'owner', OWNER_CHECKS), ('minimum_api', 'minimum_api', None),
+                                   ('catalog_retry', 'catalog_retry', {'activity_retry_displays_repaired_catalog'})]:
         raw = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', case,
                   PACKAGE + '.test/dev.notecore.app.ViewportInstrumentation')
         (out / (case + '.log')).write_bytes(raw)
