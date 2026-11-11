@@ -53,6 +53,18 @@ def expected_native(module):
     return expected
 
 
+def capture_ui_result(capture, result, output):
+    payloads = []
+    for kind, name in (('summary', 'ui-summary.json'), ('tests', 'ui-tests.json')):
+        payload = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', kind,
+                                     '--path', str(result), '--format', 'json'))
+        (output / name).write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8', newline='\n')
+        payloads.append(payload)
+    capture('xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(result),
+            '--output-path', str(output / 'ui-attachments'))
+    return payloads
+
+
 def main():
     assert os.environ.get('GITHUB_ACTIONS') == 'true', 'Only the isolated hosted CI environment is intended'
     assert platform.system() == 'Darwin' and platform.machine() == 'arm64'
@@ -140,22 +152,27 @@ def main():
         notes = container / 'Documents/PreviewNotes'
         originals = {p.name: sha(p) for p in notes.glob('*.ncp')}
         ui_result = OUTPUT / 'ui.xcresult'
-        run('ordinary-ui', ['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
+        ui_command = ['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
             '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id=' + device,
             '-derivedDataPath', str(OUTPUT / 'xcode'), 'CODE_SIGNING_ALLOWED=NO',
             '-resultBundlePath', str(ui_result), '-collect-test-diagnostics', 'never',
-            '-only-testing:NoteCorePreviewUITests', '-parallel-testing-enabled', 'NO', 'test'], 900)
-        ui_summary = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(ui_result), '--format', 'json'))
-        ui_tree = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(ui_result), '--format', 'json'))
-        (OUTPUT / 'ui-summary.json').write_text(json.dumps(ui_summary, indent=2) + '\n', encoding='utf-8', newline='\n')
-        (OUTPUT / 'ui-tests.json').write_text(json.dumps(ui_tree, indent=2) + '\n', encoding='utf-8', newline='\n')
+            '-only-testing:NoteCorePreviewUITests', '-parallel-testing-enabled', 'NO', 'test']
+        try:
+            run('ordinary-ui', ui_command, 900)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            if ui_result.is_dir():
+                try:
+                    capture_ui_result(capture, ui_result, OUTPUT)
+                except (subprocess.SubprocessError, ValueError, OSError) as capture_error:
+                    report['ui_result_capture_error'] = repr(capture_error)
+            raise
+        ui_summary, ui_tree = capture_ui_result(capture, ui_result, OUTPUT)
         ui_cases = list(cases(ui_tree['testNodes']))
         ui_expected = {'testTwoPageInkHistoryBackgroundSaveAndProcessReopen()'}
         assert {c['name'] for c in ui_cases} == ui_expected and all(c['result'] == 'Passed' for c in ui_cases)
         assert ui_summary['result'] == 'Passed' and ui_summary['totalTestCount'] == 1
         assert ui_summary['failedTests'] == ui_summary['skippedTests'] == ui_summary['expectedFailures'] == 0
         assert any(d['device']['deviceId'] == device for d in ui_summary['devicesAndConfigurations'])
-        capture('xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(ui_result), '--output-path', str(OUTPUT / 'ui-attachments'))
         assert list((OUTPUT / 'ui-attachments').rglob('*.png')), 'No UI screenshots retained'
         # Re-resolve the installed container rather than assuming its path survived launch.
         container = Path(capture('xcrun', 'simctl', 'get_app_container', device, 'dev.notecore.preview', 'data').strip())
