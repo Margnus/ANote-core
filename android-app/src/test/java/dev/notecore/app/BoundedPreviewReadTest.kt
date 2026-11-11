@@ -9,6 +9,14 @@ import kotlin.test.*
 
 /** Synthetic streams on host JVM, not ContentProvider/ART or filesystem acceptance. */
 class BoundedPreviewReadTest {
+    @Test fun sizedReadHandlesExactShrinkingAndGrowingFiles() {
+        val bytes = ByteArray(16385) { (it % 251).toByte() }
+        for (size in listOf(0, 31, bytes.size, bytes.size + 7)) {
+            assertContentEquals(bytes, readSizedPreviewBytes(ByteArrayInputStream(bytes), size))
+        }
+        assertFailsWith<IOException> { readSizedPreviewBytes(ZeroProgress(), 1) }
+    }
+
     private class ZeroProgress(private val prefix: ByteArray = byteArrayOf()) : InputStream() {
         var calls = 0
         var closed = false
