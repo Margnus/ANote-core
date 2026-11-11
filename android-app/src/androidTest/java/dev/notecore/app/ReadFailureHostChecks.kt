@@ -2,6 +2,7 @@ package dev.notecore.app
 
 import android.app.Activity
 import android.app.Instrumentation
+import android.net.Uri
 import android.os.Looper
 import android.os.SystemClock
 import dev.notecore.document.*
@@ -116,6 +117,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             }
             // Valid canonical doubles can degenerate in the original Float Path/Matrix adapter.
             val ink="NCPREVIEW\t2\nD\t$id\ttitle\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\tink\tlayer\t1\tMONOLINE\t1\t-1\t2.5\t1\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.0\t2.0\t0.5\t1\nEND\n"
+            verifyImport(File(directory, "import"), ink)
             val degenerate = listOf(ink.replace("\t2.5\t1\t", "\t1.0E-50\t1\t"),
                 ink.replace("\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n", "\t1.0\t1.0\t1.0\t1.00000001\t0.0\t0.0\n"))
             for (encoded in degenerate) {
@@ -160,5 +162,55 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             main { store.open(id) { value,error -> check(error==null);val note=store.adopt(checkNotNull(value));check(note.totalStrokeCount==0);check(store.releaseActive(note));opened=true } }
             await { opened };check(file.readText(Charsets.UTF_8)==valid)
         } finally { main { store.stopTestBackend() };directory.deleteRecursively() }
+    }
+
+    private fun verifyImport(directory: File, supported: String) {
+        val source = File(directory.parentFile, "import-source.ncp")
+        val uri = Uri.fromFile(source)
+        lateinit var store: NoteStore
+        main { store = NoteStore.isolated(host, directory) }
+        fun refuse(reason: LocalReadFailure) {
+            var done = false
+            main {
+                store.importCopy(uri) { value, error ->
+                    check(value == null && error == reason.message) { "Unexpected import refusal: $error" }
+                    check(store.activeDocumentId == null)
+                    done = true
+                }
+            }
+            await { done }
+            check(!directory.exists()) { "Rejected import created a destination" }
+        }
+        try {
+            refuse(LocalReadFailure.IO_FAILURE)
+            for ((bytes, reason) in listOf(
+                byteArrayOf(0xff.toByte()) to LocalReadFailure.INVALID_UTF8,
+                supported.replace("NCPREVIEW\t2", "NCPREVIEW\t99").toByteArray() to LocalReadFailure.INVALID_FORMAT,
+                supported.replace("MONOLINE", "PRESSURE").toByteArray() to LocalReadFailure.UNSUPPORTED_CONTENT
+            )) {
+                source.writeBytes(bytes)
+                refuse(reason)
+                check(source.readBytes().contentEquals(bytes))
+            }
+            source.writeText(supported, Charsets.UTF_8)
+            val original = PagedPreviewCodec.decode(supported)
+            var imported: OpenedDocument? = null
+            main {
+                store.importCopy(uri) { value, error ->
+                    check(error == null && value?.persisted == true)
+                    check(store.activeDocumentId == null)
+                    imported = value
+                }
+            }
+            await { imported != null }
+            val root = checkNotNull(imported).root
+            check(root.id != original.id && root.title == original.title)
+            check(root.pages().single().id != original.pages().single().id)
+            check(root.pages().single().layerId != original.pages().single().layerId)
+            check(root.scene.objects().single().id != original.scene.objects().single().id)
+            check(root.scene.objects().single().samples == original.scene.objects().single().samples)
+            check(checkNotNull(directory.listFiles()).single().readText() == PagedPreviewCodec.encode(root))
+            check(source.readText() == supported)
+        } finally { main { store.stopTestBackend() } }
     }
 }

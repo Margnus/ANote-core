@@ -29,6 +29,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         lateinit var note: PagedPreviewNotebook
         var completed = false
         val checks = mutableListOf("derived_text_capacity_checkpoint_save_and_reopen", "read_failure_classification_to_owner", "pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen")
+        checks.add("import_refusal_preserves_source_and_retry_remaps_identity")
         main {
             store = NoteStore.isolated(host, directory); note = store.create()
             val original = note.snapshot()
