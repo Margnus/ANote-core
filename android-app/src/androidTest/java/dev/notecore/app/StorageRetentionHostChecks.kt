@@ -77,6 +77,15 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             eventually("Changed root was incorrectly treated as saved") { failed && store.saveStates().single().retryRequired }
             main { check(store.saveStates().single().snapshot.sameContent(changed)) }
             checks.add("changed_revision_failure_retained")
+            var listFailed = false
+            main {
+                store.list { notes, error ->
+                    check(error != null && notes.single().id == changed.documentId)
+                    check(notes.single().title == changed.title + "（未保存）")
+                    listFailed = true
+                }
+            }
+            eventually("Failed catalog did not expose the retained edit") { listFailed }
             check(directory.delete()); check(moved.renameTo(directory))
             completed = false
             main { check(store.save(changed) { _, error -> check(error == null); completed = true }) }
@@ -101,6 +110,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             check(canonical.readText(Charsets.UTF_8) == changed.encode() && !backup.exists())
             check(unrelated.all { it.isDirectory })
             checks.add("catalog_ignores_directories_and_recovers_legacy_backup")
+            checks.add("catalog_retry_preserves_retained_edits_and_recovers_disk_list")
             val oldBytes = canonical.readBytes()
             val stagingDirectory = File(directory, canonical.name + ".new")
             check(stagingDirectory.mkdir())

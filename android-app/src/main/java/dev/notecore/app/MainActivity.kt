@@ -86,6 +86,8 @@ class MainActivity : Activity() {
         root.addView(button("导入备份") { importBackup() }, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         status = text("", 13f).apply { setPadding(dp(20), 0, dp(20), dp(8)) }
         root.addView(status)
+        val retry = button(getString(R.string.retry_note_list), ::library).apply { visibility = View.GONE }
+        root.addView(retry, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         val frame = FrameLayout(this)
         val list = ListView(this).apply {
             setPadding(dp(20), 0, dp(20), dp(20)); clipToPadding = false
@@ -104,6 +106,7 @@ class MainActivity : Activity() {
             if (generation != viewGeneration || isFinishing || isDestroyed) return@list
             empty.text = if (failure == null) "还没有笔记，写下第一个想法。" else "暂时无法读取笔记，请稍后重试。"
             adapter.replace(notes)
+            retry.visibility = if (failure == null) View.GONE else View.VISIBLE
             failure?.let(::showError)
         }
     }
