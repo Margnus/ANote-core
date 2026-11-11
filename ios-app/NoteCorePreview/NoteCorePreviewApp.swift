@@ -30,7 +30,11 @@ final class PreviewModel: ObservableObject {
     @Published private(set) var current: PagedPreviewNotebook?
     @Published var status = ""
     @Published var revision: Int64 = 0
-    @Published var exportDocument: PreviewBackup?
+    @Published var exportDocument: PreviewBackup? {
+        didSet {
+            if oldValue != nil && exportDocument == nil { pumpWrites() }
+        }
+    }
     @Published var transferBusy = false
     private let directory: URL
     private let beforeInkCompute: () throws -> Void
@@ -38,6 +42,7 @@ final class PreviewModel: ObservableObject {
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024,
         ownerCheck: { precondition(Thread.isMainThread) })
     private let storageWorkBytes: Int64 = 256 * 1024 * 1024
+    var exportReservedBytes: Int64 { Int64(exportDocument?.data.count ?? 0) }
     // Identity-only saved shortcut; the authority/ledger own content while it is needed.
     private weak var savedRoot: DocumentRoot?
     private weak var savedPending: DocumentCommandCanvas?
@@ -269,6 +274,11 @@ final class PreviewModel: ObservableObject {
     }
     private func request<Input, Output>(input: Input, bytes: Int64, compute: @escaping (Input) throws -> Output,
                                        rejected: () -> Void, receive: @escaping (AppleWorkResult<Output>) -> Void) {
+        let retained = exportReservedBytes
+        if retained > 0 {
+            let worker = try! executor.status()
+            guard bytes <= storageWorkBytes - worker.chargedBytes - retained else { rejected(); return }
+        }
         let admission = try! executor.submit(input: input, chargedBytes: bytes, compute: compute, receive: { _, result in
             receive(result); return .acknowledged
         })
@@ -441,7 +451,8 @@ final class PreviewModel: ObservableObject {
     private func pumpWrites() {
         while true {
             let worker = try! executor.status()
-            let dispatch = ledger.admitNextWrite(availableWorkBytes: storageWorkBytes - worker.chargedBytes,
+            let available = max(0, storageWorkBytes - worker.chargedBytes - exportReservedBytes)
+            let dispatch = ledger.admitNextWrite(availableWorkBytes: available,
                 maximumWorkBytes: storageWorkBytes, backendAccepting: worker.accepting)
             guard let attempt = dispatch.attempt else {
                 if dispatch.disposition != .idle && dispatch.disposition != .backpressure {

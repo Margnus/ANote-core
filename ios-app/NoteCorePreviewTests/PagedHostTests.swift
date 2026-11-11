@@ -312,6 +312,7 @@ final class PagedHostTests: XCTestCase {
         model.prepareExport() // A second request cannot replace the accepted capture.
         try await eventually("first export ready") { !model.transferBusy && model.exportDocument != nil }
         let first = try XCTUnwrap(model.exportDocument?.data)
+        XCTAssertEqual(model.exportReservedBytes, Int64(first.count))
         XCTAssertEqual(String(data: first, encoding: .utf8), original)
         model.prepareExport(); XCTAssertEqual(model.exportDocument?.data, first)
         model.importCopy(try androidFixture())
@@ -319,6 +320,7 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(model.exportDocument?.data, first)
         XCTAssertTrue(model.current === note)
         model.exportDocument = nil // Same ownership release as exporter cancellation/completion.
+        XCTAssertEqual(model.exportReservedBytes, 0)
         model.prepareExport()
         let later = try note.capture().encode()
         try await eventually("next export admitted after clear") { !model.transferBusy && model.exportDocument != nil }
