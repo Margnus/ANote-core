@@ -205,11 +205,12 @@ class MainActivity : Activity() {
         if (note.changeVersion != beforeRetry) { canvas?.refreshPage(); updateControls() }
         val snapshot = note.captureRecovery(); val generation = viewGeneration
         status?.text = getString(R.string.saving, note.totalStrokeCount)
-        return store.save(snapshot) { version, failure ->
-            if (generation != viewGeneration || notebook !== note || isFinishing) return@save
+        return store.save(snapshot) { _, failure ->
+            if (generation != viewGeneration || notebook !== note || isFinishing || isDestroyed) return@save
+            if (!snapshot.sameContent(note.captureRecovery())) return@save
             if (failure != null) showError(failure)
-            if (failure == null && snapshot.sameContent(note.captureRecovery())) status?.text =
-                if (note.hasPendingStroke) "未提交笔迹已保存为恢复记录，请重试提交" else getString(R.string.saved, note.totalStrokeCount)
+            else status?.text = if (note.hasPendingStroke) "未提交笔迹已保存为恢复记录，请重试提交"
+                else getString(R.string.saved, note.totalStrokeCount)
         }
     }
     private fun leaveEditor() {
