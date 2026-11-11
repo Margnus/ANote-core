@@ -101,6 +101,43 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             check(canonical.readText(Charsets.UTF_8) == changed.encode() && !backup.exists())
             check(unrelated.all { it.isDirectory })
             checks.add("catalog_ignores_directories_and_recovers_legacy_backup")
+            val oldBytes = canonical.readBytes()
+            val stagingDirectory = File(directory, canonical.name + ".new")
+            check(stagingDirectory.mkdir())
+            val marker = File(stagingDirectory, "keep").apply { writeText("original marker") }
+            lateinit var retained: PagedPreviewSnapshot
+            var saveRejected = false
+            main {
+                check(note.rename("Retained after staging conflict"))
+                retained = note.capture()
+                check(store.save(retained) { _, error -> check(error != null); saveRejected = true })
+            }
+            eventually("Staging conflict did not retain the edit") {
+                saveRejected && store.saveStates().singleOrNull()?.let {
+                    it.retryRequired && it.snapshot === retained
+                } == true
+            }
+            check(canonical.readBytes().contentEquals(oldBytes) && marker.readText() == "original marker")
+            check(marker.delete() && stagingDirectory.delete())
+            main { check(store.retryRetainedWrites()) }
+            eventually("Retry did not finish saving the original retained edit") { store.saveStates().isEmpty() }
+            check(canonical.readText(Charsets.UTF_8) == retained.encode())
+            main {
+                check(store.releaseActive(note))
+                store.stopTestBackend()
+                store = NoteStore.isolated(host, directory)
+            }
+            var recovered = false
+            main {
+                store.open(retained.documentId) { value, error ->
+                    check(error == null && value?.persisted == true)
+                    note = store.adopt(checkNotNull(value))
+                    check(note.capture().sameContent(retained))
+                    recovered = true
+                }
+            }
+            eventually("The retained edit did not reopen from disk") { recovered }
+            checks.add("staging_conflict_preserves_original_then_retries_and_reopens")
             main {
                 val first = note.capture()
                 val firstRequest = store.beginExportPicker(first)
