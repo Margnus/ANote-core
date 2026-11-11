@@ -194,6 +194,18 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             }
             source.writeText(supported, Charsets.UTF_8)
             val original = PagedPreviewCodec.decode(supported)
+            directory.writeText("blocked import destination")
+            var failedWrite = false
+            main {
+                store.importCopy(uri) { value, error ->
+                    check(value == null && error == "导入结果暂无法确认，请先查看列表；已有笔记未覆盖")
+                    check(store.activeDocumentId == null)
+                    failedWrite = true
+                }
+            }
+            await { failedWrite }
+            check(directory.readText() == "blocked import destination" && source.readText() == supported)
+            check(directory.delete())
             var imported: OpenedDocument? = null
             main {
                 store.importCopy(uri) { value, error ->
