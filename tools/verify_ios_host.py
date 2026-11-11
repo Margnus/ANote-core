@@ -24,6 +24,7 @@ EXPECTED = {
     'testRetiringOwnerAcknowledgesLateWorkerAndFinishesQueuedSaveBeforeRelease()',
     'testSavedIdentitySkipsUnchangedIOButChangedFailureRemainsRetryable()',
     'testPendingExportKeepsFirstCapturedContentUntilConsumerClearsIt()',
+    'testLateExportCannotPresentBackupAfterLeavingItsNote()',
     'testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData()',
     'testTypedEditModelRejectsInvalidParametersWithoutLosingActiveInk()',
     'testAuthorityConstructionFailureIsRecoverableInSwift()',

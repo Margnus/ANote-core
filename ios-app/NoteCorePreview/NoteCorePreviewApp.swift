@@ -367,6 +367,7 @@ final class PreviewModel: ObservableObject {
         guard note.retryPendingStroke() else { status = note.lastError; return }
         transferBusy = true; status = "正在准备备份…"
         let snapshot = note.capture()
+        let navigation = navigationEpoch
         request(input: snapshot, bytes: snapshot.encodingWorkByteCharge, compute: { captured in
             let encoded = try captured.encode()
             guard encoded.utf16.count <= Int(PagedPreviewCodec.shared.maximumCharacterCount()),
@@ -374,6 +375,7 @@ final class PreviewModel: ObservableObject {
             return PreviewBackup(data: Data(encoded.utf8))
         }, rejected: { transferBusy = false; status = "后台队列繁忙，请重新导出" }) { result in
             self.transferBusy = false
+            guard self.navigationEpoch == navigation else { return }
             switch result {
             case .succeeded(let document): self.exportDocument = document
             case .outcomeUnknown: self.status = "备份生成失败，笔记仍保留，请重试"
@@ -484,6 +486,7 @@ final class PreviewModel: ObservableObject {
                   note.retireAfterRecovery(snapshot: note.captureRecovery()) else { return }
         } else { guard note.retire() else { return } }
         retireInk()
+        exportDocument = nil
         navigationEpoch += 1; current = nil; savedRoot = nil; savedPending = nil; refresh()
     }
     func flushForBackground() { current?.cancelStroke(); save(); retireInk() }

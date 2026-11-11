@@ -323,6 +323,33 @@ final class PagedHostTests: XCTestCase {
         try await eventually("post-export root saved") { model.status.hasPrefix("已保存") }
         model.close()
     }
+    @MainActor func testLateExportCannotPresentBackupAfterLeavingItsNote() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir)
+        model.create()
+        let original = try XCTUnwrap(model.current)
+        let originalId = original.documentId
+        draw(original)
+        let originalBytes = try original.capture().encode()
+        model.prepareExport()
+        XCTAssertTrue(model.transferBusy)
+        model.close()
+        XCTAssertNil(model.current)
+        model.create()
+        let next = try XCTUnwrap(model.current)
+        XCTAssertNotEqual(next.documentId, originalId)
+        try await eventually("old export completes without presenting") { !model.transferBusy }
+        XCTAssertNil(model.exportDocument)
+        XCTAssertTrue(model.current === next)
+        model.prepareExport()
+        try await eventually("current note can export") { model.exportDocument != nil }
+        XCTAssertEqual(String(data: try XCTUnwrap(model.exportDocument?.data), encoding: .utf8),
+                       try next.capture().encode())
+        model.close()
+        XCTAssertNil(model.exportDocument)
+        let originalURL = dir.appendingPathComponent(originalId + ".ncp")
+        XCTAssertEqual(try String(contentsOf: originalURL, encoding: .utf8), originalBytes)
+    }
     @MainActor func testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData() throws {
         func data<T>(_ values: [T]) -> NSData {
             values.withUnsafeBufferPointer { NSData(bytes: $0.baseAddress, length: $0.count * MemoryLayout<T>.stride) }
