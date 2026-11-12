@@ -2,7 +2,7 @@
   "status": "passed",
   "host_sqlite_version": "3.50.4",
   "abrupt_process_exit_cases": 5,
-  "integrity_identity_cases": 3,
+  "integrity_identity_cases": 4,
   "cancellation_cases": 5,
   "live_producer_cases": 2,
   "observations": [
@@ -145,6 +145,11 @@
       "status": "REPAIR_REQUIRED"
     },
     {
+      "case": "unfinished_operation_identity_rejects_changed_document_or_payload",
+      "status": "IDENTITY_CONFLICT",
+      "original_retry": "COMMITTED"
+    },
+    {
       "case": "cancel-partial-stage",
       "status": "CANCELLED",
       "files_preserved": true
@@ -185,9 +190,9 @@
     "Cancellation is host-only: conservative PID observation and cooperative attempt fencing; no production cancellation UI, expiry policy or GC release authorization"
   ],
   "source_and_artifact_sha256": {
-    "tools/resource_commit_probe.py": "592dd3ea0ca3970e15fc2855cebecad35e871ae776016d28fd097e447fd87ece",
+    "tools/resource_commit_probe.py": "248687f5792c626d9e7a9cdbc44eb50f077aaf3cd7dcc4afc765e53d0e0a9983",
     "fixtures/storage/resource-commit-cases.json": "077c9e8e8a03b2229f262ba1ca8930850a1f2e0b6713ad0dd473e8bf11b1bec4",
     "fixtures/storage/resource-gc-cases.json": "3ed05a51f754315e833ef81d6c1c69bc735d1269297a55795d69c4e6ce067938",
-    "tools/verify_resource_commit_rules.py": "c5f998e1486e6f25b98f1652f0c59423912e10b9c0b3c4ece4c028413762c03a"
+    "tools/verify_resource_commit_rules.py": "eaf0b33a09d391e9d833d8ba3198889e03ae9c016c49b64ae5bc77aff6b5c068"
   }
 }
