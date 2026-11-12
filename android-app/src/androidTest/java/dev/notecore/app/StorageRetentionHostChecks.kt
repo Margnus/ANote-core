@@ -32,6 +32,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         val checks = mutableListOf("derived_text_capacity_checkpoint_save_and_reopen", "read_failure_classification_to_owner", "pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen")
         checks.add("import_refusal_preserves_source_and_retry_remaps_identity")
         checks.add("backup_round_trip_preserves_source_and_remaps_ink_references")
+        checks.add("apple_ui_backup_import_preserves_two_pages_and_three_strokes")
         main {
             store = NoteStore.isolated(host, directory); note = store.create()
             val original = note.snapshot()

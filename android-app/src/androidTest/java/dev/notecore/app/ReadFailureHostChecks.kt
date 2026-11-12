@@ -118,6 +118,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             // Valid canonical doubles can degenerate in the original Float Path/Matrix adapter.
             val ink="NCPREVIEW\t2\nD\t$id\ttitle\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\tink\tlayer\t1\tMONOLINE\t1\t-1\t2.5\t1\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.0\t2.0\t0.5\t1\nEND\n"
             verifyImport(File(directory, "import"), ink)
+            verifyAppleBackup(File(directory, "apple-backup"))
             val degenerate = listOf(ink.replace("\t2.5\t1\t", "\t1.0E-50\t1\t"),
                 ink.replace("\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n", "\t1.0\t1.0\t1.0\t1.00000001\t0.0\t0.0\n"))
             for (encoded in degenerate) {
@@ -264,6 +265,40 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             check(File(directory, "${root.id.value}.ncp").readBytes().contentEquals(backupBytes))
             check(File(directory, "${second.id.value}.ncp").readText() == PagedPreviewCodec.encode(second))
             check(backup.readBytes().contentEquals(backupBytes) && source.readText() == supported)
+        } finally { main { store.stopTestBackend() } }
+    }
+
+    private fun verifyAppleBackup(directory: File) {
+        val source = File(directory.parentFile, "apple-ui-source.ncp")
+        val bytes = test.context.assets.open("transfer/apple-ui-paged-v2.ncp").use { it.readBytes() }
+        source.writeBytes(bytes)
+        val original = PagedPreviewCodec.decode(bytes.toString(Charsets.UTF_8))
+        check(original.pages().size == 2 && original.scene.objects().size == 3)
+        lateinit var store: NoteStore
+        var opened: OpenedDocument? = null
+        main { store = NoteStore.isolated(host, directory) }
+        try {
+            main {
+                store.importCopy(Uri.fromFile(source)) { value, error ->
+                    check(error == null && value?.persisted == true)
+                    opened = value
+                }
+            }
+            await { opened != null }
+            val root = checkNotNull(opened).root
+            check(root.id != original.id && root.title == original.title)
+            val layers = original.pages().zip(root.pages()).associate { (before, after) ->
+                check(before.id != after.id && before.layerId != after.layerId)
+                check(before.width == after.width && before.height == after.height && before.paper == after.paper)
+                before.layerId to after.layerId
+            }
+            check(root.pages().size == 2 && root.scene.objects().size == 3)
+            original.scene.objects().zip(root.scene.objects()).forEach { (before, after) ->
+                check(before.id != after.id && layers.getValue(before.layerId) == after.layerId)
+                check(before.brush == after.brush && before.transform == after.transform && before.samples == after.samples)
+            }
+            check(source.readBytes().contentEquals(bytes))
+            check(checkNotNull(directory.listFiles()).single().readText() == PagedPreviewCodec.encode(root))
         } finally { main { store.stopTestBackend() } }
     }
 }

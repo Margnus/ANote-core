@@ -22,6 +22,7 @@ STORAGE_CHECKS = {'derived_text_capacity_checkpoint_save_and_reopen', 'read_fail
                   'catalog_preserves_unreadable_note_and_lists_valid_neighbor',
                   'import_refusal_preserves_source_and_retry_remaps_identity',
                   'backup_round_trip_preserves_source_and_remaps_ink_references',
+                  'apple_ui_backup_import_preserves_two_pages_and_three_strokes',
                   'export_target_failure_preserves_note_and_allows_retry',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
