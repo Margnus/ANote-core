@@ -192,6 +192,18 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
                 refuse(reason)
                 check(source.readBytes().contentEquals(bytes))
             }
+            val oversizedLength = PagedPreviewCodec.MAX_UTF8_BYTES.toLong() + 1
+            RandomAccessFile(source, "rw").use {
+                it.setLength(oversizedLength)
+                it.seek(oversizedLength - 1)
+                it.write(0x5a)
+            }
+            refuse(LocalReadFailure.BYTE_CAPACITY)
+            RandomAccessFile(source, "r").use {
+                check(it.length() == oversizedLength)
+                it.seek(oversizedLength - 1)
+                check(it.read() == 0x5a)
+            }
             source.writeText(supported, Charsets.UTF_8)
             val original = PagedPreviewCodec.decode(supported)
             directory.writeText("blocked import destination")
