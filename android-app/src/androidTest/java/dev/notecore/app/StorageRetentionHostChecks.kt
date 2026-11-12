@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Instrumentation
 import android.net.Uri
 import android.os.SystemClock
+import android.util.Base64
 import dev.notecore.document.*
 import java.io.File
 import org.json.JSONArray
@@ -23,7 +24,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
     }
     fun verify(): String {
         PendingRecoveryHostChecks(test, host).verify()
-        ReadFailureHostChecks(test, host).verify()
+        val appleRoundTrip = ReadFailureHostChecks(test, host).verify()
         val directory = File(host.cacheDir, "storage-retention-${java.util.UUID.randomUUID()}")
         val moved = File(directory.path + "-saved")
         lateinit var store: NoteStore
@@ -235,6 +236,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                 checks.add("foreign_same_revision_is_not_acknowledged_as_saved")
             }
             return JSONObject().put("checks", JSONArray(checks)).put("original_note_files_used", false)
+                .put("apple_round_trip_base64", Base64.encodeToString(appleRoundTrip, Base64.NO_WRAP))
                 .put("system_file_picker_verified", false).toString()
         } finally {
             main { store.stopTestBackend() }

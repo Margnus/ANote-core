@@ -84,7 +84,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             check(root.scene.objectCount == 9 && checkpoint.pending === pending)
         } finally { main { store.stopTestBackend() } }
     }
-    fun verify() {
+    fun verify(): ByteArray {
         val directory=File(host.cacheDir,"read-failure-${java.util.UUID.randomUUID()}").apply { mkdirs() }
         longNumericCheckpoint(File(directory, "long-numeric"))
         val id="read-failures"; val file=File(directory,"$id.ncp")
@@ -118,7 +118,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             // Valid canonical doubles can degenerate in the original Float Path/Matrix adapter.
             val ink="NCPREVIEW\t2\nD\t$id\ttitle\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\tink\tlayer\t1\tMONOLINE\t1\t-1\t2.5\t1\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.0\t2.0\t0.5\t1\nEND\n"
             verifyImport(File(directory, "import"), ink)
-            verifyAppleBackup(File(directory, "apple-backup"))
+            val appleRoundTrip = verifyAppleBackup(File(directory, "apple-backup"))
             val degenerate = listOf(ink.replace("\t2.5\t1\t", "\t1.0E-50\t1\t"),
                 ink.replace("\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n", "\t1.0\t1.0\t1.0\t1.00000001\t0.0\t0.0\n"))
             for (encoded in degenerate) {
@@ -162,6 +162,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             var opened=false
             main { store.open(id) { value,error -> check(error==null);val note=store.adopt(checkNotNull(value));check(note.totalStrokeCount==0);check(store.releaseActive(note));opened=true } }
             await { opened };check(file.readText(Charsets.UTF_8)==valid)
+            return appleRoundTrip
         } finally { main { store.stopTestBackend() };directory.deleteRecursively() }
     }
 
@@ -268,7 +269,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
         } finally { main { store.stopTestBackend() } }
     }
 
-    private fun verifyAppleBackup(directory: File) {
+    private fun verifyAppleBackup(directory: File): ByteArray {
         val source = File(directory.parentFile, "apple-ui-source.ncp")
         val bytes = test.context.assets.open("transfer/apple-ui-paged-v2.ncp").use { it.readBytes() }
         source.writeBytes(bytes)
@@ -298,7 +299,20 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
                 check(before.brush == after.brush && before.transform == after.transform && before.samples == after.samples)
             }
             check(source.readBytes().contentEquals(bytes))
-            check(checkNotNull(directory.listFiles()).single().readText() == PagedPreviewCodec.encode(root))
+            val saved = checkNotNull(directory.listFiles()).single()
+            check(saved.readText() == PagedPreviewCodec.encode(root))
+            val exported = File(directory.parentFile, "android-return.ncp")
+            var completed = false
+            main {
+                store.export(Uri.fromFile(exported), checkNotNull(opened).recovery) { error ->
+                    check(error == null)
+                    completed = true
+                }
+            }
+            await { completed }
+            return exported.readBytes().also {
+                check(it.contentEquals(saved.readBytes()) && source.readBytes().contentEquals(bytes))
+            }
         } finally { main { store.stopTestBackend() } }
     }
 }

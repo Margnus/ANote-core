@@ -1,5 +1,6 @@
 """Rebuild and run the original low-API consumer suites in a dedicated AVD; never overwrite historical reports."""
 import argparse
+import base64
 import hashlib
 import io
 import json
@@ -99,6 +100,13 @@ def main():
         else:
             assert result['api'] == args.api and result['original_view_store']
             assert result['line_dot_undo_redo_page_pixels'] and result['surface_render_bytes'] == 0
+        if case == 'storage_retention':
+            backup = base64.b64decode(result.pop('apple_round_trip_base64'), validate=True)
+            assert backup.startswith(b'NCPREVIEW\t2\n') and backup.endswith(b'END\n')
+            name = 'android-return-from-apple.ncp'
+            (out / name).write_bytes(backup)
+            result['apple_round_trip_file'] = name
+            result['apple_round_trip_sha256'] = sha(backup)
         observed[case] = result
         assert notes() == before
     adb('shell', 'am', 'force-stop', PACKAGE)
