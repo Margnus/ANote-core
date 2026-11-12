@@ -3,6 +3,7 @@ package dev.notecore.app
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
+import android.net.Uri
 import android.os.SystemClock
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import java.io.File
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -23,6 +25,9 @@ internal object CatalogRetryHostChecks {
         val movedDirectory = File(directory.path + "-moved")
         val workerEntered = CountDownLatch(1)
         val releaseWorker = CountDownLatch(1)
+        val exportEntered = CountDownLatch(1)
+        val releaseExport = CountDownLatch(1)
+        val nextGate = AtomicReference<Pair<CountDownLatch, CountDownLatch>?>(workerEntered to releaseWorker)
         val fixture = "NCPREVIEW\t2\nD\tretry-note\tRecovered note\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         val storeField = NoteStore::class.java.getDeclaredField("instance").apply { isAccessible = true }
         lateinit var store: NoteStore
@@ -32,8 +37,10 @@ internal object CatalogRetryHostChecks {
         test.runOnMainSync {
             priorStore = storeField.get(null)
             store = NoteStore.isolated(context, directory, beforeOpenRead = {
-                workerEntered.countDown()
-                check(releaseWorker.await(8, TimeUnit.SECONDS))
+                nextGate.getAndSet(null)?.let { (entered, release) ->
+                    entered.countDown()
+                    check(release.await(8, TimeUnit.SECONDS))
+                }
             })
             storeField.set(null, store)
         }
@@ -95,11 +102,46 @@ internal object CatalogRetryHostChecks {
             }
             check(File(directory, "$activeId.ncp").readText().contains("Newer in-memory content"))
             check(file.readText() == fixture)
+            val blockedExport = File(directory, "unwritable-export").apply { check(mkdir()) }
+            val marker = File(blockedExport, "keep").apply { writeText("unchanged export target") }
+            val statusField = host.javaClass.getDeclaredField("status").apply { isAccessible = true }
+            val codeField = host.javaClass.getDeclaredField("exportRequestCode").apply { isAccessible = true }
+            val sessionField = host.javaClass.getDeclaredField("exportPickerSession").apply { isAccessible = true }
+            val pickerResult = host.javaClass.getDeclaredMethod("onActivityResult", Int::class.javaPrimitiveType,
+                Int::class.javaPrimitiveType, Intent::class.java).apply { isAccessible = true }
+            nextGate.set(exportEntered to releaseExport)
+            test.runOnMainSync { store.open("hold-export-worker") { _, _ -> } }
+            check(exportEntered.await(8, TimeUnit.SECONDS))
+            var afterExport = false
+            lateinit var libraryStatus: TextView
+            test.runOnMainSync {
+                store.open(activeId) { opened, error ->
+                    check(error == null)
+                    val request = store.beginExportPicker(checkNotNull(opened).recovery)
+                    val code = checkNotNull(request.requestCode)
+                    codeField.set(host, code)
+                    sessionField.set(host, store.exportPickerSession)
+                    pickerResult.invoke(host, code, Activity.RESULT_OK, Intent().setData(Uri.fromFile(blockedExport)))
+                }
+                check(descendants(root).filterIsInstance<Button>().single { it.text == "返回" }.performClick())
+                check(store.activeDocumentId == null)
+                libraryStatus = statusField.get(host) as TextView
+                libraryStatus.text = "Current library status"
+                store.list { _, error -> check(error == null); afterExport = true }
+            }
+            releaseExport.countDown()
+            await(test, "Export and following catalog read did not finish") { afterExport }
+            test.runOnMainSync {
+                check(libraryStatus.text == "Current library status") { "An old export failure changed the new page" }
+            }
+            check(marker.readText() == "unchanged export target" && file.readText() == fixture)
             return JSONObject().put("checks", JSONArray(listOf(
-                "activity_retry_displays_repaired_catalog", "activity_ignores_stale_save_failure"
+                "activity_retry_displays_repaired_catalog", "activity_ignores_stale_save_failure",
+                "activity_export_failure_preserves_new_page_status"
             ))).toString()
         } finally {
             releaseWorker.countDown()
+            releaseExport.countDown()
             test.runOnMainSync {
                 activity?.finish()
                 storeField.set(null, priorStore)
