@@ -324,6 +324,8 @@ final class PreviewModel: ObservableObject {
     }
     func refresh() {
         guard !ownerRetiring else { return }
+        let busyMessage = "后台队列繁忙，请重试读取笔记"
+        let failedMessage = "列表读取失败，原文件与未保存内容仍保留"
         request(input: directory, bytes: 2 * 1024 * 1024, compute: { root in
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
             return try PreviewFileIO.catalog(root).map { url -> LocalNote in
@@ -336,10 +338,16 @@ final class PreviewModel: ObservableObject {
                 } else { title = "待恢复的笔记" }
                 return LocalNote(id: id, title: title, date: date)
             }
-        }, rejected: { notes = overlay(notes); catalogError = true; status = "后台队列繁忙，请重新打开列表" }) { result in
+        }, rejected: { notes = overlay(notes); catalogError = true; status = busyMessage }) { result in
             switch result {
-            case .succeeded(let disk): self.notes = self.overlay(disk); self.catalogError = false
-            case .outcomeUnknown: self.notes = self.overlay(self.notes); self.catalogError = true; self.status = "列表读取失败，原文件与未保存内容仍保留"
+            case .succeeded(let disk):
+                self.notes = self.overlay(disk)
+                self.catalogError = false
+                if self.status == busyMessage || self.status == failedMessage { self.status = "" }
+            case .outcomeUnknown:
+                self.notes = self.overlay(self.notes)
+                self.catalogError = true
+                self.status = failedMessage
             }
         }
     }
@@ -615,6 +623,7 @@ struct PreviewRoot: View {
                             Button("导入备份") { importing = true }.disabled(model.transferBusy || model.exportDocument != nil)
                         }
                         Section("本机笔记") {
+                            if model.catalogError { Button("重新读取笔记") { model.refresh() } }
                             ForEach(model.notes) { note in
                                 Button { model.open(note.id) } label: {
                                     VStack(alignment: .leading) { Text(note.title).font(.headline); Text(note.date, style: .date).font(.caption).foregroundStyle(.secondary) }

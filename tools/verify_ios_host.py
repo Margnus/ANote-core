@@ -12,6 +12,7 @@ BUILD = ROOT/'ios-app/build/host-tests'
 EXPECTED = {
     'testPublicReadingModeBlocksDirectEditsAndKeepsActivePrefix()',
     'testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown()',
+    'testCatalogRetryKeepsUnreadableNoteAndClearsFailure()',
     'testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook()',
     'testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen()',
     'testValidatedOpeningReturnsTypedFailureAndUsesOriginalNotebook()',

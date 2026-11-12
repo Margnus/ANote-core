@@ -145,6 +145,28 @@ final class PagedHostTests: XCTestCase {
         model.open(id); try await eventually("later valid read recovers") { model.current != nil }
         XCTAssertEqual(model.current?.documentId, id); model.close()
     }
+    @MainActor func testCatalogRetryKeepsUnreadableNoteAndClearsFailure() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        try Data("blocked directory".utf8).write(to: dir)
+        let model = PreviewModel(directory: dir)
+        try await eventually("catalog failure is visible") { model.catalogError }
+        XCTAssertEqual(model.status, "列表读取失败，原文件与未保存内容仍保留")
+        try FileManager.default.removeItem(at: dir)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let valid = dir.appendingPathComponent("valid-note.ncp")
+        let damaged = dir.appendingPathComponent("damaged-note.ncp")
+        let validBytes = Data("NCPREVIEW\t2\nD\tvalid-note\tValid note\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n".utf8)
+        let damagedBytes = Data(("NCPREVIEW\t2\n" + String(repeating: "x", count: 4096) + "\n").utf8)
+        try validBytes.write(to: valid)
+        try damagedBytes.write(to: damaged)
+        model.refresh()
+        try await eventually("catalog lists both notes after repair") { !model.catalogError && model.notes.count == 2 }
+        XCTAssertTrue(model.status.isEmpty)
+        XCTAssertEqual(model.notes.first { $0.id == "valid-note" }?.title, "Valid note")
+        XCTAssertEqual(model.notes.first { $0.id == "damaged-note" }?.title, "待恢复的笔记")
+        XCTAssertEqual(try Data(contentsOf: valid), validBytes)
+        XCTAssertEqual(try Data(contentsOf: damaged), damagedBytes)
+    }
     @MainActor func testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook() async throws {
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 128, journalBytes: 8 * 1024 * 1024, identityBytes: 2 * 1024 * 1024,
