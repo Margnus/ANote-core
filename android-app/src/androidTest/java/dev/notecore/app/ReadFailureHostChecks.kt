@@ -227,7 +227,8 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
                 }
             }
             await { imported != null }
-            val root = checkNotNull(imported).root
+            val firstCopy = checkNotNull(imported)
+            val root = firstCopy.root
             check(root.id != original.id && root.title == original.title)
             check(root.pages().single().id != original.pages().single().id)
             check(root.pages().single().layerId != original.pages().single().layerId)
@@ -235,6 +236,34 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             check(root.scene.objects().single().samples == original.scene.objects().single().samples)
             check(checkNotNull(directory.listFiles()).single().readText() == PagedPreviewCodec.encode(root))
             check(source.readText() == supported)
+            val backup = File(directory.parentFile, "round-trip-backup.ncp")
+            var exported = false
+            main {
+                store.export(Uri.fromFile(backup), firstCopy.recovery) { error ->
+                    check(error == null)
+                    exported = true
+                }
+            }
+            await { exported }
+            val backupBytes = backup.readBytes()
+            check(backupBytes.contentEquals(PagedPreviewCodec.encode(root).toByteArray()))
+            var restored: OpenedDocument? = null
+            main {
+                store.importCopy(Uri.fromFile(backup)) { value, error ->
+                    check(error == null && value?.persisted == true && store.activeDocumentId == null)
+                    restored = value
+                }
+            }
+            await { restored != null }
+            val second = checkNotNull(restored).root
+            check(second.id != root.id && second.title == root.title)
+            check(second.pages().single().id != root.pages().single().id)
+            val stroke = second.scene.objects().single()
+            check(stroke.id != root.scene.objects().single().id && stroke.layerId == second.pages().single().layerId)
+            check(stroke.samples == original.scene.objects().single().samples)
+            check(File(directory, "${root.id.value}.ncp").readBytes().contentEquals(backupBytes))
+            check(File(directory, "${second.id.value}.ncp").readText() == PagedPreviewCodec.encode(second))
+            check(backup.readBytes().contentEquals(backupBytes) && source.readText() == supported)
         } finally { main { store.stopTestBackend() } }
     }
 }
