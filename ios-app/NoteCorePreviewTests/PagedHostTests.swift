@@ -100,6 +100,13 @@ final class PagedHostTests: XCTestCase {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let id = "read-failures", file = dir.appendingPathComponent("read-failures.ncp")
+        let boundaryText = String(repeating: "a", count: 8191) + "笔"
+        let boundaryBytes = Data(boundaryText.utf8)
+        try boundaryBytes.write(to: file)
+        XCTAssertEqual(try PreviewFileIO.readUTF8(file, maxBytes: boundaryBytes.count), boundaryText)
+        XCTAssertThrowsError(try PreviewFileIO.readUTF8(file, maxBytes: boundaryBytes.count - 1))
+        XCTAssertThrowsError(try PreviewFileIO.readUTF8(file, maxBytes: -1))
+        XCTAssertEqual(try Data(contentsOf: file), boundaryBytes)
         let valid = "NCPREVIEW\t2\nD\tread-failures\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         let snapshot = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: valid).snapshot)
         if case .opened(let same) = PreviewFileIO.acceptRecovery(snapshot, documentId: id) { XCTAssertTrue(same === snapshot) }

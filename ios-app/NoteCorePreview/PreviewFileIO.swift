@@ -31,14 +31,18 @@ private enum TextReadRefusal: Error { case byteCapacity, invalidUTF8 }
 enum PreviewFileIO {
     static let maxReadBytes = Int(PagedPreviewCodec.shared.maximumUtf8ByteCount())
     static func readUTF8(_ url: URL, maxBytes: Int = maxReadBytes) throws -> String {
+        guard maxBytes >= 0 else { throw TextReadRefusal.byteCapacity }
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
         // Check before creating the payload buffer; growing files are checked again for each chunk.
         let size = try handle.seekToEnd(); guard size <= UInt64(maxBytes) else { throw TextReadRefusal.byteCapacity }
         try handle.seek(toOffset: 0)
-        var data = Data()
-        while let chunk = try handle.read(upToCount: 8192), !chunk.isEmpty {
-            guard chunk.count <= maxBytes - data.count else { throw TextReadRefusal.byteCapacity }
+        var data = Data(capacity: Int(size))
+        while true {
+            let remaining = maxBytes - data.count
+            // Probe at most one byte beyond the remaining budget to distinguish exact EOF.
+            guard let chunk = try handle.read(upToCount: min(8191, remaining) + 1), !chunk.isEmpty else { break }
+            guard chunk.count <= remaining else { throw TextReadRefusal.byteCapacity }
             data.append(chunk)
         }
         guard let text = String(data: data, encoding: .utf8) else { throw TextReadRefusal.invalidUTF8 }
