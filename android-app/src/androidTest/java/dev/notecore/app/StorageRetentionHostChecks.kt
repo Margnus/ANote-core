@@ -113,6 +113,22 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             check(unrelated.all { it.isDirectory })
             checks.add("catalog_ignores_directories_and_recovers_legacy_backup")
             checks.add("catalog_retry_preserves_retained_edits_and_recovers_disk_list")
+            val damaged = File(directory, "damaged-header.ncp")
+            val oversizedHeader = "NCPREVIEW\t2\n" + "x".repeat(4096) + "\n"
+            damaged.writeText(oversizedHeader)
+            var damagedCatalog: List<NoteSummary>? = null
+            main {
+                store.list { result, error ->
+                    check(error == null)
+                    damagedCatalog = result
+                }
+            }
+            eventually("Malformed header prevented catalog delivery") { damagedCatalog != null }
+            val titles = checkNotNull(damagedCatalog).associate { it.id to it.title }
+            check(titles == mapOf(changed.documentId to changed.title, "damaged-header" to "待恢复的笔记"))
+            check(damaged.readText() == oversizedHeader && canonical.readText() == changed.encode())
+            check(damaged.delete())
+            checks.add("catalog_preserves_unreadable_note_and_lists_valid_neighbor")
             val oldBytes = canonical.readBytes()
             val stagingDirectory = File(directory, canonical.name + ".new")
             check(stagingDirectory.mkdir())
