@@ -534,28 +534,47 @@ final class PagedHostTests: XCTestCase {
         let sourceURL = try androidFixture(), original = try Data(contentsOf: sourceURL)
         let source = try PagedPreviewCodec.shared.decode(text: String(decoding: original, as: UTF8.self))
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let exports = directory(); defer { try? FileManager.default.removeItem(at: exports) }
+        try FileManager.default.createDirectory(at: exports, withIntermediateDirectories: true)
         let model = PreviewModel(directory: dir); model.importCopy(sourceURL)
         try await eventually("Android root imported") { !model.transferBusy }
         let note = try XCTUnwrap(model.current), copy = note.snapshot()
         XCTAssertEqual(copy.pageCount, 3); XCTAssertEqual(copy.scene.objectCount, 3)
-        XCTAssertNotEqual(source.id.value, copy.id.value)
-        XCTAssertTrue(Set(source.pages().map { $0.id.value }).isDisjoint(with: copy.pages().map { $0.id.value }))
-        XCTAssertTrue(Set(source.pages().map { $0.layerId.value }).isDisjoint(with: copy.pages().map { $0.layerId.value }))
-        XCTAssertTrue(Set(source.scene.objects().map { $0.id.value }).isDisjoint(with: copy.scene.objects().map { $0.id.value }))
-        for index in 0..<source.pageCount {
-            let a = source.page(index: index), b = copy.page(index: index)
-            XCTAssertEqual(a.width, b.width); XCTAssertEqual(a.height, b.height); XCTAssertEqual(a.paper, b.paper)
-            let old = source.pageObjects(id: a.id), new = copy.pageObjects(id: b.id)
-            XCTAssertEqual(old.count, new.count)
-            for (before, after) in zip(old, new) {
-                XCTAssertEqual(before.brush, after.brush); XCTAssertEqual(before.transform, after.transform)
-                XCTAssertEqual(before.samples, after.samples)
+        func assertRemapped(_ from: DocumentRoot, _ to: DocumentRoot) {
+            XCTAssertNotEqual(from.id.value, to.id.value)
+            XCTAssertEqual(from.title, to.title)
+            XCTAssertEqual(from.pageCount, to.pageCount)
+            XCTAssertEqual(from.scene.objectCount, to.scene.objectCount)
+            XCTAssertTrue(Set(from.pages().map { $0.id.value }).isDisjoint(with: to.pages().map { $0.id.value }))
+            XCTAssertTrue(Set(from.pages().map { $0.layerId.value }).isDisjoint(with: to.pages().map { $0.layerId.value }))
+            XCTAssertTrue(Set(from.scene.objects().map { $0.id.value }).isDisjoint(with: to.scene.objects().map { $0.id.value }))
+            for (a, b) in zip(from.pages(), to.pages()) {
+                XCTAssertEqual(a.width, b.width); XCTAssertEqual(a.height, b.height); XCTAssertEqual(a.paper, b.paper)
+                let old = from.pageObjects(id: a.id), new = to.pageObjects(id: b.id)
+                XCTAssertEqual(old.count, new.count)
+                for (before, after) in zip(old, new) {
+                    XCTAssertEqual(before.brush, after.brush); XCTAssertEqual(before.transform, after.transform)
+                    XCTAssertEqual(before.samples, after.samples)
+                }
             }
         }
+        assertRemapped(source, copy)
         model.editPage(content: false) { $0.selectPage(id: $0.page(index: 2).id) }
         model.prepareExport(); try await eventually("whole root export ready") { !model.transferBusy }
         let exported = try XCTUnwrap(model.exportDocument)
         XCTAssertEqual(String(decoding: exported.data, as: UTF8.self), try note.capture().encode())
+        let backup = exports.appendingPathComponent("round-trip.ncp")
+        try exported.data.write(to: backup)
+        model.close()
+        XCTAssertNil(model.current)
+        model.importCopy(backup)
+        try await eventually("exported copy imported") { !model.transferBusy }
+        let restored = try XCTUnwrap(model.current).snapshot()
+        assertRemapped(copy, restored)
+        XCTAssertEqual(try Data(contentsOf: dir.appendingPathComponent(copy.id.value + ".ncp")), exported.data)
+        XCTAssertEqual(try PreviewFileIO.readUTF8(dir.appendingPathComponent(restored.id.value + ".ncp")),
+                       try PagedPreviewCodec.shared.encode(root: restored))
+        XCTAssertEqual(try Data(contentsOf: backup), exported.data)
         XCTAssertEqual(try Data(contentsOf: sourceURL), original)
         model.close()
     }
