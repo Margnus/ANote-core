@@ -577,6 +577,19 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: backup), exported.data)
         XCTAssertEqual(try Data(contentsOf: sourceURL), original)
         model.close()
+        let returned = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "android-return-from-apple", withExtension: "ncp"))
+        let returnedBytes = try Data(contentsOf: returned)
+        let returnedRoot = try PagedPreviewCodec.shared.decode(text: String(decoding: returnedBytes, as: UTF8.self))
+        XCTAssertEqual(returnedRoot.pageCount, 2)
+        XCTAssertEqual(returnedRoot.scene.objectCount, 3)
+        model.importCopy(returned)
+        try await eventually("actual Android return imported") { !model.transferBusy }
+        let roundTrip = try XCTUnwrap(model.current).snapshot()
+        assertRemapped(returnedRoot, roundTrip)
+        XCTAssertEqual(try PreviewFileIO.readUTF8(dir.appendingPathComponent(roundTrip.id.value + ".ncp")),
+                       try PagedPreviewCodec.shared.encode(root: roundTrip))
+        XCTAssertEqual(try Data(contentsOf: returned), returnedBytes)
+        model.close()
     }
     @MainActor func testUnsupportedBrushAndCorruptUTF8DoNotCreateCopyOrChangeSource() async throws {
         let dir = directory(), inputs = directory()
