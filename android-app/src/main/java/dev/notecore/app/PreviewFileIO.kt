@@ -13,6 +13,7 @@ import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.nio.file.NoSuchFileException
+import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.UUID
 
@@ -53,14 +54,15 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         // AtomicFile may rename or delete these entries during both reads and writes.
         for (suffix in listOf("", ".bak", ".new")) {
             val path = File(directory, base.name + suffix).toPath()
-            val attributes = try {
-                Files.readAttributes(path, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
-            } catch (_: NoSuchFileException) {
-                continue
-            }
+            val attributes = entryAttributes(path) ?: continue
             if (!attributes.isRegularFile) throw IOException("Unexpected preview storage entry")
         }
         return AtomicFile(base)
+    }
+    private fun entryAttributes(path: Path): BasicFileAttributes? = try {
+        Files.readAttributes(path, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
+    } catch (_: NoSuchFileException) {
+        null // An entry may disappear between enumeration and inspection.
     }
     fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
@@ -119,7 +121,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
                 if (!name.endsWith(".ncp") && !name.endsWith(".ncp.bak")) continue
                 val id = name.removeSuffix(".bak").removeSuffix(".ncp")
                 if (!id.matches(Regex("[a-zA-Z0-9-]{1,128}")) ||
-                    !Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) continue
+                    entryAttributes(path)?.isRegularFile != true) continue
                 ids.add(id)
                 require(ids.size <= 2000) { "Preview catalog capacity; paged production catalog required" }
             }
@@ -129,7 +131,8 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     private fun readHeader(id: String): PagedPreviewHeader = atomicFile(id).openRead().use { stream ->
         val input = stream.buffered(256); val bytes = java.io.ByteArrayOutputStream(1024); var newlines = 0
         while (newlines < 2) {
-            val value = input.read(); require(value >= 0 && bytes.size() < 4096) { "Invalid catalog header" }
+            require(bytes.size() < 4096) { "Invalid catalog header" }
+            val value = input.read(); require(value >= 0) { "Invalid catalog header" }
             bytes.write(value); if (value == 10) newlines++
         }
         PreviewRecoveryCodec.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
