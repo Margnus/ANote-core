@@ -285,9 +285,12 @@ class MainActivity : Activity() {
             if (resultCode != RESULT_OK) return
             val uri = data?.data ?: return showError("未获取导出位置，请重试")
             if (snapshot == null) { showError("会话已重建，请重新导出"); return }
-            store.export(uri, snapshot) { failure -> if (!isFinishing && !isDestroyed) {
-                if (failure != null) showError(failure) else Toast.makeText(this, "备份已导出", Toast.LENGTH_LONG).show()
-            } }
+            val generation = viewGeneration
+            store.export(uri, snapshot) { failure ->
+                if (isFinishing || isDestroyed) return@export
+                if (failure != null && generation == viewGeneration) showError(failure)
+                else Toast.makeText(this, failure ?: "备份已导出", Toast.LENGTH_LONG).show()
+            }
         } else if (requestCode in 1000..65535 && requestCode == importRequestCode) {
             val session = importPickerSession
             importRequestCode = null; importPickerSession = null
