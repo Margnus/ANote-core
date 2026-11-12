@@ -65,6 +65,11 @@ class BoundedPreviewReadTest {
         assertEquals(0x5a.toByte(), bytes.first()); assertEquals(0x5a.toByte(), bytes.last())
         val refusal = assertFailsWith<IllegalArgumentException> { readBoundedPreviewBytes(generated(PagedPreviewCodec.MAX_UTF8_BYTES + 1)) }
         assertEquals("BYTE_CAPACITY", refusal.message)
+        val oversized = generated(PagedPreviewCodec.MAX_UTF8_BYTES + 8192)
+        assertEquals("BYTE_CAPACITY", assertFailsWith<IllegalArgumentException> {
+            readBoundedPreviewBytes(oversized)
+        }.message)
+        assertEquals(8191, oversized.remaining)
     }
 
     @Test fun sizedReadAtCapacityDistinguishesEofFromOneExtraByte() {

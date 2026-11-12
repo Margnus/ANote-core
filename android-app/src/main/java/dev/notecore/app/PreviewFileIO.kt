@@ -200,11 +200,12 @@ private fun collectPreviewBytes(input: java.io.InputStream, prefix: ByteArray? =
         output.write(extra)
     }
     while (true) {
-        val count = input.read(buffer)
+        val remaining = PagedPreviewCodec.MAX_UTF8_BYTES - output.size()
+        // At the limit, probe one byte for EOF without reading another full chunk.
+        val count = input.read(buffer, 0, minOf(buffer.size, remaining + 1))
         if (count < 0) break
         if (count == 0) throw IOException("Preview input stream made no progress")
-        if (output.size().toLong() + count > PagedPreviewCodec.MAX_UTF8_BYTES.toLong())
-            throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+        if (count > remaining) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
         output.write(buffer, 0, count)
     }
     return output.toByteArray()
