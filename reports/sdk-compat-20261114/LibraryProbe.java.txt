@@ -1,0 +1,9 @@
+import dev.notecore.library.LibraryTrashNote;
+
+public class LibraryProbe {
+    public static void main(String[] args) {
+        var note = new LibraryTrashNote("note", null, 1L);
+        if (!"note".equals(note.getNoteId())) throw new AssertionError();
+        System.out.println(note.getNoteId());
+    }
+}

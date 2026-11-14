@@ -1,0 +1,36 @@
+#!/bin/bash
+set -eu
+out="$PWD/build/sdk-compat"
+previous="$PWD/reports/sdk-artifact-boundary-20261107/apple"
+current="$PWD/build/sdk-candidate/shared-core/bin"
+source="$PWD/reports/sdk-artifact-boundary-20261107/apple-runtime/RecoveryConsumer.swift"
+for kind in iosArm64 iosSimulatorArm64; do
+    if [[ "$kind" == iosArm64 ]]; then
+        sdk=iphoneos
+        triple=arm64-apple-ios17.0
+    else
+        sdk=iphonesimulator
+        triple=arm64-apple-ios17.0-simulator
+    fi
+    old="$out/old-$kind"
+    mkdir -p "$old"
+    unzip -oq "$previous/$kind-framework.zip" -d "$old"
+    sdk_path=$(xcrun --sdk "$sdk" --show-sdk-path)
+    swift=(xcrun --sdk "$sdk" swiftc -sdk "$sdk_path" -target "$triple")
+    "${swift[@]}" -F "$old" -module-cache-path "$old/module-cache" -c "$source" -o "$out/$kind-old-consumer.o"
+    for version in old candidate; do
+        framework="$old"
+        if [[ "$version" == candidate ]]; then framework="$current/$kind/releaseFramework"; fi
+        "${swift[@]}" -F "$framework" -framework NoteCanvasPrototype "$out/$kind-old-consumer.o" -o "$out/$kind-$version-linked"
+    done
+done
+fixture=$(find reports/view-pending-process-20261106 -name prepare.ncp)
+canonical="$(dirname "$fixture")/confirmed-final.ncp"
+device=$(xcrun simctl create NoteCoreCompatNov14 'iPad Pro 11-inch (M5)' com.apple.CoreSimulator.SimRuntime.iOS-27-0)
+trap 'xcrun simctl shutdown "$device" >/dev/null 2>&1 || true; xcrun simctl delete "$device"' EXIT
+xcrun simctl boot "$device"
+xcrun simctl bootstatus "$device" -b > "$out/apple-boot.log"
+for version in old candidate; do
+    xcrun simctl spawn "$device" "$out/iosSimulatorArm64-$version-linked" "$PWD/$fixture" "$PWD/$canonical" > "$out/apple-$version.log"
+    rg -q 'both checkpoint byte sequences matched' "$out/apple-$version.log"
+done

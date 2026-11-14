@@ -1,0 +1,21 @@
+#!/bin/bash
+set -eu
+cur="$PWD/build/sdk-candidate-check"
+out="$PWD/build/sdk-compat"
+old="$PWD/reports/sdk-artifact-boundary-20261107/android"
+java="$HOME/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/java"
+stdlib=$(find .gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21 -name kotlin-stdlib-2.2.21.jar)
+for module in canvas-core shared-core; do
+    unzip -p "$old/$module-release.aar" classes.jar > "$out/old-$module.jar"
+done
+fixture=$(find reports/view-pending-process-20261106 -name prepare.ncp)
+canonical="$(dirname "$fixture")/confirmed-final.ncp"
+for version in old candidate; do
+    if [[ "$version" == old ]]; then
+        classpath="$out/old-canvas-core.jar:$out/old-shared-core.jar"
+    else
+        classpath="$cur/canvas-core-android.jar:$cur/shared-core-android.jar"
+    fi
+    "$java" -cp "$old/recovery-consumer.jar:$classpath:$stdlib" dev.notecore.probe.RecoveryConsumerKt "$fixture" "$canonical" > "$out/android-$version.log"
+    rg -q 'both checkpoint byte sequences matched' "$out/android-$version.log"
+done

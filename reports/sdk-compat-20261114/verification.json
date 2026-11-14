@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-14",
+  "status": "selected_recovery_compatible_with_observed_non_sdk_java_break",
+  "historical_release_commit": "ed282d4fdae6e567fab76344aac13911f7d01997",
+  "candidate_commit": "e44ab9f836dfef39a1d9e3f7c282c06e503da830",
+  "apple_header": {
+    "previous_types": 261,
+    "candidate_types": 251,
+    "shared_types_with_changed_members_or_inheritance": 0,
+    "removed_types": [
+      "NCPAppleBrushJobExperiment",
+      "NCPAppleBrushOwnerExperiment",
+      "NCPAppleBrushReaderExperiment",
+      "NCPAppleBrushResultExperiment",
+      "NCPPreviewSaveAdmission",
+      "NCPPreviewSaveAttempt",
+      "NCPPreviewSaveLedger",
+      "NCPPreviewSaveState",
+      "NCPPreviewWriteAdmission",
+      "NCPPreviewWriteDisposition"
+    ],
+    "selected_profile_types": 49,
+    "reachable_with_other_members": 78
+  },
+  "apple_compatibility": {
+    "previous_header_object_links_on": [
+      "iosArm64",
+      "iosSimulatorArm64"
+    ],
+    "old_and_candidate_runtime_passed_on": "iOS 27.0 simulator",
+    "binary_sha256": {
+      "build/sdk-compat/iosArm64-old-consumer.o": "36abe64b83a73a53801fb0624bd51714e1d496df41690ea34ea728de7c6cd75b",
+      "build/sdk-compat/iosArm64-old-linked": "413394178e18d7ce59cf729fefba0470ad1cae5f5ef3f9a682ebe82026aa5e86",
+      "build/sdk-compat/iosArm64-candidate-linked": "c407bd259fe6f8e6126b8fc34198f8e5fa80bfafd5b5efde0e3f83fa43af9e24",
+      "build/sdk-compat/iosSimulatorArm64-old-consumer.o": "0afca09fb0b08fae3eb58520475b8a04c777caa9bbec1a73b3b0abdacd2a59ad",
+      "build/sdk-compat/iosSimulatorArm64-old-linked": "b412b87a79b7491089f94c7f6d2959f9a3f9c03b74701df1c003f2a497f45a6b",
+      "build/sdk-compat/iosSimulatorArm64-candidate-linked": "23e7ee84e9b74b88a278b7dde891ac109a3a9a4097ddbc4473729a4c5b3658bb"
+    }
+  },
+  "android_compatibility": {
+    "previous_consumer_jar_sha256": "38ec1bcc2fedf2a9a0b97b32e54ac6ac256088d9f8aa7e05b5a58dda8074dde0",
+    "same_jar_passed_with_previous_and_candidate_aar_on": "JDK 17",
+    "internal_library_java_constructor_break_reproduced": true,
+    "changed_internal_types": [
+      "LibraryEmptyTrashScope",
+      "LibraryTrashNote",
+      "LibraryTrashSnapshot"
+    ]
+  },
+  "evidence_sha256": {
+    "reports/sdk-compat-20261114/LibraryProbe.java.txt": "0762f52a044935ca3e30fd8c135cfaebfe39e9b7fdfcee525b9c6ad242091802",
+    "reports/sdk-compat-20261114/android-candidate.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-compat-20261114/android-old.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-compat-20261114/android-shared-jvm-signatures.diff": "2de29893203ed92561bd8be751465e6b0f7df71805d180123d0f14ef0469c206",
+    "reports/sdk-compat-20261114/android.sh.txt": "d9246f0e66d4eb5c5a8332f39600da9e9a8c5d1b22346faf07a9978b672719fe",
+    "reports/sdk-compat-20261114/apple-candidate.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-compat-20261114/apple-old.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-compat-20261114/apple.sh.txt": "847e29f9104e51fbf64fff6c217081b194e5d3cf81d92bb06ed0e4823d54bb45",
+    "reports/sdk-compat-20261114/library-candidate.log": "dc5be4898265f199d1dcf1d0549cc5939e802afb5291e9c7411ffbf5365d3df1",
+    "reports/sdk-compat-20261114/library-old.log": "389ed6887e49a315f706f6c2b931b1dcf0d797c91437124f32eb98555c669758"
+  },
+  "scope": "A fixed recovery consumer, generated Apple declarations, and JVM signatures of bytecode changed in both releases. Full Java ABI compatibility is disproved for an internal library class. Whole SDK API and ABI approval and physical platform gates remain open."
+}
