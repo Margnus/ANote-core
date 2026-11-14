@@ -1,0 +1,56 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "267A63FF-9274-4785-AAEA-BB154927C449",
+        "deviceName" : "NoteCoreStaleOpen",
+        "modelName" : "iPad Pro 11-inch (M5)",
+        "osBuildNumber" : "24A434",
+        "osVersion" : "27.0",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "NoteCorePreview · Built with macOS 27.2.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1794664549.42,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Thread running at User-interactive quality-of-service class waiting on a lower QoS thread running at Default quality-of-service class. Investigate ways to avoid priority inversions",
+      "sourceURL" : "file:///Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift"
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1794664491.801,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertEqual failed: (\"[\"older\"]\") is not equal to (\"[\"newer\"]\")",
+      "targetName" : "NoteCorePreviewTests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PagedHostTests/testStaleReadRetryCannotSupersedeNewerOpen()",
+      "testIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testStaleReadRetryCannotSupersedeNewerOpen",
+      "testName" : "testStaleReadRetryCannotSupersedeNewerOpen()"
+    }
+  ],
+  "title" : "Test - NoteCorePreview",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

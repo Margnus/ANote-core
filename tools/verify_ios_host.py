@@ -79,6 +79,7 @@ EXPECTED = {
     'testFailedSaveRetainsRootAcrossCloseAndRepair()',
     'testLateImportCannotReplaceNewActiveOwner()',
     'testLateOpenCannotReplaceNewActiveOwner()',
+    'testStaleReadRetryCannotSupersedeNewerOpen()',
     'testLegacyNoEditPreservesBytesThenEditMigratesOriginalExtent()',
     'testNativeRendererChangesPageCacheAndAppliesFullAffineDotWidth()',
     'testPagedSaveCloseAndNewOwnerReadAllPages()',

@@ -505,7 +505,11 @@ final class PreviewModel: ObservableObject {
             guard self.navigationEpoch == navigation && self.current === previous else { return }
             if self.storageEpoch != epoch {
                 // Retry the pure read after ACK; no old notebook payload is placed on a callback queue.
-                DispatchQueue.main.async { self.openDocument(id, replacingIdle: replacingIdle, opened: opened) }; return
+                DispatchQueue.main.async { [weak self, weak previous] in
+                    guard let self, self.navigationEpoch == navigation, self.current === previous else { return }
+                    self.openDocument(id, replacingIdle: replacingIdle, opened: opened)
+                }
+                return
             }
             switch result {
             case .succeeded(let reading):

@@ -1,0 +1,127 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "267A63FF-9274-4785-AAEA-BB154927C449",
+      "deviceName" : "NoteCoreStaleOpen",
+      "modelName" : "iPad Pro 11-inch (M5)",
+      "osBuildNumber" : "24A434",
+      "osVersion" : "27.0",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "duration" : "Ran for 0.58 seconds",
+  "durationInSeconds" : 0.5845450162887573,
+  "hasMediaAttachments" : false,
+  "hasPerformanceMetrics" : false,
+  "testDescription" : "Test case with 1 run",
+  "testIdentifier" : "PagedHostTests/testStaleReadRetryCannotSupersedeNewerOpen()",
+  "testIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testStaleReadRetryCannotSupersedeNewerOpen",
+  "testName" : "testStaleReadRetryCannotSupersedeNewerOpen()",
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ],
+  "testResult" : "Failed",
+  "testRuns" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "name" : "PagedHostTests.testStaleReadRetryCannotSupersedeNewerOpen()",
+                  "nodeType" : "Source Code Reference",
+                  "sourceLocation" : {
+                    "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                    "lineNumber" : 1528
+                  }
+                }
+              ],
+              "name" : "XCTAssertEqual failed: (\"[\"older\"]\") is not equal to (\"[\"newer\"]\")",
+              "nodeType" : "Test Case Run",
+              "result" : "Failed",
+              "sourceLocation" : {
+                "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                "lineNumber" : 1528
+              }
+            },
+            {
+              "children" : [
+                {
+                  "name" : "PagedHostTests.testStaleReadRetryCannotSupersedeNewerOpen()",
+                  "nodeType" : "Source Code Reference",
+                  "sourceLocation" : {
+                    "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                    "lineNumber" : 1518
+                  }
+                }
+              ],
+              "name" : "Thread running at User-interactive quality-of-service class waiting on a lower QoS thread running at Default quality-of-service class. Investigate ways to avoid priority inversions",
+              "nodeType" : "Runtime Warning",
+              "sourceLocation" : {
+                "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                "lineNumber" : 1518
+              }
+            },
+            {
+              "children" : [
+                {
+                  "name" : "PagedHostTests.testStaleReadRetryCannotSupersedeNewerOpen()",
+                  "nodeType" : "Source Code Reference",
+                  "sourceLocation" : {
+                    "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                    "lineNumber" : 1529
+                  }
+                }
+              ],
+              "name" : "XCTAssertEqual failed: (\"Optional(\"older\")\") is not equal to (\"Optional(\"newer\")\")",
+              "nodeType" : "Test Case Run",
+              "result" : "Failed",
+              "sourceLocation" : {
+                "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                "lineNumber" : 1529
+              }
+            },
+            {
+              "children" : [
+                {
+                  "name" : "PagedHostTests.testStaleReadRetryCannotSupersedeNewerOpen()",
+                  "nodeType" : "Source Code Reference",
+                  "sourceLocation" : {
+                    "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                    "lineNumber" : 1530
+                  }
+                }
+              ],
+              "name" : "XCTAssertEqual failed: (\"3\") is not equal to (\"2\")",
+              "nodeType" : "Test Case Run",
+              "result" : "Failed",
+              "sourceLocation" : {
+                "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                "lineNumber" : 1530
+              }
+            }
+          ],
+          "duration" : "0.58s",
+          "durationInSeconds" : 0.5845450162887573,
+          "name" : "Test Scheme Action",
+          "nodeIdentifier" : "1",
+          "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testStaleReadRetryCannotSupersedeNewerOpen",
+          "nodeType" : "Test Plan Configuration",
+          "result" : "Failed"
+        }
+      ],
+      "details" : "iOS Simulator 27.0",
+      "duration" : "0.58s",
+      "durationInSeconds" : 0.5845450162887573,
+      "name" : "iPad Pro 11-inch (M5)",
+      "nodeIdentifier" : "267A63FF-9274-4785-AAEA-BB154927C449",
+      "nodeType" : "Device",
+      "result" : "Failed"
+    }
+  ]
+}

@@ -1479,6 +1479,61 @@ final class PagedHostTests: XCTestCase {
         XCTAssertTrue(model.current === active); XCTAssertNotEqual(active.documentId, root.id.value)
         model.close()
     }
+    @MainActor func testStaleReadRetryCannotSupersedeNewerOpen() async throws {
+        let dir = directory()
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        for id in ["older", "newer"] {
+            let fixture = try PagedPreviewNotebook.companion.create(documentId: id, title: id, sessionNonce: id)
+            try PreviewFileIO.writeUTF8(fixture.capture().encode(), to: dir.appendingPathComponent(id + ".ncp"))
+            XCTAssertTrue(fixture.retire())
+        }
+        let resultReady = DispatchSemaphore(value: 0), releaseRead = DispatchSemaphore(value: 0)
+        let releaseNewerRead = DispatchSemaphore(value: 0)
+        defer { releaseRead.signal(); releaseNewerRead.signal() }
+        let lock = NSLock(); var reads = 0
+        let readCharge = PagedPreviewCodec.shared.maximumDecodingWorkByteCharge()
+        let model = PreviewModel(directory: dir, storageWorkBytes: 3 * readCharge, beforeOpenRead: {
+            let read = lock.withLock { reads += 1; return reads }
+            let gate = read == 1 ? releaseRead : releaseNewerRead
+            if read <= 2 && gate.wait(timeout: .now() + 5) != .success {
+                throw CocoaError(.fileReadUnknown)
+            }
+        })
+        model.create()
+        let original = try XCTUnwrap(model.current)
+        let worker = try XCTUnwrap(Mirror(reflecting: model).descendant("$__lazy_storage_$_executor") as? AppleBoundedOwnerExecutor)
+        try await eventually("initial owner work drains") { (try? worker.status().entries.isEmpty) == true }
+
+        var opened = [String]()
+        model.openForEditor("older") { opened.append($0.documentId) }
+        // A sentinel behind the read cannot run until its result is available to the owner.
+        // The owner delivers it explicitly so the retry and new selection have a fixed order.
+        let ready = try worker.submit(input: (), chargedBytes: 1, compute: { _ in resultReady.signal() },
+                                      receive: { _, _ in .acknowledged })
+        guard case .accepted = ready else { XCTFail("read sentinel was refused"); return }
+        XCTAssertTrue(original.rename(value: "Saved while opening"))
+        model.changed()
+        releaseRead.signal()
+        XCTAssertEqual(resultReady.wait(timeout: .now() + 5), .success)
+        XCTAssertEqual(try worker.drainResults(limit: 1).acknowledged, 1)
+        XCTAssertTrue(model.current === original)
+        model.openForEditor("newer") { opened.append($0.documentId) }
+
+        // Let the posted retry run before the newer read can deliver its result.
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { releaseNewerRead.signal(); continuation.resume() }
+        }
+        try await eventually("both open requests settle") { (try? worker.status().entries.isEmpty) == true }
+        XCTAssertEqual(opened, ["newer"])
+        XCTAssertEqual(model.current?.documentId, "newer")
+        XCTAssertEqual(lock.withLock { reads }, 2)
+        let file = dir.appendingPathComponent(original.documentId + ".ncp")
+        XCTAssertEqual(try PreviewRecoveryCodec.shared.header(text: PreviewFileIO.readHeaderUTF8(file)).title,
+                       "Saved while opening")
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("model retires") { model.ownerRetirementStatus.phase == .retired }
+    }
     @MainActor func testPagedSaveCloseAndNewOwnerReadAllPages() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         let model = PreviewModel(directory: dir); model.create()

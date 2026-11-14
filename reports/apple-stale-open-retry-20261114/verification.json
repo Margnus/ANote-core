@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "baseline_commit": "e7625400bb3df47a4e2d3f4b6063f2aeea2932c6",
+  "source_sha256": {
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "0edceddb7edcd402dfdf1bdf8056746dada09d676a98f0efc1aaaad737d107d9",
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "2b078f555ffb0ecd1cc73e98be84889f79b746b185b493c2d483a8e98c0d307e",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "28c8411beb37852a2c84bf706810204a6eb873ee47c9860ce6a90b816699edef",
+    "tools/verify_ios_host.py": "f34c79c29813f8e68fefbae2402c7ff75b9811ee148a3beb74171aeadd025f94"
+  },
+  "core_framework_sha256": "5a5d2fe55bf3e020f5d6c459ee7a1f2dfa78ddb3af2c55f32770e7c2be82d506",
+  "evidence_sha256": {
+    "reports/apple-stale-open-retry-20261114/baseline-details.json": "6ceaa8ab55472c47fd3af9e4698334b35d826e9739b73460580b4ee9537f39f8",
+    "reports/apple-stale-open-retry-20261114/baseline-summary.json": "6bee008c0e49d5ad27059c4216b4990109351ea4aab71290df9ae48dca9cec81",
+    "reports/apple-stale-open-retry-20261114/fixed-summary.json": "26914270d26ccbfaa8d0203f5d4058a332fda3e62e40237bbdbd47db7e16dfdc",
+    "reports/apple-stale-open-retry-20261114/fixed-tests.json": "0f34c4dfdcd2f827122d41e64bb289a4a34cc6ecc6ea92ec80653b2d45b17363"
+  },
+  "baseline_assertion_failures": [
+    "XCTAssertEqual failed: (\"[\"older\"]\") is not equal to (\"[\"newer\"]\")",
+    "XCTAssertEqual failed: (\"Optional(\"older\")\") is not equal to (\"Optional(\"newer\")\")",
+    "XCTAssertEqual failed: (\"3\") is not equal to (\"2\")"
+  ],
+  "apple_host_tests": 74,
+  "scope": "The original iOS App host delivers a read invalidated by an intervening save, submits a newer open before the deferred retry, and verifies the newer document and durable save. No physical or production gate is discharged."
+}
