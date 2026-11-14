@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "baseline_commit": "4108c362bab05441289af1ce00dd2393bf6ae93a",
+  "source_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/StorageRetentionHostChecks.kt": "658762c03a979dc75be1965cc7d4f6f0981230c39ee33d511478985b5943cd0a",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "e5932f66bd7d4fdf62c076e7a84e0ea3ce2ebd255eb793fae5259c0f88f2e5f2",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "40dd7d0c784c58388ca18f8fd0de17d6237ddc08a4835b7a629cefd166ae6cac",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "f74dc3751cb5c08c0b108848ba69ed96a56d1aaa6102a38eaaeb23ec2f668a92",
+    "tools/verify_android_input_host.py": "a672e74cc2c833209c622ac3d3f21383e9b0041c3f67049154cbf3a8db5f2e3b",
+    "tools/verify_ios_host.py": "3178b620700c19bc7cbf836c3f194c29ec5da80e24839e4c5e40fb0fb4851262"
+  },
+  "evidence_sha256": {
+    "reports/reopen-write-ack-20261114/android-apks.sha256": "254ce325e17cb4fd24a156966361b2e1b5746e3fcdc482a9b94ac9cd74cc08f3",
+    "reports/reopen-write-ack-20261114/apple-summary.json": "af5c2452bf98d8b0ad65e528c56c55a485e3db663d1b503c0b20d16c70db914a",
+    "reports/reopen-write-ack-20261114/pending_work_budget.log": "06006182ba54fce4d57983d3b978f2fc396dfb19a456d5b8776345215ffd3b6e",
+    "reports/reopen-write-ack-20261114/recovery_open_budget.log": "d1e7b5e7b22d313ffde0878c04d1b3d5c45acb2d22c46db46411765164d6b4df",
+    "reports/reopen-write-ack-20261114/storage_retention.log": "d9883416cf76ca304404eaf25c200255053f1a0d0fc4862613ddd284c382e6a5"
+  },
+  "apple_host_tests": 73,
+  "android_api32_host_cases": [
+    "storage_retention",
+    "pending_work_budget",
+    "recovery_open_budget"
+  ],
+  "android_fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+  "scope": "An earlier confirmed write can satisfy an already queued reopen of the same retained snapshot. Original App hosts verify correct saved identity and no redundant write. Physical and production gates remain open."
+}

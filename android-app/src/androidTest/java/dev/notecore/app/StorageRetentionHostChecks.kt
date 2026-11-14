@@ -291,6 +291,8 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                 check(note.snapshot() === root)
                 checks.add("foreign_same_revision_is_not_acknowledged_as_saved")
             }
+            verifyReopenAfterWriteAcknowledgement()
+            checks.add("retained_reopen_observes_preceding_write_ack")
             return JSONObject().put("checks", JSONArray(checks)).put("original_note_files_used", false)
                 .put("apple_round_trip_base64", Base64.encodeToString(appleRoundTrip, Base64.NO_WRAP))
                 .put("system_file_picker_verified", false).toString()
@@ -299,4 +301,47 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             directory.deleteRecursively(); moved.deleteRecursively()
         }
     }
+    private fun verifyReopenAfterWriteAcknowledgement() {
+        val directory = File(host.cacheDir, "open-after-write-${java.util.UUID.randomUUID()}")
+        val writerEntered = CountDownLatch(1)
+        val releaseWriter = CountDownLatch(1)
+        lateinit var store: NoteStore
+        var reopened = false
+        try {
+            main {
+                store = NoteStore.isolated(host, directory, observeWriteBoundary = { boundary ->
+                    if (boundary == PreviewWriteBoundary.SYNCED_BEFORE_REPLACE) {
+                        writerEntered.countDown()
+                        check(releaseWriter.await(12, TimeUnit.SECONDS))
+                    }
+                })
+                val note = store.create()
+                val snapshot = note.captureRecovery()
+                check(store.save(snapshot) { _, error -> check(error == null) })
+                check(writerEntered.await(5, TimeUnit.SECONDS))
+                check(store.releaseActive(note))
+                check(store.saveStates().single().inFlight)
+                store.open(snapshot.documentId) { opened, message ->
+                    check(message == null && opened?.persisted == true)
+                    val restored = store.adopt(checkNotNull(opened))
+                    check(restored.captureRecovery().sameContent(snapshot))
+                    check(store.editorPresentation(restored).phase == EditorSavePhase.SAVED)
+                    var acknowledged = false
+                    check(store.save(restored.captureRecovery()) { _, error ->
+                        check(error == null)
+                        acknowledged = true
+                    })
+                    check(acknowledged && store.saveStates().isEmpty())
+                    reopened = true
+                }
+            }
+            releaseWriter.countDown()
+            eventually("Reopen did not use the preceding write acknowledgement") { reopened }
+        } finally {
+            releaseWriter.countDown()
+            main { store.stopTestBackend() }
+            directory.deleteRecursively()
+        }
+    }
+
 }

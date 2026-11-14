@@ -518,6 +518,8 @@ final class PreviewModel: ObservableObject {
                       self.current?.hasActiveStroke != true else {
                     self.status = "其他窗口正在编辑，或原笔记尚待保存，请完成后重试"; return
                 }
+                // A preceding write may ACK this exact retained snapshot before delivery.
+                let persisted = retained == nil || self.ledger.latest(documentId: id) == nil
                 do {
                     // Saving can commit the current pending stroke. Check target admission before that side effect.
                     if self.current != nil,
@@ -529,12 +531,12 @@ final class PreviewModel: ObservableObject {
                     }
                     let notebook = try self.prepareNotebook(captured.root, recovery: captured)
                     if self.current != nil { self.retireCurrent() }
-                    self.installNotebook(notebook, root: captured.root, persisted: retained == nil, recovery: captured)
+                    self.installNotebook(notebook, root: captured.root, persisted: persisted, recovery: captured)
                 }
                 catch let failure as NotebookAdoptionFailure { self.status = failure.message; return }
                 catch { self.status = "打开失败，原文件仍保留"; return }
                 let note = self.current!
-                self.status = note.hasPendingStroke ? "已恢复未提交笔迹，请点击保存重试提交" : (retained == nil ? "已打开 · \(note.totalStrokeCount) 笔" : "有更改尚未保存，请重试保存")
+                self.status = note.hasPendingStroke ? "已恢复未提交笔迹，请点击保存重试提交" : (persisted ? "已打开 · \(note.totalStrokeCount) 笔" : "有更改尚未保存，请重试保存")
                 opened?(note)
             case .outcomeUnknown: self.status = "读取结果暂无法确认，请稍后重试"
             }

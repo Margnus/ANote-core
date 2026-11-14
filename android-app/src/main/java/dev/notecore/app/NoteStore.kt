@@ -642,8 +642,12 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 main.post { open(id, callback) }
             } else when (result) {
                 is WorkResult.Succeeded -> when (val reading = result.value) {
-                    is LocalRecoveryRead.Opened -> callback(OpenedDocument(reading.snapshot.root, retained == null, reading.snapshot),
-                        retained?.let { "有更改尚未保存，请点击保存重试" })
+                    is LocalRecoveryRead.Opened -> {
+                        // A preceding write may ACK this exact retained snapshot before delivery.
+                        val persisted = retained == null || ledger.latest(id) == null
+                        callback(OpenedDocument(reading.snapshot.root, persisted, reading.snapshot),
+                            if (persisted) null else "有更改尚未保存，请点击保存重试")
+                    }
                     is LocalRecoveryRead.Refused -> callback(null, reading.reason.message)
                 }
                 else -> callback(null, "读取结果暂无法确认，请稍后重试")

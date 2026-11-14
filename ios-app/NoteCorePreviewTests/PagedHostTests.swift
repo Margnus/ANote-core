@@ -508,6 +508,37 @@ final class PagedHostTests: XCTestCase {
         return (pendingBytes, canonicalBytes)
     }
 
+    @MainActor func testReopenRetainedSnapshotUsesPrecedingWriteAcknowledgement() async throws {
+        let dir = directory()
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let entered = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+        defer { release.signal(); try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir, observeWriteBoundary: { boundary in
+            if boundary == .beforeAtomicWrite { entered.signal(); release.wait() }
+        })
+        model.create()
+        let note = try XCTUnwrap(model.current)
+        let snapshot = note.captureRecovery()
+        var writeEntered = false
+        try await eventually("original write is blocked before replacement") {
+            if !writeEntered { writeEntered = entered.wait(timeout: .now()) == .success }
+            return writeEntered
+        }
+        model.close()
+        XCTAssertNil(model.current)
+        XCTAssertEqual(model.ownerRetirementStatus.inFlightWrites, 1)
+        model.open(note.documentId)
+        release.signal()
+        try await eventually("retained snapshot reopens") { model.current != nil }
+        let restored = try XCTUnwrap(model.current)
+        XCTAssertTrue(restored.captureRecovery().sameContent(other: snapshot))
+        XCTAssertTrue(model.status.hasPrefix("已打开"))
+        XCTAssertTrue(model.save())
+        XCTAssertEqual(model.ownerRetirementStatus.pendingWrites, 0)
+        XCTAssertTrue(model.status.hasPrefix("已保存"))
+        model.close()
+    }
+
     @MainActor func testRefusedRecoveryOpenPreservesUnsavedOriginalPending() async throws {
         let (pending, _) = try androidViewWorkerFiles()
         let dir = directory()
