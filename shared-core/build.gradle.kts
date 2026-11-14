@@ -60,6 +60,7 @@ kotlin {
         if (sdkCandidate.get()) {
             getByName("commonMain").kotlin.exclude(
                 "**/PreviewSaveLedger.kt",
+                "dev/notecore/document/PreviewAppRecoveryPreflight.kt",
                 "dev/notecore/library/**",
             )
             findByName("androidMain")?.kotlin?.exclude("**/PreviewEditorAdmission.kt")

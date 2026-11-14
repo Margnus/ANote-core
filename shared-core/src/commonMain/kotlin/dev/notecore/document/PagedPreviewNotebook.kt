@@ -445,17 +445,12 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             }
             return opened
         }
-        private fun exceedsRecoveryInputBudget(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): Boolean =
+        @JvmSynthetic
+        internal fun exceedsRecoveryInputBudget(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): Boolean =
             snapshot.pending?.let { PreviewRecoveryCodec.pendingCharge(it) > budget.inputBytes } == true
 
-        // The platform App bridges call this preflight within the same Kotlin module.
         @JvmSynthetic
-        internal fun recoveryAdmissionFailure(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): PreviewOpenFailure? {
-            if (exceedsRecoveryInputBudget(snapshot, budget)) return PreviewOpenFailure.INPUT_CAPACITY
-            return checkOpenContentAndBudget(snapshot.root, budget)?.failure
-        }
-
-        private fun checkOpenContentAndBudget(initial: DocumentRoot, budget: DocumentBudget): PreviewNotebookOpen? {
+        internal fun checkOpenContentAndBudget(initial: DocumentRoot, budget: DocumentBudget): PreviewNotebookOpen? {
             if (budget.maxPages > PagedPreviewCodec.MAX_PAGES || budget.maxObjects > PagedPreviewCodec.MAX_OBJECTS || budget.liveBytes > 8L * 1024 * 1024)
                 return PreviewNotebookOpen(null, PreviewOpenFailure.UNSUPPORTED_BUDGET)
             val read = PreviewDocumentReader.accept(initial)

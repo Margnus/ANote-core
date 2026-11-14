@@ -1,0 +1,38 @@
+from io import BytesIO
+from pathlib import Path
+import subprocess
+from zipfile import ZipFile
+
+root = Path.cwd()
+work = root/'build/sdk-preflight'
+repository = root/'build/sdk-candidate-repository'
+markers = (b'PreviewAppRecoveryPreflight', b'previewAppRecoveryFailure', b'recoveryAdmissionFailure')
+def inspect(archive):
+    for entry in archive.namelist():
+        if entry == 'classes.jar':
+            with ZipFile(BytesIO(archive.read(entry))) as inner:
+                inspect(inner)
+        elif entry.endswith(('.class','.kt','.knm')):
+            data = archive.read(entry)
+            assert all(token not in data for token in markers), (archive.filename, entry)
+archives = sorted(path for path in repository.rglob('*') if path.suffix in ('.aar','.jar'))
+for path in archives:
+    with ZipFile(path) as archive:
+        inspect(archive)
+assert len(archives) == 12
+print('App recovery preflight absent from all 12 Maven archives')
+for jar in (root/'build/sdk-candidate-check/shared-core-android.jar', root/'shared-core/build/libs/shared-core-jvm.jar'):
+    with ZipFile(jar) as archive:
+        default = jar.name == 'shared-core-jvm.jar'
+        assert ('dev/notecore/document/PreviewAppRecoveryPreflightKt.class' in archive.namelist()) == default
+print('App recovery preflight retained in default JVM output')
+jdk=Path.home()/'Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin'
+candidate = root/'build/sdk-candidate-check/shared-core-android.jar'
+source = work/'AdmissionProbe.java'
+result = subprocess.run(
+    [jdk/'javac','-J-Duser.language=en','-cp',candidate,'-d',work,source],
+    capture_output=True,text=True,
+)
+(work/'java-refusal.log').write_text(result.stderr)
+assert result.returncode == 1 and 'cannot find symbol' in result.stderr, result.stderr
+print('External Java compilation refuses the retired mangled App preflight method')
