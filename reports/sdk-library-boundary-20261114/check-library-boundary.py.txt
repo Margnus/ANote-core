@@ -1,0 +1,41 @@
+from io import BytesIO
+from pathlib import Path
+import subprocess
+from zipfile import ZipFile
+
+root = Path.cwd()
+repository = root / 'build/sdk-candidate-repository'
+prefix = 'dev/notecore/library/'
+entries_checked = 0
+for path in sorted(repository.rglob('*')):
+    if path.suffix not in ('.jar', '.aar'):
+        continue
+    with ZipFile(path) as archive:
+        names = archive.namelist()
+        if path.suffix == '.aar':
+            with ZipFile(BytesIO(archive.read('classes.jar'))) as classes:
+                names = classes.namelist()
+        assert not any(prefix in name for name in names), path
+        entries_checked += 1
+assert entries_checked == 12, entries_checked
+print(f'{entries_checked} Maven archives contain no dev.notecore.library entries')
+
+work = root/'build/sdk-compat'
+jdk = Path.home()/'Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin'
+candidate_classes = root/'build/sdk-candidate-check/shared-core-android.jar'
+with ZipFile(candidate_classes) as classes:
+    assert not any(name.startswith(prefix) for name in classes.namelist())
+probe = root/'reports/sdk-compat-20261114/LibraryProbe.java.txt'
+source = work/'LibraryProbe.java'
+source.write_bytes(probe.read_bytes())
+result = subprocess.run([jdk/'javac', '-J-Duser.language=en', '-cp', candidate_classes, '-d', work, source], capture_output=True, text=True)
+assert result.returncode == 1 and 'package dev.notecore.library does not exist' in result.stderr, result.stderr
+(work/'library-package-refusal.log').write_text(result.stderr)
+print('External Java compiler rejects the former library import')
+
+default_jar = root/'shared-core/build/libs/shared-core-jvm.jar'
+with ZipFile(default_jar) as archive:
+    assert prefix+'LibraryTrashNote.class' in archive.namelist()
+    assert prefix+'LibraryTrashSnapshot.class' in archive.namelist()
+    assert prefix+'LibraryEmptyTrashScope.class' in archive.namelist()
+print('Default JVM artifact retains the library rules')

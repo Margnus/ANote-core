@@ -58,7 +58,10 @@ kotlin {
         }
         // These ports are supplied only by the original App integration build.
         if (sdkCandidate.get()) {
-            findByName("commonMain")?.kotlin?.exclude("**/PreviewSaveLedger.kt")
+            getByName("commonMain").kotlin.exclude(
+                "**/PreviewSaveLedger.kt",
+                "dev/notecore/library/**",
+            )
             findByName("androidMain")?.kotlin?.exclude("**/PreviewEditorAdmission.kt")
             findByName("iosMain")?.kotlin?.exclude("**/ApplePreviewEditorAdmission.kt")
         }

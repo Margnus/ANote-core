@@ -1,0 +1,80 @@
+{
+  "status": "passed",
+  "baseline_commit": "d11b06a99d40e1399ea0f8816520fceba35ecb9b",
+  "build_input_sha256": "9789111f91cc8c3a208e165e36b3c8ab1ea64e9105c69db4942ff99b0c10b8fc",
+  "maven_archives_checked_for_library_package": 12,
+  "external_java_old_library_import_refused": true,
+  "default_jvm_library_rules_present": true,
+  "default_library_cached_test_results": {
+    "tests": 61,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "apple_library_symbols_absent_targets": [
+    "iosArm64",
+    "iosSimulatorArm64"
+  ],
+  "apple_generated_headers_byte_identical_to_previous_candidate": true,
+  "previous_recovery_consumer": {
+    "android_aar_jdk": "passed",
+    "apple_ios27_simulator": "passed",
+    "apple_ios_arm64": "link passed"
+  },
+  "builds": {
+    "android-producer": {
+      "log_sha256": "ac8d3b1dc24e8829e000361a116dbf7bba4a433af07fe52b838ee0bb7dd4fd7d",
+      "status": "passed"
+    },
+    "consumer": {
+      "log_sha256": "603d0b9473afe7f64b21f00eae4edea56238230edc29962f75e5749cf0a3e7e2",
+      "status": "passed"
+    },
+    "apple-producer": {
+      "log_sha256": "2505df09022a58e47f8442eaebb7c29c6f80606cd17369d231d780ebdefa7038",
+      "status": "passed"
+    },
+    "integration": {
+      "log_sha256": "495ae6dcb98db38dc409a8c3241594a89afbb543bd4c448917f36ea2a263ff8b",
+      "status": "passed"
+    }
+  },
+  "local_artifact_sha256": {
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "3bf18d7b4d41db43ba545b621c7b1271403f97ca3d916ca83d4e22952d48aba3",
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "b003b0fbf6838931dce5ea21b1c7d03d0f5cad02c248bc77af1df86b63ddd47e",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "3bf18d7b4d41db43ba545b621c7b1271403f97ca3d916ca83d4e22952d48aba3",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "21649799624bc2c5d6be9762a14c66ae219e828ad38650fe9be4878ec14b1ee4",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core/0.0.0-c1/canvas-core-0.0.0-c1-sources.jar": "fbfdb5c35ba0cff63db87e556b050ecf11ff0a42d5b338a86d684bbaf593f803",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core/0.0.0-c1/canvas-core-0.0.0-c1.jar": "567948e9c8ebd55fd9d216c7902d2879b0c5e2c97d9eb52d5b335789a8bba68c",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core/0.0.0-c1/canvas-core-0.0.0-c1.module": "afcd90155cf632fa06b211c595902834cf1a95ca72c1b49481915342eff3c62d",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core/0.0.0-c1/canvas-core-0.0.0-c1.pom": "8b551b0b521e1c433f725048d2e9638fc4e7d9f6bfcf2bcc1501afc0c85dbc20",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1-sources.jar": "a1439815c9eba8cf5de5a3fa66fbf7c2389179a0ef146db449990fa55b698a8e",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1.aar": "03b24ba8196f6f8b9dbeeca9235c5abf6fc513b35fa2a23af899bbe109e21c1b",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1.module": "37996873b6206d8122912d065aa95973920659b6f74e0a21196c00b449fccb4b",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1.pom": "a62bfff1ee5cbf6cc410db331d9fef0ba09bdb87632462abaafb62b168135184",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-jvm/0.0.0-c1/canvas-core-jvm-0.0.0-c1-sources.jar": "417f37d47397f0167e71ef78d5009876582ab8d829af02b52fb396c89d9e8830",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-jvm/0.0.0-c1/canvas-core-jvm-0.0.0-c1.jar": "63d45c56e6b3059a3d1762683a9e841a0015b02596316e5ccf39317e532a6daa",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-jvm/0.0.0-c1/canvas-core-jvm-0.0.0-c1.module": "fa53f0b9bc81f0e1543a24a692af43e506868b771de1763b4ec0928bc155fb21",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-jvm/0.0.0-c1/canvas-core-jvm-0.0.0-c1.pom": "c8948fbd76741ab25ef00e2f5264e4b0637a55fe68d278cd76c9dfafd7d7486e",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core/0.0.0-c1/shared-core-0.0.0-c1-sources.jar": "739500fd231f5669429725398f9549d9092a58e65d272c16318c36e1b549039d",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core/0.0.0-c1/shared-core-0.0.0-c1.jar": "826da67d55b95c40826dd12d41254cc01f7cc436c0239e3ef9fa029247fd54eb",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core/0.0.0-c1/shared-core-0.0.0-c1.module": "60aaef669698ffeaabb48f05d158f2d970564a0fbb85028919120da76c13e3a0",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core/0.0.0-c1/shared-core-0.0.0-c1.pom": "97198789a6d82a64f3c4bea7db46e7f71bcec767d8bf72c0a3a9f307afdaf6ed",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1-sources.jar": "030c7f83154865481c4aa15fce3ccde094a053bb664b78d6474acf07ca8f69b8",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.aar": "f42134298811e8c8b0ac9eec692db3120a81724baeb1f7f261d22ec6c43ca44f",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.module": "4741c80791811eb5857622ee3a377a79f4e690d51431c2c7da1c208f67818bc8",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.pom": "786d04719a8e3703b0cbb293fcced881ad74661bb54f38f9d892956b72ab28b3",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1-sources.jar": "739500fd231f5669429725398f9549d9092a58e65d272c16318c36e1b549039d",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1.jar": "27b0c03f16c3995f993adbc2aff1efe267590cf4794a96bc49e11da9ad5db588",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1.module": "f3ebb1a333c48ea437501e8b41ea001b977a1df9fd2ab7619f5a610c1bcefeed",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1.pom": "bb3942b71ed125016f6968a81614f560816249ba459d7e29bcb3bc09c30b2747"
+  },
+  "evidence_sha256": {
+    "reports/sdk-library-boundary-20261114/android-candidate.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-library-boundary-20261114/apple-candidate.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-library-boundary-20261114/check-library-boundary.py.txt": "080f99c65bfcd86adb4e53defb6fa0a4b3041ddc4109eaf563a766608a48febd",
+    "reports/sdk-library-boundary-20261114/library-boundary.log": "ba910bac196b72a953abb9d06d330edcbcadd529223ff489b0a030dc27b51415",
+    "reports/sdk-library-boundary-20261114/library-package-refusal.log": "149fbe36e2a306d47b012b217a496726ec27909c66df77b6de8d5aae9fafc468"
+  },
+  "scope": "Candidate packaging removes application library implementation. Older consumers of internal Java types must remove that dependency. Existing recovery consumer passes. Whole SDK and physical gates remain open."
+}
