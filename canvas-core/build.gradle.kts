@@ -3,6 +3,23 @@ import org.gradle.api.tasks.testing.Test
 
 plugins { kotlin("multiplatform") }
 
+val sdkCandidate = providers.gradleProperty("sdkCandidate").map(String::toBoolean).orElse(false)
+
+if (sdkCandidate.get()) {
+    layout.buildDirectory.set(rootProject.layout.buildDirectory.dir("sdk-candidate/$name"))
+    apply(plugin = "maven-publish")
+    group = "dev.notecore.probe"
+    version = "0.0.0-c1"
+    extensions.configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "SdkCandidate"
+                url = uri(rootProject.layout.buildDirectory.dir("sdk-candidate-repository"))
+            }
+        }
+    }
+}
+
 if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
     apply(plugin = "com.android.library")
     extensions.configure<com.android.build.gradle.LibraryExtension> {
@@ -19,7 +36,11 @@ if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
 
 kotlin {
     jvm()
-    if (providers.gradleProperty("enableAndroidTargets").orNull == "true") androidTarget()
+    if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
+        androidTarget {
+            if (sdkCandidate.get()) publishLibraryVariants("release")
+        }
+    }
     if (providers.gradleProperty("enableAppleTargets").orNull == "true") {
         iosArm64 { binaries.framework { baseName = "NoteCanvasPrototype"; isStatic = true } }
         iosSimulatorArm64 { binaries.framework { baseName = "NoteCanvasPrototype"; isStatic = true } }
@@ -46,6 +67,11 @@ kotlin {
             resources.srcDir("../fixtures/input")
             resources.srcDir("../fixtures/geometry")
             dependencies { implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0") }
+        }
+        // These ports are supplied only by the original App integration build.
+        if (sdkCandidate.get()) {
+            findByName("androidMain")?.kotlin?.exclude("**/AndroidInkFrameExperiment.kt")
+            findByName("iosMain")?.kotlin?.exclude("**/AppleBrushRenderExperiment.kt")
         }
     }
     jvmToolchain(17)

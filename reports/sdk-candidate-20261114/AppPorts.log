@@ -1,0 +1,12 @@
+build/sdk-candidate-check/AppPorts.kt:2:36: error: unresolved reference 'PreviewSaveLedger'.
+import dev.notecore.canvas.preview.PreviewSaveLedger
+                                   ^^^^^^^^^^^^^^^^^
+build/sdk-candidate-check/AppPorts.kt:5:30: error: unresolved reference 'previewEditorAdmissionFailure'.
+import dev.notecore.document.previewEditorAdmissionFailure
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+build/sdk-candidate-check/AppPorts.kt:7:22: error: unresolved reference 'PreviewSaveLedger'.
+fun savePort(ledger: PreviewSaveLedger) = ledger
+                     ^^^^^^^^^^^^^^^^^
+build/sdk-candidate-check/AppPorts.kt:9:5: error: unresolved reference 'previewEditorAdmissionFailure'.
+    previewEditorAdmissionFailure(snapshot, budget)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,55 @@
+from pathlib import Path
+from io import BytesIO
+from zipfile import ZipFile
+import os
+import subprocess
+
+root = Path.cwd()
+out = root / 'build/sdk-candidate-check'
+repo = root / 'build/sdk-candidate-repository/dev/notecore/probe'
+forbidden = ('PreviewSaveLedger', 'PreviewSaveAttempt', 'PreviewSaveState', 'PreviewSaveAdmission',
+             'PreviewWriteAdmission', 'PreviewWriteDisposition', 'PreviewEditorAdmission', 'AndroidInkFrameExperiment')
+classes = []
+for module in ('canvas-core', 'shared-core'):
+    target = module + '-android'
+    version = '0.0.0-c1'
+    with ZipFile(repo / target / version / f'{target}-{version}.aar') as aar:
+        bytecode = aar.read('classes.jar')
+        with ZipFile(BytesIO(bytecode)) as jar:
+            assert not any(token in name for token in forbidden for name in jar.namelist())
+        path = out / f'{target}.jar'
+        path.write_bytes(bytecode)
+        classes.append(path)
+for path in repo.rglob('*sources.jar'):
+    with ZipFile(path) as jar:
+        assert not any(token in name for token in forbidden for name in jar.namelist()), path
+print('Android AAR bytecode and Maven source archives exclude App ports')
+cache = root / '.gradle-user-home/caches/modules-2/files-2.1'
+def dep(group, name, version):
+    p, = (cache/group/name/version).glob(f'*/{name}-{version}.jar')
+    return p
+kotlin = 'org.jetbrains.kotlin'
+version = '2.2.21'
+stdlib = dep(kotlin, 'kotlin-stdlib', version)
+jars = [stdlib, *[dep(kotlin, 'kotlin-' + module, version) for module in ('compiler-embeddable', 'daemon-embeddable', 'script-runtime')],
+        dep(kotlin, 'kotlin-reflect', '1.6.10'), dep('org.jetbrains.kotlinx', 'kotlinx-coroutines-core-jvm', '1.8.0'),
+        dep('org.jetbrains', 'annotations', '13.0')]
+java = Path.home()/'Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin/java'
+def cp(paths):
+    return os.pathsep.join(map(str, paths))
+base = [java, '-cp', cp(jars), 'org.jetbrains.kotlin.cli.jvm.K2JVMCompiler', '-no-stdlib', '-no-reflect', '-jvm-target', '17',
+        '-cp', cp([*classes, stdlib]), '-d', out/'recovery.jar']
+source = root/'reports/sdk-maven-metadata-20261110'
+for name, symbols in [('AppPorts', ('PreviewSaveLedger', 'previewEditorAdmissionFailure')),
+                      ('RenderPort', ('AndroidInkFrameExperiment',))]:
+    probe = out / (name + '.kt')
+    probe.write_bytes((source / (name + '.kt.txt')).read_bytes())
+    result = subprocess.run(base + [probe], capture_output=True, text=True)
+    (out / (name + '.log')).write_text(result.stderr)
+    assert result.returncode == 1 and all('unresolved reference' in line for line in result.stderr.splitlines() if 'error:' in line)
+    assert all(symbol in result.stderr for symbol in symbols)
+source = root/'reports/sdk-artifact-boundary-20261107/android/RecoveryConsumer.kt'
+subprocess.run(base + [source], check=True)
+pending, = root.glob('reports/view-pending-process-20261106/process-checkpoint-*/prepare.ncp')
+subprocess.run([java, '-cp', cp([out/'recovery.jar', *classes, stdlib]), 'dev.notecore.probe.RecoveryConsumerKt',
+                pending, pending.with_name('confirmed-final.ncp')], check=True)

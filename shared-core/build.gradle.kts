@@ -1,4 +1,21 @@
 plugins { kotlin("multiplatform") }
+val sdkCandidate = providers.gradleProperty("sdkCandidate").map(String::toBoolean).orElse(false)
+
+if (sdkCandidate.get()) {
+    layout.buildDirectory.set(rootProject.layout.buildDirectory.dir("sdk-candidate/$name"))
+    apply(plugin = "maven-publish")
+    group = "dev.notecore.probe"
+    version = "0.0.0-c1"
+    extensions.configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "SdkCandidate"
+                url = uri(rootProject.layout.buildDirectory.dir("sdk-candidate-repository"))
+            }
+        }
+    }
+}
+
 if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
     apply(plugin = "com.android.library")
     extensions.configure<com.android.build.gradle.LibraryExtension> {
@@ -14,7 +31,11 @@ if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
 }
 kotlin {
     jvm()
-    if (providers.gradleProperty("enableAndroidTargets").orNull == "true") androidTarget()
+    if (providers.gradleProperty("enableAndroidTargets").orNull == "true") {
+        androidTarget {
+            if (sdkCandidate.get()) publishLibraryVariants("release")
+        }
+    }
     if (providers.gradleProperty("enableAppleTargets").orNull == "true") {
         iosArm64 { binaries.framework { baseName = "NoteCanvasPrototype"; isStatic = true; export(project(":canvas-core")) } }
         iosSimulatorArm64 { binaries.framework { baseName = "NoteCanvasPrototype"; isStatic = true; export(project(":canvas-core")) } }
@@ -34,6 +55,12 @@ kotlin {
                 dependsOn(getByName("commonTest"))
                 dependencies { implementation(kotlin("test-junit")); implementation("junit:junit:4.13.2") }
             }
+        }
+        // These ports are supplied only by the original App integration build.
+        if (sdkCandidate.get()) {
+            findByName("commonMain")?.kotlin?.exclude("**/PreviewSaveLedger.kt")
+            findByName("androidMain")?.kotlin?.exclude("**/PreviewEditorAdmission.kt")
+            findByName("iosMain")?.kotlin?.exclude("**/ApplePreviewEditorAdmission.kt")
         }
     }
     jvmToolchain(17)

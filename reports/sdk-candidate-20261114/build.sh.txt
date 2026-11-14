@@ -1,0 +1,10 @@
+#!/bin/bash
+set -eu
+export JAVA_HOME="$HOME/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home" GRADLE_USER_HOME="$PWD/.gradle-user-home" KONAN_DATA_DIR="$PWD/.konan"
+out=build/sdk-candidate-check
+native="-Pkotlin.native.home=$PWD/.konan/kotlin-native-prebuilt-macos-aarch64-2.2.21"
+./gradlew --offline --no-daemon -PsdkCandidate=true -PenableAndroidTargets=true :canvas-core:publishAllPublicationsToSdkCandidateRepository :shared-core:publishAllPublicationsToSdkCandidateRepository > "$out/android-producer.log" 2>&1
+python3 "$out/check-android.py" > "$out/android-check.log"
+./gradlew --offline --no-daemon -p "$out/consumer" assembleDebug dependencyInsight --configuration debugRuntimeClasspath --dependency canvas-core > "$out/consumer.log" 2>&1
+./gradlew --offline --no-daemon -PsdkCandidate=true -PenableAppleTargets=true "$native" :shared-core:linkReleaseFrameworkIosArm64 :shared-core:linkReleaseFrameworkIosSimulatorArm64 > "$out/apple-producer.log" 2>&1
+./gradlew --offline --no-daemon -PenableAndroidTargets=true -PenableAppleTargets=true "$native" :canvas-core:jvmTest :shared-core:jvmTest :android-app:testDebugUnitTest :android-app:assembleDebug :shared-core:linkDebugFrameworkIosSimulatorArm64 > "$out/integration.log" 2>&1

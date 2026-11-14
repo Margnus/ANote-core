@@ -11,7 +11,9 @@ dependencyResolutionManagement {
 }
 rootProject.name = "NoteCore"
 include(":canvas-core", ":shared-core")
-if (providers.gradleProperty("enableAndroidTargets").orNull == "true") include(":android-app")
+// The original app requires the integration build, which includes its host ports.
+if (providers.gradleProperty("enableAndroidTargets").orNull == "true" &&
+    providers.gradleProperty("sdkCandidate").orNull != "true") include(":android-app")
 
 if (providers.gradleProperty("enableAndroidTargets").orNull == "true" &&
     providers.gradleProperty("enableSampleHost").orNull == "true") include(":samples:sketch-host")

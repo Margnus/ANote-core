@@ -1,0 +1,34 @@
+#!/bin/bash
+set -eu
+out="$PWD/build/sdk-candidate-check"
+frames="$PWD/build/sdk-candidate/shared-core/bin"
+ports="$PWD/reports/dev036-apple-provider-sdk-20261109/AppPorts.swift"
+sample="$PWD/samples/sketch-host-ios/Sources"
+for kind in iosArm64 iosSimulatorArm64; do
+    if [[ "$kind" == iosArm64 ]]; then
+        sdk=iphoneos
+        triple=arm64-apple-ios17.0
+    else
+        sdk=iphonesimulator
+        triple=arm64-apple-ios17.0-simulator
+    fi
+    frame="$frames/$kind/releaseFramework"
+    header="$frame/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h"
+    if rg 'PreviewSave(Ledger|Admission|State|Attempt)|PreviewWrite(Admission|Disposition)|ApplePreviewEditorAdmission|AppleBrush.*Experiment' "$header"; then exit 1; fi
+    sdk_path=$(xcrun --sdk "$sdk" --show-sdk-path)
+    swift=(xcrun --sdk "$sdk" swiftc -sdk "$sdk_path" -target "$triple" -F "$frame" -module-cache-path "$out/$kind-module-cache")
+    "${swift[@]}" -emit-executable "$sample"/*.swift -o "$out/$kind-sketch" > "$out/$kind-sketch.log" 2>&1
+    if "${swift[@]}" -typecheck "$ports" > "$out/$kind-ports.log" 2>&1; then exit 1; fi
+    for symbol in ApplePreviewEditorAdmission PreviewSaveLedger AppleBrushOwnerExperiment; do
+        rg -q "cannot find (type )?'$symbol'" "$out/$kind-ports.log"
+    done
+    "${swift[@]}" -emit-executable reports/sdk-artifact-boundary-20261107/apple-runtime/RecoveryConsumer.swift -o "$out/$kind-recovery"
+done
+fixture=$(find reports/view-pending-process-20261106 -name prepare.ncp)
+test "$(shasum -a 256 "$fixture" | cut -d' ' -f1)" = c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5
+device=$(xcrun simctl create NoteCoreCandidateNov14 'iPad Pro 11-inch (M5)' com.apple.CoreSimulator.SimRuntime.iOS-27-0)
+trap 'xcrun simctl shutdown "$device" >/dev/null 2>&1 || true; xcrun simctl delete "$device"' EXIT
+xcrun simctl boot "$device"
+xcrun simctl bootstatus "$device" -b > "$out/apple-boot.log"
+xcrun simctl spawn "$device" "$out/iosSimulatorArm64-recovery" "$PWD/$fixture" "$PWD/$(dirname "$fixture")/confirmed-final.ncp" > "$out/apple-runtime.log"
+rg -q 'both checkpoint byte sequences matched' "$out/apple-runtime.log"

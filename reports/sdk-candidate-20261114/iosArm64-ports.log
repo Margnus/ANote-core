@@ -1,0 +1,37 @@
+/Users/lixiaofan/StudioProjects/notecore/reports/dev036-apple-provider-sdk-20261109/AppPorts.swift:6:46: error: cannot find type 'PreviewSaveLedger' in scope
+4 |     ApplePreviewEditorAdmission.shared.failure(snapshot: checkpoint, budget: budget)
+5 | }
+6 | func savePort(_ value: PreviewSaveLedger) -> PreviewSaveLedger { value }
+  |                                              `- error: cannot find type 'PreviewSaveLedger' in scope
+7 | func renderPort(_ value: AppleBrushOwnerExperiment) -> AppleBrushOwnerExperiment { value }
+8 | 
+
+/Users/lixiaofan/StudioProjects/notecore/reports/dev036-apple-provider-sdk-20261109/AppPorts.swift:6:24: error: cannot find type 'PreviewSaveLedger' in scope
+4 |     ApplePreviewEditorAdmission.shared.failure(snapshot: checkpoint, budget: budget)
+5 | }
+6 | func savePort(_ value: PreviewSaveLedger) -> PreviewSaveLedger { value }
+  |                        `- error: cannot find type 'PreviewSaveLedger' in scope
+7 | func renderPort(_ value: AppleBrushOwnerExperiment) -> AppleBrushOwnerExperiment { value }
+8 | 
+
+/Users/lixiaofan/StudioProjects/notecore/reports/dev036-apple-provider-sdk-20261109/AppPorts.swift:7:56: error: cannot find type 'AppleBrushOwnerExperiment' in scope
+5 | }
+6 | func savePort(_ value: PreviewSaveLedger) -> PreviewSaveLedger { value }
+7 | func renderPort(_ value: AppleBrushOwnerExperiment) -> AppleBrushOwnerExperiment { value }
+  |                                                        `- error: cannot find type 'AppleBrushOwnerExperiment' in scope
+8 | 
+
+/Users/lixiaofan/StudioProjects/notecore/reports/dev036-apple-provider-sdk-20261109/AppPorts.swift:7:26: error: cannot find type 'AppleBrushOwnerExperiment' in scope
+5 | }
+6 | func savePort(_ value: PreviewSaveLedger) -> PreviewSaveLedger { value }
+7 | func renderPort(_ value: AppleBrushOwnerExperiment) -> AppleBrushOwnerExperiment { value }
+  |                          `- error: cannot find type 'AppleBrushOwnerExperiment' in scope
+8 | 
+
+/Users/lixiaofan/StudioProjects/notecore/reports/dev036-apple-provider-sdk-20261109/AppPorts.swift:4:5: error: cannot find 'ApplePreviewEditorAdmission' in scope
+2 | 
+3 | func checkTarget(_ checkpoint: PagedPreviewSnapshot, _ budget: DocumentBudget) -> PreviewOpenFailure? {
+4 |     ApplePreviewEditorAdmission.shared.failure(snapshot: checkpoint, budget: budget)
+  |     `- error: cannot find 'ApplePreviewEditorAdmission' in scope
+5 | }
+6 | func savePort(_ value: PreviewSaveLedger) -> PreviewSaveLedger { value }
