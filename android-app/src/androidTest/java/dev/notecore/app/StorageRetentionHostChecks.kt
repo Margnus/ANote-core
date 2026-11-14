@@ -2,7 +2,9 @@ package dev.notecore.app
 
 import android.app.Activity
 import android.app.Instrumentation
+import android.net.Uri
 import android.os.SystemClock
+import android.util.Base64
 import dev.notecore.document.*
 import java.io.File
 import org.json.JSONArray
@@ -23,13 +25,16 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
     fun verify(): String {
         CatalogRetentionHostChecks(test, host).verify()
         PendingRecoveryHostChecks(test, host).verify()
-        ReadFailureHostChecks(test, host).verify()
+        val appleRoundTrip = ReadFailureHostChecks(test, host).verify()
         val directory = File(host.cacheDir, "storage-retention-${java.util.UUID.randomUUID()}")
         val moved = File(directory.path + "-saved")
         lateinit var store: NoteStore
         lateinit var note: PagedPreviewNotebook
         var completed = false
         val checks = mutableListOf("local_file_identity_refusal_preserves_owner_input_and_io", "catalog_capacity_failure_preserves_owner_snapshot", "derived_text_capacity_checkpoint_save_and_reopen", "read_failure_classification_to_owner", "pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen")
+        checks.add("import_refusal_preserves_source_and_retry_remaps_identity")
+        checks.add("backup_round_trip_preserves_source_and_remaps_ink_references")
+        checks.add("apple_ui_backup_import_preserves_two_pages_and_three_strokes")
         main {
             store = NoteStore.isolated(host, directory); note = store.create()
             val original = note.snapshot()
@@ -78,12 +83,118 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             eventually("Changed root was incorrectly treated as saved") { failed && store.saveStates().single().retryRequired }
             main { check(store.saveStates().single().snapshot.sameContent(changed)) }
             checks.add("changed_revision_failure_retained")
+            var listFailed = false
+            main {
+                store.list { notes, error ->
+                    check(error != null && notes.single().id == changed.documentId)
+                    check(notes.single().title == changed.title + "（未保存）")
+                    listFailed = true
+                }
+            }
+            eventually("Failed catalog did not expose the retained edit") { listFailed }
             check(directory.delete()); check(moved.renameTo(directory))
             completed = false
             main { check(store.save(changed) { _, error -> check(error == null); completed = true }) }
             eventually("Repair did not save the retained root") { completed && store.saveStates().isEmpty() }
             check(File(directory, "${changed.documentId}.ncp").readText(Charsets.UTF_8) == changed.encode())
             checks.add("repair_retries_exact_root")
+            val canonical = File(directory, "${changed.documentId}.ncp")
+            val backup = File(directory, canonical.name + ".bak")
+            check(canonical.renameTo(backup))
+            val unrelated = (0 until 2000).map { File(directory, "unrelated-$it.ncp") } +
+                File(directory, "unrelated-backup.ncp.bak")
+            unrelated.forEach { check(it.mkdir()) }
+            var catalogChecked = false
+            var catalogError: String? = null
+            var summaries = emptyList<NoteSummary>()
+            main { store.list { result, error -> summaries = result; catalogError = error; catalogChecked = true } }
+            eventually("Catalog did not return") { catalogChecked }
+            check(catalogError == null && summaries.singleOrNull()?.id == changed.documentId) {
+                "Unrelated directories hid the saved note: $catalogError"
+            }
+            check(summaries.single().title == changed.title)
+            check(canonical.readText(Charsets.UTF_8) == changed.encode() && !backup.exists())
+            check(unrelated.all { it.isDirectory })
+            checks.add("catalog_ignores_directories_and_recovers_legacy_backup")
+            checks.add("catalog_retry_preserves_retained_edits_and_recovers_disk_list")
+            val damaged = File(directory, "damaged-header.ncp")
+            val oversizedHeader = "NCPREVIEW\t2\n" + "x".repeat(4096) + "\n"
+            damaged.writeText(oversizedHeader)
+            var damagedCatalog: List<NoteSummary>? = null
+            main {
+                store.list { result, error ->
+                    check(error == null)
+                    damagedCatalog = result
+                }
+            }
+            eventually("Malformed header prevented catalog delivery") { damagedCatalog != null }
+            val titles = checkNotNull(damagedCatalog).associate { it.id to it.title }
+            check(titles == mapOf(changed.documentId to changed.title, "damaged-header" to "待恢复的笔记"))
+            check(damaged.readText() == oversizedHeader && canonical.readText() == changed.encode())
+            check(damaged.delete())
+            checks.add("catalog_preserves_unreadable_note_and_lists_valid_neighbor")
+            val oldBytes = canonical.readBytes()
+            val stagingDirectory = File(directory, canonical.name + ".new")
+            check(stagingDirectory.mkdir())
+            val marker = File(stagingDirectory, "keep").apply { writeText("original marker") }
+            lateinit var retained: PagedPreviewSnapshot
+            var saveRejected = false
+            main {
+                check(note.rename("Retained after staging conflict"))
+                retained = note.capture()
+                check(store.save(retained) { _, error -> check(error != null); saveRejected = true })
+            }
+            eventually("Staging conflict did not retain the edit") {
+                saveRejected && store.saveStates().singleOrNull()?.let {
+                    it.retryRequired && it.snapshot === retained
+                } == true
+            }
+            check(canonical.readBytes().contentEquals(oldBytes) && marker.readText() == "original marker")
+            check(marker.delete() && stagingDirectory.delete())
+            main { check(store.retryRetainedWrites()) }
+            eventually("Retry did not finish saving the original retained edit") { store.saveStates().isEmpty() }
+            check(canonical.readText(Charsets.UTF_8) == retained.encode())
+            main {
+                check(store.releaseActive(note))
+                store.stopTestBackend()
+                store = NoteStore.isolated(host, directory)
+            }
+            var recovered = false
+            main {
+                store.open(retained.documentId) { value, error ->
+                    check(error == null && value?.persisted == true)
+                    note = store.adopt(checkNotNull(value))
+                    check(note.capture().sameContent(retained))
+                    recovered = true
+                }
+            }
+            eventually("The retained edit did not reopen from disk") { recovered }
+            checks.add("staging_conflict_preserves_original_then_retries_and_reopens")
+            val savedBytes = canonical.readBytes()
+            val invalidDestination = File(directory, "blocked-export")
+            check(invalidDestination.mkdir())
+            val destinationMarker = File(invalidDestination, "keep").apply { writeText("keep destination") }
+            var exportFailed = false
+            main {
+                store.export(Uri.fromFile(invalidDestination), retained) { error ->
+                    check(!error.isNullOrEmpty()) { "Unwritable backup target reported success" }
+                    exportFailed = true
+                }
+            }
+            eventually("Export failure did not reach the original callback") { exportFailed }
+            check(destinationMarker.readText() == "keep destination" && canonical.readBytes().contentEquals(savedBytes))
+            val destination = File(directory, "backup-output")
+            var exported = false
+            main {
+                store.export(Uri.fromFile(destination), retained) { error ->
+                    check(error == null)
+                    exported = true
+                }
+            }
+            eventually("Retry did not export the original capture") { exported }
+            check(destination.readBytes().contentEquals(savedBytes) && canonical.readBytes().contentEquals(savedBytes))
+            main { check(note.capture().sameContent(retained) && store.saveStates().isEmpty()) }
+            checks.add("export_target_failure_preserves_note_and_allows_retry")
             main {
                 val first = note.capture()
                 val firstRequest = store.beginExportPicker(first)
@@ -136,6 +247,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                 checks.add("foreign_same_revision_is_not_acknowledged_as_saved")
             }
             return JSONObject().put("checks", JSONArray(checks)).put("original_note_files_used", false)
+                .put("apple_round_trip_base64", Base64.encodeToString(appleRoundTrip, Base64.NO_WRAP))
                 .put("system_file_picker_verified", false).toString()
         } finally {
             main { store.stopTestBackend() }

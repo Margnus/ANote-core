@@ -43,6 +43,7 @@ enum PreviewOwnerPhase { case active, retiring, retired }
 struct PreviewOwnerRetirementStatus {
     let phase: PreviewOwnerPhase
     let pendingWrites: Int
+    let inFlightWrites: Int
     let retryRequired: Int
     let renderBytes: Int64
     let workerStopped: Bool
@@ -54,7 +55,11 @@ final class PreviewModel: ObservableObject {
     @Published private(set) var current: PagedPreviewNotebook?
     @Published var status = ""
     @Published var revision: Int64 = 0
-    @Published private(set) var exportDocument: PreviewBackup?
+    @Published private(set) var exportDocument: PreviewBackup? {
+        didSet {
+            if oldValue != nil && exportDocument == nil { pumpWrites() }
+        }
+    }
     private let catalogResultByteLimit: Int64
     var catalogRetainedByteCharge: Int64 {
         precondition(Thread.isMainThread)
@@ -69,7 +74,7 @@ final class PreviewModel: ObservableObject {
     func finishExport() {
         precondition(Thread.isMainThread)
         let cancelledRequest = exportRequest != nil
-        exportCancelled = true; exportEditor = nil; exportRequest = nil
+        exportEditor = nil; exportRequest = nil
         exportDocument = nil
         // Sheet dismissal may have no result callback. Do not leave a finished export "preparing".
         // A matching success/failure callback supplies its own outcome after this cleanup.
@@ -85,7 +90,7 @@ final class PreviewModel: ObservableObject {
     private let inkReleaseBoundary: (Bool) throws -> Void
     private let ledger = PreviewSaveLedger(maxDocuments: 8, byteBudget: 32 * 1024 * 1024,
         ownerCheck: { precondition(Thread.isMainThread) })
-    private let storageWorkBytes: Int64 = 256 * 1024 * 1024
+    private let storageWorkBytes: Int64
     // Identity-only saved shortcut; the authority/ledger own content while it is needed.
     private weak var savedRoot: DocumentRoot?
     private weak var savedPending: DocumentCommandCanvas?
@@ -101,7 +106,6 @@ final class PreviewModel: ObservableObject {
     var editorCount: Int { precondition(Thread.isMainThread); return editors.count }
     private(set) var exportEditor: UUID?
     private(set) var exportRequest: UUID?
-    private var exportCancelled = false
     // Explicit service lifetime: ARC reference loss is not a close/release receipt.
     // The caller must retain a route to this owner and explicitly retire it.
     private var ownerKeepAlive: PreviewModel?
@@ -110,7 +114,8 @@ final class PreviewModel: ObservableObject {
         precondition(Thread.isMainThread)
         let saves = ledger.states()
         return PreviewOwnerRetirementStatus(phase: ownerRetired ? .retired : ownerRetiring ? .retiring : .active,
-            pendingWrites: saves.count, retryRequired: saves.filter { $0.retryRequired }.count,
+            pendingWrites: saves.count, inFlightWrites: saves.filter { $0.inFlight }.count,
+            retryRequired: saves.filter { $0.retryRequired }.count,
             renderBytes: inkChargedBytes, workerStopped: (try! executor.status()).workerStopped)
     }
     @discardableResult func beginOwnerRetirement(
@@ -312,8 +317,11 @@ final class PreviewModel: ObservableObject {
     private let observeWriteBoundary: (PreviewWriteBoundary) -> Void
     private let beforeOpenRead: () throws -> Void
     init(directory: URL? = nil, beforeInkCompute: @escaping () throws -> Void = {},
-         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil, exportResultByteLimit: Int = 32 * 1024 * 1024, catalogResultByteLimit: Int64 = 2 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}, observeWriteBoundary: @escaping (PreviewWriteBoundary) -> Void = { _ in }) {
+         inkReleaseBoundary: @escaping (Bool) throws -> Void = { _ in }, documentBudget: DocumentBudget? = nil,
+         storageWorkBytes: Int64 = 256 * 1024 * 1024, exportResultByteLimit: Int = 32 * 1024 * 1024, catalogResultByteLimit: Int64 = 2 * 1024 * 1024, beforeOpenRead: @escaping () throws -> Void = {}, observeWriteBoundary: @escaping (PreviewWriteBoundary) -> Void = { _ in }) {
         precondition(Thread.isMainThread)
+        precondition(storageWorkBytes > 0)
+        self.storageWorkBytes = storageWorkBytes
         precondition(exportResultByteLimit >= 0)
         precondition(catalogResultByteLimit >= 0)
         self.catalogResultByteLimit = catalogResultByteLimit
@@ -332,6 +340,11 @@ final class PreviewModel: ObservableObject {
     }
     private func request<Input, Output>(input: Input, bytes: Int64, compute: @escaping (Input) throws -> Output,
                                        rejected: () -> Void, receive: @escaping (AppleWorkResult<Output>) -> Void) {
+        let retained = Int64(exportRetainedByteCharge)
+        if retained > 0 {
+            let worker = try! executor.status()
+            guard bytes <= storageWorkBytes - worker.chargedBytes - retained else { rejected(); return }
+        }
         let admission = try! executor.submit(input: input, chargedBytes: bytes, compute: compute, receive: { _, result in
             receive(result); return .acknowledged
         })
@@ -396,15 +409,6 @@ final class PreviewModel: ObservableObject {
         if current != nil { retireCurrent() }
         create(); return current
     }
-    private static func readPreview(_ encoded: String) throws -> DocumentRoot {
-        let read = PreviewDocumentReader.shared.read(text: encoded)
-        guard let root = read.root else { throw CocoaError(.fileReadCorruptFile) }
-        return root
-    }
-    private static func validateRenderable(_ root: DocumentRoot) throws {
-        guard PreviewDocumentReader.shared.accept(root: root).failure == nil
-        else { throw CocoaError(.fileReadUnsupportedScheme) }
-    }
     func create() {
         precondition(Thread.isMainThread)
         guard !ownerRetiring, current == nil else { return }
@@ -415,6 +419,10 @@ final class PreviewModel: ObservableObject {
         navigationEpoch += 1
         current = note; savedRoot = nil; savedPending = nil; revision = note.changeVersion
         save()
+    }
+    private var catalogFailureStatus: String?
+    private func showCatalogFailure(_ message: String) {
+        catalogError = true; catalogFailureStatus = message; status = message
     }
     private func installCatalog(_ disk: [LocalNote], failure: String? = nil) {
         precondition(Thread.isMainThread)
@@ -429,16 +437,19 @@ final class PreviewModel: ObservableObject {
         }
         guard valid, rows <= Int(PreviewCatalogBudget.shared.maxOwnerRows),
               PreviewCatalogBudget.shared.resultByteCharge(rows: Int32(rows), textCodeUnits: text) <= catalogResultByteLimit else {
-            catalogError = true; status = "列表超过预览元数据容量，原列表与文件仍保留"; return
+            showCatalogFailure("列表超过预览元数据容量，原列表与文件仍保留"); return
         }
         notes = (disk.filter { !ids.contains($0.id) } + retained).sorted { $0.date > $1.date }
-        catalogError = failure != nil
-        if let failure { status = failure }
+        if let failure { showCatalogFailure(failure) }
+        else {
+            if status == catalogFailureStatus { status = "" }
+            catalogError = false; catalogFailureStatus = nil
+        }
     }
     func refresh() {
         guard !ownerRetiring else { return }
         let pathUnits = directory.path.utf16.count
-        guard pathUnits <= Int32.max else { catalogError = true; status = "列表路径超过预览容量，原列表仍保留"; return }
+        guard pathUnits <= Int32.max else { showCatalogFailure("列表路径超过预览容量，原列表仍保留"); return }
         request(input: directory, bytes: PreviewCatalogBudget.shared.workByteCharge(directoryPathCodeUnits: Int32(pathUnits)), compute: { root -> PreparedCatalog in
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
             let urls: [URL]
@@ -454,14 +465,14 @@ final class PreviewModel: ObservableObject {
                 } else { title = "待恢复的笔记" }
                 return LocalNote(id: id, title: title, date: date)
             })
-        }, rejected: { installCatalog(notes, failure: "后台队列繁忙，请重新打开列表") }) { result in
+        }, rejected: { installCatalog(notes, failure: "后台队列繁忙，请重试读取笔记") }) { result in
             switch result {
             case .succeeded(let prepared):
                 switch prepared {
                 case .complete(let disk): self.installCatalog(disk)
                 case .capacity: self.installCatalog(self.notes, failure: "列表超过预览记录容量，原列表与文件仍保留")
                 }
-            case .outcomeUnknown: self.installCatalog(self.notes, failure: "列表读取失败，原列表与文件仍保留")
+            case .outcomeUnknown: self.installCatalog(self.notes, failure: "列表读取失败，原文件与未保存内容仍保留")
             }
         }
     }
@@ -539,9 +550,10 @@ final class PreviewModel: ObservableObject {
         note.cancelStroke()
         guard note.retryPendingStroke() else { status = previewFailureMessage(note.lastFailure); return }
         let ticket = UUID()
-        exportEditor = editor; exportRequest = ticket; exportCancelled = false
+        exportEditor = editor; exportRequest = ticket
         transferBusy = true; status = "正在准备备份…"
         let snapshot = note.capture(), resultLimit = exportResultByteLimit
+        let navigation = navigationEpoch
         request(input: snapshot, bytes: snapshot.encodingWorkByteCharge, compute: { captured -> PreparedExport in
             let encoded = try captured.encode()
             // Count UTF8 without constructing Data; the owner keeps this result after worker ACK.
@@ -551,7 +563,10 @@ final class PreviewModel: ObservableObject {
             return .ready(PreviewBackup(data: Data(encoded.utf8)))
         }, rejected: { transferBusy = false; exportEditor = nil; exportRequest = nil; status = "后台队列繁忙，请重新导出" }) { result in
             self.transferBusy = false
-            if self.exportCancelled || self.exportRequest != ticket { self.exportEditor = nil; self.exportRequest = nil; self.status = "导出已取消，原笔记仍保留"; return }
+            guard self.exportRequest == ticket else { return }
+            guard self.navigationEpoch == navigation else {
+                self.exportEditor = nil; self.exportRequest = nil; return
+            }
             switch result {
             case .succeeded(let prepared):
                 switch prepared {
@@ -563,14 +578,17 @@ final class PreviewModel: ObservableObject {
         }
     }
     func importCopy(_ url: URL, opened: ((PagedPreviewNotebook) -> Void)? = nil) {
-        guard !ownerRetiring, !transferBusy else { return }
+        guard !ownerRetiring, !transferBusy, exportDocument == nil else { return }
         transferBusy = true; status = "正在校验并导入…"
         let scoped = url.startAccessingSecurityScopedResource()
         let id = UUID().uuidString, navigation = navigationEpoch
-        request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: PagedPreviewCodec.shared.maximumDecodingWorkByteCharge(), compute: { input in
+        request(input: (url, scoped, Self.file(id, directory: directory), id), bytes: PagedPreviewCodec.shared.maximumDecodingWorkByteCharge(), compute: { input -> Result<DocumentRoot, LocalReadFailure> in
             defer { if input.1 { input.0.stopAccessingSecurityScopedResource() } }
-            let encoded = try PreviewFileIO.readUTF8(input.0)
-            let source = try Self.readPreview(encoded)
+            let source: DocumentRoot
+            switch try PreviewFileIO.readImport(input.0) {
+            case .success(let root): source = root
+            case .failure(let reason): return .failure(reason)
+            }
             let pages = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.id, PageId(value: UUID().uuidString)) })
             let layers = Dictionary(uniqueKeysWithValues: source.pages().map { ($0.layerId, LayerId(value: UUID().uuidString)) })
             let objects = Dictionary(uniqueKeysWithValues: source.scene.objects().map { ($0.id, ObjectId(value: UUID().uuidString)) })
@@ -578,14 +596,14 @@ final class PreviewModel: ObservableObject {
                 pageIds: pages, layerIds: layers, objectIds: objects)
             guard !FileManager.default.fileExists(atPath: input.2.path) else { throw CocoaError(.fileWriteFileExists) }
             try PreviewFileIO.writeUTF8(PagedPreviewCodec.shared.encode(root: root), to: input.2)
-            return root
+            return .success(root)
         }, rejected: {
             if scoped { url.stopAccessingSecurityScopedResource() }
             transferBusy = false; status = "后台队列繁忙，请重新导入"
         }) { result in
             self.transferBusy = false
             switch result {
-            case .succeeded(let root):
+            case .succeeded(.success(let root)):
                 if self.current == nil && self.navigationEpoch == navigation {
                     self.navigationEpoch += 1
                     do { try self.adopt(root, persisted: true) }
@@ -595,7 +613,8 @@ final class PreviewModel: ObservableObject {
                     opened?(note)
                 } else { self.status = "备份已导入为新笔记，可返回列表查看" }
                 self.refresh()
-            case .outcomeUnknown: self.status = "导入失败：文件无效、超过32MB或本机无法保存；已有笔记未覆盖"
+            case .succeeded(.failure(let reason)): self.status = "导入失败：\(reason.message)"
+            case .outcomeUnknown: self.status = "导入结果暂无法确认，请先返回列表查看"
             }
         }
     }
@@ -618,7 +637,8 @@ final class PreviewModel: ObservableObject {
     private func pumpWrites() {
         while true {
             let worker = try! executor.status()
-            let dispatch = ledger.admitNextWrite(availableWorkBytes: storageWorkBytes - worker.chargedBytes,
+            let available = max(0, storageWorkBytes - worker.chargedBytes - Int64(exportRetainedByteCharge))
+            let dispatch = ledger.admitNextWrite(availableWorkBytes: available,
                 maximumWorkBytes: storageWorkBytes, backendAccepting: worker.accepting)
             guard let attempt = dispatch.attempt else {
                 if dispatch.disposition != .idle && dispatch.disposition != .backpressure {
@@ -676,7 +696,8 @@ final class PreviewModel: ObservableObject {
         precondition(editors.isEmpty && !note.hasActiveStroke)
         precondition(note.hasPendingStroke ? note.retireAfterRecovery(snapshot: note.captureRecovery()) : note.retire())
         retireInk()
-        navigationEpoch += 1; current = nil; savedRoot = nil; savedPending = nil; refresh()
+        navigationEpoch += 1; current = nil; savedRoot = nil; savedPending = nil
+        finishExport(); refresh()
     }
     func flushForBackground() { current?.cancelStroke(); save(); retireInk() }
     func applyEdit(_ request: PreviewEdit, content: Bool = true) {
@@ -876,9 +897,10 @@ struct PreviewRoot: View {
                     List {
                         Section {
                             Button("新建笔记") { window.create() }
-                            Button("导入备份") { importing = true }.disabled(model.transferBusy)
+                            Button("导入备份") { importing = true }.disabled(model.transferBusy || model.exportDocument != nil)
                         }
                         Section("本机笔记") {
+                            if model.catalogError { Button("重新读取笔记") { model.refresh() } }
                             ForEach(model.notes) { note in
                                 Button { window.open(note.id) } label: {
                                     VStack(alignment: .leading) { Text(note.title).font(.headline); Text(note.date, style: .date).font(.caption).foregroundStyle(.secondary) }

@@ -118,6 +118,21 @@ def checks():
         assert invoke(folder,'damaged-replay')=='REPAIR_REQUIRED' and signature(target)==damaged
         assert snapshot(folder)==state and (folder/'source.bin').read_bytes()==payload
         observations.append({'case':'committed_metadata_is_not_success_when_resource_damaged','status':'REPAIR_REQUIRED'})
+        folder=prepare('unfinished-identity');invoke(folder,'first','partial-stage')
+        state=snapshot(folder);identity=task_identity(folder);stage=folder/'staging/first.bin'
+        original=signature(stage);source=folder/'source.bin'
+        assert invoke(folder,'wrong-document',document='other-document')=='IDENTITY_CONFLICT'
+        changed=bytes([payload[0]^1])+payload[1:]
+        source.write_bytes(changed)
+        assert invoke(folder,'wrong-content')=='IDENTITY_CONFLICT'
+        assert source.read_bytes()==changed
+        assert snapshot(folder)==state and task_identity(folder)==identity and signature(stage)==original
+        assert list((folder/'staging').iterdir())==[stage] and not (folder/'resources').exists()
+        source.write_bytes(payload)
+        assert invoke(folder,'retry')=='COMMITTED'
+        assert snapshot(folder)['documents']==snapshot(folder)['operations']==1
+        assert source.read_bytes()==payload and signature(stage)==original
+        observations.append({'case':'unfinished_operation_identity_rejects_changed_document_or_payload','status':'IDENTITY_CONFLICT','original_retry':'COMMITTED'})
         assert recipe['cancellation_cases']==['partial-stage','promoted','committed','live-producer','stale-attempt']
         for fault in ('partial-stage','promoted'):
             folder=prepare('cancel-'+fault);invoke(folder,'first',fault)
@@ -144,7 +159,7 @@ def checks():
             assert (folder/'source.bin').read_bytes()==payload
             observations.append({'case':folder.name,'status':'CANCELLED','live_confirmation_refused':True})
     return {'status':'passed','host_sqlite_version':sqlite3.sqlite_version,'abrupt_process_exit_cases':len(recipe['crash_cases']),
-        'integrity_identity_cases':3,'cancellation_cases':5,'live_producer_cases':2,'observations':observations,'source_payloads_preserved':True,
+        'integrity_identity_cases':4,'cancellation_cases':5,'live_producer_cases':2,'observations':observations,'source_payloads_preserved':True,
         'scope':'Host child-process exit, no-clobber file link and temporary SQLite transaction design probes; not a production importer or mobile durability implementation.',
         'directory_fsync_verified':False,'power_loss_verified':False,'resource_gc_deletion_implemented':False,
         'production_schema_frozen':False,'production_sqlite_authorized':False,'c1_gate_complete':False,'limits':recipe['limits']}

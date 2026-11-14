@@ -50,7 +50,7 @@ def main():
         db.execute('CREATE TABLE IF NOT EXISTS resource(space TEXT,hash TEXT,bytes INTEGER NOT NULL,PRIMARY KEY(space,hash))')
         db.execute('CREATE TABLE IF NOT EXISTS document(id TEXT PRIMARY KEY,space TEXT NOT NULL,hash TEXT NOT NULL,FOREIGN KEY(space,hash) REFERENCES resource(space,hash))')
         db.execute('CREATE TABLE IF NOT EXISTS operation(id TEXT PRIMARY KEY,document TEXT NOT NULL,hash TEXT NOT NULL)')
-        db.execute('CREATE TABLE IF NOT EXISTS import_task(id TEXT PRIMARY KEY,state TEXT NOT NULL,hash TEXT,cancel_requested INTEGER NOT NULL DEFAULT 0,active_attempt TEXT,producer_pid INTEGER)')
+        db.execute('CREATE TABLE IF NOT EXISTS import_task(id TEXT PRIMARY KEY,state TEXT NOT NULL,hash TEXT,cancel_requested INTEGER NOT NULL DEFAULT 0,active_attempt TEXT,producer_pid INTEGER,expected_document TEXT NOT NULL,expected_hash TEXT NOT NULL)')
         db.execute('BEGIN IMMEDIATE')
         prior=db.execute('SELECT document,hash FROM operation WHERE id=?',(operation,)).fetchone()
         def reply(status):print(json.dumps({'status':status,'hash':sha,'host_only':True}),flush=True)
@@ -59,7 +59,9 @@ def main():
             if not target.is_file() or target.stat().st_size!=len(payload) or digest(target)!=sha:
                 reply('REPAIR_REQUIRED');return
             reply('ALREADY_COMMITTED');return
-        task=db.execute('SELECT state,cancel_requested,active_attempt,producer_pid FROM import_task WHERE id=?',(operation,)).fetchone()
+        task=db.execute('SELECT state,cancel_requested,active_attempt,producer_pid,expected_document,expected_hash FROM import_task WHERE id=?',(operation,)).fetchone()
+        if args.action=='commit' and task and task[4:]!=(args.document,sha):
+            reply('IDENTITY_CONFLICT');return
         if task and task[0]=='cancelled':db.execute('COMMIT');reply('CANCELLED');return
         if args.action!='commit':
             if not task or task[2]!=args.attempt:db.execute('COMMIT');reply('STALE_ATTEMPT');return
@@ -75,7 +77,9 @@ def main():
         if task and task[1]:db.execute('COMMIT');reply('CANCEL_REQUESTED');return
         if task and producer_alive(task[3]) is not False:
             db.execute('COMMIT');reply('PRODUCER_ACTIVE');return
-        db.execute("INSERT OR IGNORE INTO import_task(id,state) VALUES(?,'running')",(operation,))
+        if not task:
+            db.execute("INSERT INTO import_task(id,state,expected_document,expected_hash) VALUES(?,'running',?,?)",
+                       (operation,args.document,sha))
         db.execute('UPDATE import_task SET active_attempt=?,producer_pid=? WHERE id=?',(args.attempt,os.getpid(),operation))
         db.execute('COMMIT')
         def acknowledge_cancel():

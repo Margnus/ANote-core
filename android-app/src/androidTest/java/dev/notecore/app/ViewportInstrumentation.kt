@@ -30,6 +30,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var pendingWorkBudgetOnly = false
     private var recoveryOpenBudgetOnly = false
     private var recoveryOpenFixture: String? = null
+    private var catalogRetryOnly = false
     private var processCheckpointCase: String? = null
     private var processCheckpointScope = ""
     private var processCheckpointViewInput = false
@@ -65,6 +66,7 @@ class ViewportInstrumentation : Instrumentation() {
         pendingWorkBudgetOnly = arguments?.getString("notecore_case") == "pending_work_budget"
         recoveryOpenBudgetOnly = arguments?.getString("notecore_case") == "recovery_open_budget"
         recoveryOpenFixture = arguments?.getString("recovery_open_base64")
+        catalogRetryOnly = arguments?.getString("notecore_case") == "catalog_retry"
         editOnly = arguments?.getString("notecore_case") == "preview_edit"
         titleOnly = arguments?.getString("notecore_case") == "title_contract"
         inputBatchesOnly = arguments?.getString("notecore_case") == "input_batches"
@@ -106,6 +108,11 @@ class ViewportInstrumentation : Instrumentation() {
                 result.putString("brush_path_status", "passed")
                 finish(Activity.RESULT_OK, result)
                 return
+            }
+            if (catalogRetryOnly) {
+                result.putString("catalog_retry_observations", CatalogRetryHostChecks.verify(this))
+                result.putString("catalog_retry_status", "passed")
+                finish(Activity.RESULT_OK, result); return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             if (recoveryOpenBudgetOnly) {

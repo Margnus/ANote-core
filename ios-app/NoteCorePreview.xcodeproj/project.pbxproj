@@ -473,6 +473,7 @@
 				<string>000000000000000000000040</string>
 				<string>000000000000000000000043</string>
 				<string>000000000000000000000052</string>
+				<string>00000000000000000000006B</string>
 			</array>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
@@ -686,6 +687,7 @@
 			<array>
 				<string>000000000000000000000041</string>
 				<string>000000000000000000000044</string>
+				<string>00000000000000000000006C</string>
 			</array>
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<integer>0</integer>
@@ -920,6 +922,24 @@
 			<string>000000000000000000000064</string>
 			<key>productType</key>
 			<string>com.apple.product-type.bundle.ui-testing</string>
+		</dict>
+		<key>00000000000000000000006B</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>file</string>
+			<key>path</key>
+			<string>../fixtures/transfer/android-return-from-apple.ncp</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+		</dict>
+		<key>00000000000000000000006C</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>00000000000000000000006B</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>

@@ -11,6 +11,10 @@ import java.nio.charset.CharacterCodingException
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.NoSuchFileException
+import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.UUID
 
 /** Platform filename policy only; canonical document IDs retain their broader Unicode contract. */
@@ -54,11 +58,27 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         require(isLocalPreviewDocumentId(id))
         return File(directory, "$id.ncp")
     }
+    private fun atomicFile(id: String): AtomicFile {
+        val base = file(id)
+        // AtomicFile may rename or delete these entries during both reads and writes.
+        for (suffix in listOf("", ".bak", ".new")) {
+            val path = File(directory, base.name + suffix).toPath()
+            val attributes = entryAttributes(path) ?: continue
+            if (!attributes.isRegularFile) throw IOException("Unexpected preview storage entry")
+        }
+        return AtomicFile(base)
+    }
+    private fun entryAttributes(path: Path): BasicFileAttributes? = try {
+        Files.readAttributes(path, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
+    } catch (_: NoSuchFileException) {
+        null // An entry may disappear between enumeration and inspection.
+    }
     fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
+        val atomic = atomicFile(snapshot.documentId)
         val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
         val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
-        val atomic = AtomicFile(file(snapshot.documentId)); val stream = atomic.startWrite()
+        val stream = atomic.startWrite()
         try {
             stream.write(bytes); stream.fd.sync()
             observeWriteBoundary(PreviewWriteBoundary.SYNCED_BEFORE_REPLACE)
@@ -112,11 +132,12 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         Files.newDirectoryStream(directory.toPath()).use { stream ->
             for (path in stream) {
                 val name = path.fileName.toString()
-                if (name.endsWith(".ncp") || name.endsWith(".ncp.bak")) {
-                    val id = name.removeSuffix(".bak").removeSuffix(".ncp")
-                    if (isLocalPreviewDocumentId(id)) ids.add(id)
-                    if (ids.size > PreviewCatalogBudget.maxDiskRows) throw CatalogCapacityRefusal()
-                }
+                if (!name.endsWith(".ncp") && !name.endsWith(".ncp.bak")) continue
+                val id = name.removeSuffix(".bak").removeSuffix(".ncp")
+                if (!isLocalPreviewDocumentId(id) ||
+                    entryAttributes(path)?.isRegularFile != true) continue
+                ids.add(id)
+                if (ids.size > PreviewCatalogBudget.maxDiskRows) throw CatalogCapacityRefusal()
             }
         }
         return ids.map { id ->
@@ -126,10 +147,11 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             NoteSummary(id, title, file(id).lastModified())
         }
     }
-    private fun readHeader(id: String): PagedPreviewHeader = AtomicFile(file(id)).openRead().use { stream ->
+    private fun readHeader(id: String): PagedPreviewHeader = atomicFile(id).openRead().use { stream ->
         val input = stream.buffered(256); val bytes = java.io.ByteArrayOutputStream(1024); var newlines = 0
         while (newlines < 2) {
-            val value = input.read(); require(value >= 0 && bytes.size() < 4096) { "Invalid catalog header" }
+            require(bytes.size() < 4096) { "Invalid catalog header" }
+            val value = input.read(); require(value >= 0) { "Invalid catalog header" }
             bytes.write(value); if (value == 10) newlines++
         }
         PreviewRecoveryCodec.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
@@ -139,9 +161,11 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     fun read(id: String): DocumentRoot = readRecovery(id).let {
         require(it.pending == null) { "Pending recovery requires the original owner" }; it.root
     }
-    fun readRecovery(id: String): PagedPreviewSnapshot = AtomicFile(file(id)).openRead().use { stream ->
-        if (stream.channel.size() > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
-        val text = try { decode(readBoundedPreviewBytes(stream)) } catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
+    fun readRecovery(id: String): PagedPreviewSnapshot = atomicFile(id).openRead().use { stream ->
+        val size = stream.channel.size()
+        if (size > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+        val text = try { decode(readSizedPreviewBytes(stream, size.toInt())) }
+            catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
         val result = PreviewRecoveryCodec.read(text)
         val snapshot = result.snapshot ?: throw ReadRefused(when (checkNotNull(result.failure)) {
             PreviewReadFailure.CHARACTER_CAPACITY -> LocalReadFailure.CHARACTER_CAPACITY
@@ -172,15 +196,41 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
 
 }
 
+/** Local regular files usually retain their measured length. Growth still uses the bounded reader. */
+internal fun readSizedPreviewBytes(input: java.io.InputStream, size: Int): ByteArray {
+    require(size in 0..PagedPreviewCodec.MAX_UTF8_BYTES)
+    val bytes = ByteArray(size)
+    var offset = 0
+    while (offset < bytes.size) {
+        val count = input.read(bytes, offset, bytes.size - offset)
+        if (count < 0) return bytes.copyOf(offset)
+        if (count == 0) throw IOException("Preview input stream made no progress")
+        offset += count
+    }
+    val extra = input.read()
+    if (extra < 0) return bytes
+    if (size == PagedPreviewCodec.MAX_UTF8_BYTES) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+    return collectPreviewBytes(input, bytes, extra)
+}
+
 /** Bounded synchronous read on the original worker. A broken provider must not spin that worker forever. */
-internal fun readBoundedPreviewBytes(input: java.io.InputStream): ByteArray {
-    val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
+internal fun readBoundedPreviewBytes(input: java.io.InputStream): ByteArray = collectPreviewBytes(input)
+
+private fun collectPreviewBytes(input: java.io.InputStream, prefix: ByteArray? = null, extra: Int = -1): ByteArray {
+    val capacity = if (prefix == null) 8192 else maxOf(8192, Integer.highestOneBit(prefix.size) * 2)
+    val output = java.io.ByteArrayOutputStream(capacity)
+    val buffer = ByteArray(8192)
+    if (prefix != null) {
+        output.write(prefix)
+        output.write(extra)
+    }
     while (true) {
-        val count = input.read(buffer)
+        val remaining = PagedPreviewCodec.MAX_UTF8_BYTES - output.size()
+        // At the limit, probe one byte for EOF without reading another full chunk.
+        val count = input.read(buffer, 0, minOf(buffer.size, remaining + 1))
         if (count < 0) break
         if (count == 0) throw IOException("Preview input stream made no progress")
-        if (output.size().toLong() + count > PagedPreviewCodec.MAX_UTF8_BYTES.toLong())
-            throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+        if (count > remaining) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
         output.write(buffer, 0, count)
     }
     return output.toByteArray()

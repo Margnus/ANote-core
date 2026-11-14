@@ -1,0 +1,217 @@
+{
+  "date": "2026-11-14",
+  "status": "passed",
+  "core_parents": [
+    "0f8d8d9cfc59ec004ab2965bfd8b0e7529216554",
+    "e8e142cbda944acffabc7ddcdc82ebc6559389de"
+  ],
+  "blueprint_merge": "d220b5287b528c61d0ab2946356ccf92964f2361",
+  "jvm": {
+    "canvas_core_up_to_date_passed": 237,
+    "shared_core_up_to_date_passed": 366,
+    "android_app_executed_passed": 37
+  },
+  "apple": {
+    "simulator_host_passed": 72,
+    "app_executable_sha256": "001944900e779cc795957379e48dddf8455190e3ad8736562651c249c8208867"
+  },
+  "android_app_host": {
+    "minimum_api": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "1348d58a7551c90b09aee3012d7669f29558a4220180fd196aa2e8071f214172",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "f86b32ca46b160f812dc374e4bc58e256a7e3e22181c47c72043a0776dd089f2"
+      },
+      "observations": {
+        "api": 32,
+        "original_view_store": true,
+        "line_dot_undo_redo_page_pixels": true,
+        "surface_render_bytes": 0,
+        "hardware_canvas_verified": false,
+        "physical_device_verified": false
+      }
+    },
+    "storage_retention": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "1348d58a7551c90b09aee3012d7669f29558a4220180fd196aa2e8071f214172",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "f86b32ca46b160f812dc374e4bc58e256a7e3e22181c47c72043a0776dd089f2"
+      },
+      "observations": {
+        "checks": [
+          "local_file_identity_refusal_preserves_owner_input_and_io",
+          "catalog_capacity_failure_preserves_owner_snapshot",
+          "derived_text_capacity_checkpoint_save_and_reopen",
+          "read_failure_classification_to_owner",
+          "pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen",
+          "import_refusal_preserves_source_and_retry_remaps_identity",
+          "backup_round_trip_preserves_source_and_remaps_ink_references",
+          "apple_ui_backup_import_preserves_two_pages_and_three_strokes",
+          "validated_creation_refusal_and_independent_authority",
+          "validated_open_refusal_preserves_original_store_owner",
+          "saved_unchanged_skips_io",
+          "changed_revision_failure_retained",
+          "repair_retries_exact_root",
+          "catalog_ignores_directories_and_recovers_legacy_backup",
+          "catalog_retry_preserves_retained_edits_and_recovers_disk_list",
+          "catalog_preserves_unreadable_note_and_lists_valid_neighbor",
+          "staging_conflict_preserves_original_then_retries_and_reopens",
+          "export_target_failure_preserves_note_and_allows_retry",
+          "single_export_snapshot_preserves_original",
+          "late_capture_refused_after_latest_ack_without_disk_rollback",
+          "reopened_saved_marker_skips_stopped_backend",
+          "foreign_same_revision_is_not_acknowledged_as_saved"
+        ],
+        "original_note_files_used": false,
+        "apple_round_trip_base64": "TkNQUkVWSUVXCTIKRAlkMTJiNWMyMS1hYzE4LTRlYzMtODkwZi0yOTNkODM5MTNjZDkJQXBwbGVVSS0yN0NDODRFMi0xNTA4LTQ2RjctOUQ1Mi1EREU3QzUzRDU2N0MJMgkzCTAKRwljZjcyOThkNy0zYTQ0LTRlZjctYjU2Yi0zZWY1M2E0OTc4MWMJMTIzMDc4ZmYtMzU3OC00YTczLTgwNmEtYTdkYzEzZDJhOGJhCTU5NS4wCTg0Mi4wCUJMQU5LCTAKRwk5Y2E5NTY2NS1mNTE2LTQwMWUtYTI2ZC1lYjFmNTcwNzZlZTEJZTgxNTlmNDEtNGUyMy00YmIzLThjYzctNDIyZWM3MmUzYzkwCTU5NS4wCTg0Mi4wCUJMQU5LCTAKUwkzYzZlNzU5MS1kMmRjLTQ1OTgtOWUxNy1kZDcyYWY1NDRmZjcJMTIzMDc4ZmYtMzU3OC00YTczLTgwNmEtYTdkYzEzZDJhOGJhCTEJTU9OT0xJTkUJMQktMTQzMzk1MTMJMi41CTM1CTEuMAkwLjAJMC4wCTEuMAkwLjAJMC4wClAJMTUwLjkwNzg0NTI0NDQ5MjE3CTI5NC41NDE2NDQyNzcyNzAzCTAuNQk5MzU3MTI2MTIKUAkxNTAuOTA3ODQ1MjQ0NDkyMTcJMjk0LjU0MTY0NDI3NzI3MDMJMC41CTkzNTc3OTI3OApQCTE1MC45MDc4NDUyNDQ0OTIxNwkyOTQuNTQxNjQ0Mjc3MjcwMwkwLjUJOTM1Nzc5Mjc4ClAJMTU2LjMzNzE4NDMwOTUxMDk3CTI5Ni4zNTE0MjM5NjU2MDk5CTAuNQk5MzU3OTU5NDUKUAkxNjIuMjE4OTY4Mjk2NjE0NwkyOTguMTYxMjAzNjUzOTQ5NQkwLjUJOTM1ODEyNjEyClAJMTY4LjU1MzE5NzIwNTgwMzMxCTI5OS45NzA5ODMzNDIyODkxCTAuNQk5MzU4MjkyNzgKUAkxNzUuMzM5ODcxMDM3MDc2ODIJMzAyLjIzMzIwNzk1MjcxMzYJMC41CTkzNTg0NTk0NQpQCTE4Mi41Nzg5ODk3OTA0MzUyMwkzMDQuNDk1NDMyNTYzMTM4MQkwLjUJOTM1ODYyNjEyClAJMTkwLjI3MDU1MzQ2NTg3ODUyCTMwNi43NTc2NTcxNzM1NjI2CTAuNQk5MzU4NzkyNzgKUAkxOTcuOTYyMTE3MTQxMzIxODQJMzA5LjAxOTg4MTc4Mzk4NzEJMC41CTkzNTg5NTk0NQpQCTIwNS42NTM2ODA4MTY3NjUxNgkzMTEuMjgyMTA2Mzk0NDExNjQJMC41CTkzNTkxMjYxMgpQCTIxMy4zNDUyNDQ0OTIyMDg0NQkzMTMuOTk2Nzc1OTI2OTIxMDMJMC41CTkzNTkyOTI3OApQCTIyMS40ODkyNTMwODk3MzY2OAkzMTYuMjU5MDAwNTM3MzQ1NQkwLjUJOTM1OTQ1OTQ1ClAJMjI5LjYzMzI2MTY4NzI2NDg4CTMxOC45NzM2NzAwNjk4NTQ5CTAuNQk5MzU5NjI2MTIKUAkyMzcuNzc3MjcwMjg0NzkzMQkzMjEuMjM1ODk0NjgwMjc5NDQJMC41CTkzNTk3OTI3OApQCTI0NS45MjEyNzg4ODIzMjEzCTMyMy45NTA1NjQyMTI3ODg4MwkwLjUJOTM1OTk1NDI3ClAJMjU0LjUxNzczMjQwMTkzNDQJMzI2LjIxMjc4ODgyMzIxMzMJMC41CTkzNjAxMjYxMgpQCTI2Mi42NjE3NDA5OTk0NjI2CTMyOC45Mjc0NTgzNTU3MjI3NgkwLjUJOTM2MDI5Mjc4ClAJMjcwLjgwNTc0OTU5Njk5MDg0CTMzMS42NDIxMjc4ODgyMzIxNQkwLjUJOTM2MDQ1OTQ1ClAJMjc4Ljk0OTc1ODE5NDUxOTA2CTMzMy45MDQzNTI0OTg2NTY2NAkwLjUJOTM2MDYyNjEyClAJMjg3LjA5Mzc2Njc5MjA0NzIzCTMzNi42MTkwMjIwMzExNjYJMC41CTkzNjA3OTI3OApQCTI5NS4yMzc3NzUzODk1NzU0NgkzMzguODgxMjQ2NjQxNTkwNTYJMC41CTkzNjA5NTk0NQpQCTMwMy4zODE3ODM5ODcxMDM3CTM0MS4xNDM0NzEyNTIwMTUwNQkwLjUJOTM2MTEyNjEyClAJMzExLjA3MzM0NzY2MjU0NwkzNDMuODU4MTQwNzg0NTI0NDQJMC41CTkzNjEyOTI3OApQCTMxOC43NjQ5MTEzMzc5OTAzCTM0Ni4xMjAzNjUzOTQ5NDkJMC41CTkzNjE0NTk0NQpQCTMyNi40NTY0NzUwMTM0MzM2CTM0OC4zODI1OTAwMDUzNzM0NgkwLjUJOTM2MTYyNjEyClAJMzMzLjY5NTU5Mzc2Njc5MgkzNTAuNjQ0ODE0NjE1Nzk4CTAuNQk5MzYxNzkyNzgKUAkzNDAuNDgyMjY3NTk4MDY1NTYJMzUyLjkwNzAzOTIyNjIyMjUJMC41CTkzNjE5NTk0NQpQCTM0Ny4yNjg5NDE0MjkzMzkwNwkzNTQuNzE2ODE4OTE0NTYyMDUJMC41CTkzNjIxMjYxMgpQCTM1My42MDMxNzAzMzg1Mjc2NgkzNTYuOTc5MDQzNTI0OTg2NgkwLjUJOTM2MjI5Mjc4ClAJMzU5LjQ4NDk1NDMyNTYzMTM1CTM1OC43ODg4MjMyMTMzMjYxNwkwLjUJOTM2MjQ1OTQ1ClAJMzY0LjQ2MTg0ODQ2ODU2NTMJMzYwLjE0NjE1Nzk3OTU4MDkJMC41CTkzNjI2MjYxMQpQCTM2OC45ODYyOTc2ODk0MTQyNAkzNjEuNTAzNDkyNzQ1ODM1NTYJMC41CTkzNjI3OTI3OApQCTM3MC43OTYwNzczNzc3NTM5CTM2MS45NTU5Mzc2Njc5MjA0NwkwLjUJOTM2Mjk1OTQ1ClAJMzcwLjc5NjA3NzM3Nzc1MzkJMzYxLjk1NTkzNzY2NzkyMDQ3CTAuNQk5MzYyOTU5NDUKUwljYWE4YmI0Ni03NGEwLTQwYWItYTE1ZS02MTMzNTY0NTVmNDEJMTIzMDc4ZmYtMzU3OC00YTczLTgwNmEtYTdkYzEzZDJhOGJhCTEJTU9OT0xJTkUJMQktMTQzMzk1MTMJMi41CTMzCTEuMAkwLjAJMC4wCTEuMAkwLjAJMC4wClAJMTUwLjkwNzg0NTI0NDQ5MjE3CTQ2My4zMDM2MDAyMTQ5MzgyCTAuNQk5NDYzNDkxODQKUAkxNTYuMzM3MTg0MzA5NTEwOTcJNDY0LjY2MDkzNDk4MTE5MjkJMC41CTk0NjQzMjUxOApQCTE2Mi4yMTg5NjgyOTY2MTQ3CTQ2Ni40NzA3MTQ2Njk1MzI1CTAuNQk5NDY0NDkxODQKUAkxNjguNTUzMTk3MjA1ODAzMzEJNDY4LjczMjkzOTI3OTk1NwkwLjUJOTQ2NDY1ODUxClAJMTc1LjMzOTg3MTAzNzA3NjgyCTQ3MC41NDI3MTg5NjgyOTY2NAkwLjUJOTQ2NDgyNTE4ClAJMTgyLjU3ODk4OTc5MDQzNTIzCTQ3Mi44MDQ5NDM1Nzg3MjExCTAuNQk5NDY0OTkxODQKUAkxOTAuMjcwNTUzNDY1ODc4NTIJNDc1LjA2NzE2ODE4OTE0NTY2CTAuNQk5NDY1MTU4NTEKUAkxOTcuOTYyMTE3MTQxMzIxODQJNDc3LjMyOTM5Mjc5OTU3MDE0CTAuNQk5NDY1MzI1MTgKUAkyMDUuNjUzNjgwODE2NzY1MTYJNDgwLjA0NDA2MjMzMjA3OTUzCTAuNQk5NDY1NDkxODQKUAkyMTMuMzQ1MjQ0NDkyMjA4NDUJNDgyLjMwNjI4Njk0MjUwNDEJMC41CTk0NjU2NTg1MQpQCTIyMS40ODkyNTMwODk3MzY2OAk0ODQuNTY4NTExNTUyOTI4NTYJMC41CTk0NjU4MjUxOApQCTIyOS42MzMyNjE2ODcyNjQ4OAk0ODcuMjgzMTgxMDg1NDM3OTUJMC41CTk0NjU5OTE4NApQCTIzNy43NzcyNzAyODQ3OTMxCTQ4OS41NDU0MDU2OTU4NjI1CTAuNQk5NDY2MTU4NTEKUAkyNDUuOTIxMjc4ODgyMzIxMwk0OTIuMjYwMDc1MjI4MzcxOQkwLjUJOTQ2NjMyNTE4ClAJMjU0LjUxNzczMjQwMTkzNDQJNDk0Ljk3NDc0NDc2MDg4MTI2CTAuNQk5NDY2NDkxODQKUAkyNjIuNjYxNzQwOTk5NDYyNgk0OTcuMjM2OTY5MzcxMzA1NzUJMC41CTk0NjY2NTg1MQpQCTI3MC44MDU3NDk1OTY5OTA4NAk0OTkuOTUxNjM4OTAzODE1MgkwLjUJOTQ2NjgyNTE4ClAJMjc4Ljk0OTc1ODE5NDUxOTA2CTUwMi4yMTM4NjM1MTQyMzk3CTAuNQk5NDY2OTkxODQKUAkyODcuMDkzNzY2NzkyMDQ3MjMJNTA0LjkyODUzMzA0Njc0OTA3CTAuNQk5NDY3MTU4NTEKUAkyOTUuMjM3Nzc1Mzg5NTc1NDYJNTA3LjE5MDc1NzY1NzE3MzYJMC41CTk0NjczMjUxOApQCTMwMy4zODE3ODM5ODcxMDM3CTUwOS45MDU0MjcxODk2ODMJMC41CTk0Njc0OTE4NApQCTMxMS4wNzMzNDc2NjI1NDcJNTEyLjE2NzY1MTgwMDEwNzUJMC41CTk0Njc2NTg1MQpQCTMxOC43NjQ5MTEzMzc5OTAzCTUxNC40Mjk4NzY0MTA1MzIJMC41CTk0Njc4MjUxOApQCTMyNi40NTY0NzUwMTM0MzM2CTUxNi42OTIxMDEwMjA5NTY0CTAuNQk5NDY3OTkxODQKUAkzMzMuNjk1NTkzNzY2NzkyCTUxOC45NTQzMjU2MzEzODEJMC41CTk0NjgxNTg1MQpQCTM0MC40ODIyNjc1OTgwNjU1Ngk1MjEuMjE2NTUwMjQxODA1NQkwLjUJOTQ2ODMyNTE4ClAJMzQ3LjI2ODk0MTQyOTMzOTA3CTUyMy40Nzg3NzQ4NTIyMwkwLjUJOTQ2ODQ5MTg0ClAJMzUzLjYwMzE3MDMzODUyNzY2CTUyNS4yODg1NTQ1NDA1Njk2CTAuNQk5NDY4NjU4NTEKUAkzNTkuNDg0OTU0MzI1NjMxMzUJNTI3LjA5ODMzNDIyODkwOTIJMC41CTk0Njg4MjUxOApQCTM2NC40NjE4NDg0Njg1NjUzCTUyOC40NTU2Njg5OTUxNjM5CTAuNQk5NDY4OTkxODQKUAkzNjguOTg2Mjk3Njg5NDE0MjQJNTI5LjgxMzAwMzc2MTQxODYJMC41CTk0NjkxNTg1MQpQCTM3MC43OTYwNzczNzc3NTM5CTUzMC4yNjU0NDg2ODM1MDM2CTAuNQk5NDY5MzI1MTgKUAkzNzAuNzk2MDc3Mzc3NzUzOQk1MzAuMjY1NDQ4NjgzNTAzNgkwLjUJOTQ2OTMyNTE4ClMJOWVhMzYxOTctOTU5Yy00ZDA0LWIwY2ItYzQ5Y2Q5YjNkZTY4CWU4MTU5ZjQxLTRlMjMtNGJiMy04Y2M3LTQyMmVjNzJlM2M5MAkxCU1PTk9MSU5FCTEJLTE0MzM5NTEzCTIuNQkzNQkxLjAJMC4wCTAuMAkxLjAJMC4wCTAuMApQCTE1MC45MDc4NDUyNDQ0OTIxNwkzNzguNjk2Mzk5Nzg1MDYxODMJMC41CTk3NTk5MDgxNgpQCTE1MC45MDc4NDUyNDQ0OTIxNwkzNzguNjk2Mzk5Nzg1MDYxODMJMC41CTk3NjA1NzQ4MwpQCTE1MC45MDc4NDUyNDQ0OTIxNwkzNzguNjk2Mzk5Nzg1MDYxODMJMC41CTk3NjA1NzQ4MwpQCTE1Ni4zMzcxODQzMDk1MTA5NwkzODAuNTA2MTc5NDczNDAxNAkwLjUJOTc2MDc0MTUwClAJMTYyLjIxODk2ODI5NjYxNDcJMzgyLjMxNTk1OTE2MTc0MTAzCTAuNQk5NzYwOTA4MTYKUAkxNjguNTUzMTk3MjA1ODAzMzEJMzg0LjEyNTczODg1MDA4MDYJMC41CTk3NjEwNzQ4MwpQCTE3NS4zMzk4NzEwMzcwNzY4MgkzODYuMzg3OTYzNDYwNTA1MQkwLjUJOTc2MTI0MTUwClAJMTgyLjU3ODk4OTc5MDQzNTIzCTM4OC42NTAxODgwNzA5Mjk2MwkwLjUJOTc2MTQwODE2ClAJMTkwLjI3MDU1MzQ2NTg3ODUyCTM5MC45MTI0MTI2ODEzNTQxCTAuNQk5NzYxNTc0ODMKUAkxOTcuOTYyMTE3MTQxMzIxODQJMzkzLjE3NDYzNzI5MTc3ODY1CTAuNQk5NzYxNzM3MDkKUAkyMDUuNjUzNjgwODE2NzY1MTYJMzk1LjQzNjg2MTkwMjIwMzEzCTAuNQk5NzYxOTA4MTYKUAkyMTMuMzQ1MjQ0NDkyMjA4NDUJMzk4LjE1MTUzMTQzNDcxMjUJMC41CTk3NjIwNzQ4MwpQCTIyMS40ODkyNTMwODk3MzY2OAk0MDAuNDEzNzU2MDQ1MTM3MDYJMC41CTk3NjIyNDE1MApQCTIyOS42MzMyNjE2ODcyNjQ4OAk0MDMuMTI4NDI1NTc3NjQ2NDUJMC41CTk3NjI0MDgxNgpQCTIzNy43NzcyNzAyODQ3OTMxCTQwNS4zOTA2NTAxODgwNzA5NAkwLjUJOTc2MjU3MDExClAJMjQ1LjkyMTI3ODg4MjMyMTMJNDA4LjEwNTMxOTcyMDU4MDMJMC41CTk3NjI3NDE1MApQCTI1NC41MTc3MzI0MDE5MzQ0CTQxMC4zNjc1NDQzMzEwMDQ4NgkwLjUJOTc2MjkwODE2ClAJMjYyLjY2MTc0MDk5OTQ2MjYJNDEzLjA4MjIxMzg2MzUxNDI2CTAuNQk5NzYzMDc0ODMKUAkyNzAuODA1NzQ5NTk2OTkwODQJNDE1Ljc5Njg4MzM5NjAyMzY1CTAuNQk5NzYzMjQxNTAKUAkyNzguOTQ5NzU4MTk0NTE5MDYJNDE4LjA1OTEwODAwNjQ0ODIJMC41CTk3NjM0MDgxNgpQCTI4Ny4wOTM3NjY3OTIwNDcyMwk0MjAuNzczNzc3NTM4OTU3NgkwLjUJOTc2MzU3NDgzClAJMjk1LjIzNzc3NTM4OTU3NTQ2CTQyMy4wMzYwMDIxNDkzODIwNgkwLjUJOTc2Mzc0MTUwClAJMzAzLjM4MTc4Mzk4NzEwMzcJNDI1Ljc1MDY3MTY4MTg5MTQ1CTAuNQk5NzYzOTA4MTYKUAkzMTEuMDczMzQ3NjYyNTQ3CTQyOC4wMTI4OTYyOTIzMTYJMC41CTk3NjQwNzQ4MwpQCTMxOC43NjQ5MTEzMzc5OTAzCTQzMC4yNzUxMjA5MDI3NDA0NwkwLjUJOTc2NDI0MTUwClAJMzI2LjQ1NjQ3NTAxMzQzMzYJNDMyLjUzNzM0NTUxMzE2NQkwLjUJOTc2NDQwODE2ClAJMzMzLjY5NTU5Mzc2Njc5Mgk0MzQuNzk5NTcwMTIzNTg5NQkwLjUJOTc2NDU3NDgzClAJMzQwLjQ4MjI2NzU5ODA2NTU2CTQzNy4wNjE3OTQ3MzQwMTQJMC41CTk3NjQ3NDE1MApQCTM0Ny4yNjg5NDE0MjkzMzkwNwk0MzguODcxNTc0NDIyMzUzNgkwLjUJOTc2NDkwMzIwClAJMzUzLjYwMzE3MDMzODUyNzY2CTQ0MS4xMzM3OTkwMzI3NzgxCTAuNQk5NzY1MDcxNTIKUAkzNTkuNDg0OTU0MzI1NjMxMzUJNDQyLjk0MzU3ODcyMTExNzcJMC41CTk3NjUyNDE1MApQCTM2NC40NjE4NDg0Njg1NjUzCTQ0NC4zMDA5MTM0ODczNzI0CTAuNQk5NzY1NDA4MTYKUAkzNjguOTg2Mjk3Njg5NDE0MjQJNDQ1LjY1ODI0ODI1MzYyNzEJMC41CTk3NjU1NzQ4MwpQCTM3MC43OTYwNzczNzc3NTM5CTQ0Ni4xMTA2OTMxNzU3MTIJMC41CTk3NjU3NDE1MApQCTM3MC43OTYwNzczNzc3NTM5CTQ0Ni4xMTA2OTMxNzU3MTIJMC41CTk3NjU3NDE1MApFTkQK",
+        "system_file_picker_verified": false
+      }
+    },
+    "input_batches": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "1348d58a7551c90b09aee3012d7669f29558a4220180fd196aa2e8071f214172",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "f86b32ca46b160f812dc374e4bc58e256a7e3e22181c47c72043a0776dd089f2"
+      },
+      "observations": {
+        "checks": [
+          "sibling_surface_preserves_original_input_and_rejects_stale_events",
+          "document_capacity_refusal_and_undo_recovery",
+          "live_byte_refusal_and_undo_recovery",
+          "input_byte_budget_refusal_cancel_and_recovery",
+          "history_capacity_refuses_down_without_owning_samples",
+          "journal_identity_capacity_refuses_before_real_view_ownership",
+          "typed_pending_up_retains_exact_command_and_retries_once",
+          "double_scene_mapping_before_float_path",
+          "history_terminal_order_equal_time_and_undo",
+          "invalid_native_sample_cancels_and_recovers",
+          "resize_cancels_and_late_up_preserves_root",
+          "callback_batch_limit_explicit_cancel_and_recover"
+        ],
+        "old_float_witness_error": 0.0005255342148302589,
+        "canonical_max_error": 0,
+        "batch_sample_count": 7,
+        "callback_real_batch_limit": 1024,
+        "down_history_included": true,
+        "active_input_reservation_bytes": 1329280,
+        "input_reservation_released_after_completion": true,
+        "typed_refusal_messages_checked": [
+          "preflight_capacity",
+          "history_capacity",
+          "invalid_sample",
+          "producer_limit"
+        ],
+        "all_test_notes_in_memory": true
+      }
+    },
+    "owner_retirement": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "1348d58a7551c90b09aee3012d7669f29558a4220180fd196aa2e8071f214172",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "f86b32ca46b160f812dc374e4bc58e256a7e3e22181c47c72043a0776dd089f2"
+      },
+      "observations": {
+        "checks": [
+          "wrong_thread_store_creation_and_lookup_refused",
+          "invalid_store_configuration_does_not_start_worker",
+          "unadmitted_release_refuses_before_retiring_authority",
+          "wrong_thread_retirement_rejected",
+          "accepted_root_saved_before_terminal_worker_stop",
+          "failed_root_retained_until_explicit_retry",
+          "active_input_and_picker_refuse_without_loss",
+          "pending_read_and_delivery_refuse_retirement",
+          "full_ledger_retry_frees_slot_before_retirement",
+          "shared_editor_detach_capacity_and_reopen",
+          "pending_editor_failure_retry_original_recovery",
+          "actual_activity_shared_editor_departure",
+          "editor_original_ledger_old_ack_failure_and_retry",
+          "editor_stopped_backend_feedback",
+          "actual_activity_shared_presentation_update"
+        ],
+        "original_note_files_used": false,
+        "abrupt_owner_or_thread_loss_verified": false,
+        "gc_timing_verified": false
+      }
+    },
+    "pending_work_budget": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "1348d58a7551c90b09aee3012d7669f29558a4220180fd196aa2e8071f214172",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "f86b32ca46b160f812dc374e4bc58e256a7e3e22181c47c72043a0776dd089f2"
+      },
+      "observations": {
+        "worker_budget": 268435456,
+        "available_when_blocked": 64989,
+        "encoding_charge": 64990,
+        "retained_charge": 3038,
+        "input_charge": 2248,
+        "pending_sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+        "canonical_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+        "pending_ack": 1,
+        "canonical_ack": 1,
+        "revision": 2,
+        "strokes": 1,
+        "points": 4
+      }
+    },
+    "recovery_open_budget": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "1348d58a7551c90b09aee3012d7669f29558a4220180fd196aa2e8071f214172",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "f86b32ca46b160f812dc374e4bc58e256a7e3e22181c47c72043a0776dd089f2"
+      },
+      "observations": {
+        "input_rejected": 2247,
+        "exact_input_admitted": 2248,
+        "document_capacity_refused": true,
+        "prior_owner_preserved": true,
+        "prior_unsaved_file_absent": true,
+        "pending_sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+        "canonical_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+      }
+    },
+    "catalog_retry": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "1348d58a7551c90b09aee3012d7669f29558a4220180fd196aa2e8071f214172",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "a917d700bc1b913aa0aa39ffa490d6a55a60b12cc8bc60da7dd9e5837115a5bf"
+      },
+      "observations": {
+        "checks": [
+          "activity_retry_displays_repaired_catalog",
+          "activity_ignores_stale_save_failure",
+          "activity_export_failure_preserves_new_page_status"
+        ]
+      }
+    }
+  },
+  "resource_import_host_probe_passed": 14,
+  "source_file_sha256": {
+    ".gitattributes": "38f6515b082b769b240d7a9594838116407a7ac4d42bc1fb2756c307e99bd10c",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "debfe0e8e8746dda006fdfbd3768b518845cc5563c2b564c4ec5e0f1a9b76517",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "5f2e64cd4f7c21a3f99a3cff7cde418948e82b5571b81fc6ef745ff5527a09cd",
+    "android-app/src/main/java/dev/notecore/app/MainActivity.kt": "07627902f9559c2829c78c25688565ce3ab08b8bdaf830c52ef07a729dc58c08",
+    "android-app/src/androidTest/java/dev/notecore/app/CatalogRetryHostChecks.kt": "a108011017da350ff203654c4c3b636611296dd6d3759c94aaa54e5d537c1b70",
+    "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt": "7089df3ea0cc0a3bbc05eb532fff0d8a5150688f5f269bc1652212c8d55d1446",
+    "android-app/src/androidTest/java/dev/notecore/app/StorageRetentionHostChecks.kt": "8b217d2e5788def13eecb03fc733705b2597592ff8dcca2522448c45252efc77",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "7ba7b0dcbfa270891a5b20049316571e38464b658e0afeb746262b34204b6392",
+    "ios-app/NoteCorePreview/PreviewFileIO.swift": "24fdfb0b6527bd371fbe901085e8c13d81a79481974dc448f325017f33a17711",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "81006cc52a74db884af5744ad7ab11ce62013389e22c8d9c8c22f446122835f0",
+    "tools/verify_resource_commit_rules.py": "eaf0b33a09d391e9d833d8ba3198889e03ae9c016c49b64ae5bc77aff6b5c068",
+    "tools/resource_commit_probe.py": "248687f5792c626d9e7a9cdbc44eb50f077aaf3cd7dcc4afc765e53d0e0a9983"
+  },
+  "evidence_file_sha256": {
+    "reports/merge-20261114/apple-summary.json": "1a980c4fdd822b82e719ac6aa8f7e4c495e9f0337f00c6850220639e132ab1a3",
+    "reports/merge-20261114/apple-tests.json": "a8639ccaf53c8e99435a4f3d61c48b53ffb7a9fc8701c211f546e785ff7ead69",
+    "reports/merge-20261114/apple-first-run-summary.json": "e2b2eb8166f95482b0a63fe99d23a87968026c6c9bf169e78db3cc94df383a1f",
+    "reports/merge-20261114/minimum_api.log": "7e7af752721c549666ff442fb080b880d55a6cb9d8306e8c79b9629dc39e2051",
+    "reports/merge-20261114/storage_retention.log": "8cb05e2029acec6f578cb96703254111e83397feaee723eaea73949ac7fba633",
+    "reports/merge-20261114/input_batches.log": "77ca392d07aa67aa12be4ce71c239e341ec3930aae42f4caa444031068891dc3",
+    "reports/merge-20261114/owner_retirement.log": "867704d2bc824a2c0ac55bae738261ad00a75b647c8576fce5a2bcf800c1181e",
+    "reports/merge-20261114/pending_work_budget.log": "06006182ba54fce4d57983d3b978f2fc396dfb19a456d5b8776345215ffd3b6e",
+    "reports/merge-20261114/recovery_open_budget.log": "d1e7b5e7b22d313ffde0878c04d1b3d5c45acb2d22c46db46411765164d6b4df",
+    "reports/merge-20261114/catalog_retry.log": "09b91cd2050198f221157f433d9e9c44791832ac6d389c89eb1664a9ff4d07fd",
+    "reports/merge-20261114/android-first-catalog-crash.log": "63eceb53da8b1f6f6dce8bfb47254bcabe879c8d482be7e2d200a7f850f454d8"
+  },
+  "scope": "Merged preview App host on isolated API32 ARM64 and iOS 27.0 simulator. Apple ordinary UI, production SQLite, SDK isolation, physical M-1/heap/stylus and C1 remain open."
+}

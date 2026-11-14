@@ -1,0 +1,8 @@
+INSTRUMENTATION_RESULT: failure=java.lang.IllegalStateException: Atomic recovery changed the original note or unrelated directory
+	at dev.notecore.app.ReadFailureHostChecks.verify(ReadFailureHostChecks.kt:107)
+	at dev.notecore.app.StorageRetentionHostChecks.verify(StorageRetentionHostChecks.kt:25)
+	at dev.notecore.app.ViewportInstrumentation.onStart(ViewportInstrumentation.kt:105)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2074)
+
+INSTRUMENTATION_RESULT: viewport_status=failed
+INSTRUMENTATION_CODE: 0

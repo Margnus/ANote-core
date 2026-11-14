@@ -1,0 +1,16 @@
+--------- beginning of crash
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: FATAL EXCEPTION: main
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: Process: dev.notecore.preview, PID: 3019
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: java.lang.IllegalStateException: An old failure replaced the newer editor status
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at dev.notecore.app.CatalogRetryHostChecks.verify$lambda$9(CatalogRetryHostChecks.kt:90)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at dev.notecore.app.CatalogRetryHostChecks.$r8$lambda$BKvGdKu7RGUJd0Kbvvj_VkWOmQo(Unknown Source:0)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at dev.notecore.app.CatalogRetryHostChecks$$ExternalSyntheticLambda7.run(D8$$SyntheticClass:0)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2296)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at android.os.Handler.handleCallback(Handler.java:938)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:201)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:288)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7870)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+11-14 16:24:45.370  3019  3019 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1003)

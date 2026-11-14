@@ -1,0 +1,56 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "C352C990-6623-4B19-ADFB-917568DFBA28",
+        "deviceName" : "NoteCoreMergeNov14",
+        "modelName" : "iPad Pro 11-inch (M5)",
+        "osBuildNumber" : "24A434",
+        "osVersion" : "27.0",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 71,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "NoteCorePreview · Built with macOS 27.2",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1794643852.009,
+  "passedTests" : 71,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1794643775.351,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed - initial note saved",
+      "targetName" : "NoteCorePreviewTests",
+      "testIdentifier" : 63,
+      "testIdentifierString" : "PagedHostTests/testReleasingExportBudgetResumesWaitingSave()",
+      "testIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testReleasingExportBudgetResumesWaitingSave",
+      "testName" : "testReleasingExportBudgetResumesWaitingSave()"
+    }
+  ],
+  "title" : "Test - NoteCorePreview",
+  "topInsights" : [
+    {
+      "category" : "Longest Test Runs",
+      "impact" : "63% of duration",
+      "text" : "1 longest test run with outlier durations exceeding 6.15s (three standard deviations)"
+    }
+  ],
+  "totalTestCount" : 72
+}

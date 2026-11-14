@@ -18,6 +18,13 @@ CHECKS = {'sibling_surface_preserves_original_input_and_rejects_stale_events', '
           'history_capacity_refuses_down_without_owning_samples', 'journal_identity_capacity_refuses_before_real_view_ownership',
           'typed_pending_up_retains_exact_command_and_retries_once'}
 STORAGE_CHECKS = {'late_capture_refused_after_latest_ack_without_disk_rollback', 'local_file_identity_refusal_preserves_owner_input_and_io', 'derived_text_capacity_checkpoint_save_and_reopen', 'catalog_capacity_failure_preserves_owner_snapshot', 'read_failure_classification_to_owner', 'validated_creation_refusal_and_independent_authority', 'pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen', 'validated_open_refusal_preserves_original_store_owner', 'saved_unchanged_skips_io', 'changed_revision_failure_retained', 'repair_retries_exact_root',
+                  'catalog_ignores_directories_and_recovers_legacy_backup', 'staging_conflict_preserves_original_then_retries_and_reopens',
+                  'catalog_retry_preserves_retained_edits_and_recovers_disk_list',
+                  'catalog_preserves_unreadable_note_and_lists_valid_neighbor',
+                  'import_refusal_preserves_source_and_retry_remaps_identity',
+                  'backup_round_trip_preserves_source_and_remaps_ink_references',
+                  'apple_ui_backup_import_preserves_two_pages_and_three_strokes',
+                  'export_target_failure_preserves_note_and_allows_retry',
                   'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
 OWNER_CHECKS = {'invalid_store_configuration_does_not_start_worker', 'wrong_thread_store_creation_and_lookup_refused', 'unadmitted_release_refuses_before_retiring_authority', 'shared_editor_detach_capacity_and_reopen', 'pending_editor_failure_retry_original_recovery',

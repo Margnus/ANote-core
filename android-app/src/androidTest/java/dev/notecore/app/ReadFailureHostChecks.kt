@@ -2,6 +2,7 @@ package dev.notecore.app
 
 import android.app.Activity
 import android.app.Instrumentation
+import android.net.Uri
 import android.os.Looper
 import android.os.SystemClock
 import dev.notecore.document.*
@@ -166,7 +167,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             check(root.scene.objectCount == 9 && checkpoint.pending === pending)
         } finally { main { store.stopTestBackend() } }
     }
-    fun verify() {
+    fun verify(): ByteArray {
         val directory=File(host.cacheDir,"read-failure-${java.util.UUID.randomUUID()}").apply { mkdirs() }
         localFileIdentity(File(directory, "local-identity"))
         longNumericCheckpoint(File(directory, "long-numeric"))
@@ -183,6 +184,15 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             await { done }
         }
         try {
+            file.writeText(valid, Charsets.UTF_8)
+            val backupDirectory = File(directory, "$id.ncp.bak")
+            check(backupDirectory.mkdir())
+            val marker = File(backupDirectory, "keep").apply { writeText("unrelated directory") }
+            refuse(LocalReadFailure.IO_FAILURE.message)
+            check(file.isFile && file.readText() == valid && marker.readText() == "unrelated directory") {
+                "Atomic recovery changed the original note or unrelated directory"
+            }
+            check(marker.delete() && backupDirectory.delete())
             for ((bytes,reason) in listOf("bad format".toByteArray() to LocalReadFailure.INVALID_FORMAT,
                 valid.replace(id,"other-note").toByteArray() to LocalReadFailure.WRONG_DOCUMENT,
                 byteArrayOf(0xc3.toByte(),0x28) to LocalReadFailure.INVALID_UTF8,
@@ -191,6 +201,8 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             }
             // Valid canonical doubles can degenerate in the original Float Path/Matrix adapter.
             val ink="NCPREVIEW\t2\nD\t$id\ttitle\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\tink\tlayer\t1\tMONOLINE\t1\t-1\t2.5\t1\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.0\t2.0\t0.5\t1\nEND\n"
+            verifyImport(File(directory, "import"), ink)
+            val appleRoundTrip = verifyAppleBackup(File(directory, "apple-backup"))
             val degenerate = listOf(ink.replace("\t2.5\t1\t", "\t1.0E-50\t1\t"),
                 ink.replace("\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n", "\t1.0\t1.0\t1.0\t1.00000001\t0.0\t0.0\n"))
             for (encoded in degenerate) {
@@ -234,6 +246,157 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             var opened=false
             main { store.open(id) { value,error -> check(error==null);val note=store.adopt(checkNotNull(value));check(note.totalStrokeCount==0);check(store.releaseActive(note));opened=true } }
             await { opened };check(file.readText(Charsets.UTF_8)==valid)
+            return appleRoundTrip
         } finally { main { store.stopTestBackend() };directory.deleteRecursively() }
+    }
+
+    private fun verifyImport(directory: File, supported: String) {
+        val source = File(directory.parentFile, "import-source.ncp")
+        val uri = Uri.fromFile(source)
+        lateinit var store: NoteStore
+        main { store = NoteStore.isolated(host, directory) }
+        fun refuse(reason: LocalReadFailure) {
+            var done = false
+            main {
+                store.importCopy(uri) { value, error ->
+                    check(value == null && error == reason.message) { "Unexpected import refusal: $error" }
+                    check(store.activeDocumentId == null)
+                    done = true
+                }
+            }
+            await { done }
+            check(!directory.exists()) { "Rejected import created a destination" }
+        }
+        try {
+            refuse(LocalReadFailure.IO_FAILURE)
+            for ((bytes, reason) in listOf(
+                byteArrayOf(0xff.toByte()) to LocalReadFailure.INVALID_UTF8,
+                supported.replace("NCPREVIEW\t2", "NCPREVIEW\t99").toByteArray() to LocalReadFailure.INVALID_FORMAT,
+                supported.replace("MONOLINE", "PRESSURE").toByteArray() to LocalReadFailure.UNSUPPORTED_CONTENT
+            )) {
+                source.writeBytes(bytes)
+                refuse(reason)
+                check(source.readBytes().contentEquals(bytes))
+            }
+            val oversizedLength = PagedPreviewCodec.MAX_UTF8_BYTES.toLong() + 1
+            RandomAccessFile(source, "rw").use {
+                it.setLength(oversizedLength)
+                it.seek(oversizedLength - 1)
+                it.write(0x5a)
+            }
+            refuse(LocalReadFailure.BYTE_CAPACITY)
+            RandomAccessFile(source, "r").use {
+                check(it.length() == oversizedLength)
+                it.seek(oversizedLength - 1)
+                check(it.read() == 0x5a)
+            }
+            source.writeText(supported, Charsets.UTF_8)
+            val original = PagedPreviewCodec.decode(supported)
+            directory.writeText("blocked import destination")
+            var failedWrite = false
+            main {
+                store.importCopy(uri) { value, error ->
+                    check(value == null && error == "导入结果暂无法确认，请先查看列表；已有笔记未覆盖")
+                    check(store.activeDocumentId == null)
+                    failedWrite = true
+                }
+            }
+            await { failedWrite }
+            check(directory.readText() == "blocked import destination" && source.readText() == supported)
+            check(directory.delete())
+            var imported: OpenedDocument? = null
+            main {
+                store.importCopy(uri) { value, error ->
+                    check(error == null && value?.persisted == true)
+                    check(store.activeDocumentId == null)
+                    imported = value
+                }
+            }
+            await { imported != null }
+            val firstCopy = checkNotNull(imported)
+            val root = firstCopy.root
+            check(root.id != original.id && root.title == original.title)
+            check(root.pages().single().id != original.pages().single().id)
+            check(root.pages().single().layerId != original.pages().single().layerId)
+            check(root.scene.objects().single().id != original.scene.objects().single().id)
+            check(root.scene.objects().single().samples == original.scene.objects().single().samples)
+            check(checkNotNull(directory.listFiles()).single().readText() == PagedPreviewCodec.encode(root))
+            check(source.readText() == supported)
+            val backup = File(directory.parentFile, "round-trip-backup.ncp")
+            var exported = false
+            main {
+                store.export(Uri.fromFile(backup), firstCopy.recovery) { error ->
+                    check(error == null)
+                    exported = true
+                }
+            }
+            await { exported }
+            val backupBytes = backup.readBytes()
+            check(backupBytes.contentEquals(PagedPreviewCodec.encode(root).toByteArray()))
+            var restored: OpenedDocument? = null
+            main {
+                store.importCopy(Uri.fromFile(backup)) { value, error ->
+                    check(error == null && value?.persisted == true && store.activeDocumentId == null)
+                    restored = value
+                }
+            }
+            await { restored != null }
+            val second = checkNotNull(restored).root
+            check(second.id != root.id && second.title == root.title)
+            check(second.pages().single().id != root.pages().single().id)
+            val stroke = second.scene.objects().single()
+            check(stroke.id != root.scene.objects().single().id && stroke.layerId == second.pages().single().layerId)
+            check(stroke.samples == original.scene.objects().single().samples)
+            check(File(directory, "${root.id.value}.ncp").readBytes().contentEquals(backupBytes))
+            check(File(directory, "${second.id.value}.ncp").readText() == PagedPreviewCodec.encode(second))
+            check(backup.readBytes().contentEquals(backupBytes) && source.readText() == supported)
+        } finally { main { store.stopTestBackend() } }
+    }
+
+    private fun verifyAppleBackup(directory: File): ByteArray {
+        val source = File(directory.parentFile, "apple-ui-source.ncp")
+        val bytes = test.context.assets.open("transfer/apple-ui-paged-v2.ncp").use { it.readBytes() }
+        source.writeBytes(bytes)
+        val original = PagedPreviewCodec.decode(bytes.toString(Charsets.UTF_8))
+        check(original.pages().size == 2 && original.scene.objects().size == 3)
+        lateinit var store: NoteStore
+        var opened: OpenedDocument? = null
+        main { store = NoteStore.isolated(host, directory) }
+        try {
+            main {
+                store.importCopy(Uri.fromFile(source)) { value, error ->
+                    check(error == null && value?.persisted == true)
+                    opened = value
+                }
+            }
+            await { opened != null }
+            val root = checkNotNull(opened).root
+            check(root.id != original.id && root.title == original.title)
+            val layers = original.pages().zip(root.pages()).associate { (before, after) ->
+                check(before.id != after.id && before.layerId != after.layerId)
+                check(before.width == after.width && before.height == after.height && before.paper == after.paper)
+                before.layerId to after.layerId
+            }
+            check(root.pages().size == 2 && root.scene.objects().size == 3)
+            original.scene.objects().zip(root.scene.objects()).forEach { (before, after) ->
+                check(before.id != after.id && layers.getValue(before.layerId) == after.layerId)
+                check(before.brush == after.brush && before.transform == after.transform && before.samples == after.samples)
+            }
+            check(source.readBytes().contentEquals(bytes))
+            val saved = checkNotNull(directory.listFiles()).single()
+            check(saved.readText() == PagedPreviewCodec.encode(root))
+            val exported = File(directory.parentFile, "android-return.ncp")
+            var completed = false
+            main {
+                store.export(Uri.fromFile(exported), checkNotNull(opened).recovery) { error ->
+                    check(error == null)
+                    completed = true
+                }
+            }
+            await { completed }
+            return exported.readBytes().also {
+                check(it.contentEquals(saved.readBytes()) && source.readBytes().contentEquals(bytes))
+            }
+        } finally { main { store.stopTestBackend() } }
     }
 }

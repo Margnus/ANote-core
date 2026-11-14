@@ -92,6 +92,8 @@ class MainActivity : Activity() {
         root.addView(button("导入备份") { importBackup() }, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         status = text("", 13f).apply { setPadding(dp(20), 0, dp(20), dp(8)) }
         root.addView(status)
+        val retry = button(getString(R.string.retry_note_list), ::library).apply { visibility = View.GONE }
+        root.addView(retry, LinearLayout.LayoutParams(-1, dp(48)).apply { setMargins(dp(20), 0, dp(20), dp(12)) })
         val frame = FrameLayout(this)
         val list = ListView(this).apply {
             setPadding(dp(20), 0, dp(20), dp(20)); clipToPadding = false
@@ -110,6 +112,7 @@ class MainActivity : Activity() {
             if (generation != viewGeneration || isFinishing || isDestroyed) return@list
             empty.text = if (failure == null) "还没有笔记，写下第一个想法。" else "暂时无法读取笔记，请稍后重试。"
             adapter.replace(notes)
+            retry.visibility = if (failure == null) View.GONE else View.VISIBLE
             failure?.let(::showError)
         }
     }
@@ -240,12 +243,11 @@ class MainActivity : Activity() {
         if (note.changeVersion != beforeRetry) { canvas?.refreshPage(); updateControls() }
         val snapshot = note.captureRecovery(); val generation = viewGeneration
         status?.text = getString(R.string.saving, note.totalStrokeCount)
-        return store.save(snapshot) { version, failure ->
-            if (generation != viewGeneration || notebook !== note || isFinishing) return@save
+        return store.save(snapshot) { _, failure ->
+            if (generation != viewGeneration || notebook !== note || isFinishing || isDestroyed) return@save
+            if (!snapshot.sameContent(note.captureRecovery())) return@save
             if (failure != null) showError(failure)
-            if (failure == null && snapshot.sameContent(note.captureRecovery())) {
-                lastPresentation = null; refreshPresentation()
-            }
+            else { lastPresentation = null; refreshPresentation() }
         }
     }
     private fun leaveEditor() {
@@ -327,9 +329,12 @@ class MainActivity : Activity() {
             if (resultCode != RESULT_OK) return
             val uri = data?.data ?: return showError("未获取导出位置，请重试")
             if (snapshot == null) { showError("会话已重建，请重新导出"); return }
-            store.export(uri, snapshot) { failure -> if (!isFinishing && !isDestroyed) {
-                if (failure != null) showError(failure) else Toast.makeText(this, "备份已导出", Toast.LENGTH_LONG).show()
-            } }
+            val generation = viewGeneration
+            store.export(uri, snapshot) { failure ->
+                if (isFinishing || isDestroyed) return@export
+                if (failure != null && generation == viewGeneration) showError(failure)
+                else Toast.makeText(this, failure ?: "备份已导出", Toast.LENGTH_LONG).show()
+            }
         } else if (requestCode in 1000..65535 && requestCode == importRequestCode) {
             val session = importPickerSession
             importRequestCode = null; importPickerSession = null

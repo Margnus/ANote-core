@@ -737,6 +737,13 @@ final class PagedHostTests: XCTestCase {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let id = "read-failures", file = dir.appendingPathComponent("read-failures.ncp")
+        let boundaryText = String(repeating: "a", count: 8191) + "笔"
+        let boundaryBytes = Data(boundaryText.utf8)
+        try boundaryBytes.write(to: file)
+        XCTAssertEqual(try PreviewFileIO.readUTF8(file, maxBytes: boundaryBytes.count), boundaryText)
+        XCTAssertThrowsError(try PreviewFileIO.readUTF8(file, maxBytes: boundaryBytes.count - 1))
+        XCTAssertThrowsError(try PreviewFileIO.readUTF8(file, maxBytes: -1))
+        XCTAssertEqual(try Data(contentsOf: file), boundaryBytes)
         let valid = "NCPREVIEW\t2\nD\tread-failures\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         let snapshot = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: valid).snapshot)
         if case .opened(let same) = PreviewFileIO.acceptRecovery(snapshot, documentId: id) { XCTAssertTrue(same === snapshot) }
@@ -774,6 +781,28 @@ final class PagedHostTests: XCTestCase {
         XCTAssertNil(unknown.current); XCTAssertEqual(try PreviewFileIO.readUTF8(file), valid)
         model.open(id); try await eventually("later valid read recovers") { model.current != nil }
         XCTAssertEqual(model.current?.documentId, id); model.close()
+    }
+    @MainActor func testCatalogRetryKeepsUnreadableNoteAndClearsFailure() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        try Data("blocked directory".utf8).write(to: dir)
+        let model = PreviewModel(directory: dir)
+        try await eventually("catalog failure is visible") { model.catalogError }
+        XCTAssertEqual(model.status, "列表读取失败，原文件与未保存内容仍保留")
+        try FileManager.default.removeItem(at: dir)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let valid = dir.appendingPathComponent("valid-note.ncp")
+        let damaged = dir.appendingPathComponent("damaged-note.ncp")
+        let validBytes = Data("NCPREVIEW\t2\nD\tvalid-note\tValid note\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n".utf8)
+        let damagedBytes = Data(("NCPREVIEW\t2\n" + String(repeating: "x", count: 4096) + "\n").utf8)
+        try validBytes.write(to: valid)
+        try damagedBytes.write(to: damaged)
+        model.refresh()
+        try await eventually("catalog lists both notes after repair") { !model.catalogError && model.notes.count == 2 }
+        XCTAssertTrue(model.status.isEmpty)
+        XCTAssertEqual(model.notes.first { $0.id == "valid-note" }?.title, "Valid note")
+        XCTAssertEqual(model.notes.first { $0.id == "damaged-note" }?.title, "待恢复的笔记")
+        XCTAssertEqual(try Data(contentsOf: valid), validBytes)
+        XCTAssertEqual(try Data(contentsOf: damaged), damagedBytes)
     }
     @MainActor func testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook() async throws {
         let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
@@ -976,9 +1005,15 @@ final class PagedHostTests: XCTestCase {
         model.prepareExport() // A second request cannot replace the accepted capture.
         try await eventually("first export ready") { !model.transferBusy && model.exportDocument != nil }
         let first = try XCTUnwrap(model.exportDocument?.data)
+        XCTAssertEqual(model.exportRetainedByteCharge, 512 + first.count)
         XCTAssertEqual(String(data: first, encoding: .utf8), original)
         model.prepareExport(); XCTAssertEqual(model.exportDocument?.data, first)
+        model.importCopy(try androidFixture())
+        XCTAssertFalse(model.transferBusy)
+        XCTAssertEqual(model.exportDocument?.data, first)
+        XCTAssertTrue(model.current === note)
         model.finishExport() // Same ownership release as exporter cancellation/completion.
+        XCTAssertEqual(model.exportRetainedByteCharge, 0)
         model.prepareExport()
         let later = try note.capture().encode()
         try await eventually("next export admitted after clear") { !model.transferBusy && model.exportDocument != nil }
@@ -1103,6 +1138,65 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(model.beginOwnerRetirement(), .started)
         try await eventually("catalog owner releases snapshot on retirement") { model.ownerRetirementStatus.phase == .retired }
         XCTAssertEqual(model.catalogRetainedByteCharge, 0)
+    }
+    @MainActor func testReleasingExportBudgetResumesWaitingSave() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let note = try PagedPreviewNotebook.companion.create(documentId: "export-save", title: "Before", sessionNonce: "export-save")
+        let originalRoot = note.snapshot()
+        let original = Data(try note.capture().encode().utf8)
+        let exportCharge = Int64(512 + original.count)
+        XCTAssertTrue(note.rename(value: "Waiting for export budget"))
+        let edited = try note.capture().encode()
+        let limit = note.capture().encodingWorkByteCharge
+        let model = PreviewModel(directory: dir, storageWorkBytes: limit)
+        try model.adopt(originalRoot, persisted: false)
+        let current = try XCTUnwrap(model.current)
+        let file = dir.appendingPathComponent(current.documentId + ".ncp")
+        XCTAssertTrue(model.save())
+        try await eventually("initial note saved") { model.ownerRetirementStatus.pendingWrites == 0 }
+        model.prepareExport()
+        try await eventually("real backup occupies storage budget") { model.exportDocument != nil }
+        XCTAssertEqual(Int64(model.exportRetainedByteCharge), exportCharge)
+        XCTAssertTrue(current.rename(value: "Waiting for export budget"))
+        XCTAssertEqual(current.capture().encodingWorkByteCharge, limit)
+        XCTAssertTrue(model.save())
+        XCTAssertEqual(model.ownerRetirementStatus.pendingWrites, 1)
+        XCTAssertEqual(model.ownerRetirementStatus.inFlightWrites, 0)
+        XCTAssertEqual(model.ownerRetirementStatus.retryRequired, 0)
+        XCTAssertEqual(try Data(contentsOf: file), original)
+        model.finishExport()
+        try await eventually("export release redispatches the save") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), edited)
+        XCTAssertTrue(model.status.hasPrefix("已保存"))
+        model.close()
+    }
+    @MainActor func testLateExportCannotPresentBackupAfterLeavingItsNote() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir)
+        model.create()
+        let original = try XCTUnwrap(model.current)
+        let originalId = original.documentId
+        draw(original)
+        let originalBytes = try original.capture().encode()
+        model.prepareExport()
+        XCTAssertTrue(model.transferBusy)
+        model.close()
+        XCTAssertNil(model.current)
+        model.create()
+        let next = try XCTUnwrap(model.current)
+        XCTAssertNotEqual(next.documentId, originalId)
+        try await eventually("old export completes without presenting") { !model.transferBusy }
+        XCTAssertNil(model.exportDocument)
+        XCTAssertTrue(model.current === next)
+        model.prepareExport()
+        try await eventually("current note can export") { model.exportDocument != nil }
+        XCTAssertEqual(String(data: try XCTUnwrap(model.exportDocument?.data), encoding: .utf8),
+                       try next.capture().encode())
+        model.close()
+        XCTAssertNil(model.exportDocument)
+        let originalURL = dir.appendingPathComponent(originalId + ".ncp")
+        XCTAssertEqual(try String(contentsOf: originalURL, encoding: .utf8), originalBytes)
     }
     @MainActor func testNativeScalarBatchBridgeValidatesLengthsAndCopiesAcceptedData() throws {
         func data<T>(_ values: [T]) -> NSData {
@@ -1231,29 +1325,61 @@ final class PagedHostTests: XCTestCase {
         let sourceURL = try androidFixture(), original = try Data(contentsOf: sourceURL)
         let source = try PagedPreviewCodec.shared.decode(text: String(decoding: original, as: UTF8.self))
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let exports = directory(); defer { try? FileManager.default.removeItem(at: exports) }
+        try FileManager.default.createDirectory(at: exports, withIntermediateDirectories: true)
         let model = PreviewModel(directory: dir); model.importCopy(sourceURL)
         try await eventually("Android root imported") { !model.transferBusy }
         let note = try XCTUnwrap(model.current), copy = note.snapshot()
         XCTAssertEqual(copy.pageCount, 3); XCTAssertEqual(copy.scene.objectCount, 3)
-        XCTAssertNotEqual(source.id.value, copy.id.value)
-        XCTAssertTrue(Set(source.pages().map { $0.id.value }).isDisjoint(with: copy.pages().map { $0.id.value }))
-        XCTAssertTrue(Set(source.pages().map { $0.layerId.value }).isDisjoint(with: copy.pages().map { $0.layerId.value }))
-        XCTAssertTrue(Set(source.scene.objects().map { $0.id.value }).isDisjoint(with: copy.scene.objects().map { $0.id.value }))
-        for index in 0..<source.pageCount {
-            let a = source.page(index: index), b = copy.page(index: index)
-            XCTAssertEqual(a.width, b.width); XCTAssertEqual(a.height, b.height); XCTAssertEqual(a.paper, b.paper)
-            let old = source.pageObjects(id: a.id), new = copy.pageObjects(id: b.id)
-            XCTAssertEqual(old.count, new.count)
-            for (before, after) in zip(old, new) {
-                XCTAssertEqual(before.brush, after.brush); XCTAssertEqual(before.transform, after.transform)
-                XCTAssertEqual(before.samples, after.samples)
+        func assertRemapped(_ from: DocumentRoot, _ to: DocumentRoot) {
+            XCTAssertNotEqual(from.id.value, to.id.value)
+            XCTAssertEqual(from.title, to.title)
+            XCTAssertEqual(from.pageCount, to.pageCount)
+            XCTAssertEqual(from.scene.objectCount, to.scene.objectCount)
+            XCTAssertTrue(Set(from.pages().map { $0.id.value }).isDisjoint(with: to.pages().map { $0.id.value }))
+            XCTAssertTrue(Set(from.pages().map { $0.layerId.value }).isDisjoint(with: to.pages().map { $0.layerId.value }))
+            XCTAssertTrue(Set(from.scene.objects().map { $0.id.value }).isDisjoint(with: to.scene.objects().map { $0.id.value }))
+            for (a, b) in zip(from.pages(), to.pages()) {
+                XCTAssertEqual(a.width, b.width); XCTAssertEqual(a.height, b.height); XCTAssertEqual(a.paper, b.paper)
+                let old = from.pageObjects(id: a.id), new = to.pageObjects(id: b.id)
+                XCTAssertEqual(old.count, new.count)
+                for (before, after) in zip(old, new) {
+                    XCTAssertEqual(before.brush, after.brush); XCTAssertEqual(before.transform, after.transform)
+                    XCTAssertEqual(before.samples, after.samples)
+                }
             }
         }
+        assertRemapped(source, copy)
         model.applyEdit(PreviewEditSelectPage(pageId: note.page(index: 2).id.value), content: false)
         model.prepareExport(); try await eventually("whole root export ready") { !model.transferBusy }
         let exported = try XCTUnwrap(model.exportDocument)
         XCTAssertEqual(String(decoding: exported.data, as: UTF8.self), try note.capture().encode())
+        let backup = exports.appendingPathComponent("round-trip.ncp")
+        try exported.data.write(to: backup)
+        model.close()
+        XCTAssertNil(model.current)
+        model.importCopy(backup)
+        try await eventually("exported copy imported") { !model.transferBusy }
+        let restored = try XCTUnwrap(model.current).snapshot()
+        assertRemapped(copy, restored)
+        XCTAssertEqual(try Data(contentsOf: dir.appendingPathComponent(copy.id.value + ".ncp")), exported.data)
+        XCTAssertEqual(try PreviewFileIO.readUTF8(dir.appendingPathComponent(restored.id.value + ".ncp")),
+                       try PagedPreviewCodec.shared.encode(root: restored))
+        XCTAssertEqual(try Data(contentsOf: backup), exported.data)
         XCTAssertEqual(try Data(contentsOf: sourceURL), original)
+        model.close()
+        let returned = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "android-return-from-apple", withExtension: "ncp"))
+        let returnedBytes = try Data(contentsOf: returned)
+        let returnedRoot = try PagedPreviewCodec.shared.decode(text: String(decoding: returnedBytes, as: UTF8.self))
+        XCTAssertEqual(returnedRoot.pageCount, 2)
+        XCTAssertEqual(returnedRoot.scene.objectCount, 3)
+        model.importCopy(returned)
+        try await eventually("actual Android return imported") { !model.transferBusy }
+        let roundTrip = try XCTUnwrap(model.current).snapshot()
+        assertRemapped(returnedRoot, roundTrip)
+        XCTAssertEqual(try PreviewFileIO.readUTF8(dir.appendingPathComponent(roundTrip.id.value + ".ncp")),
+                       try PagedPreviewCodec.shared.encode(root: roundTrip))
+        XCTAssertEqual(try Data(contentsOf: returned), returnedBytes)
         model.close()
     }
     @MainActor func testUnsupportedBrushAndCorruptUTF8DoNotCreateCopyOrChangeSource() async throws {
@@ -1265,12 +1391,32 @@ final class PagedHostTests: XCTestCase {
         let url = inputs.appendingPathComponent("unsupported.ncp"); try Data(unsupported.utf8).write(to: url)
         let model = PreviewModel(directory: dir); model.importCopy(url)
         try await eventually("unsupported brush returns failure") { !model.transferBusy }
-        XCTAssertNil(model.current); XCTAssertTrue(model.status.hasPrefix("导入失败"))
+        XCTAssertNil(model.current); XCTAssertEqual(model.status, "导入失败：当前预览不支持此笔记内容，原文件已保留")
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), unsupported)
         XCTAssertTrue(try PreviewFileIO.catalog(dir).isEmpty)
         let corrupt = inputs.appendingPathComponent("bad-utf.ncp"); try Data([0xff]).write(to: corrupt)
         model.importCopy(corrupt); try await eventually("bad UTF returns failure") { !model.transferBusy }
         XCTAssertNil(model.current); XCTAssertEqual(try Data(contentsOf: corrupt), Data([0xff]))
+        XCTAssertEqual(model.status, "导入失败：笔记文本编码无效，原文件已保留")
+        let invalid = inputs.appendingPathComponent("invalid.ncp")
+        let invalidBytes = Data("NCPREVIEW\t999\n".utf8)
+        try invalidBytes.write(to: invalid)
+        model.importCopy(invalid); try await eventually("unknown version returns failure") { !model.transferBusy }
+        XCTAssertEqual(model.status, "导入失败：笔记格式无效或版本不支持，原文件已保留")
+        XCTAssertEqual(try Data(contentsOf: invalid), invalidBytes)
+        let oversized = inputs.appendingPathComponent("oversized.ncp")
+        try Data().write(to: oversized)
+        let size = PreviewFileIO.maxReadBytes + 1
+        let handle = try FileHandle(forWritingTo: oversized)
+        try handle.truncate(atOffset: UInt64(size))
+        try handle.close()
+        model.importCopy(oversized); try await eventually("byte limit returns failure") { !model.transferBusy }
+        XCTAssertEqual(model.status, "导入失败：笔记文件超过预览读取容量，原文件已保留")
+        XCTAssertEqual(try oversized.resourceValues(forKeys: [.fileSizeKey]).fileSize, size)
+        let missing = inputs.appendingPathComponent("missing.ncp")
+        model.importCopy(missing); try await eventually("missing source returns failure") { !model.transferBusy }
+        XCTAssertEqual(model.status, "导入失败：笔记文件读取失败，请检查文件后重试")
+        XCTAssertNil(model.current)
         XCTAssertTrue(try PreviewFileIO.catalog(dir).isEmpty)
     }
     @MainActor func testLateImportCannotReplaceNewActiveOwner() async throws {
