@@ -1158,6 +1158,14 @@ final class PagedHostTests: XCTestCase {
         model.prepareExport()
         try await eventually("real backup occupies storage budget") { model.exportDocument != nil }
         XCTAssertEqual(Int64(model.exportRetainedByteCharge), exportCharge)
+        let worker = try XCTUnwrap(Mirror(reflecting: model).descendant("$__lazy_storage_$_executor") as? AppleBoundedOwnerExecutor)
+        // Rendering submits directly to this worker, without going through request or pumpWrites.
+        let directJob = try worker.submit(input: (), chargedBytes: limit, compute: { _ in () },
+                                          receive: { _, _ in .acknowledged })
+        guard case .rejected(.byteCapacity) = directJob else {
+            XCTFail("Direct worker submission bypassed the retained export charge")
+            return
+        }
         XCTAssertTrue(current.rename(value: "Waiting for export budget"))
         XCTAssertEqual(current.capture().encodingWorkByteCharge, limit)
         XCTAssertTrue(model.save())

@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "baseline_commit": "246a8c99d1bb04a01f0dcd44fc20ceb2d557c7a1",
+  "source_sha256": {
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "2b078f555ffb0ecd1cc73e98be84889f79b746b185b493c2d483a8e98c0d307e",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "286aa95d74853b8fb49934d40d3d9e1695235ba7a1e0dcb4f2c002305861ac15",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "b87afc1ef05a4e8704612ad65823eae970c98ed0eab5a32830e9493805ed41db"
+  },
+  "evidence_sha256": {
+    "reports/apple-export-shared-work-budget-20261114/after-tests.json": "bcbac4f5482d3446b6dc748b9fa8de64e8a59f036758527d3ae186cc139c9914",
+    "reports/apple-export-shared-work-budget-20261114/before-summary.json": "4c268e66cb9d94b2679c5b7bd434bb5001e376b144f56bb1a7349f5fa5dfdaea",
+    "reports/apple-export-shared-work-budget-20261114/after-summary.json": "ee52a29d3a13ea5e83e4abad70d1ecaaad3056373afd143383ccf945a6a5bf73"
+  },
+  "baseline_direct_worker_admission_failed_regression": true,
+  "ios_27_host_tests_passed": 72,
+  "scope": "The original shared Apple worker counts the Model-held export result when admitting render, read and save work. Preview status, pending persistence and provider responsibility exercised by host suite. External system copies and physical heap remain unmeasured."
+}

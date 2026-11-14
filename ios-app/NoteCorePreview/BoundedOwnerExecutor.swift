@@ -30,6 +30,7 @@ struct AppleExecutorStatus {
     let workerStopped: Bool
     let chargedBytes: Int64
     let entries: [AppleWorkSummary]
+    let availableBytes: Int64
     var isDrained: Bool { !accepting && workerStopped && entries.isEmpty }
 }
 struct AppleResultDrain { let acknowledged: Int; let blocked: AppleWorkTicket? }
@@ -54,6 +55,7 @@ final class AppleBoundedOwnerExecutor {
     private let mainOwner: Bool
     private let maxEntries: Int
     private let maxBytes: Int64
+    private let retainedOwnerBytes: () -> Int64
     private let automaticPump: Bool
     private let onOwnerProgress: (() -> Void)?
     private var work: [Work] = [] // Bounded by maxEntries; no secondary payload callback queue.
@@ -68,10 +70,12 @@ final class AppleBoundedOwnerExecutor {
     // ownerQueue must be serial and this constructor must run on it (main thread for .main).
     // The caller keeps the executor alive until stopAccepting + isDrained.
     init(ownerQueue: DispatchQueue = .main, maxEntries: Int = 64, maxBytes: Int64 = 8 * 1024 * 1024,
-         automaticPump: Bool = true, onOwnerProgress: (() -> Void)? = nil) throws {
+         automaticPump: Bool = true, retainedOwnerBytes: @escaping () -> Int64 = { 0 },
+         onOwnerProgress: (() -> Void)? = nil) throws {
         precondition(maxEntries > 0 && maxEntries <= 4096 && maxBytes > 0)
         self.ownerQueue = ownerQueue; self.mainOwner = ownerQueue === DispatchQueue.main
         self.maxEntries = maxEntries; self.maxBytes = maxBytes
+        self.retainedOwnerBytes = retainedOwnerBytes
         self.automaticPump = automaticPump; self.onOwnerProgress = onOwnerProgress
         ownerQueue.setSpecific(key: ownerKey, value: identity)
         do { try checkOwner() } catch { ownerQueue.setSpecific(key: ownerKey, value: nil); throw error }
@@ -95,11 +99,13 @@ final class AppleBoundedOwnerExecutor {
                               compute: @escaping (Input) throws -> Output,
                               receive: @escaping (Input, AppleWorkResult<Output>) throws -> AppleResultDisposition) throws -> AppleWorkAdmission {
         try checkOwner()
+        let retained = retainedOwnerBytes()
+        precondition(retained >= 0)
         condition.lock(); defer { condition.unlock() }
         guard accepting else { return .rejected(.stopped) }
         guard chargedBytes > 0 else { return .rejected(.invalidCharge) }
         guard work.count < maxEntries else { return .rejected(.entryCapacity) }
-        guard chargedBytes <= maxBytes - charged else { return .rejected(.byteCapacity) }
+        guard chargedBytes <= maxBytes - charged - retained else { return .rejected(.byteCapacity) }
         guard sequence < Int64.max else { return .rejected(.idExhausted) }
         sequence += 1
         let ticket = AppleWorkTicket(identity: identity, number: sequence)
@@ -115,9 +121,12 @@ final class AppleBoundedOwnerExecutor {
     }
     func status() throws -> AppleExecutorStatus {
         try checkOwner()
+        let retained = retainedOwnerBytes()
+        precondition(retained >= 0)
         condition.lock(); defer { condition.unlock() }
         return AppleExecutorStatus(accepting: accepting, workerStopped: workerStopped, chargedBytes: charged,
-            entries: work.map { AppleWorkSummary(ticket: $0.ticket, stage: $0.stage, chargedBytes: $0.charge, deliveryFailure: $0.failure) })
+            entries: work.map { AppleWorkSummary(ticket: $0.ticket, stage: $0.stage, chargedBytes: $0.charge, deliveryFailure: $0.failure) },
+            availableBytes: max(0, maxBytes - charged - retained))
     }
     func stopAccepting() throws {
         try checkOwner()

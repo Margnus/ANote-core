@@ -57,7 +57,9 @@ final class PreviewModel: ObservableObject {
     @Published var revision: Int64 = 0
     @Published private(set) var exportDocument: PreviewBackup? {
         didSet {
-            if oldValue != nil && exportDocument == nil { pumpWrites() }
+            if oldValue != nil && exportDocument == nil {
+                pumpWrites(); retryInkAfterCapacityChange()
+            }
         }
     }
     private let catalogResultByteLimit: Int64
@@ -98,6 +100,7 @@ final class PreviewModel: ObservableObject {
     private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
+        retainedOwnerBytes: { [weak self] in Int64(self?.exportRetainedByteCharge ?? 0) },
         onOwnerProgress: { [weak self] in self?.inkOwnerProgress(); self?.pumpWrites(); self?.advanceOwnerRetirement() })
     private var ownerRetiring = false
     private var ownerRetired = false
@@ -209,6 +212,9 @@ final class PreviewModel: ObservableObject {
             inkRenderer = nil; inkRetiring = false
             logInkDrained()
         }
+        retryInkAfterCapacityChange()
+    }
+    private func retryInkAfterCapacityChange() {
         if inkRetryOnProgress { inkRetryOnProgress = false; inkAttempt = nil }
         inkView?.setNeedsDisplay()
     }
@@ -340,11 +346,6 @@ final class PreviewModel: ObservableObject {
     }
     private func request<Input, Output>(input: Input, bytes: Int64, compute: @escaping (Input) throws -> Output,
                                        rejected: () -> Void, receive: @escaping (AppleWorkResult<Output>) -> Void) {
-        let retained = Int64(exportRetainedByteCharge)
-        if retained > 0 {
-            let worker = try! executor.status()
-            guard bytes <= storageWorkBytes - worker.chargedBytes - retained else { rejected(); return }
-        }
         let admission = try! executor.submit(input: input, chargedBytes: bytes, compute: compute, receive: { _, result in
             receive(result); return .acknowledged
         })
@@ -637,8 +638,7 @@ final class PreviewModel: ObservableObject {
     private func pumpWrites() {
         while true {
             let worker = try! executor.status()
-            let available = max(0, storageWorkBytes - worker.chargedBytes - Int64(exportRetainedByteCharge))
-            let dispatch = ledger.admitNextWrite(availableWorkBytes: available,
+            let dispatch = ledger.admitNextWrite(availableWorkBytes: worker.availableBytes,
                 maximumWorkBytes: storageWorkBytes, backendAccepting: worker.accepting)
             guard let attempt = dispatch.attempt else {
                 if dispatch.disposition != .idle && dispatch.disposition != .backpressure {
