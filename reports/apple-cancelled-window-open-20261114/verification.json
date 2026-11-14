@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "baseline_commit": "5a3c960433db98525b69ac5c7d640145991a83ea",
+  "source_sha256": {
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "5a8183b20baeb162781e87a2df94ad6d5aa0ab99150d2c8acd2e42114e151acf",
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "2b078f555ffb0ecd1cc73e98be84889f79b746b185b493c2d483a8e98c0d307e",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "dbb950aada46f2a4ce1e35ee27a83ef7b6e4da95e78781a011601a044fb2ba20",
+    "tools/verify_ios_host.py": "2e0adee99a0969c43c5d01cdf92628f6fe7c0f98840ef5fb8391d62561db87a5"
+  },
+  "core_framework_sha256": "5a5d2fe55bf3e020f5d6c459ee7a1f2dfa78ddb3af2c55f32770e7c2be82d506",
+  "evidence_sha256": {
+    "reports/apple-cancelled-window-open-20261114/baseline-details.json": "dcce6f8de9a640e23f025e8e3f3ef16590eda15d4d416e85f7850e1d2f2ca273",
+    "reports/apple-cancelled-window-open-20261114/baseline-summary.json": "5c8bbc3b69c6adeb4313b08a75d59de42ffecd27841ac4f922f578dcfdac6c6f",
+    "reports/apple-cancelled-window-open-20261114/fixed-summary.json": "95247abd323cc7983a5dc8ce1ded4375b96c88f3601f6d64b07e14aa763a6787",
+    "reports/apple-cancelled-window-open-20261114/fixed-tests.json": "22baa6cbd07d706567152f58e69f893e1600f89fa0e2067b7a5e975e1b536d22"
+  },
+  "baseline_observed": [
+    "The late read switched the shared owner.",
+    "The original pending command was committed by the abandoned request.",
+    "The original file was rewritten from NCRECOVERY to committed NCPREVIEW."
+  ],
+  "apple_host_tests": 75,
+  "scope": "The original iOS App host invalidates the window request before read delivery and verifies the shared owner, pending command, and both files are preserved. The same destination still opens when selected from a visible window. Physical and production gates remain open."
+}

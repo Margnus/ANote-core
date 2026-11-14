@@ -478,19 +478,21 @@ final class PreviewModel: ObservableObject {
         }
     }
     func open(_ id: String) {
-        openDocument(id, replacingIdle: false, opened: nil)
+        openDocument(id, replacingIdle: false, isRequested: { true }, opened: nil)
     }
-    func openForEditor(_ id: String, opened: @escaping (PagedPreviewNotebook) -> Void) {
+    func openForEditor(_ id: String, isRequested: @escaping () -> Bool = { true },
+                       opened: @escaping (PagedPreviewNotebook) -> Void) {
         precondition(Thread.isMainThread)
-        guard !ownerRetiring else { return }
+        guard !ownerRetiring, isRequested() else { return }
         if let note = current, note.documentId == id { opened(note); return }
         guard editors.isEmpty, !transferBusy, exportDocument == nil else {
             status = "其他窗口正在编辑或有文件操作，请完成后重试"; return
         }
-        openDocument(id, replacingIdle: true, opened: opened)
+        openDocument(id, replacingIdle: true, isRequested: isRequested, opened: opened)
     }
-    private func openDocument(_ id: String, replacingIdle: Bool, opened: ((PagedPreviewNotebook) -> Void)?) {
-        guard !ownerRetiring, current == nil || (replacingIdle && editors.isEmpty) else { return }
+    private func openDocument(_ id: String, replacingIdle: Bool, isRequested: @escaping () -> Bool,
+                              opened: ((PagedPreviewNotebook) -> Void)?) {
+        guard !ownerRetiring, isRequested(), current == nil || (replacingIdle && editors.isEmpty) else { return }
         guard PreviewFileIO.isLocalDocumentId(id) else { status = LocalReadFailure.invalidLocalIdentity.message; return }
         let previous = current
         navigationEpoch += 1
@@ -502,12 +504,12 @@ final class PreviewModel: ObservableObject {
             guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
             return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)
         }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
-            guard self.navigationEpoch == navigation && self.current === previous else { return }
+            guard self.navigationEpoch == navigation, self.current === previous, isRequested() else { return }
             if self.storageEpoch != epoch {
                 // Retry the pure read after ACK; no old notebook payload is placed on a callback queue.
                 DispatchQueue.main.async { [weak self, weak previous] in
                     guard let self, self.navigationEpoch == navigation, self.current === previous else { return }
-                    self.openDocument(id, replacingIdle: replacingIdle, opened: opened)
+                    self.openDocument(id, replacingIdle: replacingIdle, isRequested: isRequested, opened: opened)
                 }
                 return
             }
@@ -772,7 +774,10 @@ final class PreviewWindowState: ObservableObject {
     func open(_ id: String) {
         precondition(Thread.isMainThread)
         let token = UUID(); request = token
-        model.openForEditor(id) { [weak self] note in
+        model.openForEditor(id, isRequested: { [weak self] in
+            guard let self else { return false }
+            return self.visible && self.request == token
+        }) { [weak self] note in
             guard let self, self.visible, self.request == token else { return }
             self.request = nil; self.join(note)
         }

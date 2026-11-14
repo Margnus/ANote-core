@@ -385,6 +385,56 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(model.beginOwnerRetirement(), .started)
         try await eventually("late-read owner stops") { model.ownerRetirementStatus.phase == .retired }
     }
+    @MainActor func testCancelledWindowOpenPreservesIdlePendingRecovery() async throws {
+        let dir = directory()
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let checkpoint = try windowCheckpoint()
+        let originalFile = dir.appendingPathComponent(checkpoint.documentId + ".ncp")
+        let originalBytes = try checkpoint.encode()
+        try PreviewFileIO.writeUTF8(originalBytes, to: originalFile)
+        let target = try PagedPreviewNotebook.companion.create(documentId: "window-target", title: "Target", sessionNonce: "fixture")
+        let targetFile = dir.appendingPathComponent("window-target.ncp")
+        let targetBytes = try target.capture().encode()
+        try PreviewFileIO.writeUTF8(targetBytes, to: targetFile)
+        XCTAssertTrue(target.retire())
+        let started = DispatchSemaphore(value: 0), gate = DispatchSemaphore(value: 0)
+        defer { gate.signal() }
+        var firstRead = true
+        let model = PreviewModel(directory: dir, beforeOpenRead: {
+            guard firstRead else { return }
+            firstRead = false
+            started.signal()
+            if gate.wait(timeout: .now() + 5) != .success { throw CocoaError(.fileReadUnknown) }
+        })
+        let window = PreviewWindowState(model: model)
+        window.appear()
+        try model.adopt(checkpoint.root, persisted: true, recovery: checkpoint)
+        let original = try XCTUnwrap(model.current)
+        let worker = try XCTUnwrap(Mirror(reflecting: model).descendant("$__lazy_storage_$_executor") as? AppleBoundedOwnerExecutor)
+        window.open("window-target")
+        var readStarted = false
+        try await eventually("target read starts") {
+            if !readStarted { readStarted = started.wait(timeout: .now()) == .success }
+            return readStarted
+        }
+        window.disappear()
+        gate.signal()
+        try await eventually("cancelled read releases its work") { (try? worker.status().entries.isEmpty) == true }
+        XCTAssertNil(window.current)
+        XCTAssertTrue(model.current === original)
+        XCTAssertTrue(original.pendingStroke() === checkpoint.pending)
+        XCTAssertEqual(try String(contentsOf: originalFile, encoding: .utf8), originalBytes)
+        XCTAssertEqual(try String(contentsOf: targetFile, encoding: .utf8), targetBytes)
+
+        window.appear()
+        window.open("window-target")
+        try await eventually("visible window can open the same target") { window.current?.documentId == "window-target" }
+        XCTAssertEqual(window.leave(), .documentClosed)
+        window.disappear()
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("owner retires") { model.ownerRetirementStatus.phase == .retired }
+    }
     private func windowCheckpoint() throws -> PagedPreviewSnapshot {
         let base = "NCPREVIEW\t2\nD\tpending-window\tpending\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         let ink = "NCPREVIEW\t2\nD\tpending-window\t\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\treused-ink-2\tlayer\t1\tMONOLINE\t1\t-14339513\t2.5\t3\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.25\t2.5\t0.125\t7\nP\t3.0\t4.0\t0.625\t9\nP\t8.0\t6.0\t1.0\t10\nEND\n"
