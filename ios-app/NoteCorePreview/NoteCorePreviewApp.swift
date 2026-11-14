@@ -586,7 +586,8 @@ final class PreviewModel: ObservableObject {
             }
         }
     }
-    func importCopy(_ url: URL, opened: ((PagedPreviewNotebook) -> Void)? = nil) {
+    func importCopy(_ url: URL, isRequested: @escaping () -> Bool = { true },
+                    opened: ((PagedPreviewNotebook) -> Void)? = nil) {
         guard !ownerRetiring, !transferBusy, exportDocument == nil else { return }
         transferBusy = true; status = "正在校验并导入…"
         let scoped = url.startAccessingSecurityScopedResource()
@@ -613,7 +614,8 @@ final class PreviewModel: ObservableObject {
             self.transferBusy = false
             switch result {
             case .succeeded(.success(let root)):
-                if self.current == nil && self.navigationEpoch == navigation {
+                // An accepted import saves the copy even after its window leaves.
+                if self.current == nil, self.navigationEpoch == navigation, isRequested() {
                     self.navigationEpoch += 1
                     do { try self.adopt(root, persisted: true) }
                     catch { self.status = "副本已保存在本机，暂时无法打开，请返回列表重试"; return }
@@ -785,7 +787,10 @@ final class PreviewWindowState: ObservableObject {
     func importCopy(_ url: URL) {
         precondition(Thread.isMainThread)
         let token = UUID(); request = token
-        model.importCopy(url) { [weak self] note in
+        model.importCopy(url, isRequested: { [weak self] in
+            guard let self else { return false }
+            return self.visible && self.request == token
+        }) { [weak self] note in
             guard let self, self.visible, self.request == token else { return }
             self.request = nil; self.join(note)
         }

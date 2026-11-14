@@ -1,0 +1,71 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "361BF58C-518E-48E1-8DD0-F51CDA8A1417",
+      "deviceName" : "NoteCoreDepartedImport",
+      "modelName" : "iPad Pro 11-inch (M5)",
+      "osBuildNumber" : "24A434",
+      "osVersion" : "27.0",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "duration" : "Ran for 0.47 seconds",
+  "durationInSeconds" : 0.4716470241546631,
+  "hasMediaAttachments" : false,
+  "hasPerformanceMetrics" : false,
+  "testDescription" : "Test case with 1 run",
+  "testIdentifier" : "PagedHostTests/testImportFromDepartedWindowSavesCopyForLibraryReopen()",
+  "testIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testImportFromDepartedWindowSavesCopyForLibraryReopen",
+  "testName" : "testImportFromDepartedWindowSavesCopyForLibraryReopen()",
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ],
+  "testResult" : "Failed",
+  "testRuns" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "name" : "PagedHostTests.testImportFromDepartedWindowSavesCopyForLibraryReopen()",
+                  "nodeType" : "Source Code Reference",
+                  "sourceLocation" : {
+                    "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                    "lineNumber" : 1527
+                  }
+                }
+              ],
+              "name" : "XCTAssertNil failed: \"dev.notecore.document.PagedPreviewNotebook@18bf8028\"",
+              "nodeType" : "Test Case Run",
+              "result" : "Failed",
+              "sourceLocation" : {
+                "filePath" : "/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+                "lineNumber" : 1527
+              }
+            }
+          ],
+          "duration" : "0.47s",
+          "durationInSeconds" : 0.4716470241546631,
+          "name" : "Test Scheme Action",
+          "nodeIdentifier" : "1",
+          "nodeIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testImportFromDepartedWindowSavesCopyForLibraryReopen",
+          "nodeType" : "Test Plan Configuration",
+          "result" : "Failed"
+        }
+      ],
+      "details" : "iOS Simulator 27.0",
+      "duration" : "0.47s",
+      "durationInSeconds" : 0.4716470241546631,
+      "name" : "iPad Pro 11-inch (M5)",
+      "nodeIdentifier" : "361BF58C-518E-48E1-8DD0-F51CDA8A1417",
+      "nodeType" : "Device",
+      "result" : "Failed"
+    }
+  ]
+}

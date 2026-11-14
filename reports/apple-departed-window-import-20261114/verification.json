@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "baseline_commit": "dff7a603ab76f4e7f22fe5a42e3d1b904b052a12",
+  "source_sha256": {
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "a5bfa3b12bc300bee90bf0d55a2e99683bc1679d9d89cb98ba6b440c13f98f38",
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "2b078f555ffb0ecd1cc73e98be84889f79b746b185b493c2d483a8e98c0d307e",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "0204b3df5a041005e0447d4d04135e3d641318f96abd5381dc794d5304102f16",
+    "tools/verify_ios_host.py": "a82a7545fc87623edcc9571f79c6d3f3e1bfc696828ab39fbbee2b2c54d69fa2"
+  },
+  "core_framework_sha256": "5a5d2fe55bf3e020f5d6c459ee7a1f2dfa78ddb3af2c55f32770e7c2be82d506",
+  "evidence_sha256": {
+    "reports/apple-departed-window-import-20261114/baseline-details.json": "668039d65999717e761c163ffb579d61b02e888a948344b6eac663ebc8e453a2",
+    "reports/apple-departed-window-import-20261114/baseline-summary.json": "5c8beec64bb795ba65aa39ef765c955af0c6dc7bb04e633fb90b5c7101580f0a",
+    "reports/apple-departed-window-import-20261114/fixed-summary.json": "54e26ca9ce002962df1012eb178851de48cff10e25a12bb770abd061326ec648",
+    "reports/apple-departed-window-import-20261114/fixed-tests.json": "ab80640a4adb77868ce594ff1ac585602159c0633ef3ce7a6b621b0ea3a362d0"
+  },
+  "baseline_observed": [
+    "The imported copy was present in the catalog, but the window that had left still caused the shared service to adopt it."
+  ],
+  "apple_host_tests": 76,
+  "scope": "Original iOS App host verifies that accepted import saves a standalone preview copy, preserves source bytes, leaves the shared service idle after the window disappears, and reopens the saved bytes from the catalog. Physical and production gates remain open."
+}

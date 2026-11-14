@@ -1,0 +1,52 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "361BF58C-518E-48E1-8DD0-F51CDA8A1417",
+        "deviceName" : "NoteCoreDepartedImport",
+        "modelName" : "iPad Pro 11-inch (M5)",
+        "osBuildNumber" : "24A434",
+        "osVersion" : "27.0",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "NoteCorePreview · Built with macOS 27.2.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1794665015.631,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1794664953.766,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertNil failed: \"dev.notecore.document.PagedPreviewNotebook@18bf8028\"",
+      "targetName" : "NoteCorePreviewTests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PagedHostTests/testImportFromDepartedWindowSavesCopyForLibraryReopen()",
+      "testIdentifierURL" : "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testImportFromDepartedWindowSavesCopyForLibraryReopen",
+      "testName" : "testImportFromDepartedWindowSavesCopyForLibraryReopen()"
+    }
+  ],
+  "title" : "Test - NoteCorePreview",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

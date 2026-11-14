@@ -79,6 +79,7 @@ EXPECTED = {
     'testCandidateRendererPreservesCallerCurrentPath()',
     'testFailedSaveRetainsRootAcrossCloseAndRepair()',
     'testLateImportCannotReplaceNewActiveOwner()',
+    'testImportFromDepartedWindowSavesCopyForLibraryReopen()',
     'testLateOpenCannotReplaceNewActiveOwner()',
     'testStaleReadRetryCannotSupersedeNewerOpen()',
     'testLegacyNoEditPreservesBytesThenEditMigratesOriginalExtent()',

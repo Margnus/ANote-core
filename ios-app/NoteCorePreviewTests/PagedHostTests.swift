@@ -1508,6 +1508,46 @@ final class PagedHostTests: XCTestCase {
         XCTAssertNil(model.current)
         XCTAssertTrue(try PreviewFileIO.catalog(dir).isEmpty)
     }
+    @MainActor func testImportFromDepartedWindowSavesCopyForLibraryReopen() async throws {
+        let sourceURL = try androidFixture()
+        let sourceBytes = try Data(contentsOf: sourceURL)
+        let source = try PagedPreviewCodec.shared.decode(text: String(decoding: sourceBytes, as: UTF8.self))
+        let dir = directory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir)
+        let window = PreviewWindowState(model: model)
+        window.appear()
+        window.importCopy(sourceURL)
+        XCTAssertTrue(model.transferBusy)
+        // Invalidate before the main-thread executor can deliver the worker result.
+        window.disappear()
+        try await eventually("saved copy appears in the original catalog") {
+            !model.transferBusy && model.notes.count == 1
+        }
+        XCTAssertNil(model.current)
+        XCTAssertNil(window.current)
+        XCTAssertEqual(model.editorCount, 0)
+        let record = try XCTUnwrap(model.notes.first)
+        let file = dir.appendingPathComponent(record.id + ".ncp")
+        XCTAssertEqual(try PreviewFileIO.catalog(dir), [file])
+        let bytes = try Data(contentsOf: file)
+        let copy = try PagedPreviewCodec.shared.decode(text: String(decoding: bytes, as: UTF8.self))
+        XCTAssertEqual(copy.id.value, record.id)
+        XCTAssertNotEqual(copy.id.value, source.id.value)
+        XCTAssertEqual(copy.title, source.title)
+        XCTAssertEqual(copy.pageCount, source.pageCount)
+        XCTAssertEqual(copy.scene.objectCount, source.scene.objectCount)
+        XCTAssertEqual(try Data(contentsOf: sourceURL), sourceBytes)
+
+        window.appear()
+        window.open(record.id)
+        try await eventually("visible library window reopens the saved copy") { window.current?.documentId == record.id }
+        let reopened = try XCTUnwrap(window.current)
+        XCTAssertEqual(Data(try reopened.capture().encode().utf8), bytes)
+        XCTAssertEqual(window.leave(), .documentClosed)
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("import owner retires") { model.ownerRetirementStatus.phase == .retired }
+    }
     @MainActor func testLateImportCannotReplaceNewActiveOwner() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         let model = PreviewModel(directory: dir)
