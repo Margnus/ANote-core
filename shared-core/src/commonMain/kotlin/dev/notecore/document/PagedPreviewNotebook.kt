@@ -2,6 +2,7 @@ package dev.notecore.document
 
 import dev.notecore.canvas.prototype.*
 import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.jvm.JvmSynthetic
 import kotlin.native.HiddenFromObjC
 
 /** UI-owner preview session. Exactly one authority; selected-page projection is a read-only cache. */
@@ -444,15 +445,17 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             }
             return opened
         }
-        internal fun exceedsRecoveryInputBudget(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): Boolean =
+        private fun exceedsRecoveryInputBudget(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): Boolean =
             snapshot.pending?.let { PreviewRecoveryCodec.pendingCharge(it) > budget.inputBytes } == true
 
+        // The platform App bridges call this preflight within the same Kotlin module.
+        @JvmSynthetic
         internal fun recoveryAdmissionFailure(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): PreviewOpenFailure? {
             if (exceedsRecoveryInputBudget(snapshot, budget)) return PreviewOpenFailure.INPUT_CAPACITY
             return checkOpenContentAndBudget(snapshot.root, budget)?.failure
         }
 
-        internal fun checkOpenContentAndBudget(initial: DocumentRoot, budget: DocumentBudget): PreviewNotebookOpen? {
+        private fun checkOpenContentAndBudget(initial: DocumentRoot, budget: DocumentBudget): PreviewNotebookOpen? {
             if (budget.maxPages > PagedPreviewCodec.MAX_PAGES || budget.maxObjects > PagedPreviewCodec.MAX_OBJECTS || budget.liveBytes > 8L * 1024 * 1024)
                 return PreviewNotebookOpen(null, PreviewOpenFailure.UNSUPPORTED_BUDGET)
             val read = PreviewDocumentReader.accept(initial)

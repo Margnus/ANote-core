@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "baseline_commit": "b510f3c90d3c8146e18172f22884cbe8c003529c",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "59321acfae5d605d6b1acbccadfacc91c4ed19b209161050c9573ee61d173564"
+  },
+  "candidate_android_classes_before_sha256": "d74ca27a3e04d4e139c10f75c01f4aa90a1564f338d384227f252429c585a320",
+  "candidate_android_classes_after_sha256": "43367cbc3f7d99e89ba3b83cc332b53ca06b430299dd59ead56958416dcf177e",
+  "candidate_apple_framework_sha256": {
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "725f2919f5562d96210e8c24e50a9bf44e685aa22c0f414e941ee91692d3ec79",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "8fb1a71a5a1b9f0e665b9ae9d39f077656819d33a2949073f6eefab1d3440818"
+  },
+  "android_app_and_test_apk_sha256": {
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "143231246fd434edae2e000139e0c5c436d7d0e50aab3c4c0a96bda27d127f03",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "a917d700bc1b913aa0aa39ffa490d6a55a60b12cc8bc60da7dd9e5837115a5bf"
+  },
+  "java_source_preflight_compiled_before": true,
+  "java_source_preflight_refused_after": true,
+  "app_bridge_retained_for_kotlin": true,
+  "apple_candidate_headers_and_type_closure_byte_identical": true,
+  "android_api32_recovery_open_and_pending_worker": "passed",
+  "old_consumers_recovery_android_jdk_and_ios_27": "passed",
+  "evidence_sha256": {
+    "reports/sdk-admission-boundary-20261114/AdmissionProbe.java.txt": "29263dccf2eccb301faf5f2b3ad11b112255b660c391e46f940d815a6cf9679e",
+    "reports/sdk-admission-boundary-20261114/aar-recovery.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-admission-boundary-20261114/apple-recovery.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-admission-boundary-20261114/check.sh.txt": "40524c3ab56f5dc9d4af145d4e2bb1963a92ee4721b87c33649e79f32c70ce75",
+    "reports/sdk-admission-boundary-20261114/java-refusal.log": "e384991ca24dc1e5b5d2720ff63a269b7f0cd6764dd3284d07e934f911e0cc7f",
+    "reports/sdk-admission-boundary-20261114/jvm-visibility.txt": "6a0422731c8a60a76c87d23b7615873d56ba553649726d31e7182cab942157bd",
+    "reports/sdk-admission-boundary-20261114/pending-work.log": "06006182ba54fce4d57983d3b978f2fc396dfb19a456d5b8776345215ffd3b6e",
+    "reports/sdk-admission-boundary-20261114/recovery-open.log": "d1e7b5e7b22d313ffde0878c04d1b3d5c45acb2d22c46db46411765164d6b4df"
+  },
+  "scope": "Visibility of three recovery admission helpers, with original Android Store regression. Synthetic JVM method remains callable through reflection or precompiled bytecode. Whole SDK approval and physical acceptance remain open."
+}

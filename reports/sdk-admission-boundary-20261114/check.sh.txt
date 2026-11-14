@@ -1,0 +1,20 @@
+#!/bin/bash
+set -eu
+output=build/sdk-admission-boundary
+candidate=build/sdk-candidate-check/shared-core-android.jar
+jdk="$HOME/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home/bin"
+if "$jdk/javac" -J-Duser.language=en -cp "$candidate" -d "$output" "$output/AdmissionProbe.java" > "$output/java-refusal.log" 2>&1; then
+    exit 1
+fi
+rg -q 'cannot find symbol' "$output/java-refusal.log"
+"$jdk/javap" -v -p -classpath "$candidate" 'dev.notecore.document.PagedPreviewNotebook$Companion' > "$output/javap.log"
+python3 - <<'PY'
+from pathlib import Path
+import re
+text=Path('build/sdk-admission-boundary/javap.log').read_text()
+for name in ('exceedsRecoveryInputBudget','checkOpenContentAndBudget'):
+    assert re.search(r'^  private final .* '+name+r'\(', text, re.M), name
+assert re.search(r'^  public final .* recoveryAdmissionFailure\$[^\n]+\n[^\n]+\n[^\n]+ACC_SYNTHETIC', text, re.M)
+print('Java cannot compile preflight; Kotlin bridge method remains synthetic')
+PY
+/bin/bash build/sdk-compat/android.sh

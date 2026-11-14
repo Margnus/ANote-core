@@ -1,0 +1,15 @@
+import dev.notecore.document.DocumentBudget;
+import dev.notecore.document.PagedPreviewNotebook;
+import dev.notecore.document.PagedPreviewSnapshot;
+import dev.notecore.document.PreviewOpenFailure;
+
+public final class AdmissionProbe {
+    public static PreviewOpenFailure probe(PagedPreviewSnapshot snapshot, DocumentBudget budget) {
+        return PagedPreviewNotebook.Companion.recoveryAdmissionFailure$shared_core_release(snapshot, budget);
+    }
+    public static boolean available() throws ReflectiveOperationException {
+        return PagedPreviewNotebook.Companion.getClass()
+            .getMethod("recoveryAdmissionFailure$shared_core_release", PagedPreviewSnapshot.class, DocumentBudget.class)
+            .isSynthetic();
+    }
+}
