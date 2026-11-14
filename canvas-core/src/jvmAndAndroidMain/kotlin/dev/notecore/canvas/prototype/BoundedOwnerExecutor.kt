@@ -48,6 +48,7 @@ class BoundedOwnerExecutor(
     private var accepting = true
     private var nextTicket = 0L
     private var chargedBytes = 0L
+    private var retainedOwnerBytes = 0L
     private var workerStopped = false
     private var workerFailure: String? = null
     private var ownerWakeFailure: String? = null
@@ -61,6 +62,22 @@ class BoundedOwnerExecutor(
     fun checkOutsideDrain() { checkOwnerThread(); check(!draining) { "ACK requires drain to return" } }
     fun checkWorkerThread() { check(Thread.currentThread() === worker) { "Operation requires executor worker thread" } }
 
+    /** Replace the owner-held allocation only if it fits alongside all accepted work. */
+    fun trySetRetainedOwnerBytes(bytes: Long): Boolean {
+        checkOwnerThread()
+        require(bytes >= 0)
+        return synchronized(monitor) {
+            if (bytes > byteBudget - chargedBytes) return@synchronized false
+            retainedOwnerBytes = bytes
+            true
+        }
+    }
+
+    fun availableBytes(): Long {
+        checkOwnerThread()
+        return synchronized(monitor) { byteBudget - chargedBytes - retainedOwnerBytes }
+    }
+
     /** Rejected work remains caller-owned and has never been invoked. Charge covers declared peak input/result cost. */
     fun <I : Any, R : Any> submit(input: I, chargedBytes: Long, compute: (I) -> R, receive: (I, WorkResult<R>) -> ResultDisposition): WorkAdmission {
         checkOwnerThread()
@@ -70,7 +87,7 @@ class BoundedOwnerExecutor(
                 !accepting -> WorkAdmissionFailure.STOPPED
                 chargedBytes <= 0 -> WorkAdmissionFailure.INVALID_CHARGE
                 entries.size >= maxEntries -> WorkAdmissionFailure.ENTRY_CAPACITY
-                chargedBytes > byteBudget - this.chargedBytes -> WorkAdmissionFailure.BYTE_CAPACITY
+                chargedBytes > byteBudget - this.chargedBytes - retainedOwnerBytes -> WorkAdmissionFailure.BYTE_CAPACITY
                 nextTicket == Long.MAX_VALUE -> WorkAdmissionFailure.ID_EXHAUSTED
                 else -> null
             }

@@ -5,6 +5,10 @@ import android.app.Instrumentation
 import android.net.Uri
 import android.os.SystemClock
 import android.util.Base64
+import dev.notecore.canvas.prototype.BoundedOwnerExecutor
+import dev.notecore.canvas.prototype.ResultDisposition
+import dev.notecore.canvas.prototype.WorkAdmission
+import dev.notecore.canvas.prototype.WorkAdmissionFailure
 import dev.notecore.document.*
 import java.io.File
 import org.json.JSONArray
@@ -200,6 +204,12 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                 val firstRequest = store.beginExportPicker(first)
                 check(firstRequest.disposition == ExportPickerDisposition.READY)
                 check(store.exportReservedByteCharge == first.retainedByteCharge)
+                val worker = NoteStore::class.java.getDeclaredField("executor").apply { isAccessible = true }
+                    .get(store) as BoundedOwnerExecutor
+                val maximum = 256L * 1024 * 1024
+                check(worker.status().entries.isEmpty())
+                check(worker.submit(maximum, { error("Over-budget work executed") }) { ResultDisposition.ACKNOWLEDGED } ==
+                    WorkAdmission.Rejected(WorkAdmissionFailure.BYTE_CAPACITY))
                 check(note.rename("Later export"))
                 check(store.beginExportPicker(note.capture()).disposition == ExportPickerDisposition.BUSY)
                 check(store.takeExportPicker(checkNotNull(firstRequest.requestCode)) === first); check(store.exportReservedByteCharge == 0L)

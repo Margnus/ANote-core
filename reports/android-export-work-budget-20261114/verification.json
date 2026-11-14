@@ -1,0 +1,46 @@
+{
+  "status": "passed",
+  "baseline_commit": "efcbaa45bf7741acbf8c93d7acd4840aa6d4d647",
+  "source_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/StorageRetentionHostChecks.kt": "299d539aeef01e433f7c4e0ecff2ce48af5d06188a1e3d80c2828dc8d3d00a66",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "e65eb166bacfa7cac53a2e4a0ecbf125ecc74c2a91ae52abd904dd1f48caaab8",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "4906c53bd2f3ad95681d8fe1561cf2e3f8296201c67fe43a6dda7b4185f9ccae"
+  },
+  "evidence_sha256": {
+    "reports/android-export-work-budget-20261114/32-catalog_retry.log": "09b91cd2050198f221157f433d9e9c44791832ac6d389c89eb1664a9ff4d07fd",
+    "reports/android-export-work-budget-20261114/32-owner_retirement.log": "867704d2bc824a2c0ac55bae738261ad00a75b647c8576fce5a2bcf800c1181e",
+    "reports/android-export-work-budget-20261114/32-pending_work_budget.log": "06006182ba54fce4d57983d3b978f2fc396dfb19a456d5b8776345215ffd3b6e",
+    "reports/android-export-work-budget-20261114/32-recovery_open_budget.log": "d1e7b5e7b22d313ffde0878c04d1b3d5c45acb2d22c46db46411765164d6b4df",
+    "reports/android-export-work-budget-20261114/32-storage_retention.log": "2f9370add6aa4755e2fcb46c67ae572484179b60dd01c77e687b5688e1d5adba",
+    "reports/android-export-work-budget-20261114/36-budget_overlap.log": "fe9c348d9aef31a4b9e6944db01c1a9df35f3650bc9da2e07e57a8c96c4a321a",
+    "reports/android-export-work-budget-20261114/36-surface_frames.log": "ce386a107f586b811dcc354eec7284e7f1df0914295ccf28a5bef50a958d81b2"
+  },
+  "android_simulator_runs": {
+    "32": {
+      "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "cases": [
+        "storage_retention",
+        "owner_retirement",
+        "pending_work_budget",
+        "recovery_open_budget",
+        "catalog_retry"
+      ],
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "5fa33fd2099790a2720a5d36a1f57cacbd00d35be21b8b8d21a5d37d75e9d60f",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "00e9bb00f33e72bcd37179bc81d88b69de4e804d1b370dbec4892d70b7a0128c"
+      }
+    },
+    "36": {
+      "fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+      "cases": [
+        "budget_overlap",
+        "surface_frames"
+      ],
+      "apk_sha256": {
+        "android-app/build/outputs/apk/debug/android-app-debug.apk": "5fa33fd2099790a2720a5d36a1f57cacbd00d35be21b8b8d21a5d37d75e9d60f",
+        "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "00e9bb00f33e72bcd37179bc81d88b69de4e804d1b370dbec4892d70b7a0128c"
+      }
+    }
+  },
+  "scope": "The Android Store reserves Model-held export picker bytes in its shared executor. API32 verifies refusal of a direct maximum-size job with a held picker snapshot, save and pending restoration. API36 verifies native rendering and existing overlap cases. Physical heap, picker process recreation and C1 remain open."
+}

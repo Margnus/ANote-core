@@ -297,6 +297,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         if (pendingExport != null || pendingImport != null) return ExportPickerAdmission(ExportPickerDisposition.BUSY)
         if (snapshot.retainedByteCharge > exportPickerByteLimit) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
         if (nextExportRequestCode > 65535) return ExportPickerAdmission(ExportPickerDisposition.IDENTITY_EXHAUSTED)
+        if (!executor.trySetRetainedOwnerBytes(snapshot.retainedByteCharge)) return ExportPickerAdmission(ExportPickerDisposition.CAPACITY)
         val code = nextExportRequestCode++
         pendingExport = code to snapshot
         return ExportPickerAdmission(ExportPickerDisposition.READY, code)
@@ -305,7 +306,11 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     internal fun takeExportPicker(requestCode: Int): PagedPreviewSnapshot? {
         executor.checkOwnerThread()
         val capture = pendingExport?.takeIf { it.first == requestCode } ?: return null
-        pendingExport = null; return capture.second
+        pendingExport = null
+        check(executor.trySetRetainedOwnerBytes(0))
+        // Defer save dispatch so the matching picker result can hand its snapshot to export first.
+        requestPump()
+        return capture.second
     }
     private fun requestPump() {
         if (!wakePending.compareAndSet(false, true)) return
@@ -329,6 +334,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private var inkShown = false
     private var inkGeneration = 0L
     private var inkPollScheduled = false
+    private var inkAdmissionRejected = false
     private var observedCallbacks = 0
     internal var inkFramePublications = 0; private set
     internal var inkFrameDraws = 0; private set
@@ -346,6 +352,13 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun pumpInk() {
         executor.checkOutsideDrain()
         val renderer = inkRenderer ?: return
+        if (inkAdmissionRejected) {
+            renderer.close()
+            check(renderer.isDrained)
+            inkRenderer = null; inkKey = null; inkAdmissionRejected = false
+            inkView.get()?.invalidate()
+            return
+        }
         // A lost presentation endpoint must retire on this same owner, including late worker results.
         // Keep the old pool/image charged until their original receipts drain; never create a replacement here.
         if (inkView.get() == null) {
@@ -419,6 +432,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             inkKey = key
             inkPending = inkRenderer!!.submit(scene,frame,view.notebook.currentPage.layerId,key.x,key.y,
                 key.width,key.height,1/key.scale)
+            inkAdmissionRejected = inkPending == null
         }
         val image = inkImage ?: return false
         if (!image.ready) return false
@@ -438,7 +452,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     }
     private fun retireInk(lostEndpoint: Boolean = false) {
         executor.checkOwnerThread()
-        inkShown = false; inkKey = null; inkPending = null
+        inkShown = false; inkKey = null; inkPending = null; inkAdmissionRejected = false
         inkImage?.let { if (lostEndpoint) it.closeWithoutView() else it.close(); if (it.released) inkImage = null }
         inkRenderer?.let { it.close(); inkRetiring = true }
         inkView.get()?.invalidate()
@@ -493,7 +507,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         executor.checkOwnerThread()
         while (true) {
             val worker = executor.status()
-            val dispatch = ledger.admitNextWrite(STORAGE_WORK_BYTES - worker.chargedBytes, STORAGE_WORK_BYTES,
+            val dispatch = ledger.admitNextWrite(executor.availableBytes(), STORAGE_WORK_BYTES,
                 worker.accepting && worker.workerFailure == null)
             val attempt = dispatch.attempt
             if (attempt == null) {
