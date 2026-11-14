@@ -1,0 +1,189 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :canvas-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+[32m[1mSolution:[0m[0m
+[32m[3mPlease keep dependsOn edges only from one group and remove the others. [0m[0m
+
+
+> Configure project :shared-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':shared-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+Kotlin Source Set 'androidInstrumentedTest' can't depend on 'commonTest' as they are from different Source Set Trees.
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove this dependency edge.[0m[0m
+
+
+> Task :canvas-core:androidReleaseSourcesJar
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preReleaseBuild UP-TO-DATE
+> Task :canvas-core:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeReleaseNativeLibs NO-SOURCE
+> Task :canvas-core:stripReleaseDebugSymbols NO-SOURCE
+> Task :canvas-core:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :canvas-core:generateReleaseResValues UP-TO-DATE
+> Task :canvas-core:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:generateReleaseResources UP-TO-DATE
+> Task :canvas-core:packageReleaseResources UP-TO-DATE
+> Task :canvas-core:parseReleaseLocalResources UP-TO-DATE
+> Task :canvas-core:generateReleaseRFile UP-TO-DATE
+> Task :canvas-core:mergeReleaseShaders UP-TO-DATE
+> Task :canvas-core:compileReleaseShaders NO-SOURCE
+> Task :canvas-core:generateReleaseAssets UP-TO-DATE
+> Task :canvas-core:releaseAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:mergeReleaseAssets UP-TO-DATE
+> Task :canvas-core:javaPreCompileRelease UP-TO-DATE
+> Task :canvas-core:prepareLintJarForPublish UP-TO-DATE
+> Task :canvas-core:prepareReleaseArtProfile UP-TO-DATE
+> Task :canvas-core:processReleaseManifest UP-TO-DATE
+> Task :canvas-core:writeReleaseAarMetadata UP-TO-DATE
+> Task :canvas-core:generatePomFileForAndroidReleasePublication
+> Task :canvas-core:compileKotlinJvm
+> Task :canvas-core:compileJvmMainJava NO-SOURCE
+> Task :canvas-core:jvmProcessResources NO-SOURCE
+> Task :canvas-core:processJvmMainResources SKIPPED
+> Task :canvas-core:jvmMainClasses
+
+> Task :canvas-core:compileReleaseKotlinAndroid
+w: file:///Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt:189:121 'val id: Long' is deprecated. Deprecated in Java.
+w: file:///Users/lixiaofan/StudioProjects/notecore/canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt:189:132 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :canvas-core:jvmJar
+> Task :canvas-core:extractReleaseAnnotations
+> Task :canvas-core:compileReleaseJavaWithJavac NO-SOURCE
+> Task :canvas-core:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :canvas-core:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :canvas-core:processReleaseJavaRes UP-TO-DATE
+> Task :canvas-core:mergeReleaseJavaResource UP-TO-DATE
+> Task :canvas-core:syncReleaseLibJars
+> Task :canvas-core:bundleReleaseAar
+> Task :canvas-core:generateMetadataFileForAndroidReleasePublication
+> Task :canvas-core:publishAndroidReleasePublicationToSdkCandidateRepository
+> Task :canvas-core:jvmSourcesJar
+> Task :canvas-core:generateMetadataFileForJvmPublication
+> Task :canvas-core:generatePomFileForJvmPublication
+> Task :canvas-core:publishJvmPublicationToSdkCandidateRepository
+> Task :canvas-core:transformCommonMainDependenciesMetadata UP-TO-DATE
+> Task :canvas-core:compileCommonMainKotlinMetadata SKIPPED
+> Task :canvas-core:metadataCommonMainProcessResources NO-SOURCE
+> Task :canvas-core:metadataCommonMainClasses UP-TO-DATE
+> Task :canvas-core:transformJvmAndAndroidMainDependenciesMetadata UP-TO-DATE
+> Task :canvas-core:compileJvmAndAndroidMainKotlinMetadata SKIPPED
+> Task :canvas-core:generateProjectStructureMetadata UP-TO-DATE
+> Task :canvas-core:metadataJvmAndAndroidMainProcessResources NO-SOURCE
+> Task :canvas-core:metadataJvmAndAndroidMainClasses UP-TO-DATE
+> Task :canvas-core:allMetadataJar UP-TO-DATE
+> Task :canvas-core:buildKotlinToolingMetadata UP-TO-DATE
+> Task :canvas-core:sourcesJar
+> Task :canvas-core:generateMetadataFileForKotlinMultiplatformPublication
+> Task :canvas-core:generatePomFileForKotlinMultiplatformPublication
+> Task :canvas-core:publishKotlinMultiplatformPublicationToSdkCandidateRepository
+> Task :canvas-core:publishAllPublicationsToSdkCandidateRepository
+> Task :shared-core:androidReleaseSourcesJar UP-TO-DATE
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preReleaseBuild UP-TO-DATE
+> Task :shared-core:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :shared-core:mergeReleaseNativeLibs NO-SOURCE
+> Task :shared-core:stripReleaseDebugSymbols NO-SOURCE
+> Task :shared-core:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :shared-core:generateReleaseResValues UP-TO-DATE
+> Task :shared-core:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:generateReleaseResources UP-TO-DATE
+> Task :shared-core:packageReleaseResources UP-TO-DATE
+> Task :shared-core:parseReleaseLocalResources UP-TO-DATE
+> Task :shared-core:generateReleaseRFile UP-TO-DATE
+> Task :shared-core:mergeReleaseShaders UP-TO-DATE
+> Task :shared-core:compileReleaseShaders NO-SOURCE
+> Task :shared-core:generateReleaseAssets UP-TO-DATE
+> Task :shared-core:releaseAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:mergeReleaseAssets UP-TO-DATE
+> Task :canvas-core:bundleLibCompileToJarRelease
+> Task :shared-core:javaPreCompileRelease UP-TO-DATE
+> Task :shared-core:prepareLintJarForPublish UP-TO-DATE
+> Task :shared-core:prepareReleaseArtProfile UP-TO-DATE
+> Task :shared-core:processReleaseManifest UP-TO-DATE
+> Task :shared-core:writeReleaseAarMetadata UP-TO-DATE
+> Task :canvas-core:exportTargetPublicationCoordinatesForReleaseApiElements UP-TO-DATE
+> Task :canvas-core:exportTargetPublicationCoordinatesForReleaseRuntimeElements UP-TO-DATE
+> Task :shared-core:generatePomFileForAndroidReleasePublication
+> Task :shared-core:compileReleaseKotlinAndroid
+> Task :shared-core:extractReleaseAnnotations
+> Task :shared-core:compileReleaseJavaWithJavac NO-SOURCE
+> Task :shared-core:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :shared-core:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :shared-core:processReleaseJavaRes UP-TO-DATE
+> Task :shared-core:mergeReleaseJavaResource UP-TO-DATE
+> Task :shared-core:syncReleaseLibJars UP-TO-DATE
+> Task :shared-core:bundleReleaseAar UP-TO-DATE
+> Task :shared-core:generateMetadataFileForAndroidReleasePublication
+> Task :shared-core:publishAndroidReleasePublicationToSdkCandidateRepository
+> Task :shared-core:jvmProcessResources NO-SOURCE
+> Task :shared-core:processJvmMainResources SKIPPED
+> Task :shared-core:jvmSourcesJar UP-TO-DATE
+> Task :canvas-core:exportTargetPublicationCoordinatesForJvmApiElements UP-TO-DATE
+> Task :canvas-core:exportTargetPublicationCoordinatesForJvmRuntimeElements UP-TO-DATE
+> Task :shared-core:generatePomFileForJvmPublication
+> Task :canvas-core:exportCommonSourceSetsMetadataLocationsForMetadataApiElements UP-TO-DATE
+> Task :shared-core:transformCommonMainDependenciesMetadata UP-TO-DATE
+> Task :shared-core:compileCommonMainKotlinMetadata SKIPPED
+> Task :canvas-core:exportRootPublicationCoordinatesForMetadataApiElements UP-TO-DATE
+> Task :shared-core:generateProjectStructureMetadata UP-TO-DATE
+> Task :shared-core:metadataCommonMainProcessResources NO-SOURCE
+> Task :shared-core:metadataCommonMainClasses UP-TO-DATE
+> Task :shared-core:allMetadataJar UP-TO-DATE
+> Task :shared-core:buildKotlinToolingMetadata UP-TO-DATE
+> Task :shared-core:sourcesJar UP-TO-DATE
+> Task :shared-core:generateMetadataFileForKotlinMultiplatformPublication
+> Task :shared-core:generatePomFileForKotlinMultiplatformPublication
+> Task :shared-core:publishKotlinMultiplatformPublicationToSdkCandidateRepository
+> Task :shared-core:compileKotlinJvm
+> Task :shared-core:compileJvmMainJava NO-SOURCE
+> Task :shared-core:jvmMainClasses
+> Task :shared-core:jvmJar
+> Task :shared-core:generateMetadataFileForJvmPublication
+> Task :shared-core:publishJvmPublicationToSdkCandidateRepository
+> Task :shared-core:publishAllPublicationsToSdkCandidateRepository
+
+[Incubating] Problems report is available at: file:///Users/lixiaofan/StudioProjects/notecore/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 40s
+92 actionable tasks: 34 executed, 58 up-to-date
