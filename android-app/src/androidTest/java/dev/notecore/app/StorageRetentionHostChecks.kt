@@ -11,6 +11,8 @@ import dev.notecore.canvas.prototype.WorkAdmission
 import dev.notecore.canvas.prototype.WorkAdmissionFailure
 import dev.notecore.document.*
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -225,6 +227,39 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             }
             checks.add("single_export_snapshot_preserves_original")
             eventually("Post-export edit did not save") { completed && store.saveStates().isEmpty() }
+            val releaseWorker = CountDownLatch(1)
+            val worker = NoteStore::class.java.getDeclaredField("executor").apply { isAccessible = true }
+                .get(store) as BoundedOwnerExecutor
+            try {
+                main {
+                    val picker = store.beginExportPicker(note.capture())
+                    val pickerCode = checkNotNull(picker.requestCode)
+                    check(note.rename("Save waiting for picker"))
+                    val waiting = note.capture()
+                    val needed = waiting.encodingWorkByteCharge
+                    // Keep the queue exactly one byte short until the matching picker releases it.
+                    check(worker.submit(worker.availableBytes() - needed + 1, {
+                        check(releaseWorker.await(12, TimeUnit.SECONDS))
+                    }) { ResultDisposition.ACKNOWLEDGED } is WorkAdmission.Accepted)
+                    check(worker.availableBytes() == needed - 1)
+                    completed = false
+                    check(store.save(waiting) { _, error -> check(error == null); completed = true })
+                    check(!store.saveStates().single().inFlight)
+                    check(store.takeExportPicker(pickerCode + 1) == null)
+                    check(worker.availableBytes() == needed - 1)
+                    check(store.takeExportPicker(pickerCode) != null)
+                    check(!store.saveStates().single().inFlight)
+                }
+                eventually("Matching picker release did not dispatch the waiting save") {
+                    store.saveStates().singleOrNull()?.inFlight == true
+                }
+                check(canonical.readText().contains("Later export"))
+            } finally {
+                releaseWorker.countDown()
+            }
+            eventually("Waiting save did not reach disk") { completed && store.saveStates().isEmpty() }
+            check(canonical.readText().contains("Save waiting for picker"))
+            checks.add("export_picker_release_dispatches_waiting_save")
             val confirmed = File(directory, "${changed.documentId}.ncp").readBytes()
             main {
                 val root = note.snapshot(); val history = note.authorityStatus()

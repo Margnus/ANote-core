@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "production_commit": "f1f0473b47f267af32beb2be144d0fba660869da",
+  "source_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/StorageRetentionHostChecks.kt": "7ccac519f114ea044cfcd410849427d6b33d881c2d10cc079db30889f717576d",
+    "tools/verify_android_input_host.py": "d50e2fa67eec16a218e6b1544d6d00b1119d5a3f73fb299779c02e60d80ca9ea"
+  },
+  "evidence_sha256": {
+    "reports/android-export-picker-wake-20261114/storage-retention.log": "465048f6774a39a87c5e491080cab39ba911f6636db93e529bdcaf6f5a07593b"
+  },
+  "apk_sha256": {
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "5fa33fd2099790a2720a5d36a1f57cacbd00d35be21b8b8d21a5d37d75e9d60f",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "9035ac62d1edcd2d65535315a481e75604928b1eef63ddabb3b150a48e339dd6"
+  },
+  "platform": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+  "scope": "Original API32 Store/worker and instrumented picker ownership callbacks. Save waits with one byte less than required; mismatched result preserves capacity; matching result wakes the waiting write before the blocked worker completes; original file persists until worker execution. No system picker or physical heap claim."
+}

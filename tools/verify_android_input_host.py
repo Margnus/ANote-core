@@ -25,7 +25,7 @@ STORAGE_CHECKS = {'late_capture_refused_after_latest_ack_without_disk_rollback',
                   'backup_round_trip_preserves_source_and_remaps_ink_references',
                   'apple_ui_backup_import_preserves_two_pages_and_three_strokes',
                   'export_target_failure_preserves_note_and_allows_retry',
-                  'single_export_snapshot_preserves_original', 'reopened_saved_marker_skips_stopped_backend',
+                  'single_export_snapshot_preserves_original', 'export_picker_release_dispatches_waiting_save', 'reopened_saved_marker_skips_stopped_backend',
                   'foreign_same_revision_is_not_acknowledged_as_saved'}
 OWNER_CHECKS = {'invalid_store_configuration_does_not_start_worker', 'wrong_thread_store_creation_and_lookup_refused', 'unadmitted_release_refuses_before_retiring_authority', 'shared_editor_detach_capacity_and_reopen', 'pending_editor_failure_retry_original_recovery',
                 'editor_original_ledger_old_ack_failure_and_retry', 'editor_stopped_backend_feedback', 'actual_activity_shared_presentation_update',
