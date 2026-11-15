@@ -264,6 +264,14 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
      * No platform event is retained, and intervening edits can invalidate this observation.
      */
     fun prepareRealBatch(phase: PointerPhase, count: Int): PreviewInputResult? {
+        checkRealBatchShape(phase, count)?.let { return it }
+        if (phase == PointerPhase.DOWN) {
+            val plan = planNewStroke(count, root())
+            if (plan is NewStrokePlan.Refused) return plan.result
+        }
+        return null
+    }
+    private fun checkRealBatchShape(phase: PointerPhase, count: Int): PreviewInputResult? {
         realBatchGate(phase)?.let { return it }
         if (count > PREVIEW_INPUT_BATCH_LIMIT) return rejectRealBatch(PreviewFailureKind.INPUT_BATCH_CAPACITY)
         if (count < 0 || (phase == PointerPhase.CANCEL && count != 0) ||
@@ -284,7 +292,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     @HiddenFromObjC
     fun offerRealBatch(phase: PointerPhase, eventTimeMicros: Long, xs: DoubleArray, ys: DoubleArray,
                        pressures: FloatArray, times: LongArray): PreviewInputResult {
-        prepareRealBatch(phase, xs.size)?.let { return it }
+        checkRealBatchShape(phase, xs.size)?.let { return it }
         val count = xs.size
         if (count != ys.size || count != pressures.size || count != times.size || eventTimeMicros < 0)
             return rejectRealBatch(PreviewFailureKind.INVALID_INPUT, InputRejection.INVALID_BATCH)
@@ -300,30 +308,16 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val sequence: Long
         var command = strokeCommand; var objectId = strokeObject; var page = strokePage
         if (phase == PointerPhase.DOWN) {
-            val remaining = PagedPreviewCodec.MAX_POINTS - totalPoints(current)
-            if (remaining <= 0 || current.scene.objectCount >= inputObjectLimit ||
-                count > minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining))
-                return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
-            // Peek both identities without consuming them: refused DOWN must leave retry/undo usable.
-            val nextOperation = nextIdentity("op")
-                ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
-            val nextObject = nextIdentity("ink", nextOperation.second)
-                ?: return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
-            val capacity = memory.strokeInputCapacity(ObjectId(nextObject.first), selected)
-            val pointCapacity = affordableInputPoints(minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining, capacity.points),
-                nextOperation.first, nextObject.first, current.findPage(selected)!!)
-            if (count > pointCapacity) {
-                if (count > capacity.points && capacity.limitingReason != DocumentRejection.LIVE_BYTE_CAPACITY) {
-                    fail("当前预览编辑容量不足，本批未接收，请先保存或导出现有内容", PreviewFailureKind.DOCUMENT_REJECTED, capacity.limitingReason)
-                    return inputResult(PreviewInputDisposition.REJECTED, 0, InputRejection.CAPACITY)
-                }
-                return rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY)
+            val plan = when (val planned = planNewStroke(count, current)) {
+                is NewStrokePlan.Refused -> return planned.result
+                is NewStrokePlan.Ready -> planned
             }
-            command = operation() ?: return inputResult(PreviewInputDisposition.REJECTED, 0)
-            objectId = ObjectId(identity("ink") ?: return inputResult(PreviewInputDisposition.REJECTED, 0))
-            page = selected; session = InputReplaySession(pointCapacity); sequence = 0
-            inputPointLimit = pointCapacity
-            inputReservation = inputReservation(pointCapacity, command.value, objectId.value, current.findPage(page)!!)
+            this.sequence = plan.lastIdentity
+            command = plan.command
+            objectId = plan.objectId
+            page = selected; session = InputReplaySession(plan.pointCapacity); sequence = 0
+            inputPointLimit = plan.pointCapacity
+            inputReservation = plan.reservation
         } else {
             session = input!!; sequence = inputSequence
             if (sequence == Long.MAX_VALUE) return rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED)
@@ -346,6 +340,32 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         }
         input = session; clearError()
         return inputResult(PreviewInputDisposition.ACCEPTED, count)
+    }
+    private sealed interface NewStrokePlan {
+        class Ready(val command: CommandId, val objectId: ObjectId, val lastIdentity: Long,
+                    val pointCapacity: Int, val reservation: Long) : NewStrokePlan
+        class Refused(val result: PreviewInputResult) : NewStrokePlan
+    }
+    /** Plan against the current root and peek identities without consuming them. */
+    private fun planNewStroke(count: Int, root: DocumentRoot): NewStrokePlan {
+        fun noCapacity() = NewStrokePlan.Refused(rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY))
+        fun exhausted() = NewStrokePlan.Refused(rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED))
+        val remaining = PagedPreviewCodec.MAX_POINTS - totalPoints(root)
+        val maximum = minOf(PagedPreviewCodec.MAX_STROKE_POINTS, remaining)
+        if (root.scene.objectCount >= inputObjectLimit || count > maximum) return noCapacity()
+        val (operation, opSequence) = nextIdentity("op") ?: return exhausted()
+        val (objectValue, objectSequence) = nextIdentity("ink", opSequence) ?: return exhausted()
+        val objectId = ObjectId(objectValue)
+        val page = root.findPage(selected)!!
+        val capacity = memory.strokeInputCapacity(objectId, selected)
+        val pointCapacity = affordableInputPoints(minOf(maximum, capacity.points), operation, objectValue, page)
+        if (count > pointCapacity) {
+            if (count <= capacity.points || capacity.limitingReason == DocumentRejection.LIVE_BYTE_CAPACITY) return noCapacity()
+            fail("当前预览编辑容量不足，本批未接收，请先保存或导出现有内容", PreviewFailureKind.DOCUMENT_REJECTED, capacity.limitingReason)
+            return NewStrokePlan.Refused(inputResult(PreviewInputDisposition.REJECTED, 0, InputRejection.CAPACITY))
+        }
+        return NewStrokePlan.Ready(CommandId(operation), objectId, objectSequence, pointCapacity,
+            inputReservation(pointCapacity, operation, objectValue, page))
     }
     /** Reserve the entire admitted stroke, including completion overlap, before allocating identities.
      * Rejection never lowers an active session's capacity or drops its accepted prefix.
@@ -390,7 +410,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
 
     /** Legacy Boolean adapters preserve their explicit unfinished-stroke cancellation on invalid input. */
     private fun legacyInput(phase: PointerPhase, x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean {
-        val result = prepareRealBatch(phase, 1) ?:
+        val result = checkRealBatchShape(phase, 1) ?:
             offerRealBatch(phase, timeMicros, doubleArrayOf(x), doubleArrayOf(y), floatArrayOf(pressure), longArrayOf(timeMicros))
         if (result.disposition == PreviewInputDisposition.REJECTED && phase != PointerPhase.DOWN) cancelStroke()
         return result.disposition == PreviewInputDisposition.ACCEPTED || result.disposition == PreviewInputDisposition.COMMITTED

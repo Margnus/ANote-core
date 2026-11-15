@@ -63,6 +63,22 @@ class PreviewInputBudgetTest {
         owner = true
         assertNull(n.prepareRealBatch(PointerPhase.DOWN, 1)); assertSame(root, n.snapshot())
     }
+    @Test fun preparationChecksDocumentCapacityAndOfferRechecksAfterAnEdit() {
+        val n = note(reservation(2), journal = 1)
+        assertNull(n.prepareRealBatch(PointerPhase.DOWN, 1))
+        assertTrue(n.rename("journal filled"))
+        val root = n.snapshot(); val authority = n.authorityStatus()
+        val prepared = assertNotNull(n.prepareRealBatch(PointerPhase.DOWN, 1))
+        val offered = offer(n, PointerPhase.DOWN, 1)
+        for (rejected in listOf(prepared, offered)) {
+            assertEquals(PreviewFailureKind.DOCUMENT_REJECTED, rejected.failure?.kind)
+            assertEquals(DocumentRejection.JOURNAL_CAPACITY, rejected.failure?.documentReason)
+            assertEquals(InputRejection.CAPACITY, rejected.inputReason)
+            assertEquals(0, rejected.acceptedSamples)
+        }
+        assertSame(root, n.snapshot()); assertEquals(authority, n.authorityStatus())
+        assertNull(n.activeInputOperationId); assertEquals(0L, n.inputReservedByteCharge)
+    }
 
     @Test fun insufficientBudgetRejectsBeforeIdentityAndEmptyUpCanFinishExactBudget() {
         for (bytes in listOf(0L, reservation(1) - 1)) {

@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "baseline_commit": "28300a1a3e9ca4e352995f660046c914a1cc7527",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "7b6d45a2fd31326e45dec316ea7a6bae35f12ae7a02a3617f28b9fc4c2948a5e",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputBudgetTest.kt": "d94acbeed56b4418bdc908049eb7ad4e020f33752cbe25221cd48a82c36a784d",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "65ddece0fecd560da8096294a98d230c4ed4d1f95cfcb89119b89e1d895ac67c",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "f61c95ae8cb28663a117f8a22e16ff1fbaf2cbe63c30908d49b1a59bc494eee1",
+    "tools/verify_ios_host.py": "116ca5488c52aae7125f07aef31c8e1660cb4cde7510d1bc96854f9954579628"
+  },
+  "evidence_sha256": {
+    "reports/down-document-preflight-20261115/1-budget_overlap.log": "fe9c348d9aef31a4b9e6944db01c1a9df35f3650bc9da2e07e57a8c96c4a321a",
+    "reports/down-document-preflight-20261115/2-input_batches.log": "a7e01deafde8973e74f72682065839ba5f481d4be1f02781ee2929cb528183f3",
+    "reports/down-document-preflight-20261115/3-pending_work_budget.log": "06006182ba54fce4d57983d3b978f2fc396dfb19a456d5b8776345215ffd3b6e",
+    "reports/down-document-preflight-20261115/Probe.swift.txt": "44e52a616d8747674757803128d8cbcc998f64719e2d20a22eada593de3be563",
+    "reports/down-document-preflight-20261115/after.log": "c0cc5997c885b8aa63ba9b33b1d7d00f4b09ef38592d8fb0447f140b7151674d",
+    "reports/down-document-preflight-20261115/api.txt": "a4b2c5db15348c29451e18b8307e5ef81625ea638e807935f39ceaa8d9ac7758",
+    "reports/down-document-preflight-20261115/apks.sha256": "3afaebf8e425396fd1e0378c9696d81dde20fd5654b4d0e599c4eea7baf3aaf4",
+    "reports/down-document-preflight-20261115/before.log": "2d8118f6ac79a6feae5498b069cff5eb1962851cea59466c0ef275ede8de77d3",
+    "reports/down-document-preflight-20261115/fingerprint.txt": "e6d554f822e844090f7f421d5b4de578313d7f407839d2a5d7a48be0bae3dac1",
+    "reports/down-document-preflight-20261115/summary.json": "7c3c286d14da8c0fa236d3c6d4771e7f9e81980f4e56debecac92621d812190c"
+  },
+  "apple_before_framework_sha256": "2c0267c4460af1cadfe790f12c63c46b623153e077729e9d08efab4a12d40538",
+  "apple_after_framework_sha256": "0747b4d6408c97588d64d9d7da32cfa49e0f4f14a1ebf7a9767162066dc6d6d1",
+  "apple_app_host_passed": 77,
+  "android_api": 36,
+  "android_app_host_cases": [
+    "budget_overlap",
+    "input_batches",
+    "pending_work_budget"
+  ],
+  "jvm_suites": {
+    "canvas-core": {
+      "tests": 237,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 367,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "android-app": {
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "scope": "Document capacity during synchronous DOWN preparation and revalidation at offer. Retains existing API signatures and logical bounds. Native host callback simulation does not certify physical input latency or heap."
+}

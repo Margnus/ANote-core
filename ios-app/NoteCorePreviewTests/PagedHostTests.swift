@@ -1868,6 +1868,32 @@ final class PagedHostTests: XCTestCase {
         }
         XCTAssertEqual(event.predictionReads, 0); XCTAssertFalse(view.hasInk)
     }
+    @MainActor func testDocumentCapacityRejectsUIKitDownBeforeReadingScalars() throws {
+        let budget = try DocumentBudget(maxPages: 1, maxObjects: 10, liveBytes: 8 * 1024 * 1024,
+            journalEntries: 1, journalBytes: 8 * 1024 * 1024, identityBytes: 1024 * 1024,
+            historyEntries: 10, historyBytes: 1024 * 1024, inputBytes: 1024 * 1024)
+        let opened = PagedPreviewNotebook.companion.createValidated(documentId: "full-journal", title: "Before",
+            sessionNonce: "capacity", width: 595, height: 842, paper: .blank, budget: budget,
+            ownerCheck: { precondition(Thread.isMainThread) })
+        let note = try XCTUnwrap(opened.notebook)
+        XCTAssertTrue(note.rename(value: "Journal full"))
+        let before = note.snapshot()
+        var failures = [String]()
+        let view = InkUIView(note: note)
+        view.changed = { XCTFail("Rejected input published a change") }
+        view.failed = { failures.append($0) }
+        view.frame = CGRect(x: 0, y: 0, width: 300, height: 400)
+        view.layoutIfNeeded()
+        let touch = SyntheticInkTouch(30, 1)
+        view.touchesBegan([touch], with: nil)
+        XCTAssertEqual(touch.locationReads, 0)
+        XCTAssertEqual(failures.count, 1)
+        XCTAssertEqual(note.lastFailure?.documentReason, .journalCapacity)
+        XCTAssertTrue(note.snapshot() === before)
+        XCTAssertFalse(note.hasActiveStroke)
+        XCTAssertEqual(note.inputReservedByteCharge, 0)
+        XCTAssertTrue(note.retire())
+    }
     @MainActor func testMaximumProducerBatchPreservesAllScalarsAndRejectsOversizeBeforeRecovery() throws {
         let view = try inputView(), note = view.note, event = SyntheticInkEvent()
         let main = SyntheticInkTouch(0, 1)
@@ -1978,10 +2004,11 @@ private final class SyntheticInkTouch: UITouch {
     override var timestamp: TimeInterval { seconds }
     override var type: UITouch.TouchType { .pencil }
     var forceValue: CGFloat = 0.5
+    private(set) var locationReads = 0
     var maximumValue: CGFloat = 1
     override var force: CGFloat { forceValue }
     override var maximumPossibleForce: CGFloat { maximumValue }
-    override func location(in view: UIView?) -> CGPoint { position }
+    override func location(in view: UIView?) -> CGPoint { locationReads += 1; return position }
 }
 private final class SyntheticInkEvent: UIEvent {
     var real: [SyntheticInkTouch]?

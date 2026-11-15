@@ -1,0 +1,19 @@
+import Foundation
+import NoteCanvasPrototype
+
+let budget = DocumentBudget.companion.validated(maxPages: 1, maxObjects: 10, liveBytes: 8*1024*1024,
+    journalEntries: 1, journalBytes: 8*1024*1024, identityBytes: 1024*1024,
+    historyEntries: 10, historyBytes: 1024*1024, inputBytes: 1024*1024).budget!
+let note = PagedPreviewNotebook.companion.createValidated(documentId: "probe", title: "Before",
+    sessionNonce: "probe", width: 595, height: 842, paper: .blank, budget: budget,
+    ownerCheck: { precondition(Thread.isMainThread) }).notebook!
+precondition(note.prepareRealBatch(phase: .down, count: 1) == nil)
+precondition(note.rename(value: "Journal full"))
+let root = note.snapshot()
+if let failure = note.prepareRealBatch(phase: .down, count: 1) {
+    precondition(failure.failure?.documentReason == .journalCapacity && failure.acceptedSamples == 0)
+    print("Full journal refused before scalar copy")
+} else {
+    print("Full journal incorrectly admitted scalar preparation")
+}
+precondition(note.snapshot() === root && !note.hasActiveStroke && note.inputReservedByteCharge == 0)
