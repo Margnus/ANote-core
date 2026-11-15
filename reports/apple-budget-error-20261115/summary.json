@@ -1,0 +1,58 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "F57F6A04-75DE-4F76-A6BE-4EBEE5090C48",
+        "deviceName" : "NoteCoreBudgetError",
+        "modelName" : "iPad Pro 11-inch (M5)",
+        "osBuildNumber" : "24A434",
+        "osVersion" : "27.0",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 76,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "NoteCorePreview · Built with macOS 27.2.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1794713863.752,
+  "passedTests" : 76,
+  "result" : "Passed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Thread running at User-interactive quality-of-service class waiting on a lower QoS thread running at Default quality-of-service class. Investigate ways to avoid priority inversions",
+      "sourceURL" : "file:///Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift"
+    },
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Thread running at User-interactive quality-of-service class waiting on a lower QoS thread running at Default quality-of-service class. Investigate ways to avoid priority inversions",
+      "sourceURL" : "file:///Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift"
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1794713816.604,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - NoteCorePreview",
+  "topInsights" : [
+    {
+      "category" : "Longest Test Runs",
+      "impact" : "20% of duration",
+      "text" : "1 longest test run with outlier durations exceeding 0.61s (three standard deviations)"
+    }
+  ],
+  "totalTestCount" : 76
+}

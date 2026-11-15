@@ -25,9 +25,7 @@ EDIT_VARIANTS = {
 # Supplementary members needed to obtain/use the selected values. This profile
 # excludes the App's legacy compatibility, catalog, save ledger and render ports.
 VALUE_MEMBERS = {
-    # The existing independent host uses the initializer with fixed trusted values.
-    'NCPDocumentBudget': ('companion',
-        'init(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)'),
+    'NCPDocumentBudget': ('companion',),
     'NCPPagedPreviewNotebook': ('companion', 'changeVersion', 'inputBatchLimit'),
     'NCPApplePreviewInput': ('shared',),
     'NCPPreviewDocumentReader': ('shared',),

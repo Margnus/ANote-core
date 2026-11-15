@@ -41,7 +41,7 @@ final class SketchHostTests: XCTestCase {
         let reading = PreviewRecoveryCodec.shared.read(text: text)
         XCTAssertNil(reading.failure)
         let checkpoint = try XCTUnwrap(reading.snapshot)
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
             journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
             historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
         func open(_ value: PagedPreviewSnapshot, nonce: String) throws -> PagedPreviewNotebook {

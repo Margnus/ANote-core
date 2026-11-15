@@ -49,7 +49,7 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(readLock.withLock { reads }, 1); model.close()
         XCTAssertEqual(try Data(contentsOf: ignored), original)
         let unicode = PagedPreviewNotebook.companion.createValidated(documentId: "中文😀", title: "canonical", sessionNonce: "unicode",
-            width: 595, height: 842, paper: .blank, budget: DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+            width: 595, height: 842, paper: .blank, budget: try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
                 journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
                 historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024), ownerCheck: { precondition(Thread.isMainThread) })
         XCTAssertNotNil(unicode.notebook); XCTAssertTrue(unicode.notebook?.retire() == true)
@@ -90,7 +90,7 @@ final class PagedHostTests: XCTestCase {
             try Data(pending.utf8).write(to: dir.appendingPathComponent("expected-pending.txt"))
             let hold = DispatchSemaphore(value: 0)
             // Prevent the original save() retry from committing the synthetic pending in this owner.
-            let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+            let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
                 journalEntries: 4096, journalBytes: 32*1024*1024, identityBytes: 4*1024*1024,
                 historyEntries: 128, historyBytes: 0, inputBytes: 2*1024*1024)
             var model: PreviewModel!
@@ -161,6 +161,9 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(points[0].2, 0.25); XCTAssertEqual(points[1].3, 2)
     }
     @MainActor func testRawBudgetFailuresDoNotTrapAndPreviewStillChecksPolicy() async throws {
+        XCTAssertThrowsError(try DocumentBudget(maxPages: 0, maxObjects: 10, liveBytes: 1024,
+            journalEntries: 1, journalBytes: 1024, identityBytes: 1024,
+            historyEntries: 1, historyBytes: 1024, inputBytes: 1024))
         func validate(pages: Int32 = 128, objects: Int32 = 5000, live: Int64 = 8*1024*1024,
                       journal: Int32 = 128, journalBytes: Int64 = 8*1024*1024, identity: Int64 = 2*1024*1024,
                       history: Int32 = 128, historyBytes: Int64 = 8*1024*1024, input: Int64 = 2*1024*1024) -> DocumentBudgetCreation {
@@ -243,7 +246,7 @@ final class PagedHostTests: XCTestCase {
         let dir = directory(); try Data("blocked".utf8).write(to: dir)
         defer { try? FileManager.default.removeItem(at: dir) }
         let checkpoint = try windowCheckpoint()
-        let limited = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+        let limited = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
             journalEntries: 4096, journalBytes: 32*1024*1024, identityBytes: 4*1024*1024,
             historyEntries: 128, historyBytes: 0, inputBytes: 2*1024*1024)
         let model = PreviewModel(directory: dir, documentBudget: limited)
@@ -444,7 +447,7 @@ final class PagedHostTests: XCTestCase {
     @MainActor func testPublicReadingModeBlocksDirectEditsAndKeepsActivePrefix() throws {
         let opening = PagedPreviewNotebook.companion.createValidated(documentId: "swift-reading", title: "reading",
             sessionNonce: "swift-reading-owner", width: 595, height: 842, paper: .blank,
-            budget: DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024, journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024, historyEntries: 128, historyBytes: 16 * 1024 * 1024, inputBytes: 2 * 1024 * 1024), ownerCheck: { precondition(Thread.isMainThread) })
+            budget: try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024, journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024, historyEntries: 128, historyBytes: 16 * 1024 * 1024, inputBytes: 2 * 1024 * 1024), ownerCheck: { precondition(Thread.isMainThread) })
         let note = try XCTUnwrap(opening.notebook)
         let root = note.snapshot()
         XCTAssertTrue(note.setReadOnly(value: true)); XCTAssertTrue(note.isReadOnly)
@@ -479,7 +482,7 @@ final class PagedHostTests: XCTestCase {
         // Exact original command metadata plus three real samples: 2048 + 2*(11+4+12+5) + 3*28.
         let inputCharge: Int64 = 2196
         for bytes in [Int64(0), inputCharge - 1, inputCharge] {
-            let inputBudget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+            let inputBudget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
                 journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
                 historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: bytes)
             let result = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: "consumer",
@@ -497,7 +500,7 @@ final class PagedHostTests: XCTestCase {
         }
         let file = dir.appendingPathComponent("pending-swift.ncp")
         try PreviewFileIO.writeUTF8(encoded, to: file)
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
             historyEntries: 128, historyBytes: 0, inputBytes: 2 * 1024 * 1024)
         try FileManager.default.removeItem(at: dir); try Data("blocked".utf8).write(to: dir)
@@ -726,7 +729,7 @@ final class PagedHostTests: XCTestCase {
         let releaseOccupancy = DispatchSemaphore(value: 0), occupancyEntered = DispatchSemaphore(value: 0)
         let releaseWrite = DispatchSemaphore(value: 0), writeEntered = DispatchSemaphore(value: 0)
         defer { releaseOccupancy.signal(); releaseWrite.signal() }
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
             historyEntries: 128, historyBytes: 0, inputBytes: 2248)
         let model = PreviewModel(directory: dir, documentBudget: budget, observeWriteBoundary: { boundary in
@@ -886,7 +889,7 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: damaged), damagedBytes)
     }
     @MainActor func testValidatedCreationRejectsRawParametersAndModelUsesFactoryNotebook() async throws {
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 128, journalBytes: 8 * 1024 * 1024, identityBytes: 2 * 1024 * 1024,
             historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
         let invalid = PagedPreviewNotebook.companion.createValidated(documentId: "invalid", title: "title", sessionNonce: "swift",
@@ -912,7 +915,7 @@ final class PagedHostTests: XCTestCase {
         let root = DocumentRoot.companion.empty(id: SceneId(value: "validated-swift"), title: "unchanged",
             firstPage: PageDescriptor(id: PageId(value: "page"), layerId: LayerId(value: "layer"),
                 width: 595, height: 842, paper: .blank, contentRevision: 0))
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
             journalEntries: 128, journalBytes: 8 * 1024 * 1024, identityBytes: 2 * 1024 * 1024,
             historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
         let refused = PagedPreviewNotebook.companion.open(initial: root, sessionNonce: "bad nonce", budget: budget,
@@ -1342,7 +1345,7 @@ final class PagedHostTests: XCTestCase {
         // constructor's IllegalArgumentException using a representable over-budget root.
         let text = "NCPREVIEW\t2\nD\ttitle-host\t合法😀\t2\t0\t0\nG\tfirst\tlayer-a\t400\t400\tBLANK\t0\nG\tsecond\tlayer-b\t400\t400\tBLANK\t0\nEND\n"
         let root = try PagedPreviewCodec.shared.decode(text: text)
-        let budget = DocumentBudget(maxPages: 1, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
+        let budget = try DocumentBudget(maxPages: 1, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
             journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
         XCTAssertThrowsError(try MemoryDocumentAuthority(initial: root, budget: budget, ownerCheck: {}))
         let valid = try MemoryDocumentAuthority(initial: root, budget: DocumentBudget(maxPages: 128, maxObjects: 5000,
@@ -1696,7 +1699,7 @@ final class PagedHostTests: XCTestCase {
     @MainActor func testNativeRendererChangesPageCacheAndAppliesFullAffineDotWidth() throws {
         let text = "NCPREVIEW\t2\nD\trender\tRender\t2\t1\t1\nG\tfirst\tlayer-a\t400\t400\tBLANK\t1\nG\tsecond\tlayer-b\t400\t400\tBLANK\t0\nS\tdot\tlayer-a\t1\tMONOLINE\t1\t-65536\t10\t1\t4\t0\t0\t2\t0\t0\nP\t50\t100\t0.5\t1\nEND\n"
         let root = try PagedPreviewCodec.shared.decode(text: text)
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024, journalEntries: 128,
             journalBytes: 8*1024*1024, identityBytes: 2*1024*1024, historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
         let note = try PagedPreviewNotebook(initial: root, sessionNonce: "render-session", budget: budget, ownerCheck: { precondition(Thread.isMainThread) })
         let view = InkUIView(note: note); view.frame = CGRect(x: 0, y: 0, width: 400, height: 400); view.layoutIfNeeded()

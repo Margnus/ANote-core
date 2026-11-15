@@ -34,9 +34,9 @@ final class SketchSession: ObservableObject {
         guard Thread.isMainThread else { return .refused(.wrongOwner) }
         guard !tools.isEmpty, tools.allSatisfy({ $0.width.isFinite && (0.5...16).contains($0.width) })
         else { return .refused(.invalidTool) }
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+        let budget = DocumentBudget.companion.validated(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
             journalEntries: 128, journalBytes: 8*1024*1024, identityBytes: 2*1024*1024,
-            historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
+            historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024).budget! // Fixed sketch limits.
         let opened = PagedPreviewNotebook.companion.createValidated(documentId: id, title: title, sessionNonce: nonce,
             width: 595, height: 842, paper: .blank, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread, "Sketch core owner is the main thread") })

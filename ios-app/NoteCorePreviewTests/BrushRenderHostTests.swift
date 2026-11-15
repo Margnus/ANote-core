@@ -12,7 +12,7 @@ final class BrushRenderHostTests: XCTestCase {
         let lock = NSLock(), entered = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
         var armWrite = false
         defer { release.signal() } // Cleanup only; successful assertions below require explicit real IO completion.
-        let budget = DocumentBudget(maxPages: 128, maxObjects: 2, liveBytes: 8*1024*1024,
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 2, liveBytes: 8*1024*1024,
             journalEntries: 4096, journalBytes: 32*1024*1024, identityBytes: 4*1024*1024,
             historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2*1024*1024)
         let model = PreviewModel(directory: directory, documentBudget: budget, observeWriteBoundary: { boundary in

@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "baseline_commit": "a4e5b809365efdbed105617044bd1717f57f088a",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "f2719ced3cf6bdd77b2c1935a35dc175e23bfe70a65082e960c7a71c66b55f19",
+    "tools/audit_public_boundary.py": "7e6eea0211eee80696851c03244f6ee4269e4dd3e693a5ddfa9e8dcec58f5a73",
+    "tools/audit_sdk_type_closure.py": "b3d4483c3840283eddd6be3ad5b18d2ed05d9f10a04a0fe35010af5848f4bca1",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "c51592cbe6a70a4e246aec9bb820409fe51ed68e33f8e68229f7d2759f2c1efd",
+    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "c24a3bf34bb341335e450dba852db4f1c67811325cf4a24739ea24d84bc2f405",
+    "samples/sketch-host-ios/Sources/SketchSession.swift": "6df8fa1cb244a49adc89234113409a06b51af10abf85cba81ab4994de60ef0de",
+    "samples/sketch-host-ios/Tests/SketchHostTests.swift": "ab08aa5bf2356eb658bb1ad5aec2bea1022cd67af826e948c75df6933f684eee"
+  },
+  "evidence_sha256": {
+    "reports/apple-budget-error-20261115/After.swift.txt": "5a52f14bcb630e8ac611053aba7e06c5feaa4f050ebb4ebda93d22942b11c480",
+    "reports/apple-budget-error-20261115/Before.swift.txt": "7658498f018fec8b89485be590c09fcfca5d6c78641a1736935a540c3e97033c",
+    "reports/apple-budget-error-20261115/after-runtime.log": "81c877e1cd89b891890cd74f848e437e7e1491dd2b4d1358a7f0d978d5f96dd5",
+    "reports/apple-budget-error-20261115/before-exit.txt": "e726b440cc164001999e718b51780d80314709efe06e7857282377be9111127b",
+    "reports/apple-budget-error-20261115/before-runtime.log": "51e9855742683da94020a5e60902fd3188fc48562d20f2ba32994f1bf2f1f773",
+    "reports/apple-budget-error-20261115/header-diff.json": "a8046b73a4061c368b96d1beb9f1382a6cff8cb4cab91d9c3db5be7571da75a5",
+    "reports/apple-budget-error-20261115/recovery.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/apple-budget-error-20261115/summary.json": "bd0bb060fed8e3cc369aae2da9aedf451e4d015fbfe65c9f8c7cdbfd8b7fd720"
+  },
+  "artifact_sha256": {
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "64150ad80e4d8e1146f56508278bf1a56fb9ad621eb0ec7c81d7b4cc58fe95ec",
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "4027fc9ad9944765f66cebfeca2d582ae736bcf663846d8b3ad675be013d1797",
+    "build/sdk-budget-error/iosArm64-after": "ca1b1981e206dc1b9ffb0b70a3c39a4bff13648e9116bb5e7a2e7cb8e9d20311",
+    "build/sdk-budget-error/iosArm64-recovery": "638791c30e71efa8ab0016032c5820626cf07c4559aceb5d8b22663b4bbf7b29",
+    "build/sdk-budget-error/iosArm64-sketch": "c2245557c34568a6dd2c1d7f391faaafcdca181d36f63c33572e03af55f9ea43",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "e5dddba6b95d951e9fe6af27536ad4636a6c7e0f42de92f43c67f4f3167ed385",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "4027fc9ad9944765f66cebfeca2d582ae736bcf663846d8b3ad675be013d1797",
+    "build/sdk-budget-error/iosSimulatorArm64-after": "395ed778a3e1f113dbb43dcc2e7867a073438d0911500ef68034d1476ddbe3ee",
+    "build/sdk-budget-error/iosSimulatorArm64-recovery": "664d5a9fd6a883a561bfc2239220f42553c4fb3cb8db3fb332092c690cd8a6db",
+    "build/sdk-budget-error/iosSimulatorArm64-sketch": "5b89911e6b6a37a2dd8d21094941dd0141956489db611b7f3b65415c920fb17f"
+  },
+  "ios_simulator_os": "27.0",
+  "ios_app_host_passed": 76,
+  "independent_sketch_test_target_compiled": true,
+  "default_jvm": {
+    "canvas-core": {
+      "tests": 237,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 366,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "scope": "Direct Apple budget initializer error bridging, typed budget factory and selected recovery API. The raw Objective-C initializer selector changed; direct callers must rebuild. Generated copy has no NSError bridge. Minimum OS runtime and physical gates remain pending."
+}

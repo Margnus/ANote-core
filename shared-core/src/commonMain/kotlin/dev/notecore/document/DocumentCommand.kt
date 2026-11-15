@@ -48,7 +48,8 @@ sealed interface DocumentCommand {
     }
 }
 
-data class DocumentBudget(val maxPages: Int = 128, val maxObjects: Int = 5000, val liveBytes: Long = 8L * 1024 * 1024,
+data class DocumentBudget @Throws(IllegalArgumentException::class) constructor(
+                          val maxPages: Int = 128, val maxObjects: Int = 5000, val liveBytes: Long = 8L * 1024 * 1024,
                           val journalEntries: Int = 128, val journalBytes: Long = 8L * 1024 * 1024,
                           val identityBytes: Long = 2L * 1024 * 1024,
                           val historyEntries: Int = 128, val historyBytes: Long = 8L * 1024 * 1024,

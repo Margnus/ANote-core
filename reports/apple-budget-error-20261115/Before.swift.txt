@@ -1,0 +1,6 @@
+import NoteCanvasPrototype
+
+let invalid = DocumentBudget(maxPages: 0, maxObjects: 10, liveBytes: 1024,
+    journalEntries: 1, journalBytes: 1024, identityBytes: 1024,
+    historyEntries: 1, historyBytes: 1024, inputBytes: 1024)
+print(invalid.maxPages)

@@ -1,0 +1,18 @@
+import Foundation
+import NoteCanvasPrototype
+
+do {
+    _ = try DocumentBudget(maxPages: 0, maxObjects: 10, liveBytes: 1024,
+        journalEntries: 1, journalBytes: 1024, identityBytes: 1024,
+        historyEntries: 1, historyBytes: 1024, inputBytes: 1024)
+    preconditionFailure("Invalid budget was accepted")
+} catch {
+    let failure = error as NSError
+    precondition(failure.userInfo["KotlinException"] != nil)
+    print("Caught the Kotlin exception through NSError")
+}
+let result = DocumentBudget.companion.validated(maxPages: 0, maxObjects: 10, liveBytes: 1024,
+    journalEntries: 1, journalBytes: 1024, identityBytes: 1024,
+    historyEntries: 1, historyBytes: 1024, inputBytes: 1024)
+precondition(result.budget == nil && result.failure == .maxPages)
+print("Validated budget preserved the typed maxPages refusal")
