@@ -385,20 +385,29 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }
         inkImage?.let { image ->
             image.poll()
-            if (image.callbackCount > observedCallbacks) {
-                inkReleaseCallbacks += image.callbackCount-observedCallbacks; observedCallbacks = image.callbackCount
-                logInk("release-receipt")
-            }
-            inkValidFenceObserved = inkValidFenceObserved || image.validFenceObserved
-            inkHandoffRecovered = inkHandoffRecovered || image.handoffRecovered
-            inkReleaseDeferred = inkReleaseDeferred || image.releaseDeferred
-            if (image.released) { inkImage = null; inkShown = false; logInk("source-released") }
-            else if (image.needsPoll) pollInkLater()
+            observeInkRelease(image)
+            if (image.needsPoll) pollInkLater()
         }
         if (inkRetiring && renderer.isDrained) {
             inkRenderer = null; inkRetiring = false; logInk("owner-drained")
         }
         inkView.get()?.invalidate()
+    }
+    // Close can settle a receipt synchronously. Record it before dropping the image.
+    private fun observeInkRelease(image: AndroidInkFrameExperiment.SurfaceImage) {
+        val callbacks = image.callbackCount
+        if (callbacks > observedCallbacks) {
+            inkReleaseCallbacks += callbacks - observedCallbacks
+            observedCallbacks = callbacks
+            logInk("release-receipt")
+        }
+        inkValidFenceObserved = inkValidFenceObserved || image.validFenceObserved
+        inkHandoffRecovered = inkHandoffRecovered || image.handoffRecovered
+        inkReleaseDeferred = inkReleaseDeferred || image.releaseDeferred
+        if (image.released) {
+            inkImage = null; inkShown = false
+            logInk("source-released")
+        }
     }
     private fun logInk(event: String) {
         if (ioDebug) Log.d("NoteCoreRender","$event charged=$inkChargedBytes")
@@ -453,15 +462,20 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun retireInk(lostEndpoint: Boolean = false) {
         executor.checkOwnerThread()
         inkShown = false; inkKey = null; inkPending = null; inkAdmissionRejected = false
-        inkImage?.let { if (lostEndpoint) it.closeWithoutView() else it.close(); if (it.released) inkImage = null }
+        inkImage?.let { image ->
+            if (lostEndpoint) image.closeWithoutView() else image.close()
+            observeInkRelease(image)
+        }
         inkRenderer?.let { it.close(); inkRetiring = true }
         inkView.get()?.invalidate()
         requestPump()
     }
     internal fun reconcileInkRelease(): Boolean {
         executor.checkOutsideDrain()
-        if (inkImage?.reconcileReleased() != true) return false
-        inkImage = null; pumpInk(); advanceOwnerRetirement(); return true
+        val image = inkImage ?: return false
+        if (!image.reconcileReleased()) return false
+        observeInkRelease(image)
+        pumpInk(); advanceOwnerRetirement(); return true
     }
     private fun notifyUi(action: () -> Unit) {
         // Original Notebook/ledger/file keeps responsibility; UI notification is advisory only.

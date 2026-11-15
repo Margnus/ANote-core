@@ -130,8 +130,9 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
             view.surfaceHost!!.requestLayout()
         }
         eventually("Resize did not replace the old surface identity/size") { store.inkFramePublications>beforeResize }
-        val callbacks = store.inkReleaseCallbacks
-        val validFence = store.inkValidFenceObserved
+        var callbacks = 0
+        var validFence = false
+        main { callbacks = store.inkReleaseCallbacks; validFence = store.inkValidFenceObserved }
         var savedFirst = false
         var encoded = ""
         var document = ""
@@ -226,7 +227,11 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         for ((file, contents) in rejectedSources) check(file.readText(Charsets.UTF_8) == contents)
         main { readerStores.forEach { it.stopTestBackend() } }
         close()
-        check(store.inkReleaseCallbacks>callbacks) { "Missing actual compositor release callback on close" }
+        main {
+            check(store.inkReleaseCallbacks > callbacks) {
+                "Missing actual compositor release callback on close: before=$callbacks after=${store.inkReleaseCallbacks}"
+            }
+        }
 
         var reopened = false
         main {

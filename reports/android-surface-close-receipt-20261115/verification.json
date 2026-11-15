@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "baseline_commit": "6df1761d550ba148ac116b970d57e2a40836752e",
+  "source_sha256": {
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "931c6c1c896070b0685cd54aa2c95af279d2cad733068c73278bffdf4d141ae3",
+    "android-app/src/androidTest/java/dev/notecore/app/SurfaceFrameHostChecks.kt": "2e1237db552b0839758b702b3fc8386460c1f84b1b4f08caaa3cb0c7087b396f",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidInkFrameExperiment.kt": "4e7cba4ddb48356f50fda105677c4f68f3f9109941055f83537c7758e9526309"
+  },
+  "evidence_sha256": {
+    "reports/android-surface-close-receipt-20261115/1-surface_frames.log": "9f943ee685c72337e10200534781b7a3f2fcb668f9e3663503d206c7ecd215ba",
+    "reports/android-surface-close-receipt-20261115/2-surface_frames.log": "5ad17c15bc6b232bfd075bb4c702ac3bf1237ed27265dc557166ec130b928373",
+    "reports/android-surface-close-receipt-20261115/3-surface_frames.log": "ef3683c6c823ce45b530e2f9019ba81c37ec58dc3d78ae782d08fa05b760cd06",
+    "reports/android-surface-close-receipt-20261115/4-budget_overlap.log": "fe9c348d9aef31a4b9e6944db01c1a9df35f3650bc9da2e07e57a8c96c4a321a",
+    "reports/android-surface-close-receipt-20261115/api.txt": "a4b2c5db15348c29451e18b8307e5ef81625ea638e807935f39ceaa8d9ac7758",
+    "reports/android-surface-close-receipt-20261115/apks.sha256": "41e6dbe9f014ddf4f3622d743918771e3ceb099a2329f3e420dcbce3e12a892a",
+    "reports/android-surface-close-receipt-20261115/architecture.json": "10f6de44b5e9bbaf5447524bdb8a4878580d597433189d167e62841029fde53e",
+    "reports/android-surface-close-receipt-20261115/fingerprint.txt": "e6d554f822e844090f7f421d5b4de578313d7f407839d2a5d7a48be0bae3dac1"
+  },
+  "prior_failure_sha256": "9a45870eb2a1698800252e26ff881bc8af6b8777f25277c4008e74c402926dac",
+  "android_api": 36,
+  "surface_frames_passed": 3,
+  "budget_overlap_passed": 1,
+  "android_unit_tests": {
+    "tests": 37,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "scope": "Original API36 App host release observation and storage overlap. Observe real receipts and fence state before dropping image ownership, including synchronous settlement. Prior failure was intermittent; the new runs do not guarantee recurrence-free compositor behavior across devices."
+}
