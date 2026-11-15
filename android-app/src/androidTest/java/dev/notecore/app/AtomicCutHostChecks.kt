@@ -13,7 +13,7 @@ import org.json.JSONObject
 
 /** Only unique synthetic cache files. No original documents or production service singleton. */
 internal class AtomicCutHostChecks(private val test: Instrumentation, private val host: Activity,
-                                  identity: String, boundaryName: String) {
+                                  identity: String, boundaryName: String, private val firstWrite: Boolean) {
     private val boundary = PreviewWriteBoundary.valueOf(boundaryName)
     private val directory: File
     init {
@@ -36,10 +36,11 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
     fun prepare(): Nothing {
         check(!directory.exists() && directory.mkdirs())
         val checkpoint = checkpoint(); val initial = PagedPreviewSnapshot.fromRoot(checkpoint.root)
-        val io = PreviewFileIO(directory, host.contentResolver)
-        io.write(initial)
+        if (!firstWrite) {
+            PreviewFileIO(directory, host.contentResolver).write(initial)
+            File(directory, "expected-old.txt").writeText(initial.encode(), Charsets.UTF_8)
+        }
         // Independent expected bytes for the external verifier; never used to repair files after death.
-        File(directory, "expected-old.txt").writeText(initial.encode(), Charsets.UTF_8)
         File(directory, "expected-pending.txt").writeText(checkpoint.encode(), Charsets.UTF_8)
         val hold = CountDownLatch(1)
         lateinit var owner: NoteStore; lateinit var note: PagedPreviewNotebook
@@ -52,6 +53,7 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
                         check(owner.editorPresentation(note).phase == EditorSavePhase.SAVING)
                         val marker = JSONObject().put("pid", Process.myPid()).put("boundary", reached.name)
                             .put("callbacks", callbacks).put("phase", "SAVING").put("has_pending", true)
+                            .put("first_write", firstWrite)
                         File(directory, "ready.json").writeText(marker.toString(), Charsets.UTF_8)
                     }
                     hold.await() // No timeout release or fabricated receipt. External process termination ends it.
@@ -70,13 +72,32 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
         val checkpoint = checkpoint(); var opened: OpenedDocument? = null; var error: String? = null; var read = false
         lateinit var owner: NoteStore; lateinit var note: PagedPreviewNotebook
         var confirmedContent: PagedPreviewSnapshot? = null
+        val expectedPending = boundary == PreviewWriteBoundary.VERIFIED_BEFORE_RETURN
+        val expectedAbsent = firstWrite && !expectedPending
         main {
             owner = NoteStore.isolated(host, directory)
-            owner.open("atomic-cut") { value, failure -> opened = value; error = failure; read = true }
         }
         try {
+            if (firstWrite) {
+                var catalogReady = false
+                main {
+                    owner.list { entries, failure ->
+                        check(failure == null)
+                        check(entries.map { it.id } == if (expectedAbsent) emptyList() else listOf("atomic-cut"))
+                        catalogReady = true
+                    }
+                }
+                eventually("Original catalog did not settle") { catalogReady }
+                check(!File(directory, "atomic-cut.ncp.new").exists())
+            }
+            main { owner.open("atomic-cut") { value, failure -> opened = value; error = failure; read = true } }
             eventually("Original reader did not finish after process death") { read }
-            val expectedPending = boundary == PreviewWriteBoundary.VERIFIED_BEFORE_RETURN
+            if (expectedAbsent) {
+                check(opened == null && error == LocalReadFailure.IO_FAILURE.message)
+                check(!File(directory, "atomic-cut.ncp").exists() && !File(directory, "atomic-cut.ncp.bak").exists())
+                retire(owner)
+                return result(previousPid, false, 0, null, true)
+            }
             main {
                 check(error == null); val value = checkNotNull(opened)
                 check(value.persisted && (value.recovery.pending != null) == expectedPending)
@@ -97,15 +118,23 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
             check(actual.sameContent(checkNotNull(confirmedContent)))
             check(actual.pending == null && actual.root.scene.objectCount == if (expectedPending) 1 else 0)
             check(!File(directory, "atomic-cut.ncp.new").exists())
-            main { check(owner.beginOwnerRetirement() == StoreRetirementRequest.STARTED) }
-            eventually("Reopened original worker did not retire") { owner.ownerRetirementStatus().phase == StoreOwnerPhase.RETIRED }
-            return JSONObject().put("previous_pid", previousPid).put("pid", Process.myPid()).put("boundary", boundary.name)
-                .put("recovered_pending", expectedPending).put("committed_strokes", actual.root.scene.objectCount)
-                .put("revision", actual.version).put("temporary_file_absent", true).put("original_owner_retired", true).toString()
+            retire(owner)
+            return result(previousPid, expectedPending, actual.root.scene.objectCount, actual.version, false)
         } finally {
             // Keep failures for diagnosis. Only successful real retirement authorizes fixture cleanup.
             var retired = false; main { retired = owner.ownerRetirementStatus().phase == StoreOwnerPhase.RETIRED }
             if (retired) check(directory.deleteRecursively())
         }
     }
+
+    private fun retire(owner: NoteStore) {
+        main { check(owner.beginOwnerRetirement() == StoreRetirementRequest.STARTED) }
+        eventually("Reopened original worker did not retire") { owner.ownerRetirementStatus().phase == StoreOwnerPhase.RETIRED }
+    }
+
+    private fun result(previousPid: Int, pending: Boolean, strokes: Int, revision: Long?, absent: Boolean): String =
+        JSONObject().put("previous_pid", previousPid).put("pid", Process.myPid()).put("boundary", boundary.name)
+            .put("recovered_pending", pending).put("committed_strokes", strokes)
+            .put("revision", revision ?: JSONObject.NULL).put("document_absent", absent)
+            .put("temporary_file_absent", true).put("original_owner_retired", true).toString()
 }

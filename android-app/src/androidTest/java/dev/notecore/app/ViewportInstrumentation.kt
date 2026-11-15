@@ -40,6 +40,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var atomicCutAction: String? = null
     private var atomicCutIdentity: String? = null
     private var atomicCutBoundary: String? = null
+    private var atomicCutFirstWrite = false
     private var pdfGeometryOnly = false
     private var pdfFixture = "crop-rotations.pdf"
     private var pdfUserUnit = 1.0
@@ -51,6 +52,7 @@ class ViewportInstrumentation : Instrumentation() {
         atomicCutAction = arguments?.getString("notecore_atomic_cut")
         atomicCutIdentity = arguments?.getString("notecore_atomic_identity")
         atomicCutBoundary = arguments?.getString("notecore_atomic_boundary")
+        atomicCutFirstWrite = arguments?.getString("notecore_atomic_first_write") == "true"
         imageOwnershipOnly = arguments?.getString("notecore_case") == "image_ownership"
         imageBudgetOnly = arguments?.getString("notecore_case") == "image_budget"
         fontFallbackOnly = arguments?.getString("notecore_case") == "font_fallback"
@@ -127,7 +129,7 @@ class ViewportInstrumentation : Instrumentation() {
                 finish(Activity.RESULT_OK, result); return
             }
             atomicCutAction?.let { action ->
-                val checks = AtomicCutHostChecks(this, host, checkNotNull(atomicCutIdentity), checkNotNull(atomicCutBoundary))
+                val checks = AtomicCutHostChecks(this, host, checkNotNull(atomicCutIdentity), checkNotNull(atomicCutBoundary), atomicCutFirstWrite)
                 when (action) {
                     "prepare" -> checks.prepare() // Deliberately never returns; external verified-PID termination.
                     "reopen" -> {

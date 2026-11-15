@@ -107,6 +107,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             val canonical = File(directory, "${changed.documentId}.ncp")
             val backup = File(directory, canonical.name + ".bak")
             check(canonical.renameTo(backup))
+            canonical.writeText("partial base left by a legacy writer")
             val unrelated = (0 until 2000).map { File(directory, "unrelated-$it.ncp") } +
                 File(directory, "unrelated-backup.ncp.bak")
             unrelated.forEach { check(it.mkdir()) }

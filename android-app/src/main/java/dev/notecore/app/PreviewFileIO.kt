@@ -2,10 +2,11 @@ package dev.notecore.app
 
 import android.content.ContentResolver
 import android.net.Uri
-import android.util.AtomicFile
 import dev.notecore.canvas.prototype.*
 import dev.notecore.document.*
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.charset.CharacterCodingException
 import java.nio.ByteBuffer
@@ -14,6 +15,7 @@ import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.UUID
 
@@ -58,15 +60,18 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         require(isLocalPreviewDocumentId(id))
         return File(directory, "$id.ncp")
     }
-    private fun atomicFile(id: String): AtomicFile {
+    private fun recoverFile(id: String): File {
         val base = file(id)
-        // AtomicFile may rename or delete these entries during both reads and writes.
         for (suffix in listOf("", ".bak", ".new")) {
             val path = File(directory, base.name + suffix).toPath()
             val attributes = entryAttributes(path) ?: continue
             if (!attributes.isRegularFile) throw IOException("Unexpected preview storage entry")
         }
-        return AtomicFile(base)
+        // Older Android builds backed up the previous committed file before writing the base.
+        val backup = File(directory, base.name + ".bak").toPath()
+        if (entryAttributes(backup) != null) Files.move(backup, base.toPath(), ATOMIC_MOVE)
+        Files.deleteIfExists(File(directory, base.name + ".new").toPath())
+        return base
     }
     private fun entryAttributes(path: Path): BasicFileAttributes? = try {
         Files.readAttributes(path, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
@@ -75,25 +80,29 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
-        val atomic = atomicFile(snapshot.documentId)
         val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
         val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
-        val stream = atomic.startWrite()
+        val base = recoverFile(snapshot.documentId)
+        val staging = File(directory, base.name + ".new")
         try {
-            // The host observer can stop the original worker with a partial staging file.
-            if (observeWriteBoundary != null && bytes.size > 1) {
-                val prefix = bytes.size / 2
-                stream.write(bytes, 0, prefix)
-                observeWriteBoundary(PreviewWriteBoundary.PREFIX_WRITTEN_BEFORE_SYNC)
-                stream.write(bytes, prefix, bytes.size - prefix)
-            } else stream.write(bytes)
-            stream.fd.sync()
+            FileOutputStream(staging).use { stream ->
+                // The host observer can stop the original worker with a partial staging file.
+                if (observeWriteBoundary != null && bytes.size > 1) {
+                    val prefix = bytes.size / 2
+                    stream.write(bytes, 0, prefix)
+                    observeWriteBoundary(PreviewWriteBoundary.PREFIX_WRITTEN_BEFORE_SYNC)
+                    stream.write(bytes, prefix, bytes.size - prefix)
+                } else stream.write(bytes)
+                stream.fd.sync()
+            }
             observeWriteBoundary?.invoke(PreviewWriteBoundary.SYNCED_BEFORE_REPLACE)
-            atomic.finishWrite(stream)
+            Files.move(staging.toPath(), base.toPath(), ATOMIC_MOVE)
+        } catch (error: Throwable) {
+            try { Files.deleteIfExists(staging.toPath()) }
+            catch (cleanup: IOException) { error.addSuppressed(cleanup) }
+            throw error
         }
-        catch (error: Throwable) { atomic.failWrite(stream); throw error }
-        // AtomicFile.finishWrite can only log a failed rename. Verify through its serialized read path.
-        atomic.openRead().use { input ->
+        FileInputStream(base).use { input ->
             require(input.channel.size() == bytes.size.toLong()) { "Atomic replacement was not committed" }
             val buffer = ByteArray(8192); var offset = 0
             while (offset < bytes.size) {
@@ -139,6 +148,16 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         Files.newDirectoryStream(directory.toPath()).use { stream ->
             for (path in stream) {
                 val name = path.fileName.toString()
+                if (name.endsWith(".ncp.new")) {
+                    // A process can leave a first write behind before the document has a visible ID.
+                    val id = name.removeSuffix(".ncp.new")
+                    if (isLocalPreviewDocumentId(id) && entryAttributes(path)?.isRegularFile == true &&
+                        entryAttributes(file(id).toPath()) == null &&
+                        entryAttributes(File(directory, "$id.ncp.bak").toPath()) == null) {
+                        try { Files.deleteIfExists(path) } catch (_: IOException) { /* Retry on a later scan. */ }
+                    }
+                    continue
+                }
                 if (!name.endsWith(".ncp") && !name.endsWith(".ncp.bak")) continue
                 val id = name.removeSuffix(".bak").removeSuffix(".ncp")
                 if (!isLocalPreviewDocumentId(id) ||
@@ -154,7 +173,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             NoteSummary(id, title, file(id).lastModified())
         }
     }
-    private fun readHeader(id: String): PagedPreviewHeader = atomicFile(id).openRead().use { stream ->
+    private fun readHeader(id: String): PagedPreviewHeader = FileInputStream(recoverFile(id)).use { stream ->
         val input = stream.buffered(256); val bytes = java.io.ByteArrayOutputStream(1024); var newlines = 0
         while (newlines < 2) {
             require(bytes.size() < 4096) { "Invalid catalog header" }
@@ -168,7 +187,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     fun read(id: String): DocumentRoot = readRecovery(id).let {
         require(it.pending == null) { "Pending recovery requires the original owner" }; it.root
     }
-    fun readRecovery(id: String): PagedPreviewSnapshot = atomicFile(id).openRead().use { stream ->
+    fun readRecovery(id: String): PagedPreviewSnapshot = FileInputStream(recoverFile(id)).use { stream ->
         val size = stream.channel.size()
         if (size > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
         val text = try { decode(readSizedPreviewBytes(stream, size.toInt())) }

@@ -83,15 +83,24 @@ def main():
     boundaries = ['SYNCED_BEFORE_REPLACE', 'VERIFIED_BEFORE_RETURN']
     if args.isolated_api32:
         boundaries.insert(0, 'PREFIX_WRITTEN_BEFORE_SYNC')
-    for boundary in boundaries:
+    scenarios = [(boundary, False) for boundary in boundaries]
+    if args.isolated_api32:
+        scenarios += [(boundary, True) for boundary in boundaries]
+    for boundary, first_write in scenarios:
         identity = str(uuid.uuid4()); cache = 'cache/atomic-cut-' + identity
-        stage = folder / boundary.lower(); stage.mkdir(exist_ok=True)
+        stage = folder / (('first_write_' if first_write else '') + boundary.lower())
+        stage.mkdir(exist_ok=True)
 
         def fixture(name):
             return adb('exec-out', 'run-as', BUNDLE, 'cat', cache + '/' + name)
 
+        def base_file():
+            names = adb('shell', 'run-as', BUNDLE, 'ls', cache).decode().splitlines()
+            return fixture('atomic-cut.ncp') if 'atomic-cut.ncp' in names else None
+
+        first_write_option = ['-e', 'notecore_atomic_first_write', 'true'] if first_write else []
         command = [*prefix, 'shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_atomic_identity', identity,
-                   '-e', 'notecore_atomic_boundary', boundary, '-e', 'notecore_atomic_cut', 'prepare',
+                   '-e', 'notecore_atomic_boundary', boundary, *first_write_option, '-e', 'notecore_atomic_cut', 'prepare',
                    BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation']
         prepare_log = stage / 'prepare.log'
         with prepare_log.open('wb') as log:
@@ -103,9 +112,13 @@ def main():
                 except (subprocess.CalledProcessError, json.JSONDecodeError): time.sleep(.1)
             assert ready is not None, 'No live worker boundary observed; do not restart or infer completion'
             assert ready['boundary'] == boundary and ready['phase'] == 'SAVING' and ready['callbacks'] == 0 and ready['has_pending']
+            assert ready.get('first_write', False) == first_write
             victim = pid(); assert victim == ready['pid'] and victim is not None and process.poll() is None
-            old = fixture('expected-old.txt'); pending = fixture('expected-pending.txt'); base = fixture('atomic-cut.ncp')
-            assert old.startswith(b'NCPREVIEW') and pending.startswith(b'NCRECOVERY') and old != pending
+            old = None if first_write else fixture('expected-old.txt')
+            pending = fixture('expected-pending.txt')
+            base = base_file()
+            assert pending.startswith(b'NCRECOVERY')
+            assert old is None or (old.startswith(b'NCPREVIEW') and old != pending)
             if boundary != 'VERIFIED_BEFORE_RETURN':
                 expected_temporary = pending if boundary == 'SYNCED_BEFORE_REPLACE' else pending[:len(pending)//2]
                 temporary = fixture('atomic-cut.ncp.new'); assert base == old and temporary == expected_temporary
@@ -114,27 +127,37 @@ def main():
                 assert base == pending
                 assert adb('shell', 'run-as', BUNDLE, 'ls', cache).decode().splitlines().count('atomic-cut.ncp.new') == 0
             for name, content in [('old.ncp', old), ('pending.ncp', pending), ('base-before-kill.ncp', base)]:
-                (stage / name).write_bytes(content)
+                if content is not None:
+                    (stage / name).write_bytes(content)
             # Kill only the exact app PID whose original owner/worker marker was observed live.
             assert pid() == victim and process.poll() is None
             adb('shell', 'am', 'force-stop', BUNDLE)
             assert pid() is None; process.wait(timeout=15)
         assert b'atomic_cut_status=passed' not in prepare_log.read_bytes()
-        assert fixture('atomic-cut.ncp') == base
+        assert base_file() == base
         if boundary != 'VERIFIED_BEFORE_RETURN': assert fixture('atomic-cut.ncp.new') == expected_temporary
         reopened = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_atomic_identity', identity,
-                       '-e', 'notecore_atomic_boundary', boundary, '-e', 'notecore_atomic_cut', 'reopen',
+                       '-e', 'notecore_atomic_boundary', boundary, *first_write_option, '-e', 'notecore_atomic_cut', 'reopen',
                        BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode()
         reopen_log = stage / 'reopen.log'; reopen_log.write_text(reopened, encoding='utf-8')
         assert 'atomic_cut_status=passed' in reopened and 'INSTRUMENTATION_CODE: -1' in reopened, reopened
         result = json.loads(re.search(r'atomic_cut_observations=(\{.*\})', reopened).group(1))
         expect_pending = boundary == 'VERIFIED_BEFORE_RETURN'
+        expect_absent = first_write and not expect_pending
         assert result['previous_pid'] == victim and result['pid'] != victim and result['boundary'] == boundary
         assert result['recovered_pending'] == expect_pending and result['committed_strokes'] == int(expect_pending)
-        assert result['revision'] == int(expect_pending) and result['temporary_file_absent'] and result['original_owner_retired']
-        observation = {'ready': ready, 'reopen': result, 'actual_process_terminated': True,
-                       'base_before_kill_sha256': sha(base), 'old_sha256': sha(old), 'pending_sha256': sha(pending),
-                       'outcome': 'previous file preserved; unconfirmed pending was not committed' if not expect_pending else 'pending file recovered before any prior owner ACK; explicit commit occurs exactly once'}
+        assert result['revision'] == (None if expect_absent else int(expect_pending))
+        assert result.get('document_absent', False) == expect_absent
+        assert result['temporary_file_absent'] and result['original_owner_retired']
+        observation = {'first_write': first_write, 'ready': ready, 'reopen': result, 'actual_process_terminated': True,
+                       'base_before_kill_sha256': sha(base) if base is not None else None,
+                       'old_sha256': sha(old) if old is not None else None, 'pending_sha256': sha(pending)}
+        if expect_pending:
+            observation['outcome'] = 'Complete pending recovered before owner ACK and explicitly committed once.'
+        elif expect_absent:
+            observation['outcome'] = 'Catalog stayed empty and removed the unpublished staging file.'
+        else:
+            observation['outcome'] = 'Previous file preserved and unpublished staging file removed.'
         record = stage / 'observation.json'; record.write_text(json.dumps(observation, indent=2) + '\n', encoding='utf-8')
         observations.append(observation); evidence.extend(p for p in stage.iterdir() if p.is_file())
     assert original_files() == before
@@ -152,8 +175,8 @@ def main():
               'android_api': sdk_api, 'android_fingerprint': fingerprint,
               'apk_sha256': sha(apk.read_bytes()), 'source_and_artifact_sha256': dict(sorted(bindings.items())),
               'sdk_contract_sha256': {str(sdk_contract): sha(sdk_contract.read_bytes())} if not args.isolated_api32 else {},
-              'decision': 'Keep the original serialized AtomicFile replacement/readback and owner ACK boundary. Process death before replacement preserves the old file and may lose the unconfirmed pending; after verified replacement a fresh process recovers the exact pending and commits once. Never infer owner confirmation from admission or a ready marker.',
-              'scope': 'Real force-stops at observed worker boundaries using unique synthetic cache files and fresh instrumentation processes. The prefix case uses an observed split write. No power-loss, directory fsync, physical or production durability proof.',
+              'decision': 'Stage in the same directory, sync, atomically move and read back on the original worker before owner ACK. Before the move the only catalog-visible version is any previously published file. After verified replacement a fresh process can recover the exact pending and commit once.',
+              'scope': 'Real force-stops at observed original worker boundaries using unique synthetic cache files and fresh instrumentation processes. The prefix case uses an observed split write. Scope covers process death in the observed emulator.',
               'c1_gate_complete': False, 'production_sqlite_authorized': False}
     destination = folder / 'result.json' if args.isolated_api32 else ROOT / 'reports/android-atomic-cut.json'
     destination.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
