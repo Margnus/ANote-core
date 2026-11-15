@@ -1,0 +1,55 @@
+{
+  "status": "passed",
+  "baseline_commit": "e920baa6750e1e31b62326f39b69ee70260a1558",
+  "source_sha256": {
+    "canvas-core/build.gradle.kts": "0e277d516c39fdd5e4ce666d89ba05a8448197d4a0b3838c1291bf914d8e3566",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/DocumentCloseCoordinator.kt": "6136c2528b6b1f392ac71a21d28282376b0bd482a1da6153bf9ecac638c4b84d",
+    "tools/audit_public_boundary.py": "e23c3f7e24e1a79a07a1d5d0fc5bc82fab408e507aaa153a06ac1b7a28fb6e2f",
+    "tools/audit_sdk_type_closure.py": "58be2a1ea4436eaca90c5f4794de79b48d9a471b915ad5ee08b61e96ebf7532d"
+  },
+  "android_art_api": 32,
+  "art_inputs_sha256": {
+    "reports/sdk-artifact-boundary-20261107/android/canvas-core-release.aar": "5926fe32897a6fe6efb72b81c8160904d42b86a77148732298d441b15da7d37b",
+    "reports/sdk-artifact-boundary-20261107/android/shared-core-release.aar": "6921d63fd3e5d3b99707c47a959530696995e0501aaf0357518466f77d81e495",
+    "build/sdk-art-runtime/historical.jar": "cdfe35f750d11919ff93696a19157b4b68685b01a8a10bc47f0e9512c4174dcf",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1.aar": "752c13e13b6885b6d169fdfa40385bb3065dc0d64a7995e978005bd254991679",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.aar": "2e370e8c09a077a8f5edf1a03dffeef965a74d2b9af8a59a2771f7cca4a653a0",
+    "build/sdk-art-runtime/candidate.jar": "cbd698d7866b811df0ea4657fb593a9f2facae89c909fa39914f99071e059cb1",
+    "reports/sdk-artifact-boundary-20261107/android/recovery-consumer.jar": "38ec1bcc2fedf2a9a0b97b32e54ac6ac256088d9f8aa7e05b5a58dda8074dde0",
+    "kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+    "d8.jar": "4097ff9c46c185c6e7214da7fe9b1befb5adeea5cc9ca349270e0249904f9240",
+    "platforms/android-36/android.jar": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a"
+  },
+  "apple_runtime_version": "27.0 simulator",
+  "apple_artifact_sha256": {
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "d5fe544a6a4edb1ce6e66886dfed64daa5e2a2415bf8273023491293dd359891",
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "11427b511c70c9089e15751e6ec29a9cf996e8f43217fb0c6a2561f1175c0808",
+    "build/sdk-close/iosArm64-old-consumer.o": "992bbcf2117f3d60eaab826ae9a333dc4879bc775fa72009571380782b307632",
+    "build/sdk-close/iosArm64-old-linked": "b07b7836a4e3263f6912ea19432f6a9102638702c547ebd81aab3435fec4a37f",
+    "build/sdk-close/iosArm64-candidate-linked": "18bc1066ed82a43cd6ea165089758a3e27e8258b7402b7ae7b9c647ceb70a12a",
+    "build/sdk-close/iosArm64-sketch": "78de2647b8463807a438a2ef3499b8ecceecf2354c4f8f9d78dd2dff21013945",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "a0406bbb5a6038bd5f8025088942470d1f024d18c7f6ccf565e4152d390aa403",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "11427b511c70c9089e15751e6ec29a9cf996e8f43217fb0c6a2561f1175c0808",
+    "build/sdk-close/iosSimulatorArm64-old-consumer.o": "fbcaf7a23e8f5bfcac651b24753bd37e28a7ccc63dbefe7d9026ed29877331d3",
+    "build/sdk-close/iosSimulatorArm64-old-linked": "1b0fd4a711b69797b296eedfbf69e9ba6b7cad0d7bb4bd1d223033f6071c72de",
+    "build/sdk-close/iosSimulatorArm64-candidate-linked": "4358f6e6f505414ba3a4aa81b73f886f9ced55e965fcdcd997f9a2a112b5a8ee",
+    "build/sdk-close/iosSimulatorArm64-sketch": "72794714d734ad150bfb68a95c6e2d7288462ebe9af6fb64fca78ebb0cdaf4bf"
+  },
+  "common_android_classes_byte_identical": 244,
+  "evidence_sha256": {
+    "reports/sdk-close-boundary-20261115/CloseProbe.java.txt": "e4d32bd097afe4c2d38f11ec07fe5101ae4bee9e7dde7f778658960d8a082b0c",
+    "reports/sdk-close-boundary-20261115/CloseProbe.m.txt": "f527452f618e933491139aefdbcffde879b10ed26befbc8d42a399fcf71ae994",
+    "reports/sdk-close-boundary-20261115/apple-candidate.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-close-boundary-20261115/apple-old.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-close-boundary-20261115/art-candidate.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-close-boundary-20261115/art-dex-on-device.sha256": "e35abf0125d1514e1ed01378478f6184f2892d1152454c4bcd70b1f43eec110d",
+    "reports/sdk-close-boundary-20261115/art-fingerprint.txt": "c522bc88554283839ffd330352feb2b4de6aadcf16563dad0c1abdb40942a652",
+    "reports/sdk-close-boundary-20261115/art-fixtures-on-device.sha256": "13a2c9b11bb9787badbded9662e8a7edb28119bc7eb5dfad6dd99d6e695fbc74",
+    "reports/sdk-close-boundary-20261115/art-historical.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-close-boundary-20261115/build-summary.txt": "328878b0e6bbdb34d854a6833e48e5012292feee5b6f63f769267a42b39c55e1",
+    "reports/sdk-close-boundary-20261115/inventory.json": "449d04822864de5c64818c6ea2a994a91f72d69fc8f104324a066b7615ac1442",
+    "reports/sdk-close-boundary-20261115/java-refusal.log": "f63c94f96c5e61ca2bb6fcfd3b0c421982bc2ee5a901c6e2fe32983fdd54fdc0",
+    "reports/sdk-close-boundary-20261115/objc-refusal.log": "4f66d4bd8615f46fb3831aa64dc412c144a43b9708edc3e099d009fd8bdc2fd3"
+  },
+  "scope": "Candidate isolation of the reference close coordinator and its declarations, with original default JVM demo and independent recovery consumers on API32 ART and iOS 27 simulator. Earlier prototype type references fail to compile against the new candidate. Stable SDK coverage and physical and minimum runtime gates remain pending."
+}
