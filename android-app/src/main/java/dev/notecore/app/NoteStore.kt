@@ -45,7 +45,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private val afterInkBufferSubmitted: () -> Unit = {}, private val maySettleInkRelease: () -> Boolean = { true },
     private val exportPickerByteLimit: Long = 8L * 1024 * 1024, private val beforeOpenRead: () -> Unit = {},
     private val catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit,
-    observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {},
+    observeWriteBoundary: ((PreviewWriteBoundary) -> Unit)? = null,
     private val documentBudget: DocumentBudget? = null) {
     init {
         // The fixed main wake route requires this owner before allocating a worker or ledger.
@@ -684,7 +684,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             afterInkNativeClose: () -> Unit = {}, afterInkBufferSubmitted: () -> Unit = {},
             maySettleInkRelease: () -> Boolean = { true }, exportPickerByteLimit: Long = 8L * 1024 * 1024, beforeOpenRead: () -> Unit = {},
             catalogResultByteLimit: Long = PreviewCatalogBudget.resultByteLimit,
-            observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}, documentBudget: DocumentBudget? = null): NoteStore =
+            observeWriteBoundary: ((PreviewWriteBoundary) -> Unit)? = null, documentBudget: DocumentBudget? = null): NoteStore =
             NoteStore(context,directory,beforeInkCompute,afterInkNativeClose,afterInkBufferSubmitted,maySettleInkRelease,exportPickerByteLimit,beforeOpenRead,catalogResultByteLimit,observeWriteBoundary,documentBudget)
     }
 }

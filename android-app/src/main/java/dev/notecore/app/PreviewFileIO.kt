@@ -22,7 +22,7 @@ internal fun isLocalPreviewDocumentId(id: String): Boolean = id.length in 1..128
     id.all { it == '-' || it in '0'..'9' || it in 'A'..'Z' || it in 'a'..'z' }
 
 internal class CatalogCapacityRefusal : RuntimeException()
-internal enum class PreviewWriteBoundary { SYNCED_BEFORE_REPLACE, VERIFIED_BEFORE_RETURN }
+internal enum class PreviewWriteBoundary { PREFIX_WRITTEN_BEFORE_SYNC, SYNCED_BEFORE_REPLACE, VERIFIED_BEFORE_RETURN }
 
 /** Platform-local read result; no mutable document or secondary storage ownership. */
 internal enum class LocalReadFailure(val message: String) {
@@ -52,7 +52,7 @@ private fun PreviewReadFailure.localReason(): LocalReadFailure = when (this) {
 
 /** Serial worker capability. Contains immutable filesystem/resolver handles, no UI or owner ledger. */
 internal class PreviewFileIO(private val directory: File, private val resolver: ContentResolver, private val beforeRead: () -> Unit = {},
-    private val observeWriteBoundary: (PreviewWriteBoundary) -> Unit = {}) {
+    private val observeWriteBoundary: ((PreviewWriteBoundary) -> Unit)? = null) {
     private fun ensureDirectory() { check(directory.isDirectory || directory.mkdirs()) { "Storage directory unavailable" } }
     private fun file(id: String): File {
         require(isLocalPreviewDocumentId(id))
@@ -80,8 +80,15 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
         val stream = atomic.startWrite()
         try {
-            stream.write(bytes); stream.fd.sync()
-            observeWriteBoundary(PreviewWriteBoundary.SYNCED_BEFORE_REPLACE)
+            // The host observer can stop the original worker with a partial staging file.
+            if (observeWriteBoundary != null && bytes.size > 1) {
+                val prefix = bytes.size / 2
+                stream.write(bytes, 0, prefix)
+                observeWriteBoundary(PreviewWriteBoundary.PREFIX_WRITTEN_BEFORE_SYNC)
+                stream.write(bytes, prefix, bytes.size - prefix)
+            } else stream.write(bytes)
+            stream.fd.sync()
+            observeWriteBoundary?.invoke(PreviewWriteBoundary.SYNCED_BEFORE_REPLACE)
             atomic.finishWrite(stream)
         }
         catch (error: Throwable) { atomic.failWrite(stream); throw error }
@@ -97,7 +104,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             }
             require(input.read() == -1)
         }
-        observeWriteBoundary(PreviewWriteBoundary.VERIFIED_BEFORE_RETURN)
+        observeWriteBoundary?.invoke(PreviewWriteBoundary.VERIFIED_BEFORE_RETURN)
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {
         require(snapshot.pending == null) { "Recovery checkpoint is not an interchange export" }

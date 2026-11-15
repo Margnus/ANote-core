@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Terminate the real original worker process at two IO boundaries using synthetic cache files."""
+"""Terminate the original worker process at observable IO boundaries in synthetic cache files."""
 import argparse
 import hashlib
 import json
@@ -19,9 +19,12 @@ def sha(value):
 
 def main():
     parser = argparse.ArgumentParser(); parser.add_argument('--serial', required=True); parser.add_argument('--adb', required=True)
-    args = parser.parse_args(); assert args.serial == 'emulator-5554'
+    parser.add_argument('--isolated-api32', action='store_true', help='Use an empty NoteCoreAtomicCut32 emulator and the current APKs')
+    args = parser.parse_args()
+    assert args.serial == ('emulator-5586' if args.isolated_api32 else 'emulator-5554')
     driver_sha = sha(Path(__file__).read_bytes())
-    folder = ROOT / 'build/android-atomic-cut'; folder.mkdir(parents=True, exist_ok=True)
+    folder = ROOT / ('build/android-atomic-cut-api32-' + uuid.uuid4().hex if args.isolated_api32 else 'build/android-atomic-cut')
+    folder.mkdir(parents=True, exist_ok=True)
     prefix = [args.adb, '-s', args.serial]
 
     def adb(*command):
@@ -38,25 +41,49 @@ def main():
         return {name: sha(adb('exec-out', 'run-as', BUNDLE, 'cat', 'files/preview-notes/' + name))
                 for name in names if re.fullmatch(r'[A-Za-z0-9-]+\.ncp', name)}
 
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode().strip() == 'NoteCorePreview'
-    before = original_files(); assert len(before) == 66
-    assert before == {Path(k).name: v for k, v in json.loads((ROOT / 'build/android-input-host/original-files.json').read_text(encoding='utf-8')).items()}
-    for name, digest in before.items():
-        assert sha((ROOT / 'build/pending-input-budget/android-originals' / name).read_bytes()) == digest
-    build = json.loads((ROOT / 'reports/preview-build.json').read_text(encoding='utf-8')); assert build['status'] == 'passed'
-    stamp = dict(line.split('  ', 1)[::-1] for line in (ROOT / 'reports/android-brush-build-inputs.sha256').read_text(encoding='utf-8').splitlines())
-    bindings = {**build['source_and_build_input_sha256'], **stamp}
+    avd = 'NoteCoreAtomicCut32' if args.isolated_api32 else 'NoteCorePreview'
+    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode().strip() == avd
+    fingerprint = adb('shell', 'getprop', 'ro.build.fingerprint').decode().strip()
+    sdk_api = int(adb('shell', 'getprop', 'ro.build.version.sdk').decode().strip())
+    original_binding_files = []
+    if args.isolated_api32:
+        assert sdk_api == 32
+        installed_packages = adb('shell', 'pm', 'list', 'packages').decode().splitlines()
+        assert not any(line in installed_packages for line in ('package:' + BUNDLE, 'package:' + BUNDLE + '.test'))
+        apk = ROOT / 'android-app/build/outputs/apk/debug/android-app-debug.apk'
+        source_paths = subprocess.check_output(
+            ['git', 'ls-files', 'canvas-core/src', 'shared-core/src', 'android-app/src', '*gradle.kts', 'gradle.properties'],
+            cwd=ROOT, text=True).splitlines()
+        bindings = {name: sha((ROOT / name).read_bytes()) for name in source_paths}
+        before = {}
+    else:
+        before = original_files(); assert len(before) == 66
+        assert before == {Path(k).name: v for k, v in json.loads((ROOT / 'build/android-input-host/original-files.json').read_text(encoding='utf-8')).items()}
+        for name, digest in before.items():
+            assert sha((ROOT / 'build/pending-input-budget/android-originals' / name).read_bytes()) == digest
+        build_path = ROOT / 'reports/preview-build.json'
+        stamp_path = ROOT / 'reports/android-brush-build-inputs.sha256'
+        original_binding_files = [build_path, stamp_path]
+        build = json.loads(build_path.read_text(encoding='utf-8')); assert build['status'] == 'passed'
+        stamp = dict(line.split('  ', 1)[::-1] for line in stamp_path.read_text(encoding='utf-8').splitlines())
+        bindings = {**build['source_and_build_input_sha256'], **stamp}
+        apk = ROOT / build['android']['artifact']; assert sha(apk.read_bytes()) == build['android']['sha256']
+        for name, digest in bindings.items(): assert sha((ROOT / name).read_bytes()) == digest, name
     assert 'android-app/src/androidTest/java/dev/notecore/app/AtomicCutHostChecks.kt' in bindings
-    for name, digest in bindings.items(): assert sha((ROOT / name).read_bytes()) == digest, name
-    apk = ROOT / build['android']['artifact']; assert sha(apk.read_bytes()) == build['android']['sha256']
     test_apk = ROOT / 'android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk'
     adb('install', '-r', str(apk)); adb('install', '-r', str(test_apk))
     for package, local in [(BUNDLE, apk), (BUNDLE + '.test', test_apk)]:
         remote = adb('shell', 'pm', 'path', package).decode().strip().removeprefix('package:')
         assert re.fullmatch(r'/data/app/[a-zA-Z0-9_./=+~:-]+/base.apk', remote)
         assert sha(adb('exec-out', 'cat', remote)) == sha(local.read_bytes())
+    if args.isolated_api32:
+        adb('shell', 'run-as', BUNDLE, 'mkdir', '-p', 'files/preview-notes')
+        assert original_files() == before
     observations = []; evidence = []
-    for boundary in ['SYNCED_BEFORE_REPLACE', 'VERIFIED_BEFORE_RETURN']:
+    boundaries = ['SYNCED_BEFORE_REPLACE', 'VERIFIED_BEFORE_RETURN']
+    if args.isolated_api32:
+        boundaries.insert(0, 'PREFIX_WRITTEN_BEFORE_SYNC')
+    for boundary in boundaries:
         identity = str(uuid.uuid4()); cache = 'cache/atomic-cut-' + identity
         stage = folder / boundary.lower(); stage.mkdir(exist_ok=True)
 
@@ -79,8 +106,9 @@ def main():
             victim = pid(); assert victim == ready['pid'] and victim is not None and process.poll() is None
             old = fixture('expected-old.txt'); pending = fixture('expected-pending.txt'); base = fixture('atomic-cut.ncp')
             assert old.startswith(b'NCPREVIEW') and pending.startswith(b'NCRECOVERY') and old != pending
-            if boundary == 'SYNCED_BEFORE_REPLACE':
-                temporary = fixture('atomic-cut.ncp.new'); assert base == old and temporary == pending
+            if boundary != 'VERIFIED_BEFORE_RETURN':
+                expected_temporary = pending if boundary == 'SYNCED_BEFORE_REPLACE' else pending[:len(pending)//2]
+                temporary = fixture('atomic-cut.ncp.new'); assert base == old and temporary == expected_temporary
                 (stage / 'temporary-before-kill.ncp').write_bytes(temporary)
             else:
                 assert base == pending
@@ -93,7 +121,7 @@ def main():
             assert pid() is None; process.wait(timeout=15)
         assert b'atomic_cut_status=passed' not in prepare_log.read_bytes()
         assert fixture('atomic-cut.ncp') == base
-        if boundary == 'SYNCED_BEFORE_REPLACE': assert fixture('atomic-cut.ncp.new') == pending
+        if boundary != 'VERIFIED_BEFORE_RETURN': assert fixture('atomic-cut.ncp.new') == expected_temporary
         reopened = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_atomic_identity', identity,
                        '-e', 'notecore_atomic_boundary', boundary, '-e', 'notecore_atomic_cut', 'reopen',
                        BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode()
@@ -115,19 +143,21 @@ def main():
     assert original_files() == before and pid() is not None
     originals = folder / 'original-files.json'; originals.write_text(json.dumps(before, indent=2) + '\n', encoding='utf-8')
     sdk_contract = Path(args.adb).resolve().parent.parent / 'sources/android-36/android/util/AtomicFile.java'
-    paths = [*evidence, originals, Path(__file__), apk, test_apk, ROOT / 'reports/preview-build.json',
-             ROOT / 'reports/android-brush-build-inputs.sha256']
+    paths = [*evidence, originals, Path(__file__), apk, test_apk, *original_binding_files]
     assert sha(Path(__file__).read_bytes()) == driver_sha, 'Driver changed during execution'
     for name, digest in bindings.items(): assert sha((ROOT / name).read_bytes()) == digest, name
     for path in paths: bindings[path.relative_to(ROOT).as_posix()] = sha(path.read_bytes())
     report = {'schema': 'android-atomic-cut-1', 'status': 'passed', 'observations': observations,
-              'original_files_preserved': 66, 'ordinary_process_restored': True, 'ordinary_pid': pid(),
+              'original_files_preserved': len(before), 'ordinary_process_restored': True, 'ordinary_pid': pid(),
+              'android_api': sdk_api, 'android_fingerprint': fingerprint,
               'apk_sha256': sha(apk.read_bytes()), 'source_and_artifact_sha256': dict(sorted(bindings.items())),
-              'sdk_contract_sha256': {str(sdk_contract): sha(sdk_contract.read_bytes())},
+              'sdk_contract_sha256': {str(sdk_contract): sha(sdk_contract.read_bytes())} if not args.isolated_api32 else {},
               'decision': 'Keep the original serialized AtomicFile replacement/readback and owner ACK boundary. Process death before replacement preserves the old file and may lose the unconfirmed pending; after verified replacement a fresh process recovers the exact pending and commits once. Never infer owner confirmation from admission or a ready marker.',
-              'scope': 'Two real force-stops at observed worker boundaries using unique synthetic cache files and fresh instrumentation processes. No abrupt power/storage failure, directory fsync guarantee, Apple run, physical M-1/heap/stylus, or production DURABLE receipt.',
+              'scope': 'Real force-stops at observed worker boundaries using unique synthetic cache files and fresh instrumentation processes. The prefix case uses an observed split write. No power-loss, directory fsync, physical or production durability proof.',
               'c1_gate_complete': False, 'production_sqlite_authorized': False}
-    (ROOT / 'reports/android-atomic-cut.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    destination = folder / 'result.json' if args.isolated_api32 else ROOT / 'reports/android-atomic-cut.json'
+    destination.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    print(f'Evidence: {destination}')
     print(json.dumps({k: v for k, v in report.items() if k not in ('source_and_artifact_sha256', 'sdk_contract_sha256')}, ensure_ascii=False))
 
 
