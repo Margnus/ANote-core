@@ -1,0 +1,66 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :canvas-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:jvmProcessResources NO-SOURCE
+> Task :canvas-core:processJvmMainResources SKIPPED
+> Task :canvas-core:generateScaleFixtures UP-TO-DATE
+> Task :canvas-core:jvmTestProcessResources UP-TO-DATE
+> Task :canvas-core:processJvmTestResources SKIPPED
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:jvmProcessResources NO-SOURCE
+> Task :shared-core:processJvmMainResources SKIPPED
+> Task :shared-core:jvmTestProcessResources NO-SOURCE
+> Task :shared-core:processJvmTestResources SKIPPED
+> Task :canvas-core:compileKotlinJvm
+> Task :canvas-core:compileJvmMainJava NO-SOURCE
+> Task :canvas-core:jvmMainClasses
+
+> Task :canvas-core:runPrototype
+scene=demo-page revision=1 layer=captured-layer
+durability=MEMORY_ONLY; disk persistence and native rendering are not implemented
+submission_retry_objects=1 queue_charged_bytes=0
+old_frame_publish=false
+cache_entries=2 resident_bytes=8 budget=8
+resource_model_closed_charged=4 borrowed=4
+resource_model_drained=true charged=0; native_gpu_verified=false
+document_close_before_ack=CLOSING late_frame_publish=false
+document_close_before_handoff=CLOSING receipt=MEMORY_ONLY
+document_close_after_handoff=CLOSED retained_submissions=0; durable_recovery_verified=false
+real_worker_stopped=true before_ack_charged=8 drained=false
+real_owner_received=2 after_ack_charged=0 drained=true; apple_executor_verified=false
+
+> Task :canvas-core:jvmJar
+> Task :canvas-core:compileTestKotlinJvm UP-TO-DATE
+> Task :canvas-core:compileJvmTestJava NO-SOURCE
+> Task :canvas-core:jvmTestClasses UP-TO-DATE
+> Task :canvas-core:jvmTest UP-TO-DATE
+> Task :shared-core:compileKotlinJvm
+> Task :shared-core:compileJvmMainJava NO-SOURCE
+> Task :shared-core:jvmMainClasses
+> Task :shared-core:jvmJar
+> Task :shared-core:compileTestKotlinJvm UP-TO-DATE
+> Task :shared-core:compileJvmTestJava NO-SOURCE
+> Task :shared-core:jvmTestClasses UP-TO-DATE
+> Task :shared-core:jvmTest UP-TO-DATE
+
+[Incubating] Problems report is available at: file:///Users/lixiaofan/StudioProjects/notecore/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 19s
+13 actionable tasks: 7 executed, 6 up-to-date

@@ -1,0 +1,325 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :canvas-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':canvas-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest, androidMain, jvmAndAndroidMain, jvmAndAndroidTest, jvmMain, jvmTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+    Following Kotlin Source Set groups can't depend on 'jvmAndAndroidTest' together as they belong to different Kotlin Source Set Trees.
+    Source Sets from 'instrumentedTest' Tree:
+  * 'androidInstrumentedTest'
+Source Sets from 'test' Tree:
+  * 'jvmTest'
+[32m[1mSolution:[0m[0m
+[32m[3mPlease keep dependsOn edges only from one group and remove the others. [0m[0m
+
+
+> Configure project :shared-core
+w: [33m[1m⚠️ Default Kotlin Hierarchy Template Not Applied Correctly[0m[0m
+The Default Kotlin Hierarchy Template was not applied to 'project ':shared-core'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[androidInstrumentedTest]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove the dependsOn-calls or disable the default template.[0m[0m
+[36mLearn more about hierarchy templates: [0m[34mhttps://kotl.in/hierarchy-template[0m[36m[0m
+
+w: [33m[1m⚠️ Invalid Source Set Dependency Across Trees[0m[0m
+Kotlin Source Set 'androidInstrumentedTest' can't depend on 'commonTest' as they are from different Source Set Trees.
+[32m[1mSolution:[0m[0m
+[32m[3mPlease remove this dependency edge.[0m[0m
+
+
+> Task :canvas-core:androidReleaseSourcesJar UP-TO-DATE
+> Task :canvas-core:preBuild UP-TO-DATE
+> Task :canvas-core:preReleaseBuild UP-TO-DATE
+> Task :canvas-core:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :canvas-core:mergeReleaseNativeLibs NO-SOURCE
+> Task :canvas-core:stripReleaseDebugSymbols NO-SOURCE
+> Task :canvas-core:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :canvas-core:generateReleaseResValues UP-TO-DATE
+> Task :canvas-core:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :canvas-core:kmpPartiallyResolvedDependenciesChecker
+> Task :canvas-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :canvas-core:generateReleaseResources UP-TO-DATE
+> Task :canvas-core:packageReleaseResources UP-TO-DATE
+> Task :canvas-core:parseReleaseLocalResources UP-TO-DATE
+> Task :canvas-core:generateReleaseRFile UP-TO-DATE
+> Task :canvas-core:compileReleaseKotlinAndroid UP-TO-DATE
+> Task :canvas-core:extractReleaseAnnotations UP-TO-DATE
+> Task :canvas-core:mergeReleaseShaders UP-TO-DATE
+> Task :canvas-core:compileReleaseShaders NO-SOURCE
+> Task :canvas-core:generateReleaseAssets UP-TO-DATE
+> Task :canvas-core:releaseAssetsCopyForAGP NO-SOURCE
+> Task :canvas-core:mergeReleaseAssets UP-TO-DATE
+> Task :canvas-core:javaPreCompileRelease UP-TO-DATE
+> Task :canvas-core:compileReleaseJavaWithJavac NO-SOURCE
+> Task :canvas-core:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :canvas-core:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :canvas-core:prepareLintJarForPublish UP-TO-DATE
+> Task :canvas-core:prepareReleaseArtProfile UP-TO-DATE
+> Task :canvas-core:processReleaseManifest UP-TO-DATE
+> Task :canvas-core:processReleaseJavaRes UP-TO-DATE
+> Task :canvas-core:mergeReleaseJavaResource UP-TO-DATE
+> Task :canvas-core:syncReleaseLibJars UP-TO-DATE
+> Task :canvas-core:writeReleaseAarMetadata UP-TO-DATE
+> Task :canvas-core:bundleReleaseAar UP-TO-DATE
+> Task :canvas-core:generateMetadataFileForAndroidReleasePublication
+> Task :canvas-core:generatePomFileForAndroidReleasePublication
+> Task :canvas-core:publishAndroidReleasePublicationToSdkCandidateRepository
+> Task :canvas-core:jvmProcessResources NO-SOURCE
+> Task :canvas-core:processJvmMainResources SKIPPED
+> Task :canvas-core:jvmSourcesJar UP-TO-DATE
+> Task :canvas-core:generatePomFileForJvmPublication
+> Task :canvas-core:transformCommonMainDependenciesMetadata UP-TO-DATE
+> Task :canvas-core:compileCommonMainKotlinMetadata SKIPPED
+> Task :canvas-core:metadataCommonMainProcessResources NO-SOURCE
+> Task :canvas-core:metadataCommonMainClasses UP-TO-DATE
+> Task :canvas-core:transformJvmAndAndroidMainDependenciesMetadata UP-TO-DATE
+> Task :canvas-core:compileJvmAndAndroidMainKotlinMetadata SKIPPED
+> Task :canvas-core:generateProjectStructureMetadata UP-TO-DATE
+> Task :canvas-core:metadataJvmAndAndroidMainProcessResources NO-SOURCE
+> Task :canvas-core:metadataJvmAndAndroidMainClasses UP-TO-DATE
+> Task :canvas-core:allMetadataJar UP-TO-DATE
+> Task :canvas-core:buildKotlinToolingMetadata UP-TO-DATE
+> Task :canvas-core:sourcesJar UP-TO-DATE
+> Task :canvas-core:generateMetadataFileForKotlinMultiplatformPublication
+> Task :canvas-core:generatePomFileForKotlinMultiplatformPublication
+> Task :canvas-core:publishKotlinMultiplatformPublicationToSdkCandidateRepository
+> Task :shared-core:androidReleaseSourcesJar UP-TO-DATE
+> Task :shared-core:preBuild UP-TO-DATE
+> Task :shared-core:preReleaseBuild UP-TO-DATE
+> Task :shared-core:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :shared-core:mergeReleaseNativeLibs NO-SOURCE
+> Task :shared-core:stripReleaseDebugSymbols NO-SOURCE
+> Task :shared-core:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :shared-core:generateReleaseResValues UP-TO-DATE
+> Task :shared-core:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :canvas-core:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :shared-core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared-core:generateReleaseResources UP-TO-DATE
+> Task :shared-core:packageReleaseResources UP-TO-DATE
+> Task :shared-core:parseReleaseLocalResources UP-TO-DATE
+> Task :shared-core:generateReleaseRFile UP-TO-DATE
+> Task :shared-core:compileReleaseKotlinAndroid UP-TO-DATE
+> Task :shared-core:extractReleaseAnnotations UP-TO-DATE
+> Task :shared-core:mergeReleaseShaders UP-TO-DATE
+> Task :shared-core:compileReleaseShaders NO-SOURCE
+> Task :shared-core:generateReleaseAssets UP-TO-DATE
+> Task :shared-core:releaseAssetsCopyForAGP NO-SOURCE
+> Task :shared-core:mergeReleaseAssets UP-TO-DATE
+> Task :shared-core:javaPreCompileRelease UP-TO-DATE
+> Task :shared-core:compileReleaseJavaWithJavac NO-SOURCE
+> Task :shared-core:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :shared-core:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :shared-core:prepareLintJarForPublish UP-TO-DATE
+> Task :shared-core:prepareReleaseArtProfile UP-TO-DATE
+> Task :shared-core:processReleaseManifest UP-TO-DATE
+> Task :shared-core:processReleaseJavaRes UP-TO-DATE
+> Task :shared-core:mergeReleaseJavaResource UP-TO-DATE
+> Task :shared-core:syncReleaseLibJars UP-TO-DATE
+> Task :shared-core:writeReleaseAarMetadata UP-TO-DATE
+> Task :shared-core:bundleReleaseAar UP-TO-DATE
+> Task :shared-core:generateMetadataFileForAndroidReleasePublication
+> Task :canvas-core:exportTargetPublicationCoordinatesForReleaseApiElements UP-TO-DATE
+> Task :canvas-core:exportTargetPublicationCoordinatesForReleaseRuntimeElements UP-TO-DATE
+> Task :shared-core:generatePomFileForAndroidReleasePublication
+> Task :shared-core:publishAndroidReleasePublicationToSdkCandidateRepository
+> Task :shared-core:jvmProcessResources NO-SOURCE
+> Task :shared-core:processJvmMainResources SKIPPED
+> Task :shared-core:jvmSourcesJar UP-TO-DATE
+> Task :canvas-core:exportTargetPublicationCoordinatesForJvmApiElements UP-TO-DATE
+> Task :canvas-core:exportTargetPublicationCoordinatesForJvmRuntimeElements UP-TO-DATE
+> Task :shared-core:generatePomFileForJvmPublication
+> Task :canvas-core:exportCommonSourceSetsMetadataLocationsForMetadataApiElements UP-TO-DATE
+> Task :shared-core:transformCommonMainDependenciesMetadata UP-TO-DATE
+> Task :shared-core:compileCommonMainKotlinMetadata SKIPPED
+> Task :canvas-core:exportRootPublicationCoordinatesForMetadataApiElements UP-TO-DATE
+> Task :shared-core:generateProjectStructureMetadata UP-TO-DATE
+> Task :shared-core:metadataCommonMainProcessResources NO-SOURCE
+> Task :shared-core:metadataCommonMainClasses UP-TO-DATE
+> Task :shared-core:allMetadataJar UP-TO-DATE
+> Task :shared-core:buildKotlinToolingMetadata UP-TO-DATE
+> Task :shared-core:sourcesJar UP-TO-DATE
+> Task :shared-core:generateMetadataFileForKotlinMultiplatformPublication
+> Task :shared-core:generatePomFileForKotlinMultiplatformPublication
+> Task :shared-core:publishKotlinMultiplatformPublicationToSdkCandidateRepository
+
+> Task :canvas-core:tasks
+
+------------------------------------------------------------
+Tasks runnable from project ':canvas-core'
+------------------------------------------------------------
+
+Android tasks
+-------------
+androidDependencies - Displays the Android dependencies of the project.
+signingReport - Displays the signing info for the base and test modules
+sourceSets - Prints out all the source sets defined in this project.
+
+Build tasks
+-----------
+allMetadataJar - Assembles a jar archive containing the metadata for all Kotlin source sets.
+androidDebugSourcesJar - Assembles a jar archive containing the sources of target 'androidDebug'.
+androidReleaseSourcesJar - Assembles a jar archive containing the sources of target 'androidRelease'.
+assemble - Assemble main outputs for all the variants.
+assembleAndroidTest - Assembles all the Test applications.
+assembleUnitTest - Assembles all the unit test applications.
+build - Assembles and tests this project.
+buildDependents - Assembles and tests this project and all projects that depend on it.
+buildKotlinToolingMetadata - Build metadata json file containing information about the used Kotlin tooling
+buildNeeded - Assembles and tests this project and all projects it depends on.
+clean - Deletes the build directory.
+cleanAllTests - Deletes all the test results.
+compileDebugAndroidTestSources
+compileDebugSources
+compileDebugUnitTestSources
+compileReleaseSources
+compileReleaseUnitTestSources
+extractDebugAnnotations - Extracts Android annotations for the debug variant into the archive file
+extractReleaseAnnotations - Extracts Android annotations for the release variant into the archive file
+jvmJar - Assembles an archive containing the main classes.
+jvmMainClasses - Assembles outputs for compilation 'main' of target 'jvm'
+jvmSourcesJar - Assembles a jar archive containing the sources of target 'jvm'.
+jvmTestClasses - Assembles outputs for compilation 'test' of target 'jvm'
+metadataCommonMainClasses - Assembles outputs for compilation 'commonMain' of target 'metadata'
+metadataJvmAndAndroidMainClasses - Assembles outputs for compilation 'jvmAndAndroidMain' of target 'metadata'
+metadataMainClasses - Assembles outputs for compilation 'main' of target 'metadata'
+metadataSourcesJar - Assembles a jar archive containing the sources of target 'metadata'.
+sourcesJar - Assembles a jar archive containing the sources of target 'kotlin'.
+
+Help tasks
+----------
+artifactTransforms - Displays the Artifact Transforms that can be executed in project ':canvas-core'.
+buildEnvironment - Displays all buildscript dependencies declared in project ':canvas-core'.
+dependencies - Displays all dependencies declared in project ':canvas-core'.
+dependencyInsight - Displays the insight into a specific dependency in project ':canvas-core'.
+help - Displays a help message.
+javaToolchains - Displays the detected java toolchains.
+kotlinDslAccessorsReport - Prints the Kotlin code for accessing the currently available project extensions and conventions.
+outgoingVariants - Displays the outgoing variants of project ':canvas-core'.
+projects - Displays the sub-projects of project ':canvas-core'.
+properties - Displays the properties of project ':canvas-core'.
+resolvableConfigurations - Displays the configurations that can be resolved in project ':canvas-core'.
+tasks - Displays the tasks runnable from project ':canvas-core'.
+
+Ide tasks
+---------
+resolveIdeDependencies - Debugging/Diagnosing task that will resolve dependencies for the IDE
+
+Install tasks
+-------------
+installDebugAndroidTest - Installs the android (on device) tests for the Debug build.
+uninstallAll - Uninstall all applications.
+uninstallDebugAndroidTest - Uninstalls the android (on device) tests for the Debug build.
+
+Publishing tasks
+----------------
+generateMetadataFileForAndroidReleasePublication - Generates the Gradle metadata file for publication 'androidRelease'.
+generateMetadataFileForJvmPublication - Generates the Gradle metadata file for publication 'jvm'.
+generateMetadataFileForKotlinMultiplatformPublication - Generates the Gradle metadata file for publication 'kotlinMultiplatform'.
+generatePomFileForAndroidReleasePublication - Generates the Maven POM file for publication 'androidRelease'.
+generatePomFileForJvmPublication - Generates the Maven POM file for publication 'jvm'.
+generatePomFileForKotlinMultiplatformPublication - Generates the Maven POM file for publication 'kotlinMultiplatform'.
+publish - Publishes all publications produced by this project.
+publishAllPublicationsToSdkCandidateRepository - Publishes all Maven publications produced by this project to the SdkCandidate repository.
+publishAndroidReleasePublicationToMavenLocal - Publishes Maven publication 'androidRelease' to the local Maven repository.
+publishAndroidReleasePublicationToSdkCandidateRepository - Publishes Maven publication 'androidRelease' to Maven repository 'SdkCandidate'.
+publishJvmPublicationToMavenLocal - Publishes Maven publication 'jvm' to the local Maven repository.
+publishJvmPublicationToSdkCandidateRepository - Publishes Maven publication 'jvm' to Maven repository 'SdkCandidate'.
+publishKotlinMultiplatformPublicationToMavenLocal - Publishes Maven publication 'kotlinMultiplatform' to the local Maven repository.
+publishKotlinMultiplatformPublicationToSdkCandidateRepository - Publishes Maven publication 'kotlinMultiplatform' to Maven repository 'SdkCandidate'.
+publishToMavenLocal - Publishes all Maven publications produced by this project to the local Maven cache.
+
+Run tasks
+---------
+jvmRun - Jvm Run task for target 'jvm' and compilation 'main'. This task can act as carrier for the IDE to execute jvm based code
+
+Signing tasks
+-------------
+generatePgpKeys - Generates a new PGP keypair.
+
+Usage:
+gradlew generatePgpKeys --name "Jane Doe <janedoe@example.com>" --password YOUR_PASSWORD
+
+Validation tasks
+----------------
+checkPomFileForAndroidReleasePublication
+checkPomFileForJvmPublication
+checkPomFileForKotlinMultiplatformPublication
+checkSigningConfiguration - Checks that a signing configuration is set up correctly.
+
+Verification tasks
+------------------
+allTests - Runs the tests for all targets and create aggregated report
+check - Runs all checks.
+checkJetifier - Checks whether Jetifier is needed for the current project
+checkKotlinGradlePluginConfigurationErrors - Checks that Kotlin Gradle Plugin hasn't reported project configuration errors, failing otherwise. This task always runs before compileKotlin* or similar tasks.
+connectedAndroidTest - Installs and runs instrumentation tests for all flavors on connected devices.
+connectedCheck - Runs all device checks on currently connected devices.
+connectedDebugAndroidTest - Installs and runs the tests for debug on connected devices.
+deviceAndroidTest - Installs and runs instrumentation tests using all Device Providers.
+deviceCheck - Runs all device checks using Device Providers and Test Servers.
+generateBrushPathFixtures
+jvmTest - Runs the tests of the test test run.
+lint - Runs lint on the default variant.
+lintDebug - Print text output from the corresponding lint report task
+lintFix - Runs lint on the default variant and applies any safe suggestions to the source code.
+lintRelease - Print text output from the corresponding lint report task
+runBrushPathCosts
+runBrushTileCacheCosts - Synthetic viewport cache/reader accounting trace; not a heap or device benchmark.
+runCanonicalIndexBenchmark - Compare existing exact and broad-phase index candidates on canonical reference ink.
+runSpatialIndexPoc - Opt-in M-3 desktop AABB experiment; not a physical device benchmark.
+test - Run unit tests for all variants.
+testDebugUnitTest - Run unit tests for the debug build.
+testReleaseUnitTest - Run unit tests for the release build.
+updateLintBaseline - Updates the lint baseline using the default variant.
+
+Rules
+-----
+Pattern: clean<TaskName>: Cleans the output files of a task.
+Pattern: build<ConfigurationName>: Assembles the artifacts of a configuration.
+
+To see all tasks and more detail, run gradlew tasks --all
+
+To see more detail about a task, run gradlew help --task <task>
+
+> Task :canvas-core:compileKotlinJvm
+> Task :canvas-core:compileJvmMainJava NO-SOURCE
+> Task :canvas-core:jvmMainClasses
+> Task :canvas-core:jvmJar
+> Task :canvas-core:generateMetadataFileForJvmPublication
+> Task :canvas-core:publishJvmPublicationToSdkCandidateRepository
+> Task :canvas-core:publishAllPublicationsToSdkCandidateRepository
+> Task :shared-core:compileKotlinJvm
+> Task :shared-core:compileJvmMainJava NO-SOURCE
+> Task :shared-core:jvmMainClasses
+> Task :shared-core:jvmJar
+> Task :shared-core:generateMetadataFileForJvmPublication
+> Task :shared-core:publishJvmPublicationToSdkCandidateRepository
+> Task :shared-core:publishAllPublicationsToSdkCandidateRepository
+
+[Incubating] Problems report is available at: file:///Users/lixiaofan/StudioProjects/notecore/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 27s
+93 actionable tasks: 25 executed, 68 up-to-date

@@ -1,0 +1,7 @@
+import dev.notecore.canvas.prototype.BoundedOwnerExecutor;
+
+final class ExecutorProbe {
+    long reserve(BoundedOwnerExecutor executor) {
+        return executor.trySetRetainedOwnerBytes(1) ? executor.availableBytes() : 0;
+    }
+}

@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "baseline_commit": "5ca5cee223ce162323b2839fd4ff47bfb6d73f5a",
+  "source_sha256": {
+    "canvas-core/build.gradle.kts": "b20d0a8a4391763dee9869458e9d5ab91d1ace85f3d749eadd864f86909ab2f3",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "4906c53bd2f3ad95681d8fe1561cf2e3f8296201c67fe43a6dda7b4185f9ccae",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "e5932f66bd7d4fdf62c076e7a84e0ea3ce2ebd255eb793fae5259c0f88f2e5f2",
+    "android-app/src/androidTest/java/dev/notecore/app/StorageRetentionHostChecks.kt": "658762c03a979dc75be1965cc7d4f6f0981230c39ee33d511478985b5943cd0a"
+  },
+  "candidate_archive_sha256": {
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core/0.0.0-c1/canvas-core-0.0.0-c1-sources.jar": "91352fd1323f4e2725d071b5482dcabdc1b792d33495b5c63f6ff772b9ce2cee",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core/0.0.0-c1/canvas-core-0.0.0-c1.jar": "567948e9c8ebd55fd9d216c7902d2879b0c5e2c97d9eb52d5b335789a8bba68c",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1-sources.jar": "c2a9c5ebafb0db30f28cd020fe0bfd8092d3941344750a73e523e8c429764c31",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1.aar": "c9f2e01f37e70e6c48ca80c99508d7861a19a1402dbb5d6bd3d2f4874a24c2d5",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-jvm/0.0.0-c1/canvas-core-jvm-0.0.0-c1-sources.jar": "f8c61d79904fb29ba9ff48f4ad931945c8f8f7837fc21287355c9dfc3905526d",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-jvm/0.0.0-c1/canvas-core-jvm-0.0.0-c1.jar": "dfa7f5849c5ecf03e64d9b48a5e42b35812234f75399f73fb6e8f0a8143f08a0",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core/0.0.0-c1/shared-core-0.0.0-c1-sources.jar": "ef3e920dada5639b4a7b92ffda835596e7742c38b672543ed6def5f2ed20f7b3",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core/0.0.0-c1/shared-core-0.0.0-c1.jar": "826da67d55b95c40826dd12d41254cc01f7cc436c0239e3ef9fa029247fd54eb",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1-sources.jar": "c715f761739357f94e103b39eedbe4432d38bbae0fd3c59d8889eb46271c689a",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.aar": "2e370e8c09a077a8f5edf1a03dffeef965a74d2b9af8a59a2771f7cca4a653a0",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1-sources.jar": "ef3e920dada5639b4a7b92ffda835596e7742c38b672543ed6def5f2ed20f7b3",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-jvm/0.0.0-c1/shared-core-jvm-0.0.0-c1.jar": "740ddb81731974fce0bc884e1495ad9dd5ed3266e15d10346118e7e5307280d4"
+  },
+  "detached_art_inputs_sha256": {
+    "reports/sdk-artifact-boundary-20261107/android/canvas-core-release.aar": "5926fe32897a6fe6efb72b81c8160904d42b86a77148732298d441b15da7d37b",
+    "reports/sdk-artifact-boundary-20261107/android/shared-core-release.aar": "6921d63fd3e5d3b99707c47a959530696995e0501aaf0357518466f77d81e495",
+    "build/sdk-art-runtime/historical.jar": "cdfe35f750d11919ff93696a19157b4b68685b01a8a10bc47f0e9512c4174dcf",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1.aar": "c9f2e01f37e70e6c48ca80c99508d7861a19a1402dbb5d6bd3d2f4874a24c2d5",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.aar": "2e370e8c09a077a8f5edf1a03dffeef965a74d2b9af8a59a2771f7cca4a653a0",
+    "build/sdk-art-runtime/candidate.jar": "8591c8f746a5b8256ed3b9d2c1f8dd5e869d3215d49319dde941daaa86ce30dc",
+    "reports/sdk-artifact-boundary-20261107/android/recovery-consumer.jar": "38ec1bcc2fedf2a9a0b97b32e54ac6ac256088d9f8aa7e05b5a58dda8074dde0",
+    "kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+    "d8.jar": "4097ff9c46c185c6e7214da7fe9b1befb5adeea5cc9ca349270e0249904f9240",
+    "platforms/android-36/android.jar": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a"
+  },
+  "android_art_api": 32,
+  "default_jvm": {
+    "canvas-core": {
+      "tests": 237,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "task_outcome": "> Task :canvas-core:jvmTest UP-TO-DATE"
+    },
+    "shared-core": {
+      "tests": 366,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "task_outcome": "> Task :shared-core:jvmTest UP-TO-DATE"
+    }
+  },
+  "before_classes_sha256": "34da44dfcb00c5718d3e5eab6f48acbfa8c0e1dfee0bc186f4db5ce7d92aff8f",
+  "evidence_sha256": {
+    "reports/sdk-executor-boundary-20261114/ExecutorProbe.java.txt": "8257f7f9f3473a8d201e3a22038ed4a7a126ab279c2f2bb8276875aefda86fbd",
+    "reports/sdk-executor-boundary-20261114/apks.sha256": "254ce325e17cb4fd24a156966361b2e1b5746e3fcdc482a9b94ac9cd74cc08f3",
+    "reports/sdk-executor-boundary-20261114/app-fingerprint.txt": "c522bc88554283839ffd330352feb2b4de6aadcf16563dad0c1abdb40942a652",
+    "reports/sdk-executor-boundary-20261114/archives.log": "8687321ea82bf43aa5c2c60d079c791a6a82b1959d75afa026b6efd7dbe24116",
+    "reports/sdk-executor-boundary-20261114/art-candidate.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-executor-boundary-20261114/art-dex-on-device.sha256": "08cce8c619ede144f75b441096f8083bd4c5b71848d333d9bc04746ab282fc64",
+    "reports/sdk-executor-boundary-20261114/art-fingerprint.txt": "c522bc88554283839ffd330352feb2b4de6aadcf16563dad0c1abdb40942a652",
+    "reports/sdk-executor-boundary-20261114/art-fixtures-on-device.sha256": "13a2c9b11bb9787badbded9662e8a7edb28119bc7eb5dfad6dd99d6e695fbc74",
+    "reports/sdk-executor-boundary-20261114/art-historical.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-executor-boundary-20261114/before-javap.txt": "059fc5ef833c904e8734bf94363975dadb53dcb6b973b69f743d65eb4a9bfea1",
+    "reports/sdk-executor-boundary-20261114/candidate-javap.log": "28a6e42d4c3e9a0e9f30d40af403556495b4386f444430f4143bed9c23a3f9b9",
+    "reports/sdk-executor-boundary-20261114/consumer.log": "fceda16b7e92efa459df49dbebf5a34c9d605bcc8a56ac720c134def37b72ce7",
+    "reports/sdk-executor-boundary-20261114/default-javap.txt": "059fc5ef833c904e8734bf94363975dadb53dcb6b973b69f743d65eb4a9bfea1",
+    "reports/sdk-executor-boundary-20261114/default.log": "2b9bc47fbc1fb53a3281705420cc08ebc1f169aaac2ebc209047cdf4fa043bbe",
+    "reports/sdk-executor-boundary-20261114/final-default.log": "e5c2158ac21a79342aa26edae27188483297847c8f838ca27b3d7a7b4e0f94cc",
+    "reports/sdk-executor-boundary-20261114/final-producer.log": "01c2a6c418caba32d7310b9b54bd865c7ab1c868974c956ad46080199dcd2c2d",
+    "reports/sdk-executor-boundary-20261114/java-refusal.log": "97ebf3990eea5e6dc0cb16adc9680977d507d757cfb9d7a4afd77140ce4783d1",
+    "reports/sdk-executor-boundary-20261114/java-result.txt": "fb49d18c76435cb18fdd660ebe9c41d342a58815ae73f92ac14cede352f7cab4",
+    "reports/sdk-executor-boundary-20261114/pending_work_budget.log": "06006182ba54fce4d57983d3b978f2fc396dfb19a456d5b8776345215ffd3b6e",
+    "reports/sdk-executor-boundary-20261114/recovery_open_budget.log": "d1e7b5e7b22d313ffde0878c04d1b3d5c45acb2d22c46db46411765164d6b4df",
+    "reports/sdk-executor-boundary-20261114/storage_retention.log": "7dfa1e94c175c90ae24e2fbf2158bec16500dbca19acdfde9a8df1a075ede9a7"
+  },
+  "scope": "Android/JVM SDK candidate exclusions, detached Android recovery on API32 ART, default App budget and recovery host, and original JVM prototype. Actual minimum OS, the full stable SDK surface, and physical gates remain pending.",
+  "retry": "The first detached runtime attempt lost the emulator during a graphics buffer error. The isolated second attempt completed and emitted both matching checkpoint receipts."
+}

@@ -70,7 +70,9 @@ kotlin {
         }
         // These ports are supplied only by the original App integration build.
         if (sdkCandidate.get()) {
-            findByName("androidMain")?.kotlin?.exclude("**/AndroidInkFrameExperiment.kt")
+            jvmAndAndroidMain.kotlin.exclude("**/BoundedOwnerExecutor.kt", "**/BrushRenderExecutorPoc.kt")
+            getByName("jvmMain").kotlin.exclude("**/PrototypeDemo.kt")
+            findByName("androidMain")?.kotlin?.exclude("**/AndroidInkFrameExperiment.kt", "**/AndroidBrushImagePoc.kt")
             findByName("iosMain")?.kotlin?.exclude("**/AppleBrushRenderExperiment.kt")
         }
     }
@@ -100,13 +102,15 @@ tasks.named<Test>("jvmTest") {
     systemProperty("notecore.brush.actual", rootProject.file("build/brush-golden-actual.json").absolutePath)
 }
 
-tasks.register<JavaExec>("runPrototype") {
-    group = "application"
-    description = "Run the in-memory C1 scene contract demonstration."
-    dependsOn("jvmMainClasses")
-    val mainCompilation = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("main")
-    classpath(mainCompilation.output.allOutputs, configurations.named("jvmRuntimeClasspath"))
-    mainClass.set("dev.notecore.canvas.prototype.PrototypeDemoKt")
+if (!sdkCandidate.get()) {
+    tasks.register<JavaExec>("runPrototype") {
+        group = "application"
+        description = "Run the in-memory C1 scene contract demonstration."
+        dependsOn("jvmMainClasses")
+        val mainCompilation = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("main")
+        classpath(mainCompilation.output.allOutputs, configurations.named("jvmRuntimeClasspath"))
+        mainClass.set("dev.notecore.canvas.prototype.PrototypeDemoKt")
+    }
 }
 
 tasks.register<JavaExec>("runSpatialIndexPoc") {
