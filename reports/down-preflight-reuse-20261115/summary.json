@@ -1,0 +1,53 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "96BB8EB6-0A1E-423B-BC7F-2E118C13A668",
+        "deviceName" : "NoteCoreDownReuse",
+        "modelName" : "iPad Pro 11-inch (M5)",
+        "osBuildNumber" : "24A434",
+        "osVersion" : "27.0",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 77,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "NoteCorePreview · Built with macOS 27.2.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1794738724.017,
+  "passedTests" : 77,
+  "result" : "Passed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Thread running at User-interactive quality-of-service class waiting on a lower QoS thread running at Default quality-of-service class. Investigate ways to avoid priority inversions",
+      "sourceURL" : "file:///Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift"
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1794738659.264,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - NoteCorePreview",
+  "topInsights" : [
+    {
+      "category" : "Longest Test Runs",
+      "impact" : "56% of duration",
+      "text" : "1 longest test run with outlier durations exceeding 3.24s (three standard deviations)"
+    }
+  ],
+  "totalTestCount" : 77
+}

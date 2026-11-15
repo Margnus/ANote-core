@@ -17,6 +17,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var inputReservation = 0L
     private var inputPointLimit = 0
     private var inputSequence = 0L
+    private var preparedStroke: NewStrokePlan.Ready? = null
     private var strokePage: PageId? = null
     private var strokeCommand: CommandId? = null
     private var strokeObject: ObjectId? = null
@@ -312,6 +313,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                 is NewStrokePlan.Refused -> return planned.result
                 is NewStrokePlan.Ready -> planned
             }
+            preparedStroke = null
             this.sequence = plan.lastIdentity
             command = plan.command
             objectId = plan.objectId
@@ -342,12 +344,21 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         return inputResult(PreviewInputDisposition.ACCEPTED, count)
     }
     private sealed interface NewStrokePlan {
-        class Ready(val command: CommandId, val objectId: ObjectId, val lastIdentity: Long,
+        class Ready(val revision: Long, val page: PageId, val identitySequence: Long, val count: Int,
+                    val command: CommandId, val objectId: ObjectId, val lastIdentity: Long,
                     val pointCapacity: Int, val reservation: Long) : NewStrokePlan
         class Refused(val result: PreviewInputResult) : NewStrokePlan
     }
     /** Plan against the current root and peek identities without consuming them. */
     private fun planNewStroke(count: Int, root: DocumentRoot): NewStrokePlan {
+        // The authority publishes journal/identity/history changes with a new root revision.
+        // Selection and peeked identities can change independently. Keep no root or samples here.
+        val pageId = selected
+        preparedStroke?.let {
+            if (it.revision == root.revision && it.page == pageId && it.identitySequence == sequence && it.count == count)
+                return it
+            preparedStroke = null
+        }
         fun noCapacity() = NewStrokePlan.Refused(rejectRealBatch(PreviewFailureKind.CAPACITY, InputRejection.CAPACITY))
         fun exhausted() = NewStrokePlan.Refused(rejectRealBatch(PreviewFailureKind.IDENTITY_EXHAUSTED))
         val remaining = PagedPreviewCodec.MAX_POINTS - totalPoints(root)
@@ -356,16 +367,17 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val (operation, opSequence) = nextIdentity("op") ?: return exhausted()
         val (objectValue, objectSequence) = nextIdentity("ink", opSequence) ?: return exhausted()
         val objectId = ObjectId(objectValue)
-        val page = root.findPage(selected)!!
-        val capacity = memory.strokeInputCapacity(objectId, selected)
+        val page = root.findPage(pageId)!!
+        val capacity = memory.strokeInputCapacity(objectId, pageId)
         val pointCapacity = affordableInputPoints(minOf(maximum, capacity.points), operation, objectValue, page)
         if (count > pointCapacity) {
             if (count <= capacity.points || capacity.limitingReason == DocumentRejection.LIVE_BYTE_CAPACITY) return noCapacity()
             fail("当前预览编辑容量不足，本批未接收，请先保存或导出现有内容", PreviewFailureKind.DOCUMENT_REJECTED, capacity.limitingReason)
             return NewStrokePlan.Refused(inputResult(PreviewInputDisposition.REJECTED, 0, InputRejection.CAPACITY))
         }
-        return NewStrokePlan.Ready(CommandId(operation), objectId, objectSequence, pointCapacity,
-            inputReservation(pointCapacity, operation, objectValue, page))
+        return NewStrokePlan.Ready(root.revision, pageId, sequence, count, CommandId(operation), objectId,
+            objectSequence, pointCapacity, inputReservation(pointCapacity, operation, objectValue, page))
+            .also { preparedStroke = it }
     }
     /** Reserve the entire admitted stroke, including completion overlap, before allocating identities.
      * Rejection never lowers an active session's capacity or drops its accepted prefix.
@@ -418,7 +430,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun beginStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = legacyInput(PointerPhase.DOWN, x, y, pressure, timeMicros)
     fun appendStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = legacyInput(PointerPhase.MOVE, x, y, pressure, timeMicros)
     fun endStroke(x: Double, y: Double, pressure: Float, timeMicros: Long): Boolean = legacyInput(PointerPhase.UP, x, y, pressure, timeMicros)
-    fun cancelStroke() { ownerCheck(); input?.close(); input = null }
+    fun cancelStroke() { ownerCheck(); input?.close(); input = null; preparedStroke = null }
     fun retryPendingStroke(): Boolean {
         ownerCheck()
         if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)

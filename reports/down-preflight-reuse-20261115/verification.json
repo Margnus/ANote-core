@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "baseline_commit": "b3b2e47d59d1d2f7ef0806bd9a5fe171c70dd21b",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "33c4d5d7e0786ae663e9889329bd1f8f53e7fe7c85819d074c5ed952c9c928e6",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewInputBudgetTest.kt": "6a3f82326fd5c4a6296643fdb7a4a0ab35ef1dc79abd5aeb67d9cc53ed600f70",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "65ddece0fecd560da8096294a98d230c4ed4d1f95cfcb89119b89e1d895ac67c",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "f61c95ae8cb28663a117f8a22e16ff1fbaf2cbe63c30908d49b1a59bc494eee1",
+    "tools/verify_ios_host.py": "116ca5488c52aae7125f07aef31c8e1660cb4cde7510d1bc96854f9954579628"
+  },
+  "evidence_sha256": {
+    "reports/down-preflight-reuse-20261115/1-budget_overlap.log": "fe9c348d9aef31a4b9e6944db01c1a9df35f3650bc9da2e07e57a8c96c4a321a",
+    "reports/down-preflight-reuse-20261115/2-input_batches.log": "a7e01deafde8973e74f72682065839ba5f481d4be1f02781ee2929cb528183f3",
+    "reports/down-preflight-reuse-20261115/3-pending_work_budget.log": "06006182ba54fce4d57983d3b978f2fc396dfb19a456d5b8776345215ffd3b6e",
+    "reports/down-preflight-reuse-20261115/Probe.swift.txt": "d3f469c08742a65331cefccc2d58c2740b5a95ea78e2b249004843fb89efb282",
+    "reports/down-preflight-reuse-20261115/after.log": "af60417f432702cc9da97f43f67196713ae2ed54b4714797287878615f4f2303",
+    "reports/down-preflight-reuse-20261115/api.txt": "a4b2c5db15348c29451e18b8307e5ef81625ea638e807935f39ceaa8d9ac7758",
+    "reports/down-preflight-reuse-20261115/apks.sha256": "23a278c9bea357194a8b361ac57d7f757be5a8edb41be5abe5957e78e53713b5",
+    "reports/down-preflight-reuse-20261115/before.log": "db92a415a0358845915d56163bb9756901e5b59d99f0d45f0eea299ec410d098",
+    "reports/down-preflight-reuse-20261115/fingerprint.txt": "e6d554f822e844090f7f421d5b4de578313d7f407839d2a5d7a48be0bae3dac1",
+    "reports/down-preflight-reuse-20261115/summary.json": "b48f782ad721754841e60195d2ed01a8dcab3b21c0763f6d1341a9d0a9b4a454"
+  },
+  "apple_before_framework_sha256": "0747b4d6408c97588d64d9d7da32cfa49e0f4f14a1ebf7a9767162066dc6d6d1",
+  "apple_after_framework_sha256": "5cee91c0f1b21fbe160f1ffd0b22360c7d5418bf75e59376c52c20c6621dbca4",
+  "apple_app_host_passed": 77,
+  "android_api": 36,
+  "android_app_host_cases": [
+    "budget_overlap",
+    "input_batches",
+    "pending_work_budget"
+  ],
+  "jvm_suites": {
+    "canvas-core": {
+      "tests": 237,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 369,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "owner_check_counts": {
+    "before": {
+      "first": 11,
+      "repeated": 11
+    },
+    "after": {
+      "first": 11,
+      "repeated": 7
+    }
+  },
+  "scope": "Reuses a single bounded DOWN plan only on matching root revision, page, identity sequence and batch count. Same-owner check counts show avoided capacity traversal. Probe does not measure actual latency or physical heap."
+}

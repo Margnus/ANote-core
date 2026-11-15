@@ -1,0 +1,17 @@
+import NoteCanvasPrototype
+
+var ownerChecks = 0
+let budget = DocumentBudget.companion.validated(maxPages: 2, maxObjects: 10, liveBytes: 8*1024*1024,
+    journalEntries: 5, journalBytes: 8*1024*1024, identityBytes: 1024*1024,
+    historyEntries: 10, historyBytes: 1024*1024, inputBytes: 1024*1024).budget!
+let note = PagedPreviewNotebook.companion.createValidated(documentId: "probe", title: "Before",
+    sessionNonce: "probe", width: 595, height: 842, paper: .blank, budget: budget,
+    ownerCheck: { ownerChecks += 1 }).notebook!
+let root = note.snapshot()
+ownerChecks = 0
+precondition(note.prepareRealBatch(phase: .down, count: 1) == nil)
+let initial = ownerChecks
+ownerChecks = 0
+precondition(note.prepareRealBatch(phase: .down, count: 1) == nil)
+print("first=\(initial) repeated=\(ownerChecks)")
+precondition(note.snapshot() === root && !note.hasActiveStroke && note.inputReservedByteCharge == 0)

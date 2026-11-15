@@ -79,6 +79,42 @@ class PreviewInputBudgetTest {
         assertSame(root, n.snapshot()); assertEquals(authority, n.authorityStatus())
         assertNull(n.activeInputOperationId); assertEquals(0L, n.inputReservedByteCharge)
     }
+    @Test fun repeatedPreparationReusesCapacityButFailedEditInvalidatesPeekedIdentities() {
+        var ownerChecks = 0
+        val root = DocumentRoot.empty(SceneId("prepared"), "title",
+            PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0))
+        val n = PagedPreviewNotebook(root, "bounded", DocumentBudget(inputBytes = reservation(2)),
+            ownerCheck = { ownerChecks++ })
+        ownerChecks = 0
+        assertNull(n.prepareRealBatch(PointerPhase.DOWN, 1))
+        val firstChecks = ownerChecks
+        ownerChecks = 0
+        assertNull(n.prepareRealBatch(PointerPhase.DOWN, 1))
+        assertTrue(ownerChecks < firstChecks, "Repeating a preflight should skip authority capacity checks")
+        // A rejected edit advances the local identity sequence without publishing a root.
+        assertFalse(n.deleteCurrentPage())
+        assertSame(root, n.snapshot())
+        assertTrue(offer(n, PointerPhase.DOWN, 1).admitted)
+        assertEquals("bounded-op-2", n.activeInputOperationId)
+        assertEquals(PreviewInputDisposition.COMMITTED, n.offerRealBatch(PointerPhase.UP, 1,
+            doubleArrayOf(), doubleArrayOf(), floatArrayOf(), longArrayOf()).disposition)
+        assertEquals("bounded-ink-3", n.strokeId(0))
+        assertEquals(0L, n.inputReservedByteCharge)
+    }
+
+    @Test fun changingSelectionRechecksCapacityWithoutChangingTheRoot() {
+        val first = PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0)
+        val second = PageDescriptor(PageId("longer-page"), LayerId("longer-layer"), 595.0, 842.0)
+        val root = DocumentRoot.compose("title", SceneSnapshot.empty(SceneId("prepared")), listOf(first, second))
+        val n = PagedPreviewNotebook(root, "bounded", DocumentBudget(inputBytes = reservation(1)))
+        assertNull(n.prepareRealBatch(PointerPhase.DOWN, 1))
+        assertTrue(n.selectPage(second.id)); assertSame(root, n.snapshot())
+        assertEquals(PreviewFailureKind.CAPACITY, n.prepareRealBatch(PointerPhase.DOWN, 1)?.failure?.kind)
+        assertFalse(offer(n, PointerPhase.DOWN, 1).admitted)
+        assertTrue(n.selectPage(first.id))
+        assertTrue(offer(n, PointerPhase.DOWN, 1).admitted)
+        assertEquals("bounded-op-1", n.activeInputOperationId)
+    }
 
     @Test fun insufficientBudgetRejectsBeforeIdentityAndEmptyUpCanFinishExactBudget() {
         for (bytes in listOf(0L, reservation(1) - 1)) {
