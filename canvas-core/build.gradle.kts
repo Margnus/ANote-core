@@ -77,6 +77,10 @@ kotlin {
                 "**/BrushRenderOwnerPoc.kt",
                 "**/BrushTileCachePoc.kt",
                 "**/BrushTilePixelsPoc.kt",
+                "**/SubmissionQueue.kt",
+                "**/Presentation.kt",
+                "**/ChunkedBrushPoc.kt",
+                "**/WeightedLruCache.kt",
             )
             jvmAndAndroidMain.kotlin.exclude("**/BoundedOwnerExecutor.kt", "**/BrushRenderExecutorPoc.kt")
             getByName("jvmMain").kotlin.exclude("**/PrototypeDemo.kt")

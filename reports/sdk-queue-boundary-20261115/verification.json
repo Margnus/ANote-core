@@ -1,0 +1,56 @@
+{
+  "status": "passed",
+  "baseline_commit": "bc4acdaf5734238e5a99994a990b24e148ca0343",
+  "source_sha256": {
+    "canvas-core/build.gradle.kts": "a5b45679656eb85e8dd01e9ff79460c0ba753eaa120ed53a2fad103c48bf2f2c",
+    "tools/audit_public_boundary.py": "e23c3f7e24e1a79a07a1d5d0fc5bc82fab408e507aaa153a06ac1b7a28fb6e2f",
+    "tools/audit_sdk_type_closure.py": "58be2a1ea4436eaca90c5f4794de79b48d9a471b915ad5ee08b61e96ebf7532d",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "833a858bcb7dda8ac85f986f28f5881fa59070aa5025855676e701ccdb3e5f39",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "1c5418e5b485eb8ff8feed9910286ef0676d0417a0c851e9e1c3d57877644e21",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8"
+  },
+  "android_art_api": 32,
+  "art_inputs_sha256": {
+    "reports/sdk-artifact-boundary-20261107/android/canvas-core-release.aar": "5926fe32897a6fe6efb72b81c8160904d42b86a77148732298d441b15da7d37b",
+    "reports/sdk-artifact-boundary-20261107/android/shared-core-release.aar": "6921d63fd3e5d3b99707c47a959530696995e0501aaf0357518466f77d81e495",
+    "build/sdk-art-runtime/historical.jar": "cdfe35f750d11919ff93696a19157b4b68685b01a8a10bc47f0e9512c4174dcf",
+    "build/sdk-candidate-repository/dev/notecore/probe/canvas-core-android/0.0.0-c1/canvas-core-android-0.0.0-c1.aar": "0fca478d6013b4972eff997d3ff014df2484c0c128f1236ba9a19b2d917ae9d9",
+    "build/sdk-candidate-repository/dev/notecore/probe/shared-core-android/0.0.0-c1/shared-core-android-0.0.0-c1.aar": "2e370e8c09a077a8f5edf1a03dffeef965a74d2b9af8a59a2771f7cca4a653a0",
+    "build/sdk-art-runtime/candidate.jar": "9eaec28dcf8f054e03f240767878e478e24f1142ba3e645f2cdfc96125501fff",
+    "reports/sdk-artifact-boundary-20261107/android/recovery-consumer.jar": "38ec1bcc2fedf2a9a0b97b32e54ac6ac256088d9f8aa7e05b5a58dda8074dde0",
+    "kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+    "d8.jar": "4097ff9c46c185c6e7214da7fe9b1befb5adeea5cc9ca349270e0249904f9240",
+    "platforms/android-36/android.jar": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a"
+  },
+  "apple_runtime_version": "27.0 simulator",
+  "apple_artifact_sha256": {
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "3213f087a2273a8d36fd3f3a28b39b2d40c2438b8ca3a8d5835a9368b7458778",
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "a22025db6c4a3ca19e6a289ea1cf850d04b1034ee82ccbd573886539c4dd8055",
+    "build/sdk-queue-boundary/iosArm64-old-consumer.o": "bc2e482acc3d6badf06453f2f0d249db97f7b7c052aea302f767303f6d87bbca",
+    "build/sdk-queue-boundary/iosArm64-old-linked": "b07b33c42321da2c52f0dc8b88a01c795969c8f8576cfcfde97db2c6ccc548a9",
+    "build/sdk-queue-boundary/iosArm64-candidate-linked": "880e4dacb42983b3847d0a28a8ec4ca96df8136a985b3f1309624cfdd6451421",
+    "build/sdk-queue-boundary/iosArm64-sketch": "4b8864354c4a01a4d51515bfb4bd183801642b1283aa21924110e324f65b61f2",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "1dc9fddf56368b39d6072eefe183a283df302d8a5021e39fad4d8a29f6ca2c4e",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "a22025db6c4a3ca19e6a289ea1cf850d04b1034ee82ccbd573886539c4dd8055",
+    "build/sdk-queue-boundary/iosSimulatorArm64-old-consumer.o": "630b2a1d63aa80774e4db69413b24a036ba7418de22e746353b4b5771e508ea0",
+    "build/sdk-queue-boundary/iosSimulatorArm64-old-linked": "cc1cb275a6dcd35a7c33df62e36f88dce02a02cd30152e75e6a2d648108e50ef",
+    "build/sdk-queue-boundary/iosSimulatorArm64-candidate-linked": "00370e0b9b75c5744a3bb687c8b7d3bc174d4faa552e1608cbe8055da18f6799",
+    "build/sdk-queue-boundary/iosSimulatorArm64-sketch": "0e6c9af8243732a668cd44fadb7c751b6fd7f6015f355ead665aab236e4e1a7d"
+  },
+  "common_android_classes_byte_identical": 121,
+  "evidence_sha256": {
+    "reports/sdk-queue-boundary-20261115/apple-candidate.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-queue-boundary-20261115/apple-old.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-queue-boundary-20261115/art-candidate.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-queue-boundary-20261115/art-dex-on-device.sha256": "cafb8f42876ece15ebcb72e908e1ebc86f36dd6040eac270419fbe805e004cf9",
+    "reports/sdk-queue-boundary-20261115/art-fingerprint.txt": "c522bc88554283839ffd330352feb2b4de6aadcf16563dad0c1abdb40942a652",
+    "reports/sdk-queue-boundary-20261115/art-fixtures-on-device.sha256": "13a2c9b11bb9787badbded9662e8a7edb28119bc7eb5dfad6dd99d6e695fbc74",
+    "reports/sdk-queue-boundary-20261115/art-historical.log": "cdfc65d56994fd905cc0de4f743ac98913a10b14d2e22b1947444474d7d1f618",
+    "reports/sdk-queue-boundary-20261115/build-summary.txt": "1cd28bc58b98045e410bdc115909bd6850b5db2862084e710633889ddbb7fced",
+    "reports/sdk-queue-boundary-20261115/check.py.txt": "e1df9540a29d81f6da7441d5d3ef4a00fb087afe7b4194f3ca1f92a0ba74d217",
+    "reports/sdk-queue-boundary-20261115/inventory.json": "136453788dc40aaed0428f3186c3ba15fb6df5a36be96a0a55c510dca6b0d8cf"
+  },
+  "scope": "Candidate isolation of the reference submission queue, frame publication identities, chunked rendering and cache. Independent recovery consumers on API32 ART and iOS 27 simulator. Stable SDK coverage and physical and minimum runtime gates remain pending."
+}

@@ -1,0 +1,63 @@
+import hashlib
+from io import BytesIO
+import json
+from pathlib import Path
+from zipfile import ZipFile
+import sys
+
+sys.path.insert(0, str(Path('tools').resolve()))
+from audit_sdk_type_closure import audit, parse_header
+
+out = Path('build/sdk-queue-boundary')
+removed = ('StrokeSubmission', 'SubmissionState', 'SubmissionAttempt', 'SubmissionSummary',
+           'AdmissionRejection', 'AdmissionResult', 'DispatchResult', 'CompletionUpdate',
+           'FrameToken', 'FramePublicationGate', 'GeometryCacheKey', 'DisplacedEntry', 'CacheAdmission', 'WeightedLruCache',
+           'BrushPixelGridPoc', 'BrushFrameGridPoc', 'BrushTileGridPoc', 'ChunkedBrush', 'BrushTileBuild', 'BrushTileMaskPoc')
+excluded_files = {'SubmissionQueue.kt', 'Presentation.kt', 'ChunkedBrushPoc.kt', 'WeightedLruCache.kt'}
+sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+frames = Path('build/sdk-candidate/shared-core/bin')
+first = None
+for platform in ('iosArm64', 'iosSimulatorArm64'):
+    candidate = frames/platform/'releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h'
+    header = candidate.read_text()
+    if first is None:
+        first = header
+    assert header == first
+    assert not any('NCP'+name in header for name in removed), platform
+previous = (out/'before.h').read_text()
+before, after = parse_header(previous), parse_header(first)
+assert not set(after)-set(before)
+assert all(before[name]==after[name] for name in after)
+gone = sorted(set(before)-set(after))
+assert gone and all(name == 'NCPKotlinPair' or any(name.startswith('NCP'+prefix) for prefix in removed) for name in gone), gone
+old, new = audit(previous), audit(first)
+assert old['selected_types'] == new['selected_types'] == 49
+assert old['all_members_reachable_types'] == new['all_members_reachable_types'] == 78
+assert {name:row for name,row in old['types'].items() if 'selected_path' in row} == {
+    name:row for name,row in new['types'].items() if 'selected_path' in row}
+repo = Path('build/sdk-candidate-repository/dev/notecore/probe')
+archives = sorted(path for path in repo.rglob('*') if path.suffix in {'.aar','.jar'})
+assert len(archives)==12
+android_removed=[]
+for path in archives:
+    with ZipFile(path) as archive:
+        filenames=archive.namelist()
+        if path.suffix=='.aar':
+            classes=archive.read('classes.jar')
+            with ZipFile(BytesIO(classes)) as jar:
+                filenames+=jar.namelist()
+                if path.name.startswith('canvas-core-android'):
+                    (out/'after.jar').write_bytes(classes)
+        assert not any(Path(entry).name in excluded_files or Path(entry).name.startswith(removed) for entry in filenames), path
+with ZipFile(out/'before.jar') as a, ZipFile(out/'after.jar') as b:
+    a_classes={name for name in a.namelist() if name.endswith('.class')}
+    b_classes={name for name in b.namelist() if name.endswith('.class')}
+    android_removed=sorted(a_classes-b_classes)
+    assert all(a.read(name)==b.read(name) for name in b_classes)
+    assert not b_classes-a_classes
+    assert android_removed and all(Path(name).name.startswith(removed) for name in android_removed)
+result=dict(archives={str(path):sha(path) for path in archives}, previous_header=sha(out/'before.h'),
+            new_headers=sha(candidate), apple_removed=gone, apple_remaining=len(after),
+            apple_selected=49, apple_reachable=78, android_removed=android_removed)
+(out/'inventory.json').write_text(json.dumps(result,indent=2)+'\n')
+print(len(gone), 'Objective-C declarations and',len(android_removed),'Android classes removed')
