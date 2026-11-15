@@ -143,10 +143,22 @@ final class PagedHostTests: XCTestCase {
         let model = PreviewModel(directory: dir); model.create()
         let note = try XCTUnwrap(model.current)
         XCTAssertTrue(note.beginStroke(x: 10, y: 20, pressure: 0.25, timeMicros: 1))
+        let active = note.activeInputOperationId, charge = note.inputReservedByteCharge
+        for index in [Int32.min, -1, 1, Int32.max] {
+            XCTAssertNil(note.pageAt(index: index))
+            XCTAssertNil(note.snapshot().pageAt(index: index))
+            XCTAssertNil(note.strokeAt(index: index))
+        }
+        XCTAssertNil(note.strokeAt(index: 0))
+        XCTAssertEqual(note.activeInputOperationId, active)
+        XCTAssertEqual(note.inputReservedByteCharge, charge)
+        XCTAssertNil(note.lastFailure)
         XCTAssertTrue(note.endStroke(x: 30, y: 40, pressure: 0.75, timeMicros: 2))
-        let page = note.currentPageId, stroke = note.stroke(index: 0), samples = stroke.samples
+        let page = note.currentPageId, stroke = try XCTUnwrap(note.strokeAt(index: 0)), samples = stroke.samples
         let snapshot = note.capture(), encoded = try snapshot.encode()
+        XCTAssertTrue(note.pageAt(index: 0) === snapshot.root.pageAt(index: 0))
         XCTAssertTrue(note.insertPage()); XCTAssertEqual(note.strokeCount, 0)
+        XCTAssertNil(note.strokeAt(index: 0))
         XCTAssertTrue(note.selectPage(id: page)); XCTAssertTrue(note.stroke(index: 0) === stroke)
         XCTAssertTrue(note.undo()); XCTAssertEqual(note.strokeCount, 1)
         XCTAssertTrue(note.undo()); XCTAssertEqual(note.strokeCount, 0)
@@ -155,8 +167,10 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(try snapshot.encode(), encoded)
         var points = [(Double, Double, Float, Int64)]()
         for index in 0..<samples.size {
-            points.append((samples.x(index: index), samples.y(index: index), samples.pressure(index: index), samples.timeMicros(index: index)))
+            let point = try XCTUnwrap(samples.sampleAt(index: index))
+            points.append((point.x, point.y, point.pressure, point.timeMicros))
         }
+        for index in [Int32.min, -1, samples.size, Int32.max] { XCTAssertNil(samples.sampleAt(index: index)) }
         XCTAssertEqual(points.count, 2); XCTAssertEqual(points[0].0, 10); XCTAssertEqual(points[1].1, 40)
         XCTAssertEqual(points[0].2, 0.25); XCTAssertEqual(points[1].3, 2)
     }

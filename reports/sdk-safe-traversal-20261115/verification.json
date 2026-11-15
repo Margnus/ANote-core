@@ -1,0 +1,61 @@
+{
+  "status": "passed",
+  "baseline_commit": "47f679b3ee70ca80e6fe8cadb95ee276f3f6db3d",
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "5eafd73d203d6ad08c44ab18be35e96622f3955b955815abce8567de860332bc",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentRoot.kt": "1bdc8a431bc4ab4bb9d39b9c86156dbded295904f305642e3dd7bc6cc5771904",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "f6883b949e221d8a87043bfd6e94eebb61ebe9106bbd1333695a1f001697d546",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewReadTraversalTest.kt": "00cb4dfca626093fbd5ee2b1a8fcd4e7bc5a4644438bd8b32ce760089dd10240",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "1108cedecc831a4d6c8fa45e4e263a3226e6a438377500112fef96754c45b7f3",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "9f38e78fc972b3e836cb448761c5984ae20dce1e551f14e86698d167f58388b8",
+    "ios-app/NoteCorePreviewUITests/PreviewJourneyUITests.swift": "f178d8f39d4a664a22b5e7289915d65eb11f7e78a622e76934dc4a67ea7314ed",
+    "tools/audit_public_boundary.py": "66557595f8afb7486673b3e238ab5eb4e27110f0e5ff2e9783d60a18b52256ce",
+    "tools/audit_sdk_type_closure.py": "97daab27242744c538f996465d8d1fddad5c100158724088cc75566bf1b2f45a"
+  },
+  "evidence_sha256": {
+    "reports/sdk-safe-traversal-20261115/After.swift.txt": "2ed4073c4bb1dc827860f6845a5631d084b97fc6a47360782f89235d5393ba2e",
+    "reports/sdk-safe-traversal-20261115/Before.swift.txt": "62624b418a71344b131b94d70cf7463b1f88f7f5b9b2ffa9b8dc5dfff1ab33f5",
+    "reports/sdk-safe-traversal-20261115/after-runtime.log": "bd7b4df19a2d2f300e080aecc303c59937b18223e9e345baf3eb1f6db409f079",
+    "reports/sdk-safe-traversal-20261115/before-exit.txt": "e726b440cc164001999e718b51780d80314709efe06e7857282377be9111127b",
+    "reports/sdk-safe-traversal-20261115/before-runtime.log": "3b50c621182456e4bbe1440bcc588d89fe812c483dbc5b3b45f65103eb793b6a",
+    "reports/sdk-safe-traversal-20261115/header-diff.json": "bf122fafb596fd2329128d2b1a5ae55c1e8d28a8e67259a2c417789fcdde67f1",
+    "reports/sdk-safe-traversal-20261115/recovery.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/sdk-safe-traversal-20261115/summary.json": "4122ca1502f527a1df8b96356382e99bc1aa37e371fb2d0690035e0e23843960",
+    "reports/sdk-safe-traversal-20261115/ui-summary.json": "9e756358e995abfbbaba0313e66326f32d88212d1eb88f4e628d59984d3c2b37",
+    "reports/sdk-safe-traversal-20261115/ui-tests.json": "4bb0d8c158dfb82654811fb2e2b634720a04282209ce5e8d90bae8112eead469"
+  },
+  "artifact_sha256": {
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "ddb19cbc3990dbbd01ecd0859babe4a6be35c41400b6cd93f19bfa1fda5dee59",
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "02ebfa1e089b4bc4e07bb198daf799dba74f4365bb1db30d79045eb62c451bbf",
+    "build/sdk-safe-traversal/iosArm64-after": "86ee26f10957293b0a813eb3f699ed442173868fcec27a7c5c41ba3f4b65fbd3",
+    "build/sdk-safe-traversal/iosArm64-recovery": "5b607fe192a4da15b6161e69f35bbd41ff3c9c43523466124559b970c2105a0f",
+    "build/sdk-safe-traversal/iosArm64-sketch": "34c25bd5d5033d740ecf861cb40bff916e74d5be02ee464e470404bdd1022427",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "2c0267c4460af1cadfe790f12c63c46b623153e077729e9d08efab4a12d40538",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "02ebfa1e089b4bc4e07bb198daf799dba74f4365bb1db30d79045eb62c451bbf",
+    "build/sdk-safe-traversal/iosSimulatorArm64-after": "0f3be5cd525ef29fc3a78a70010d7b09fe8b455af1c0e0d6d3dc601645326aa0",
+    "build/sdk-safe-traversal/iosSimulatorArm64-recovery": "7e89a815a69ad0eed82224fe4ea1847d227e02fb6b9610632e1342091755f6bf",
+    "build/sdk-safe-traversal/iosSimulatorArm64-sketch": "979890bbcdc7c76ead9b8265b808e2077bfc07834b52d7fe846222e9f2702526"
+  },
+  "ios_simulator_os": "27.0",
+  "ios_app_host_passed": 76,
+  "independent_sketch_linked_targets": [
+    "iosArm64",
+    "iosSimulatorArm64"
+  ],
+  "ios_ui_journey_passed": 1,
+  "default_jvm": {
+    "canvas-core": {
+      "tests": 237,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 366,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "scope": "Additive nullable indexed reads. Default Swift page controls use nullable lookup, and the iOS UI journey covers paging and process reopen. Existing scalar methods still require valid indices, and mutable Notebook calls still require the owner. Minimum OS runtime and physical gates remain pending."
+}

@@ -37,6 +37,7 @@ VALUE_MEMBERS = {
     'NCPPagedPreviewSnapshot': ('documentId', 'title'),
     'NCPStrokeObject': ('samples', 'brush', 'transform'),
     'NCPStrokeSamples': ('size', 'x(index:)', 'y(index:)', 'pressure(index:)', 'timeMicros(index:)'),
+    'NCPInputSample': ('x', 'y', 'pressure', 'timeMicros'),
     'NCPBrushSpec': ('argb', 'width'),
     'NCPAffine2D': ('a', 'b', 'c', 'd', 'tx', 'ty'),
 }

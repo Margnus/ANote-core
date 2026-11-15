@@ -26,6 +26,12 @@ class StrokeSamples private constructor(
     fun pressure(index: Int): Float = pressures[index]
     fun timeMicros(index: Int): Long = timesMicros[index]
 
+    /** A single local sample value, or null for an index outside this immutable stroke. */
+    fun sampleAt(index: Int): InputSample? {
+        if (index !in xs.indices) return null
+        return InputSample(xs[index], ys[index], pressures[index], timesMicros[index])
+    }
+
     fun bounds(radius: Double): BoundsD {
         var left = xs[0]; var right = left; var top = ys[0]; var bottom = top
         for (i in 1 until size) {

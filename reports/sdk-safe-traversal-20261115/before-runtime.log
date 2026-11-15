@@ -1,0 +1,11 @@
+Function doesn't have or inherit @Throws annotation and thus exception isn't propagated from Kotlin to Objective-C/Swift as NSError.
+It is considered unexpected and unhandled instead. Program will be terminated.
+Uncaught Kotlin exception: kotlin.IndexOutOfBoundsException: Empty list doesn't contain element at index -1.
+    at 0   before-probe                        0x104f75863        kfun:kotlin.collections.EmptyList#get(kotlin.Int){}kotlin.Nothing + 231
+    at 1   before-probe                        0x104f75c3f        kfun:kotlin.collections.EmptyList#$<bridge-DNN>get(kotlin.Int){}kotlin.Nothing(kotlin.Int){}kotlin.Any? + 31
+    at 2   before-probe                        0x104fd2127        kfun:dev.notecore.document.PagedPreviewNotebook#stroke(kotlin.Int){}dev.notecore.canvas.prototype.StrokeObject + 275
+    at 3   before-probe                        0x10503e857        objc2kotlin_kfun:dev.notecore.document.PagedPreviewNotebook#stroke(kotlin.Int){}dev.notecore.canvas.prototype.StrokeObject + 235
+    at 4   before-probe                        0x104ef96ef        main + 1687
+    at 5   dyld                                0x10547834f        dyld-internal + 19
+    at 6   ???                                 0x10532dd7b        0x0 + 4382186875
+Child process terminated with signal 6: Abort trap

@@ -1,0 +1,30 @@
+import Foundation
+import NoteCanvasPrototype
+
+let bytes = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]))
+let canonical = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[2]))
+let checkpoint = PreviewRecoveryCodec.shared.read(text: String(decoding: bytes, as: UTF8.self)).snapshot!
+let budget = DocumentBudget.companion.validated(maxPages: 128, maxObjects: 5000, liveBytes: 8*1024*1024,
+    journalEntries: 4096, journalBytes: 32*1024*1024, identityBytes: 4*1024*1024,
+    historyEntries: 128, historyBytes: 8*1024*1024, inputBytes: 2248).budget!
+let note = PagedPreviewNotebook.companion.openRecovery(snapshot: checkpoint, sessionNonce: "probe",
+    budget: budget, ownerCheck: { precondition(Thread.isMainThread) }).notebook!
+for index in [Int32.min, -1, 1, Int32.max] {
+    precondition(note.pageAt(index: index) == nil)
+    precondition(checkpoint.root.pageAt(index: index) == nil)
+    precondition(note.strokeAt(index: index) == nil)
+}
+precondition(note.pageAt(index: 0) === checkpoint.root.pageAt(index: 0))
+precondition(note.strokeAt(index: 0) == nil)
+let samples = note.pendingInk()!.samples
+precondition(samples.sampleAt(index: -1) == nil && samples.sampleAt(index: samples.size) == nil)
+let point = samples.sampleAt(index: 0)!
+precondition(point.x == samples.x(index: 0) && point.y == samples.y(index: 0) &&
+    point.pressure == samples.pressure(index: 0) && point.timeMicros == samples.timeMicros(index: 0))
+let retained = try note.captureRecovery().encode()
+precondition(Data(retained.utf8) == bytes && note.inputReservedByteCharge == 2248 && note.lastFailure == nil)
+precondition(note.retryPendingStroke() && note.retryPendingStroke())
+precondition(note.strokeAt(index: 0)?.samples === samples)
+let committed = try note.capture().encode()
+precondition(Data(committed.utf8) == canonical)
+print("Out-of-range lookups returned nil; pending and committed checkpoint bytes matched")

@@ -877,12 +877,20 @@ struct PreviewRoot: View {
                         Text("双指缩放").font(.caption).foregroundStyle(.secondary)
                     }.padding(.horizontal)
                     HStack(spacing: 8) {
-                        Button { model.applyEdit(PreviewEditSelectPage(pageId: note.page(index: note.currentPageIndex - 1).id.value), content: false) } label: {
+                        Button {
+                            if let page = note.pageAt(index: note.currentPageIndex - 1) {
+                                model.applyEdit(PreviewEditSelectPage(pageId: page.id.value), content: false)
+                            }
+                        } label: {
                             Image(systemName: "chevron.left").frame(width: 44, height: 44)
                         }.accessibilityLabel("上一页").disabled(note.currentPageIndex == 0)
                         Text("\(note.currentPageIndex + 1)/\(note.pageCount)").monospacedDigit().fixedSize()
                             .accessibilityLabel("当前页码").accessibilityValue("\(note.currentPageIndex + 1)/\(note.pageCount)")
-                        Button { model.applyEdit(PreviewEditSelectPage(pageId: note.page(index: note.currentPageIndex + 1).id.value), content: false) } label: {
+                        Button {
+                            if let page = note.pageAt(index: note.currentPageIndex + 1) {
+                                model.applyEdit(PreviewEditSelectPage(pageId: page.id.value), content: false)
+                            }
+                        } label: {
                             Image(systemName: "chevron.right").frame(width: 44, height: 44)
                         }.accessibilityLabel("下一页").disabled(note.currentPageIndex == note.pageCount - 1)
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -890,9 +898,18 @@ struct PreviewRoot: View {
                                 Button("加页") { model.applyEdit(PreviewEditInsertPage.shared) }
                                 Button("复制页") { model.applyEdit(PreviewEditCopyPage.shared) }
                                 Button("删页") { window.cancelInput(); deletingPage = true }
-                                Button("前移") { model.applyEdit(PreviewEditMovePage(beforePageId: note.page(index: note.currentPageIndex - 1).id.value)) }
+                                Button("前移") {
+                                    if let page = note.pageAt(index: note.currentPageIndex - 1) {
+                                        model.applyEdit(PreviewEditMovePage(beforePageId: page.id.value))
+                                    }
+                                }
                                     .disabled(note.currentPageIndex == 0)
-                                Button("后移") { model.applyEdit(PreviewEditMovePage(beforePageId: note.currentPageIndex + 2 < note.pageCount ? note.page(index: note.currentPageIndex + 2).id.value : nil)) }.disabled(note.currentPageIndex == note.pageCount - 1)
+                                Button("后移") {
+                                    let index = note.currentPageIndex
+                                    if note.pageAt(index: index + 1) != nil {
+                                        model.applyEdit(PreviewEditMovePage(beforePageId: note.pageAt(index: index + 2)?.id.value))
+                                    }
+                                }.disabled(note.currentPageIndex == note.pageCount - 1)
                                 Menu("纸张") {
                                     Button("空白") { model.applyEdit(PreviewEditSetPaper(width: note.currentPage.width, height: note.currentPage.height, paper: .blank)) }
                                     Button("横线") { model.applyEdit(PreviewEditSetPaper(width: note.currentPage.width, height: note.currentPage.height, paper: .ruled)) }

@@ -72,6 +72,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     val canRedo: Boolean get() { ownerCheck(); return !retired && !readOnly && input == null && pending == null && memory.status().nextRedoOperationId != null }
     fun snapshot(): DocumentRoot = root()
     fun page(index: Int): PageDescriptor = root().page(index)
+    /** Owner-only lookup. An out-of-range index is absence and does not change the session. */
+    fun pageAt(index: Int): PageDescriptor? = root().pageAt(index)
     fun authorityStatus(): DocumentAuthorityStatus { ownerCheck(); return memory.status() }
     private fun clearProjection() { projection = emptyList(); projectionRevision = -1L; projectionPage = null }
     private fun visible(): List<StrokeObject> {
@@ -83,6 +85,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         return projection
     }
     fun stroke(index: Int): StrokeObject = visible()[index]
+    /** Owner-only lookup in the selected page; the returned stroke is immutable. */
+    fun strokeAt(index: Int): StrokeObject? = visible().getOrNull(index)
     fun strokeId(index: Int): String = stroke(index).id.value
     fun strokeColor(index: Int): Int = stroke(index).brush.argb
     fun strokeWidth(index: Int): Double = stroke(index).brush.width

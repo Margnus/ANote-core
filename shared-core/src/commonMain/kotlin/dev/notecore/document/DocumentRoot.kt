@@ -24,6 +24,7 @@ class DocumentRoot private constructor(val title: String, val scene: SceneSnapsh
     }
     fun pages(): List<PageDescriptor> = directory.toList()
     fun page(index: Int): PageDescriptor = directory[index]
+    fun pageAt(index: Int): PageDescriptor? = directory.getOrNull(index)
     fun findPage(id: PageId): PageDescriptor? = directory.firstOrNull { it.id == id }
     fun pageObjects(id: PageId): List<StrokeObject> {
         val page = findPage(id) ?: return emptyList()

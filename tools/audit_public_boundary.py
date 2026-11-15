@@ -61,11 +61,14 @@ CANDIDATE_METHODS = {
         'setReadOnly(value:)': (False, False), 'cancelStroke()': (False, False),
         'retryPendingStroke()': (False, False), 'pendingInk()': (False, True),
         'page(index:)': (False, False), 'stroke(index:)': (False, False),
+        'pageAt(index:)': (False, True), 'strokeAt(index:)': (False, True),
         'pointCount(index:)': (False, False), 'pointX(index:point:)': (False, False),
         'pointY(index:point:)': (False, False), 'pointPressure(index:point:)': (False, False),
         'capture()': (False, False), 'captureRecovery()': (False, False), 'snapshot()': (False, False),
         'retire()': (False, False), 'retireAfterRecovery(snapshot:)': (False, False)},
     'NCPPagedPreviewSnapshot': {'encode()': (True, True), 'sameContent(other:)': (False, False)},
+    'NCPDocumentRoot': {'pageAt(index:)': (False, True)},
+    'NCPStrokeSamples': {'sampleAt(index:)': (False, True)},
 }
 CANDIDATE_PROPERTIES = {
     'NCPDocumentBudgetCreation': {'budget': (False, True), 'failure': (False, True)},

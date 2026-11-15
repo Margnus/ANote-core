@@ -25,10 +25,11 @@ class PreviewReadTraversalTest {
         val root = n.snapshot(); val checkpoint = n.capture(); val version = n.changeVersion
         owned = false
         for (read in listOf<() -> Any?>({ n.snapshot() }, { n.page(0) }, { n.strokeCount }, { n.stroke(0) },
-            { n.pointX(0, 0) }, { n.pointPressure(0, 0) }, { n.captureRecovery() }))
+            { n.pageAt(-1) }, { n.strokeAt(-1) }, { n.pointX(0, 0) }, { n.pointPressure(0, 0) }, { n.captureRecovery() }))
             assertFailsWith<IllegalStateException> { read() }
         // Immutable value getters have no owner callback. They do not read or mutate the Notebook.
-        assertEquals(30.0, stroke.samples.x(1)); assertSame(root, checkpoint.root)
+        assertEquals(30.0, stroke.samples.sampleAt(1)?.x); assertSame(root, checkpoint.root)
+        assertEquals(root.page(0), root.pageAt(0)); assertNull(root.pageAt(-1))
         owned = true; assertSame(root, n.snapshot()); assertEquals(version, n.changeVersion)
         assertEquals("", n.lastError); assertSame(stroke, n.stroke(0))
     }
