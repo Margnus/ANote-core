@@ -1,6 +1,8 @@
 package dev.notecore.document
 
 import dev.notecore.canvas.prototype.*
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 
 /** Unfrozen root operations. One document identity/base revision and one operation-id namespace. */
 sealed interface DocumentCommand {
@@ -48,15 +50,62 @@ sealed interface DocumentCommand {
     }
 }
 
-data class DocumentBudget @Throws(IllegalArgumentException::class) constructor(
-                          val maxPages: Int = 128, val maxObjects: Int = 5000, val liveBytes: Long = 8L * 1024 * 1024,
-                          val journalEntries: Int = 128, val journalBytes: Long = 8L * 1024 * 1024,
-                          val identityBytes: Long = 2L * 1024 * 1024,
-                          val historyEntries: Int = 128, val historyBytes: Long = 8L * 1024 * 1024,
-                          /** Per-notebook active input reservation; independent of retained document/history quotas. */
-                          val inputBytes: Long = 2L * 1024 * 1024) {
+@OptIn(ExperimentalObjCRefinement::class)
+class DocumentBudget @Throws(IllegalArgumentException::class) constructor(
+    val maxPages: Int = 128, val maxObjects: Int = 5000, val liveBytes: Long = 8L * 1024 * 1024,
+    val journalEntries: Int = 128, val journalBytes: Long = 8L * 1024 * 1024,
+    val identityBytes: Long = 2L * 1024 * 1024,
+    val historyEntries: Int = 128, val historyBytes: Long = 8L * 1024 * 1024,
+    /** Per-notebook active input reservation; independent of retained document/history quotas. */
+    val inputBytes: Long = 2L * 1024 * 1024,
+) {
     init { require(invalidField(maxPages, maxObjects, liveBytes, journalEntries, journalBytes, identityBytes,
         historyEntries, historyBytes, inputBytes) == null) }
+
+    /** Explicit so invalid copies use the same native error channel as construction. */
+    @Throws(IllegalArgumentException::class)
+    fun copy(maxPages: Int = this.maxPages, maxObjects: Int = this.maxObjects, liveBytes: Long = this.liveBytes,
+             journalEntries: Int = this.journalEntries, journalBytes: Long = this.journalBytes,
+             identityBytes: Long = this.identityBytes, historyEntries: Int = this.historyEntries,
+             historyBytes: Long = this.historyBytes, inputBytes: Long = this.inputBytes): DocumentBudget =
+        DocumentBudget(maxPages, maxObjects, liveBytes, journalEntries, journalBytes, identityBytes,
+            historyEntries, historyBytes, inputBytes)
+
+    // Preserve Kotlin destructuring and the existing JVM descriptors.
+    @HiddenFromObjC operator fun component1() = maxPages
+    @HiddenFromObjC operator fun component2() = maxObjects
+    @HiddenFromObjC operator fun component3() = liveBytes
+    @HiddenFromObjC operator fun component4() = journalEntries
+    @HiddenFromObjC operator fun component5() = journalBytes
+    @HiddenFromObjC operator fun component6() = identityBytes
+    @HiddenFromObjC operator fun component7() = historyEntries
+    @HiddenFromObjC operator fun component8() = historyBytes
+    @HiddenFromObjC operator fun component9() = inputBytes
+
+    override fun equals(other: Any?): Boolean = this === other || (
+        other is DocumentBudget && maxPages == other.maxPages && maxObjects == other.maxObjects &&
+            liveBytes == other.liveBytes && journalEntries == other.journalEntries &&
+            journalBytes == other.journalBytes && identityBytes == other.identityBytes &&
+            historyEntries == other.historyEntries && historyBytes == other.historyBytes && inputBytes == other.inputBytes
+        )
+
+    override fun hashCode(): Int {
+        var result = maxPages
+        result = 31 * result + maxObjects
+        result = 31 * result + liveBytes.hashCode()
+        result = 31 * result + journalEntries
+        result = 31 * result + journalBytes.hashCode()
+        result = 31 * result + identityBytes.hashCode()
+        result = 31 * result + historyEntries
+        result = 31 * result + historyBytes.hashCode()
+        return 31 * result + inputBytes.hashCode()
+    }
+
+    override fun toString(): String =
+        "DocumentBudget(maxPages=$maxPages, maxObjects=$maxObjects, liveBytes=$liveBytes, " +
+            "journalEntries=$journalEntries, journalBytes=$journalBytes, identityBytes=$identityBytes, " +
+            "historyEntries=$historyEntries, historyBytes=$historyBytes, inputBytes=$inputBytes)"
+
     companion object {
         /** Raw immutable values only: no owner, authority, reservation, clamping or exception recovery.
          * A valid general budget may still be unsupported or insufficient for a preview notebook.

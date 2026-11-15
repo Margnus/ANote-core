@@ -1,0 +1,82 @@
+Compiled from "DocumentCommand.kt"
+public final class dev.notecore.document.DocumentBudget {
+  public static final dev.notecore.document.DocumentBudget$Companion Companion;
+    descriptor: Ldev/notecore/document/DocumentBudget$Companion;
+  public dev.notecore.document.DocumentBudget(int, int, long, int, long, long, int, long, long) throws java.lang.IllegalArgumentException;
+    descriptor: (IIJIJJIJJ)V
+
+  public dev.notecore.document.DocumentBudget(int, int, long, int, long, long, int, long, long, int, kotlin.jvm.internal.DefaultConstructorMarker) throws java.lang.IllegalArgumentException;
+    descriptor: (IIJIJJIJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+
+  public final int getMaxPages();
+    descriptor: ()I
+
+  public final int getMaxObjects();
+    descriptor: ()I
+
+  public final long getLiveBytes();
+    descriptor: ()J
+
+  public final int getJournalEntries();
+    descriptor: ()I
+
+  public final long getJournalBytes();
+    descriptor: ()J
+
+  public final long getIdentityBytes();
+    descriptor: ()J
+
+  public final int getHistoryEntries();
+    descriptor: ()I
+
+  public final long getHistoryBytes();
+    descriptor: ()J
+
+  public final long getInputBytes();
+    descriptor: ()J
+
+  public final int component1();
+    descriptor: ()I
+
+  public final int component2();
+    descriptor: ()I
+
+  public final long component3();
+    descriptor: ()J
+
+  public final int component4();
+    descriptor: ()I
+
+  public final long component5();
+    descriptor: ()J
+
+  public final long component6();
+    descriptor: ()J
+
+  public final int component7();
+    descriptor: ()I
+
+  public final long component8();
+    descriptor: ()J
+
+  public final long component9();
+    descriptor: ()J
+
+  public final dev.notecore.document.DocumentBudget copy(int, int, long, int, long, long, int, long, long);
+    descriptor: (IIJIJJIJJ)Ldev/notecore/document/DocumentBudget;
+
+  public static dev.notecore.document.DocumentBudget copy$default(dev.notecore.document.DocumentBudget, int, int, long, int, long, long, int, long, long, int, java.lang.Object);
+    descriptor: (Ldev/notecore/document/DocumentBudget;IIJIJJIJJILjava/lang/Object;)Ldev/notecore/document/DocumentBudget;
+
+  public java.lang.String toString();
+    descriptor: ()Ljava/lang/String;
+
+  public int hashCode();
+    descriptor: ()I
+
+  public boolean equals(java.lang.Object);
+    descriptor: (Ljava/lang/Object;)Z
+
+  public dev.notecore.document.DocumentBudget() throws java.lang.IllegalArgumentException;
+    descriptor: ()V
+}

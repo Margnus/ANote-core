@@ -1,0 +1,20 @@
+import Foundation
+import NoteCanvasPrototype
+
+let budget = DocumentBudget.companion.validated(maxPages: 128, maxObjects: 5000, liveBytes: 1024,
+    journalEntries: 1, journalBytes: 1024, identityBytes: 1024,
+    historyEntries: 1, historyBytes: 1024, inputBytes: 1024).budget!
+do {
+    _ = try budget.doCopy(maxPages: 0, maxObjects: 5000, liveBytes: 1024,
+        journalEntries: 1, journalBytes: 1024, identityBytes: 1024,
+        historyEntries: 1, historyBytes: 1024, inputBytes: 1024)
+    preconditionFailure("Invalid budget copy was accepted")
+} catch {
+    precondition((error as NSError).userInfo["KotlinException"] != nil)
+    print("Caught the Kotlin copy exception through NSError")
+}
+let copied = try budget.doCopy(maxPages: 128, maxObjects: 5000, liveBytes: 1024,
+    journalEntries: 1, journalBytes: 1024, identityBytes: 1024,
+    historyEntries: 1, historyBytes: 1024, inputBytes: 2248)
+precondition(budget.inputBytes == 1024 && copied.inputBytes == 2248 && copied.maxPages == budget.maxPages)
+print("Valid copy preserves the original budget and applies the requested quota")

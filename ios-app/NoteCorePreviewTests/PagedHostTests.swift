@@ -180,6 +180,16 @@ final class PagedHostTests: XCTestCase {
         for (result, reason) in failures { XCTAssertNil(result.budget); XCTAssertEqual(result.failure, reason) }
         let zero = try XCTUnwrap(validate(live: 0, journalBytes: 0, identity: 0, historyBytes: 0, input: 0).budget)
         XCTAssertEqual(zero.inputBytes, 0); XCTAssertEqual(zero.liveBytes, 0)
+        XCTAssertThrowsError(try zero.doCopy(maxPages: zero.maxPages, maxObjects: zero.maxObjects,
+            liveBytes: zero.liveBytes, journalEntries: zero.journalEntries, journalBytes: zero.journalBytes,
+            identityBytes: zero.identityBytes, historyEntries: zero.historyEntries, historyBytes: zero.historyBytes,
+            inputBytes: -1))
+        let copied = try zero.doCopy(maxPages: zero.maxPages, maxObjects: zero.maxObjects,
+            liveBytes: zero.liveBytes, journalEntries: zero.journalEntries, journalBytes: zero.journalBytes,
+            identityBytes: zero.identityBytes, historyEntries: zero.historyEntries, historyBytes: zero.historyBytes,
+            inputBytes: 2248)
+        XCTAssertEqual(copied.inputBytes, 2248)
+        XCTAssertEqual(zero.inputBytes, 0)
         let huge = try XCTUnwrap(validate(live: Int64.max, input: Int64.max).budget)
         XCTAssertEqual(huge.liveBytes, Int64.max); XCTAssertEqual(huge.inputBytes, Int64.max)
         let unsupported = PagedPreviewNotebook.companion.createValidated(documentId: "budget", title: "budget", sessionNonce: "budget",

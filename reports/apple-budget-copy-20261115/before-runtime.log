@@ -1,0 +1,9 @@
+Function doesn't have or inherit @Throws annotation and thus exception isn't propagated from Kotlin to Objective-C/Swift as NSError.
+It is considered unexpected and unhandled instead. Program will be terminated.
+Uncaught Kotlin exception: kotlin.IllegalArgumentException: Failed requirement.
+    at 0   before-probe                        0x10462f6fb        kfun:dev.notecore.document.DocumentBudget#<init>(kotlin.Int;kotlin.Int;kotlin.Long;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Int;kotlin.Long;kotlin.Long){} + 303
+    at 1   before-probe                        0x1046aada3        objc2kotlin_kfun:dev.notecore.document.DocumentBudget#copy(kotlin.Int;kotlin.Int;kotlin.Long;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Int;kotlin.Long;kotlin.Long){}dev.notecore.document.DocumentBudget + 435
+    at 2   before-probe                        0x1045851d3        main + 379
+    at 3   dyld                                0x104b0434f        dyld-internal + 19
+    at 4   ???                                 0x10490dd7b        0x0 + 4371570043
+Child process terminated with signal 6: Abort trap

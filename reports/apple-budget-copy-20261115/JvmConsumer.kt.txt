@@ -1,0 +1,16 @@
+import dev.notecore.document.DocumentBudget
+
+fun main() {
+    val budget = DocumentBudget(8, 257, 1L shl 35, 11, 12, 13, 14, 15, 16)
+    val (pages, objects, live, entries, journal, ids, historyEntries, history, input) = budget
+    check(listOf(pages, objects, entries, historyEntries) == listOf(8, 257, 11, 14))
+    check(listOf(live, journal, ids, history, input) == listOf(1L shl 35, 12L, 13L, 15L, 16L))
+    val same = budget.copy()
+    check(same == budget && same !== budget && same.hashCode() == budget.hashCode())
+    val changed = budget.copy(inputBytes = 2248)
+    check(changed != budget && changed.inputBytes == 2248L && changed.liveBytes == live)
+    check(runCatching { budget.copy(maxPages = 0) }.exceptionOrNull() is IllegalArgumentException)
+    println(budget)
+    println(budget.hashCode())
+    println(changed)
+}

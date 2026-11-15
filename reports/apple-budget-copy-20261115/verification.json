@@ -1,0 +1,63 @@
+{
+  "status": "passed",
+  "baseline_commit": "36a1d7abe9d8d5059beb25cd707bddac9cb225db",
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/DocumentCommand.kt": "c5e7bcde3d247d519be3c991d1d5565852f20e48d2429026dad8f2dbd652b631",
+    "tools/audit_public_boundary.py": "3438b1f131acb9b06dd5e9909edef576f3e849233bdb1a31cdb98597ead38e4f",
+    "tools/audit_sdk_type_closure.py": "b3d4483c3840283eddd6be3ad5b18d2ed05d9f10a04a0fe35010af5848f4bca1",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "0d8e50203b396c61e2d4a3ff02eeab031687721652b6a4ec88b2afb737559cb9",
+    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "c24a3bf34bb341335e450dba852db4f1c67811325cf4a24739ea24d84bc2f405",
+    "samples/sketch-host-ios/Sources/SketchSession.swift": "6df8fa1cb244a49adc89234113409a06b51af10abf85cba81ab4994de60ef0de"
+  },
+  "evidence_sha256": {
+    "reports/apple-budget-copy-20261115/After.swift.txt": "2b511c3e17eff9430464a08a16cb043ec12b0773ddb0db07dd04561eb1c44afd",
+    "reports/apple-budget-copy-20261115/Before.swift.txt": "9d99e56ffb1e8c4e9f7d358f3bc28ceb1288f2292c07071e5213b36c0457c631",
+    "reports/apple-budget-copy-20261115/JvmConsumer.kt.txt": "1bc99226430d9ce49908720ba922aed125c93b2879b167724b7bf41b31b1ef8f",
+    "reports/apple-budget-copy-20261115/after-runtime.log": "cf0db52be16993e50f860ba119e0ffd5b106bc70ab0fe9facd13bb3a04d1fb57",
+    "reports/apple-budget-copy-20261115/before-exit.txt": "e726b440cc164001999e718b51780d80314709efe06e7857282377be9111127b",
+    "reports/apple-budget-copy-20261115/before-runtime.log": "aa31af56c3a9448e2c3c6d94d5882dfbfeebedc9e4423a9bfc1f6e232a9f343b",
+    "reports/apple-budget-copy-20261115/header-diff.json": "a5fc28e0a89a2f816dc7c973cb530f6d8288c08a421e68c3adce236f81737da2",
+    "reports/apple-budget-copy-20261115/jvm-after-signatures.txt": "511b4c4d5094cdee6a3489d4c72cd72149ac88b6abae27d26d9f34fb3760eef6",
+    "reports/apple-budget-copy-20261115/jvm-after.log": "596f14b30f7221547ce93c77b0deb23a673b962af20c07a39efc5746a6bac2c2",
+    "reports/apple-budget-copy-20261115/jvm-before-signatures.txt": "236e5d53912af2eff09fa2156339428c16bd691d08d7903e1219482dd900c98d",
+    "reports/apple-budget-copy-20261115/jvm-before.log": "596f14b30f7221547ce93c77b0deb23a673b962af20c07a39efc5746a6bac2c2",
+    "reports/apple-budget-copy-20261115/recovery.log": "fb1956bb91df880a09daa6bf832441caf898176e667d7727849244c85962f166",
+    "reports/apple-budget-copy-20261115/summary.json": "f7ccb34df6afcac0eb06d578f7fb0e3c65b9a5f84216c7cae40ced66b4cfd331"
+  },
+  "artifact_sha256": {
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "0446cda8d70fa9dc4108d0993a5795ac7c4d5a801a0b0d2fedf1a3bc95255da2",
+    "build/sdk-candidate/shared-core/bin/iosArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "84b1fb7b15884707d030262be62cc9a3d7d43b5743c3cdf300d5c4e40a579c90",
+    "build/sdk-budget-copy/iosArm64-after": "a4184301080f2baffa979b7123350a78dd29a3d2bd343d56e0c8193b01549745",
+    "build/sdk-budget-copy/iosArm64-recovery": "c2f63211a5dd310ecd62f6f067fd1bc70de452e118ce28b44048f979d471835d",
+    "build/sdk-budget-copy/iosArm64-sketch": "129d83271b13bd836b6544c82fb3978c3a8cba809e1803f06ffe2fbd8f7a20be",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "38d254deb13d09f1ed7b86f539732b5241f0ec488ca6719c58a5bcb87ebe0129",
+    "build/sdk-candidate/shared-core/bin/iosSimulatorArm64/releaseFramework/NoteCanvasPrototype.framework/Headers/NoteCanvasPrototype.h": "84b1fb7b15884707d030262be62cc9a3d7d43b5743c3cdf300d5c4e40a579c90",
+    "build/sdk-budget-copy/iosSimulatorArm64-after": "ba76c0919d4c7b9121affeab0eba820d6737c378855bdc823c035d213d745e91",
+    "build/sdk-budget-copy/iosSimulatorArm64-recovery": "e14824116522262c3e0cf1a4f2165c36e1a59ca9a4437222058bd831b15cc44e",
+    "build/sdk-budget-copy/iosSimulatorArm64-sketch": "c7cd97801b4eae7b5bccaeb226837bd8f7d9428c0bfd46f2f526f3de1ae1fd83"
+  },
+  "ios_simulator_os": "27.0",
+  "ios_app_host_passed": 76,
+  "jvm_legacy_consumer_sha256": "f54a5a1c5932382af86346d24dd744a07c8d12e530e67e87ed7fabf754e12a54",
+  "default_jvm_before_sha256": "340cdf6b88114ce5cc3097404c633639b4da686d7bb60a02284dbdec583905e6",
+  "default_jvm_after_sha256": "328993baedbe95990e1cde12d66b0b8a67252c0e1b3c36e1c21e04240ff22a1c",
+  "independent_sketch_linked_targets": [
+    "iosArm64",
+    "iosSimulatorArm64"
+  ],
+  "default_jvm": {
+    "canvas-core": {
+      "tests": 237,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 366,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "scope": "Explicit immutable budget copy bridges invalid values to Apple NSError, with historical JVM consumer and unchanged selected recovery signatures. Direct Objective-C copy callers must rebuild. Kotlin reflection no longer reports a data class. Minimum OS runtime and physical gates remain pending."
+}
