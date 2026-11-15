@@ -1,0 +1,7 @@
+INSTRUMENTATION_RESULT: failure=java.lang.IllegalStateException: Missing actual compositor release callback on close
+	at dev.notecore.app.SurfaceFrameHostChecks.verify(SurfaceFrameHostChecks.kt:229)
+	at dev.notecore.app.ViewportInstrumentation.onStart(ViewportInstrumentation.kt:201)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2597)
+
+INSTRUMENTATION_RESULT: viewport_status=failed
+INSTRUMENTATION_CODE: 0

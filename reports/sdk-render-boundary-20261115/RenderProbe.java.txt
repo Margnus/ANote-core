@@ -1,0 +1,7 @@
+import dev.notecore.canvas.prototype.ResourceLeasePool;
+import dev.notecore.canvas.prototype.WorkResult;
+
+final class RenderProbe {
+    Class<?> pool() { return ResourceLeasePool.class; }
+    Class<?> result() { return WorkResult.class; }
+}

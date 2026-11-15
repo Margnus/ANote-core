@@ -1,0 +1,4 @@
+@import NoteCanvasPrototype;
+
+Class resourcePool(void) { return [NCPResourceLeasePool class]; }
+Protocol *workResult(void) { return @protocol(NCPWorkResult); }

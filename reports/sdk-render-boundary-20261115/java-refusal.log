@@ -1,0 +1,21 @@
+build/sdk-render-boundary/RenderProbe.java:1: error: cannot find symbol
+import dev.notecore.canvas.prototype.ResourceLeasePool;
+                                    ^
+  symbol:   class ResourceLeasePool
+  location: package dev.notecore.canvas.prototype
+build/sdk-render-boundary/RenderProbe.java:2: error: cannot find symbol
+import dev.notecore.canvas.prototype.WorkResult;
+                                    ^
+  symbol:   class WorkResult
+  location: package dev.notecore.canvas.prototype
+build/sdk-render-boundary/RenderProbe.java:5: error: cannot find symbol
+    Class<?> pool() { return ResourceLeasePool.class; }
+                             ^
+  symbol:   class ResourceLeasePool
+  location: class RenderProbe
+build/sdk-render-boundary/RenderProbe.java:6: error: cannot find symbol
+    Class<?> result() { return WorkResult.class; }
+                               ^
+  symbol:   class WorkResult
+  location: class RenderProbe
+4 errors

@@ -1,0 +1,7 @@
+build/sdk-render-boundary/RenderProbe.m:3:36: error: use of undeclared identifier 'NCPResourceLeasePool'
+    3 | Class resourcePool(void) { return [NCPResourceLeasePool class]; }
+      |                                    ^~~~~~~~~~~~~~~~~~~~
+build/sdk-render-boundary/RenderProbe.m:4:38: error: cannot find protocol declaration for 'NCPWorkResult'
+    4 | Protocol *workResult(void) { return @protocol(NCPWorkResult); }
+      |                                      ^
+2 errors generated.

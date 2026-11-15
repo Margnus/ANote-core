@@ -70,7 +70,14 @@ kotlin {
         }
         // These ports are supplied only by the original App integration build.
         if (sdkCandidate.get()) {
-            getByName("commonMain").kotlin.exclude("**/DocumentCloseCoordinator.kt")
+            getByName("commonMain").kotlin.exclude(
+                "**/DocumentCloseCoordinator.kt",
+                "**/OwnedWork.kt",
+                "**/ResourceLeasePool.kt",
+                "**/BrushRenderOwnerPoc.kt",
+                "**/BrushTileCachePoc.kt",
+                "**/BrushTilePixelsPoc.kt",
+            )
             jvmAndAndroidMain.kotlin.exclude("**/BoundedOwnerExecutor.kt", "**/BrushRenderExecutorPoc.kt")
             getByName("jvmMain").kotlin.exclude("**/PrototypeDemo.kt")
             findByName("androidMain")?.kotlin?.exclude("**/AndroidInkFrameExperiment.kt", "**/AndroidBrushImagePoc.kt")
