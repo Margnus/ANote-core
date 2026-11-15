@@ -7,14 +7,11 @@ internal object LegacyPreviewReader {
     private data class Metadata(val header: PagedPreviewHeader, val nextObject: Long)
     fun header(text: String): PagedPreviewHeader {
         require(text.length <= 4096)
-        val rows = Rows(text)
+        val rows = PagedPreviewCodec.Rows(text)
         require(rows.row(2) == listOf("NCPREVIEW", "1"))
         return metadata(rows.row(6)).header
     }
-    fun decode(text: String): DocumentRoot {
-        require(text.length <= PagedPreviewCodec.MAX_CHARACTERS)
-        val rows = Rows(text)
-        require(rows.row(2) == listOf("NCPREVIEW", "1"))
+    fun decodeRows(rows: PreviewRows): DocumentRoot {
         val meta = metadata(rows.row(6)); val h = meta.header
         val objects = ArrayList<StrokeObject>(h.objectCount); val ids = mutableSetOf<ObjectId>()
         var total = 0
@@ -46,20 +43,6 @@ internal object LegacyPreviewReader {
         val count = row[4].toInt(); val revision = row[5].toLong()
         SceneId(id); require(title.length <= 120 && next > 0 && count in 0..500 && revision >= 0)
         return Metadata(PagedPreviewHeader(id, title, 1, count, revision, 1), next)
-    }
-    private class Rows(private val text: String) {
-        private var offset = 0
-        fun row(fields: Int): List<String> {
-            require(offset < text.length) { "Truncated legacy preview" }
-            val start = offset
-            while (offset < text.length && text[offset] != '\n') { require(offset - start < 1024); offset++ }
-            val end = if (offset > start && text[offset - 1] == '\r') offset - 1 else offset
-            val line = text.substring(start, end)
-            if (offset < text.length) offset++
-            require(line.count { it == '\t' } == fields - 1)
-            return line.split('\t')
-        }
-        fun end() { require(offset == text.length) { "Trailing legacy data" } }
     }
     private fun unescape(value: String): String = buildString {
         var index = 0

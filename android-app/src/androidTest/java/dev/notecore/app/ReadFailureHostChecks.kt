@@ -19,6 +19,18 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
         while (!done && SystemClock.uptimeMillis()<end) { main { done=predicate() }; if (!done) SystemClock.sleep(20) }
         check(done) { "Read callback did not arrive" }
     }
+    private fun fileDigest(file: File): String {
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { source ->
+            val bytes = ByteArray(8192)
+            while (true) {
+                val count = source.read(bytes)
+                if (count < 0) break
+                digest.update(bytes, 0, count)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
     private fun localFileIdentity(directory: File) {
         check(directory.mkdirs())
         val invalid = listOf("../outside", "a/b", "", "local\n", "local\r", "local\r\n", "local\u2028", "中文😀", "x".repeat(129))
@@ -143,6 +155,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             await(60000) { saved && store.saveStates().isEmpty() }
             val file = File(directory, "$id.ncp")
             check(file.length() > 16_000_000 && file.length() <= PagedPreviewCodec.MAX_UTF8_BYTES)
+            android.util.Log.i("NoteCoreStorageTest", "200000-point pending bytes=${file.length()} sha256=${fileDigest(file)}")
             main { check(store.releaseActive(producer)); store.stopTestBackend(); store = NoteStore.isolated(host, directory) }
             saved = false
             lateinit var owner: PagedPreviewNotebook
@@ -167,6 +180,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             await(60000) { opened }
             check(file.length() > 16_000_000 && file.length() <= PagedPreviewCodec.MAX_UTF8_BYTES)
             check(root.scene.objectCount == 9 && checkpoint.pending === pending)
+            android.util.Log.i("NoteCoreStorageTest", "200000-point reopened canonical bytes=${file.length()} sha256=${fileDigest(file)}")
         } finally { main { store.stopTestBackend() } }
     }
     fun verify(): ByteArray {
@@ -197,10 +211,18 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             check(marker.delete() && backupDirectory.delete())
             for ((bytes,reason) in listOf("bad format".toByteArray() to LocalReadFailure.INVALID_FORMAT,
                 valid.replace(id,"other-note").toByteArray() to LocalReadFailure.WRONG_DOCUMENT,
-                byteArrayOf(0xc3.toByte(),0x28) to LocalReadFailure.INVALID_UTF8,
-                ByteArray(PagedPreviewCodec.MAX_CHARACTERS+1) { 'x'.code.toByte() } to LocalReadFailure.CHARACTER_CAPACITY)) {
+                byteArrayOf(0xc3.toByte(),0x28) to LocalReadFailure.INVALID_UTF8)) {
                 file.writeBytes(bytes);refuse(reason.message);check(file.readBytes().contentEquals(bytes))
             }
+            val tooManyCharacters = PagedPreviewCodec.MAX_CHARACTERS + 1
+            file.outputStream().use { output ->
+                val chunk = ByteArray(8192) { 'x'.code.toByte() }
+                repeat(tooManyCharacters / chunk.size) { output.write(chunk) }
+                output.write(chunk, 0, tooManyCharacters % chunk.size)
+            }
+            val oversizedTextDigest = fileDigest(file)
+            refuse(LocalReadFailure.CHARACTER_CAPACITY.message)
+            check(file.length() == tooManyCharacters.toLong() && fileDigest(file) == oversizedTextDigest)
             // Valid canonical doubles can degenerate in the original Float Path/Matrix adapter.
             val ink="NCPREVIEW\t2\nD\t$id\ttitle\t1\t1\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nS\tink\tlayer\t1\tMONOLINE\t1\t-1\t2.5\t1\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\nP\t1.0\t2.0\t0.5\t1\nEND\n"
             verifyImport(File(directory, "import"), ink)
@@ -222,8 +244,9 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
                 check(file.readText(Charsets.UTF_8) == encoded)
             }
             RandomAccessFile(file,"rw").use { it.setLength(32L*1024*1024+1) }
-            val largeBefore=file.readBytes()
-            refuse(LocalReadFailure.BYTE_CAPACITY.message);check(file.readBytes().contentEquals(largeBefore))
+            val oversizedFileDigest = fileDigest(file)
+            refuse(LocalReadFailure.BYTE_CAPACITY.message)
+            check(file.length() == 32L * 1024 * 1024 + 1 && fileDigest(file) == oversizedFileDigest)
             check(file.delete());refuse(LocalReadFailure.IO_FAILURE.message)
             main { store.stopTestBackend();store=NoteStore.isolated(host,directory,beforeOpenRead={ error("injected non-IO read failure") }) }
             file.writeText(valid,Charsets.UTF_8)

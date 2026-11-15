@@ -9,13 +9,8 @@ import kotlin.test.*
 
 /** Synthetic streams on host JVM, not ContentProvider/ART or filesystem acceptance. */
 class BoundedPreviewReadTest {
-    @Test fun sizedReadHandlesExactShrinkingAndGrowingFiles() {
-        val bytes = ByteArray(16385) { (it % 251).toByte() }
-        for (size in listOf(0, 31, bytes.size, bytes.size + 7)) {
-            assertContentEquals(bytes, readSizedPreviewBytes(ByteArrayInputStream(bytes), size))
-        }
-        assertFailsWith<IOException> { readSizedPreviewBytes(ZeroProgress(), 1) }
-    }
+    private fun readBoundedPreviewBytes(input: InputStream): ByteArray =
+        BoundedPreviewInput(input).readBytes()
 
     private class ZeroProgress(private val prefix: ByteArray = byteArrayOf()) : InputStream() {
         var calls = 0
@@ -63,31 +58,36 @@ class BoundedPreviewReadTest {
         val bytes = readBoundedPreviewBytes(generated(PagedPreviewCodec.MAX_UTF8_BYTES))
         assertEquals(PagedPreviewCodec.MAX_UTF8_BYTES, bytes.size)
         assertEquals(0x5a.toByte(), bytes.first()); assertEquals(0x5a.toByte(), bytes.last())
-        val refusal = assertFailsWith<IllegalArgumentException> { readBoundedPreviewBytes(generated(PagedPreviewCodec.MAX_UTF8_BYTES + 1)) }
+        val refusal = assertFailsWith<IOException> { readBoundedPreviewBytes(generated(PagedPreviewCodec.MAX_UTF8_BYTES + 1)) }
         assertEquals("BYTE_CAPACITY", refusal.message)
         val oversized = generated(PagedPreviewCodec.MAX_UTF8_BYTES + 8192)
-        assertEquals("BYTE_CAPACITY", assertFailsWith<IllegalArgumentException> {
+        assertEquals("BYTE_CAPACITY", assertFailsWith<IOException> {
             readBoundedPreviewBytes(oversized)
         }.message)
         assertEquals(8191, oversized.remaining)
     }
 
-    @Test fun sizedReadAtCapacityDistinguishesEofFromOneExtraByte() {
+    @Test fun capacityProbeDistinguishesEofFromOneExtraByte() {
         val cap = PagedPreviewCodec.MAX_UTF8_BYTES
         fun measuredFile(extra: Int) = object : InputStream() {
             var remaining = cap
             override fun read(): Int = extra
             override fun read(b: ByteArray, off: Int, len: Int): Int {
+                if (remaining == 0) {
+                    if (extra < 0) return -1
+                    b[off] = extra.toByte()
+                    return 1
+                }
                 val count = minOf(remaining, len, 8192)
                 b.fill(0x5a, off, off + count)
                 remaining -= count
                 return count
             }
         }
-        val exact = readSizedPreviewBytes(measuredFile(-1), cap)
+        val exact = readBoundedPreviewBytes(measuredFile(-1))
         assertEquals(cap, exact.size)
         assertEquals(0x5a.toByte(), exact.last())
-        val refusal = assertFailsWith<IllegalArgumentException> { readSizedPreviewBytes(measuredFile(0), cap) }
+        val refusal = assertFailsWith<IOException> { readBoundedPreviewBytes(measuredFile(0)) }
         assertEquals("BYTE_CAPACITY", refusal.message)
     }
 

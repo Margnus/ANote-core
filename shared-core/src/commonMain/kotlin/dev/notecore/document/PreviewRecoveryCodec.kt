@@ -10,20 +10,25 @@ class PreviewRecoveryRead internal constructor(val snapshot: PagedPreviewSnapsho
 
 object PreviewRecoveryCodec {
     private class ContentRefusal(val reason: PreviewReadFailure) : IllegalArgumentException("Preview refused: $reason")
-    private fun previewRoot(text: String): DocumentRoot {
-        val result = PreviewDocumentReader.read(text)
-        return result.root ?: throw ContentRefusal(requireNotNull(result.failure))
-    }
+    private fun previewRoot(text: String): DocumentRoot = accepted(PreviewDocumentReader.read(text))
+
+    internal fun accepted(root: DocumentRoot): DocumentRoot = accepted(PreviewDocumentReader.accept(root))
+
+    private fun accepted(result: PreviewDocumentRead): DocumentRoot =
+        result.root ?: throw ContentRefusal(requireNotNull(result.failure))
     /** Pure bounded content boundary. Decode/validation only; no IO, owner or callbacks to catch. */
     fun read(text: String): PreviewRecoveryRead {
         if (text.length > PagedPreviewCodec.MAX_CHARACTERS) return PreviewRecoveryRead(null, PreviewReadFailure.CHARACTER_CAPACITY)
-        return try { PreviewRecoveryRead(decode(text), null) }
-        catch (refusal: ContentRefusal) { PreviewRecoveryRead(null, refusal.reason) }
-        catch (_: IllegalArgumentException) { PreviewRecoveryRead(null, PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT) }
+        return readParsed { decode(text) }
     }
 
-    private const val MAGIC = "NCRECOVERY\t1\n"
-    private const val END = "RECOVERY-END\n"
+    internal fun readParsed(parse: () -> PagedPreviewSnapshot): PreviewRecoveryRead =
+        try { PreviewRecoveryRead(parse(), null) }
+        catch (refusal: ContentRefusal) { PreviewRecoveryRead(null, refusal.reason) }
+        catch (_: IllegalArgumentException) { PreviewRecoveryRead(null, PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT) }
+
+    internal const val MAGIC = "NCRECOVERY\t1\n"
+    internal const val END = "RECOVERY-END\n"
     private fun payload(root: DocumentRoot, pending: DocumentCommand.Canvas): DocumentRoot {
         val stroke = pending.command as CanvasCommand.AddStroke
         return DocumentRoot.compose("", SceneSnapshot.restored(root.id, 0, listOf(
@@ -59,13 +64,40 @@ object PreviewRecoveryCodec {
         validate(snapshot.root, pending)
         val base = PagedPreviewCodec.encode(snapshot.root)
         val ink = PagedPreviewCodec.encode(payload(snapshot.root, pending))
-        // Fixed-width hex avoids delimiter/Unicode ambiguity; CommandId is bounded by the canonical type.
-        val operation = pending.id.value.map { it.code.toString(16).padStart(4, '0') }.joinToString("")
-        val metadata = base.substringAfter('\n').substringBefore('\n')
-        val framing = "$MAGIC$metadata\n${base.length}\t${ink.length}\t$operation\n"
+        val framing = framing(PagedPreviewCodec.documentRow(snapshot.root), base.length, ink.length, pending.id.value)
         require(base.length.toLong() + ink.length + framing.length + END.length <= PagedPreviewCodec.MAX_CHARACTERS)
         return framing + base + ink + END
     }
+
+    internal fun writeRows(snapshot: PagedPreviewSnapshot, beforeWrite: ((Int) -> Unit)?, write: (String) -> Unit) {
+        val pending = snapshot.pending
+        if (pending == null) {
+            if (beforeWrite != null) beforeWrite(PagedPreviewCodec.writeRows(snapshot.root) {}.utf8Bytes)
+            PagedPreviewCodec.writeRows(snapshot.root, write)
+            return
+        }
+        validate(snapshot.root, pending)
+        val ink = payload(snapshot.root, pending)
+        // The existing frame stores UTF-16 lengths ahead of the two bodies. Measure without retaining either body.
+        val baseSize = PagedPreviewCodec.writeRows(snapshot.root) {}
+        val inkSize = PagedPreviewCodec.writeRows(ink) {}
+        val framing = framing(PagedPreviewCodec.documentRow(snapshot.root), baseSize.characters, inkSize.characters, pending.id.value)
+        val bytes = previewUtf8Size(framing) + baseSize.utf8Bytes + inkSize.utf8Bytes + END.length
+        require(framing.length + baseSize.characters + inkSize.characters + END.length <= PagedPreviewCodec.MAX_CHARACTERS)
+        require(bytes <= PagedPreviewCodec.MAX_UTF8_BYTES)
+        beforeWrite?.invoke(bytes)
+        write(framing)
+        PagedPreviewCodec.writeRows(snapshot.root, write)
+        PagedPreviewCodec.writeRows(ink, write)
+        write(END)
+    }
+
+    private fun framing(metadata: String, baseSize: Int, inkSize: Int, commandId: String): String {
+        // Fixed-width hex avoids delimiter and Unicode ambiguity.
+        val operation = commandId.map { it.code.toString(16).padStart(4, '0') }.joinToString("")
+        return "$MAGIC$metadata$baseSize\t$inkSize\t$operation\n"
+    }
+
     /** Strict framing bounds before allocating/decoding either canonical payload. */
     @Throws(IllegalArgumentException::class)
     fun decode(text: String): PagedPreviewSnapshot {
@@ -77,7 +109,20 @@ object PreviewRecoveryCodec {
         require(metadataEnd in MAGIC.length..4096)
         val frameEnd = text.indexOf('\n', metadataEnd + 1)
         require(frameEnd > metadataEnd && frameEnd - metadataEnd <= 1024)
-        val framing = text.substring(metadataEnd + 1, frameEnd)
+        val (baseSize, inkSize, operation) = readFrame(text.substring(metadataEnd + 1, frameEnd))
+        require(frameEnd.toLong() + 1 + baseSize + inkSize + END.length == text.length.toLong())
+        val baseStart = frameEnd + 1; val inkStart = baseStart + baseSize
+        require(text.substring(inkStart + inkSize) == END)
+        val baseText = text.substring(baseStart, inkStart)
+        require(baseText.substringAfter('\n').substringBefore('\n') == text.substring(MAGIC.length, metadataEnd))
+        val base = previewRoot(baseText)
+        val ink = previewRoot(text.substring(inkStart, inkStart + inkSize))
+        return restore(base, ink, operation)
+    }
+
+    internal data class Frame(val baseSize: Int, val inkSize: Int, val operation: String)
+
+    internal fun readFrame(framing: String): Frame {
         require(framing.count { it == '\t' } == 2)
         val fields = framing.split('\t')
         // Numeric parsers accept signs (and platform-dependent Unicode digits). Framing is ASCII,
@@ -88,13 +133,10 @@ object PreviewRecoveryCodec {
         val baseSize = fields[0].toInt(); val inkSize = fields[1].toInt()
         require(baseSize > 0 && inkSize > 0 && fields[2].length in 4..512 && fields[2].length % 4 == 0)
         val operation = fields[2].chunked(4).map { it.toInt(16).toChar() }.joinToString("")
-        require(frameEnd.toLong() + 1 + baseSize + inkSize + END.length == text.length.toLong())
-        val baseStart = frameEnd + 1; val inkStart = baseStart + baseSize
-        require(text.substring(inkStart + inkSize) == END)
-        val baseText = text.substring(baseStart, inkStart)
-        require(baseText.substringAfter('\n').substringBefore('\n') == text.substring(MAGIC.length, metadataEnd))
-        val base = previewRoot(baseText)
-        val ink = previewRoot(text.substring(inkStart, inkStart + inkSize))
+        return Frame(baseSize, inkSize, operation)
+    }
+
+    internal fun restore(base: DocumentRoot, ink: DocumentRoot, operation: String): PagedPreviewSnapshot {
         require(ink.id == base.id && ink.title == "" && ink.revision == 0L && ink.pageCount == 1 && ink.scene.objectCount == 1)
         val page = ink.page(0); val originalPage = requireNotNull(base.findPage(page.id))
         require(page == originalPage.copy(contentRevision = 0))

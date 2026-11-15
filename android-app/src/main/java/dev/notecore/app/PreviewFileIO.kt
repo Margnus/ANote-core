@@ -4,10 +4,15 @@ import android.content.ContentResolver
 import android.net.Uri
 import dev.notecore.canvas.prototype.*
 import dev.notecore.document.*
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FilterInputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.OutputStream
 import java.nio.charset.CharacterCodingException
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
@@ -17,6 +22,8 @@ import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.attribute.BasicFileAttributes
+import java.security.DigestOutputStream
+import java.security.MessageDigest
 import java.util.UUID
 
 /** Platform filename policy only; canonical document IDs retain their broader Unicode contract. */
@@ -45,7 +52,7 @@ internal sealed interface LocalImportResult {
     data class Imported(val root: DocumentRoot) : LocalImportResult
     data class Refused(val reason: LocalReadFailure) : LocalImportResult
 }
-private class ReadRefused(val reason: LocalReadFailure) : IllegalArgumentException(reason.name)
+private class ReadRefused(val reason: LocalReadFailure) : IOException(reason.name)
 private fun PreviewReadFailure.localReason(): LocalReadFailure = when (this) {
     PreviewReadFailure.CHARACTER_CAPACITY -> LocalReadFailure.CHARACTER_CAPACITY
     PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT -> LocalReadFailure.INVALID_FORMAT
@@ -80,19 +87,15 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
-        val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
-        val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
         val base = recoverFile(snapshot.documentId)
         val staging = File(directory, base.name + ".new")
+        val digest = MessageDigest.getInstance("SHA-256")
+        var size: Int
         try {
             FileOutputStream(staging).use { stream ->
-                // The host observer can stop the original worker with a partial staging file.
-                if (observeWriteBoundary != null && bytes.size > 1) {
-                    val prefix = bytes.size / 2
-                    stream.write(bytes, 0, prefix)
-                    observeWriteBoundary(PreviewWriteBoundary.PREFIX_WRITTEN_BEFORE_SYNC)
-                    stream.write(bytes, prefix, bytes.size - prefix)
-                } else stream.write(bytes)
+                val buffered = BufferedOutputStream(DigestOutputStream(stream, digest))
+                size = writeSnapshot(buffered, snapshot as PagedPreviewSnapshot, observeWriteBoundary)
+                buffered.flush()
                 stream.fd.sync()
             }
             observeWriteBoundary?.invoke(PreviewWriteBoundary.SYNCED_BEFORE_REPLACE)
@@ -102,33 +105,34 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             catch (cleanup: IOException) { error.addSuppressed(cleanup) }
             throw error
         }
+        val expected = digest.digest()
         FileInputStream(base).use { input ->
-            require(input.channel.size() == bytes.size.toLong()) { "Atomic replacement was not committed" }
-            val buffer = ByteArray(8192); var offset = 0
-            while (offset < bytes.size) {
-                val count = input.read(buffer, 0, minOf(buffer.size, bytes.size - offset))
+            require(input.channel.size() == size.toLong()) { "Atomic replacement was not committed" }
+            val buffer = ByteArray(8192)
+            var remaining = size
+            while (remaining > 0) {
+                val count = input.read(buffer, 0, minOf(buffer.size, remaining))
                 require(count > 0) { "Committed file truncated" }
-                for (i in 0 until count) require(buffer[i] == bytes[offset + i]) { "Committed file differs from accepted snapshot" }
-                offset += count
+                digest.update(buffer, 0, count)
+                remaining -= count
             }
-            require(input.read() == -1)
+            require(input.read() == -1 && digest.digest().contentEquals(expected)) {
+                "Committed file differs from accepted snapshot"
+            }
         }
         observeWriteBoundary?.invoke(PreviewWriteBoundary.VERIFIED_BEFORE_RETURN)
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {
         require(snapshot.pending == null) { "Recovery checkpoint is not an interchange export" }
-        val encoded = snapshot.encode(); require(encoded.length <= PagedPreviewCodec.MAX_CHARACTERS)
-        val bytes = encoded.toByteArray(Charsets.UTF_8); require(bytes.size <= PagedPreviewCodec.MAX_UTF8_BYTES)
-        checkNotNull(resolver.openOutputStream(uri, "wt")).use { it.write(bytes); it.flush() }
+        checkNotNull(resolver.openOutputStream(uri, "wt")).buffered().use { writeSnapshot(it, snapshot) }
     }
     fun importCopy(uri: Uri): LocalImportResult {
         // Only source-read failures are known refusals. A failed write may already be visible;
         // leave it to the original executor's unknown outcome instead of claiming rollback.
         val source = try {
-            val bytes = (resolver.openInputStream(uri) ?: throw IOException("Source unavailable"))
-                .use(::readBoundedPreviewBytes)
-            val reading = PreviewDocumentReader.read(decode(bytes))
-            reading.root ?: return LocalImportResult.Refused(checkNotNull(reading.failure).localReason())
+            (resolver.openInputStream(uri) ?: throw IOException("Source unavailable")).use { input ->
+                readSnapshot(input, allowRecovery = false).root
+            }
         } catch (refusal: ReadRefused) { return LocalImportResult.Refused(refusal.reason) }
           catch (_: CharacterCodingException) { return LocalImportResult.Refused(LocalReadFailure.INVALID_UTF8) }
           catch (_: IOException) { return LocalImportResult.Refused(LocalReadFailure.IO_FAILURE) }
@@ -190,14 +194,7 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     fun readRecovery(id: String): PagedPreviewSnapshot = FileInputStream(recoverFile(id)).use { stream ->
         val size = stream.channel.size()
         if (size > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
-        val text = try { decode(readSizedPreviewBytes(stream, size.toInt())) }
-            catch (_: CharacterCodingException) { throw ReadRefused(LocalReadFailure.INVALID_UTF8) }
-        val result = PreviewRecoveryCodec.read(text)
-        val snapshot = result.snapshot ?: throw ReadRefused(when (checkNotNull(result.failure)) {
-            PreviewReadFailure.CHARACTER_CAPACITY -> LocalReadFailure.CHARACTER_CAPACITY
-            PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT -> LocalReadFailure.INVALID_FORMAT
-            PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT -> LocalReadFailure.UNSUPPORTED_CONTENT
-        })
+        val snapshot = readSnapshot(stream, allowRecovery = true)
         if (snapshot.documentId != id) throw ReadRefused(LocalReadFailure.WRONG_DOCUMENT)
         snapshot
     }
@@ -222,42 +219,57 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
 
 }
 
-/** Local regular files usually retain their measured length. Growth still uses the bounded reader. */
-internal fun readSizedPreviewBytes(input: java.io.InputStream, size: Int): ByteArray {
-    require(size in 0..PagedPreviewCodec.MAX_UTF8_BYTES)
-    val bytes = ByteArray(size)
-    var offset = 0
-    while (offset < bytes.size) {
-        val count = input.read(bytes, offset, bytes.size - offset)
-        if (count < 0) return bytes.copyOf(offset)
-        if (count == 0) throw IOException("Preview input stream made no progress")
-        offset += count
-    }
-    val extra = input.read()
-    if (extra < 0) return bytes
-    if (size == PagedPreviewCodec.MAX_UTF8_BYTES) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
-    return collectPreviewBytes(input, bytes, extra)
-}
+/** Counts actual bytes, including on providers without a reliable length. */
+internal class BoundedPreviewInput(private val source: InputStream) : FilterInputStream(source) {
+    private var remaining = PagedPreviewCodec.MAX_UTF8_BYTES
 
-/** Bounded synchronous read on the original worker. A broken provider must not spin that worker forever. */
-internal fun readBoundedPreviewBytes(input: java.io.InputStream): ByteArray = collectPreviewBytes(input)
-
-private fun collectPreviewBytes(input: java.io.InputStream, prefix: ByteArray? = null, extra: Int = -1): ByteArray {
-    val capacity = if (prefix == null) 8192 else maxOf(8192, Integer.highestOneBit(prefix.size) * 2)
-    val output = java.io.ByteArrayOutputStream(capacity)
-    val buffer = ByteArray(8192)
-    if (prefix != null) {
-        output.write(prefix)
-        output.write(extra)
+    override fun read(): Int {
+        val value = source.read()
+        if (value >= 0 && --remaining < 0) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+        return value
     }
-    while (true) {
-        val remaining = PagedPreviewCodec.MAX_UTF8_BYTES - output.size()
-        // At the limit, probe one byte for EOF without reading another full chunk.
-        val count = input.read(buffer, 0, minOf(buffer.size, remaining + 1))
-        if (count < 0) break
+
+    override fun read(bytes: ByteArray, offset: Int, length: Int): Int {
+        if (length == 0) return 0
+        val count = source.read(bytes, offset, minOf(length, remaining + 1))
         if (count == 0) throw IOException("Preview input stream made no progress")
         if (count > remaining) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
-        output.write(buffer, 0, count)
+        if (count > 0) remaining -= count
+        return count
     }
-    return output.toByteArray()
+}
+
+private fun readSnapshot(input: InputStream, allowRecovery: Boolean): PagedPreviewSnapshot {
+    val bytes = BoundedPreviewInput(input)
+    val decoder = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+        .onUnmappableCharacter(CodingErrorAction.REPORT)
+    val reader = InputStreamReader(bytes, decoder)
+    val result = try {
+        if (allowRecovery) AndroidPreviewTextCodec.readCheckpoint(reader) else AndroidPreviewTextCodec.readDocument(reader)
+    } catch (_: CharacterCodingException) {
+        // Byte capacity takes precedence even when a provider contains invalid UTF-8 before the limit.
+        val buffer = ByteArray(8192)
+        while (bytes.read(buffer) >= 0) Unit
+        throw ReadRefused(LocalReadFailure.INVALID_UTF8)
+    }
+    return result.snapshot ?: throw ReadRefused(checkNotNull(result.failure).localReason())
+}
+
+private fun writeSnapshot(output: OutputStream, snapshot: PagedPreviewSnapshot,
+                          observe: ((PreviewWriteBoundary) -> Unit)? = null): Int {
+    var count = 0
+    var prefix = 0
+    val beforeWrite: ((Int) -> Unit)? = if (observe != null) { size -> prefix = size / 2 } else null
+    AndroidPreviewTextCodec.write(snapshot, beforeWrite) { line ->
+        val bytes = line.toByteArray(Charsets.UTF_8)
+        if (observe != null && prefix > count && prefix <= count + bytes.size) {
+            val partial = prefix - count
+            output.write(bytes, 0, partial)
+            output.flush()
+            observe(PreviewWriteBoundary.PREFIX_WRITTEN_BEFORE_SYNC)
+            output.write(bytes, partial, bytes.size - partial)
+        } else output.write(bytes)
+        count += bytes.size
+    }
+    return count
 }

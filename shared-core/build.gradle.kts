@@ -63,7 +63,7 @@ kotlin {
                 "dev/notecore/document/PreviewAppRecoveryPreflight.kt",
                 "dev/notecore/library/**",
             )
-            findByName("androidMain")?.kotlin?.exclude("**/PreviewEditorAdmission.kt")
+            findByName("androidMain")?.kotlin?.exclude("**/PreviewEditorAdmission.kt", "**/AndroidPreviewTextCodec.kt")
             findByName("iosMain")?.kotlin?.exclude("**/ApplePreviewEditorAdmission.kt")
         }
     }

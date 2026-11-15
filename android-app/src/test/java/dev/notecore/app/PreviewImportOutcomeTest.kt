@@ -85,9 +85,12 @@ class PreviewImportOutcomeTest {
             val resolver = shadowOf(context.contentResolver)
             resolver.registerInputStreamSupplier(uri) { throw SecurityException("source permission") }
             assertEquals(LocalReadFailure.IO_FAILURE, assertIs<LocalImportResult.Refused>(io.importCopy(uri)).reason)
-            val unexpected = IllegalStateException("unexpected provider fault")
+            val unexpected = IllegalStateException("unexpected provider open fault")
             resolver.registerInputStreamSupplier(uri) { throw unexpected }
             assertSame(unexpected, assertFailsWith<IllegalStateException> { io.importCopy(uri) })
+            val badArgument = IllegalArgumentException("unexpected provider read fault")
+            install(Tracked(valid(), badArgument))
+            assertSame(badArgument, assertFailsWith<IllegalArgumentException> { io.importCopy(uri) })
             assertEquals(emptyMap(), preserve(directory))
         } finally { directory.deleteRecursively() }
     }

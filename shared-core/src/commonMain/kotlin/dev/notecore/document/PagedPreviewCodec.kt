@@ -2,6 +2,28 @@ package dev.notecore.document
 
 import dev.notecore.canvas.prototype.*
 
+internal interface PreviewRows {
+    fun row(fields: Int): List<String>
+    fun end()
+}
+
+internal data class PreviewTextSize(val characters: Int, val utf8Bytes: Int)
+
+internal fun previewUtf8Size(text: String): Int {
+    var size = 0
+    var index = 0
+    while (index < text.length) {
+        val c = text[index++]
+        size += when {
+            c.code <= 0x7f -> 1
+            c.code <= 0x7ff -> 2
+            c.isHighSurrogate() -> { index++; 4 } // Canonical text already passed Unicode validation.
+            else -> 3
+        }
+    }
+    return size
+}
+
 data class PagedPreviewHeader(val documentId: String, val title: String, val pageCount: Int,
                               val objectCount: Int, val revision: Long, val formatVersion: Int)
 
@@ -41,10 +63,12 @@ object PagedPreviewCodec {
     fun decode(text: String): DocumentRoot {
         require(text.length <= MAX_CHARACTERS) { "Preview document too large" }
         val rows = Rows(text)
-        when (rows.row(2)) {
-            listOf("NCPREVIEW", "1") -> {
-                return LegacyPreviewReader.decode(text)
-            }
+        return decodeRows(rows.row(2), rows)
+    }
+
+    internal fun decodeRows(magic: List<String>, rows: PreviewRows): DocumentRoot {
+        when (magic) {
+            listOf("NCPREVIEW", "1") -> return LegacyPreviewReader.decodeRows(rows)
             listOf("NCPREVIEW", "2") -> Unit
             else -> throw IllegalArgumentException("Unsupported preview version")
         }
@@ -136,11 +160,18 @@ object PagedPreviewCodec {
     }
 
     @Throws(IllegalArgumentException::class)
-    fun encode(root: DocumentRoot): String {
+    fun encode(root: DocumentRoot): String = buildString {
+        writeRows(root) { append(it) }
+    }
+
+    internal fun documentRow(root: DocumentRoot): String =
+        listOf("D", escape(root.id.value), escape(root.title), root.pageCount, root.scene.objectCount, root.revision).joinToString("\t") + "\n"
+
+    internal fun writeRows(root: DocumentRoot, write: (String) -> Unit): PreviewTextSize {
         retainedByteCharge(root)
-        val out = BoundedText()
+        val out = BoundedText(write)
         out.row("NCPREVIEW", 2)
-        out.row("D", escape(root.id.value), escape(root.title), root.pageCount, root.scene.objectCount, root.revision)
+        out.metadata(documentRow(root))
         for (page in root.pages()) out.row("G", escape(page.id.value), escape(page.layerId.value), page.width, page.height, page.paper.name, page.contentRevision)
         root.scene.forEachObject { obj ->
             val m = obj.transform
@@ -149,7 +180,7 @@ object PagedPreviewCodec {
             for (p in 0 until obj.samples.size) out.point("P\t${obj.samples.x(p)}\t${obj.samples.y(p)}\t${obj.samples.pressure(p)}\t${obj.samples.timeMicros(p)}\n")
         }
         out.row("END")
-        return out.toString()
+        return out.size
     }
 
     /** Caller supplies all new identities; no allocator or mutable authority is hidden in a codec. */
@@ -185,9 +216,9 @@ object PagedPreviewCodec {
         require(pages in 1..MAX_PAGES && objects in 0..MAX_OBJECTS && revision >= 0)
         return PagedPreviewHeader(id, title, pages, objects, revision, 2)
     }
-    private class Rows(private val text: String) {
+    internal class Rows(private val text: String) : PreviewRows {
         private var offset = 0
-        fun row(fields: Int): List<String> {
+        override fun row(fields: Int): List<String> {
             require(offset < text.length) { "Truncated preview document" }
             val start = offset
             while (offset < text.length && text[offset] != '\n') { require(offset - start < MAX_LINE); offset++ }
@@ -198,35 +229,33 @@ object PagedPreviewCodec {
             require(line.count { it == '\t' } == fields - 1)
             return line.split('\t')
         }
-        fun end() { require(offset == text.length) { "Trailing preview data" } }
+        override fun end() { require(offset == text.length) { "Trailing preview data" } }
     }
-    private class BoundedText {
-        private val value = StringBuilder()
+    private class BoundedText(private val write: (String) -> Unit) {
+        private var characters = 0
         private var utf8Bytes = 0
-        fun row(vararg fields: Any) {
-            val line = fields.joinToString("\t") + "\n"
-            var size = 0; var index = 0
-            while (index < line.length) {
-                val c = line[index++]
-                size += when {
-                    c.code <= 0x7f -> 1
-                    c.code <= 0x7ff -> 2
-                    c.isHighSurrogate() -> { index++; 4 } // Stored strings were validated before encoding.
-                    else -> 3
-                }
-            }
-            require(size <= MAX_LINE) { "Preview metadata row too large" }
-            append(line, size)
+        val size: PreviewTextSize get() = PreviewTextSize(characters, utf8Bytes)
+
+        fun row(vararg fields: Any) = metadata(fields.joinToString("\t") + "\n")
+        fun metadata(line: String) {
+            val bytes = previewUtf8Size(line)
+            require(bytes <= MAX_LINE) { "Preview metadata row too large" }
+            append(line, bytes)
         }
+
         fun point(line: String) {
             require(line.length <= MAX_POINT_LINE) { "Preview point row too large" }
-            append(line, line.length) // Numeric fields and separators are ASCII.
+            append(line, line.length)
         }
+
         private fun append(line: String, bytes: Int) {
-            require(line.length <= MAX_LINE && line.length <= MAX_CHARACTERS - value.length && bytes <= MAX_UTF8_BYTES - utf8Bytes) { "Preview document too large" }
-            value.append(line); utf8Bytes += bytes
+            require(line.length <= MAX_LINE && line.length <= MAX_CHARACTERS - characters && bytes <= MAX_UTF8_BYTES - utf8Bytes) {
+                "Preview document too large"
+            }
+            characters += line.length
+            utf8Bytes += bytes
+            write(line)
         }
-        override fun toString(): String = value.toString()
     }
     private fun validText(value: String) { require(value.hasValidUnicode()) { "Invalid Unicode text" } }
     private fun escape(value: String): String = buildString {
