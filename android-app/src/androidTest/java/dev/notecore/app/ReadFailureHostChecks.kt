@@ -114,7 +114,7 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
         lateinit var pending: DocumentCommand.Canvas
         lateinit var producer: PagedPreviewNotebook
         lateinit var store: NoteStore
-        var saved = false; var armed = false; var probing = false
+        var saved = false; var saveError: String? = null; var armed = false; var probing = false
         main {
             store = NoteStore.isolated(host, directory)
             producer = PagedPreviewNotebook(root, "producer", ownerCheck = {
@@ -137,7 +137,9 @@ internal class ReadFailureHostChecks(private val test: Instrumentation, private 
             checkpoint=producer.captureRecovery(); pending=checkNotNull(checkpoint.pending)
         }
         try {
-            main { check(store.save(checkpoint) { _, error -> check(error == null); saved = true }) }
+            main { check(store.save(checkpoint) { _, error -> saveError = error; saved = true }) }
+            await(60000) { saved }
+            check(saveError == null) { "Initial checkpoint save failed: $saveError" }
             await(60000) { saved && store.saveStates().isEmpty() }
             val file = File(directory, "$id.ncp")
             check(file.length() > 16_000_000 && file.length() <= PagedPreviewCodec.MAX_UTF8_BYTES)

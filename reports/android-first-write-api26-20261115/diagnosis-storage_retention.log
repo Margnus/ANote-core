@@ -1,0 +1,9 @@
+INSTRUMENTATION_RESULT: failure=java.lang.IllegalStateException: Initial checkpoint save failed: 保存失败，更改仍在本机会话中，请重试保存
+	at dev.notecore.app.ReadFailureHostChecks.longNumericCheckpoint(ReadFailureHostChecks.kt:142)
+	at dev.notecore.app.ReadFailureHostChecks.verify(ReadFailureHostChecks.kt:175)
+	at dev.notecore.app.StorageRetentionHostChecks.verify(StorageRetentionHostChecks.kt:34)
+	at dev.notecore.app.ViewportInstrumentation.onStart(ViewportInstrumentation.kt:164)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2074)
+
+INSTRUMENTATION_RESULT: viewport_status=failed
+INSTRUMENTATION_CODE: 0

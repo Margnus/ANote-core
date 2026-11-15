@@ -19,11 +19,17 @@ def sha(value):
 
 def main():
     parser = argparse.ArgumentParser(); parser.add_argument('--serial', required=True); parser.add_argument('--adb', required=True)
-    parser.add_argument('--isolated-api32', action='store_true', help='Use an empty NoteCoreAtomicCut32 emulator and the current APKs')
+    isolated = parser.add_mutually_exclusive_group()
+    isolated.add_argument('--isolated-api26', action='store_true', help='Use an empty NoteCoreAtomicCut26 emulator and the current APKs')
+    isolated.add_argument('--isolated-api32', action='store_true', help='Use an empty NoteCoreAtomicCut32 emulator and the current APKs')
     args = parser.parse_args()
-    assert args.serial == ('emulator-5586' if args.isolated_api32 else 'emulator-5554')
+    isolated_api = 26 if args.isolated_api26 else 32 if args.isolated_api32 else None
+    avd, serial = {26: ('NoteCoreAtomicCut26', 'emulator-5582'),
+                   32: ('NoteCoreAtomicCut32', 'emulator-5586'),
+                   None: ('NoteCorePreview', 'emulator-5554')}[isolated_api]
+    assert args.serial == serial
     driver_sha = sha(Path(__file__).read_bytes())
-    folder = ROOT / ('build/android-atomic-cut-api32-' + uuid.uuid4().hex if args.isolated_api32 else 'build/android-atomic-cut')
+    folder = ROOT / (f'build/android-atomic-cut-api{isolated_api}-{uuid.uuid4().hex}' if isolated_api else 'build/android-atomic-cut')
     folder.mkdir(parents=True, exist_ok=True)
     prefix = [args.adb, '-s', args.serial]
 
@@ -41,13 +47,13 @@ def main():
         return {name: sha(adb('exec-out', 'run-as', BUNDLE, 'cat', 'files/preview-notes/' + name))
                 for name in names if re.fullmatch(r'[A-Za-z0-9-]+\.ncp', name)}
 
-    avd = 'NoteCoreAtomicCut32' if args.isolated_api32 else 'NoteCorePreview'
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').decode().strip() == avd
+    avd_property = 'ro.kernel.qemu.avd_name' if isolated_api == 26 else 'ro.boot.qemu.avd_name'
+    assert adb('shell', 'getprop', avd_property).decode().strip() == avd
     fingerprint = adb('shell', 'getprop', 'ro.build.fingerprint').decode().strip()
     sdk_api = int(adb('shell', 'getprop', 'ro.build.version.sdk').decode().strip())
     original_binding_files = []
-    if args.isolated_api32:
-        assert sdk_api == 32
+    if isolated_api:
+        assert sdk_api == isolated_api
         installed_packages = adb('shell', 'pm', 'list', 'packages').decode().splitlines()
         assert not any(line in installed_packages for line in ('package:' + BUNDLE, 'package:' + BUNDLE + '.test'))
         apk = ROOT / 'android-app/build/outputs/apk/debug/android-app-debug.apk'
@@ -76,15 +82,15 @@ def main():
         remote = adb('shell', 'pm', 'path', package).decode().strip().removeprefix('package:')
         assert re.fullmatch(r'/data/app/[a-zA-Z0-9_./=+~:-]+/base.apk', remote)
         assert sha(adb('exec-out', 'cat', remote)) == sha(local.read_bytes())
-    if args.isolated_api32:
+    if isolated_api:
         adb('shell', 'run-as', BUNDLE, 'mkdir', '-p', 'files/preview-notes')
         assert original_files() == before
     observations = []; evidence = []
     boundaries = ['SYNCED_BEFORE_REPLACE', 'VERIFIED_BEFORE_RETURN']
-    if args.isolated_api32:
+    if isolated_api:
         boundaries.insert(0, 'PREFIX_WRITTEN_BEFORE_SYNC')
     scenarios = [(boundary, False) for boundary in boundaries]
-    if args.isolated_api32:
+    if isolated_api:
         scenarios += [(boundary, True) for boundary in boundaries]
     for boundary, first_write in scenarios:
         identity = str(uuid.uuid4()); cache = 'cache/atomic-cut-' + identity
@@ -174,11 +180,11 @@ def main():
               'original_files_preserved': len(before), 'ordinary_process_restored': True, 'ordinary_pid': pid(),
               'android_api': sdk_api, 'android_fingerprint': fingerprint,
               'apk_sha256': sha(apk.read_bytes()), 'source_and_artifact_sha256': dict(sorted(bindings.items())),
-              'sdk_contract_sha256': {str(sdk_contract): sha(sdk_contract.read_bytes())} if not args.isolated_api32 else {},
+              'sdk_contract_sha256': {} if isolated_api else {str(sdk_contract): sha(sdk_contract.read_bytes())},
               'decision': 'Stage in the same directory, sync, atomically move and read back on the original worker before owner ACK. Before the move the only catalog-visible version is any previously published file. After verified replacement a fresh process can recover the exact pending and commit once.',
               'scope': 'Real force-stops at observed original worker boundaries using unique synthetic cache files and fresh instrumentation processes. The prefix case uses an observed split write. Scope covers process death in the observed emulator.',
               'c1_gate_complete': False, 'production_sqlite_authorized': False}
-    destination = folder / 'result.json' if args.isolated_api32 else ROOT / 'reports/android-atomic-cut.json'
+    destination = folder / 'result.json' if isolated_api else ROOT / 'reports/android-atomic-cut.json'
     destination.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f'Evidence: {destination}')
     print(json.dumps({k: v for k, v in report.items() if k not in ('source_and_artifact_sha256', 'sdk_contract_sha256')}, ensure_ascii=False))

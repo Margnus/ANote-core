@@ -544,6 +544,9 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 val original = input.first
                 val success = result is WorkResult.Succeeded
                 check(ledger.complete(original, success))
+                if (result is WorkResult.OutcomeUnknown) {
+                    Log.e("NoteCoreStorage", "Preview write outcome unknown: ${result.exceptionType}")
+                }
                 val id = original.snapshot.documentId
                 if (success && activeNotebook?.documentId == id) {
                     val captured = original.snapshot as PagedPreviewSnapshot

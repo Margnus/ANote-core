@@ -1,0 +1,10 @@
+INSTRUMENTATION_RESULT: failure=java.lang.IllegalStateException: Read callback did not arrive
+	at dev.notecore.app.ReadFailureHostChecks.await(ReadFailureHostChecks.kt:20)
+	at dev.notecore.app.ReadFailureHostChecks.longNumericCheckpoint(ReadFailureHostChecks.kt:141)
+	at dev.notecore.app.ReadFailureHostChecks.verify(ReadFailureHostChecks.kt:173)
+	at dev.notecore.app.StorageRetentionHostChecks.verify(StorageRetentionHostChecks.kt:34)
+	at dev.notecore.app.ViewportInstrumentation.onStart(ViewportInstrumentation.kt:164)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2074)
+
+INSTRUMENTATION_RESULT: viewport_status=failed
+INSTRUMENTATION_CODE: 0

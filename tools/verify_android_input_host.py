@@ -42,7 +42,13 @@ def digest(path):
 
 def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner_crash=False, view_input=False):
     """Stop isolated processes after original worker bytes; optionally verify confirmed main-owner crashes only."""
-    assert (args.path_api32 and args.serial == 'emulator-5586' and args.avd == 'NoteCorePath32') or (args.process_checkpoint and args.serial == 'emulator-5554' and args.avd == 'NoteCorePreview')
+    if getattr(args, 'isolated_api26', False):
+        assert args.serial == 'emulator-5582' and args.avd == 'NoteCoreAtomicCut26' and not main_owner_crash
+        assert adb('shell', 'getprop', 'ro.kernel.qemu.avd_name').decode().strip() == args.avd
+        assert adb('shell', 'getprop', 'ro.build.version.sdk').decode().strip() == '26'
+        assert before == {}
+    else:
+        assert (args.path_api32 and args.serial == 'emulator-5586' and args.avd == 'NoteCorePath32') or (args.process_checkpoint and args.serial == 'emulator-5554' and args.avd == 'NoteCorePreview')
     assert not (view_input and main_owner_crash)
     input_args = ['-e', 'process_checkpoint_view_input', 'true'] if view_input else []
     scope = str(uuid.uuid4())
