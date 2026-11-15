@@ -1,0 +1,118 @@
+{
+  "status": "passed",
+  "baseline_commit": "1b445830067015d25c69e506912f2954b387346c",
+  "source_sha256": {
+    "tools/verify_android_input_host.py": "32f27504c3e045d21878737eed6f48e090c2b53781acfc83eb87a2ce94f7b44d",
+    "tools/verify_apple_atomic_cut.py": "af8f81d7907949d3adf2c3defa9c50f1f911d4957172d13c46f5b4764add6e28",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "f61c95ae8cb28663a117f8a22e16ff1fbaf2cbe63c30908d49b1a59bc494eee1",
+    "ios-app/NoteCorePreview/NoteCorePreviewApp.swift": "1108cedecc831a4d6c8fa45e4e263a3226e6a438377500112fef96754c45b7f3",
+    "ios-app/NoteCorePreview/PreviewFileIO.swift": "24fdfb0b6527bd371fbe901085e8c13d81a79481974dc448f325017f33a17711",
+    "android-app/src/main/java/dev/notecore/app/NoteStore.kt": "931c6c1c896070b0685cd54aa2c95af279d2cad733068c73278bffdf4d141ae3",
+    "android-app/src/main/java/dev/notecore/app/PreviewFileIO.kt": "5f2e64cd4f7c21a3f99a3cff7cde418948e82b5571b81fc6ef745ff5527a09cd",
+    "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt": "7089df3ea0cc0a3bbc05eb532fff0d8a5150688f5f269bc1652212c8d55d1446",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "33c4d5d7e0786ae663e9889329bd1f8f53e7fe7c85819d074c5ed952c9c928e6"
+  },
+  "evidence_sha256": {
+    "reports/current-pending-process-20261115/android-apks.sha256": "23a278c9bea357194a8b361ac57d7f757be5a8edb41be5abe5957e78e53713b5",
+    "reports/current-pending-process-20261115/android-fingerprint.txt": "c522bc88554283839ffd330352feb2b4de6aadcf16563dad0c1abdb40942a652",
+    "reports/current-pending-process-20261115/apple/afterAtomicWrite/base-before-kill.ncp": "7756b64b03a6b87a9faa440f690e57d492b896a8b8b68fbb9ce02b526040b772",
+    "reports/current-pending-process-20261115/apple/afterAtomicWrite/observation.json": "452289ee2adc815ec58843a967be099f1d9a838afc13a926dd179dcdf58936b6",
+    "reports/current-pending-process-20261115/apple/afterAtomicWrite/old.ncp": "09603bc5ae4fb71c7bddce178a931556e56a417068137e0cecf4bb630f1501ee",
+    "reports/current-pending-process-20261115/apple/afterAtomicWrite/pending.ncp": "7756b64b03a6b87a9faa440f690e57d492b896a8b8b68fbb9ce02b526040b772",
+    "reports/current-pending-process-20261115/apple/afterAtomicWrite/prepare.log": "0ff8d49b939e9ae5a742ce573a120a357cc04538a939fae958a16a7dbbb08e7a",
+    "reports/current-pending-process-20261115/apple/afterAtomicWrite/reopen.log": "ec621023b633c64777c05de4f1a0cf3c9580600b0549bae40c81e66753fddbb6",
+    "reports/current-pending-process-20261115/apple/afterAtomicWrite/summary.json": "9773a93ec9d3927b7a553d97fa3312fd14f9874558f90c5c84a4c51288a4b752",
+    "reports/current-pending-process-20261115/apple/beforeAtomicWrite/base-before-kill.ncp": "09603bc5ae4fb71c7bddce178a931556e56a417068137e0cecf4bb630f1501ee",
+    "reports/current-pending-process-20261115/apple/beforeAtomicWrite/observation.json": "2796b9dc327def856d81b488939dda044df28ad1c5602e20f56964d8d643be18",
+    "reports/current-pending-process-20261115/apple/beforeAtomicWrite/old.ncp": "09603bc5ae4fb71c7bddce178a931556e56a417068137e0cecf4bb630f1501ee",
+    "reports/current-pending-process-20261115/apple/beforeAtomicWrite/pending.ncp": "7756b64b03a6b87a9faa440f690e57d492b896a8b8b68fbb9ce02b526040b772",
+    "reports/current-pending-process-20261115/apple/beforeAtomicWrite/prepare.log": "6a9072761578778b0a5d6ba8e7fd21d32840a1eeffb0a84b9b7ed97a9517f75b",
+    "reports/current-pending-process-20261115/apple/beforeAtomicWrite/reopen.log": "3148ab4d7c6f6b6f25e126b878de7e971d310e75de46c54eb55af0291ade0bd1",
+    "reports/current-pending-process-20261115/apple/beforeAtomicWrite/summary.json": "6c241ea6e5ab10f16071afd80e4165ac0b5434a4d9f1aeaa8697fd4508b49526",
+    "reports/current-pending-process-20261115/apple/original-files.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "reports/current-pending-process-20261115/apple-cut.py.txt": "3a8f240fcdca3669f4653ca97423092f8225d20b5803c478f7dd1b05e2d3e70f",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/checkpoint-ready.json": "97eb74a0ba5752e75829d66c00a93be09aa1519fdcd2526068014aca868fb039",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/committed-ready.json": "99c644797c0f7ebde430c5f0955af9acd0ecf5b19724b2a7a380a5623e50ba7d",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/prepare.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/result.json": "ace75db072c67476f82435613cb1db80345b70cc4767381b285a2f9153a26284",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/resume.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/resume.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+    "reports/current-pending-process-20261115/process-checkpoint-220afcec-c322-41d9-8dfa-431416238042/verify.log": "033a69853fb0f5322e5ede37ddb10bcfe8c17495443f71cd2f4277c6d2200340",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/checkpoint-ready.json": "b6482a5ff563317bca8518f42bacb4b6bcb3c9a6264ac57c69fd195e433efe71",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/committed-ready.json": "4f3bd79af2f0a760e2e48bd5cc7703cd713c468130a39b6e5b1831a45833deee",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/confirmed-final.ncp": "f1ff4d4d49cabbda51a5ab39316b31c7c71c1f5f7eb505ba0b8d37af90f677ea",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/final.ncp": "04d09841ebd037038a8db8237e906ac4fde6cfe850fb6c393ae34c67b992996b",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/prepare.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/prepare.ncp": "8e8707a26db0da913fb61575938135b86bc8bd9a03f3414905ef5657e34f6372",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/result.json": "de39c6ae63c52f39b3fe65e8b6d838e01f26ef1fc429a0934dd0e65c8476e80e",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/resume.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/resume.ncp": "f1ff4d4d49cabbda51a5ab39316b31c7c71c1f5f7eb505ba0b8d37af90f677ea",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/undelivered-ready.json": "38234c9aa495f68d55f673033a521b7621baf79c808e2565f0571c29192dfa1c",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/undelivered.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/undelivered.ncp": "04d09841ebd037038a8db8237e906ac4fde6cfe850fb6c393ae34c67b992996b",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/verify-undelivered.log": "ff4ccb12c4f9ac3af8a136a5027891491b4ebec8979116314f272ad822b11153",
+    "reports/current-pending-process-20261115/process-checkpoint-4cfde893-1710-43e8-b9ff-afc551ccd785/verify.log": "682d64482aad8e6760541d945b417ea910fd6184c6db763f349fe37697b9a1d6",
+    "reports/current-pending-process-20261115/process.py.txt": "ce4d04e60b6ffef30fb459d39f7c459cc0e1318d345918346620fe1759dc85cc"
+  },
+  "android_api": 32,
+  "android_view_processes": 3,
+  "android_worker_force_stops": 3,
+  "android_fresh_view_bytes_match_apple_host_fixture": true,
+  "apple_runtime": "iOS 27.0 simulator",
+  "apple_atomic_cut_observations": [
+    {
+      "ready": {
+        "boundary": "beforeAtomicWrite",
+        "has_pending": true,
+        "pid": 14798,
+        "pending_writes": 1,
+        "status": "\u6b63\u5728\u4fdd\u5b58\u2026 \u00b7 0 \u7b14",
+        "worker_returned": false
+      },
+      "reopen": {
+        "boundary": "beforeAtomicWrite",
+        "owner_retired": true,
+        "revision": 0,
+        "recovered_pending": false,
+        "committed_strokes": 0,
+        "pid": 15001,
+        "same_content_after_save": true,
+        "previous_pid": 14798
+      },
+      "original_pid_sigkill_confirmed": true,
+      "base_before_kill_sha256": "09603bc5ae4fb71c7bddce178a931556e56a417068137e0cecf4bb630f1501ee",
+      "reopen_xcresult": "build/current-pending-process/apple/beforeAtomicWrite/reopen-8acb60d40ee549578b44664863b6714b.xcresult"
+    },
+    {
+      "ready": {
+        "status": "\u6b63\u5728\u4fdd\u5b58\u2026 \u00b7 0 \u7b14",
+        "worker_returned": false,
+        "pid": 15066,
+        "boundary": "afterAtomicWrite",
+        "has_pending": true,
+        "pending_writes": 1
+      },
+      "reopen": {
+        "same_content_after_save": true,
+        "committed_strokes": 1,
+        "recovered_pending": true,
+        "boundary": "afterAtomicWrite",
+        "owner_retired": true,
+        "pid": 15171,
+        "previous_pid": 15066,
+        "revision": 1
+      },
+      "original_pid_sigkill_confirmed": true,
+      "base_before_kill_sha256": "7756b64b03a6b87a9faa440f690e57d492b896a8b8b68fbb9ce02b526040b772",
+      "reopen_xcresult": "build/current-pending-process/apple/afterAtomicWrite/reopen-cb2924d0401b4af291ea4bd58eaa917b.xcresult"
+    }
+  ],
+  "apple_artifact_sha256": {
+    "build/down-preflight-reuse/derived/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "001944900e779cc795957379e48dddf8455190e3ad8736562651c249c8208867",
+    "build/down-preflight-reuse/derived/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview.debug.dylib": "b24b8b4e19683bc02183bf85b344af029c49fd17196f8fffe251da4fa75c392b",
+    "build/down-preflight-reuse/derived/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "6900890af992c0e8d336d764292295ab1d68ddebf72b14b059abecec04cf8c91"
+  },
+  "scope": "Current original host process boundaries. Android verifies confirmed and visible-but-undelivered worker bytes, as well as a four-sample original View recovery. Apple verifies before and after the atomic API call. Fresh Android fixture bytes match both exact byte inputs already exercised by the same Apple App host. No power-loss, physical stylus, heap, or production SQLite evidence."
+}

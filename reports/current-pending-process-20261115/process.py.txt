@@ -1,0 +1,34 @@
+import json
+from pathlib import Path
+import subprocess
+import sys
+from types import SimpleNamespace
+
+sys.path.insert(0, str(Path('tools').resolve()))
+from verify_android_input_host import BUNDLE, digest, process_checkpoint
+
+folder=Path(sys.argv[1]).resolve()
+args=SimpleNamespace(adb=sys.argv[2], serial='emulator-5586', avd='NoteCorePath32', path_api32=True, process_checkpoint=True)
+def adb(*command):
+    return subprocess.run([args.adb,'-s',args.serial,*command],check=True,capture_output=True,timeout=120).stdout
+
+assert adb('shell','getprop','ro.boot.qemu.avd_name').decode().strip()==args.avd
+assert adb('shell','getprop','ro.build.version.sdk').decode().strip()=='32'
+for target in (BUNDLE,BUNDLE+'.test'):
+    location=adb('shell','pm','path',target).decode().strip().removeprefix('package:')
+    apk=Path('android-app/build/outputs/apk', 'debug/android-app-debug.apk' if target==BUNDLE else 'androidTest/debug/android-app-debug-androidTest.apk')
+    import hashlib
+    assert hashlib.sha256(adb('exec-out','cat',location)).hexdigest()==digest(apk)
+adb('shell','run-as',BUNDLE,'mkdir','-p','files/preview-notes')
+def files():
+    listing=adb('shell','run-as',BUNDLE,'ls','files/preview-notes').decode().splitlines()
+    return {name:adb('exec-out','run-as',BUNDLE,'cat','files/preview-notes/'+name) for name in listing}
+before=files()
+assert before=={}
+bindings={}
+view=process_checkpoint(args,adb,folder,files,before,bindings,view_input=True)
+print('view confirmed recovery passed',flush=True)
+worker=process_checkpoint(args,adb,folder,files,before,bindings)
+print('worker confirmed and undelivered recovery passed',flush=True)
+assert files()=={}
+(folder/'process-results.json').write_text(json.dumps({'view':view,'worker':worker,'evidence_sha256':bindings},indent=2)+'\n')

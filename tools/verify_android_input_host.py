@@ -90,7 +90,7 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
                     assert wait_visible and time.monotonic() < deadline and process.poll() is None, 'Expected worker bytes not visible'
                     time.sleep(.1)
                 assert process.poll() is None and adb('shell','pidof',BUNDLE).decode('utf-8').strip() == str(ready['pid'])
-                (local / marker).write_text(json.dumps(ready, indent=2)+'\n', encoding='utf-8', newline='\n')
+                (local / marker).write_bytes((json.dumps(ready, indent=2)+'\n').encode('utf-8'))
                 (local / (phase + '.ncp')).write_bytes(data)
                 assert files() == before
                 if main_owner_crash:
@@ -105,7 +105,7 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
                         assert time.monotonic() < deadline, 'Main-owner crash did not terminate original process'
                         time.sleep(.1)
                     crash = adb('logcat', '-b', 'crash', '-d', '--pid=' + str(ready['pid'])).decode('utf-8')
-                    (local / (phase + '-main-crash.log')).write_text(crash, encoding='utf-8', newline='\n')
+                    (local / (phase + '-main-crash.log')).write_bytes(crash.encode('utf-8'))
                     assert 'FATAL EXCEPTION: main' in crash and 'shell-induced crash' in crash, crash
                     assert 'Process: ' + BUNDLE + ', PID: ' + str(ready['pid']) in crash, crash
                 else:
@@ -127,7 +127,7 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
     stop_stage('resume','committed-ready.json',2,1,False)
     raw = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'process_checkpoint_verify',
         '-e', 'process_checkpoint_scope', scope, *input_args, BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-    (local / 'verify.log').write_text(raw, encoding='utf-8', newline='\n')
+    (local / 'verify.log').write_bytes(raw.encode('utf-8'))
     assert 'process_checkpoint_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
     observed = json.loads(re.search(r'process_checkpoint_observations=(\{.*\})', raw).group(1))
     assert observed['pid'] not in [entry['pid'] for entry in killed]
@@ -152,20 +152,20 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
         assert final.startswith(b'NCPREVIEW\t2\n') and final == (local / 'resume.ncp').read_bytes()
         result['sample_rows_verified_in_all_three_files'] = expected_points
         result['scope'] = 'The original Android View handled real synthetic MotionEvent batches. Test-only quota revocation after DOWN caused typed pending UP. The original isolated Store/worker confirmed that exact capture, then two force-stops and a third process proved recovery, single commit, and canonical reopen with all four original samples.'
-        (local/'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+        (local/'result.json').write_bytes((json.dumps(result, ensure_ascii=False, indent=2)+'\n').encode('utf-8'))
         for path in local.iterdir():
             bindings[path.relative_to(ROOT).as_posix()] = digest(path)
         return result
     if main_owner_crash:
         result['scope'] = 'Original Store/worker confirmed pending checkpoint, then platform shell-induced uncaught main exception terminated the process. New PID reopened, committed once and confirmed canonical replacement before a second uncaught main exception. Third PID reopened exact canonical bytes. No blocked-owner/undelivered-completion, partial-write, power-loss, hot takeover or native release claim.'
-        (local / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+        (local / 'result.json').write_bytes((json.dumps(result, ensure_ascii=False, indent=2)+'\n').encode('utf-8'))
         for path in local.iterdir():
             bindings[path.relative_to(ROOT).as_posix()] = digest(path)
         return result
     stop_stage('undelivered','undelivered-ready.json',3,2,False,wait_visible=True)
     raw = adb('shell','am','instrument','-w','-r','-e','notecore_case','process_checkpoint_verify_undelivered',
         '-e','process_checkpoint_scope',scope,BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-    (local/'verify-undelivered.log').write_text(raw,encoding='utf-8',newline='\n')
+    (local/'verify-undelivered.log').write_bytes(raw.encode('utf-8'))
     assert 'process_checkpoint_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
     resumed = json.loads(re.search(r'process_checkpoint_observations=(\{.*\})',raw).group(1))
     assert resumed['pid'] not in [entry['pid'] for entry in killed] and resumed['scope']==scope
@@ -177,7 +177,7 @@ def process_checkpoint(args, adb, folder, files, before, bindings, *, main_owner
     (local/'final.ncp').write_bytes(final)
     result['undelivered_completion']={'killed_process':killed[-1],'reopen':resumed,
         'scope':'Original worker new canonical bytes were visible while the main owner was blocked inside its save action with zero callbacks and an in-flight ledger. Full process force-stop before owner delivery; new PID reopened the exact two-stroke canonical root. Not a partial-write or power-loss test.'}
-    (local / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+    (local / 'result.json').write_bytes((json.dumps(result, ensure_ascii=False, indent=2)+'\n').encode('utf-8'))
     for path in local.iterdir():
         bindings[path.relative_to(ROOT).as_posix()] = digest(path)
     return result
@@ -238,7 +238,7 @@ def main():
         assert hashlib.sha256(adb('exec-out', 'cat', remote)).hexdigest() == digest(local)
     output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'input_batches',
                  BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-    log = folder/'run.log'; log.write_text(output, encoding='utf-8', newline='\n')
+    log = folder/'run.log'; log.write_bytes(output.encode('utf-8'))
     assert 'input_status=passed' in output and 'INSTRUMENTATION_CODE: -1' in output, output
     observed = json.loads(re.search(r'input_observations=(\{.*\})', output).group(1))
     assert len(observed['checks']) == len(CHECKS) and set(observed['checks']) == CHECKS
@@ -248,14 +248,14 @@ def main():
     assert observed['active_input_reservation_bytes'] == 1_329_280 and observed['input_reservation_released_after_completion']
     storage_output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'storage_retention',
                          BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-    storage_log = folder/'storage-retention.log'; storage_log.write_text(storage_output, encoding='utf-8', newline='\n')
+    storage_log = folder/'storage-retention.log'; storage_log.write_bytes(storage_output.encode('utf-8'))
     assert 'storage_status=passed' in storage_output and 'INSTRUMENTATION_CODE: -1' in storage_output, storage_output
     storage = json.loads(re.search(r'storage_observations=(\{.*\})', storage_output).group(1))
     assert len(storage['checks']) == len(STORAGE_CHECKS) and set(storage['checks']) == STORAGE_CHECKS
     assert storage['original_note_files_used'] is False and storage['system_file_picker_verified'] is False
     owner_output = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'owner_retirement',
                        BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-    owner_log = folder/'owner-retirement.log'; owner_log.write_text(owner_output, encoding='utf-8', newline='\n')
+    owner_log = folder/'owner-retirement.log'; owner_log.write_bytes(owner_output.encode('utf-8'))
     assert 'owner_status=passed' in owner_output and 'INSTRUMENTATION_CODE: -1' in owner_output, owner_output
     owner = json.loads(re.search(r'owner_observations=(\{.*\})', owner_output).group(1))
     assert len(owner['checks']) == len(OWNER_CHECKS) and set(owner['checks']) == OWNER_CHECKS
@@ -263,7 +263,7 @@ def main():
     assert owner['abrupt_owner_or_thread_loss_verified'] is False
     assert files() == before, 'Original Android file set or bytes changed'
     baseline = folder/'original-files.json'
-    baseline.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8', newline='\n')
+    baseline.write_bytes((json.dumps(before, indent=2)+'\n').encode('utf-8'))
     adb('shell', 'am', 'force-stop', BUNDLE)
     restored = adb('shell', 'am', 'start', '-W', '-n', BUNDLE+'/dev.notecore.app.MainActivity').decode('utf-8')
     assert 'Status: ok' in restored
@@ -291,7 +291,7 @@ def main():
             'image_archive_sha256':digest(archive),'repository_url':f'https://dl.google.com/android/repository/sys-img/{tag}/sys-img2-3.xml',
             'build_fingerprint':adb('shell','getprop','ro.build.fingerprint').decode().strip(),'isolated_avd':args.avd}
         raw = adb('shell','am','instrument','-w','-r','-e','notecore_case','minimum_api',BUNDLE+'.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-        path = folder/'minimum-api.log'; path.write_text(raw,encoding='utf-8',newline='\n')
+        path = folder/'minimum-api.log'; path.write_bytes(raw.encode('utf-8'))
         assert 'minimum_api_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
         minimum = json.loads(re.search(r'minimum_api_observations=(\{.*\})',raw).group(1))
         assert minimum['api'] == api
@@ -313,7 +313,7 @@ def main():
         assert args.serial == 'emulator-5554' and args.avd == 'NoteCorePreview' and not fallback
         raw = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_case', 'budget_overlap',
                   BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode('utf-8')
-        overlap_log = folder/'budget-overlap.log'; overlap_log.write_text(raw, encoding='utf-8', newline='\n')
+        overlap_log = folder/'budget-overlap.log'; overlap_log.write_bytes(raw.encode('utf-8'))
         assert 'budget_overlap_status=passed' in raw and 'INSTRUMENTATION_CODE: -1' in raw, raw
         budget_overlap = json.loads(re.search(r'budget_overlap_observations=(\{.*\})', raw).group(1))
         assert budget_overlap['actual_release_callback_observed'] and budget_overlap['old_and_new_real_writes_verified']
@@ -346,7 +346,7 @@ def main():
         'physical_device_or_heap_measured': False, 'runtime_source_equivalence_verified': False,
         'c1_gate_complete': False,
     }
-    (ROOT/('reports/android-path-api32-host-tests.json' if args.path_api32 else 'reports/android-min-api-host-tests.json' if args.minimum_api else 'reports/android-input-host-tests.json')).write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
+    (ROOT/('reports/android-path-api32-host-tests.json' if args.path_api32 else 'reports/android-min-api-host-tests.json' if args.minimum_api else 'reports/android-input-host-tests.json')).write_bytes((json.dumps(report, ensure_ascii=False, indent=2)+'\n').encode('utf-8'))
     print(json.dumps({key: report[key] for key in ('status', 'check_count', 'observations', 'storage_retention_check_count', 'owner_retirement_check_count', 'original_file_count', 'ordinary_pid_after_host')}, ensure_ascii=False))
 
 
