@@ -288,18 +288,28 @@ object PagedPreviewCodec {
         require(pages in 1..MAX_PAGES && objects in 0..MAX_OBJECTS && revision >= 0)
         return PagedPreviewHeader(id, title, pages, objects, revision, 2)
     }
-    internal class Rows(private val text: String) : PreviewRows {
-        private var offset = 0
+    internal class Rows(private val text: String, startOffset: Int = 0,
+                        private val endOffset: Int = text.length) : PreviewRows {
+        init { require(startOffset in 0..endOffset && endOffset <= text.length) }
+        private var offset = startOffset
+
+        fun requireNextRawLine(expected: String) {
+            val next = offset + expected.length
+            require(offset < endOffset && next <= endOffset)
+            require(text.regionMatches(offset, expected, 0, expected.length))
+            require(next == endOffset || text[next] == '\n')
+        }
+
         override fun line(): String {
-            require(offset < text.length) { "Truncated preview document" }
+            require(offset < endOffset) { "Truncated preview document" }
             val start = offset
-            while (offset < text.length && text[offset] != '\n') { require(offset - start < MAX_LINE); offset++ }
+            while (offset < endOffset && text[offset] != '\n') { require(offset - start < MAX_LINE); offset++ }
             val end = if (offset > start && text[offset - 1] == '\r') offset - 1 else offset
             val line = text.substring(start, end)
-            if (offset < text.length) offset++
+            if (offset < endOffset) offset++
             return line
         }
-        override fun end() { require(offset == text.length) { "Trailing preview data" } }
+        override fun end() { require(offset == endOffset) { "Trailing preview data" } }
     }
 
     /** Reuse only the immediately previous spelling of each field during this encode. */

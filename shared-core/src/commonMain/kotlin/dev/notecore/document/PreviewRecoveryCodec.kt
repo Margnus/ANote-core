@@ -12,6 +12,14 @@ object PreviewRecoveryCodec {
     private class ContentRefusal(val reason: PreviewReadFailure) : IllegalArgumentException("Preview refused: $reason")
     private fun previewRoot(text: String): DocumentRoot = accepted(PreviewDocumentReader.read(text))
 
+    private fun previewRoot(rows: PagedPreviewCodec.Rows, metadata: String? = null): DocumentRoot {
+        val magic = rows.row(2)
+        if (metadata != null) rows.requireNextRawLine(metadata)
+        val root = try { PagedPreviewCodec.decodeRows(magic, rows) }
+        catch (_: IllegalArgumentException) { throw ContentRefusal(PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT) }
+        return accepted(root)
+    }
+
     internal fun accepted(root: DocumentRoot): DocumentRoot = accepted(PreviewDocumentReader.accept(root))
 
     private fun accepted(result: PreviewDocumentRead): DocumentRoot =
@@ -111,12 +119,13 @@ object PreviewRecoveryCodec {
         require(frameEnd > metadataEnd && frameEnd - metadataEnd <= 1024)
         val (baseSize, inkSize, operation) = readFrame(text.substring(metadataEnd + 1, frameEnd))
         require(frameEnd.toLong() + 1 + baseSize + inkSize + END.length == text.length.toLong())
-        val baseStart = frameEnd + 1; val inkStart = baseStart + baseSize
-        require(text.substring(inkStart + inkSize) == END)
-        val baseText = text.substring(baseStart, inkStart)
-        require(baseText.substringAfter('\n').substringBefore('\n') == text.substring(MAGIC.length, metadataEnd))
-        val base = previewRoot(baseText)
-        val ink = previewRoot(text.substring(inkStart, inkStart + inkSize))
+        val baseStart = frameEnd + 1
+        val inkStart = baseStart + baseSize
+        val inkEnd = inkStart + inkSize
+        require(text.startsWith(END, inkEnd))
+        val metadata = text.substring(MAGIC.length, metadataEnd)
+        val base = previewRoot(PagedPreviewCodec.Rows(text, baseStart, inkStart), metadata)
+        val ink = previewRoot(PagedPreviewCodec.Rows(text, inkStart, inkEnd))
         return restore(base, ink, operation)
     }
 

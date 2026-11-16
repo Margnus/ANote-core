@@ -47,4 +47,41 @@ class PreviewReadAllocationTest {
         println("preview-recovery-header rejectedBytes=$allocated")
         assertTrue(allocated < 64 * 1024, "Rejected header copied body: $allocated bytes")
     }
+
+    @Test fun longRecoveryDecodeDoesNotAllocateCopiesOfTheFramedBodies() {
+        val meter = assertIs<com.sun.management.ThreadMXBean>(java.lang.management.ManagementFactory.getThreadMXBean())
+        assertTrue(meter.isThreadAllocatedMemorySupported)
+        meter.isThreadAllocatedMemoryEnabled = true
+        val point = "P\t-1.2345678901234567E-100\t-1.2345678901234567E-100\t1.2345679E-20\t9223372036854775807\n"
+        val metadata = "D\tlong-capacity\tlong digits\t1\t9\t1"
+        val base = buildString {
+            append("NCPREVIEW\t2\n$metadata\nG\tpage\tink\t595.0\t842.0\tBLANK\t1\n")
+            repeat(9) { stroke ->
+                append("S\told-$stroke\tink\t1\tMONOLINE\t1\t-1\t2.0\t20000\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n")
+                repeat(20_000) { append(point) }
+            }
+            append("END\n")
+        }
+        val ink = buildString {
+            append("NCPREVIEW\t2\nD\tlong-capacity\t\t1\t1\t0\nG\tpage\tink\t595.0\t842.0\tBLANK\t0\n")
+            append("S\tproducer-ink-2\tink\t1\tMONOLINE\t1\t-14339513\t2.5\t20000\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n")
+            repeat(20_000) { append(point) }
+            append("END\n")
+        }
+        val operation = "producer-op-1".map { it.code.toString(16).padStart(4, '0') }.joinToString("")
+        val text = "NCRECOVERY\t1\n$metadata\n${base.length}\t${ink.length}\t$operation\n$base${ink}RECOVERY-END\n"
+        fun decode(): PagedPreviewSnapshot = PreviewRecoveryCodec.decode(text)
+        repeat(3) { assertEquals(9, decode().root.scene.objectCount) }
+        val allocated = (1..3).minOf {
+            val before = meter.getThreadAllocatedBytes(Thread.currentThread().id)
+            val snapshot = decode()
+            val bytes = meter.getThreadAllocatedBytes(Thread.currentThread().id) - before
+            assertEquals(180_000, snapshot.root.scene.objects().sumOf { it.samples.size })
+            val pending = assertIs<CanvasCommand.AddStroke>(snapshot.pending?.command)
+            assertEquals(20_000, pending.samples.size)
+            bytes
+        }
+        println("preview-recovery-frame inputCharacters=${text.length} decodeAllocatedBytes=$allocated")
+        assertTrue(allocated < 50L * 1024 * 1024, "Recovery decode allocated $allocated bytes for ${text.length} characters")
+    }
 }

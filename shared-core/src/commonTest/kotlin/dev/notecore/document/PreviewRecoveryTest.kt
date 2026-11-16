@@ -203,6 +203,40 @@ class PreviewRecoveryTest {
         assertTrue(decodedUnicode.sameContent(PreviewRecoveryCodec.decode(decodedUnicode.encode())))
         assertTrue(PreviewRecoveryCodec.decode(text).sameContent(PreviewRecoveryCodec.decode(framed(op = frame[2].uppercase()))))
     }
+
+    @Test fun eachFramedBodyUsesItsOwnEndAndExactUtf16Metadata() {
+        val source = recovery()
+        val root = DocumentRoot.compose("标题\uD83D\uDE80", source.root.scene, source.root.pages())
+        val expected = PagedPreviewSnapshot(root, source.pending)
+        val parts = expected.encode().split('\n', limit = 4)
+        val (baseSize, inkSize) = PreviewRecoveryCodec.readFrame(parts[2])
+        val operationHex = parts[2].substringAfterLast('\t')
+        val base = parts[3].substring(0, baseSize)
+        val ink = parts[3].substring(baseSize, baseSize + inkSize)
+        fun framed(left: String = base, right: String = ink, metadata: String = parts[1],
+                   leftSize: Int = left.length, rightSize: Int = right.length): String =
+            "${parts[0]}\n$metadata\n$leftSize\t$rightSize\t$operationHex\n$left$right${PreviewRecoveryCodec.END}"
+
+        assertTrue(expected.sameContent(PreviewRecoveryCodec.decode(framed())))
+        assertTrue(expected.sameContent(PreviewRecoveryCodec.decode(framed(base.dropLast(1), ink.dropLast(1)))))
+        assertTrue(expected.sameContent(PreviewRecoveryCodec.decode(framed(
+            base.replace("\n", "\r\n"), ink.replace("\n", "\r\n"), parts[1] + "\r"
+        ))))
+        val utf8Size = base.encodeToByteArray().size
+        for (bad in listOf(
+            framed(leftSize = baseSize - 1, rightSize = inkSize + 1),
+            framed(leftSize = baseSize + 1, rightSize = inkSize - 1),
+            framed(leftSize = utf8Size, rightSize = baseSize + inkSize - utf8Size),
+            framed(base.replace("\n", "\r\n")),
+            framed(base.dropLast(2)),
+            framed(right = ink.dropLast(2))
+        )) {
+            val result = PreviewRecoveryCodec.read(bad)
+            assertNull(result.snapshot)
+            assertEquals(PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT, result.failure)
+        }
+    }
+
     @Test fun recoveryRetirementRequiresExactRootAndCommandAndCannotResubmit() {
         val recovery = recovery(); val note = assertNotNull(PagedPreviewNotebook.openRecovery(recovery, "reused").notebook)
         assertFalse(note.retireAfterRecovery(PagedPreviewSnapshot.fromRoot(recovery.root)))
