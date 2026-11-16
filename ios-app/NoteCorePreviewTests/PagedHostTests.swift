@@ -1,3 +1,4 @@
+import CryptoKit
 import XCTest
 import UIKit
 import SwiftUI
@@ -839,6 +840,164 @@ final class PagedHostTests: XCTestCase {
         reopened.close(); XCTAssertNil(reopened.current)
         XCTAssertEqual(reopened.beginOwnerRetirement(), .started)
         try await eventually("replacement worker drains") { reopened.ownerRetirementStatus.phase == .retired }
+    }
+
+    // Reconstruct the two file bodies from the Android fixture recipe and authenticate the exact Android bytes.
+    private func androidLongCheckpoint() throws -> PagedPreviewSnapshot {
+        func header(_ title: String, _ count: Int, _ revision: Int, _ pageRevision: Int) -> String {
+            "NCPREVIEW\t2\nD\tlong-capacity\t\(title)\t1\t\(count)\t\(revision)\nG\tpage\tink\t595.0\t842.0\tBLANK\t\(pageRevision)\n"
+        }
+        let rows = String(repeating: "P\t-1.2345678901234567E-100\t-1.2345678901234567E-100\t1.2345679E-20\t9223372036854775807\n",
+                          count: 20_000)
+        func stroke(_ id: String, color: Int32 = -1, width: String = "2.0") -> String {
+            "S\t\(id)\tink\t1\tMONOLINE\t1\t\(color)\t\(width)\t20000\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n" + rows
+        }
+        let base = header("long digits", 9, 1, 1) + (0..<9).map { stroke("old-\($0)") }.joined() + "END\n"
+        let ink = header("", 1, 0, 0) + stroke("producer-ink-2", color: Int32(bitPattern: 0xff253247), width: "2.5") + "END\n"
+        let operation = "producer-op-1".utf16.map { String(format: "%04x", $0) }.joined()
+        let text = "NCRECOVERY\t1\nD\tlong-capacity\tlong digits\t1\t9\t1\n\(base.utf16.count)\t\(ink.utf16.count)\t\(operation)\n"
+            + base + ink + "RECOVERY-END\n"
+        XCTAssertEqual(text.utf8.count, 17_200_917)
+        XCTAssertEqual(SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined(),
+                       "92460fcaad0900fbb494a3fdc1be2aec8cb2c31ec592a02272d889b8131089ce")
+        return try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: text).snapshot)
+    }
+
+    private func longFileIdentity(_ url: URL) throws -> (bytes: Int, sha256: String) {
+        let file = try FileHandle(forReadingFrom: url)
+        defer { try? file.close() }
+        var digest = SHA256(), size = 0
+        while let bytes = try file.read(upToCount: 8192), !bytes.isEmpty {
+            size += bytes.count
+            digest.update(data: bytes)
+        }
+        return (size, digest.finalize().map { String(format: "%02x", $0) }.joined())
+    }
+
+    @MainActor func testLongAndroidCheckpointThroughOriginalAppleWorkerAndBudget() async throws {
+        let checkpoint = try androidLongCheckpoint()
+        let base = try PagedPreviewSnapshot.companion.fromRoot(root: checkpoint.root)
+        let inputCharge = checkpoint.retainedByteCharge - base.retainedByteCharge
+        let expectedSamples = try XCTUnwrap(checkpoint.root.scene.objects().first).samples
+        let directory = directory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let id = checkpoint.documentId, file = directory.appendingPathComponent(id + ".ncp")
+        let limit: Int64 = 256 * 1024 * 1024
+        func budget(input: Int64, history: Int64) throws -> DocumentBudget {
+            try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+                journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
+                historyEntries: 128, historyBytes: history, inputBytes: input)
+        }
+        func waitFor(_ message: String, _ predicate: () -> Bool) async throws {
+            // This is a completion deadline for the large debug fixture. Device latency has a separate gate.
+            let deadline = ContinuousClock.now + .seconds(60)
+            while !predicate() && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(20)) }
+            _ = try XCTUnwrap(predicate() ? true : nil, message)
+        }
+        func retire(_ model: PreviewModel) async throws {
+            model.close()
+            XCTAssertNil(model.current)
+            XCTAssertEqual(model.beginOwnerRetirement(), .started)
+            try await waitFor("original model and worker retire") { model.ownerRetirementStatus.phase == .retired }
+        }
+
+        let writer = PreviewModel(directory: directory, documentBudget: try budget(input: inputCharge, history: 0))
+        try writer.adopt(checkpoint.root, persisted: false, recovery: checkpoint)
+        let active = try XCTUnwrap(writer.current)
+        XCTAssertEqual(active.inputReservedByteCharge, inputCharge)
+        let fields = Mirror(reflecting: writer)
+        let ledger = try XCTUnwrap(fields.descendant("ledger") as? PreviewSaveLedger)
+        let worker = try XCTUnwrap(fields.descendant("$__lazy_storage_$_executor") as? AppleBoundedOwnerExecutor)
+        try await waitFor("initial catalog has acknowledged its work") { (try? worker.status().entries.isEmpty) == true }
+        let releaseOneByte = DispatchSemaphore(value: 0)
+        let releaseRemaining = DispatchSemaphore(value: 0)
+        defer { releaseOneByte.signal(); releaseRemaining.signal() }
+        let occupied = limit - checkpoint.encodingWorkByteCharge
+        XCTAssertGreaterThan(occupied, 0)
+        let first = try worker.submit(input: (), chargedBytes: 1, compute: { _ in
+            releaseOneByte.wait()
+            return true
+        }, receive: { _, _ in .acknowledged })
+        let second = try worker.submit(input: (), chargedBytes: occupied, compute: { _ in
+            releaseRemaining.wait()
+            return true
+        }, receive: { _, _ in .acknowledged })
+        guard case .accepted = first, case .accepted = second else {
+            return XCTFail("Expected both reservations on the original worker")
+        }
+        XCTAssertEqual(try worker.status().chargedBytes, occupied + 1)
+        XCTAssertTrue(writer.save())
+        let waiting = try XCTUnwrap(ledger.states().first)
+        XCTAssertFalse(waiting.inFlight)
+        XCTAssertFalse(waiting.retryRequired)
+        XCTAssertTrue(waiting.snapshot.sameContent(other: checkpoint))
+        XCTAssertEqual(try worker.status().availableBytes, checkpoint.encodingWorkByteCharge - 1)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        releaseOneByte.signal()
+        try await waitFor("the one-byte acknowledgment admits the exact remaining work charge") {
+            ledger.states().first?.inFlight == true
+        }
+        XCTAssertTrue(ledger.latest(documentId: id) === waiting.snapshot)
+        XCTAssertEqual(try worker.status().chargedBytes, limit)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        releaseRemaining.signal()
+        let writingStarted = ContinuousClock.now
+        try await waitFor("original worker confirms the retained long write") {
+            writer.status == "未提交笔迹已保存为恢复记录，请重试提交"
+                && ledger.states().isEmpty && (try? worker.status().chargedBytes) == 0
+        }
+        let pending = try longFileIdentity(file)
+        print("NOTECORE_LONG_PENDING bytes=\(pending.bytes) sha256=\(pending.sha256) charge=\(inputCharge) work=\(checkpoint.encodingWorkByteCharge) elapsed=\(writingStarted.duration(to: .now))")
+        XCTAssertEqual(pending.bytes, 17_200_917)
+        XCTAssertEqual(pending.sha256, "92460fcaad0900fbb494a3fdc1be2aec8cb2c31ec592a02272d889b8131089ce")
+        try await retire(writer)
+
+        let refused = PreviewModel(directory: directory, documentBudget: try budget(input: inputCharge - 1, history: 8 * 1024 * 1024))
+        refused.open(id)
+        try await waitFor("one byte below the pending capacity is refused") {
+            refused.status == "未提交笔迹超过当前恢复容量，原文件仍保留"
+        }
+        XCTAssertNil(refused.current)
+        XCTAssertEqual(try longFileIdentity(file).sha256, pending.sha256)
+        try await retire(refused)
+
+        let recovered = PreviewModel(directory: directory, documentBudget: try budget(input: inputCharge, history: 8 * 1024 * 1024))
+        recovered.open(id)
+        try await waitFor("exact input budget reopens the full original worker file") { recovered.current?.hasPendingStroke == true }
+        let note = try XCTUnwrap(recovered.current)
+        XCTAssertTrue(note.captureRecovery().sameContent(other: checkpoint))
+        XCTAssertEqual(note.totalStrokeCount, 9)
+        XCTAssertTrue(note.retryPendingStroke())
+        let committed = note.snapshot()
+        XCTAssertTrue(note.retryPendingStroke())
+        XCTAssertTrue(note.snapshot() === committed)
+        XCTAssertEqual(note.changeVersion, 2)
+        XCTAssertEqual(note.totalStrokeCount, 10)
+        XCTAssertTrue(note.rename(value: "saved long digits"))
+        XCTAssertTrue(recovered.save())
+        try await waitFor("original worker confirms the canonical replacement") {
+            recovered.status.hasPrefix("已保存") && recovered.ownerRetirementStatus.pendingWrites == 0
+        }
+        let canonical = try longFileIdentity(file)
+        print("NOTECORE_LONG_CANONICAL bytes=\(canonical.bytes) sha256=\(canonical.sha256)")
+        XCTAssertEqual(canonical.bytes, 17_200_724)
+        XCTAssertEqual(canonical.sha256, "3be49cb9e505c658a3545af912f0924f1a68b699bd5b8f48390000194e3fad51")
+        let expected = note.captureRecovery()
+        try await retire(recovered)
+
+        let final = PreviewModel(directory: directory)
+        final.open(id)
+        try await waitFor("final original owner reopens without replaying the stroke") { final.current?.totalStrokeCount == 10 }
+        let reopened = try XCTUnwrap(final.current)
+        XCTAssertFalse(reopened.hasPendingStroke)
+        XCTAssertEqual(reopened.changeVersion, 3)
+        XCTAssertTrue(reopened.captureRecovery().sameContent(other: expected))
+        for index in Int32(0)..<10 {
+            let samples = try XCTUnwrap(reopened.strokeAt(index: index)).samples
+            XCTAssertEqual(samples.size, 20_000)
+            XCTAssertTrue(samples.isEqual(expectedSamples))
+        }
+        try await retire(final)
     }
 
     @MainActor func testKnownReadRefusalsReachOwnerSeparatelyFromIOAndUnknown() async throws {
