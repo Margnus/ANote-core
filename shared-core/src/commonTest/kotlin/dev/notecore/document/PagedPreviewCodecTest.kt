@@ -73,6 +73,18 @@ class PagedPreviewCodecTest {
         assertEquals(encoded, PagedPreviewCodec.encode(PagedPreviewCodec.decode(encoded)))
     }
 
+    @Test fun previouslyValidPointDoesNotMaskInvalidFollowingPoint() {
+        val valid = "P\t0.0\t-0.0\t0.25\t10"
+        val malformed = listOf("X\t0.0\t-0.0\t0.25\t10", "P\t0.0\t\t0.25\t10",
+            "P\t0.0\t-0.0\t0.25\t", "$valid\t", "P\t0.0\t-0.0\t0.25\t9",
+            "P\t0.0\t-0.0\t0.25\t9223372036854775808", "P\tNaN\t-0.0\t0.25\t10")
+        val header = "NCPREVIEW\t1\nD\tlegacy\ttitle\t2\t1\t1\nS\tink-1\t-1\t2.5\t2\n"
+        val repeated = PagedPreviewCodec.decode("$header$valid\n$valid\nEND\n")
+        val samples = repeated.scene.objects().single().samples
+        assertEquals((-0.0).toRawBits(), samples.y(1).toRawBits())
+        for (row in malformed) invalid("$header$valid\n$row\nEND\n")
+    }
+
     @Test fun cumulativePointsCannotBypassAdmissionWithManyIndividuallyValidStrokes() {
         val text = buildString {
             append("NCPREVIEW\t2\nD\tcumulative\tcapacity\t1\t11\t0\nG\tp\tl\t595.0\t842.0\tBLANK\t0\n")

@@ -42,11 +42,11 @@ object AndroidPreviewTextCodec {
     private fun readRoot(input: PreviewInput, magic: String, end: Int?, metadata: String? = null): DocumentRoot {
         var first = true
         val rows = object : PreviewRows {
-            override fun row(fields: Int): List<String> {
+            override fun line(): String {
                 val line = input.line(1024, end)
                 if (first && metadata != null) require(line == metadata)
                 first = false
-                return fields(line, fields)
+                return line.removeSuffix("\r")
             }
 
             override fun end() {
@@ -54,12 +54,7 @@ object AndroidPreviewTextCodec {
                 else require(input.position == end) { "Preview frame length differs from its content" }
             }
         }
-        return PreviewRecoveryCodec.accepted(PagedPreviewCodec.decodeRows(fields(magic, 2), rows))
-    }
-
-    private fun fields(line: String, count: Int): List<String> {
-        require(line.count { it == '\t' } == count - 1)
-        return line.removeSuffix("\r").split('\t')
+        return PreviewRecoveryCodec.accepted(PagedPreviewCodec.decodeRows(previewFields(magic.removeSuffix("\r"), 2), rows))
     }
 
     private class PreviewInput(private val reader: Reader) {

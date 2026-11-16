@@ -3,8 +3,83 @@ package dev.notecore.document
 import dev.notecore.canvas.prototype.*
 
 internal interface PreviewRows {
-    fun row(fields: Int): List<String>
+    fun line(): String
+    fun row(fields: Int): List<String> = previewFields(line(), fields)
     fun end()
+}
+
+internal fun previewFields(line: String, count: Int): List<String> {
+    // Bound split allocation before creating a field list.
+    require(line.count { it == '\t' } == count - 1)
+    return line.split('\t')
+}
+
+/** Parse complete point spelling once per change. Admission and sample validation belong to the existing callers. */
+internal class PreviewPointReader(private val rows: PreviewRows) {
+    private var previousLine: String? = null
+    private var xToken = ""
+    private var yToken = ""
+    private var pressureToken = ""
+    private var timeToken = ""
+    private var x = 0.0
+    private var y = 0.0
+    private var pressure = 0f
+    private var time = 0L
+
+    fun read(size: Int): StrokeSamples {
+        val xs = DoubleArray(size)
+        val ys = DoubleArray(size)
+        val pressures = FloatArray(size)
+        val times = LongArray(size)
+        for (index in 0 until size) {
+            val line = rows.line()
+            if (line != previousLine) readChangedLine(line)
+            xs[index] = x
+            ys[index] = y
+            pressures[index] = pressure
+            times[index] = time
+        }
+        return StrokeSamples.copyOf(xs, ys, pressures, times)
+    }
+
+    private fun readChangedLine(line: String) {
+        require(line.startsWith("P\t"))
+        val xEnd = nextTab(line, 2)
+        val yEnd = nextTab(line, xEnd + 1)
+        val pressureEnd = nextTab(line, yEnd + 1)
+        val timeStart = pressureEnd + 1
+        require(line.indexOf('\t', timeStart) < 0)
+        if (!matches(line, 2, xEnd, xToken)) {
+            val token = line.substring(2, xEnd)
+            x = token.toDouble()
+            xToken = token
+        }
+        if (!matches(line, xEnd + 1, yEnd, yToken)) {
+            val token = line.substring(xEnd + 1, yEnd)
+            y = token.toDouble()
+            yToken = token
+        }
+        if (!matches(line, yEnd + 1, pressureEnd, pressureToken)) {
+            val token = line.substring(yEnd + 1, pressureEnd)
+            pressure = token.toFloat()
+            pressureToken = token
+        }
+        if (!matches(line, timeStart, line.length, timeToken)) {
+            val token = line.substring(timeStart)
+            time = token.toLong()
+            timeToken = token
+        }
+        previousLine = line
+    }
+
+    private fun nextTab(line: String, start: Int): Int {
+        val index = line.indexOf('\t', start)
+        require(index > start)
+        return index
+    }
+
+    private fun matches(line: String, start: Int, end: Int, token: String): Boolean =
+        end > start && end - start == token.length && line.regionMatches(start, token, 0, token.length)
 }
 
 internal data class PreviewTextSize(val characters: Int, val utf8Bytes: Int)
@@ -85,6 +160,7 @@ object PagedPreviewCodec {
             pages.add(page)
         }
         val objects = ArrayList<StrokeObject>(header.objectCount); val ids = mutableSetOf<ObjectId>()
+        val points = PreviewPointReader(rows)
         var total = 0
         repeat(header.objectCount) {
             val row = rows.row(15); require(row[0] == "S")
@@ -97,12 +173,7 @@ object PagedPreviewCodec {
             require(retained <= MAX_RETAINED_BYTES)
             val transform = Affine2D(row[9].toDouble(), row[10].toDouble(), row[11].toDouble(), row[12].toDouble(), row[13].toDouble(), row[14].toDouble())
             require(transform.inverseOrNull() != null)
-            val xs = DoubleArray(size); val ys = DoubleArray(size); val pressures = FloatArray(size); val times = LongArray(size)
-            repeat(size) { point ->
-                val p = rows.row(5); require(p[0] == "P")
-                xs[point] = p[1].toDouble(); ys[point] = p[2].toDouble(); pressures[point] = p[3].toFloat(); times[point] = p[4].toLong()
-            }
-            objects.add(StrokeObject(id, revision, layer, brush, StrokeSamples.copyOf(xs, ys, pressures, times), transform))
+            objects.add(StrokeObject(id, revision, layer, brush, points.read(size), transform))
         }
         require(rows.row(1) == listOf("END")); rows.end()
         return DocumentRoot.compose(header.title, SceneSnapshot.restored(SceneId(header.documentId), header.revision, objects), pages)
@@ -219,16 +290,14 @@ object PagedPreviewCodec {
     }
     internal class Rows(private val text: String) : PreviewRows {
         private var offset = 0
-        override fun row(fields: Int): List<String> {
+        override fun line(): String {
             require(offset < text.length) { "Truncated preview document" }
             val start = offset
             while (offset < text.length && text[offset] != '\n') { require(offset - start < MAX_LINE); offset++ }
             val end = if (offset > start && text[offset - 1] == '\r') offset - 1 else offset
             val line = text.substring(start, end)
             if (offset < text.length) offset++
-            // Bound split allocation by checking delimiter count before creating a field list.
-            require(line.count { it == '\t' } == fields - 1)
-            return line.split('\t')
+            return line
         }
         override fun end() { require(offset == text.length) { "Trailing preview data" } }
     }

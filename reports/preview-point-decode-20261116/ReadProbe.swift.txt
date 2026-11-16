@@ -1,0 +1,19 @@
+import CryptoKit
+import Foundation
+import NoteCanvasPrototype
+
+let input = URL(fileURLWithPath: CommandLine.arguments[1])
+let text = try String(contentsOf: input, encoding: .utf8)
+var last: PagedPreviewSnapshot?
+for _ in 0..<3 {
+    let started = ContinuousClock.now
+    last = autoreleasepool { PreviewRecoveryCodec.shared.read(text: text).snapshot }
+    let elapsed = started.duration(to: .now).components
+    let ms = Double(elapsed.seconds) * 1000 + Double(elapsed.attoseconds) / 1e15
+    let checkpoint = last!
+    precondition(checkpoint.root.scene.objectCount == 9 && checkpoint.pending != nil)
+    print("READ_MS \(ms)")
+}
+let bytes = Data(try last!.encode().utf8)
+let digest = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
+print("BYTES \(bytes.count) SHA256 \(digest)")

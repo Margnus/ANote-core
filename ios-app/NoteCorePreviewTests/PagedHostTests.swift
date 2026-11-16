@@ -980,8 +980,10 @@ final class PagedHostTests: XCTestCase {
         try await retire(refused)
 
         let recovered = PreviewModel(directory: directory, documentBudget: try budget(input: inputCharge, history: 8 * 1024 * 1024))
+        let readingStarted = ContinuousClock.now
         recovered.open(id)
         try await waitFor("exact input budget reopens the full original worker file") { recovered.current?.hasPendingStroke == true }
+        print("NOTECORE_LONG_REOPEN elapsed=\(readingStarted.duration(to: .now))")
         let note = try XCTUnwrap(recovered.current)
         XCTAssertTrue(note.captureRecovery().sameContent(other: checkpoint))
         XCTAssertEqual(note.totalStrokeCount, 9)

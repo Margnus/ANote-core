@@ -14,6 +14,7 @@ internal object LegacyPreviewReader {
     fun decodeRows(rows: PreviewRows): DocumentRoot {
         val meta = metadata(rows.row(6)); val h = meta.header
         val objects = ArrayList<StrokeObject>(h.objectCount); val ids = mutableSetOf<ObjectId>()
+        val points = PreviewPointReader(rows)
         var total = 0
         repeat(h.objectCount) {
             val row = rows.row(5); require(row[0] == "S")
@@ -23,14 +24,8 @@ internal object LegacyPreviewReader {
             require(width.isFinite() && width in 0.5..16.0)
             require(size in 1..PagedPreviewCodec.MAX_STROKE_POINTS && size <= PagedPreviewCodec.MAX_POINTS - total)
             total += size // Admit the aggregate before allocating the next real-sample arrays.
-            val xs = DoubleArray(size); val ys = DoubleArray(size); val pressures = FloatArray(size); val times = LongArray(size)
-            repeat(size) { index ->
-                val point = rows.row(5); require(point[0] == "P")
-                xs[index] = point[1].toDouble(); ys[index] = point[2].toDouble()
-                pressures[index] = point[3].toFloat(); times[index] = point[4].toLong()
-            }
             objects.add(StrokeObject(id, 1, LayerId("ink"), BrushSpec(BrushKind.MONOLINE, 1, width, color),
-                StrokeSamples.copyOf(xs, ys, pressures, times)))
+                points.read(size)))
         }
         require(rows.row(1) == listOf("END")); rows.end()
         return DocumentRoot.compose(h.title, SceneSnapshot.restored(SceneId(h.documentId), h.revision, objects),
