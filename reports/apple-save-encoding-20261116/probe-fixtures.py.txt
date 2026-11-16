@@ -1,0 +1,47 @@
+"""Reconstruct the Android checkpoint and the distinct-numeric control, then verify input digests."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+out = Path(sys.argv[1])
+source = Path(sys.argv[2])
+golden = json.loads(source.read_text())['fixture_identity']['pending']['sha256']
+point = b'P\t-1.2345678901234567E-100\t-1.2345678901234567E-100\t1.2345679E-20\t9223372036854775807\n'
+def header(title, count, revision, page_revision):
+    return f'NCPREVIEW\t2\nD\tlong-capacity\t{title}\t1\t{count}\t{revision}\nG\tpage\tink\t595.0\t842.0\tBLANK\t{page_revision}\n'.encode()
+
+def stroke(identity, color=-1, width=2.0):
+    return f'S\t{identity}\tink\t1\tMONOLINE\t1\t{color}\t{width}\t20000\t1.0\t0.0\t0.0\t1.0\t0.0\t0.0\n'.encode() + point * 20000
+
+metadata = b'D\tlong-capacity\tlong digits\t1\t9\t1'
+operation = 'producer-op-1'.encode('utf-16-be').hex().encode()
+base = header('long digits', 9, 1, 1) + b''.join(stroke(f'old-{i}') for i in range(9)) + b'END\n'
+ink = header('', 1, 0, 0) + stroke('producer-ink-2', 0xff253247 - (1 << 32), 2.5) + b'END\n'
+
+def envelope(left, right):
+    framing = b'\t'.join((str(len(left)).encode(), str(len(right)).encode(), operation))
+    return b'\n'.join((b'NCRECOVERY\t1', metadata, framing)) + b'\n' + left + right + b'RECOVERY-END\n'
+
+pending = envelope(base, ink)
+assert hashlib.sha256(pending).hexdigest() == golden
+
+def vary(body, count):
+    rows = []
+    for line in body.splitlines(keepends=True):
+        if line.startswith(b'P\t'):
+            count += 1
+            x = -1e-100 * (1 + count / 1_000_000)
+            y = 1e-100 * (1 + count / 2_000_000)
+            p = 0.125 + (count % 20_000) / 32_000
+            rows.append(f'P\t{x:.17E}\t{y:.17E}\t{p:.9E}\t{count}\n'.encode())
+        else:
+            rows.append(line)
+    return b''.join(rows), count
+
+left, count = vary(base, 0)
+right, count = vary(ink, count)
+assert count == 200_000
+out.mkdir(parents=True, exist_ok=True)
+(out / 'pending.ncp').write_bytes(pending)
+(out / 'distinct.ncp').write_bytes(envelope(left, right))

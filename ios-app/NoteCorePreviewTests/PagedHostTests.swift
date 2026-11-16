@@ -78,6 +78,7 @@ final class PagedHostTests: XCTestCase {
               let config = try JSONSerialization.jsonObject(with: data) as? [String: String],
               let identity = config["identity"], UUID(uuidString: identity) != nil,
               let name = config["boundary"], let boundary = PreviewWriteBoundary(rawValue: name),
+              boundary == .beforeAtomicWrite || boundary == .afterAtomicWrite,
               let action = config["action"], ["prepare", "reopen"].contains(action) else { throw CocoaError(.fileReadCorruptFile) }
         let dir = caches.appendingPathComponent("atomic-cut-" + identity, isDirectory: true)
         let checkpoint = try windowCheckpoint(), file = dir.appendingPathComponent("pending-window.ncp")
@@ -901,7 +902,12 @@ final class PagedHostTests: XCTestCase {
             try await waitFor("original model and worker retire") { model.ownerRetirementStatus.phase == .retired }
         }
 
-        let writer = PreviewModel(directory: directory, documentBudget: try budget(input: inputCharge, history: 0))
+        let phaseLock = NSLock()
+        var phases: [(PreviewWriteBoundary, ContinuousClock.Instant)] = []
+        let writer = PreviewModel(directory: directory, documentBudget: try budget(input: inputCharge, history: 0),
+            observeWriteBoundary: { boundary in
+                phaseLock.withLock { phases.append((boundary, .now)) }
+            })
         try writer.adopt(checkpoint.root, persisted: false, recovery: checkpoint)
         let active = try XCTUnwrap(writer.current)
         XCTAssertEqual(active.inputReservedByteCharge, inputCharge)
@@ -940,14 +946,26 @@ final class PagedHostTests: XCTestCase {
         XCTAssertTrue(ledger.latest(documentId: id) === waiting.snapshot)
         XCTAssertEqual(try worker.status().chargedBytes, limit)
         XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
-        releaseRemaining.signal()
         let writingStarted = ContinuousClock.now
+        releaseRemaining.signal()
         try await waitFor("original worker confirms the retained long write") {
             writer.status == "未提交笔迹已保存为恢复记录，请重试提交"
                 && ledger.states().isEmpty && (try? worker.status().chargedBytes) == 0
         }
+        let confirmed = ContinuousClock.now
+        let observed = phaseLock.withLock { phases }
+        XCTAssertEqual(observed.map(\.0), [.beforeEncoding, .afterEncoding, .beforeAtomicWrite, .afterAtomicWrite])
+        if observed.count == 4 {
+            let points = [writingStarted] + observed.map(\.1) + [confirmed]
+            XCTAssertEqual(points, points.sorted())
+            let milliseconds = zip(points, points.dropFirst()).map { start, end in
+                let duration = start.duration(to: end).components
+                return Double(duration.seconds) * 1000 + Double(duration.attoseconds) / 1e15
+            }
+            print("NOTECORE_LONG_PHASE_MS queue=\(milliseconds[0]) encode_and_bridge=\(milliseconds[1]) utf8=\(milliseconds[2]) atomic_write=\(milliseconds[3]) ack_observed=\(milliseconds[4])")
+        }
         let pending = try longFileIdentity(file)
-        print("NOTECORE_LONG_PENDING bytes=\(pending.bytes) sha256=\(pending.sha256) charge=\(inputCharge) work=\(checkpoint.encodingWorkByteCharge) elapsed=\(writingStarted.duration(to: .now))")
+        print("NOTECORE_LONG_PENDING bytes=\(pending.bytes) sha256=\(pending.sha256) charge=\(inputCharge) work=\(checkpoint.encodingWorkByteCharge) elapsed=\(writingStarted.duration(to: confirmed))")
         XCTAssertEqual(pending.bytes, 17_200_917)
         XCTAssertEqual(pending.sha256, "92460fcaad0900fbb494a3fdc1be2aec8cb2c31ec592a02272d889b8131089ce")
         try await retire(writer)

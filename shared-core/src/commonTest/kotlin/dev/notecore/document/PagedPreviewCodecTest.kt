@@ -57,6 +57,22 @@ class PagedPreviewCodecTest {
         assertSame(root.scene.objects().single().samples, copy.scene.objects().single().samples)
         assertEquals(root.page(0).width, copy.page(0).width)
     }
+
+    @Test fun repeatedNumericFieldsPreserveEachValueAndSignedZero() {
+        val xs = doubleArrayOf(0.0, -0.0, -0.0, 0.0, 1e-100, 1e-100, 2e-100)
+        val ys = doubleArrayOf(-0.0, -0.0, 0.0, 0.0, 2e-100, 1e-100, 2e-100)
+        val pressure = floatArrayOf(-0.0f, 0.0f, 0.0f, -0.0f, .25f, .25f, .25f)
+        val times = longArrayOf(0, 0, 1, 2, 2, 3, Long.MAX_VALUE)
+        val samples = StrokeSamples.copyOf(xs, ys, pressure, times)
+        val original = root()
+        val strokes = original.scene.objects().map { it.copy(samples = samples) }
+        val fixture = DocumentRoot.compose(original.title, SceneSnapshot.restored(original.id, original.revision, strokes), original.pages())
+        val expectedRows = xs.indices.map { "P\t${xs[it]}\t${ys[it]}\t${pressure[it]}\t${times[it]}" }
+        val encoded = PagedPreviewCodec.encode(fixture)
+        assertEquals(expectedRows + expectedRows, encoded.lineSequence().filter { it.startsWith("P\t") }.toList())
+        assertEquals(encoded, PagedPreviewCodec.encode(PagedPreviewCodec.decode(encoded)))
+    }
+
     @Test fun cumulativePointsCannotBypassAdmissionWithManyIndividuallyValidStrokes() {
         val text = buildString {
             append("NCPREVIEW\t2\nD\tcumulative\tcapacity\t1\t11\t0\nG\tp\tl\t595.0\t842.0\tBLANK\t0\n")

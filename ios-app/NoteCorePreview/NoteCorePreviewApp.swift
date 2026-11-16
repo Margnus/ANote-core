@@ -660,7 +660,7 @@ final class PreviewModel: ObservableObject {
             }
             let admission = try! executor.submit(input: (attempt, Self.file(attempt.snapshot.documentId, directory: directory), observeWriteBoundary),
                 chargedBytes: attempt.snapshot.encodingWorkByteCharge, compute: { input in
-                    try PreviewFileIO.writeUTF8(input.0.snapshot.encode(), to: input.1, observeBoundary: input.2)
+                    try PreviewFileIO.writeSnapshot(input.0.snapshot, to: input.1, observeBoundary: input.2)
                     return true
                 }, receive: { input, result in
                     let success: Bool

@@ -173,11 +173,12 @@ object PagedPreviewCodec {
         out.row("NCPREVIEW", 2)
         out.metadata(documentRow(root))
         for (page in root.pages()) out.row("G", escape(page.id.value), escape(page.layerId.value), page.width, page.height, page.paper.name, page.contentRevision)
+        val pointText = PointText()
         root.scene.forEachObject { obj ->
             val m = obj.transform
             out.row("S", escape(obj.id.value), escape(obj.layerId.value), obj.objectRevision, obj.brush.kind.name, obj.brush.algorithmVersion,
                 obj.brush.argb, obj.brush.width, obj.samples.size, m.a, m.b, m.c, m.d, m.tx, m.ty)
-            for (p in 0 until obj.samples.size) out.point("P\t${obj.samples.x(p)}\t${obj.samples.y(p)}\t${obj.samples.pressure(p)}\t${obj.samples.timeMicros(p)}\n")
+            for (p in 0 until obj.samples.size) out.point(pointText.row(obj.samples, p))
         }
         out.row("END")
         return out.size
@@ -231,6 +232,35 @@ object PagedPreviewCodec {
         }
         override fun end() { require(offset == text.length) { "Trailing preview data" } }
     }
+
+    /** Reuse only the immediately previous spelling of each field during this encode. */
+    private class PointText {
+        private var xBits = 0L
+        private var yBits = 0L
+        private var pressureBits = 0
+        private var time = 0L
+        private var xText = 0.0.toString()
+        private var yText = xText
+        private var pressureText = 0f.toString()
+        private var timeText = 0L.toString()
+
+        fun row(samples: StrokeSamples, index: Int): String {
+            val x = samples.x(index)
+            val y = samples.y(index)
+            val pressure = samples.pressure(index)
+            val micros = samples.timeMicros(index)
+            val nextX = x.toRawBits()
+            val nextY = y.toRawBits()
+            val nextPressure = pressure.toRawBits()
+            // Raw bits distinguish positive zero from negative zero in the existing file format.
+            if (nextX != xBits) { xBits = nextX; xText = x.toString() }
+            if (nextY != yBits) { yBits = nextY; yText = y.toString() }
+            if (nextPressure != pressureBits) { pressureBits = nextPressure; pressureText = pressure.toString() }
+            if (micros != time) { time = micros; timeText = micros.toString() }
+            return "P\t$xText\t$yText\t$pressureText\t$timeText\n"
+        }
+    }
+
     private class BoundedText(private val write: (String) -> Unit) {
         private var characters = 0
         private var utf8Bytes = 0

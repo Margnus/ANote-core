@@ -31,7 +31,7 @@ enum CatalogCapacityRefusal: Error { case tooManyRows }
 private enum TextReadRefusal: Error { case byteCapacity, invalidUTF8 }
 
 // Preview text IO only. No UIKit, mutable owner collections or production storage schema.
-enum PreviewWriteBoundary: String { case beforeAtomicWrite, afterAtomicWrite }
+enum PreviewWriteBoundary: String { case beforeEncoding, afterEncoding, beforeAtomicWrite, afterAtomicWrite }
 
 enum PreviewFileIO {
     // Local filename policy only; canonical document IDs may contain other Unicode scalars.
@@ -113,6 +113,14 @@ enum PreviewFileIO {
         }
         throw CocoaError(.fileReadCorruptFile)
     }
+    static func writeSnapshot(_ snapshot: any PreviewSaveSnapshot, to url: URL,
+                              observeBoundary: (PreviewWriteBoundary) -> Void) throws {
+        observeBoundary(.beforeEncoding)
+        let text = try snapshot.encode()
+        observeBoundary(.afterEncoding)
+        try writeUTF8(text, to: url, observeBoundary: observeBoundary)
+    }
+
     static func writeUTF8(_ text: String, to url: URL, observeBoundary: (PreviewWriteBoundary) -> Void = { _ in }) throws {
         guard text.utf16.count <= Int(PagedPreviewCodec.shared.maximumCharacterCount()) else { throw CocoaError(.fileWriteOutOfSpace) }
         let bytes = Data(text.utf8)
