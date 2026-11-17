@@ -111,6 +111,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             is PreviewEdit.Rename -> rename(request.title)
             is PreviewEdit.SetPaper -> setPaper(request.width, request.height, request.paper)
             is PreviewEdit.SelectPen -> selectPen(request.argb, request.width, request.kind)
+            is PreviewEdit.EraseStrokes -> eraseStrokes(request.path, request.radius)
             is PreviewEdit.SelectPage -> {
                 if (!validPageId(request.pageId)) fail("页面编号无效", PreviewFailureKind.INVALID_ARGUMENT)
                 else selectPage(PageId(request.pageId))
@@ -175,6 +176,27 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
                 else -> "操作未完成，原内容仍保留，请重试"
             }, PreviewFailureKind.DOCUMENT_REJECTED, result.reason)
         }
+    }
+    /** One eraser gesture deletes every hit as one PreparedCanvas command, hence one undo entry. */
+    fun eraseStrokes(path: List<PointD>, radius: Double): Boolean {
+        if (!prepareEdit()) return false
+        val root = root()
+        val result = EraserRules.plan(root, root.id, root.revision, selected, path, radius, ERASER_PAIR_TEST_BUDGET)
+        val plan = result.plan
+        if (plan == null) {
+            return when (result.failure) {
+                EraserFailure.NO_HIT -> { clearError(); true }
+                EraserFailure.INVALID_PATH -> fail("橡皮路径无效", PreviewFailureKind.INVALID_ARGUMENT)
+                EraserFailure.CAPACITY -> fail("当前预览已达到编辑容量，请保留笔记并导出备份", PreviewFailureKind.CAPACITY)
+                EraserFailure.MISSING_PAGE -> fail("页面不存在", PreviewFailureKind.MISSING_PAGE)
+                else -> fail("操作未完成，原内容仍保留，请重试", PreviewFailureKind.DOCUMENT_REJECTED)
+            }
+        }
+        val changes = plan.objectIds().map { ObjectChange(root.scene.find(it)!!, null) }
+        val op = operation() ?: return false
+        val prepared = SceneReducer.prepareChanges(root.scene, op, changes)
+        if (prepared !is PrepareResult.Prepared) return fail("操作未完成，原内容仍保留，请重试", PreviewFailureKind.DOCUMENT_REJECTED)
+        return commit(DocumentCommand.PreparedCanvas(selected, prepared.patch))
     }
     fun selectPage(id: PageId): Boolean {
         ownerCheck()
@@ -470,6 +492,8 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     fun captureRecovery(): PagedPreviewSnapshot { ownerCheck(); return PagedPreviewSnapshot(root(), pending) }
 
     companion object {
+        /** Candidate pair-test ceiling for one eraser gesture; dense pages need the spatial index port later. */
+        private const val ERASER_PAIR_TEST_BUDGET = 1_000_000
         /** Validate the entire immutable checkpoint before constructing the original authority. No auto-commit. */
         fun openRecovery(snapshot: PagedPreviewSnapshot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
                          ownerCheck: () -> Unit = {}): PreviewNotebookOpen {

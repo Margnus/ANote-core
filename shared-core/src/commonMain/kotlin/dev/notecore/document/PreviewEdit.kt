@@ -1,6 +1,7 @@
 package dev.notecore.document
 
 import dev.notecore.canvas.prototype.BrushKind
+import dev.notecore.canvas.prototype.PointD
 
 /** Unfrozen raw-parameter facade over the existing notebook, never another content owner. */
 sealed interface PreviewEdit {
@@ -8,6 +9,8 @@ sealed interface PreviewEdit {
     data class SetPaper(val width: Double, val height: Double, val paper: PaperKind) : PreviewEdit
     /** Kind defaults to MONOLINE for legacy callers; PRESSURE stays closed at algorithm version 1. */
     data class SelectPen(val argb: Int, val width: Double, val kind: BrushKind = BrushKind.MONOLINE) : PreviewEdit
+    /** Whole-stroke eraser gesture on the current page; a miss is an accepted no-op without history. */
+    data class EraseStrokes(val path: List<PointD>, val radius: Double) : PreviewEdit
     data class SelectPage(val pageId: String) : PreviewEdit
     data class MovePage(val beforePageId: String?) : PreviewEdit
     data object InsertPage : PreviewEdit
