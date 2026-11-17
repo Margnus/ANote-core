@@ -13,6 +13,7 @@ import dev.notecore.document.*
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -295,6 +296,8 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             verifyReopenAfterWriteAcknowledgement()
             checks.add("retained_reopen_observes_preceding_write_ack")
             checks.add("retained_reopen_reserves_capture_at_exact_byte_boundary")
+            verifySupersededOpenDoesNotRetry()
+            checks.add("superseded_open_acks_without_disk_retry_or_delivery")
             return JSONObject().put("checks", JSONArray(checks)).put("original_note_files_used", false)
                 .put("apple_round_trip_base64", Base64.encodeToString(appleRoundTrip, Base64.NO_WRAP))
                 .put("system_file_picker_verified", false).toString()
@@ -360,6 +363,55 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             android.util.Log.i("NoteCoreStorageTest", "retained open charge=${snapshot.retainedByteCharge + 4096} disk=${PagedPreviewCodec.maximumDecodingWorkByteCharge()}")
         } finally {
             releaseWriter.countDown()
+            main { store.stopTestBackend() }
+            directory.deleteRecursively()
+        }
+    }
+
+    private fun verifySupersededOpenDoesNotRetry() {
+        val directory = File(host.cacheDir, "superseded-open-${java.util.UUID.randomUUID()}")
+        check(directory.mkdir())
+        val oldBytes = "NCPREVIEW\t2\nD\told-note\tEarlier selection\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
+        val original = File(directory, "old-note.ncp").apply { writeText(oldBytes) }
+        val entered = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        val reads = AtomicInteger()
+        lateinit var store: NoteStore
+        lateinit var worker: BoundedOwnerExecutor
+        lateinit var current: PagedPreviewSnapshot
+        var requested = true
+        var oldDeliveries = 0
+        var saved = false
+        try {
+            main {
+                store = NoteStore.isolated(host, directory, beforeOpenRead = {
+                    reads.incrementAndGet()
+                    entered.countDown()
+                    check(release.await(10, TimeUnit.SECONDS))
+                })
+                worker = NoteStore::class.java.getDeclaredField("executor").apply { isAccessible = true }
+                    .get(store) as BoundedOwnerExecutor
+                store.open("old-note", isRequested = { requested }) { _, _ -> oldDeliveries++ }
+            }
+            check(entered.await(5, TimeUnit.SECONDS))
+            main {
+                val note = store.create()
+                current = note.captureRecovery()
+                check(store.save(current) { _, failure -> saved = failure == null })
+                requested = false
+                store.open(current.documentId) { result, failure ->
+                    check(failure == null && result?.root === current.root)
+                }
+            }
+            release.countDown()
+            eventually("Newer save did not settle") { saved && store.saveStates().isEmpty() }
+            test.waitForIdleSync()
+            eventually("Work was not acknowledged") { worker.status().entries.isEmpty() }
+            main { check(oldDeliveries == 0 && store.activeDocumentId == current.documentId) }
+            check(reads.get() == 1 && original.readText() == oldBytes)
+            check(File(directory, "${current.documentId}.ncp").readText() == current.encode())
+        } finally {
+            release.countDown()
             main { store.stopTestBackend() }
             directory.deleteRecursively()
         }

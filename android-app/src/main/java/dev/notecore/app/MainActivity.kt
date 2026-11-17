@@ -120,8 +120,7 @@ class MainActivity : Activity() {
     private fun open(id: String) {
         viewGeneration++; val generation = viewGeneration
         root.removeAllViews(); root.addView(text("正在打开…").apply { setPadding(dp(24), dp(24), 0, 0) })
-        store.open(id) { note, failure ->
-            if (generation != viewGeneration || isFinishing || isDestroyed) return@open
+        store.open(id, isRequested = { generation == viewGeneration && !isFinishing && !isDestroyed }) { note, failure ->
             val adoption = note?.let(store::adoptForEditor)
             val adopted = adoption?.notebook
             if (adopted != null) { editor(adopted); failure?.let(::showError) }

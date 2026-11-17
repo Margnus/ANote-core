@@ -641,8 +641,11 @@ class NoteStore private constructor(context: Context, private val directory: Fil
     private fun retainedSummaries(): List<NoteSummary> = ledger.states().map {
         NoteSummary(it.snapshot.documentId, it.snapshot.title + "（未保存）", System.currentTimeMillis())
     }
-    fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) {
+    fun open(id: String, callback: (OpenedDocument?, String?) -> Unit) = open(id, { true }, callback)
+
+    internal fun open(id: String, isRequested: () -> Boolean, callback: (OpenedDocument?, String?) -> Unit) {
         executor.checkOwnerThread()
+        if (!isRequested()) return
         if (ownerRetiring || (editors.isNotEmpty() && activeNotebook?.documentId != id)) {
             notifyUi { callback(null, "其他窗口正在编辑，或原笔记尚待保存，请完成后重试") }; return
         }
@@ -654,9 +657,10 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         request(Triple(id, retained, io), previewOpenWorkByteCharge(retained), { input ->
             if (input.second == null) input.third.readOutcome(input.first) else input.third.acceptRecovery(input.second as PagedPreviewSnapshot, input.first)
         }, { callback(null, "后台队列繁忙，请重新打开笔记") }) { result ->
+            if (!isRequested()) return@request
             if (viewEpoch != epoch) {
                 // No mutable/read payload is posted; retry a pure read after this result is ACKed.
-                main.post { open(id, callback) }
+                main.post { open(id, isRequested, callback) }
             } else when (result) {
                 is WorkResult.Succeeded -> when (val reading = result.value) {
                     is LocalRecoveryRead.Opened -> {
