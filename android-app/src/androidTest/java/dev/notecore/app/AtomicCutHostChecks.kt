@@ -13,11 +13,14 @@ import org.json.JSONObject
 
 /** Only unique synthetic cache files. No original documents or production service singleton. */
 internal class AtomicCutHostChecks(private val test: Instrumentation, private val host: Activity,
-                                  identity: String, boundaryName: String, private val firstWrite: Boolean) {
+                                  identity: String, boundaryName: String, private val firstWrite: Boolean,
+                                  private val legacyBackup: Boolean) {
     private val boundary = PreviewWriteBoundary.valueOf(boundaryName)
     private val directory: File
     init {
         check(identity.matches(Regex("[0-9a-f-]{36}")))
+        check(!legacyBackup || !firstWrite)
+        check(boundary != PreviewWriteBoundary.LEGACY_BACKUP_BEFORE_REMOVAL || legacyBackup)
         directory = File(host.cacheDir, "atomic-cut-$identity")
     }
     private fun main(action: () -> Unit) = test.runOnMainSync(action)
@@ -39,6 +42,14 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
         if (!firstWrite) {
             PreviewFileIO(directory, host.contentResolver).write(initial)
             File(directory, "expected-old.txt").writeText(initial.encode(), Charsets.UTF_8)
+            if (legacyBackup) {
+                val base = File(directory, "atomic-cut.ncp")
+                check(base.renameTo(File(directory, "atomic-cut.ncp.bak")))
+                val root = initial.root
+                val unconfirmed = PagedPreviewSnapshot.fromRoot(DocumentRoot.compose("Unconfirmed legacy base", root.scene, root.pages()))
+                base.writeText(unconfirmed.encode(), Charsets.UTF_8)
+                File(directory, "expected-legacy-base.txt").writeText(unconfirmed.encode(), Charsets.UTF_8)
+            }
         }
         // Independent expected bytes for the external verifier; never used to repair files after death.
         File(directory, "expected-pending.txt").writeText(checkpoint.encode(), Charsets.UTF_8)
@@ -53,7 +64,7 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
                         check(owner.editorPresentation(note).phase == EditorSavePhase.SAVING)
                         val marker = JSONObject().put("pid", Process.myPid()).put("boundary", reached.name)
                             .put("callbacks", callbacks).put("phase", "SAVING").put("has_pending", true)
-                            .put("first_write", firstWrite)
+                            .put("first_write", firstWrite).put("legacy_backup", legacyBackup)
                         File(directory, "ready.json").writeText(marker.toString(), Charsets.UTF_8)
                     }
                     hold.await() // No timeout release or fabricated receipt. External process termination ends it.
@@ -118,6 +129,7 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
             check(actual.sameContent(checkNotNull(confirmedContent)))
             check(actual.pending == null && actual.root.scene.objectCount == if (expectedPending) 1 else 0)
             check(!File(directory, "atomic-cut.ncp.new").exists())
+            check(!File(directory, "atomic-cut.ncp.bak").exists())
             retire(owner)
             return result(previousPid, expectedPending, actual.root.scene.objectCount, actual.version, false)
         } finally {
@@ -136,5 +148,5 @@ internal class AtomicCutHostChecks(private val test: Instrumentation, private va
         JSONObject().put("previous_pid", previousPid).put("pid", Process.myPid()).put("boundary", boundary.name)
             .put("recovered_pending", pending).put("committed_strokes", strokes)
             .put("revision", revision ?: JSONObject.NULL).put("document_absent", absent)
-            .put("temporary_file_absent", true).put("original_owner_retired", true).toString()
+            .put("temporary_file_absent", true).put("legacy_backup_absent", true).put("original_owner_retired", true).toString()
 }

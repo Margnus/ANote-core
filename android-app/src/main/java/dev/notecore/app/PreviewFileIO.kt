@@ -31,7 +31,9 @@ internal fun isLocalPreviewDocumentId(id: String): Boolean = id.length in 1..128
     id.all { it == '-' || it in '0'..'9' || it in 'A'..'Z' || it in 'a'..'z' }
 
 internal class CatalogCapacityRefusal : RuntimeException()
-internal enum class PreviewWriteBoundary { PREFIX_WRITTEN_BEFORE_SYNC, SYNCED_BEFORE_REPLACE, VERIFIED_BEFORE_RETURN }
+internal enum class PreviewWriteBoundary {
+    PREFIX_WRITTEN_BEFORE_SYNC, SYNCED_BEFORE_REPLACE, LEGACY_BACKUP_BEFORE_REMOVAL, VERIFIED_BEFORE_RETURN
+}
 
 /** Platform-local read result; no mutable document or secondary storage ownership. */
 internal enum class LocalReadFailure(val message: String) {
@@ -119,7 +121,11 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             }
         }
         // A legacy backup remains the prior recovery source until the replacement has been verified.
-        Files.deleteIfExists(backupFile(base).toPath())
+        val backup = backupFile(base).toPath()
+        if (observeWriteBoundary != null && entryAttributes(backup) != null) {
+            observeWriteBoundary.invoke(PreviewWriteBoundary.LEGACY_BACKUP_BEFORE_REMOVAL)
+        }
+        Files.deleteIfExists(backup)
         observeWriteBoundary?.invoke(PreviewWriteBoundary.VERIFIED_BEFORE_RETURN)
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {

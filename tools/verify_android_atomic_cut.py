@@ -22,12 +22,15 @@ def main():
     isolated = parser.add_mutually_exclusive_group()
     isolated.add_argument('--isolated-api26', action='store_true', help='Use an empty NoteCoreAtomicCut26 emulator and the current APKs')
     isolated.add_argument('--isolated-api32', action='store_true', help='Use an empty NoteCoreAtomicCut32 emulator and the current APKs')
+    parser.add_argument('--legacy-backup-cuts', action='store_true', help='Include three legacy .bak transitions on an isolated emulator')
     args = parser.parse_args()
     isolated_api = 26 if args.isolated_api26 else 32 if args.isolated_api32 else None
     avd, serial = {26: ('NoteCoreAtomicCut26', 'emulator-5582'),
                    32: ('NoteCoreAtomicCut32', 'emulator-5586'),
                    None: ('NoteCorePreview', 'emulator-5554')}[isolated_api]
     assert args.serial == serial
+    if args.legacy_backup_cuts and not isolated_api:
+        parser.error('--legacy-backup-cuts requires an isolated emulator')
     driver_sha = sha(Path(__file__).read_bytes())
     folder = ROOT / (f'build/android-atomic-cut-api{isolated_api}-{uuid.uuid4().hex}' if isolated_api else 'build/android-atomic-cut')
     folder.mkdir(parents=True, exist_ok=True)
@@ -89,24 +92,32 @@ def main():
     boundaries = ['SYNCED_BEFORE_REPLACE', 'VERIFIED_BEFORE_RETURN']
     if isolated_api:
         boundaries.insert(0, 'PREFIX_WRITTEN_BEFORE_SYNC')
-    scenarios = [(boundary, False) for boundary in boundaries]
+    scenarios = [(boundary, False, False) for boundary in boundaries]
     if isolated_api:
-        scenarios += [(boundary, True) for boundary in boundaries]
-    for boundary, first_write in scenarios:
+        scenarios += [(boundary, True, False) for boundary in boundaries]
+    if args.legacy_backup_cuts:
+        scenarios += [(boundary, False, True) for boundary in
+                      ('SYNCED_BEFORE_REPLACE', 'LEGACY_BACKUP_BEFORE_REMOVAL', 'VERIFIED_BEFORE_RETURN')]
+    for boundary, first_write, legacy_backup in scenarios:
         identity = str(uuid.uuid4()); cache = 'cache/atomic-cut-' + identity
-        stage = folder / (('first_write_' if first_write else '') + boundary.lower())
+        stage_prefix = 'legacy_backup_' if legacy_backup else 'first_write_' if first_write else ''
+        stage = folder / (stage_prefix + boundary.lower())
         stage.mkdir(exist_ok=True)
 
         def fixture(name):
             return adb('exec-out', 'run-as', BUNDLE, 'cat', cache + '/' + name)
 
-        def base_file():
+        def optional_file(name):
             names = adb('shell', 'run-as', BUNDLE, 'ls', cache).decode().splitlines()
-            return fixture('atomic-cut.ncp') if 'atomic-cut.ncp' in names else None
+            return fixture(name) if name in names else None
 
-        first_write_option = ['-e', 'notecore_atomic_first_write', 'true'] if first_write else []
+        options = ['-e', 'notecore_atomic_first_write', 'true'] if first_write else []
+        if legacy_backup:
+            options += ['-e', 'notecore_atomic_legacy_backup', 'true']
+        before_replace = boundary in ('PREFIX_WRITTEN_BEFORE_SYNC', 'SYNCED_BEFORE_REPLACE')
+        expect_pending = boundary == 'VERIFIED_BEFORE_RETURN'
         command = [*prefix, 'shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_atomic_identity', identity,
-                   '-e', 'notecore_atomic_boundary', boundary, *first_write_option, '-e', 'notecore_atomic_cut', 'prepare',
+                   '-e', 'notecore_atomic_boundary', boundary, *options, '-e', 'notecore_atomic_cut', 'prepare',
                    BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation']
         prepare_log = stage / 'prepare.log'
         with prepare_log.open('wb') as log:
@@ -119,15 +130,22 @@ def main():
             assert ready is not None, 'No live worker boundary observed; do not restart or infer completion'
             assert ready['boundary'] == boundary and ready['phase'] == 'SAVING' and ready['callbacks'] == 0 and ready['has_pending']
             assert ready.get('first_write', False) == first_write
+            assert ready.get('legacy_backup', False) == legacy_backup
             victim = pid(); assert victim == ready['pid'] and victim is not None and process.poll() is None
             old = None if first_write else fixture('expected-old.txt')
             pending = fixture('expected-pending.txt')
-            base = base_file()
+            base = optional_file('atomic-cut.ncp')
+            legacy_base = fixture('expected-legacy-base.txt') if legacy_backup else None
+            if legacy_backup:
+                assert legacy_base.startswith(b'NCPREVIEW') and legacy_base != old
+                assert optional_file('atomic-cut.ncp.bak') == (None if expect_pending else old)
+                (stage / 'legacy-base.ncp').write_bytes(legacy_base)
             assert pending.startswith(b'NCRECOVERY')
             assert old is None or (old.startswith(b'NCPREVIEW') and old != pending)
-            if boundary != 'VERIFIED_BEFORE_RETURN':
+            if before_replace:
                 expected_temporary = pending if boundary == 'SYNCED_BEFORE_REPLACE' else pending[:len(pending)//2]
-                temporary = fixture('atomic-cut.ncp.new'); assert base == old and temporary == expected_temporary
+                temporary = fixture('atomic-cut.ncp.new')
+                assert base == (legacy_base if legacy_backup else old) and temporary == expected_temporary
                 (stage / 'temporary-before-kill.ncp').write_bytes(temporary)
             else:
                 assert base == pending
@@ -140,15 +158,15 @@ def main():
             adb('shell', 'am', 'force-stop', BUNDLE)
             assert pid() is None; process.wait(timeout=15)
         assert b'atomic_cut_status=passed' not in prepare_log.read_bytes()
-        assert base_file() == base
-        if boundary != 'VERIFIED_BEFORE_RETURN': assert fixture('atomic-cut.ncp.new') == expected_temporary
+        assert optional_file('atomic-cut.ncp') == base
+        if before_replace: assert fixture('atomic-cut.ncp.new') == expected_temporary
+        if legacy_backup: assert optional_file('atomic-cut.ncp.bak') == (None if expect_pending else old)
         reopened = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'notecore_atomic_identity', identity,
-                       '-e', 'notecore_atomic_boundary', boundary, *first_write_option, '-e', 'notecore_atomic_cut', 'reopen',
+                       '-e', 'notecore_atomic_boundary', boundary, *options, '-e', 'notecore_atomic_cut', 'reopen',
                        BUNDLE + '.test/dev.notecore.app.ViewportInstrumentation').decode()
         reopen_log = stage / 'reopen.log'; reopen_log.write_text(reopened, encoding='utf-8')
         assert 'atomic_cut_status=passed' in reopened and 'INSTRUMENTATION_CODE: -1' in reopened, reopened
         result = json.loads(re.search(r'atomic_cut_observations=(\{.*\})', reopened).group(1))
-        expect_pending = boundary == 'VERIFIED_BEFORE_RETURN'
         expect_absent = first_write and not expect_pending
         assert result['previous_pid'] == victim and result['pid'] != victim and result['boundary'] == boundary
         assert result['recovered_pending'] == expect_pending and result['committed_strokes'] == int(expect_pending)
@@ -158,10 +176,17 @@ def main():
         observation = {'first_write': first_write, 'ready': ready, 'reopen': result, 'actual_process_terminated': True,
                        'base_before_kill_sha256': sha(base) if base is not None else None,
                        'old_sha256': sha(old) if old is not None else None, 'pending_sha256': sha(pending)}
+        if legacy_backup:
+            assert result['legacy_backup_absent']
+            observation['legacy_backup'] = True
+            observation['legacy_backup_before_kill_sha256'] = None if expect_pending else sha(old)
+            observation['legacy_base_sha256'] = sha(legacy_base)
         if expect_pending:
             observation['outcome'] = 'Complete pending recovered before owner ACK and explicitly committed once.'
         elif expect_absent:
             observation['outcome'] = 'Catalog stayed empty and removed the unpublished staging file.'
+        elif legacy_backup:
+            observation['outcome'] = 'The legacy backup was restored and the unacknowledged pending replacement was not adopted.'
         else:
             observation['outcome'] = 'Previous file preserved and unpublished staging file removed.'
         record = stage / 'observation.json'; record.write_text(json.dumps(observation, indent=2) + '\n', encoding='utf-8')
