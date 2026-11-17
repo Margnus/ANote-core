@@ -54,4 +54,20 @@ class AndroidPreviewTextCodecTest {
         }
         assertNotNull(AndroidPreviewTextCodec.readDocument(reader).snapshot)
     }
+
+    @Test fun frameAndMalformedTailAreCheckedAcrossReaderChunks() {
+        val original = PreviewRecoveryCodec.decode(checkpoint)
+        for (size in listOf(1, 2, 3, 7, 17, 64)) {
+            fun source(text: String) = object : Reader() {
+                val reader = text.reader()
+                override fun read(buffer: CharArray, offset: Int, length: Int): Int =
+                    reader.read(buffer, offset, minOf(size, length))
+                override fun close() = reader.close()
+            }
+            val reopened = assertNotNull(AndroidPreviewTextCodec.readCheckpoint(source(checkpoint)).snapshot)
+            assertTrue(original.sameContent(reopened))
+            assertEquals(PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
+                AndroidPreviewTextCodec.readCheckpoint(source(checkpoint + "\n")).failure)
+        }
+    }
 }

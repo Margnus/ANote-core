@@ -60,11 +60,12 @@ kotlin {
         if (sdkCandidate.get()) {
             getByName("commonMain").kotlin.exclude(
                 "**/PreviewSaveLedger.kt",
+                "**/PreviewStreamReader.kt",
                 "dev/notecore/document/PreviewAppRecoveryPreflight.kt",
                 "dev/notecore/library/**",
             )
             findByName("androidMain")?.kotlin?.exclude("**/PreviewEditorAdmission.kt", "**/AndroidPreviewTextCodec.kt")
-            findByName("iosMain")?.kotlin?.exclude("**/ApplePreviewEditorAdmission.kt")
+            findByName("iosMain")?.kotlin?.exclude("**/ApplePreviewEditorAdmission.kt", "**/ApplePreviewTextCodec.kt")
         }
     }
     jvmToolchain(17)

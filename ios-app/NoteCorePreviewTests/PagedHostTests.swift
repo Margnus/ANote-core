@@ -1035,8 +1035,20 @@ final class PagedHostTests: XCTestCase {
         XCTAssertThrowsError(try PreviewFileIO.readUTF8(file, maxBytes: boundaryBytes.count - 1))
         XCTAssertThrowsError(try PreviewFileIO.readUTF8(file, maxBytes: -1))
         XCTAssertEqual(try Data(contentsOf: file), boundaryBytes)
+        for prefixCount in 8189...8192 {
+            let split = String(repeating: "a", count: prefixCount) + "🚀\u{feff}末"
+            try Data(split.utf8).write(to: file)
+            XCTAssertEqual(try PreviewFileIO.readUTF8(file), split)
+        }
+        let interiorBOM = String(repeating: "b", count: 8192) + "\u{feff}末"
+        try Data(interiorBOM.utf8).write(to: file)
+        XCTAssertEqual(try PreviewFileIO.readUTF8(file), interiorBOM)
         let valid = "NCPREVIEW\t2\nD\tread-failures\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         let snapshot = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: valid).snapshot)
+        try Data(("\u{feff}" + valid).utf8).write(to: file)
+        if case .opened(let fromDisk) = try PreviewFileIO.readRecovery(file, documentId: id, beforeRead: {}) {
+            XCTAssertTrue(fromDisk.sameContent(other: snapshot))
+        } else { XCTFail("Compatible UTF-8 signature was rejected") }
         if case .opened(let same) = PreviewFileIO.acceptRecovery(snapshot, documentId: id) { XCTAssertTrue(same === snapshot) }
         else { XCTFail("Retained snapshot rejected") }
         let unsupported = valid.replacingOccurrences(of: "\t0\t0\nG", with: "\t1\t0\nG").replacingOccurrences(of: "END\n", with:
@@ -1047,7 +1059,8 @@ final class PagedHostTests: XCTestCase {
         let model = PreviewModel(directory: dir)
         for (bytes, reason) in [(Data("bad format".utf8), LocalReadFailure.invalidFormat),
             (Data(valid.replacingOccurrences(of: id, with: "other-note").utf8), .wrongDocument),
-            (Data([0xc3, 0x28]), .invalidUTF8), (Data(repeating: 120, count: Int(PagedPreviewCodec.shared.maximumCharacterCount()) + 1), .characterCapacity)] {
+            (Data([0xc3, 0x28]), .invalidUTF8), (Data(valid.utf8) + Data([0xf0, 0x9f]), .invalidUTF8),
+            (Data(repeating: 120, count: Int(PagedPreviewCodec.shared.maximumCharacterCount()) + 1), .characterCapacity)] {
             try bytes.write(to: file); model.open(id)
             try await eventually("known read refusal reaches owner") { model.status == reason.message }
             XCTAssertNil(model.current); XCTAssertEqual(try Data(contentsOf: file), bytes)

@@ -30,6 +30,68 @@ enum CatalogCapacityRefusal: Error { case tooManyRows }
 
 private enum TextReadRefusal: Error { case byteCapacity, invalidUTF8 }
 
+private struct BoundedUTF8Input {
+    private static let chunkByteLimit = 8192
+    private let handle: FileHandle
+    private var remaining: Int
+    private var carry = Data()
+    private var first = true
+
+    init(handle: FileHandle, maxBytes: Int) throws {
+        guard maxBytes >= 0, try handle.seekToEnd() <= UInt64(maxBytes) else { throw TextReadRefusal.byteCapacity }
+        try handle.seek(toOffset: 0)
+        self.handle = handle
+        remaining = maxBytes
+    }
+
+    private mutating func readBytes() throws -> Data? {
+        // Read one extra byte at the limit to distinguish true EOF from a growing file.
+        let limit = min(Self.chunkByteLimit - carry.count - 1, remaining) + 1
+        guard let bytes = try handle.read(upToCount: limit), !bytes.isEmpty else { return nil }
+        guard bytes.count <= remaining else { throw TextReadRefusal.byteCapacity }
+        remaining -= bytes.count
+        return bytes
+    }
+
+    private func completePrefixLength(_ bytes: Data) -> Int {
+        var last = bytes.count - 1
+        // A valid scalar can leave at most three bytes at the end of this chunk.
+        while last >= max(0, bytes.count - 3), bytes[last] & 0xc0 == 0x80 { last -= 1 }
+        guard last >= max(0, bytes.count - 3) else { return bytes.count }
+        let width: Int
+        switch bytes[last] {
+        case 0xc2...0xdf: width = 2
+        case 0xe0...0xef: width = 3
+        case 0xf0...0xf4: width = 4
+        default: return bytes.count
+        }
+        return bytes.count - last < width ? last : bytes.count
+    }
+
+    mutating func next() throws -> String? {
+        while let chunk = try readBytes() {
+            let bytes: Data
+            if carry.isEmpty { bytes = chunk }
+            else { carry.append(chunk); bytes = carry }
+            let end = completePrefixLength(bytes)
+            carry = Data(bytes.suffix(from: end))
+            guard end > 0 else { continue }
+            let prefix = bytes.prefix(end)
+            guard let text = String(data: prefix, encoding: .utf8) else {
+                // Before streaming, byte capacity and filesystem failures took precedence over malformed UTF-8.
+                while try readBytes() != nil {}
+                throw TextReadRefusal.invalidUTF8
+            }
+            defer { first = false }
+            // Foundation strips a leading BOM from each chunk. Only the BOM at file start is a signature.
+            if !first, prefix.starts(with: [0xef, 0xbb, 0xbf]) { return "\u{feff}" + text }
+            if !text.isEmpty { return text }
+        }
+        guard carry.isEmpty else { throw TextReadRefusal.invalidUTF8 }
+        return nil
+    }
+}
+
 // Preview text IO only. No UIKit, mutable owner collections or production storage schema.
 enum PreviewWriteBoundary: String { case beforeEncoding, afterEncoding, beforeAtomicWrite, afterAtomicWrite }
 
@@ -43,22 +105,25 @@ enum PreviewFileIO {
     }
     static let maxReadBytes = Int(PagedPreviewCodec.shared.maximumUtf8ByteCount())
     static func readUTF8(_ url: URL, maxBytes: Int = maxReadBytes) throws -> String {
-        guard maxBytes >= 0 else { throw TextReadRefusal.byteCapacity }
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
-        // Check before creating the payload buffer; growing files are checked again for each chunk.
-        let size = try handle.seekToEnd(); guard size <= UInt64(maxBytes) else { throw TextReadRefusal.byteCapacity }
-        try handle.seek(toOffset: 0)
-        var data = Data(capacity: Int(size))
-        while true {
-            let remaining = maxBytes - data.count
-            // Probe at most one byte beyond the remaining budget to distinguish exact EOF.
-            guard let chunk = try handle.read(upToCount: min(8191, remaining) + 1), !chunk.isEmpty else { break }
-            guard chunk.count <= remaining else { throw TextReadRefusal.byteCapacity }
-            data.append(chunk)
-        }
-        guard let text = String(data: data, encoding: .utf8) else { throw TextReadRefusal.invalidUTF8 }
+        var input = try BoundedUTF8Input(handle: handle, maxBytes: maxBytes)
+        var text = ""
+        while let chunk = try input.next() { text.append(chunk) }
         return text
+    }
+    private static func readPreview(_ url: URL, allowRecovery: Bool) throws -> PreviewRecoveryRead {
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var input = try BoundedUTF8Input(handle: handle, maxBytes: maxReadBytes)
+        var transportError: Error?
+        // The parser invokes this synchronously. Return transport errors outside its format result.
+        let result = ApplePreviewTextCodec.shared.read(allowRecovery: allowRecovery) {
+            do { return try input.next() }
+            catch { transportError = error; return nil }
+        }
+        if let transportError { throw transportError }
+        return result
     }
     static func acceptRecovery(_ snapshot: PagedPreviewSnapshot, documentId: String) -> LocalRecoveryRead {
         let content = PreviewDocumentReader.shared.accept(root: snapshot.root)
@@ -71,7 +136,7 @@ enum PreviewFileIO {
     static func readRecovery(_ url: URL, documentId: String, beforeRead: () throws -> Void) throws -> LocalRecoveryRead {
         do {
             try beforeRead()
-            let reading = try PreviewRecoveryCodec.shared.read(text: readUTF8(url))
+            let reading = try readPreview(url, allowRecovery: true)
             guard let snapshot = reading.snapshot else {
                 guard let reason = reading.failure else { preconditionFailure("Reader returned neither snapshot nor failure") }
                 return .refused(LocalReadFailure(reason))
@@ -86,8 +151,8 @@ enum PreviewFileIO {
     }
     static func readImport(_ url: URL) throws -> Result<DocumentRoot, LocalReadFailure> {
         do {
-            let reading = try PreviewDocumentReader.shared.read(text: readUTF8(url))
-            if let root = reading.root { return .success(root) }
+            let reading = try readPreview(url, allowRecovery: false)
+            if let root = reading.snapshot?.root { return .success(root) }
             guard let reason = reading.failure else { preconditionFailure("Reader returned neither root nor failure") }
             return .failure(LocalReadFailure(reason))
         } catch TextReadRefusal.byteCapacity { return .failure(.byteCapacity) }
