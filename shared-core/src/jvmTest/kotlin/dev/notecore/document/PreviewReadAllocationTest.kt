@@ -3,7 +3,7 @@ package dev.notecore.document
 import dev.notecore.canvas.prototype.*
 import kotlin.test.*
 
-/** Specific opening-admission allocation regression; not a physical heap/performance threshold. */
+/** JVM allocation regressions for preview validation and framed recovery. */
 class PreviewReadAllocationTest {
     @Test fun acceptingDenseImmutableRootDoesNotAllocateCoefficientListsAndDerivedInversesPerStroke() {
         val meter = assertIs<com.sun.management.ThreadMXBean>(java.lang.management.ManagementFactory.getThreadMXBean())
@@ -52,6 +52,41 @@ class PreviewReadAllocationTest {
         val meter = assertIs<com.sun.management.ThreadMXBean>(java.lang.management.ManagementFactory.getThreadMXBean())
         assertTrue(meter.isThreadAllocatedMemorySupported)
         meter.isThreadAllocatedMemoryEnabled = true
+        val text = longRecoveryText()
+        fun decode(): PagedPreviewSnapshot = PreviewRecoveryCodec.decode(text)
+        repeat(3) { assertEquals(9, decode().root.scene.objectCount) }
+        val allocated = (1..3).minOf {
+            val before = meter.getThreadAllocatedBytes(Thread.currentThread().id)
+            val snapshot = decode()
+            val bytes = meter.getThreadAllocatedBytes(Thread.currentThread().id) - before
+            assertEquals(180_000, snapshot.root.scene.objects().sumOf { it.samples.size })
+            val pending = assertIs<CanvasCommand.AddStroke>(snapshot.pending?.command)
+            assertEquals(20_000, pending.samples.size)
+            bytes
+        }
+        println("preview-recovery-frame inputCharacters=${text.length} decodeAllocatedBytes=$allocated")
+        assertTrue(allocated < 50L * 1024 * 1024, "Recovery decode allocated $allocated bytes for ${text.length} characters")
+    }
+
+    @Test fun longRecoveryEncodeDoesNotAllocateCopiesOfTheFramedBodies() {
+        val meter = assertIs<com.sun.management.ThreadMXBean>(java.lang.management.ManagementFactory.getThreadMXBean())
+        assertTrue(meter.isThreadAllocatedMemorySupported)
+        meter.isThreadAllocatedMemoryEnabled = true
+        val text = longRecoveryText()
+        val snapshot = PreviewRecoveryCodec.decode(text)
+        repeat(3) { assertEquals(text.length, snapshot.encode().length) }
+        val allocated = (1..3).minOf {
+            val before = meter.getThreadAllocatedBytes(Thread.currentThread().id)
+            val encoded = snapshot.encode()
+            val bytes = meter.getThreadAllocatedBytes(Thread.currentThread().id) - before
+            assertTrue(encoded == text, "Recovery encoding differs from the fixed cross-platform fixture")
+            bytes
+        }
+        println("preview-recovery-encoding outputCharacters=${text.length} encodeAllocatedBytes=$allocated")
+        assertTrue(allocated < 100L * 1024 * 1024, "Recovery encode allocated $allocated bytes for ${text.length} characters")
+    }
+
+    private fun longRecoveryText(): String {
         val point = "P\t-1.2345678901234567E-100\t-1.2345678901234567E-100\t1.2345679E-20\t9223372036854775807\n"
         val metadata = "D\tlong-capacity\tlong digits\t1\t9\t1"
         val base = buildString {
@@ -69,19 +104,6 @@ class PreviewReadAllocationTest {
             append("END\n")
         }
         val operation = "producer-op-1".map { it.code.toString(16).padStart(4, '0') }.joinToString("")
-        val text = "NCRECOVERY\t1\n$metadata\n${base.length}\t${ink.length}\t$operation\n$base${ink}RECOVERY-END\n"
-        fun decode(): PagedPreviewSnapshot = PreviewRecoveryCodec.decode(text)
-        repeat(3) { assertEquals(9, decode().root.scene.objectCount) }
-        val allocated = (1..3).minOf {
-            val before = meter.getThreadAllocatedBytes(Thread.currentThread().id)
-            val snapshot = decode()
-            val bytes = meter.getThreadAllocatedBytes(Thread.currentThread().id) - before
-            assertEquals(180_000, snapshot.root.scene.objects().sumOf { it.samples.size })
-            val pending = assertIs<CanvasCommand.AddStroke>(snapshot.pending?.command)
-            assertEquals(20_000, pending.samples.size)
-            bytes
-        }
-        println("preview-recovery-frame inputCharacters=${text.length} decodeAllocatedBytes=$allocated")
-        assertTrue(allocated < 50L * 1024 * 1024, "Recovery decode allocated $allocated bytes for ${text.length} characters")
+        return "NCRECOVERY\t1\n$metadata\n${base.length}\t${ink.length}\t$operation\n$base${ink}RECOVERY-END\n"
     }
 }

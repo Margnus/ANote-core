@@ -70,11 +70,18 @@ object PreviewRecoveryCodec {
     fun encode(snapshot: PagedPreviewSnapshot): String {
         val pending = requireNotNull(snapshot.pending)
         validate(snapshot.root, pending)
-        val base = PagedPreviewCodec.encode(snapshot.root)
-        val ink = PagedPreviewCodec.encode(payload(snapshot.root, pending))
-        val framing = framing(PagedPreviewCodec.documentRow(snapshot.root), base.length, ink.length, pending.id.value)
-        require(base.length.toLong() + ink.length + framing.length + END.length <= PagedPreviewCodec.MAX_CHARACTERS)
-        return framing + base + ink + END
+        return buildString {
+            append(MAGIC)
+            append(PagedPreviewCodec.documentRow(snapshot.root))
+            val frameOffset = length
+            val base = PagedPreviewCodec.writeRows(snapshot.root) { append(it) }
+            val ink = PagedPreviewCodec.writeRows(payload(snapshot.root, pending)) { append(it) }
+            val frame = frameLine(base.characters, ink.characters, pending.id.value)
+            require(length.toLong() + frame.length + END.length <= PagedPreviewCodec.MAX_CHARACTERS)
+            // Insert the small length record once after both bodies have been measured in the output buffer.
+            insert(frameOffset, frame)
+            append(END)
+        }
     }
 
     internal fun writeRows(snapshot: PagedPreviewSnapshot, beforeWrite: ((Int) -> Unit)?, write: (String) -> Unit) {
@@ -89,7 +96,8 @@ object PreviewRecoveryCodec {
         // The existing frame stores UTF-16 lengths ahead of the two bodies. Measure without retaining either body.
         val baseSize = PagedPreviewCodec.writeRows(snapshot.root) {}
         val inkSize = PagedPreviewCodec.writeRows(ink) {}
-        val framing = framing(PagedPreviewCodec.documentRow(snapshot.root), baseSize.characters, inkSize.characters, pending.id.value)
+        val framing = MAGIC + PagedPreviewCodec.documentRow(snapshot.root) +
+            frameLine(baseSize.characters, inkSize.characters, pending.id.value)
         val bytes = previewUtf8Size(framing) + baseSize.utf8Bytes + inkSize.utf8Bytes + END.length
         require(framing.length + baseSize.characters + inkSize.characters + END.length <= PagedPreviewCodec.MAX_CHARACTERS)
         require(bytes <= PagedPreviewCodec.MAX_UTF8_BYTES)
@@ -100,10 +108,10 @@ object PreviewRecoveryCodec {
         write(END)
     }
 
-    private fun framing(metadata: String, baseSize: Int, inkSize: Int, commandId: String): String {
+    private fun frameLine(baseSize: Int, inkSize: Int, commandId: String): String {
         // Fixed-width hex avoids delimiter and Unicode ambiguity.
         val operation = commandId.map { it.code.toString(16).padStart(4, '0') }.joinToString("")
-        return "$MAGIC$metadata$baseSize\t$inkSize\t$operation\n"
+        return "$baseSize\t$inkSize\t$operation\n"
     }
 
     /** Strict framing bounds before allocating/decoding either canonical payload. */

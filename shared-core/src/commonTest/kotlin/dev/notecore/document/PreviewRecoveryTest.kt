@@ -208,6 +208,12 @@ class PreviewRecoveryTest {
         val source = recovery()
         val root = DocumentRoot.compose("标题\uD83D\uDE80", source.root.scene, source.root.pages())
         val expected = PagedPreviewSnapshot(root, source.pending)
+        var streamedByteCount = 0
+        val streamed = buildString {
+            PreviewRecoveryCodec.writeRows(expected, { streamedByteCount = it }) { append(it) }
+        }
+        assertEquals(expected.encode(), streamed)
+        assertEquals(streamed.encodeToByteArray().size, streamedByteCount)
         val parts = expected.encode().split('\n', limit = 4)
         val (baseSize, inkSize) = PreviewRecoveryCodec.readFrame(parts[2])
         val operationHex = parts[2].substringAfterLast('\t')
