@@ -14,6 +14,7 @@ BUNDLE = 'dev.notecore.preview'
 DEVICE = '7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0'
 JAVA = 'android-app/src/androidTest/java/dev/notecore/app/probes/SqliteCrashProbe.java'
 SWIFT = 'tools/probes/SqliteCrashProbe.swift'
+SWIFT_SUPPORT = 'tools/probes/SqliteProbeSupport.swift'
 
 
 def sha(path):
@@ -106,7 +107,8 @@ def main():
     before_apple = apple_files()
     sdk = Path(run(['xcrun','--sdk','iphonesimulator','--show-sdk-path'],check=True).stdout.strip())
     binary = build/'SqliteCrashProbe'
-    compile_command = ['xcrun','--sdk','iphonesimulator','swiftc','-target','arm64-apple-ios16.0-simulator',str(ROOT/SWIFT),'-lsqlite3','-o',str(binary)]
+    compile_command = ['xcrun','--sdk','iphonesimulator','swiftc','-target','arm64-apple-ios16.0-simulator',
+                       str(ROOT/SWIFT_SUPPORT),str(ROOT/SWIFT),'-lsqlite3','-o',str(binary)]
     compile_result = run(compile_command)
     compile_log = ROOT/'build/dev038-apple-sqlite-build.log'
     compile_log.write_text(compile_result.stdout+compile_result.stderr,encoding='utf-8')
@@ -123,7 +125,7 @@ def main():
     sdk_android = Path(args.adb).resolve().parent.parent
     contracts = [sdk_android/'sources/android-36/android/database/sqlite/SQLiteDatabase.java',
                  sdk_android/'sources/android-36/android/database/DefaultDatabaseErrorHandler.java',sdk/'usr/include/sqlite3.h']
-    evidence = set(stamp) | {JAVA,SWIFT,'tools/verify_sqlite_capabilities.py',
+    evidence = set(stamp) | {JAVA,SWIFT,SWIFT_SUPPORT,'tools/verify_sqlite_capabilities.py',
         str(binary.relative_to(ROOT)),str(android_log.relative_to(ROOT)),str(apple_log.relative_to(ROOT)),
         str(compile_log.relative_to(ROOT)),str(baseline.relative_to(ROOT))}
     report = {'schema':'sqlite-platform-capabilities-1','status':'passed',

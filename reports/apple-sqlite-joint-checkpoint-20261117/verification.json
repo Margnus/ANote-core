@@ -1,0 +1,158 @@
+{
+  "status": "passed",
+  "milestone": "DEV-041",
+  "scope": "iOS simulator isolated executable with system SQLite and fixed Kotlin/Native codec",
+  "runtime": {
+    "identifier": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+    "version": "27.0",
+    "build": "24A434",
+    "device_type": "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+    "sqlite": "3.54.0"
+  },
+  "simulator_link_floor": "17.0",
+  "observations": {
+    "initial_document": {
+      "pid": 24480,
+      "sqlite": "3.54.0",
+      "stage": "init",
+      "status": "SEEDED",
+      "exit": 0
+    },
+    "first_resource_published": {
+      "cut": "resource-published",
+      "pid": 24499,
+      "exit": 137
+    },
+    "pending_manifest_conflict": {
+      "pid": 24529,
+      "sqlite": "3.54.0",
+      "stage": "conflict",
+      "status": "OPERATION_CONFLICT",
+      "exit": 0
+    },
+    "occupied_target_refuses_overwrite": {
+      "pid": 24557,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "REPAIR_REQUIRED",
+      "exit": 0
+    },
+    "joint_sql_transaction_uncommitted": {
+      "cut": "before-commit",
+      "pid": 24569,
+      "exit": 137
+    },
+    "committed_before_receipt": {
+      "cut": "after-commit",
+      "pid": 24582,
+      "exit": 137
+    },
+    "exact_replay": {
+      "pid": 24596,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "REPLAYED",
+      "exit": 0
+    },
+    "committed_manifest_conflict": {
+      "pid": 24606,
+      "sqlite": "3.54.0",
+      "stage": "conflict",
+      "status": "OPERATION_CONFLICT",
+      "exit": 0
+    },
+    "same_size_corruption_refuses_receipt": {
+      "pid": 24616,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "REPAIR_REQUIRED",
+      "exit": 0
+    }
+  },
+  "resource_manifest": [
+    [
+      "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+      4152
+    ],
+    [
+      "ab916f7a748e994a4b04442d062c309cf493efdd3764d6f41a59969def47dc09",
+      4728
+    ]
+  ],
+  "native_checkpoint_matches_jvm_reference": true,
+  "retained_source_bytes_exact": true,
+  "pending_pins_transition_to_committed_references": true,
+  "resource_inode_reused": true,
+  "prior_dev038_stages_retested": 20,
+  "existing_simulator_inventory_unchanged": true,
+  "temporary_simulator_deleted": true,
+  "production_connected": false,
+  "physical_verified": false,
+  "power_loss_verified": false,
+  "framework_sha256": "4e213be7fe01123071b8fac323a37a0d79b816349843d6bfc14b342b43bc692e",
+  "probe_sha256": "6686b1d2516a64ca4a4966d4c31f65946f06d32855bbbef9c6264e86eb6dc8ae",
+  "control_sha256": "8f3ceb841eb6138f8b2c494477190bc6c54b2207bb1210e1961d9761decc8961",
+  "host_jvm_sha256": {
+    "canvas-main.jar": "667e1d07b72517f52dd039b51a4451e91f61e31bf3a9e96d48269637290ef428",
+    "shared-main.jar": "d10bf10fece335424f9f972f9e713e4e2a6d36f9cc99b3b2651d7d1aaae73cf2",
+    "kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd"
+  },
+  "source_sha256": {
+    "tools/verify_apple_sqlite_joint_checkpoint.py": "f1d33995d7167edecf9095cfbdba2cc753e513468ad487e2e586cbd21e970697",
+    "tools/probes/SqliteJointCheckpoint.swift": "d55911ab4860bb9b71e3a45b9b6c3de93c7db65a06f296fd8f593150307645f9",
+    "tools/probes/SqliteProbeSupport.swift": "a89000490611b9b4fe56f1038db07904152d9cf332f73db92b147ae943b8d827",
+    "tools/probes/SqliteCrashProbe.swift": "874ff20b74deaa10431f7aa871eef84f46c7eb50e8835c6b973c2ff160ad08a5",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "fixtures/storage/dev041-legacy-v1.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+    "fixtures/transfer/android-paged-v2.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "tools/verify_sqlite_capabilities.py": "8e785d6c85d8d5da6e002bc8365d535ee02c52540f8ff0c34572749bbc581c41"
+  },
+  "raw_sha256": {
+    "boot.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "boot.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bootstatus.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bootstatus.stdout.log": "a3e026ba679fd0fa5bb3b3924ef29a76a4148810defe9437f0c1a28e8113a9da",
+    "committed_before_receipt.stderr.log": "1c6ea21037b0fb3d34051c6db4b6ede935e813692401e6157e9112ae96398538",
+    "committed_before_receipt.stdout.log": "d39bba816b93bc68c125a0202d56b47d4cfd13ee6c365779cdb6febb23112c3a",
+    "committed_manifest_conflict.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_manifest_conflict.stdout.log": "c2c2f631bf991250982d10225f71c1700256c6fc6b94a862dd837343227c3f74",
+    "compile-control.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-control.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-joint.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-joint.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "create.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "create.stdout.log": "3474af474392026b6388e057eaeb2cb7e935ff77bab3662afb1745ab866d7a11",
+    "delete.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "delete.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dev038-regression.log": "37462e8cc53920dd962a4c3c079522e0ecc5e4194bb403630df555e19aac3fcb",
+    "devices-after.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "devices-after.stdout.log": "35af3692b30ead83e2ba6333bd738205ab06a059036763e1425f089244002a6a",
+    "devices-before.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "devices-before.stdout.log": "35af3692b30ead83e2ba6333bd738205ab06a059036763e1425f089244002a6a",
+    "exact_replay.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exact_replay.stdout.log": "62d32b4a094bf78b825c5aeed636662f6a5e2b3a61475783a3e45063c0c413d8",
+    "first_resource_published.stderr.log": "1c6ea21037b0fb3d34051c6db4b6ede935e813692401e6157e9112ae96398538",
+    "first_resource_published.stdout.log": "8a568f53fe958432daab23a5acc50d20de49d249637b96ae95871a52efc5a5c6",
+    "initial_document.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial_document.stdout.log": "6c63ede287fb81de8d64b7fa79cc70e3a2ce9268fa6aab86525f3c1511197c95",
+    "joint_sql_transaction_uncommitted.stderr.log": "1c6ea21037b0fb3d34051c6db4b6ede935e813692401e6157e9112ae96398538",
+    "joint_sql_transaction_uncommitted.stdout.log": "0a6791e5f4db47d2f0b60d134cfc3598a0b831584184474979e17da8e3b7310c",
+    "link-platform.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "link-platform.stdout.log": "c769a8217dbb107e6328ca2b5b3b2665079b1dc86d1bf0c6ece8274bee0d9d9b",
+    "occupied_target_refuses_overwrite.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "occupied_target_refuses_overwrite.stdout.log": "1e5f0bf6215442ef8d591be2225bae5655e7cd9694ff9aa90e2a5bfba8ad7390",
+    "pending_manifest_conflict.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pending_manifest_conflict.stdout.log": "7723ca7837e507a6e3a103c670e3cc3ac3e77d4d79e095038d552229bd7fe79d",
+    "runtimes.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtimes.stdout.log": "b9be59e491fcb550dff124d3a8c9e7e006ce68d7f93558e27227d96764579959",
+    "same_size_corruption_refuses_receipt.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_size_corruption_refuses_receipt.stdout.log": "f8915686971d8b4161bcfb74e4f7d79c33feaa297952112384f2e40c2e1b3d4a",
+    "shutdown.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "shutdown.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "raw_archive": {
+    "path": "reports/apple-sqlite-joint-checkpoint-20261117/raw-logs.zip",
+    "sha256": "57b229339007d608a46a5f64173d1174a22f5dce4000f0a6cbe6548d3395d11a"
+  }
+}
