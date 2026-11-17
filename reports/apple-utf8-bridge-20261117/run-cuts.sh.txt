@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+device=$(xcrun simctl create NoteCoreBorrowedUTF8Cut 'iPad Pro 11-inch (M5)' com.apple.CoreSimulator.SimRuntime.iOS-27-0)
+trap 'xcrun simctl shutdown "$device" >/dev/null 2>&1 || true; xcrun simctl delete "$device"' EXIT
+xcrun simctl boot "$device"
+xcrun simctl bootstatus "$device" -b
+NOTECORE_BORROWED_UTF8_DEVICE="$device" python3 build/apple-save-borrowed-utf8/atomic_cut.py --device "$device"

@@ -1,0 +1,41 @@
+import CryptoKit
+import Foundation
+import NoteCanvasPrototype
+
+let fixture = URL(fileURLWithPath: CommandLine.arguments[1])
+let expected = try Data(contentsOf: fixture)
+let text = try String(contentsOf: fixture, encoding: .utf8)
+let checkpoint = PreviewRecoveryCodec.shared.read(text: text).snapshot!
+let expectedHash = SHA256.hash(data: expected)
+
+func prepare(_ mode: String, _ text: String) throws -> (ContinuousClock.Duration, Bool?) {
+    let started = ContinuousClock.now
+    if mode == "borrow" {
+        var contiguous = text
+        return try contiguous.withUTF8 { buffer in
+            let data = Data(bytesNoCopy: UnsafeMutableRawPointer(mutating: buffer.baseAddress!),
+                            count: buffer.count, deallocator: .none)
+            let elapsed = started.duration(to: .now)
+            precondition(SHA256.hash(data: data) == expectedHash)
+            return (elapsed, data.withUnsafeBytes { $0.baseAddress == UnsafeRawPointer(buffer.baseAddress) })
+        }
+    }
+    let data = mode == "foundation" ? text.data(using: .utf8)! : Data(text.utf8)
+    let elapsed = started.duration(to: .now)
+    precondition(SHA256.hash(data: data) == expectedHash)
+    return (elapsed, nil)
+}
+
+let modes = ["existing", "borrow", "foundation"]
+for repeatIndex in 0..<3 {
+    for offset in 0..<modes.count {
+        let mode = modes[(offset + repeatIndex) % modes.count]
+        let encoded = try checkpoint.encode()
+        let (elapsed, alias) = try prepare(mode, encoded)
+        let (seconds, attoseconds) = elapsed.components
+        let ms = Double(seconds) * 1000 + Double(attoseconds) / 1e15
+        let sameStorage = alias.map { String($0) } ?? "n/a"
+        print("NOTECORE_UTF8_BRIDGE trial=\(repeatIndex) mode=\(mode) contiguous=\(encoded.isContiguousUTF8) alias=\(sameStorage) ms=\(ms)")
+    }
+}
+print("NOTECORE_UTF8_BRIDGE bytes=\(expected.count) sha256=\(expectedHash.map { String(format: "%02x", $0) }.joined())")

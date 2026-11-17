@@ -66,12 +66,16 @@ final class PagedHostTests: XCTestCase {
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             let file = dir.appendingPathComponent("normal.ncp")
             try PreviewFileIO.writeUTF8("old", to: file)
+            let replacement = "页🚀\u{0}" + String(repeating: "é", count: 8192)
             var reached = [PreviewWriteBoundary]()
-            try PreviewFileIO.writeUTF8("new", to: file) { boundary in
+            try PreviewFileIO.writeUTF8(replacement, to: file) { boundary in
                 reached.append(boundary)
-                XCTAssertEqual(try? String(contentsOf: file, encoding: .utf8), boundary == .beforeAtomicWrite ? "old" : "new")
+                XCTAssertEqual(try? Data(contentsOf: file), Data((boundary == .beforeAtomicWrite ? "old" : replacement).utf8))
             }
-            XCTAssertEqual(reached, [.beforeAtomicWrite, .afterAtomicWrite]); return
+            XCTAssertEqual(reached, [.beforeAtomicWrite, .afterAtomicWrite])
+            try PreviewFileIO.writeUTF8("", to: file)
+            XCTAssertEqual(try Data(contentsOf: file), Data())
+            return
         }
         let data = try Data(contentsOf: request)
         guard data.count <= 4096,

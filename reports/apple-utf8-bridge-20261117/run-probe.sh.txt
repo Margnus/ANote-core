@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+out="$PWD/build/apple-save-borrowed-utf8"
+framework="$PWD/shared-core/build/bin/iosSimulatorArm64/debugFramework"
+xcrun --sdk iphonesimulator swiftc -target arm64-apple-ios17.0-simulator -F "$framework" "$out/BufferProbe.swift" -o "$out/buffer-probe"
+device=$(xcrun simctl create NoteCoreUTF8Bridge 'iPad Pro 11-inch (M5)' com.apple.CoreSimulator.SimRuntime.iOS-27-0)
+trap 'xcrun simctl shutdown "$device" >/dev/null 2>&1 || true; xcrun simctl delete "$device"' EXIT
+xcrun simctl boot "$device"
+xcrun simctl bootstatus "$device" -b > "$out/probe-boot.log"
+xcrun simctl spawn "$device" "$out/buffer-probe" "$PWD/build/apple-long-checkpoint/pending.ncp"
