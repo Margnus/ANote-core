@@ -67,7 +67,6 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         return PreviewCatalogBudget.resultByteCharge(catalogSnapshot.size,
             catalogSnapshot.sumOf { it.id.length.toLong() + it.title.length })
     }
-    private var viewEpoch = 0L
     private var activeNotebook: PagedPreviewNotebook? = null
     // Main-owner presentation identities only. Never retain an Activity or another content authority.
     private val editors = mutableMapOf<String, java.lang.ref.WeakReference<EditorObserver>?>()
@@ -96,7 +95,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }) return StoreRetirementRequest.WORK_PENDING
         val note = activeNotebook
         if (note != null && !save(note.capture()) { _, _ -> }) return StoreRetirementRequest.SAVE_REJECTED
-        ownerRetiring = true; retirementObserver = onRetired; viewEpoch++
+        ownerRetiring = true; retirementObserver = onRetired
         if (note != null) releaseActive(note, lostEndpoint = true) else retireInk(lostEndpoint = true)
         inkView.clear()
         advanceOwnerRetirement()
@@ -501,7 +500,6 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             publishEditorState()
             if (callback != null) notifyUi { callback(snapshot.version, null) }; return true
         }
-        val previous = ledger.latest(snapshot.documentId)
         val admission = ledger.offer(snapshot)
         if (admission != PreviewSaveAdmission.ACCEPTED) {
             publishEditorState()
@@ -509,7 +507,6 @@ class NoteStore private constructor(context: Context, private val directory: Fil
                 "保存内容发生冲突，请保留当前笔记并导出备份" else "保存队列已满或内容版本过期，请保留当前笔记并重试") }
             return false
         }
-        if (previous == null || !previous.sameContent(snapshot)) viewEpoch++
         if (callback != null) saveCallbacks[snapshot.documentId] = SaveCallback(ledger.latest(snapshot.documentId) as PagedPreviewSnapshot, callback)
         else if (saveCallbacks[snapshot.documentId]?.snapshot?.sameContent(snapshot) == false) saveCallbacks.remove(snapshot.documentId)
         // Departure has no UI receiver; keep an existing receiver for this exact accepted content.
@@ -653,19 +650,21 @@ class NoteStore private constructor(context: Context, private val directory: Fil
             notifyUi { callback(null, LocalReadFailure.INVALID_LOCAL_IDENTITY.message) }; return
         }
         activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot() && activeSavedPending.get() === it.pendingStroke(), it.captureRecovery()), null); return }
-        val retained = ledger.latest(id); val epoch = viewEpoch
+        val retained = ledger.latest(id)
         request(Triple(id, retained, io), previewOpenWorkByteCharge(retained), { input ->
             if (input.second == null) input.third.readOutcome(input.first) else input.third.acceptRecovery(input.second as PagedPreviewSnapshot, input.first)
         }, { callback(null, "后台队列繁忙，请重新打开笔记") }) { result ->
             if (!isRequested()) return@request
-            if (viewEpoch != epoch) {
+            val latest = ledger.latest(id)
+            // A later same-note write cannot ACK ahead of this read on the serial worker.
+            if (ownerRetiring || (latest != null && latest !== retained)) {
                 // No mutable/read payload is posted; retry a pure read after this result is ACKed.
                 main.post { open(id, isRequested, callback) }
             } else when (result) {
                 is WorkResult.Succeeded -> when (val reading = result.value) {
                     is LocalRecoveryRead.Opened -> {
                         // A preceding write may ACK this exact retained snapshot before delivery.
-                        val persisted = retained == null || ledger.latest(id) == null
+                        val persisted = latest == null
                         callback(OpenedDocument(reading.snapshot.root, persisted, reading.snapshot),
                             if (persisted) null else "有更改尚未保存，请点击保存重试")
                     }

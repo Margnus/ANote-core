@@ -97,7 +97,6 @@ final class PreviewModel: ObservableObject {
     private weak var savedRoot: DocumentRoot?
     private weak var savedPending: DocumentCommandCanvas?
     private let documentBudget: DocumentBudget?
-    private var storageEpoch: Int64 = 0
     private var navigationEpoch: Int64 = 0
     private lazy var executor = try! AppleBoundedOwnerExecutor(maxEntries: 16, maxBytes: storageWorkBytes,
         retainedOwnerBytes: { [weak self] in Int64(self?.exportRetainedByteCharge ?? 0) },
@@ -496,7 +495,7 @@ final class PreviewModel: ObservableObject {
         guard PreviewFileIO.isLocalDocumentId(id) else { status = LocalReadFailure.invalidLocalIdentity.message; return }
         let previous = current
         navigationEpoch += 1
-        let navigation = navigationEpoch, epoch = storageEpoch
+        let navigation = navigationEpoch
         let retained = ledger.latest(documentId: id)
         let workBytes = ApplePreviewEditorAdmission.shared.openWorkByteCharge(retained: retained)
         status = "正在打开…"
@@ -506,7 +505,9 @@ final class PreviewModel: ObservableObject {
             return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)
         }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
             guard self.navigationEpoch == navigation, self.current === previous, isRequested() else { return }
-            if self.storageEpoch != epoch {
+            let latest = self.ledger.latest(documentId: id)
+            // A later same-note write cannot ACK ahead of this read on the serial worker.
+            if let latest, latest !== retained {
                 // Retry the pure read after ACK; no old notebook payload is placed on a callback queue.
                 DispatchQueue.main.async { [weak self, weak previous] in
                     guard let self, self.navigationEpoch == navigation, self.current === previous else { return }
@@ -526,7 +527,7 @@ final class PreviewModel: ObservableObject {
                     self.status = "其他窗口正在编辑，或原笔记尚待保存，请完成后重试"; return
                 }
                 // A preceding write may ACK this exact retained snapshot before delivery.
-                let persisted = retained == nil || self.ledger.latest(documentId: id) == nil
+                let persisted = latest == nil
                 do {
                     // Saving can commit the current pending stroke. Check target admission before that side effect.
                     if self.current != nil,
@@ -642,7 +643,6 @@ final class PreviewModel: ObservableObject {
         guard admission == .accepted else {
             status = admission == .versionConflict ? "保存内容发生冲突，请保留当前笔记并导出备份" : "保存队列已满或内容版本过期，请保留当前笔记并重试"; return false
         }
-        if previous == nil || !previous!.sameContent(other: snapshot) { storageEpoch += 1 }
         status = "正在保存… · \(note.totalStrokeCount) 笔"
         pumpWrites(); return true
     }

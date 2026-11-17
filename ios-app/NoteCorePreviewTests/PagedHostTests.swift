@@ -1839,7 +1839,7 @@ final class PagedHostTests: XCTestCase {
         XCTAssertTrue(model.current === active); XCTAssertNotEqual(active.documentId, root.id.value)
         model.close()
     }
-    @MainActor func testStaleReadRetryCannotSupersedeNewerOpen() async throws {
+    @MainActor func testUnrelatedSaveDoesNotRetryCurrentOpen() async throws {
         let dir = directory()
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -1867,8 +1867,7 @@ final class PagedHostTests: XCTestCase {
 
         var opened = [String]()
         model.openForEditor("older") { opened.append($0.documentId) }
-        // A sentinel behind the read cannot run until its result is available to the owner.
-        // The owner delivers it explicitly so the retry and new selection have a fixed order.
+        // Deliver the first read while the unrelated save still awaits its owner ACK.
         let ready = try worker.submit(input: (), chargedBytes: 1, compute: { _ in resultReady.signal() },
                                       receive: { _, _ in .acknowledged })
         guard case .accepted = ready else { XCTFail("read sentinel was refused"); return }
@@ -1877,15 +1876,15 @@ final class PagedHostTests: XCTestCase {
         releaseRead.signal()
         XCTAssertEqual(resultReady.wait(timeout: .now() + 5), .success)
         XCTAssertEqual(try worker.drainResults(limit: 1).acknowledged, 1)
-        XCTAssertTrue(model.current === original)
+        XCTAssertEqual(opened, ["older"])
+        XCTAssertEqual(model.current?.documentId, "older")
         model.openForEditor("newer") { opened.append($0.documentId) }
 
-        // Let the posted retry run before the newer read can deliver its result.
         await withCheckedContinuation { continuation in
             DispatchQueue.main.async { releaseNewerRead.signal(); continuation.resume() }
         }
         try await eventually("both open requests settle") { (try? worker.status().entries.isEmpty) == true }
-        XCTAssertEqual(opened, ["newer"])
+        XCTAssertEqual(opened, ["older", "newer"])
         XCTAssertEqual(model.current?.documentId, "newer")
         XCTAssertEqual(lock.withLock { reads }, 2)
         let file = dir.appendingPathComponent(original.documentId + ".ncp")

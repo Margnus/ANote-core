@@ -296,8 +296,12 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             verifyReopenAfterWriteAcknowledgement()
             checks.add("retained_reopen_observes_preceding_write_ack")
             checks.add("retained_reopen_reserves_capture_at_exact_byte_boundary")
-            verifySupersededOpenDoesNotRetry()
+            verifyOpenDuringSave(cancel = true)
             checks.add("superseded_open_acks_without_disk_retry_or_delivery")
+            verifyOpenDuringSave(cancel = false)
+            checks.add("unrelated_save_does_not_retry_requested_open")
+            verifyOpenDuringSave(cancel = false, sameDocument = true)
+            checks.add("same_note_save_supersedes_in_flight_read")
             return JSONObject().put("checks", JSONArray(checks)).put("original_note_files_used", false)
                 .put("apple_round_trip_base64", Base64.encodeToString(appleRoundTrip, Base64.NO_WRAP))
                 .put("system_file_picker_verified", false).toString()
@@ -368,7 +372,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         }
     }
 
-    private fun verifySupersededOpenDoesNotRetry() {
+    private fun verifyOpenDuringSave(cancel: Boolean, sameDocument: Boolean = false) {
         val directory = File(host.cacheDir, "superseded-open-${java.util.UUID.randomUUID()}")
         check(directory.mkdir())
         val oldBytes = "NCPREVIEW\t2\nD\told-note\tEarlier selection\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
@@ -391,14 +395,22 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                 })
                 worker = NoteStore::class.java.getDeclaredField("executor").apply { isAccessible = true }
                     .get(store) as BoundedOwnerExecutor
-                store.open("old-note", isRequested = { requested }) { _, _ -> oldDeliveries++ }
+                store.open("old-note", isRequested = { requested }) { result, failure ->
+                    check(failure == null && result != null)
+                    if (sameDocument) check(result.root === current.root)
+                    else check(result.recovery.encode() == oldBytes)
+                    oldDeliveries++
+                }
             }
             check(entered.await(5, TimeUnit.SECONDS))
             main {
-                val note = store.create()
+                val note = if (sameDocument) {
+                    val decoded = PreviewRecoveryCodec.decode(oldBytes)
+                    store.adopt(OpenedDocument(decoded.root, true, decoded)).also { check(it.rename("Newer save")) }
+                } else store.create()
                 current = note.captureRecovery()
                 check(store.save(current) { _, failure -> saved = failure == null })
-                requested = false
+                requested = !cancel
                 store.open(current.documentId) { result, failure ->
                     check(failure == null && result?.root === current.root)
                 }
@@ -407,8 +419,9 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             eventually("Newer save did not settle") { saved && store.saveStates().isEmpty() }
             test.waitForIdleSync()
             eventually("Work was not acknowledged") { worker.status().entries.isEmpty() }
-            main { check(oldDeliveries == 0 && store.activeDocumentId == current.documentId) }
-            check(reads.get() == 1 && original.readText() == oldBytes)
+            main { check(oldDeliveries == if (cancel) 0 else 1); check(store.activeDocumentId == current.documentId) }
+            check(reads.get() == 1)
+            if (!sameDocument) check(original.readText() == oldBytes)
             check(File(directory, "${current.documentId}.ncp").readText() == current.encode())
         } finally {
             release.countDown()
