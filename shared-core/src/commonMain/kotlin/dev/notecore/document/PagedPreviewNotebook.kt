@@ -24,6 +24,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var pending: DocumentCommand.Canvas? = null
     private var color = 0xff253247.toInt()
     private var width = 2.5
+    private var penKind = BrushKind.MONOLINE
     private var error = ""
     private var failure: PreviewSessionFailure? = null
     private var readOnly = false
@@ -109,7 +110,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val accepted = when (request) {
             is PreviewEdit.Rename -> rename(request.title)
             is PreviewEdit.SetPaper -> setPaper(request.width, request.height, request.paper)
-            is PreviewEdit.SelectPen -> selectPen(request.argb, request.width)
+            is PreviewEdit.SelectPen -> selectPen(request.argb, request.width, request.kind)
             is PreviewEdit.SelectPage -> {
                 if (!validPageId(request.pageId)) fail("页面编号无效", PreviewFailureKind.INVALID_ARGUMENT)
                 else selectPage(PageId(request.pageId))
@@ -247,11 +248,13 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (!commit(command)) return false
         repairSelection(index); return true
     }
-    fun selectPen(argb: Int, width: Double): Boolean {
+    fun selectPen(argb: Int, width: Double, kind: BrushKind = BrushKind.MONOLINE): Boolean {
         ownerCheck()
         if (retired) return fail("此会话已关闭，请重新打开笔记", PreviewFailureKind.CLOSED)
         if (!width.isFinite() || width !in 0.5..16.0) return fail("笔宽无效", PreviewFailureKind.INVALID_ARGUMENT)
-        color = argb; this.width = width; clearError(); return true
+        // Algorithm version 1 keeps the original stroke data; PRESSURE opens only with version 2 geometry.
+        if (kind == BrushKind.PRESSURE) return fail("压感笔将在后续版本提供", PreviewFailureKind.UNSUPPORTED_BRUSH)
+        color = argb; this.width = width; this.penKind = kind; clearError(); return true
     }
     val inputBatchLimit: Int get() = PREVIEW_INPUT_BATCH_LIMIT
     private fun totalPoints(root: DocumentRoot): Int {
@@ -326,7 +329,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         }
         // Original session copies validated scalars directly into its arena; no InputSample/InputBatch lists.
         val result = session.consumeReal(sequence, eventTimeMicros, 1, PointerTool.STYLUS, phase, xs, ys, pressures, times,
-            StrokeTarget(current.id, current.findPage(page!!)!!.layerId, BrushSpec(BrushKind.MONOLINE, 1, width, color)))
+            StrokeTarget(current.id, current.findPage(page!!)!!.layerId, BrushSpec(penKind, 1, width, color)))
         if (result is InputResult.Rejected) return rejectRealBatch(
             if (result.reason == InputRejection.CAPACITY) PreviewFailureKind.CAPACITY else PreviewFailureKind.INVALID_INPUT, result.reason)
         strokeCommand = command; strokeObject = objectId; strokePage = page

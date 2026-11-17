@@ -1,10 +1,13 @@
 package dev.notecore.document
 
+import dev.notecore.canvas.prototype.BrushKind
+
 /** Unfrozen raw-parameter facade over the existing notebook, never another content owner. */
 sealed interface PreviewEdit {
     data class Rename(val title: String) : PreviewEdit
     data class SetPaper(val width: Double, val height: Double, val paper: PaperKind) : PreviewEdit
-    data class SelectPen(val argb: Int, val width: Double) : PreviewEdit
+    /** Kind defaults to MONOLINE for legacy callers; PRESSURE stays closed at algorithm version 1. */
+    data class SelectPen(val argb: Int, val width: Double, val kind: BrushKind = BrushKind.MONOLINE) : PreviewEdit
     data class SelectPage(val pageId: String) : PreviewEdit
     data class MovePage(val beforePageId: String?) : PreviewEdit
     data object InsertPage : PreviewEdit
@@ -17,6 +20,7 @@ sealed interface PreviewEdit {
 enum class PreviewFailureKind {
     CLOSED, PENDING_STROKE, ACTIVE_STROKE, INVALID_ARGUMENT, MISSING_PAGE, CAPACITY,
     IDENTITY_EXHAUSTED, HISTORY_EMPTY, DOCUMENT_REJECTED, NO_ACTIVE_STROKE, INVALID_INPUT, INPUT_BATCH_CAPACITY, READ_ONLY,
+    UNSUPPORTED_BRUSH,
 }
 
 /** Caller remains on the original owner. Programmer/owner callback failures are not converted. */

@@ -303,7 +303,7 @@ final class InkUIView: UIView {
         guard let samples = preparedSamples(touch, event: event, phase: .down), let first = samples.first else { return }
         let p = first.point
         guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
-        let pen = note.edit(request: PreviewEditSelectPen(argb: penColor, width: penWidth))
+        let pen = note.edit(request: PreviewEditSelectPen(argb: penColor, width: penWidth, kind: .monoline))
         guard pen.accepted else { failed(previewFailureMessage(pen.failure)); return }
         let result = offerReal(samples, phase: .down)
         guard result.admitted else { rejectInput(previewFailureMessage(result.failure)); return }
