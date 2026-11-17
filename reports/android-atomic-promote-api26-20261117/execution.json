@@ -1,0 +1,328 @@
+[
+  {
+    "label": "boot",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "getprop",
+      "sys.boot_completed"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "avd-kernel",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "getprop",
+      "ro.kernel.qemu.avd_name"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e11e68387f5fba81c46b43273d8bbaadfa1390e232fc925a7fd54e8b9015ba10",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "api",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "getprop",
+      "ro.build.version.sdk"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "20d2add851bf39edcc6b5e830930f962db7e19dffa2cab8610eed551eda6c302",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "abi",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "getprop",
+      "ro.product.cpu.abi"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "7f10c3cd4593d1d6ded27d658e7c05216011c955c200aac551caad0c979d4d90",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "no-preview-in-isolated-avd",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "pm",
+      "list",
+      "packages",
+      "dev.notecore.preview"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "fingerprint",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "getprop",
+      "ro.build.fingerprint"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "26810751a272e4ea481416f938e3a7c91cac2c34b64f1feea3ba0108b19b923d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "kernel",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "uname",
+      "-r"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "f8a9893fe6337c3af529e0fd275f28438b1d9e8cb725cf184898c60238c1ce80",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "selinux",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "getenforce"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "4fefafd0dcddf54b31a0fef448083e7b77576d86a9ec97c14bfd92479c404290",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "page_size",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "getconf",
+      "PAGE_SIZE"
+    ],
+    "returncode": 127,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "4abec8b7037221d4df63573731e3a5bcda6e9de41c8ad492d76a3f3e7fbfe1b6"
+  },
+  {
+    "label": "page_size_smaps",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "while read -r key value unit; do\n                             if [ \"$key\" = KernelPageSize: ]; then echo \"$((value * 1024))\"; break; fi\n                           done < /proc/self/smaps"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "retained-apk-badging",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/build-tools/36.0.0/aapt2",
+      "dump",
+      "badging",
+      "/Users/lixiaofan/StudioProjects/notecore/build/atomic-promote-api26.0yM2Ea/receipts/retained-probe.apk"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "c0bb6db8b7f60bfac2304fc62bedb1828e1ba64e76fced007dc6c6ea298ccdac",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "probe-absent",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "pm",
+      "list",
+      "packages",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "install-retained-probe",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "install",
+      "/Users/lixiaofan/StudioProjects/notecore/build/atomic-promote-api26.0yM2Ea/receipts/retained-probe.apk"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "instrument-cases",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "am",
+      "instrument",
+      "-w",
+      "-r",
+      "-e",
+      "scope",
+      "resource-atomic-4f97f30d-713b-4342-b170-077f419efef4",
+      "-e",
+      "mode",
+      "cases",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297/dev.notecore.probes.AtomicPromoteProbe"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "f485e067b5bdff644100c9f6dd8c0f3489a7da24e6fd786fc8aff1c3341bef4b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "instrument-crash",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "am",
+      "instrument",
+      "-w",
+      "-r",
+      "-e",
+      "scope",
+      "resource-atomic-4f97f30d-713b-4342-b170-077f419efef4",
+      "-e",
+      "mode",
+      "crash",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297/dev.notecore.probes.AtomicPromoteProbe"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "crash-marker",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "exec-out",
+      "run-as",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297",
+      "cat",
+      "cache/resource-atomic-4f97f30d-713b-4342-b170-077f419efef4/crash-marker.json"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "7fafc2e03dcc4a56667eec170092390e9e41c86d61cecdc5e646b0c293231988",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "probe-stopped",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "pidof",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297"
+    ],
+    "returncode": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "own-kill-log",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "logcat",
+      "-d",
+      "--pid=2679",
+      "-s",
+      "Process:I",
+      "*:S"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "8d15faa30e68ec9c0264fd6d45c786b7ca111f0a289ee0bd7d5d0714de178649",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "instrument-recover",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "am",
+      "instrument",
+      "-w",
+      "-r",
+      "-e",
+      "scope",
+      "resource-atomic-4f97f30d-713b-4342-b170-077f419efef4",
+      "-e",
+      "mode",
+      "recover",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297/dev.notecore.probes.AtomicPromoteProbe"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "c7be1e5b8793033832603cb1758aa45d3e5089c5ebb1a37275eceb0f56a56776",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "remove-probe",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "uninstall",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "7fc0023a6402c7bd7abd98bb3e580968de4833eed07d88d1cc8d70819d69c7a0",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "probe-removed",
+    "argv": [
+      "/Users/lixiaofan/Library/Android/sdk/platform-tools/adb",
+      "-s",
+      "emulator-5582",
+      "shell",
+      "pm",
+      "list",
+      "packages",
+      "dev.notecore.probes.atomicpromote.p798be55b1d794059a399b67169f31297"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

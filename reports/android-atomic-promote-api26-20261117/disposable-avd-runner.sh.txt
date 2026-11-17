@@ -1,0 +1,52 @@
+#!/bin/bash
+# Run the pre-OpenParams SQLite candidate on an isolated API 26 ARM64 emulator.
+set -euo pipefail
+root=$PWD
+sdk="${ANDROID_HOME:?set ANDROID_HOME to a local Android SDK}"
+jdk="${JAVA_HOME:?set JAVA_HOME to JDK 17}"
+image="${1:?pass the local API 26 ARM64 system-image directory}"
+test -f "$image/system.img"
+image=$(cd "$image" && pwd)
+adb="$sdk/platform-tools/adb"
+port=5582
+serial="emulator-$port"
+"$adb" devices | awk -v serial="$serial" '$1 == serial {found=1} END{exit found?1:0}'
+mkdir -p build
+run=$(mktemp -d "$root/build/atomic-promote-api26.XXXXXX")
+echo "$run"
+name="NoteCoreAtomic26-${run##*.}"
+export ANDROID_AVD_HOME="$run/avd" ANDROID_EMULATOR_HOME="$run" ANDROID_USER_HOME="$run"
+avd="$ANDROID_AVD_HOME/$name.avd"
+mkdir -p "$avd" "$run/classes"
+printf 'avd.ini.encoding=UTF-8\npath=%s\ntarget=android-26\n' "$avd" > "$ANDROID_AVD_HOME/$name.ini"
+sed -e "s/^AvdId = .*/AvdId = $name/" -e "s/^avd.ini.displayname = .*/avd.ini.displayname = $name/" \
+    -e "s@^image.sysdir.1 = .*@image.sysdir.1 = $image/@" -e 's/^tag.id = .*/tag.id = default/' \
+    -e 's/^tag.display = .*/tag.display = Default Android System Image/' \
+    -e 's/^disk.dataPartition.size = .*/disk.dataPartition.size = 2147483648/' \
+    .android-avd/NoteCorePreview.avd/config.ini > "$avd/config.ini"
+"$sdk/emulator/emulator" -avd "$name" -port "$port" -no-window -no-audio -no-snapshot \
+    -gpu swiftshader_indirect > "$run/emulator.log" 2>&1 &
+emulator=$!
+cleanup() {
+    kill "$emulator" 2>/dev/null || true
+    wait "$emulator" 2>/dev/null || true
+    # Only the AVD created by mktemp above is removed.
+    rm -rf -- "$avd" "$ANDROID_AVD_HOME/$name.ini"
+}
+trap cleanup EXIT
+connected=false
+for attempt in $(seq 1 100); do
+    kill -0 "$emulator"
+    if test "$("$adb" -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1; then
+        connected=true
+        break
+    fi
+    sleep 2
+done
+test "$connected" = true
+test "$("$adb" -s "$serial" shell getprop ro.kernel.qemu.avd_name | tr -d '\r')" = "$name"
+test "$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')" = 26
+"$adb" -s "$serial" shell getprop ro.build.fingerprint > "$run/fingerprint.txt"
+"$adb" -s "$serial" shell getprop ro.product.cpu.abi > "$run/abi.txt"
+"$adb" -s "$serial" shell getenforce > "$run/selinux.txt"
+python3 tools/verify_android_atomic_promote_api32.py --api 26 --serial "$serial" --avd "$name" --raw "$run/receipts" --output "$run/report.json"

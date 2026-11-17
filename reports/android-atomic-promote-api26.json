@@ -1,0 +1,189 @@
+{
+  "schema": "android-atomic-promote-api26-1",
+  "status": "passed",
+  "scope": "resource-atomic-4f97f30d-713b-4342-b170-077f419efef4",
+  "environment": {
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "kernel": "3.18.94+",
+    "selinux": "Enforcing",
+    "page_size": "4096",
+    "android_api": 26,
+    "abi": "arm64-v8a",
+    "avd": "NoteCoreAtomic26-0yM2Ea"
+  },
+  "cases": {
+    "pid": 2645,
+    "mode": "cases",
+    "selinux_context": "u:r:untrusted_app:s0:c512,c768",
+    "fresh": {
+      "errno": 0,
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 115106,
+        "device": 65056
+      },
+      "stage_absent": true
+    },
+    "identical": {
+      "errno": 17,
+      "stage": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 115107,
+        "device": 65056
+      },
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 115108,
+        "device": 65056
+      }
+    },
+    "corrupt": {
+      "errno": 17,
+      "stage": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 115109,
+        "device": 65056
+      },
+      "target": {
+        "bytes": 3,
+        "sha256": "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81",
+        "inode": 115110,
+        "device": 65056
+      }
+    },
+    "race": {
+      "winner": 0,
+      "winner_errno": 0,
+      "loser_errno": 17,
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 115111,
+        "device": 65056
+      },
+      "loser_stage": {
+        "bytes": 65539,
+        "sha256": "0817763fda29f2d15c3841ab41d0d21fde7e30ae233dd1f0b878ad27981e5f18",
+        "inode": 115112,
+        "device": 65056
+      }
+    },
+    "status": "passed"
+  },
+  "recovery": {
+    "pid": 2717,
+    "mode": "recover",
+    "selinux_context": "u:r:untrusted_app:s0:c512,c768",
+    "before_death": {
+      "pid": 2679,
+      "errno": 0,
+      "target": {
+        "bytes": 65539,
+        "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+        "inode": 115113,
+        "device": 65056
+      },
+      "stage_absent": true
+    },
+    "after_death": {
+      "bytes": 65539,
+      "sha256": "ce8ab5e02d52b9d74227078ca655d336386fcdd6774f476832593582722d6b32",
+      "inode": 115113,
+      "device": 65056
+    },
+    "status": "passed"
+  },
+  "retained_api36_report_sha256": "5765a9049d4dfc27e19716c083d2909d0864c3cbda4448eba1896f25416a367d",
+  "retained_executables_sha256": "c3482748190b869cdb1d891e11c2f2ea6839fe6715a83316f694d703249a232f",
+  "identical_apk_sha256": "6c214d2de85b5dee2c4c7263fc7abb5ec994c8d459345ab5b29c45f742e675c0",
+  "original_avd_all_bytes_unchanged": true,
+  "fresh_original_app_runtime_verified": false,
+  "probe_removed": true,
+  "decision": "Adopt observed API 26 App-domain same-volume no-replace capability.",
+  "limits": [
+    "Identical prior APK, no new JNI build or production port.",
+    "Manufacturer, physical storage/heap, cross-volume, directory fsync and power-loss evidence remain open.",
+    "Same-App thread race and SIGKILL-after-success only, not cross-process coordination or interrupted syscall.",
+    "No production resource/DB/task/GC integration, C1/M-1/DEV-041 approval or requirement promotion."
+  ],
+  "c1_complete": false,
+  "whole_requirement_accepted": false,
+  "source_and_evidence_sha256": {
+    "tools/verify_android_atomic_promote_api32.py": "3b44f472cb979ba462650a192c2d1c614a87fdf9a7899150dcb346299d233c13",
+    "reports/android-atomic-promote.json": "5765a9049d4dfc27e19716c083d2909d0864c3cbda4448eba1896f25416a367d",
+    "reports/android-atomic-promote-20261031/resource-atomic-798be55b-1d79-4059-a399-b67169f31297/executables.zip": "c3482748190b869cdb1d891e11c2f2ea6839fe6715a83316f694d703249a232f",
+    "build/atomic-promote-api26.0yM2Ea/receipts/before.json": "a1850b7ad5280e63a76247117f723601c62e2e20959e2081797e7aef9db07a3e",
+    "build/atomic-promote-api26.0yM2Ea/receipts/no-preview-in-isolated-avd.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/fingerprint.stdout.log": "26810751a272e4ea481416f938e3a7c91cac2c34b64f1feea3ba0108b19b923d",
+    "build/atomic-promote-api26.0yM2Ea/receipts/page_size.stderr.log": "4abec8b7037221d4df63573731e3a5bcda6e9de41c8ad492d76a3f3e7fbfe1b6",
+    "build/atomic-promote-api26.0yM2Ea/receipts/page_size_smaps.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/own-kill-log.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/probe-removed.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/probe-absent.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/instrument-crash.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/instrument-cases.stdout.log": "f485e067b5bdff644100c9f6dd8c0f3489a7da24e6fd786fc8aff1c3341bef4b",
+    "build/atomic-promote-api26.0yM2Ea/receipts/boot.stdout.log": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "build/atomic-promote-api26.0yM2Ea/receipts/crash-marker.stdout.log": "7fafc2e03dcc4a56667eec170092390e9e41c86d61cecdc5e646b0c293231988",
+    "build/atomic-promote-api26.0yM2Ea/receipts/install-retained-probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/remove-probe.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/api.stdout.log": "20d2add851bf39edcc6b5e830930f962db7e19dffa2cab8610eed551eda6c302",
+    "build/atomic-promote-api26.0yM2Ea/receipts/abi.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/instrument-recover.stdout.log": "c7be1e5b8793033832603cb1758aa45d3e5089c5ebb1a37275eceb0f56a56776",
+    "build/atomic-promote-api26.0yM2Ea/receipts/avd-kernel.stdout.log": "e11e68387f5fba81c46b43273d8bbaadfa1390e232fc925a7fd54e8b9015ba10",
+    "build/atomic-promote-api26.0yM2Ea/receipts/probe-stopped.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/retained-apk-badging.stdout.log": "c0bb6db8b7f60bfac2304fc62bedb1828e1ba64e76fced007dc6c6ea298ccdac",
+    "build/atomic-promote-api26.0yM2Ea/receipts/kernel.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/after.json": "a1850b7ad5280e63a76247117f723601c62e2e20959e2081797e7aef9db07a3e",
+    "build/atomic-promote-api26.0yM2Ea/receipts/selinux.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/page_size_smaps.stdout.log": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+    "build/atomic-promote-api26.0yM2Ea/receipts/probe-absent.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/own-kill-log.stdout.log": "8d15faa30e68ec9c0264fd6d45c786b7ca111f0a289ee0bd7d5d0714de178649",
+    "build/atomic-promote-api26.0yM2Ea/receipts/probe-removed.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/no-preview-in-isolated-avd.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/page_size.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/retained-probe.apk": "6c214d2de85b5dee2c4c7263fc7abb5ec994c8d459345ab5b29c45f742e675c0",
+    "build/atomic-promote-api26.0yM2Ea/receipts/fingerprint.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/instrument-cases.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/instrument-crash.stdout.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "build/atomic-promote-api26.0yM2Ea/receipts/instrument-recover.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/avd-kernel.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/crash-marker.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/boot.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/api.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/abi.stdout.log": "7f10c3cd4593d1d6ded27d658e7c05216011c955c200aac551caad0c979d4d90",
+    "build/atomic-promote-api26.0yM2Ea/receipts/source-at-start.json": "b4f1447bda29589c55d33affdf8351bebd7f6ee04043cb11b2469938e413be70",
+    "build/atomic-promote-api26.0yM2Ea/receipts/install-retained-probe.stdout.log": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "build/atomic-promote-api26.0yM2Ea/receipts/remove-probe.stdout.log": "7fc0023a6402c7bd7abd98bb3e580968de4833eed07d88d1cc8d70819d69c7a0",
+    "build/atomic-promote-api26.0yM2Ea/receipts/selinux.stdout.log": "4fefafd0dcddf54b31a0fef448083e7b77576d86a9ec97c14bfd92479c404290",
+    "build/atomic-promote-api26.0yM2Ea/receipts/execution.json": "4639ec3787a5fd7fbc6a65b703df53dcd7a00cf051d42c2ee00a433fdd663599",
+    "build/atomic-promote-api26.0yM2Ea/receipts/retained-apk-badging.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/probe-stopped.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/atomic-promote-api26.0yM2Ea/receipts/kernel.stdout.log": "f8a9893fe6337c3af529e0fd275f28438b1d9e8cb725cf184898c60238c1ce80"
+  },
+  "synthetic_avd_deleted": true,
+  "preflight_attempts_stopped_before_install": [
+    "getconf unavailable",
+    "awk unavailable"
+  ],
+  "retained_runtime_evidence_sha256": {
+    "reports/android-atomic-promote-api26-20261117/after.json": "a1850b7ad5280e63a76247117f723601c62e2e20959e2081797e7aef9db07a3e",
+    "reports/android-atomic-promote-api26-20261117/before.json": "a1850b7ad5280e63a76247117f723601c62e2e20959e2081797e7aef9db07a3e",
+    "reports/android-atomic-promote-api26-20261117/crash-marker.stdout.log": "7fafc2e03dcc4a56667eec170092390e9e41c86d61cecdc5e646b0c293231988",
+    "reports/android-atomic-promote-api26-20261117/disposable-avd-runner.sh.txt": "9a350ae115821be1ab450527265639beb92cfa74266ccda0b9cf54056e0f7946",
+    "reports/android-atomic-promote-api26-20261117/execution.json": "4639ec3787a5fd7fbc6a65b703df53dcd7a00cf051d42c2ee00a433fdd663599",
+    "reports/android-atomic-promote-api26-20261117/instrument-cases.stdout.log": "f485e067b5bdff644100c9f6dd8c0f3489a7da24e6fd786fc8aff1c3341bef4b",
+    "reports/android-atomic-promote-api26-20261117/instrument-crash.stdout.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "reports/android-atomic-promote-api26-20261117/instrument-recover.stdout.log": "c7be1e5b8793033832603cb1758aa45d3e5089c5ebb1a37275eceb0f56a56776",
+    "reports/android-atomic-promote-api26-20261117/no-preview-in-isolated-avd.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api26-20261117/own-kill-log.stdout.log": "8d15faa30e68ec9c0264fd6d45c786b7ca111f0a289ee0bd7d5d0714de178649",
+    "reports/android-atomic-promote-api26-20261117/page_size_smaps.stdout.log": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+    "reports/android-atomic-promote-api26-20261117/preflight-1.stderr.log": "4abec8b7037221d4df63573731e3a5bcda6e9de41c8ad492d76a3f3e7fbfe1b6",
+    "reports/android-atomic-promote-api26-20261117/preflight-2.stderr.log": "aeddeb1e9de8e20f6266e51c3b2d727d54eeb602da5a6dfc4b8748b05dd3f6cb",
+    "reports/android-atomic-promote-api26-20261117/probe-removed.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/android-atomic-promote-api26-20261117/source-at-start.json": "b4f1447bda29589c55d33affdf8351bebd7f6ee04043cb11b2469938e413be70"
+  }
+}

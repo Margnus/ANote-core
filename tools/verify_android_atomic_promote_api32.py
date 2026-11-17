@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Experimental replay of the unchanged retained probe on a prepared API32 AVD.
+"""Experimental replay of the unchanged retained probe on a prepared API 26/32 AVD.
 
 Only actual emitted receipts establish runtime evidence. The original NoteCorePreview
 AVD stays stopped and every disk file is hashed before/after; no original App run is
 claimed. This tool does not download images or create devices.
 """
+import argparse
 from pathlib import Path
 import hashlib
 import json
@@ -33,18 +34,27 @@ def save(path, value):
 
 
 def main():
-    RAW.mkdir(exist_ok=False)  # A failed attempt must be inspected, never overwritten.
-    work = Path('/private/tmp/notecore-api32-single-sdk')
-    work.mkdir(exist_ok=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--api', type=int, choices=(26, 32), default=32)
+    parser.add_argument('--serial', default=SERIAL)
+    parser.add_argument('--avd', default=AVD)
+    parser.add_argument('--raw', type=Path, default=RAW)
+    parser.add_argument('--output', type=Path)
+    args = parser.parse_args()
+    raw_dir = args.raw.resolve()
+    output = args.output or ROOT / f'reports/android-atomic-promote-api{args.api}.json'
+    if not raw_dir.is_relative_to(ROOT) or output.exists():
+        parser.error('provide a new output and a raw directory inside this checkout')
+    raw_dir.mkdir(exist_ok=False)  # A failed attempt must be inspected, never overwritten.
     receipt_path = ROOT / 'reports/android-atomic-promote.json'
     prior = json.loads(receipt_path.read_text(encoding='utf-8'))
     assert prior['status'] == 'passed'
     archive = ROOT / 'reports/android-atomic-promote-20261031' / prior['scope'] / 'executables.zip'
     assert sha(archive) == prior['source_and_evidence_sha256'][archive.relative_to(ROOT).as_posix()]
     source_inputs = {p.relative_to(ROOT).as_posix(): sha(p) for p in (Path(__file__), receipt_path, archive)}
-    save(RAW / 'source-at-start.json', source_inputs)
+    save(raw_dir / 'source-at-start.json', source_inputs)
     with zipfile.ZipFile(archive) as zipped:
-        apk = work / 'retained-probe.apk'
+        apk = raw_dir / 'retained-probe.apk'
         apk.write_bytes(zipped.read('probe.apk'))
     records = []
 
@@ -54,14 +64,14 @@ def main():
                         'stdout_sha256': hashlib.sha256(result.stdout).hexdigest(),
                         'stderr_sha256': hashlib.sha256(result.stderr).hexdigest()})
         if not binary:
-            (RAW / (label + '.stdout.log')).write_bytes(result.stdout)
-            (RAW / (label + '.stderr.log')).write_bytes(result.stderr)
-        save(RAW / 'execution.json', records)
+            (raw_dir / (label + '.stdout.log')).write_bytes(result.stdout)
+            (raw_dir / (label + '.stderr.log')).write_bytes(result.stderr)
+        save(raw_dir / 'execution.json', records)
         assert result.returncode in allowed, (label, result.returncode, result.stderr[:1000])
         return result.stdout if binary else result.stdout.decode('utf-8').strip()
 
-    def adb(*args, label, serial=SERIAL, **kwargs):
-        return run([SDK / 'platform-tools/adb', '-s', serial, *args], label, **kwargs)
+    def adb(*command, label, **kwargs):
+        return run([SDK / 'platform-tools/adb', '-s', args.serial, *command], label, **kwargs)
 
     def original(label):
         folder = ROOT / '.android-avd/NoteCorePreview.avd'
@@ -74,15 +84,26 @@ def main():
         return {'avd': 'NoteCorePreview', 'offline_file_hashes': files,
                 'scope': 'All existing original AVD disk bytes, no fresh original App/66-note runtime claim'}
 
-    before = original('before'); save(RAW / 'before.json', before)
+    before = original('before'); save(raw_dir / 'before.json', before)
     assert adb('shell', 'getprop', 'sys.boot_completed', label='boot') == '1'
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name', label='avd') == AVD
-    assert adb('shell', 'getprop', 'ro.build.version.sdk', label='api') == '32'
+    avd = adb('shell', 'getprop', 'ro.kernel.qemu.avd_name', label='avd-kernel')
+    if not avd:
+        avd = adb('shell', 'getprop', 'ro.boot.qemu.avd_name', label='avd')
+    assert avd == args.avd
+    assert adb('shell', 'getprop', 'ro.build.version.sdk', label='api') == str(args.api)
     assert adb('shell', 'getprop', 'ro.product.cpu.abi', label='abi') == 'arm64-v8a'
     assert not adb('shell', 'pm', 'list', 'packages', 'dev.notecore.preview', label='no-preview-in-isolated-avd')
-    environment = {name: adb('shell', *args, label=name) for name, args in [
+    environment = {name: adb('shell', *command, label=name) for name, command in [
         ('fingerprint', ['getprop', 'ro.build.fingerprint']), ('kernel', ['uname', '-r']),
-        ('selinux', ['getenforce']), ('page_size', ['getconf', 'PAGE_SIZE'])]}
+        ('selinux', ['getenforce'])]}
+    page_size = adb('shell', 'getconf', 'PAGE_SIZE', label='page_size', allowed=(0, 127))
+    if not page_size:
+        page_size = adb('shell',
+                        """while read -r key value unit; do
+                             if [ "$key" = KernelPageSize: ]; then echo "$((value * 1024))"; break; fi
+                           done < /proc/self/smaps""", label='page_size_smaps', allowed=(0, 1))
+    environment['page_size'] = page_size if page_size.isdecimal() else None
+    environment.update(android_api=args.api, abi='arm64-v8a', avd=avd)
     assert environment['selinux'] == 'Enforcing'
     badging = run([SDK / 'build-tools/36.0.0/aapt2', 'dump', 'badging', apk], 'retained-apk-badging')
     package = re.search(r"^package: name='(dev\.notecore\.probes\.atomicpromote\.p[a-f0-9]+)'", badging).group(1)
@@ -118,23 +139,24 @@ def main():
     finally:
         adb('uninstall', package, label='remove-probe')
         assert not adb('shell', 'pm', 'list', 'packages', package, label='probe-removed')
-    after = original('after'); save(RAW / 'after.json', after); assert before == after
+    after = original('after'); save(raw_dir / 'after.json', after); assert before == after
     assert all(sha(ROOT / path) == digest for path, digest in source_inputs.items()), 'Replay inputs changed during execution'
-    report = {'schema': 'android-atomic-promote-api32-1', 'status': cases['status'], 'scope': scope,
+    report = {'schema': f'android-atomic-promote-api{args.api}-1', 'status': cases['status'], 'scope': scope,
               'environment': environment, 'cases': cases, 'recovery': recovery,
               'retained_api36_report_sha256': sha(receipt_path), 'retained_executables_sha256': sha(archive),
               'identical_apk_sha256': sha(apk), 'original_avd_all_bytes_unchanged': True,
               'fresh_original_app_runtime_verified': False, 'probe_removed': True,
-              'decision': 'Adopt only observed API32/App-domain same-volume no-replace capability.' if recovery else
+              'decision': f'Adopt observed API {args.api} App-domain same-volume no-replace capability.' if recovery else
                           'Reject native candidate on this runtime; keep errno and stage, no fallback.',
               'limits': ['Identical prior APK, no new JNI build or production port.',
-                         'No API26, manufacturer, physical storage/heap, cross-volume, directory fsync or power-loss evidence.',
+                         'Manufacturer, physical storage/heap, cross-volume, directory fsync and power-loss evidence remain open.',
                          'Same-App thread race and SIGKILL-after-success only, not cross-process coordination or interrupted syscall.',
                          'No production resource/DB/task/GC integration, C1/M-1/DEV-041 approval or requirement promotion.'],
               'c1_complete': False, 'whole_requirement_accepted': False,
               'source_and_evidence_sha256': {p.relative_to(ROOT).as_posix(): sha(p) for p in
-                  [Path(__file__), receipt_path, archive, *RAW.rglob('*')] if p.is_file()}}
-    save(ROOT / 'reports/android-atomic-promote-api32.json', report)
+                  [Path(__file__), receipt_path, archive, *raw_dir.rglob('*')] if p.is_file()}}
+    with output.open('x', encoding='utf-8') as handle:
+        handle.write(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': cases['status'], 'environment': environment, 'cases': cases, 'recovery': recovery}, ensure_ascii=False))
 
 
