@@ -1,0 +1,51 @@
+#!/bin/bash
+set -euo pipefail
+run=$(mktemp -d "$PWD/build/sdk-art-api26-run.XXXXXX")
+echo "Evidence: $run"
+sdk="$HOME/Library/Android/sdk"
+export JAVA_HOME="$HOME/Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home"
+export ANDROID_HOME="$sdk" ANDROID_AVD_HOME="$run/avd" ANDROID_EMULATOR_HOME="$run" ANDROID_USER_HOME="$run"
+mkdir -p "$ANDROID_AVD_HOME"
+adb="$sdk/platform-tools/adb"
+name=NoteCoreSdkArt26
+serial=emulator-5582
+avd="$ANDROID_AVD_HOME/$name.avd"
+mkdir -p "$avd"
+printf 'avd.ini.encoding=UTF-8\npath=%s\ntarget=android-26\n' "$avd" > "$ANDROID_AVD_HOME/$name.ini"
+sed -e "s/AvdId = .*/AvdId = $name/" -e "s/avd.ini.displayname = .*/avd.ini.displayname = $name/" -e "s@^image.sysdir.1 = .*@image.sysdir.1 = $PWD/build/api26-probe/image/arm64-v8a/@" -e 's/^tag.id = .*/tag.id = default/' -e 's/^tag.display = .*/tag.display = Default Android System Image/' -e 's/^disk.dataPartition.size = .*/disk.dataPartition.size = 2147483648/'  .android-avd/NoteCorePreview.avd/config.ini > "$avd/config.ini"
+"$sdk/emulator/emulator" -avd "$name" -port 5582 -no-window -no-audio -no-snapshot -gpu swiftshader_indirect > "$run/emulator.log" 2>&1 &
+pid=$!
+trap '"$adb" -s "$serial" emu kill >/dev/null 2>&1 || kill "$pid" 2>/dev/null || true; wait "$pid" 2>/dev/null || true; rm -rf "$ANDROID_AVD_HOME"' EXIT
+for i in $(seq 1 100); do
+  if ! kill -0 "$pid" 2>/dev/null; then tail -60 "$run/emulator.log"; exit 1; fi
+  if test "$("$adb" -s "$serial" shell getprop sys.boot_completed 2>/dev/null || true)" = 1; then break; fi
+  sleep 2
+done
+test "$("$adb" -s "$serial" shell getprop ro.kernel.qemu.avd_name | tr -d '\r')" = "$name"
+"$adb" -s "$serial" shell getprop ro.build.fingerprint > "$run/fingerprint.txt"
+"$adb" -s "$serial" shell getprop ro.product.cpu.abi > "$run/abi.txt"
+"$adb" -s "$serial" shell getenforce > "$run/selinux.txt"
+sdk_api=$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')
+test "$sdk_api" = 26
+printf '%s
+' "$sdk_api" > "$run/api.txt"
+fixture=$(find reports/view-pending-process-20261106 -name prepare.ncp)
+canonical="$(dirname "$fixture")/confirmed-final.ncp"
+shasum -a 256 "$fixture" "$canonical" > "$run/fixtures.sha256"
+remote=/data/local/tmp/sdk-recovery
+"$adb" -s "$serial" shell mkdir -p "$remote"
+"$adb" -s "$serial" push "$fixture" "$remote/pending.ncp"
+"$adb" -s "$serial" push "$canonical" "$remote/canonical.ncp"
+for variant in historical candidate; do
+  payload="build/sdk-art-api26/$variant.jar"
+  "$adb" -s "$serial" push "$payload" "$remote/$variant.jar"
+  host_hash=$(shasum -a 256 "$payload" | cut -d' ' -f1)
+  remote_hash=$("$adb" -s "$serial" shell sha256sum "$remote/$variant.jar" | cut -d' ' -f1)
+  test "$host_hash" = "$remote_hash"
+  printf '%s  %s
+' "$remote_hash" "$variant.jar" >> "$run/dex-on-device.sha256"
+  "$adb" -s "$serial" shell "CLASSPATH=$remote/$variant.jar /system/bin/app_process /system/bin dev.notecore.probe.RecoveryConsumerKt $remote/pending.ncp $remote/canonical.ncp" > "$run/$variant.log" 2>&1
+  rg -q 'both checkpoint byte sequences matched' "$run/$variant.log"
+done
+"$adb" -s "$serial" shell sha256sum "$remote/pending.ncp" "$remote/canonical.ncp" > "$run/fixtures-on-device.sha256"
+test "$(cut -d' ' -f1 "$run/fixtures.sha256")" = "$(cut -d' ' -f1 "$run/fixtures-on-device.sha256")"

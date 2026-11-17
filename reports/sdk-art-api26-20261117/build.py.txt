@@ -1,0 +1,51 @@
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+from zipfile import ZipFile
+
+root = Path.cwd()
+out = root / 'build/sdk-art-api26'
+sdk = Path.home() / 'Library/Android/sdk'
+java = Path.home() / 'Library/Java/JavaVirtualMachines/jbr-17.0.14/Contents/Home'
+candidate = json.loads((root / 'reports/sdk-app-preflight-20261114/verification.json').read_text())['candidate_artifact_sha256']
+historical = root / 'reports/sdk-artifact-boundary-20261107/android'
+version = '0.0.0-c1'
+paths = {}
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+stdlib, = (root / '.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21').glob('*/kotlin-stdlib-2.2.21.jar')
+consumer = historical / 'recovery-consumer.jar'
+expected = json.loads((root / 'reports/sdk-artifact-boundary.json').read_text())['android']
+assert digest(consumer) == json.loads((root / 'reports/sdk-artifact-boundary.json').read_text())['artifact_sha256']['android/recovery-consumer.jar']
+assert digest(stdlib) == expected['compiler_dependencies'][stdlib.name]
+for variant in ('historical', 'candidate'):
+    jars = []
+    for module in ('canvas-core', 'shared-core'):
+        if variant == 'candidate':
+            platform = module + '-android'
+            source = root / f'build/sdk-candidate-repository/dev/notecore/probe/{platform}/{version}/{platform}-{version}.aar'
+            if '--current' not in sys.argv:
+                assert digest(source) == candidate[str(source.relative_to(root))]
+        else:
+            source = historical / (module + '-release.aar')
+            assert digest(source) == expected['aar'][module]['aar_sha256']
+        with ZipFile(source) as aar:
+            jar = out / f'{module}-{variant}.jar'
+            jar.write_bytes(aar.read('classes.jar'))
+            jars.append(jar)
+        paths[str(source.relative_to(root))] = digest(source)
+    d8 = sdk / 'build-tools/36.0.0/lib/d8.jar'
+    dex = out / f'{variant}.jar'
+    subprocess.run([java/'bin/java', '-cp', d8, 'com.android.tools.r8.D8', '--release', '--min-api', '26', '--lib',
+        sdk/'platforms/android-36/android.jar', '--output', dex, consumer, *jars, stdlib], check=True)
+    with ZipFile(dex) as packaged:
+        assert 'classes.dex' in packaged.namelist()
+    paths[str(dex.relative_to(root))] = digest(dex)
+paths[str(consumer.relative_to(root))] = digest(consumer)
+paths[stdlib.name] = digest(stdlib)
+paths[d8.name] = digest(d8)
+paths['platforms/android-36/android.jar'] = digest(sdk/'platforms/android-36/android.jar')
+(out/'inputs.json').write_text(json.dumps(paths, indent=2) + '\n')
