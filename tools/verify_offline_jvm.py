@@ -25,7 +25,7 @@ def main():
     build = ROOT/'canvas-core/build/offline-jvm'
     build.mkdir(parents=True, exist_ok=True)
     def jar(group, artifact, version):
-        matches = list((cache/group/artifact/version).glob('*/*.jar'))
+        matches = list((cache/group/artifact/version).glob(f'*/{artifact}-{version}.jar'))
         assert len(matches) == 1, 'Cached exact dependency unavailable: '+artifact+':'+version
         return matches[0]
     stdlib = jar('org.jetbrains.kotlin', 'kotlin-stdlib', '2.2.21')
@@ -64,6 +64,9 @@ def main():
             '-no-stdlib', '-no-reflect', '-jvm-target', '17', '-module-name', name+'-offline',
             '-classpath', classpath([stdlib, annotations, *dependencies]), '-d', str(outputs[name])]
         if friend: command.append('-Xfriend-paths='+str(outputs[friend]))
+        common = [str(path) for path in groups[name] if {'commonMain', 'commonTest'}.intersection(path.parts)]
+        if common:
+            command.extend(['-Xmulti-platform', '-Xcommon-sources='+','.join(common)])
         run([*command, *map(str, groups[name])], name)
     # Keep both main modules separate and grant each test group friendship only to its own module.
     compile_group('canvas-main', [])
@@ -74,7 +77,7 @@ def main():
     for name in ('canvas-tests', 'shared-tests'):
         with zipfile.ZipFile(outputs[name]) as archive:
             test_classes.extend(n[:-6].replace('/', '.') for n in archive.namelist() if n.endswith('Test.class') and '$' not in n)
-    cp = [*outputs.values(), stdlib, annotations, *testing, ROOT/'fixtures/input', ROOT/'fixtures/geometry']
+    cp = [*outputs.values(), stdlib, annotations, *testing, ROOT/'fixtures', ROOT/'fixtures/input', ROOT/'fixtures/geometry']
     properties = ['-Dnotecore.scale.fixture.dir='+str(ROOT/'.generated-fixtures/scale'),
                   '-Dnotecore.scale.manifest='+str(ROOT/'fixtures/scale/manifest.json')]
     output = run([str(java), *properties, '-cp', classpath(cp), 'org.junit.runner.JUnitCore', *sorted(test_classes)], 'tests')

@@ -1,0 +1,38 @@
+{
+  "milestone": "DEV-036/C1",
+  "status": "device-run-pending",
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "host_device_preflight": {
+    "adb_devices": 0,
+    "devicectl_physical_devices": 0,
+    "devicectl_simulated_devices": 3,
+    "simulator_runtimes": [
+      "iOS 27.0 (24A434)"
+    ],
+    "minimum_ios_runtime_17_available": false
+  },
+  "collector_checks": {
+    "android": {
+      "origin": "fake-adb",
+      "passed": 7
+    },
+    "apple": {
+      "origin": "mocked CLI, IPA metadata and trace output",
+      "passed": [
+        "successful_artifact_capture",
+        "wrong_pid_refused",
+        "trace_failure_retained",
+        "pid_change_refused"
+      ]
+    }
+  },
+  "m1_accepted": false,
+  "physical_verified": false,
+  "scope": "Host device inventory and synthetic collector behavior. No on-device trace, latency, heap, stylus or iOS 17 app execution.",
+  "sha256": {
+    "tools/capture_apple_m1.py": "6d9615b52dc204465860066331ffaedb5d5db117887bc11963451b966e00604b",
+    "tools/capture_android_m1.py": "b90d0b69a83797875cba5ec2ae4c74cefd410654de802eb0ac383ba747644f10",
+    "tools/probes/m1-android-perfetto.pbtxt": "d567ff1b63515aad89db11c89a8fcfdb57838d600711eef64942b8dd9b88427a",
+    "docs/M1真机采集.md": "bb20da5ad5aa9a77ec3deb3aed4c1a4c68a20cf29f203d91ec88aa4c437b223e"
+  }
+}

@@ -94,8 +94,8 @@ def capture(adb, serial, output, emulator_preflight=False, apk=None):
         raise
     finally:
         report['finished_utc'] = now()
-        (output / 'snapshot.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n',
-                                             encoding='utf-8', newline='\n')
+        with (output / 'snapshot.json').open('w', encoding='utf-8', newline='\n') as stream:
+            stream.write(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
 
 
 if __name__ == '__main__':
