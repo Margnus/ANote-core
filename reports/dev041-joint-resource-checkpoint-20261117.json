@@ -1,0 +1,138 @@
+{
+  "status": "passed",
+  "milestone": "DEV-041",
+  "scope": "isolated host SQLite, JVM preview codec, synthetic notes",
+  "sqlite_version": "3.54.0",
+  "journal_mode": "wal",
+  "synchronous": "full",
+  "crash_signal": "SIGKILL",
+  "events": {
+    "bad_legacy": {
+      "status": "INVALID_SOURCE"
+    },
+    "import_before_commit": {
+      "cut": "before-commit",
+      "pid": 21065
+    },
+    "import_after_commit_lost_receipt": {
+      "cut": "after-commit",
+      "pid": 21071
+    },
+    "import_retry": {
+      "status": "REPLAYED",
+      "revision": 2
+    },
+    "same_canonical_different_source": {
+      "status": "OPERATION_CONFLICT"
+    },
+    "real_sqlite_full": {
+      "status": "SQLITE_FULL"
+    },
+    "edit_before_commit": {
+      "cut": "before-commit",
+      "pid": 21079
+    },
+    "edit_after_commit_lost_receipt": {
+      "cut": "after-commit",
+      "pid": 21083
+    },
+    "edit_retry": {
+      "status": "REPLAYED",
+      "revision": 3
+    },
+    "retry_older_operation": {
+      "status": "REPLAYED",
+      "revision": 2
+    },
+    "same_id_other_bytes": {
+      "status": "OPERATION_CONFLICT"
+    },
+    "stale_writer": {
+      "status": "STALE_BASE"
+    },
+    "concurrent_v2_retry": [
+      "COMMITTED",
+      "REPLAYED"
+    ],
+    "damaged_source_replay": {
+      "status": "REPAIR_REQUIRED"
+    },
+    "damaged_checkpoint_replay": {
+      "status": "REPAIR_REQUIRED"
+    }
+  },
+  "original_fixtures_preserved": true,
+  "joint_resource_import": {
+    "observations": {
+      "previous_document": {
+        "status": "COMMITTED",
+        "revision": 11
+      },
+      "one_resource_published": {
+        "cut": "resource-published",
+        "pid": 21123
+      },
+      "pending_manifest_conflict": {
+        "status": "OPERATION_CONFLICT"
+      },
+      "pending_operation_reserved_document": {
+        "status": "DOCUMENT_RESERVED"
+      },
+      "pending_operation_cannot_bypass_manifest": {
+        "status": "OPERATION_CONFLICT"
+      },
+      "occupied_hash_refuses_overwrite": {
+        "status": "REPAIR_REQUIRED"
+      },
+      "joint_transaction_uncommitted": {
+        "cut": "before-commit",
+        "pid": 21133
+      },
+      "joint_transaction_committed_before_receipt": {
+        "cut": "after-commit",
+        "pid": 21135
+      },
+      "replay_resource_order_independent": {
+        "status": "REPLAYED",
+        "revision": 2
+      },
+      "committed_manifest_conflict": {
+        "status": "OPERATION_CONFLICT"
+      },
+      "same_size_corruption_refuses_receipt": {
+        "status": "REPAIR_REQUIRED"
+      }
+    },
+    "resource_manifest": [
+      [
+        "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+        3990
+      ],
+      [
+        "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+        3870
+      ]
+    ],
+    "partial_publication_retains_all_task_pins": true,
+    "joint_commit_transfers_pins_to_references": true,
+    "published_inode_reused": true
+  },
+  "app_storage_touched": false,
+  "production_connected": false,
+  "power_loss_verified": false,
+  "fixture_sha256": {
+    "fixtures/storage/dev041-legacy-v1.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+    "fixtures/transfer/android-paged-v2.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+  },
+  "implementation_sha256": {
+    "tools/verify_sqlite_checkpoint_fixture.py": "6c674d48427588fd4b5bf2b8238b0da2fb1d59fee24c8261a00a67c498397d47",
+    "tools/probes/SqliteLegacyFixture.java": "356baa2167a07ae2100ed4e8035109744ef0f2bbd8b7f421e13738376264d8a0",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc"
+  },
+  "codec_artifact_sha256": {
+    "canvas-main.jar": "667e1d07b72517f52dd039b51a4451e91f61e31bf3a9e96d48269637290ef428",
+    "shared-main.jar": "d10bf10fece335424f9f972f9e713e4e2a6d36f9cc99b3b2651d7d1aaae73cf2",
+    "kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd"
+  },
+  "codec_verification_sha256": "c66e66243333f3afe19976f8196aac5d0a583a532f84a76c05ffed4799d8b855"
+}

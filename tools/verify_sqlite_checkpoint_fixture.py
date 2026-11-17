@@ -21,6 +21,11 @@ BUILD = ROOT / 'build'
 OFFLINE = ROOT / 'reports/offline-jvm-verification.json'
 DECODE = ROOT / 'tools/probes/SqliteLegacyFixture.java'
 SCOPE = 'dev041-checkpoint-fixture-v1'
+ATTACHMENTS = {
+    'attached': ('resource-a.bin', 'resource-b.bin'),
+    'attached-reversed': ('resource-b.bin', 'resource-a.bin'),
+    'attached-conflict': ('resource-a.bin',),
+}
 
 
 def raw_hash(path):
@@ -83,7 +88,9 @@ def worker(folder, op, base, source, kind, fault):
                 pages, = db.execute('PRAGMA page_count').fetchone()
                 db.execute(f'PRAGMA max_page_count={pages}')
             receipt = commit(db, op, None if base == 'new' else int(base), checkpoint,
-                             original=content if kind == 'import' else None, phase=phase)
+                             original=content if kind == 'import' or kind in ATTACHMENTS else None,
+                             resources=tuple((folder / name).read_bytes() for name in ATTACHMENTS.get(kind, ())),
+                             folder=folder, phase=phase)
         result = {'status': receipt.status, 'revision': receipt.revision}
     except Rejected as error:
         result = {'status': str(error)}
@@ -93,6 +100,114 @@ def worker(folder, op, base, source, kind, fault):
             raise
         result = {'status': 'SQLITE_FULL'}
     print(json.dumps(result), flush=True)
+
+
+def verify_resource_import(imported, transferred, v1, v2):
+    payloads = {'resource-a.bin': b'dev041-synthetic-attachment-A\x00' * 129,
+                'resource-b.bin': b'dev041-synthetic-attachment-B\x00' * 133}
+    inputs = {'legacy.ncp': v1, 'transfer.ncp': v2, **payloads}
+    manifest = sorted((digest(data).hex(), len(data)) for data in payloads.values())
+    expected_files = {digest(data).hex(): data for data in payloads.values()}
+    observations = {}
+    with tempfile.TemporaryDirectory(prefix='dev041-checkpoint-', dir=BUILD) as temp:
+        folder = Path(temp)
+        (folder / '.fixture-scope').write_text(SCOPE, encoding='utf-8')
+        for name, data in inputs.items():
+            (folder / name).write_bytes(data)
+        with open_store(folder, initialize=True):
+            pass
+
+        def invoke(label, expected, *, operation='attach-legacy', source='legacy.ncp', kind='attached', cut='none'):
+            result = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve()), '--worker', str(folder), operation,
+                 'new', source, kind, cut],
+                capture_output=True, timeout=45,
+            )
+            assert result.returncode == (-signal.SIGKILL if cut != 'none' else 0), (label, result)
+            observation = json.loads(result.stdout)
+            if cut == 'none':
+                assert observation == expected, (label, observation)
+            else:
+                assert observation['cut'] == cut and observation['pid'] > 0
+            observations[label] = observation
+
+        def snapshot():
+            with open_store(folder) as db:
+                assert db.execute('PRAGMA integrity_check').fetchone() == ('ok',)
+                assert db.execute('PRAGMA foreign_key_check').fetchall() == []
+                return {
+                    'documents': db.execute('SELECT id,revision,checkpoint FROM document ORDER BY id').fetchall(),
+                    'sources': db.execute('SELECT document_id,original FROM legacy_source ORDER BY document_id').fetchall(),
+                    'operations': db.execute('SELECT id,document_id FROM operation ORDER BY id').fetchall(),
+                    'resources': db.execute('SELECT sha256,size FROM resource ORDER BY sha256').fetchall(),
+                    'references': db.execute('SELECT operation_id,sha256 FROM operation_resource ORDER BY 1,2').fetchall(),
+                    'tasks': db.execute('SELECT operation_id,document_id FROM import_task').fetchall(),
+                    'pins': db.execute('SELECT sha256,size FROM import_task_resource ORDER BY sha256').fetchall(),
+                }
+
+        def published_files():
+            return {path.name: path.read_bytes() for path in (folder / 'resources').iterdir()}
+
+        invoke('previous_document', {'status': 'COMMITTED', 'revision': transferred.revision},
+               operation='existing', source='transfer.ncp', kind='import')
+        previous = {
+            'documents': [(transferred.document_id, transferred.revision, transferred.canonical)],
+            'sources': [(transferred.document_id, v2)],
+            'operations': [('existing', transferred.document_id)],
+            'resources': [], 'references': [], 'tasks': [], 'pins': [],
+        }
+        assert snapshot() == previous
+        invoke('one_resource_published', None, cut='resource-published')
+        pending = {**previous, 'tasks': [('attach-legacy', imported.document_id)], 'pins': manifest}
+        assert snapshot() == pending
+        first_sha = manifest[0][0]
+        assert published_files() == {first_sha: expected_files[first_sha]}
+        published_inode = (folder / 'resources' / first_sha).stat().st_ino
+
+        invoke('pending_manifest_conflict', {'status': 'OPERATION_CONFLICT'}, kind='attached-conflict')
+        invoke('pending_operation_reserved_document', {'status': 'DOCUMENT_RESERVED'}, operation='other-import', kind='import')
+        invoke('pending_operation_cannot_bypass_manifest', {'status': 'OPERATION_CONFLICT'}, kind='import')
+        assert snapshot() == pending
+        assert published_files() == {first_sha: expected_files[first_sha]}
+
+        second_sha = manifest[1][0]
+        occupied = folder / 'resources' / second_sha
+        invalid_target = b'X' * len(expected_files[second_sha])
+        occupied.write_bytes(invalid_target)
+        invoke('occupied_hash_refuses_overwrite', {'status': 'REPAIR_REQUIRED'})
+        assert snapshot() == pending
+        assert published_files() == {first_sha: expected_files[first_sha], second_sha: invalid_target}
+        occupied.unlink()  # Remove only the synthetic corruption that this verifier injected.
+
+        invoke('joint_transaction_uncommitted', None, cut='before-commit')
+        assert snapshot() == pending
+        assert published_files() == expected_files
+
+        invoke('joint_transaction_committed_before_receipt', None, cut='after-commit')
+        committed = {
+            'documents': sorted([*previous['documents'], (imported.document_id, imported.revision, imported.canonical)]),
+            'sources': sorted([*previous['sources'], (imported.document_id, v1)]),
+            'operations': [('attach-legacy', imported.document_id), *previous['operations']],
+            'resources': manifest,
+            'references': [('attach-legacy', sha) for sha, _ in manifest],
+            'tasks': [], 'pins': [],
+        }
+        assert snapshot() == committed
+        assert published_files() == expected_files
+        assert (folder / 'resources' / first_sha).stat().st_ino == published_inode
+
+        invoke('replay_resource_order_independent', {'status': 'REPLAYED', 'revision': imported.revision},
+               kind='attached-reversed')
+        invoke('committed_manifest_conflict', {'status': 'OPERATION_CONFLICT'}, kind='attached-conflict')
+        damaged = bytes([expected_files[first_sha][0] ^ 1]) + expected_files[first_sha][1:]
+        (folder / 'resources' / first_sha).write_bytes(damaged)
+        invoke('same_size_corruption_refuses_receipt', {'status': 'REPAIR_REQUIRED'})
+        assert snapshot() == committed
+        assert published_files() == {**expected_files, first_sha: damaged}
+        assert all((folder / name).read_bytes() == data for name, data in inputs.items())
+    return {'observations': observations, 'resource_manifest': manifest,
+            'partial_publication_retains_all_task_pins': True,
+            'joint_commit_transfers_pins_to_references': True, 'published_inode_reused': True}
 
 
 def verify():
@@ -211,6 +326,7 @@ def verify():
         'status': 'passed', 'milestone': 'DEV-041', 'scope': 'isolated host SQLite, JVM preview codec, synthetic notes',
         'sqlite_version': sqlite3.sqlite_version, 'journal_mode': 'wal', 'synchronous': 'full',
         'crash_signal': 'SIGKILL', 'events': events, 'original_fixtures_preserved': True,
+        'joint_resource_import': verify_resource_import(imported, transferred, v1, v2),
         'app_storage_touched': False, 'production_connected': False, 'power_loss_verified': False,
         'fixture_sha256': {path.relative_to(ROOT).as_posix(): raw_hash(path) for path in (V1, V2)},
         'implementation_sha256': {
