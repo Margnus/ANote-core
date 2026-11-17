@@ -622,6 +622,53 @@ final class PagedHostTests: XCTestCase {
         model.close()
     }
 
+    @MainActor func testRetainedOpenUsesItsOwnWorkerByteBoundary() async throws {
+        let original = try windowCheckpoint()
+        let snapshot = try PagedPreviewSnapshot.companion.fromRoot(root: original.root)
+        let needed = snapshot.retainedByteCharge + 4096
+        print("NOTECORE_RETAINED_OPEN charge=\(needed) disk=\(PagedPreviewCodec.shared.maximumDecodingWorkByteCharge())")
+        for shortfall in [Int64(1), 0] {
+            let dir = directory()
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            let entered = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+            defer { release.signal(); try? FileManager.default.removeItem(at: dir) }
+            let model = PreviewModel(directory: dir, storageWorkBytes: snapshot.encodingWorkByteCharge + needed - shortfall,
+                beforeOpenRead: { throw CocoaError(.fileReadUnknown) }, observeWriteBoundary: { boundary in
+                    if boundary == .beforeAtomicWrite { entered.signal(); release.wait() }
+                })
+            try model.adopt(snapshot.root, persisted: false)
+            XCTAssertTrue(model.save())
+            var writing = false
+            try await eventually("original write holds the worker reservation") {
+                if !writing { writing = entered.wait(timeout: .now()) == .success }
+                return writing
+            }
+            model.close()
+            XCTAssertNil(model.current)
+            let worker = try XCTUnwrap(Mirror(reflecting: model).descendant("$__lazy_storage_$_executor") as? AppleBoundedOwnerExecutor)
+            XCTAssertEqual(try worker.status().availableBytes, needed - shortfall)
+            model.open(snapshot.documentId)
+            if shortfall == 1 {
+                XCTAssertEqual(model.status, "后台队列繁忙，请重新打开笔记")
+                XCTAssertEqual(try worker.status().entries.count, 1)
+            } else {
+                XCTAssertEqual(try worker.status().entries.map(\.chargedBytes), [snapshot.encodingWorkByteCharge, needed])
+            }
+            XCTAssertEqual(model.ownerRetirementStatus.inFlightWrites, 1)
+            release.signal()
+            try await eventually("retained capture and original write settle") { (try? worker.status().entries.isEmpty) == true }
+            if shortfall == 1 { XCTAssertNil(model.current) }
+            else {
+                XCTAssertTrue(model.current?.snapshot() === snapshot.root)
+                XCTAssertTrue(model.status.hasPrefix("已打开"))
+            }
+            let file = dir.appendingPathComponent(snapshot.documentId + ".ncp")
+            XCTAssertEqual(try Data(contentsOf: file), Data(try snapshot.encode().utf8))
+            XCTAssertEqual(model.beginOwnerRetirement(), .started)
+            try await eventually("isolated owner retires") { model.ownerRetirementStatus.phase == .retired }
+        }
+    }
+
     @MainActor func testRefusedRecoveryOpenPreservesUnsavedOriginalPending() async throws {
         let (pending, _) = try androidViewWorkerFiles()
         let dir = directory()

@@ -651,7 +651,7 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         }
         activeNotebook?.takeIf { it.documentId == id }?.let { callback(OpenedDocument(it.snapshot(), activeSavedRoot.get() === it.snapshot() && activeSavedPending.get() === it.pendingStroke(), it.captureRecovery()), null); return }
         val retained = ledger.latest(id); val epoch = viewEpoch
-        request(Triple(id, retained, io), READ_WORK_BYTES, { input ->
+        request(Triple(id, retained, io), previewOpenWorkByteCharge(retained), { input ->
             if (input.second == null) input.third.readOutcome(input.first) else input.third.acceptRecovery(input.second as PagedPreviewSnapshot, input.first)
         }, { callback(null, "后台队列繁忙，请重新打开笔记") }) { result ->
             if (viewEpoch != epoch) {

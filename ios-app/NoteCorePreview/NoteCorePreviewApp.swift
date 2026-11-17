@@ -498,8 +498,9 @@ final class PreviewModel: ObservableObject {
         navigationEpoch += 1
         let navigation = navigationEpoch, epoch = storageEpoch
         let retained = ledger.latest(documentId: id)
+        let workBytes = ApplePreviewEditorAdmission.shared.openWorkByteCharge(retained: retained)
         status = "正在打开…"
-        request(input: (Self.file(id, directory: directory), id, retained, beforeOpenRead), bytes: PagedPreviewCodec.shared.maximumDecodingWorkByteCharge(), compute: { input in
+        request(input: (Self.file(id, directory: directory), id, retained, beforeOpenRead), bytes: workBytes, compute: { input in
             if let retained = input.2 as? PagedPreviewSnapshot { return PreviewFileIO.acceptRecovery(retained, documentId: input.1) }
             guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
             return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)

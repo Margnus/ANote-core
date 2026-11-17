@@ -4,4 +4,6 @@ package dev.notecore.document
 object ApplePreviewEditorAdmission {
     fun failure(snapshot: PagedPreviewSnapshot, budget: DocumentBudget): PreviewOpenFailure? =
         previewAppRecoveryFailure(snapshot, budget)
+
+    fun openWorkByteCharge(retained: PreviewSaveSnapshot?): Long = previewAppOpenWorkByteCharge(retained)
 }

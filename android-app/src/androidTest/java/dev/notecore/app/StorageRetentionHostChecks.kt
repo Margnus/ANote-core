@@ -294,6 +294,7 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             }
             verifyReopenAfterWriteAcknowledgement()
             checks.add("retained_reopen_observes_preceding_write_ack")
+            checks.add("retained_reopen_reserves_capture_at_exact_byte_boundary")
             return JSONObject().put("checks", JSONArray(checks)).put("original_note_files_used", false)
                 .put("apple_round_trip_base64", Base64.encodeToString(appleRoundTrip, Base64.NO_WRAP))
                 .put("system_file_picker_verified", false).toString()
@@ -307,21 +308,36 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
         val writerEntered = CountDownLatch(1)
         val releaseWriter = CountDownLatch(1)
         lateinit var store: NoteStore
+        lateinit var snapshot: PagedPreviewSnapshot
         var reopened = false
         try {
             main {
-                store = NoteStore.isolated(host, directory, observeWriteBoundary = { boundary ->
-                    if (boundary == PreviewWriteBoundary.SYNCED_BEFORE_REPLACE) {
-                        writerEntered.countDown()
-                        check(releaseWriter.await(12, TimeUnit.SECONDS))
-                    }
-                })
+                store = NoteStore.isolated(host, directory, beforeOpenRead = { error("retained reopen reached disk") },
+                    observeWriteBoundary = { boundary ->
+                        if (boundary == PreviewWriteBoundary.SYNCED_BEFORE_REPLACE) {
+                            writerEntered.countDown()
+                            check(releaseWriter.await(12, TimeUnit.SECONDS))
+                        }
+                    })
                 val note = store.create()
-                val snapshot = note.captureRecovery()
+                snapshot = note.captureRecovery()
                 check(store.save(snapshot) { _, error -> check(error == null) })
                 check(writerEntered.await(5, TimeUnit.SECONDS))
                 check(store.releaseActive(note))
                 check(store.saveStates().single().inFlight)
+                val worker = NoteStore::class.java.getDeclaredField("executor").apply { isAccessible = true }
+                    .get(store) as BoundedOwnerExecutor
+                val needed = snapshot.retainedByteCharge + 4096
+                val padding = worker.availableBytes() - needed
+                check(worker.trySetRetainedOwnerBytes(padding + 1))
+                var refused = false
+                store.open(snapshot.documentId) { opened, message ->
+                    check(opened == null && message == "后台队列繁忙，请重新打开笔记")
+                    refused = true
+                }
+                check(refused && worker.availableBytes() == needed - 1)
+                check(store.saveStates().single().inFlight && store.saveStates().single().snapshot.sameContent(snapshot))
+                check(worker.trySetRetainedOwnerBytes(padding))
                 store.open(snapshot.documentId) { opened, message ->
                     check(message == null && opened?.persisted == true)
                     val restored = store.adopt(checkNotNull(opened))
@@ -335,9 +351,13 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                     check(acknowledged && store.saveStates().isEmpty())
                     reopened = true
                 }
+                check(worker.availableBytes() == 0L)
+                check(worker.trySetRetainedOwnerBytes(0))
             }
             releaseWriter.countDown()
             eventually("Reopen did not use the preceding write acknowledgement") { reopened }
+            check(File(directory, "${snapshot.documentId}.ncp").readText() == snapshot.encode())
+            android.util.Log.i("NoteCoreStorageTest", "retained open charge=${snapshot.retainedByteCharge + 4096} disk=${PagedPreviewCodec.maximumDecodingWorkByteCharge()}")
         } finally {
             releaseWriter.countDown()
             main { store.stopTestBackend() }
