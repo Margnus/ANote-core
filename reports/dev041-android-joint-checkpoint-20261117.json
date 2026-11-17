@@ -1,0 +1,209 @@
+{
+  "status": "passed",
+  "environment": {
+    "api": "26",
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "abi": "arm64-v8a",
+    "selinux": "Enforcing",
+    "kernel": "3.18.94+"
+  },
+  "avd": "NoteCoreJoint26-54aa282dd1c04b889aee57e1357133d9",
+  "observations": {
+    "seeded": {
+      "status": "SEEDED",
+      "stage": "init",
+      "pid": 2649,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"SEEDED\",\"stage\":\"init\",\"pid\":2649,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c98b2b2a5bb28b81812b5dd76b8d58347bd81d70188bc344c6fc8467a1a64f00"
+      },
+      "resources": {}
+    },
+    "partial_publish": {
+      "cut": "resource-published",
+      "pid": 2685,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c98b2b2a5bb28b81812b5dd76b8d58347bd81d70188bc344c6fc8467a1a64f00",
+        "checkpoint.sqlite-wal": "ebb65c4d392dd84d9892b972f6b7b378b68121f12646d074db4603d611ff8686"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      }
+    },
+    "pending_conflict": {
+      "status": "OPERATION_CONFLICT",
+      "stage": "conflict",
+      "pid": 2734,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"OPERATION_CONFLICT\",\"stage\":\"conflict\",\"pid\":2734,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "605873f7977f2ac0252d56227a03c05ee941b292cd52642ce3901fa3fca0be72"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      }
+    },
+    "uncommitted": {
+      "cut": "before-commit",
+      "pid": 2779,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "605873f7977f2ac0252d56227a03c05ee941b292cd52642ce3901fa3fca0be72",
+        "checkpoint.sqlite-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115115,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      }
+    },
+    "occupied_corrupt": {
+      "status": "REPAIR_REQUIRED",
+      "stage": "replay",
+      "pid": 2842,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"REPAIR_REQUIRED\",\"stage\":\"replay\",\"pid\":2842,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "605873f7977f2ac0252d56227a03c05ee941b292cd52642ce3901fa3fca0be72"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115115,
+          "sha256": "658753fe728e4b5a17703a609f7484569180580c14dbd781a0f23609882c2663"
+        }
+      }
+    },
+    "committed_without_receipt": {
+      "cut": "after-commit",
+      "pid": 2900,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "605873f7977f2ac0252d56227a03c05ee941b292cd52642ce3901fa3fca0be72",
+        "checkpoint.sqlite-wal": "8380164e9171d75a8c8a863d2e8a0cc7c7c4e9953d1d9966bd2efddaff1f62db"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115115,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      }
+    },
+    "replayed": {
+      "status": "REPLAYED",
+      "stage": "replay",
+      "pid": 2957,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"REPLAYED\",\"stage\":\"replay\",\"pid\":2957,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "07aaaabe875d3921c3e6ac6a173c76f1b3632ffe0874646848b7641c9411f392"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115115,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      }
+    },
+    "committed_conflict": {
+      "status": "OPERATION_CONFLICT",
+      "stage": "conflict",
+      "pid": 3008,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"OPERATION_CONFLICT\",\"stage\":\"conflict\",\"pid\":3008,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "07aaaabe875d3921c3e6ac6a173c76f1b3632ffe0874646848b7641c9411f392"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115115,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      }
+    },
+    "committed_corruption": {
+      "status": "REPAIR_REQUIRED",
+      "stage": "replay",
+      "pid": 3064,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"REPAIR_REQUIRED\",\"stage\":\"replay\",\"pid\":3064,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "07aaaabe875d3921c3e6ac6a173c76f1b3632ffe0874646848b7641c9411f392"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115113,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115115,
+          "sha256": "658753fe728e4b5a17703a609f7484569180580c14dbd781a0f23609882c2663"
+        }
+      }
+    }
+  },
+  "host_integrity_and_foreign_keys": "passed after all 9 stages",
+  "canonical_sha256": "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+  "inputs_sha256": {
+    "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+    "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+    "schema.json": "680f815cfa16ddf54c32ef442ef1a8f1696217022fd48e52dbec40c7cc07f6a8",
+    "resource-a.bin": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+    "resource-b.bin": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+  },
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "aars_sha256": {
+    "canvas-core-android-0.0.0-c1.aar": "4d80b415f483fdd707bc37248abd0cf93b39905d3e5167bb2452a1bfe567a2d4",
+    "shared-core-android-0.0.0-c1.aar": "55bc9a3d861f7df1ef5bcc6967bbbbd26238c66dfd5ef583c77a98d8f332b112"
+  },
+  "apk_sha256": "0c0f04e688df84347045be4ec84a6ac2015a64fcbce4a1e611a08610c4fa8418",
+  "atomic_apk_sha256": "6c214d2de85b5dee2c4c7263fc7abb5ec994c8d459345ab5b29c45f742e675c0",
+  "jni_sha256": "539834aaa8b90f15ba5872f72e24422f431b9c331681e4c8e5ba0e0857f7bfa1",
+  "source_sha256": {
+    "tools/verify_android_sqlite_joint_checkpoint.py": "86b7e5663b9a185393d32f363458e94e4199ac2d05299137c493734fe4105d04",
+    "tools/probes/AtomicPromoteProbe.java": "d362b84363f1b040e3e683f611006d2ce3f9fc977c78294ee19e35304574ced3",
+    "tools/probes/SqliteJointCheckpointAndroid.java": "67dcd4e703b274cb050d4e0d0065e44d7f7a93178dcc7574989de168b155bae2",
+    "tools/probes/atomic-promote-AndroidManifest.xml": "d4bb3980917d8c225d4084e3c8bd3a231fe0f7082c226d66db5ac05c35896385",
+    "tools/probes/SqliteLegacyFixture.java": "356baa2167a07ae2100ed4e8035109744ef0f2bbd8b7f421e13738376264d8a0",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/android-atomic-promote-api26.json": "af627daf02026b1893734e7423ebb414f63068aaf320953af442398f7cd2a667"
+  }
+}
