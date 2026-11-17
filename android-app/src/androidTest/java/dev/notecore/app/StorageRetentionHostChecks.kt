@@ -107,8 +107,29 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             checks.add("repair_retries_exact_root")
             val canonical = File(directory, "${changed.documentId}.ncp")
             val backup = File(directory, canonical.name + ".bak")
+            val validBytes = changed.encode()
+            val damagedBackup = validBytes.removeSuffix("END\n") + "INCOMPLETE\n"
+            backup.writeText(damagedBackup)
+            var listedWithDamagedBackup = false
+            var refusedBackup = false
+            main {
+                check(store.releaseActive(note))
+                store.list { rows, error ->
+                    check(error == null && rows.single().id == changed.documentId)
+                    listedWithDamagedBackup = true
+                }
+                store.open(changed.documentId) { opened, error ->
+                    check(opened == null && error == LocalReadFailure.INVALID_FORMAT.message)
+                    refusedBackup = true
+                }
+            }
+            eventually("Damaged legacy backup was not refused") { listedWithDamagedBackup && refusedBackup }
+            check(canonical.readText() == validBytes && backup.readText() == damagedBackup)
+            checks.add("damaged_legacy_backup_preserves_original_during_list_and_open")
+            check(backup.delete())
             check(canonical.renameTo(backup))
-            canonical.writeText("partial base left by a legacy writer")
+            val partialBase = "partial base left by a legacy writer"
+            canonical.writeText(partialBase)
             val unrelated = (0 until 2000).map { File(directory, "unrelated-$it.ncp") } +
                 File(directory, "unrelated-backup.ncp.bak")
             unrelated.forEach { check(it.mkdir()) }
@@ -121,9 +142,20 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
                 "Unrelated directories hid the saved note: $catalogError"
             }
             check(summaries.single().title == changed.title)
-            check(canonical.readText(Charsets.UTF_8) == changed.encode() && !backup.exists())
+            check(canonical.readText() == partialBase && backup.readText() == validBytes)
+            var backupOpened = false
+            main { store.open(changed.documentId) { opened, error ->
+                check(error == null && opened?.persisted == true)
+                note = store.adopt(checkNotNull(opened))
+                check(note.captureRecovery().sameContent(changed))
+                backupOpened = true
+            } }
+            eventually("Open did not recover valid legacy backup") { backupOpened }
+            check(canonical.readText(Charsets.UTF_8) == validBytes && !backup.exists())
             check(unrelated.all { it.isDirectory })
             checks.add("catalog_ignores_directories_and_recovers_legacy_backup")
+            verifyLegacyBackupDuringFailedWrite(changed)
+            checks.add("legacy_backup_survives_failed_write_until_verified_replacement")
             checks.add("catalog_retry_preserves_retained_edits_and_recovers_disk_list")
             val damaged = File(directory, "damaged-header.ncp")
             val oversizedHeader = "NCPREVIEW\t2\n" + "x".repeat(4096) + "\n"
@@ -367,6 +399,42 @@ internal class StorageRetentionHostChecks(private val test: Instrumentation, pri
             android.util.Log.i("NoteCoreStorageTest", "retained open charge=${snapshot.retainedByteCharge + 4096} disk=${PagedPreviewCodec.maximumDecodingWorkByteCharge()}")
         } finally {
             releaseWriter.countDown()
+            main { store.stopTestBackend() }
+            directory.deleteRecursively()
+        }
+    }
+
+    private fun verifyLegacyBackupDuringFailedWrite(original: PagedPreviewSnapshot) {
+        val directory = File(host.cacheDir, "legacy-backup-write-${java.util.UUID.randomUUID()}")
+        check(directory.mkdir())
+        val root = original.root
+        val base = File(directory, "${original.documentId}.ncp").apply { writeText(original.encode()) }
+        val backupText = PagedPreviewSnapshot.fromRoot(DocumentRoot.compose("Legacy backup", root.scene, root.pages())).encode()
+        val backup = File(directory, base.name + ".bak").apply { writeText(backupText) }
+        val staging = File(directory, base.name + ".new").apply { writeText("Unpublished staging") }
+        val fail = java.util.concurrent.atomic.AtomicBoolean(true)
+        lateinit var store: NoteStore
+        lateinit var latest: PagedPreviewSnapshot
+        try {
+            main {
+                store = NoteStore.isolated(host, directory, observeWriteBoundary = { boundary ->
+                    if (boundary == PreviewWriteBoundary.SYNCED_BEFORE_REPLACE && fail.getAndSet(false)) {
+                        throw java.io.IOException("Injected replacement failure")
+                    }
+                })
+                val note = store.adopt(OpenedDocument(root, true, original))
+                check(note.rename("Verified replacement"))
+                latest = note.captureRecovery()
+                check(store.save(latest) { _, _ -> })
+            }
+            eventually("Replacement failure did not retain the latest capture") {
+                store.saveStates().singleOrNull()?.let { it.retryRequired && it.snapshot === latest } == true
+            }
+            check(base.readText() == original.encode() && backup.readText() == backupText && !staging.exists())
+            main { check(store.retryRetainedWrites()) }
+            eventually("Legacy replacement did not receive write ACK") { store.saveStates().isEmpty() }
+            check(base.readText() == latest.encode() && !backup.exists())
+        } finally {
             main { store.stopTestBackend() }
             directory.deleteRecursively()
         }

@@ -67,19 +67,15 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
         require(isLocalPreviewDocumentId(id))
         return File(directory, "$id.ncp")
     }
-    private fun recoverFile(id: String): File {
-        val base = file(id)
+    private fun checkStorageEntries(base: File) {
         for (suffix in listOf("", ".bak", ".new")) {
             val path = File(directory, base.name + suffix).toPath()
             val attributes = entryAttributes(path) ?: continue
             if (!attributes.isRegularFile) throw IOException("Unexpected preview storage entry")
         }
-        // Older Android builds backed up the previous committed file before writing the base.
-        val backup = File(directory, base.name + ".bak").toPath()
-        if (entryAttributes(backup) != null) Files.move(backup, base.toPath(), ATOMIC_MOVE)
-        Files.deleteIfExists(File(directory, base.name + ".new").toPath())
-        return base
     }
+    private fun backupFile(base: File): File = File(directory, base.name + ".bak")
+    private fun stagingFile(base: File): File = File(directory, base.name + ".new")
     private fun entryAttributes(path: Path): BasicFileAttributes? = try {
         Files.readAttributes(path, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
     } catch (_: NoSuchFileException) {
@@ -87,8 +83,10 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
     }
     fun write(snapshot: PreviewSaveSnapshot) {
         ensureDirectory()
-        val base = recoverFile(snapshot.documentId)
-        val staging = File(directory, base.name + ".new")
+        val base = file(snapshot.documentId)
+        checkStorageEntries(base)
+        val staging = stagingFile(base)
+        Files.deleteIfExists(staging.toPath())
         val digest = MessageDigest.getInstance("SHA-256")
         var size: Int
         try {
@@ -120,6 +118,8 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
                 "Committed file differs from accepted snapshot"
             }
         }
+        // A legacy backup remains the prior recovery source until the replacement has been verified.
+        Files.deleteIfExists(backupFile(base).toPath())
         observeWriteBoundary?.invoke(PreviewWriteBoundary.VERIFIED_BEFORE_RETURN)
     }
     fun export(uri: Uri, snapshot: PagedPreviewSnapshot) {
@@ -177,26 +177,39 @@ internal class PreviewFileIO(private val directory: File, private val resolver: 
             NoteSummary(id, title, file(id).lastModified())
         }
     }
-    private fun readHeader(id: String): PagedPreviewHeader = FileInputStream(recoverFile(id)).use { stream ->
+    private fun readHeader(id: String): PagedPreviewHeader {
+        val base = file(id)
+        checkStorageEntries(base)
+        val source = backupFile(base).takeIf { entryAttributes(it.toPath()) != null } ?: base
+        return FileInputStream(source).use(::readHeader).also { require(it.documentId == id) }
+    }
+
+    private fun readHeader(stream: FileInputStream): PagedPreviewHeader {
         val input = stream.buffered(256); val bytes = java.io.ByteArrayOutputStream(1024); var newlines = 0
         while (newlines < 2) {
             require(bytes.size() < 4096) { "Invalid catalog header" }
             val value = input.read(); require(value >= 0) { "Invalid catalog header" }
             bytes.write(value); if (value == 10) newlines++
         }
-        PreviewRecoveryCodec.header(decode(bytes.toByteArray())).also { require(it.documentId == id) }
+        return PreviewRecoveryCodec.header(decode(bytes.toByteArray()))
     }
     private fun decode(bytes: ByteArray): String = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
         .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
     fun read(id: String): DocumentRoot = readRecovery(id).let {
         require(it.pending == null) { "Pending recovery requires the original owner" }; it.root
     }
-    fun readRecovery(id: String): PagedPreviewSnapshot = FileInputStream(recoverFile(id)).use { stream ->
-        val size = stream.channel.size()
-        if (size > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
-        val snapshot = readSnapshot(stream, allowRecovery = true)
+    fun readRecovery(id: String): PagedPreviewSnapshot {
+        val base = file(id)
+        checkStorageEntries(base)
+        val backup = backupFile(base).takeIf { entryAttributes(it.toPath()) != null }
+        val snapshot = FileInputStream(backup ?: base).use { stream ->
+            if (stream.channel.size() > PagedPreviewCodec.MAX_UTF8_BYTES.toLong()) throw ReadRefused(LocalReadFailure.BYTE_CAPACITY)
+            readSnapshot(stream, allowRecovery = true)
+        }
         if (snapshot.documentId != id) throw ReadRefused(LocalReadFailure.WRONG_DOCUMENT)
-        snapshot
+        if (backup != null) Files.move(backup.toPath(), base.toPath(), ATOMIC_MOVE)
+        Files.deleteIfExists(stagingFile(base).toPath())
+        return snapshot
     }
     fun acceptRecovery(snapshot: PagedPreviewSnapshot, id: String): LocalRecoveryRead {
         val content = PreviewDocumentReader.accept(snapshot.root)
