@@ -1,0 +1,104 @@
+{
+  "status": "passed",
+  "scope": "Android API 26 instrumentation in a fresh App sandbox; process kills",
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "runtime": {
+    "api": "26",
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "abi": "arm64-v8a",
+    "selinux": "Enforcing"
+  },
+  "observations": {
+    "00-seed": {
+      "stage": "seed",
+      "pid": 2597,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "SEEDED",
+      "sqlite": "3.18.2"
+    },
+    "01-invalid": {
+      "stage": "invalid",
+      "pid": 2629,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "INVALID_SOURCE",
+      "sqlite": "3.18.2"
+    },
+    "02-capacity": {
+      "stage": "capacity",
+      "pid": 2664,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "INPUT_CAPACITY",
+      "sqlite": "3.18.2"
+    },
+    "03-before-commit": {
+      "stage": "before-commit",
+      "pid": 2696,
+      "domain": "u:r:untrusted_app:s0:c512,c768"
+    },
+    "04-empty": {
+      "stage": "empty",
+      "pid": 2730,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "EMPTY",
+      "sqlite": "3.18.2"
+    },
+    "05-after-commit": {
+      "stage": "after-commit",
+      "pid": 2762,
+      "domain": "u:r:untrusted_app:s0:c512,c768"
+    },
+    "06-present": {
+      "stage": "present",
+      "pid": 2797,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "PRESENT",
+      "sqlite": "3.18.2"
+    },
+    "07-replay": {
+      "stage": "replay",
+      "pid": 2830,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "REPLAYED",
+      "sqlite": "3.18.2"
+    },
+    "08-duplicate": {
+      "stage": "duplicate",
+      "pid": 2862,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "STALE_BASE",
+      "sqlite": "3.18.2"
+    },
+    "09-present": {
+      "stage": "present",
+      "pid": 2894,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "PRESENT",
+      "sqlite": "3.18.2"
+    }
+  },
+  "source_unchanged": true,
+  "checkpoint_revision": 2,
+  "source_archive_sha256": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+  "canonical_sha256": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+  "apk_sha256": "7ba061601177187f9ba094651e018b16fcddc6e89b20c95b35bbf279d1805912",
+  "aars_sha256": {
+    "canvas-core-android-0.0.0-c1.aar": "4d80b415f483fdd707bc37248abd0cf93b39905d3e5167bb2452a1bfe567a2d4",
+    "shared-core-android-0.0.0-c1.aar": "55bc9a3d861f7df1ef5bcc6967bbbbd26238c66dfd5ef583c77a98d8f332b112"
+  },
+  "stdlib_sha256": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+  "inputs_sha256": {
+    "tools/verify_android_sqlite_pending_recovery.py": "f9ae279336ef4f5bc377a674d1ea1f7ba1a04c7eae43cbb110cbbe0d93d0a0ef",
+    "tools/probes/SqlitePendingCheckpointAndroid.java": "cd41fb045d888f7f0d871709a4228fba3a4034e5948c8e04c173aa57589b1472",
+    "tools/probes/atomic-promote-AndroidManifest.xml": "d4bb3980917d8c225d4084e3c8bd3a231fe0f7082c226d66db5ac05c35896385",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/apple-sqlite-joint-checkpoint-20261117/verification.json": "b7bd43b8986756c0a141a4aa39ff80902077288f6be065143609db57940b1ae9",
+    "reports/dev041-pending-recovery-20261118.json": "6435d876d4076ade193b22200c4c6c6ac7a35f0224434838228e61b7c21c746e",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+  },
+  "raw_sha256": {
+    "commands.log": "faf38e444356d538ace204137c51f57d74f7122c2e765b3cd843e5842e04e6db",
+    "emulator.log": "e9aa903153c8ee539c9aed3216404308f3f5108124cfc5f64c84a7f054b0a284"
+  }
+}
