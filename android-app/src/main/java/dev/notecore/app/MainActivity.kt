@@ -12,6 +12,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowInsets
 import android.widget.*
+import dev.notecore.canvas.prototype.BrushKind
 import dev.notecore.document.*
 
 class MainActivity : Activity() {
@@ -151,6 +152,14 @@ class MainActivity : Activity() {
         val colors = listOf("墨黑" to navy, "深蓝" to 0xff3568be.toInt(), "朱红" to 0xffce4d52.toInt(), "松绿" to 0xff21816b.toInt())
         colors.forEach { (name, color) -> palette.addView(button(name) { canvas?.cancelInk(); canvas?.penColor = color }.apply { setTextColor(color) }) }
         listOf("细" to 2.5, "中" to 5.0, "粗" to 9.0).forEach { (name, width) -> palette.addView(button(name) { canvas?.cancelInk(); canvas?.penWidth = width }) }
+        val highlighterButton = button("荧光笔") {}
+        highlighterButton.setOnClickListener {
+            val view = canvas ?: return@setOnClickListener
+            view.cancelInk()
+            view.penKind = if (view.penKind == BrushKind.HIGHLIGHTER) BrushKind.MONOLINE else BrushKind.HIGHLIGHTER
+            highlighterButton.text = if (view.penKind == BrushKind.HIGHLIGHTER) "荧光笔✓" else "荧光笔"
+        }
+        palette.addView(highlighterButton)
         root.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(palette) })
         val viewportTools = row()
         viewportTools.addView(button("缩小") { canvas?.zoomViewport(1.0 / 1.5) })

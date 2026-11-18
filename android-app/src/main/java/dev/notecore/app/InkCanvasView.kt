@@ -5,7 +5,7 @@ import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
 import dev.notecore.document.*
-import dev.notecore.canvas.prototype.PointerPhase
+import dev.notecore.canvas.prototype.*
 import dev.notecore.canvas.preview.PreviewViewport
 import kotlin.math.hypot
 
@@ -17,6 +17,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     var fingerDrawing = true
     var penColor = 0xff253247.toInt()
     var penWidth = 2.5
+    var penKind = BrushKind.MONOLINE
     private val ink = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
     private val paper = Paint().apply { color = Color.WHITE }
     private val guide = Paint().apply { color = 0xffeaf0f5.toInt(); strokeWidth = 1f }
@@ -105,7 +106,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                     val m = stroke.transform
                     val matrix = Matrix().apply { setValues(floatArrayOf(m.a.toFloat(), m.c.toFloat(), m.tx.toFloat(),
                         m.b.toFloat(), m.d.toFloat(), m.ty.toFloat(), 0f, 0f, 1f)) }
-                    paths.add(RenderStroke(path, stroke.brush.argb, stroke.brush.width.toFloat(), x, sy,
+                    paths.add(RenderStroke(path, BrushDisplayRules.displayArgb(stroke.brush), stroke.brush.width.toFloat(), x, sy,
                         n == 1 || (0 until n).all { samples.x(it).toFloat() == x && samples.y(it).toFloat() == sy }, matrix))
                 }
                 cachedVersion = notebook.changeVersion; cachedPage = page.id
@@ -121,7 +122,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         }
         canvas.clipRect(0f,0f,notebook.currentPage.width.toFloat(),notebook.currentPage.height.toFloat())
         active?.takeIf { ownsInput }?.let {
-            ink.style = Paint.Style.STROKE; ink.color = penColor; ink.strokeWidth = penWidth.toFloat()
+            ink.style = Paint.Style.STROKE; ink.color = BrushDisplayRules.displayArgb(BrushSpec(penKind, 1, penWidth, penColor)); ink.strokeWidth = penWidth.toFloat()
             if (moved) canvas.drawPath(it, ink) else { ink.style = Paint.Style.FILL; canvas.drawCircle(startX, startY, penWidth.toFloat() / 2, ink) }
         }
         canvas.restore()
@@ -221,7 +222,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 val x = batch.xs.first(); val y = batch.ys.first()
                 if (!x.isFinite() || !y.isFinite()) { rejectInput("输入数据无效"); return true }
                 if (x !in 0.0..notebook.currentPage.width || y !in 0.0..notebook.currentPage.height) return true
-                val pen = notebook.edit(PreviewEdit.SelectPen(penColor, penWidth))
+                val pen = notebook.edit(PreviewEdit.SelectPen(penColor, penWidth, penKind))
                 if (!pen.accepted) { error(pen.failure.previewMessage()); return true }
                 admit(batch, PointerPhase.DOWN) ?: return true
                 inputOperation = notebook.activeInputOperationId

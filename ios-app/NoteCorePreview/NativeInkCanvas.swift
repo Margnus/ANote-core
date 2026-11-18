@@ -31,6 +31,7 @@ struct NativeInkCanvas: UIViewRepresentable {
     let renderModel: PreviewModel
     let color: Int32
     let width: Double
+    let kind: BrushKind
     let finger: Bool
     let revision: Int64
     let viewportRequest: Int
@@ -47,9 +48,9 @@ struct NativeInkCanvas: UIViewRepresentable {
     func updateUIView(_ view: InkUIView, context: Context) {
         view.inputWindow = inputOwner
         inputOwner?.bindInput(view)
-        if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width { view.cancelInk() }
+        if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width || view.penKind != kind { view.cancelInk() }
         view.refreshPage()
-        view.penColor = color; view.penWidth = width; view.fingerDrawing = finger
+        view.penColor = color; view.penWidth = width; view.penKind = kind; view.fingerDrawing = finger
         if view.lastViewportRequest != viewportRequest {
             view.cancelInk(); view.lastViewportRequest = viewportRequest
             if viewportRatio == 0 { view.viewport.reset() }
@@ -104,6 +105,7 @@ final class InkUIView: UIView {
     var failed: (String) -> Void = { _ in }
     var penColor: Int32 = Int32(bitPattern: 0xff253247)
     var penWidth: Double = 2.5
+    var penKind: BrushKind = .monoline
     var fingerDrawing = true
     private var active: UITouch?
     private var inputOperation: String?
@@ -210,7 +212,7 @@ final class InkUIView: UIView {
                         let next = CGPoint(x: samples.x(index: point), y: samples.y(index: point))
                         p.addLine(to: next); moved = moved || next != start
                     }
-                    return CachedStroke(path: p, color: inkColor(stroke.brush.argb), width: stroke.brush.width,
+                    return CachedStroke(path: p, color: inkColor(BrushDisplayRules.shared.displayArgb(brush: stroke.brush)), width: stroke.brush.width,
                         transform: CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty), dot: moved ? nil : start)
                 }
                 cachedVersion = note.changeVersion; cachedPage = page.id.value
@@ -225,7 +227,7 @@ final class InkUIView: UIView {
                 c.restoreGState()
             }
         }
-        if ownsInput, let path = path { inkColor(penColor).setStroke(); path.lineWidth = penWidth; path.stroke() }
+        if ownsInput, let path = path { inkColor(BrushDisplayRules.shared.displayArgb(brush: BrushSpec(kind: penKind, algorithmVersion: 1, width: penWidth, argb: penColor))).setStroke(); path.lineWidth = penWidth; path.stroke() }
         c.restoreGState()
     }
     private struct RealSample { let point: CGPoint; let pressure: Float; let time: Int64 }
@@ -303,7 +305,7 @@ final class InkUIView: UIView {
         guard let samples = preparedSamples(touch, event: event, phase: .down), let first = samples.first else { return }
         let p = first.point
         guard (0...note.currentPage.width).contains(p.x), (0...note.currentPage.height).contains(p.y) else { return }
-        let pen = note.edit(request: PreviewEditSelectPen(argb: penColor, width: penWidth, kind: .monoline))
+        let pen = note.edit(request: PreviewEditSelectPen(argb: penColor, width: penWidth, kind: penKind))
         guard pen.accepted else { failed(previewFailureMessage(pen.failure)); return }
         let result = offerReal(samples, phase: .down)
         guard result.admitted else { rejectInput(previewFailureMessage(result.failure)); return }
