@@ -6,8 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Process;
+import android.system.Os;
 import android.system.OsConstants;
+import android.system.StructStat;
 import dev.notecore.document.PagedPreviewCodec;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -292,6 +295,112 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
         return "COMMITTED";
     }
 
+    private static String attachmentIdentity(Path file, Resource resource) throws Exception {
+        if (!Files.exists(file, LinkOption.NOFOLLOW_LINKS)) return null;
+        StructStat metadata = Os.lstat(file.toString());
+        if (!OsConstants.S_ISREG(metadata.st_mode) || metadata.st_size != resource.contents.length
+                || !Arrays.equals(Files.readAllBytes(file), resource.contents)) throw new Refused("REPAIR_REQUIRED");
+        return metadata.st_dev + ":" + metadata.st_ino;
+    }
+
+    private String retire(SQLiteDatabase db, Path folder, Resource resource) throws Exception {
+        Path source = resource.target;
+        Path tombstone = folder.resolve("retire-tombstone");
+        db.beginTransactionNonExclusive();
+        try {
+            checkWriter(db);
+            if (text(db, "SELECT state FROM retirement WHERE sha256=?", resource.sha) == null) {
+                boolean protectedResource = text(db, "SELECT 1 FROM resource WHERE sha256=?", resource.sha) != null
+                        || text(db, "SELECT 1 FROM retirement_reader WHERE sha256=?", resource.sha) != null
+                        || text(db, "SELECT 1 FROM import_task_resource r JOIN import_task t USING (operation_id)"
+                                + " WHERE r.sha256=? AND t.cancel_state<>'cancelled'", resource.sha) != null;
+                if (protectedResource) return "PROTECTED";
+                String identity = attachmentIdentity(source, resource);
+                if (identity == null || Files.exists(tombstone, LinkOption.NOFOLLOW_LINKS))
+                    throw new Refused("REPAIR_REQUIRED");
+                db.execSQL("INSERT INTO retirement VALUES(?,'retiring',?)", new Object[]{resource.sha, identity});
+            }
+            db.setTransactionSuccessful();
+        } finally { db.endTransaction(); }
+        if (stage.equals("retire-reserved")) cut(folder, stage);
+
+        db.beginTransactionNonExclusive();
+        try {
+            checkWriter(db);
+            if ("retiring".equals(text(db, "SELECT state FROM retirement WHERE sha256=?", resource.sha))) {
+                String expected = text(db, "SELECT identity FROM retirement WHERE sha256=?", resource.sha);
+                String original = attachmentIdentity(source, resource);
+                String moved = attachmentIdentity(tombstone, resource);
+                if (expected.equals(original) && moved == null) {
+                    int errno = new AtomicPromoteProbe().promote(source, tombstone);
+                    if (errno == OsConstants.EEXIST) throw new Refused("REPAIR_REQUIRED");
+                    require(errno == 0, "retirement rename errno " + errno);
+                    if (stage.equals("retire-moved")) cut(folder, stage);
+                    original = attachmentIdentity(source, resource);
+                    moved = attachmentIdentity(tombstone, resource);
+                }
+                if (original != null || !expected.equals(moved)) throw new Refused("REPAIR_REQUIRED");
+                db.execSQL("UPDATE retirement SET state='delete-pending' WHERE sha256=?", new Object[]{resource.sha});
+            }
+            db.setTransactionSuccessful();
+        } finally { db.endTransaction(); }
+        if (stage.equals("retire-delete-pending")) cut(folder, stage);
+
+        db.beginTransactionNonExclusive();
+        try {
+            checkWriter(db);
+            if (Files.exists(source, LinkOption.NOFOLLOW_LINKS)) throw new Refused("REPAIR_REQUIRED");
+            String current = text(db, "SELECT state FROM retirement WHERE sha256=?", resource.sha);
+            String moved = attachmentIdentity(tombstone, resource);
+            if ("retired".equals(current)) {
+                if (moved != null) throw new Refused("REPAIR_REQUIRED");
+                return "RETIRED";
+            }
+            require("delete-pending".equals(current), "invalid retirement state");
+            if (moved != null) {
+                String expected = text(db, "SELECT identity FROM retirement WHERE sha256=?", resource.sha);
+                if (!expected.equals(moved)) throw new Refused("REPAIR_REQUIRED");
+                Files.delete(tombstone);
+                if (stage.equals("retire-unlinked")) cut(folder, stage);
+            }
+            db.execSQL("UPDATE retirement SET state='retired' WHERE sha256=?", new Object[]{resource.sha});
+            db.setTransactionSuccessful();
+            return "RETIRED";
+        } finally { db.endTransaction(); }
+    }
+
+    private String retirementStep(SQLiteDatabase db, Path folder, Resource resource) throws Exception {
+        if (stage.equals("retire-pin") || stage.equals("retire-release") || stage.equals("retire-stale-release")) {
+            db.beginTransactionNonExclusive();
+            try {
+                checkWriter(db);
+                if (stage.equals("retire-pin")) {
+                    if (text(db, "SELECT 1 FROM retirement WHERE sha256=?", resource.sha) != null)
+                        return "RESOURCE_NOT_AVAILABLE";
+                    if (attachmentIdentity(resource.target, resource) == null) throw new Refused("REPAIR_REQUIRED");
+                    db.execSQL("INSERT INTO retirement_reader VALUES(?,'reader-new')", new Object[]{resource.sha});
+                } else {
+                    String owner = stage.equals("retire-release") ? "reader-new" : "reader-old";
+                    int changed = db.delete("retirement_reader", "sha256=? AND owner=?", new String[]{resource.sha, owner});
+                    db.setTransactionSuccessful();
+                    return changed == 1 ? "RELEASED" : "STALE_READER";
+                }
+                db.setTransactionSuccessful();
+            } finally { db.endTransaction(); }
+            try (InputStream reader = Files.newInputStream(resource.target);
+                 SQLiteDatabase collector = openWriter(folder.resolve("checkpoint.sqlite"),
+                         SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING)) {
+                require("PROTECTED".equals(retire(collector, folder, resource)), "live reader must protect file");
+                for (byte expected : resource.contents)
+                    require(reader.read() == (expected & 255), "pinned reader bytes");
+                require(reader.read() == -1, "pinned reader length");
+            }
+            // The later process releases the durable pin, modeling a lost release receipt.
+            return "PINNED";
+        }
+        return retire(db, folder, resource);
+    }
+
     private static String domain() throws Exception {
         return new String(Files.readAllBytes(Paths.get("/proc/self/attr/current")), StandardCharsets.UTF_8).trim();
     }
@@ -308,7 +417,8 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
         try {
             Path folder = getTargetContext().getCacheDir().toPath().resolve(scope);
             require(scope.matches("dev041-joint-[0-9a-f-]{36}") && Files.isDirectory(folder), "isolated fixture");
-            require(stage.matches("init|resource-published|before-commit|after-commit|replay|conflict|cancel-request|cancel-stale|cancel-live"), "stage");
+            require(stage.matches("init|resource-published|before-commit|after-commit|replay|conflict|cancel-request|cancel-stale|cancel-live"
+                    + "|retire|retire-(pin|release|stale-release|reserved|moved|delete-pending|unlinked)"), "stage");
             Path path = folder.resolve("checkpoint.sqlite");
             boolean initial = stage.equals("init");
             require(Files.exists(path) != initial, "fixture database lifecycle");
@@ -325,6 +435,8 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
                         for (int index = 0; index < statements.length(); index++) db.execSQL(statements.getString(index));
                         db.execSQL("ALTER TABLE import_task ADD COLUMN active_attempt TEXT NOT NULL DEFAULT 'first'");
                         db.execSQL("ALTER TABLE import_task ADD COLUMN cancel_state TEXT NOT NULL DEFAULT 'active'");
+                        db.execSQL("CREATE TABLE retirement(sha256 TEXT PRIMARY KEY, state TEXT NOT NULL, identity TEXT NOT NULL)");
+                        db.execSQL("CREATE TABLE retirement_reader(sha256 TEXT, owner TEXT, PRIMARY KEY(sha256,owner))");
                         db.setVersion(2);
                         record(db, "existing", existing);
                         db.setTransactionSuccessful();
@@ -339,7 +451,9 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
                     if (!stage.equals("conflict")) resources.add(new Resource(folder.resolve("resource-b.bin"), targets));
                     resources.sort(Comparator.comparing(resource -> resource.sha));
                     try {
-                        if (stage.equals("cancel-request") || stage.equals("cancel-stale")) {
+                        if (stage.startsWith("retire")) {
+                            status = retirementStep(db, folder, resources.get(0));
+                        } else if (stage.equals("cancel-request") || stage.equals("cancel-stale")) {
                             status = requestCancellation(db, value, resources, stage.equals("cancel-stale") ? "stale" : "first");
                         } else {
                             status = importCheckpoint(db, folder, value, resources);

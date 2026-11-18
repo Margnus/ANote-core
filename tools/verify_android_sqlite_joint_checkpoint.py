@@ -185,6 +185,8 @@ def verify(args, work):
             assert not db.execute('PRAGMA foreign_key_check').fetchall()
             assert db.execute('PRAGMA user_version').fetchone() == (2,)
             rows = {table: db.execute(f'SELECT * FROM {table} ORDER BY 1,2').fetchall() for table in TABLES}
+            observations[label]['retirement'] = db.execute('SELECT * FROM retirement ORDER BY 1').fetchall()
+            observations[label]['retirement_readers'] = db.execute('SELECT * FROM retirement_reader ORDER BY 1').fetchall()
         published = {}
         if 'resources' in files:
             for resource in app('ls', '-1', f'{scope}/resources').splitlines():
@@ -198,6 +200,11 @@ def verify(args, work):
             file.name: sha(file.read_bytes()) for file in sorted(folder.iterdir())
         }
         observations[label]['resources'] = published
+        tombstone = f'{scope}/retire-tombstone'
+        observations[label]['retirement_file'] = ({
+            'identity': app('stat', '-c', '%d:%i', tombstone),
+            'sha256': sha(app('cat', tombstone, binary=True)),
+        } if 'retire-tombstone' in files else None)
         return rows, published
 
     def rows(operation, value, original):
@@ -268,6 +275,9 @@ def verify(args, work):
             put(target, data)
             step('committed_without_receipt', 'after-commit')
             assert state('committed_without_receipt') == (committed, published)
+            step('retire_committed_resource', 'retire', expected='PROTECTED')
+            assert state('retire_committed_resource') == (committed, published)
+            assert observations['retire_committed_resource']['retirement'] == []
             step('late_cancel_after_commit', 'cancel-request', expected='ALREADY_COMMITTED')
             assert state('late_cancel_after_commit') == (committed, published)
             step('replayed', 'replay', expected='REPLAYED')
@@ -286,6 +296,13 @@ def verify(args, work):
             database, retained_files = state('cancel_after_stop_publish')
             assert database == pending and list(retained_files) == resource_ids[:1]
             assert retained_files[resource_ids[0]]['sha256'] == resource_ids[0]
+            first_resource = resource_ids[0]
+            retained_identity = app('stat', '-c', '%d:%i', f'{scope}/resources/{first_resource}')
+            step('retire_active_task', 'retire', expected='PROTECTED')
+            assert state('retire_active_task') == (pending, retained_files)
+            step('reader_pin_before_cancel', 'retire-pin', expected='PINNED')
+            assert state('reader_pin_before_cancel') == (pending, retained_files)
+            assert observations['reader_pin_before_cancel']['retirement_readers'] == [(first_resource, 'reader-new')]
             step('stale_cancel_after_stop', 'cancel-stale', expected='STALE_ATTEMPT')
             assert state('stale_cancel_after_stop') == (pending, retained_files)
             step('request_cancel_after_stop', 'cancel-request', expected='CANCEL_REQUESTED')
@@ -294,6 +311,48 @@ def verify(args, work):
             assert state('ack_cancel_after_stop') == (cancellation_state('cancelled'), retained_files)
             step('retry_cancelled_after_stop', 'replay', expected='CANCELLED')
             assert state('retry_cancelled_after_stop') == (cancellation_state('cancelled'), retained_files)
+
+            cancelled = cancellation_state('cancelled')
+            step('late_reader_release', 'retire-stale-release', expected='STALE_READER')
+            assert state('late_reader_release') == (cancelled, retained_files)
+            assert observations['late_reader_release']['retirement_readers'] == [(first_resource, 'reader-new')]
+            step('retire_reader_protected', 'retire', expected='PROTECTED')
+            assert state('retire_reader_protected') == (cancelled, retained_files)
+            assert observations['retire_reader_protected']['retirement'] == []
+            step('release_reader', 'retire-release', expected='RELEASED')
+            assert state('release_reader') == (cancelled, retained_files)
+            assert observations['release_reader']['retirement_readers'] == []
+
+            def check_retirement(label, metadata, expected_files, tomb=None):
+                assert state(label) == (cancelled, expected_files)
+                assert observations[label]['retirement'] == [(first_resource, metadata, retained_identity)]
+                assert observations[label]['retirement_file'] == tomb
+                assert observations[label]['retirement_readers'] == []
+
+            step('retirement_reserved', 'retire-reserved')
+            check_retirement('retirement_reserved', 'retiring', retained_files)
+            step('retiring_refuses_new_pin', 'retire-pin', expected='RESOURCE_NOT_AVAILABLE')
+            check_retirement('retiring_refuses_new_pin', 'retiring', retained_files)
+            tombstone = f'{scope}/retire-tombstone'
+            put(tombstone, resources[first_resource])
+            occupied = {'identity': app('stat', '-c', '%d:%i', tombstone), 'sha256': first_resource}
+            assert occupied['identity'] != retained_identity
+            step('same_bytes_different_inode', 'retire', expected='REPAIR_REQUIRED')
+            check_retirement('same_bytes_different_inode', 'retiring', retained_files, occupied)
+            app('rm', tombstone)  # Remove only the fixture-created collision.
+            tomb = {'identity': retained_identity, 'sha256': first_resource}
+            step('retirement_moved', 'retire-moved')
+            check_retirement('retirement_moved', 'retiring', {}, tomb)
+            step('retirement_delete_pending', 'retire-delete-pending')
+            check_retirement('retirement_delete_pending', 'delete-pending', {}, tomb)
+            step('retirement_unlinked', 'retire-unlinked')
+            check_retirement('retirement_unlinked', 'delete-pending', {})
+            step('retirement_recovered', 'retire', expected='RETIRED')
+            check_retirement('retirement_recovered', 'retired', {})
+            step('retirement_replayed', 'retire', expected='RETIRED')
+            check_retirement('retirement_replayed', 'retired', {})
+            step('retired_refuses_new_pin', 'retire-pin', expected='RESOURCE_NOT_AVAILABLE')
+            check_retirement('retired_refuses_new_pin', 'retired', {})
             for filename, data in inputs.items():
                 assert app('cat', f'{scope}/{filename}', binary=True) == data
 
