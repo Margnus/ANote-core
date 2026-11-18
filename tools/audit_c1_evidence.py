@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Audit retained evidence bindings, not execution, device measurements or C1 approval."""
 import argparse
+from functools import lru_cache
 import hashlib
 import json
 from pathlib import Path
-from verification_hash import verification_digest
+import subprocess
+from verification_hash import TEXT_SUFFIXES, verification_digest
 
 ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
@@ -97,7 +99,51 @@ def binding(root, relative, expected, normalized=False):
             'expected': expected, 'actual': actual}
 
 
-def audit(root):
+class GitBindings:
+    def __init__(self, root, revision):
+        self.root = root
+        self.commit = self.git('rev-parse', '--verify', '--end-of-options', revision + '^{commit}').decode().strip()
+        self.blobs = self.tree(self.commit)
+        self.current = self.tree('HEAD')
+
+    def git(self, *args):
+        return subprocess.check_output(['git', '-C', str(self.root), *args])
+
+    def tree(self, revision):
+        files = {}
+        for record in self.git('ls-tree', '-rz', revision).split(b'\0'):
+            if record:
+                header, relative = record.split(b'\t', 1)
+                mode, kind, oid = header.decode().split()
+                files[relative.decode()] = oid if kind == 'blob' and mode.startswith('100') else None
+        return files
+
+    @lru_cache(maxsize=None)
+    def digest(self, oid, normalize_lf):
+        data = self.git('cat-file', 'blob', oid)
+        if normalize_lf:
+            data = data.replace(b'\r\n', b'\n')
+        return hashlib.sha256(data).hexdigest()
+
+    def binding(self, relative, expected, normalized=False):
+        if relative not in self.blobs and relative not in self.current:
+            return {**binding(self.root, relative, expected, normalized), 'origin': 'local_artifact'}
+        oid = self.blobs.get(relative)
+        if oid is None:
+            return {'path': relative, 'state': 'missing', 'expected': expected, 'origin': 'git_revision'}
+        actual = self.digest(oid, normalized and Path(relative).suffix.lower() in TEXT_SUFFIXES)
+        return {'path': relative, 'state': 'matched' if actual == expected else 'changed',
+                'expected': expected, 'actual': actual, 'origin': 'git_revision'}
+
+
+def audit(root, revision=None):
+    git_bindings = GitBindings(root, revision) if revision else None
+
+    def inspect(relative, sha, normalized=False):
+        if git_bindings:
+            return git_bindings.binding(relative, sha, normalized)
+        return binding(root, relative, sha, normalized)
+
     reports = {}
     errors = []
     for name in (*HISTORICAL, *CURRENT):
@@ -114,14 +160,14 @@ def audit(root):
             if not recorded:
                 errors.append(name + ': missing binding map ' + field)
             for relative, sha in recorded.items():
-                checks.append(binding(root, relative, sha, normalized=name == 'verification'))
+                checks.append(inspect(relative, sha, normalized=name == 'verification'))
         for field, relative in ARTIFACTS.get(name, ()):
-            checks.append(binding(root, relative or data['test_apk'], data[field]))
+            checks.append(inspect(relative or data['test_apk'], data[field]))
         for field, relative in (('fixture_sha256', 'S2-ink-dense-page.bin'),
                                 ('dense_fixture_sha256', 'S2-ink-dense-page.bin'),
                                 ('long_fixture_sha256', 'S9-ink-long-stroke.bin')):
             if field in data:
-                checks.append(binding(root, '.generated-fixtures/scale/' + relative, data[field]))
+                checks.append(inspect('.generated-fixtures/scale/' + relative, data[field]))
         mismatches = [item for item in checks if item['state'] != 'matched']
         evidence_status = data.get('evidence_status') if name == 'android-render-integration' else data.get('status')
         if evidence_status != 'passed':
@@ -133,11 +179,15 @@ def audit(root):
             'role': 'historical_experiment' if historical else 'current_regression',
             'binding_state': 'historical_drift' if historical and mismatches else 'failed' if mismatches else 'matched',
             'matched_bindings': len(checks) - len(mismatches), 'mismatches': mismatches,
+            **({'matched_git_bindings': sum(item['state'] == 'matched' and item['origin'] == 'git_revision' for item in checks),
+                'matched_local_bindings': sum(item['state'] == 'matched' and item['origin'] == 'local_artifact' for item in checks)}
+               if git_bindings else {}),
             'scope': data.get('scope', data.get('phase')),
         }
     return {
         'schema': 'c1-evidence-audit-1', 'status': 'failed' if errors else 'passed',
         'reports': reports, 'errors': errors,
+        **({'revision': git_bindings.commit, 'untracked_bindings_use_local_artifacts': True} if git_bindings else {}),
         'scope': 'Read-only rehash of recorded inputs and retained artifacts; no rerun or completeness proof. Historical drift is explicit, never promoted to current benchmark evidence. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.',
         'ordinary_app_backend_integration_verified_by_this_audit': False, 'c1_gate_complete': False,
         'physical_device_or_heap_measured': False,
@@ -147,8 +197,9 @@ def audit(root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / 'reports/c1-evidence-audit.json')
+    parser.add_argument('--revision', help='Read tracked inputs from this Git commit and untracked artifacts locally')
     args = parser.parse_args()
-    report = audit(ROOT)
+    report = audit(ROOT, args.revision)
     report['audit_tool_sha256'] = digest(Path(__file__))
     with args.output.open('w', encoding='utf-8', newline='\n') as output:
         output.write(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
