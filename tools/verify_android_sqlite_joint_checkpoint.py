@@ -141,6 +141,13 @@ def verify(args, work):
               'schema.json': json.dumps(SCHEMA).encode(), **attachments}
     observations = {}
 
+    def seed(label):
+        device('shell', 'run-as', package, 'mkdir', scope)
+        for filename, data in inputs.items():
+            put(f'{scope}/{filename}', data)
+        step(label, 'init', expected='SEEDED')
+        assert state(label) == (previous, {})
+
     def step(label, stage, *, expected=None):
         result = device('shell', 'am', 'instrument', '-w', '-r',
                         '-e', 'scope', scope.split('/')[1], '-e', 'stage', stage,
@@ -201,8 +208,12 @@ def verify(args, work):
 
     previous = {**dict.fromkeys(TABLES, []), **rows('existing', existing, v2)}
     pending = {**previous, 'import_task': [('attach-legacy', imported.document_id, json.dumps([
-        imported.document_id, None, imported.revision, sha(imported.canonical), sha(v1)], separators=(',', ':')))],
+        imported.document_id, None, imported.revision, sha(imported.canonical), sha(v1)], separators=(',', ':')), 'first', 'active')],
         'import_task_resource': [('attach-legacy', key, len(resources[key])) for key in resource_ids]}
+    def cancellation_state(status):
+        task, = pending['import_task']
+        return {**pending, 'import_task': [(*task[:-1], status)]}
+
     committed = {table: sorted(previous[table] + values)
                  for table, values in rows('attach-legacy', imported, v1).items()}
     committed.update(resource=[(key, len(resources[key])) for key in resource_ids],
@@ -234,11 +245,7 @@ def verify(args, work):
             installed = device('shell', 'pm', 'path', package).removeprefix('package:')
             assert installed.startswith('/data/app/') and installed.endswith('/base.apk')
             assert sha(device('exec-out', 'cat', installed, binary=True)) == sha(apk.read_bytes())
-            device('shell', 'run-as', package, 'mkdir', scope)
-            for filename, data in inputs.items():
-                put(f'{scope}/{filename}', data)
-            step('seeded', 'init', expected='SEEDED')
-            assert state('seeded') == (previous, {})
+            seed('seeded')
             step('partial_publish', 'resource-published')
             database, first = state('partial_publish')
             assert database == pending and list(first) == resource_ids[:1]
@@ -261,6 +268,8 @@ def verify(args, work):
             put(target, data)
             step('committed_without_receipt', 'after-commit')
             assert state('committed_without_receipt') == (committed, published)
+            step('late_cancel_after_commit', 'cancel-request', expected='ALREADY_COMMITTED')
+            assert state('late_cancel_after_commit') == (committed, published)
             step('replayed', 'replay', expected='REPLAYED')
             assert state('replayed') == (committed, published)
             step('committed_conflict', 'conflict', expected='OPERATION_CONFLICT')
@@ -268,6 +277,34 @@ def verify(args, work):
             put(target, corrupt)
             step('committed_corruption', 'replay', expected='REPAIR_REQUIRED')
             assert state('committed_corruption') == (committed, damaged)
+            for filename, data in inputs.items():
+                assert app('cat', f'{scope}/{filename}', binary=True) == data
+
+            scope = 'cache/dev041-joint-' + str(uuid.uuid4())
+            seed('seed_cancel_after_stop')
+            step('cancel_after_stop_publish', 'resource-published')
+            database, retained_files = state('cancel_after_stop_publish')
+            assert database == pending and list(retained_files) == resource_ids[:1]
+            assert retained_files[resource_ids[0]]['sha256'] == resource_ids[0]
+            step('stale_cancel_after_stop', 'cancel-stale', expected='STALE_ATTEMPT')
+            assert state('stale_cancel_after_stop') == (pending, retained_files)
+            step('request_cancel_after_stop', 'cancel-request', expected='CANCEL_REQUESTED')
+            assert state('request_cancel_after_stop') == (cancellation_state('requested'), retained_files)
+            step('ack_cancel_after_stop', 'replay', expected='CANCELLED')
+            assert state('ack_cancel_after_stop') == (cancellation_state('cancelled'), retained_files)
+            step('retry_cancelled_after_stop', 'replay', expected='CANCELLED')
+            assert state('retry_cancelled_after_stop') == (cancellation_state('cancelled'), retained_files)
+            for filename, data in inputs.items():
+                assert app('cat', f'{scope}/{filename}', binary=True) == data
+
+            scope = 'cache/dev041-joint-' + str(uuid.uuid4())
+            seed('seed_live_cancel')
+            step('request_while_producer_live', 'cancel-live', expected='CANCELLED')
+            database, live_files = state('request_while_producer_live')
+            assert database == cancellation_state('cancelled') and list(live_files) == resource_ids[:1]
+            assert live_files[resource_ids[0]]['sha256'] == resource_ids[0]
+            step('retry_live_cancelled', 'replay', expected='CANCELLED')
+            assert state('retry_live_cancelled') == (cancellation_state('cancelled'), live_files)
             for filename, data in inputs.items():
                 assert app('cat', f'{scope}/{filename}', binary=True) == data
             assert device('uninstall', package) == 'Success'
@@ -282,7 +319,7 @@ def verify(args, work):
 
     report = {
         'status': 'passed', 'environment': environment, 'avd': name,
-        'observations': observations, 'host_integrity_and_foreign_keys': 'passed after all 9 stages',
+        'observations': observations, 'host_integrity_and_foreign_keys': f'passed after all {len(observations)} stages',
         'canonical_sha256': sha(imported.canonical), 'inputs_sha256': {key: sha(data) for key, data in inputs.items()},
         'candidate_source_commit': pin['candidate_source_commit'], 'aars_sha256': artifacts,
         'apk_sha256': sha(apk.read_bytes()), 'atomic_apk_sha256': sha(atomic_apk), 'jni_sha256': sha(native),

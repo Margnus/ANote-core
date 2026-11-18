@@ -168,6 +168,57 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
         throw new AssertionError("SIGKILL returned");
     }
 
+    private static String cancelState(SQLiteDatabase db) {
+        return text(db, "SELECT cancel_state FROM import_task WHERE operation_id=?", OP);
+    }
+
+    private static boolean acknowledgeCancellation(SQLiteDatabase db) {
+        String state = cancelState(db);
+        if ("requested".equals(state)) {
+            db.execSQL("UPDATE import_task SET cancel_state='cancelled' WHERE operation_id=?", new Object[]{OP});
+            return true;
+        }
+        return "cancelled".equals(state);
+    }
+
+    private static String requestCancellation(SQLiteDatabase db, Checkpoint value, List<Resource> resources,
+                                              String attempt) throws Exception {
+        db.beginTransactionNonExclusive();
+        try {
+            checkWriter(db);
+            String status;
+            if (replay(db, value, resources)) {
+                status = "ALREADY_COMMITTED";
+            } else {
+                String identity = text(db, "SELECT identity FROM import_task WHERE operation_id=?", OP);
+                require(value.identity.equals(identity) && manifestMatches(db, "import_task_resource", resources),
+                        "cancel request identity");
+                if (!attempt.equals(text(db, "SELECT active_attempt FROM import_task WHERE operation_id=?", OP))) {
+                    status = "STALE_ATTEMPT";
+                } else if ("cancelled".equals(cancelState(db))) {
+                    status = "CANCELLED";
+                } else {
+                    db.execSQL("UPDATE import_task SET cancel_state='requested' WHERE operation_id=?", new Object[]{OP});
+                    status = "CANCEL_REQUESTED";
+                }
+            }
+            db.setTransactionSuccessful();
+            return status;
+        } finally { db.endTransaction(); }
+    }
+
+    private static SQLiteDatabase openWriter(Path path, int flags) {
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(path.toString(), null, flags, damaged -> {});
+        try {
+            db.setForeignKeyConstraintsEnabled(true);
+            db.execSQL("PRAGMA synchronous=FULL");
+            return db;
+        } catch (RuntimeException | Error failure) {
+            db.close();
+            throw failure;
+        }
+    }
+
     private String importCheckpoint(SQLiteDatabase db, Path folder, Checkpoint value, List<Resource> resources)
             throws Exception {
         db.beginTransactionNonExclusive();
@@ -180,12 +231,17 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
             String pending = text(db, "SELECT identity FROM import_task WHERE operation_id=?", OP);
             if (pending == null) {
                 require(text(db, "SELECT id FROM document WHERE id=?", value.id) == null, "fresh document");
-                db.execSQL("INSERT INTO import_task VALUES(?,?,?)", new Object[]{OP, value.id, value.identity});
+                db.execSQL("INSERT INTO import_task(operation_id,document_id,identity) VALUES(?,?,?)",
+                        new Object[]{OP, value.id, value.identity});
                 for (Resource resource : resources)
                     db.execSQL("INSERT INTO import_task_resource VALUES(?,?,?)",
                             new Object[]{OP, resource.sha, resource.contents.length});
             } else if (!pending.equals(value.identity) || !manifestMatches(db, "import_task_resource", resources)) {
                 throw new Refused("OPERATION_CONFLICT");
+            }
+            if (acknowledgeCancellation(db)) {
+                db.setTransactionSuccessful();
+                return "CANCELLED";
             }
             db.setTransactionSuccessful();
         } finally { db.endTransaction(); }
@@ -194,6 +250,17 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
         for (Resource resource : resources) {
             resource.publish(folder, port);
             if (stage.equals("resource-published")) cut(folder, stage);
+            if (stage.equals("cancel-live")) {
+                // This second pool may request cancellation but the producer still owns the task.
+                try (SQLiteDatabase client = openWriter(folder.resolve("checkpoint.sqlite"),
+                        SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING)) {
+                    require("CANCEL_REQUESTED".equals(requestCancellation(client, value, resources, "first")),
+                            "live cancel request");
+                    require("requested".equals(cancelState(client))
+                            && manifestMatches(client, "import_task_resource", resources), "request keeps holds");
+                }
+                break;
+            }
         }
         db.beginTransactionNonExclusive();
         try {
@@ -204,6 +271,10 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
             }
             require(value.identity.equals(text(db, "SELECT identity FROM import_task WHERE operation_id=?", OP))
                     && manifestMatches(db, "import_task_resource", resources), "pending ownership");
+            if (acknowledgeCancellation(db)) {
+                db.setTransactionSuccessful();
+                return "CANCELLED";
+            }
             record(db, OP, value);
             for (Resource resource : resources) {
                 resource.validate();
@@ -237,15 +308,13 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
         try {
             Path folder = getTargetContext().getCacheDir().toPath().resolve(scope);
             require(scope.matches("dev041-joint-[0-9a-f-]{36}") && Files.isDirectory(folder), "isolated fixture");
-            require(stage.matches("init|resource-published|before-commit|after-commit|replay|conflict"), "stage");
+            require(stage.matches("init|resource-published|before-commit|after-commit|replay|conflict|cancel-request|cancel-stale|cancel-live"), "stage");
             Path path = folder.resolve("checkpoint.sqlite");
             boolean initial = stage.equals("init");
             require(Files.exists(path) != initial, "fixture database lifecycle");
             int flags = SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING | (initial ? SQLiteDatabase.CREATE_IF_NECESSARY : 0);
             String status, sqlite;
-            try (SQLiteDatabase db = SQLiteDatabase.openDatabase(path.toString(), null, flags, damaged -> {})) {
-                db.setForeignKeyConstraintsEnabled(true);
-                db.execSQL("PRAGMA synchronous=FULL");
+            try (SQLiteDatabase db = openWriter(path, flags)) {
                 if (initial) {
                     JSONArray statements = new JSONArray(new String(Files.readAllBytes(folder.resolve("schema.json")),
                             StandardCharsets.UTF_8));
@@ -254,6 +323,8 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
                     try {
                         checkWriter(db);
                         for (int index = 0; index < statements.length(); index++) db.execSQL(statements.getString(index));
+                        db.execSQL("ALTER TABLE import_task ADD COLUMN active_attempt TEXT NOT NULL DEFAULT 'first'");
+                        db.execSQL("ALTER TABLE import_task ADD COLUMN cancel_state TEXT NOT NULL DEFAULT 'active'");
                         db.setVersion(2);
                         record(db, "existing", existing);
                         db.setTransactionSuccessful();
@@ -267,8 +338,13 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
                     resources.add(new Resource(folder.resolve("resource-a.bin"), targets));
                     if (!stage.equals("conflict")) resources.add(new Resource(folder.resolve("resource-b.bin"), targets));
                     resources.sort(Comparator.comparing(resource -> resource.sha));
-                    try { status = importCheckpoint(db, folder, value, resources); }
-                    catch (Refused refusal) { status = refusal.status; }
+                    try {
+                        if (stage.equals("cancel-request") || stage.equals("cancel-stale")) {
+                            status = requestCancellation(db, value, resources, stage.equals("cancel-stale") ? "stale" : "first");
+                        } else {
+                            status = importCheckpoint(db, folder, value, resources);
+                        }
+                    } catch (Refused refusal) { status = refusal.status; }
                 }
                 sqlite = text(db, "SELECT sqlite_version()");
             }
