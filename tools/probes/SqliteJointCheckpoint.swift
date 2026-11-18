@@ -100,8 +100,21 @@ private struct Checkpoint {
     }
 }
 
-private func stop(at stage: String) throws -> Never {
-    try emit(["cut": stage, "pid": getpid()])
+private func emitJoint(_ event: [String: Any], folder: URL) throws {
+#if DEV041_APP
+    var receipt = event
+    receipt["bundle"] = Bundle.main.bundleIdentifier
+    receipt["sandbox_home"] = NSHomeDirectory()
+    let data = try JSONSerialization.data(withJSONObject: receipt, options: [.sortedKeys])
+    // A closed, atomic marker lets the driver correlate an intentional kill to this launch.
+    try data.write(to: folder.appendingPathComponent("result.json"), options: .atomic)
+#else
+    try emit(event)
+#endif
+}
+
+private func stop(at stage: String, folder: URL) throws -> Never {
+    try emitJoint(["cut": stage, "pid": getpid()], folder: folder)
     kill(getpid(), SIGKILL)
     throw ProbeFailure.invariant
 }
@@ -165,7 +178,7 @@ private func importCheckpoint(_ db: DB, _ folder: URL, _ checkpoint: Checkpoint,
     if alreadyCommitted { return "REPLAYED" }
     for resource in resources {
         try resource.publish(in: folder)
-        if stage == "resource-published" { try stop(at: stage) }
+        if stage == "resource-published" { try stop(at: stage, folder: folder) }
     }
     let replayed = try immediate(db) {
         if try replay() { return true }
@@ -179,36 +192,57 @@ private func importCheckpoint(_ db: DB, _ folder: URL, _ checkpoint: Checkpoint,
             try db.exec("INSERT INTO operation_resource VALUES(?,?)", [operation, resource.sha])
         }
         try db.exec("DELETE FROM import_task WHERE operation_id=?", [operation])
-        if stage == "before-commit" { try stop(at: stage) }
+        if stage == "before-commit" { try stop(at: stage, folder: folder) }
         return false
     }
     if replayed { return "REPLAYED" }
-    if stage == "after-commit" { try stop(at: stage) }
+    if stage == "after-commit" { try stop(at: stage, folder: folder) }
     return "COMMITTED"
 }
 
+#if !DEV041_APP
 @main
+#endif
 struct SqliteJointCheckpoint {
+#if !DEV041_APP
     static func main() {
-        do { try run() }
+        do { try runCLI() }
         catch { fputs("Synthetic joint checkpoint failed: \(error)\n", stderr); exit(2) }
     }
 
-    private static func run() throws {
+    private static func runCLI() throws {
         let args = CommandLine.arguments
         try require(args.count == 3)
         let stage = args[2]
-        try require(["init", "resource-published", "before-commit", "after-commit", "replay", "conflict"].contains(stage))
         let folder = URL(fileURLWithPath: args[1]).standardizedFileURL
         try require(folder.deletingLastPathComponent().lastPathComponent == "build"
                     && folder.lastPathComponent.hasPrefix("dev041-apple-"))
+        try emitJoint(run(folder: folder, stage: stage), folder: folder)
+    }
+#endif
+
+#if DEV041_APP
+    static func runApp() throws {
+        let args = CommandLine.arguments
+        try require(args.count == 3 && args[1] == "--dev041-stage")
+        guard let bundle = Bundle.main.bundleIdentifier,
+              bundle.hasPrefix("dev.notecore.probes.sqlitejointapple.") else { throw ProbeFailure.invariant }
+        let home = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+        let folder = home.appendingPathComponent("Library/Caches/dev041-apple-joint", isDirectory: true)
+        try emitJoint(run(folder: folder, stage: args[2]), folder: folder)
+    }
+#endif
+
+    private static func run(folder: URL, stage: String) throws -> [String: Any] {
+        try require(["init", "resource-published", "before-commit", "after-commit", "replay", "conflict"].contains(stage))
         try require(String(contentsOf: folder.appendingPathComponent(".fixture-scope"), encoding: .utf8) == "dev041-apple")
         let database = folder.appendingPathComponent("checkpoint.sqlite")
         try require(FileManager.default.fileExists(atPath: database.path) == (stage != "init"))
         let db = try DB(database.path)
         defer { db.close() }
         try db.exec("PRAGMA foreign_keys=ON")
-        try require(db.query("PRAGMA journal_mode") == "wal" && db.number("PRAGMA synchronous") == 2)
+        try require(db.query("PRAGMA journal_mode") == "wal" && db.number("PRAGMA synchronous") == 2
+                    && db.number("PRAGMA foreign_keys") == 1)
         var result: [String: Any] = ["stage": stage, "pid": getpid(), "sqlite": String(cString: sqlite3_libversion())]
         if stage == "init" {
             let statements = try JSONDecoder().decode([String].self, from: Data(contentsOf: folder.appendingPathComponent("schema.json")))
@@ -231,6 +265,6 @@ struct SqliteJointCheckpoint {
             catch Admission.conflict { result["status"] = "OPERATION_CONFLICT" }
             catch Admission.repairRequired { result["status"] = "REPAIR_REQUIRED" }
         }
-        try emit(result)
+        return result
     }
 }
