@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "scope": "Independent Java executable under Android API 26 ART via app_process on an isolated AVD",
+  "runtime": {
+    "api": "26",
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "abi": "arm64-v8a",
+    "selinux": "Enforcing",
+    "kernel": "3.18.94+"
+  },
+  "selected_typed_channels_and_recovery": {
+    "budget_typed": "INPUT_BYTES",
+    "unsupported_document_typed": "UNSUPPORTED_PREVIEW_CONTENT",
+    "malformed_recovery_typed": "INVALID_OR_UNSUPPORTED_FORMAT",
+    "recovery_refused_bytes": 2247,
+    "recovery_admitted_bytes": 2248,
+    "missing_index_is_nil": true,
+    "invalid_edit_preserved_pending": true,
+    "retry_preserved_checkpoint_bytes": true
+  },
+  "compatibility_exceptions": {
+    "budget_constructor_exception": "IllegalArgumentException",
+    "budget_copy_exception": "IllegalArgumentException",
+    "malformed_recovery_exception": "ContentRefusal"
+  },
+  "compatibility_exception_base": "IllegalArgumentException",
+  "typed_observations_match_apple": true,
+  "android_aars_sha256": {
+    "canvas-core-android-0.0.0-c1.aar": "4d80b415f483fdd707bc37248abd0cf93b39905d3e5167bb2452a1bfe567a2d4",
+    "shared-core-android-0.0.0-c1.aar": "55bc9a3d861f7df1ef5bcc6967bbbbd26238c66dfd5ef583c77a98d8f332b112"
+  },
+  "kotlin_stdlib_sha256": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+  "consumer_dex_sha256": "e6fee4ac990cd78c88c7c403ca9c08d5514ec3b98d943fe96ce2be8b7b444db9",
+  "source_sha256": {
+    "tools/verify_c1_android_failure_channels.py": "d9fc05a9adfb13204e0172145282a52b83cd9f46e227dab7db253b0bf16f9aab",
+    "tools/probes/C1AndroidFailureConsumer.java": "1fcba095743bb1b087326d2cd3bd01373ac17dbf906554c79c96c24fa2b1d193",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/c1-apple-failure-channels-20261118.json": "1b4ba5d7042f6063cd7d790b8a355d29128b35f40f81538492fcad9404750e7b",
+    "reports/apple-sqlite-joint-checkpoint-20261117/verification.json": "b7bd43b8986756c0a141a4aa39ff80902077288f6be065143609db57940b1ae9",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+  },
+  "raw_sha256": {
+    "commands.log": "e77809cd678d6906c5810c4782039ab5291600a7de7cff185e29bb35b553d477",
+    "emulator.log": "5df93e31013e3206339ae53015229dcb4295bac4d8ceaa7241339965c9aa396b"
+  }
+}
