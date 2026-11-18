@@ -11,9 +11,23 @@ import java.nio.file.Files;
 import java.util.Arrays;
 
 /** Test-only app_process entry. One synthetic database, one writer, no App document access. */
-@android.annotation.TargetApi(28)
 public final class SqliteCrashProbe {
     private static SQLiteDatabase open(File path, boolean readOnly) {
+        if (android.os.Build.VERSION.SDK_INT >= 28) return openWithParams(path, readOnly);
+        int flags = readOnly ? SQLiteDatabase.OPEN_READONLY
+                : SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(path.toString(), null, flags, damaged -> {});
+        try {
+            if (!readOnly) db.execSQL("PRAGMA synchronous=FULL");
+            return db;
+        } catch (RuntimeException | Error failure) {
+            db.close();
+            throw failure;
+        }
+    }
+
+    @android.annotation.TargetApi(28)
+    private static SQLiteDatabase openWithParams(File path, boolean readOnly) {
         SQLiteDatabase.OpenParams.Builder params = new SQLiteDatabase.OpenParams.Builder()
             .setOpenFlags(readOnly ? SQLiteDatabase.OPEN_READONLY : SQLiteDatabase.CREATE_IF_NECESSARY)
             .setErrorHandler(database -> { /* Never delete an unknown/corrupt file. */ });
@@ -36,6 +50,7 @@ public final class SqliteCrashProbe {
     private static String apply(SQLiteDatabase db, String op, long base, String payload, String crash) throws Exception {
         db.beginTransactionNonExclusive();
         try {
+            check("wal".equalsIgnoreCase(string(db, "PRAGMA journal_mode")) && number(db, "PRAGMA synchronous") == 2);
             try (Cursor cursor = db.rawQuery("SELECT payload,revision FROM operations WHERE op_id=?", new String[]{op})) {
                 if (cursor.moveToFirst()) {
                     check(payload.equals(cursor.getString(0)) && cursor.getLong(1)==base+1);
@@ -112,7 +127,9 @@ public final class SqliteCrashProbe {
                     // Query-returning PRAGMA on this transaction's writer connection, not a pooled reader.
                     check(number(db,"PRAGMA max_page_count="+limit)==limit);
                     db.execSQL("INSERT INTO operations VALUES('op3',3,'C')");
-                    db.execSQL("UPDATE root SET payload=? WHERE id=1",new Object[]{"X".repeat(512*1024)});
+                    char[] overflow = new char[512 * 1024];
+                    Arrays.fill(overflow, 'X');
+                    db.execSQL("UPDATE root SET payload=? WHERE id=1",new Object[]{new String(overflow)});
                     db.setTransactionSuccessful();
                 } catch (SQLiteFullException expected) { full = true; }
                 finally { try { db.endTransaction(); } catch (SQLiteException end) { if (!full) throw end; } }

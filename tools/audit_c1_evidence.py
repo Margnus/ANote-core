@@ -81,6 +81,7 @@ CURRENT = {
     'android-input-host-tests': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
     'android-render-integration': ('source_evidence_sha256', 'sdk_contract_source_sha256'),
     'sqlite-platform-capabilities': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
+    'dev041-sqlite-capabilities-20261118': ('source_sha256',),
     'incremental-spatial-index': ('source_and_artifact_sha256',),
     'pdf-platform-capabilities': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
 }

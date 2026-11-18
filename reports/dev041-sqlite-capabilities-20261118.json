@@ -1,0 +1,370 @@
+{
+  "status": "passed",
+  "scope": "Native SQLite recovery and refusal matrix on disposable simulators",
+  "android": {
+    "runtime": {
+      "api": "26",
+      "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+      "abi": "arm64-v8a",
+      "selinux": "Enforcing"
+    },
+    "app_uid": "uid=10061(u0_a61) gid=10061(u0_a61) groups=10061(u0_a61) context=u:r:untrusted_app:s0:c512,c768",
+    "probe_apk_sha256": "d166fda19022c2181e486990d2b3295c330b6ad1c99e26bee1d7934db6dee8fb",
+    "observations": [
+      {
+        "stage": "init",
+        "sqlite_version": "3.18.2",
+        "revision": 1,
+        "payload": "A",
+        "operation_count": 1,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_uncommitted",
+        "writer_exit": 137,
+        "crash_point": "uncommitted"
+      },
+      {
+        "stage": "verify",
+        "revision": 1,
+        "payload": "A",
+        "operation_count": 1,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_committed",
+        "writer_exit": 137,
+        "crash_point": "committed_no_receipt"
+      },
+      {
+        "stage": "verify",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "replay",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "conflict",
+        "refused": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "replay_base_conflict",
+        "refused": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "stale",
+        "refused": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "rollback",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "migration_failure",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "capacity_full",
+        "sqlite_capacity_full": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "unknown_schema",
+        "refused_without_modification": true
+      },
+      {
+        "stage": "verify",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "corrupt_readonly",
+        "refused_without_modification": true
+      },
+      {
+        "stage": "verify",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_after_receipt",
+        "writer_exit": 137,
+        "crash_point": "after_receipt"
+      },
+      {
+        "stage": "verify",
+        "revision": 3,
+        "payload": "C",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "replay_final",
+        "revision": 3,
+        "payload": "C",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "verify",
+        "revision": 3,
+        "payload": "C",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      }
+    ]
+  },
+  "apple": {
+    "runtime": {
+      "identifier": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+      "version": "27.0",
+      "build": "24A434"
+    },
+    "probe_binary_sha256": "8f3ceb841eb6138f8b2c494477190bc6c54b2207bb1210e1961d9761decc8961",
+    "binary_build_version": "/Users/lixiaofan/StudioProjects/notecore/build/dev041-sqlite-capability-run.QzLCuR/run/SqliteCrashProbe:\nLoad command 11\n      cmd LC_BUILD_VERSION\n  cmdsize 32\n platform IOSSIMULATOR\n    minos 17.0\n      sdk 27.2\n   ntools 1\n     tool LD\n  version 27106.1\n",
+    "observations": [
+      {
+        "journal_mode": "wal",
+        "operation_count": 1,
+        "payload": "A",
+        "revision": 1,
+        "schema": 1,
+        "sqlite_version": "3.54.0",
+        "stage": "init",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_uncommitted",
+        "writer_exit": 137,
+        "crash_point": "uncommitted"
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 1,
+        "payload": "A",
+        "revision": 1,
+        "schema": 1,
+        "stage": "verify",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_committed",
+        "writer_exit": 137,
+        "crash_point": "committed_no_receipt"
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "revision": 2,
+        "schema": 1,
+        "stage": "verify",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "revision": 2,
+        "schema": 1,
+        "stage": "replay",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "refused": true,
+        "revision": 2,
+        "schema": 1,
+        "stage": "conflict",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "refused": true,
+        "revision": 2,
+        "schema": 1,
+        "stage": "replay_base_conflict",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "refused": true,
+        "revision": 2,
+        "schema": 1,
+        "stage": "stale",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "revision": 2,
+        "schema": 1,
+        "stage": "rollback",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "revision": 2,
+        "schema": 1,
+        "stage": "migration_failure",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "revision": 2,
+        "schema": 1,
+        "sqlite_capacity_full": true,
+        "stage": "capacity_full",
+        "synchronous": 2
+      },
+      {
+        "refused_without_modification": true,
+        "stage": "unknown_schema"
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "revision": 2,
+        "schema": 1,
+        "stage": "verify",
+        "synchronous": 2
+      },
+      {
+        "refused_without_modification": true,
+        "stage": "corrupt_readonly"
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 2,
+        "payload": "B",
+        "revision": 2,
+        "schema": 1,
+        "stage": "verify",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_after_receipt",
+        "writer_exit": 137,
+        "crash_point": "after_receipt"
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 3,
+        "payload": "C",
+        "revision": 3,
+        "schema": 1,
+        "stage": "verify",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 3,
+        "payload": "C",
+        "revision": 3,
+        "schema": 1,
+        "stage": "replay_final",
+        "synchronous": 2
+      },
+      {
+        "journal_mode": "wal",
+        "operation_count": 3,
+        "payload": "C",
+        "revision": 3,
+        "schema": 1,
+        "stage": "verify",
+        "synchronous": 2
+      }
+    ]
+  },
+  "same_observations": true,
+  "source_sha256": {
+    "tools/verify_sqlite_capabilities_isolated.py": "ca5fb096a091d059d2dfffabeb057a7e190f52ca070f7e0cc0ae855b03a05d4e",
+    "tools/verify_sqlite_capabilities.py": "8e785d6c85d8d5da6e002bc8365d535ee02c52540f8ff0c34572749bbc581c41",
+    "android-app/src/androidTest/java/dev/notecore/app/probes/SqliteCrashProbe.java": "443f23f5d3cdee046a244c03919f03ea94819c2d0649c9b1b184cad14e682137",
+    "tools/probes/SqliteCrashProbe.swift": "874ff20b74deaa10431f7aa871eef84f46c7eb50e8835c6b973c2ff160ad08a5",
+    "tools/probes/SqliteProbeSupport.swift": "a89000490611b9b4fe56f1038db07904152d9cf332f73db92b147ae943b8d827"
+  },
+  "retained_artifact_sha256": {
+    "SqliteCrashProbe": "8f3ceb841eb6138f8b2c494477190bc6c54b2207bb1210e1961d9761decc8961",
+    "android-matrix.log": "55256bafe6c471a28359b8f94e7c55a41f889ba7ae97b108835203017d88bcd6",
+    "apple-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apple-matrix.log": "37462e8cc53920dd962a4c3c079522e0ecc5e4194bb403630df555e19aac3fcb",
+    "emulator.log": "aca8657be26b333bbb90e6c2d17732fc382c3ff65d9740575dc4e1bf14484905",
+    "sqlite-probe.apk": "d166fda19022c2181e486990d2b3295c330b6ad1c99e26bee1d7934db6dee8fb",
+    "sqlite-probe.apk.idsig": "153ffd2626912b278ed2f20f18d7ea8ddd130a714568fb851a10971f603e2486"
+  }
+}
