@@ -127,12 +127,20 @@ private func record(_ db: DB, _ operation: String, _ checkpoint: Checkpoint) thr
                 blobs: [Data(SHA256.hash(data: checkpoint.canonical)), Data(SHA256.hash(data: checkpoint.source))])
 }
 
+private func openWriter(_ database: URL) throws -> DB {
+    let db = try DB(database.path)
+    try db.exec("PRAGMA foreign_keys=ON")
+    try require(db.query("PRAGMA journal_mode") == "wal" && db.number("PRAGMA synchronous") == 2
+                && db.number("PRAGMA foreign_keys") == 1)
+    return db
+}
+
 private func importCheckpoint(_ db: DB, _ folder: URL, _ checkpoint: Checkpoint, _ resources: [Resource],
                               stage: String) throws -> String {
     let operation = "attach-legacy"
     let manifest = resources.map(\.sha).sorted().joined(separator: ",")
     let taskIdentity = try checkpoint.taskIdentity()
-    func replay() throws -> Bool {
+    func replay(_ db: DB) throws -> Bool {
         if let document = try db.query("SELECT document_id FROM operation WHERE id=?", [operation]) {
             let saved = try db.query("""
                 SELECT coalesce(group_concat(sha256, ','), '') FROM
@@ -157,32 +165,74 @@ private func importCheckpoint(_ db: DB, _ folder: URL, _ checkpoint: Checkpoint,
         }
         return false
     }
-    let alreadyCommitted = try immediate(db) {
-        if try replay() { return true }
-        if let identity = try db.query("SELECT identity FROM import_task WHERE operation_id=?", [operation]) {
-            let pending = try db.query("""
-                SELECT coalesce(group_concat(sha256, ','), '') FROM
-                    (SELECT sha256 FROM import_task_resource WHERE operation_id=? ORDER BY sha256)
-                """, [operation])
-            guard identity == taskIdentity, pending == manifest else { throw Admission.conflict }
+    func verifyPending(_ connection: DB) throws {
+        let identity = try connection.query("SELECT identity FROM import_task WHERE operation_id=?", [operation])
+        let pinned = try connection.query("""
+            SELECT coalesce(group_concat(sha256 || ':' || size, ','), '') FROM
+                (SELECT sha256,size FROM import_task_resource WHERE operation_id=? ORDER BY sha256)
+            """, [operation])
+        let expected = resources.map { "\($0.sha):\($0.payload.count)" }.joined(separator: ",")
+        guard identity == taskIdentity, pinned == expected else { throw Admission.conflict }
+    }
+
+    func requestCancellation(_ connection: DB, attempt: String) throws -> String {
+        try immediate(connection) {
+            if try replay(connection) { return "ALREADY_COMMITTED" }
+            try verifyPending(connection)
+            guard try connection.query("SELECT active_attempt FROM import_task WHERE operation_id=?", [operation]) == attempt
+            else { return "STALE_ATTEMPT" }
+            if try connection.query("SELECT cancel_state FROM import_task WHERE operation_id=?", [operation]) == "cancelled" {
+                return "CANCELLED"
+            }
+            try connection.exec("UPDATE import_task SET cancel_state='requested' WHERE operation_id=?", [operation])
+            return "CANCEL_REQUESTED"
+        }
+    }
+
+    func acknowledgeCancellation() throws -> Bool {
+        let state = try db.query("SELECT cancel_state FROM import_task WHERE operation_id=?", [operation])
+        if state == "requested" {
+            try db.exec("UPDATE import_task SET cancel_state='cancelled' WHERE operation_id=?", [operation])
+            return true
+        }
+        return state == "cancelled"
+    }
+
+    if stage == "cancel-request" || stage == "cancel-stale" {
+        return try requestCancellation(db, attempt: stage == "cancel-stale" ? "stale" : "first")
+    }
+    let initialStatus: String? = try immediate(db) {
+        if try replay(db) { return "REPLAYED" }
+        if try db.query("SELECT identity FROM import_task WHERE operation_id=?", [operation]) != nil {
+            try verifyPending(db)
         } else {
             try require(db.query("SELECT id FROM document WHERE id=?", [checkpoint.id]) == nil)
-            try db.exec("INSERT INTO import_task VALUES(?,?,?)", [operation, checkpoint.id, taskIdentity])
+            try db.exec("INSERT INTO import_task(operation_id,document_id,identity) VALUES(?,?,?)", [operation, checkpoint.id, taskIdentity])
             for resource in resources {
                 try db.exec("INSERT INTO import_task_resource VALUES(?,?,?)",
                             [operation, resource.sha, String(resource.payload.count)])
             }
         }
-        return false
+        return try acknowledgeCancellation() ? "CANCELLED" : nil
     }
-    if alreadyCommitted { return "REPLAYED" }
+    if let initialStatus { return initialStatus }
     for resource in resources {
         try resource.publish(in: folder)
         if stage == "resource-published" { try stop(at: stage, folder: folder) }
+        if stage == "cancel-live" {
+            // A separate SQLite connection records intent while this producer still owns its task.
+            let client = try openWriter(folder.appendingPathComponent("checkpoint.sqlite"))
+            defer { client.close() }
+            try require(requestCancellation(client, attempt: "first") == "CANCEL_REQUESTED")
+            try require(client.query("SELECT cancel_state FROM import_task WHERE operation_id=?", [operation]) == "requested")
+            try verifyPending(client)
+            break
+        }
     }
-    let replayed = try immediate(db) {
-        if try replay() { return true }
-        try require(db.query("SELECT identity FROM import_task WHERE operation_id=?", [operation]) == taskIdentity)
+    let finalStatus = try immediate(db) {
+        if try replay(db) { return "REPLAYED" }
+        try verifyPending(db)
+        if try acknowledgeCancellation() { return "CANCELLED" }
         try record(db, operation, checkpoint)
         for resource in resources {
             try resource.validate()
@@ -193,11 +243,10 @@ private func importCheckpoint(_ db: DB, _ folder: URL, _ checkpoint: Checkpoint,
         }
         try db.exec("DELETE FROM import_task WHERE operation_id=?", [operation])
         if stage == "before-commit" { try stop(at: stage, folder: folder) }
-        return false
+        return "COMMITTED"
     }
-    if replayed { return "REPLAYED" }
-    if stage == "after-commit" { try stop(at: stage, folder: folder) }
-    return "COMMITTED"
+    if finalStatus == "COMMITTED" && stage == "after-commit" { try stop(at: stage, folder: folder) }
+    return finalStatus
 }
 
 #if !DEV041_APP
@@ -224,31 +273,34 @@ struct SqliteJointCheckpoint {
 #if DEV041_APP
     static func runApp() throws {
         let args = CommandLine.arguments
-        try require(args.count == 3 && args[1] == "--dev041-stage")
+        try require(args.count == 4 && args[1] == "--dev041-stage")
         guard let bundle = Bundle.main.bundleIdentifier,
               bundle.hasPrefix("dev.notecore.probes.sqlitejointapple.") else { throw ProbeFailure.invariant }
         let home = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
-        let folder = home.appendingPathComponent("Library/Caches/dev041-apple-joint", isDirectory: true)
+        let fixture = args[3]
+        try require(["dev041-apple-joint", "dev041-apple-cancel-stopped", "dev041-apple-cancel-live"].contains(fixture))
+        let folder = home.appendingPathComponent("Library/Caches", isDirectory: true)
+            .appendingPathComponent(fixture, isDirectory: true)
         try emitJoint(run(folder: folder, stage: args[2]), folder: folder)
     }
 #endif
 
     private static func run(folder: URL, stage: String) throws -> [String: Any] {
-        try require(["init", "resource-published", "before-commit", "after-commit", "replay", "conflict"].contains(stage))
+        try require(["init", "resource-published", "before-commit", "after-commit", "replay", "conflict",
+                     "cancel-request", "cancel-stale", "cancel-live"].contains(stage))
         try require(String(contentsOf: folder.appendingPathComponent(".fixture-scope"), encoding: .utf8) == "dev041-apple")
         let database = folder.appendingPathComponent("checkpoint.sqlite")
         try require(FileManager.default.fileExists(atPath: database.path) == (stage != "init"))
-        let db = try DB(database.path)
+        let db = try openWriter(database)
         defer { db.close() }
-        try db.exec("PRAGMA foreign_keys=ON")
-        try require(db.query("PRAGMA journal_mode") == "wal" && db.number("PRAGMA synchronous") == 2
-                    && db.number("PRAGMA foreign_keys") == 1)
         var result: [String: Any] = ["stage": stage, "pid": getpid(), "sqlite": String(cString: sqlite3_libversion())]
         if stage == "init" {
             let statements = try JSONDecoder().decode([String].self, from: Data(contentsOf: folder.appendingPathComponent("schema.json")))
             let checkpoint = try Checkpoint(folder.appendingPathComponent("existing.ncp"))
             try immediate(db) {
                 for statement in statements { try db.exec(statement) }
+                try db.exec("ALTER TABLE import_task ADD COLUMN active_attempt TEXT NOT NULL DEFAULT 'first'")
+                try db.exec("ALTER TABLE import_task ADD COLUMN cancel_state TEXT NOT NULL DEFAULT 'active'")
                 try db.exec("PRAGMA user_version=2")
                 try record(db, "existing", checkpoint)
             }

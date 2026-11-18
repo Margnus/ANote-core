@@ -159,7 +159,7 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                 result = run(label, *simctl, 'launch',
                              f'--stdout={output / (label + ".app-stdout.log")}',
                              f'--stderr={output / (label + ".app-stderr.log")}',
-                             device, bundle, '--dev041-stage', stage)
+                             device, bundle, '--dev041-stage', stage, root.name)
                 launch = result.stdout.decode().strip()
                 match = re.fullmatch(re.escape(bundle) + r': (\d+)', launch)
                 assert match, launch
@@ -211,7 +211,7 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                         'operations': db.execute('SELECT id,document_id,base_revision,revision,checkpoint_sha256,source_sha256 FROM operation ORDER BY id').fetchall(),
                         'resources': db.execute('SELECT sha256,size FROM resource ORDER BY sha256').fetchall(),
                         'references': db.execute('SELECT operation_id,sha256 FROM operation_resource ORDER BY 1,2').fetchall(),
-                        'tasks': db.execute('SELECT operation_id,document_id,identity FROM import_task').fetchall(),
+                        'tasks': db.execute('SELECT operation_id,document_id,identity,active_attempt,cancel_state FROM import_task').fetchall(),
                         'pins': db.execute('SELECT sha256,size FROM import_task_resource ORDER BY sha256').fetchall(),
                     }
 
@@ -243,7 +243,8 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
             assert db_state() == previous
             step('first_resource_published', 'resource-published', cut=True)
             task_identity = json.dumps([imported.document_id, None, imported.revision, sha(imported.canonical), sha(v1)])
-            pending = {**previous, 'tasks': [('attach-legacy', imported.document_id, task_identity)], 'pins': manifest}
+            task = ('attach-legacy', imported.document_id, task_identity, 'first')
+            pending = {**previous, 'tasks': [(*task, 'active')], 'pins': manifest}
             assert db_state() == pending
             first, second = (item[0] for item in manifest)
             target = root / 'resources' / first
@@ -273,6 +274,8 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                 'tasks': [], 'pins': [],
             }
             assert db_state() == committed and file_state() == resources
+            step('late_cancel_after_commit', 'cancel-request', expected='ALREADY_COMMITTED')
+            assert db_state() == committed and file_state() == resources
             step('exact_replay', 'replay', expected='REPLAYED')
             assert db_state() == committed and file_state() == resources
             assert {item.name: item.stat().st_ino for item in target.parent.iterdir()} == inodes
@@ -283,6 +286,46 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
             assert db_state() == committed and file_state() == {**resources, second: bad}
             assert all((root / name).read_bytes() == data for name, data in inputs.items())
             if app_sandbox:
+                def start_case(fixture):
+                    case = home / 'Library/Caches' / fixture
+                    case.mkdir()
+                    return case
+
+                def cancelled_state(status):
+                    return {**pending, 'tasks': [(*task, status)]}
+
+                root = start_case('dev041-apple-cancel-stopped')
+                seed_inputs()
+                step('seed_cancel_after_stop', 'init', expected='SEEDED')
+                assert db_state() == previous
+                step('cancel_after_stop_publish', 'resource-published', cut=True)
+                retained = {first: resources[first]}
+                assert db_state() == pending and file_state() == retained
+                original = root / 'resources' / first
+                retained_inode = original.stat().st_ino
+                step('stale_cancel_after_stop', 'cancel-stale', expected='STALE_ATTEMPT')
+                assert db_state() == pending and file_state() == retained
+                step('request_cancel_after_stop', 'cancel-request', expected='CANCEL_REQUESTED')
+                assert db_state() == cancelled_state('requested') and file_state() == retained
+                step('ack_cancel_after_stop', 'replay', expected='CANCELLED')
+                assert db_state() == cancelled_state('cancelled') and file_state() == retained
+                step('retry_cancelled_after_stop', 'replay', expected='CANCELLED')
+                assert db_state() == cancelled_state('cancelled') and file_state() == retained
+                assert original.stat().st_ino == retained_inode
+                assert all((root / name).read_bytes() == data for name, data in inputs.items())
+
+                root = start_case('dev041-apple-cancel-live')
+                seed_inputs()
+                step('seed_live_cancel', 'init', expected='SEEDED')
+                assert db_state() == previous
+                step('request_while_producer_live', 'cancel-live', expected='CANCELLED')
+                assert db_state() == cancelled_state('cancelled') and file_state() == retained
+                original = root / 'resources' / first
+                retained_inode = original.stat().st_ino
+                step('retry_live_cancelled', 'replay', expected='CANCELLED')
+                assert db_state() == cancelled_state('cancelled') and file_state() == retained
+                assert original.stat().st_ino == retained_inode
+                assert all((root / name).read_bytes() == data for name, data in inputs.items())
                 run('uninstall', *simctl, 'uninstall', device, bundle)
 
             with tempfile.TemporaryDirectory(prefix='sqlite-capability-joint-regression-', dir=BUILD) as control_root:

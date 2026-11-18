@@ -97,7 +97,7 @@ def main():
         db.execute('UPDATE import_task SET hash=? WHERE id=?',(sha,operation))
         if args.fault=='stage-closed':os._exit(73)
         if args.hold_after_stage:
-            (folder/(args.attempt+'.ready')).write_text('ready',encoding='utf-8',newline='\n')
+            (folder/(args.attempt+'.ready')).write_bytes(b'ready')
             deadline=time.monotonic()+10
             while not (folder/(args.attempt+'.release')).exists():
                 if time.monotonic()>deadline:os._exit(73) # Retain ownership on timeout.

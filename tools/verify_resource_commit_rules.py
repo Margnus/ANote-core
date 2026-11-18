@@ -59,7 +59,7 @@ def live_cancel(folder,stale=False):
         assert child.poll() is None and task_identity(folder)==('running',1,'live',child.pid)
         stage=folder/'staging/live.bin';original=signature(stage)
         assert snapshot(folder)['documents']==0 and not (folder/'resources').exists()
-        (folder/'live.release').write_text('release',encoding='utf-8',newline='\n')
+        (folder/'live.release').write_bytes(b'release')
         stdout,stderr=child.communicate(timeout=5)
         assert child.returncode==0 and not stderr and json.loads(stdout)['status']=='CANCELLED'
         assert task_identity(folder)==('cancelled',1,'live',child.pid) and signature(stage)==original
@@ -67,7 +67,7 @@ def live_cancel(folder,stale=False):
         assert invoke(folder,'retry')=='CANCELLED' and not (folder/'staging/retry.bin').exists()
     finally:
         if child.poll() is None:
-            (folder/'live.release').write_text('release',encoding='utf-8',newline='\n')
+            (folder/'live.release').write_bytes(b'release')
             try:child.communicate(timeout=5)
             except subprocess.TimeoutExpired:child.kill();child.communicate();raise
 
@@ -83,7 +83,7 @@ def checks():
     with tempfile.TemporaryDirectory(prefix='resource-joint-boundaries-',dir=build) as temporary:
         base=Path(temporary)
         def prepare(name):
-            folder=base/name;folder.mkdir();(folder/'.fixture-scope').write_text(MARKER,encoding='utf-8',newline='\n')
+            folder=base/name;folder.mkdir();(folder/'.fixture-scope').write_bytes(MARKER.encode('utf-8'))
             (folder/'source.bin').write_bytes(payload);return folder
         for case in recipe['crash_cases']:
             folder=prepare(case['fault']);invoke(folder,'first',case['fault']);before=snapshot(folder)
@@ -165,6 +165,7 @@ def checks():
         'production_schema_frozen':False,'production_sqlite_authorized':False,'c1_gate_complete':False,'limits':recipe['limits']}
 def main():
     report=checks();report['source_and_artifact_sha256']={p.relative_to(ROOT).as_posix():sha(p) for p in (PROBE,RECIPE,PAYLOADS,Path(__file__))}
-    (ROOT/'reports/resource-commit-rules.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+    with (ROOT/'reports/resource-commit-rules.json').open('w',encoding='utf-8',newline='\n') as output:
+        output.write(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k not in ('observations','source_and_artifact_sha256')},ensure_ascii=False))
 if __name__=='__main__':main()
