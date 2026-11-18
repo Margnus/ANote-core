@@ -24,5 +24,7 @@ internal fun PreviewSessionFailure?.previewMessage(): String = when (this?.kind)
     PreviewFailureKind.INVALID_INPUT -> "输入数据无效"
     PreviewFailureKind.INPUT_BATCH_CAPACITY -> "输入批次超限"
     PreviewFailureKind.READ_ONLY -> "阅读模式不能修改笔记"
+    PreviewFailureKind.UNSUPPORTED_BRUSH -> "压感笔将在后续版本提供"
+    PreviewFailureKind.EMPTY_SELECTION -> "请先圈选要操作的笔迹"
     null -> "当前操作无法完成"
 }

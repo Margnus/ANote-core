@@ -25,6 +25,9 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     private var color = 0xff253247.toInt()
     private var width = 2.5
     private var penKind = BrushKind.MONOLINE
+    private var lassoSelection: List<ObjectId> = emptyList()
+    /** Presentation-only lasso selection; invalidated by page switches and history traversal. */
+    val selectedStrokeIds: List<ObjectId> get() { ownerCheck(); return lassoSelection.toList() }
     private var error = ""
     private var failure: PreviewSessionFailure? = null
     private var readOnly = false
@@ -90,7 +93,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     /** Owner-only lookup in the selected page; the returned stroke is immutable. */
     fun strokeAt(index: Int): StrokeObject? = visible().getOrNull(index)
     fun strokeId(index: Int): String = stroke(index).id.value
-    fun strokeColor(index: Int): Int = stroke(index).brush.argb
+    fun strokeColor(index: Int): Int = BrushDisplayRules.displayArgb(stroke(index).brush)
     fun strokeWidth(index: Int): Double = stroke(index).brush.width
     fun pointCount(index: Int): Int = stroke(index).samples.size
     fun pointX(index: Int, point: Int): Double = stroke(index).let { it.transform.a * it.samples.x(point) + it.transform.c * it.samples.y(point) + it.transform.tx }
@@ -112,6 +115,9 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             is PreviewEdit.SetPaper -> setPaper(request.width, request.height, request.paper)
             is PreviewEdit.SelectPen -> selectPen(request.argb, request.width, request.kind)
             is PreviewEdit.EraseStrokes -> eraseStrokes(request.path, request.radius)
+            is PreviewEdit.LassoSelect -> lassoSelect(request.polygon)
+            is PreviewEdit.TransformSelection -> transformSelection(request.dx, request.dy, request.scaleFactor, request.anchor)
+            PreviewEdit.DeleteSelection -> deleteSelection()
             is PreviewEdit.SelectPage -> {
                 if (!validPageId(request.pageId)) fail("页面编号无效", PreviewFailureKind.INVALID_ARGUMENT)
                 else selectPage(PageId(request.pageId))
@@ -177,6 +183,68 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
             }, PreviewFailureKind.DOCUMENT_REJECTED, result.reason)
         }
     }
+    /** Lasso selection is presentation-only: no command, no revision change, no history entry. */
+    fun lassoSelect(polygon: List<PointD>): Boolean {
+        if (!prepareEdit(contentChange = false)) return false
+        val root = root()
+        val result = LassoRules.select(root, root.id, root.revision, selected, polygon, LASSO_PAIR_TEST_BUDGET)
+        val plan = result.plan
+        if (plan == null) {
+            return when (result.failure) {
+                LassoFailure.NO_HIT -> { lassoSelection = emptyList(); clearError(); true }
+                LassoFailure.INVALID_PATH -> fail("套索路径无效", PreviewFailureKind.INVALID_ARGUMENT)
+                LassoFailure.CAPACITY -> fail("当前预览已达到编辑容量，请保留笔记并导出备份", PreviewFailureKind.CAPACITY)
+                else -> fail("操作未完成，原内容仍保留，请重试", PreviewFailureKind.DOCUMENT_REJECTED)
+            }
+        }
+        lassoSelection = plan.objectIds(); clearError(); return true
+    }
+
+    /** One transform command for the whole selection, hence one undo entry; selection stays for further moves. */
+    fun transformSelection(dx: Double, dy: Double, scaleFactor: Double = 1.0, anchor: PointD = PointD(0.0, 0.0)): Boolean {
+        if (!prepareEdit()) return false
+        if (lassoSelection.isEmpty()) return fail("请先圈选要操作的笔迹", PreviewFailureKind.EMPTY_SELECTION)
+        val root = root()
+        val result = LassoRules.transform(root, root.id, root.revision, selected, lassoSelection, dx, dy, scaleFactor, anchor)
+        val plan = result.plan
+        if (plan == null) {
+            return when (result.failure) {
+                LassoFailure.NO_CHANGE -> { clearError(); true }
+                LassoFailure.INVALID_TRANSFORM -> fail("变换参数无效", PreviewFailureKind.INVALID_ARGUMENT)
+                LassoFailure.MISSING_OBJECT, LassoFailure.WRONG_PAGE, LassoFailure.EMPTY_SELECTION -> {
+                    lassoSelection = emptyList(); fail("选择已失效，请重新圈选", PreviewFailureKind.EMPTY_SELECTION)
+                }
+                else -> fail("操作未完成，原内容仍保留，请重试", PreviewFailureKind.DOCUMENT_REJECTED)
+            }
+        }
+        val changes = plan.changes().map { (id, transform) ->
+            val old = root.scene.find(id)!!
+            ObjectChange(old, old.copy(objectRevision = old.objectRevision + 1, transform = transform))
+        }
+        val op = operation() ?: return false
+        val prepared = SceneReducer.prepareChanges(root.scene, op, changes)
+        if (prepared !is PrepareResult.Prepared) return fail("操作未完成，原内容仍保留，请重试", PreviewFailureKind.DOCUMENT_REJECTED)
+        return commit(DocumentCommand.PreparedCanvas(selected, prepared.patch))
+    }
+
+    fun deleteSelection(): Boolean {
+        if (!prepareEdit()) return false
+        if (lassoSelection.isEmpty()) return fail("请先圈选要操作的笔迹", PreviewFailureKind.EMPTY_SELECTION)
+        val root = root()
+        val changes = mutableListOf<ObjectChange>()
+        for (id in lassoSelection) {
+            val old = root.scene.find(id) ?: run {
+                lassoSelection = emptyList(); return fail("选择已失效，请重新圈选", PreviewFailureKind.EMPTY_SELECTION)
+            }
+            changes.add(ObjectChange(old, null))
+        }
+        val op = operation() ?: return false
+        val prepared = SceneReducer.prepareChanges(root.scene, op, changes)
+        if (prepared !is PrepareResult.Prepared) return fail("操作未完成，原内容仍保留，请重试", PreviewFailureKind.DOCUMENT_REJECTED)
+        if (!commit(DocumentCommand.PreparedCanvas(selected, prepared.patch))) return false
+        lassoSelection = emptyList(); return true
+    }
+
     /** One eraser gesture deletes every hit as one PreparedCanvas command, hence one undo entry. */
     fun eraseStrokes(path: List<PointD>, radius: Double): Boolean {
         if (!prepareEdit()) return false
@@ -204,7 +272,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         if (root().findPage(id) == null) return fail("页面不存在", PreviewFailureKind.MISSING_PAGE)
         if (id == selected) { clearError(); return true }
         if (!prepareEdit(contentChange = false)) return false
-        cancelStroke(); clearProjection(); selected = id; clearError(); return true // Presentation-only; no root commit.
+        cancelStroke(); clearProjection(); selected = id; lassoSelection = emptyList(); clearError(); return true // Presentation-only; no root commit.
     }
     fun insertPage(): Boolean {
         if (!prepareEdit()) return false
@@ -213,7 +281,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val op = operation() ?: return false
         val before = root.pages().getOrNull(currentPageIndex + 1)?.id
         if (!commit(DocumentCommand.InsertPage(op, root.id, root.revision, PageDescriptor(page, layer, source.width, source.height, source.paper), before))) return false
-        selected = page; return true
+        selected = page; lassoSelection = emptyList(); return true
     }
     fun moveCurrentPage(before: PageId?): Boolean {
         if (!prepareEdit()) return false
@@ -231,13 +299,13 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val op = operation() ?: return false
         if (!commit(DocumentCommand.CopyPage(op, root.id, root.revision, selected, source.contentRevision, page, layer,
                 mapping, root.pages().getOrNull(currentPageIndex + 1)?.id))) return false
-        selected = page; return true
+        selected = page; lassoSelection = emptyList(); return true
     }
     fun deleteCurrentPage(): Boolean {
         if (!prepareEdit()) return false
         val root = root(); val index = currentPageIndex; val op = operation() ?: return false
         if (!commit(DocumentCommand.DeletePage(op, root.id, root.revision, selected))) return false
-        repairSelection(index); return true
+        repairSelection(index); lassoSelection = emptyList(); return true
     }
     private fun repairSelection(previousIndex: Int) {
         val root = root()
@@ -268,7 +336,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
         val root = root(); val index = currentPageIndex; val op = operation() ?: return false
         val command = if (undo) DocumentCommand.Undo(op, root.id, root.revision, top) else DocumentCommand.Redo(op, root.id, root.revision, top)
         if (!commit(command)) return false
-        repairSelection(index); return true
+        repairSelection(index); lassoSelection = emptyList(); return true
     }
     fun selectPen(argb: Int, width: Double, kind: BrushKind = BrushKind.MONOLINE): Boolean {
         ownerCheck()
@@ -494,6 +562,7 @@ class PagedPreviewNotebook @Throws(IllegalArgumentException::class) constructor(
     companion object {
         /** Candidate pair-test ceiling for one eraser gesture; dense pages need the spatial index port later. */
         private const val ERASER_PAIR_TEST_BUDGET = 1_000_000
+        private const val LASSO_PAIR_TEST_BUDGET = 1_000_000
         /** Validate the entire immutable checkpoint before constructing the original authority. No auto-commit. */
         fun openRecovery(snapshot: PagedPreviewSnapshot, sessionNonce: String, budget: DocumentBudget = DocumentBudget(),
                          ownerCheck: () -> Unit = {}): PreviewNotebookOpen {
