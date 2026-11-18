@@ -60,7 +60,7 @@ internal object LibrarySearchRules {
         return null
     }
 
-    private fun invalidOperation(query: LibrarySearchQuery) = query.operationId.isBlank() ||
+    internal fun invalidOperation(query: LibrarySearchQuery) = query.operationId.isBlank() ||
         query.operationId.length > 128 || !query.operationId.hasValidUnicode() || query.queryVersion < 0
 
     private fun freeze(s: LibrarySearchSnapshot) = LibrarySearchSnapshot(
