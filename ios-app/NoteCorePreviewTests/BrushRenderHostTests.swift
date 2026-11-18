@@ -206,7 +206,7 @@ final class BrushRenderHostTests: XCTestCase {
         let note = try XCTUnwrap(model.current)
         XCTAssertTrue(note.setPaper(width: 200, height: 200, paper: .blank))
         for color: UInt32 in [0x80ff0000, 0x800000ff] {
-            note.selectPen(argb: Int32(bitPattern: color), width: 10)
+            XCTAssertTrue(note.selectPen(argb: Int32(bitPattern: color), width: 10, kind: .monoline))
             XCTAssertTrue(note.beginStroke(x: 50, y: 40, pressure: 1, timeMicros: 0))
             XCTAssertTrue(note.endStroke(x: 50, y: 40, pressure: 1, timeMicros: 1))
         }
@@ -247,7 +247,7 @@ final class BrushRenderHostTests: XCTestCase {
         for i in 0..<4 { XCTAssertLessThanOrEqual(abs(expected[i] - actual[i]), 2) }
         XCTAssertLessThan(actual[1], 100); XCTAssertGreaterThan(actual[2], 170)
         XCTAssertEqual(try pixel(after, 50, 160), [255,255,255,255]) // Detect upside-down image.
-        note.selectPen(argb: Int32(bitPattern: 0x8000ff00), width: 10)
+        XCTAssertTrue(note.selectPen(argb: Int32(bitPattern: 0x8000ff00), width: 10, kind: .monoline))
         XCTAssertTrue(note.beginStroke(x: 50, y: 40, pressure: 1, timeMicros: 2))
         XCTAssertTrue(note.endStroke(x: 50, y: 40, pressure: 1, timeMicros: 3))
         model.changed()
@@ -259,7 +259,7 @@ final class BrushRenderHostTests: XCTestCase {
         XCTAssertGreaterThan(committed[1], actual[1]) // New green object appears exactly once.
         NativeInkCanvas.dismantleUIView(view, coordinator: ())
         try await eventually { !model.inkOwnerRetained }; XCTAssertEqual(model.inkChargedBytes, 0)
-        note.selectPen(argb: -16777216, width: 2)
+        XCTAssertTrue(note.selectPen(argb: -16777216, width: 2, kind: .monoline))
         XCTAssertTrue(note.beginStroke(x: 100, y: 80, pressure: 1, timeMicros: 2))
         XCTAssertTrue(note.endStroke(x: 100, y: 80, pressure: 1, timeMicros: 3))
         model.changed(); model.close(); XCTAssertNil(model.current)

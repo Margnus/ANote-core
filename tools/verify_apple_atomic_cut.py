@@ -35,24 +35,55 @@ def originals(container):
 
 
 def main():
-    parser = argparse.ArgumentParser(); parser.add_argument('--device', required=True)
-    args = parser.parse_args(); assert args.device == DEVICE
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--device', required=True)
+    parser.add_argument('--isolated', action='store_true', help='Rebuild the host and run on a fresh NoteCoreAtomicCut simulator')
+    args = parser.parse_args()
+    device_id = str(uuid.UUID(args.device)).upper()
     devices = json.loads(sim('list', 'devices', '--json'))['devices']
-    device = next(d for group in devices.values() for d in group if d['udid'] == DEVICE)
-    assert device['name'] == 'NoteCorePreview' and device['state'] == 'Booted'
-    container = Path(sim('get_app_container', DEVICE, BUNDLE, 'data').strip())
-    before = originals(container); assert len(before) == 14
-    assert before == json.loads((ROOT / 'build/remote-sync-20261027/ios-after.json').read_text(encoding='utf-8'))
-    built_path = ROOT / 'reports/ios-preview-build.json'
-    host_path = ROOT / 'reports/ios-host-tests.json'
-    built = json.loads(built_path.read_text(encoding='utf-8'))
-    hosted = json.loads(host_path.read_text(encoding='utf-8'))
-    assert built['status'] == hosted['status'] == 'passed' and hosted['test_count'] == len(hosted['checks']) and 'testAtomicWriteProcessBoundary()' in hosted['checks']
-    bindings = {**built['source_and_build_input_sha256'], **hosted['source_and_framework_sha256'],
-                **hosted['test_build_sha256']}
-    bindings.update({p.relative_to(ROOT).as_posix(): sha(p) for p in [Path(__file__), built_path, host_path]})
+    runtime, device = next((runtime, device) for runtime, group in devices.items()
+                           for device in group if device['udid'] == device_id)
+    assert device['state'] == 'Booted'
+    if args.isolated:
+        from verify_ios_host import inputs
+        assert device['name'].startswith('NoteCoreAtomicCut-')
+        assert BUNDLE not in sim('listapps', device_id), 'Expected a fresh fixture simulator without the preview app'
+        folder = ROOT / ('build/apple-atomic-cut-isolated-' + uuid.uuid4().hex)
+        folder.mkdir(parents=True)
+        host = folder / 'host-tests'
+        bindings = inputs()
+        with (folder / 'host-build.log').open('w', encoding='utf-8') as log:
+            subprocess.run(['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
+                            '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination',
+                            'platform=iOS Simulator,id=' + device_id, '-derivedDataPath', str(host),
+                            'CODE_SIGNING_ALLOWED=NO', 'build-for-testing'], cwd=ROOT,
+                           stdout=log, stderr=subprocess.STDOUT, timeout=240, check=True)
+        app = host / 'Build/Products/Debug-iphonesimulator/NoteCorePreview.app'
+        products = [app / 'NoteCorePreview', app / 'NoteCorePreview.debug.dylib',
+                    app / 'PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests']
+        bindings.update({path.relative_to(ROOT).as_posix(): sha(path) for path in products})
+        sim('install', device_id, str(app))
+        container = Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())
+        before = originals(container)
+        assert not before
+    else:
+        assert device_id == DEVICE and device['name'] == 'NoteCorePreview'
+        host = HOST
+        container = Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())
+        before = originals(container); assert len(before) == 14
+        assert before == json.loads((ROOT / 'build/remote-sync-20261027/ios-after.json').read_text(encoding='utf-8'))
+        built_path = ROOT / 'reports/ios-preview-build.json'
+        host_path = ROOT / 'reports/ios-host-tests.json'
+        built = json.loads(built_path.read_text(encoding='utf-8'))
+        hosted = json.loads(host_path.read_text(encoding='utf-8'))
+        assert built['status'] == hosted['status'] == 'passed' and hosted['test_count'] == len(hosted['checks'])
+        assert 'testAtomicWriteProcessBoundary()' in hosted['checks']
+        bindings = {**built['source_and_build_input_sha256'], **hosted['source_and_framework_sha256'],
+                    **hosted['test_build_sha256']}
+        bindings.update({p.relative_to(ROOT).as_posix(): sha(p) for p in (built_path, host_path)})
+        folder = ROOT / 'build/apple-atomic-cut'; folder.mkdir(parents=True, exist_ok=True)
+    bindings[Path(__file__).relative_to(ROOT).as_posix()] = sha(Path(__file__))
     for name, digest in bindings.items(): assert sha(ROOT / name) == digest, name
-    folder = ROOT / 'build/apple-atomic-cut'; folder.mkdir(parents=True, exist_ok=True)
     control = container / 'Library/Caches/NoteCoreAtomicCutControl'; control.mkdir(parents=True, exist_ok=True)
     request = control / 'request.json'; assert not request.exists(), 'Existing control belongs to another run'
     evidence = []; observations = []
@@ -68,7 +99,7 @@ def main():
             prepare_result = stage / ('prepare-' + uuid.uuid4().hex + '.xcresult')
             base_command = ['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
                             '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination',
-                            'platform=iOS Simulator,id=' + DEVICE, '-derivedDataPath', str(HOST),
+                            'platform=iOS Simulator,id=' + device_id, '-derivedDataPath', str(host),
                             'CODE_SIGNING_ALLOWED=NO', '-parallel-testing-enabled', 'NO',
                             '-only-testing:' + TEST, '-collect-test-diagnostics', 'never']
             log = stage / 'prepare.log'
@@ -81,7 +112,7 @@ def main():
                     assert process.poll() is None, log.read_text(encoding='utf-8')
                     time.sleep(.1)
                     # XCTest installation can relocate the data container while preserving its contents.
-                    container = Path(sim('get_app_container', DEVICE, BUNDLE, 'data').strip())
+                    container = Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())
                     control = container / 'Library/Caches/NoteCoreAtomicCutControl'
                     request = control / 'request.json'
                     fixture = container / 'Library/Caches' / ('atomic-cut-' + identity)
@@ -91,7 +122,9 @@ def main():
                 victim = ready['pid']; assert isinstance(victim, int) and victim > 1
                 assert ready['boundary'] == boundary and ready['has_pending'] and ready['pending_writes'] == 1
                 assert ready['worker_returned'] is False and ready['status'].startswith('正在保存')
-                installed = Path(sim('get_app_container', DEVICE, BUNDLE, 'app').strip())
+                installed = Path(sim('get_app_container', device_id, BUNDLE, 'app').strip())
+                if args.isolated:
+                    assert all(sha(installed / p.relative_to(app)) == sha(p) for p in products)
                 command = run('ps', '-p', str(victim), '-o', 'comm=').strip()
                 assert command == str(installed / 'NoteCorePreview'), command
                 os.kill(victim, 0)
@@ -113,7 +146,7 @@ def main():
                 assert (fixture / 'pending-window.ncp').read_bytes() == base
                 process.wait(timeout=90)
                 assert process.returncode != 0, 'Killed prepare invocation must not pass'
-            container = Path(sim('get_app_container', DEVICE, BUNDLE, 'data').strip())
+            container = Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())
             control = container / 'Library/Caches/NoteCoreAtomicCutControl'
             request = control / 'request.json'
             config['action'] = 'reopen'; request.write_text(json.dumps(config), encoding='utf-8')
@@ -127,7 +160,7 @@ def main():
             summary = json.loads(summary_text)
             assert summary['result'] == 'Passed' and summary['totalTestCount'] == 1
             assert summary['failedTests'] == summary['skippedTests'] == summary['expectedFailures'] == 0
-            container = Path(sim('get_app_container', DEVICE, BUNDLE, 'data').strip())
+            container = Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())
             control = container / 'Library/Caches/NoteCoreAtomicCutControl'
             request = control / 'request.json'
             result_file = control / 'result.json'
@@ -147,28 +180,35 @@ def main():
             request.unlink()
         assert originals(container) == before
     finally:
-        container = Path(sim('get_app_container', DEVICE, BUNDLE, 'data').strip())
+        container = Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())
         request = container / 'Library/Caches/NoteCoreAtomicCutControl/request.json'
         if request.exists(): request.unlink()
         if process is not None and process.poll() is None:
-            subprocess.run(['xcrun', 'simctl', 'terminate', DEVICE, BUNDLE], capture_output=True, timeout=30)
+            subprocess.run(['xcrun', 'simctl', 'terminate', device_id, BUNDLE], capture_output=True, timeout=30)
             process.wait(timeout=60)
-        # Always restore the exact already-built ordinary app, without resetting data.
-        run(os.sys.executable, str(ROOT / 'tools/restore_ios_preview.py'), '--device', DEVICE)
-    container = Path(sim('get_app_container', DEVICE, BUNDLE, 'data').strip())
+        if not args.isolated:
+            run(os.sys.executable, str(ROOT / 'tools/restore_ios_preview.py'), '--device', device_id)
+    container = Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())
     assert originals(container) == before
     original_file = folder / 'original-files.json'
     original_file.write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8'); evidence.append(original_file)
-    restored = ROOT / 'reports/ios-preview-restored.json'; evidence.append(restored)
+    if args.isolated:
+        sim('launch', device_id, BUNDLE)
+        assert originals(Path(sim('get_app_container', device_id, BUNDLE, 'data').strip())) == before
+        evidence.append(folder / 'host-build.log')
+    else:
+        evidence.append(ROOT / 'reports/ios-preview-restored.json')
     for name, digest in bindings.items(): assert sha(ROOT / name) == digest, name
     bindings.update({p.relative_to(ROOT).as_posix(): sha(p) for p in evidence})
     report = {'schema': 'apple-atomic-cut-1', 'status': 'passed', 'observations': observations,
-              'original_files_preserved': 14, 'ordinary_payload_restored': True,
+              'original_files_preserved': len(before), 'ordinary_payload_restored': not args.isolated,
+              'isolated_simulator': args.isolated, 'runtime': runtime,
               'source_and_artifact_sha256': dict(sorted(bindings.items())),
               'decision': 'Retain original serial Data.write(.atomic) and original owner ACK. Before API entry the old file survives; after API return but before original owner ACK a new process recovers complete pending and commits once.',
               'scope': 'Two exact observed original test-host SIGKILLs on Apple Simulator, with fresh original Model readers. The internal temporary write/sync/rename point inside Data.write is opaque and untested. No random internal interruption, power loss, directory fsync guarantee, physical M-1/heap/stylus or production DURABLE receipt.',
               'c1_gate_complete': False, 'production_sqlite_authorized': False}
-    (ROOT / 'reports/apple-atomic-cut.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    destination = folder / 'result.json' if args.isolated else ROOT / 'reports/apple-atomic-cut.json'
+    destination.write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({k: v for k, v in report.items() if k != 'source_and_artifact_sha256'}, ensure_ascii=False))
 
 

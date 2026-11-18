@@ -22,6 +22,7 @@ CURRENT = {
     'viewport-native-contracts': ('source_and_artifact_sha256',),
     'owner-budget-overlap': ('source_and_artifact_sha256',),
     'apple-atomic-cut': ('source_and_artifact_sha256',),
+    'dev041-original-atomic-revalidation-20261118': ('source_sha256',),
     'android-atomic-cut': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
     'read-traversal': ('source_and_artifact_sha256',),
     'budget-creation': ('source_and_artifact_sha256',),

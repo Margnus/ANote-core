@@ -1899,7 +1899,7 @@ final class PagedHostTests: XCTestCase {
         let note = try XCTUnwrap(model.current), id = note.documentId
         draw(note); model.changed(); let first = note.currentPageId
         model.applyEdit(PreviewEditInsertPage.shared); XCTAssertEqual(note.pageCount, 2)
-        XCTAssertTrue(note.selectPen(argb: Int32(bitPattern: 0xff3568be), width: 5))
+        XCTAssertTrue(note.selectPen(argb: Int32(bitPattern: 0xff3568be), width: 5, kind: .monoline))
         draw(note, x: 200); model.changed()
         let beforeSelection = note.snapshot()
         model.applyEdit(PreviewEditSelectPage(pageId: first.value), content: false)
