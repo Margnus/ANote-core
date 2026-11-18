@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "scope": "Host SQLite and fixed C1 Java recovery oracle; synthetic source; isolated migration",
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "sqlite_version": "3.54.0",
+  "checkpoint_revision": 2,
+  "recovery_admitted_bytes": 2248,
+  "source_unchanged": true,
+  "android_aars_sha256": {
+    "canvas-core-android-0.0.0-c1.aar": "4d80b415f483fdd707bc37248abd0cf93b39905d3e5167bb2452a1bfe567a2d4",
+    "shared-core-android-0.0.0-c1.aar": "55bc9a3d861f7df1ef5bcc6967bbbbd26238c66dfd5ef583c77a98d8f332b112"
+  },
+  "kotlin_stdlib_sha256": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+  "observations": {
+    "confirmed_document_requires_normal_import": {
+      "status": "INVALID_SOURCE"
+    },
+    "truncated_refused": {
+      "status": "INVALID_SOURCE"
+    },
+    "capacity_refused": {
+      "status": "INPUT_CAPACITY"
+    },
+    "dies_before_commit": {
+      "cut": "before-commit",
+      "pid": 15248
+    },
+    "dies_after_commit_before_receipt": {
+      "cut": "after-commit",
+      "pid": 15250
+    },
+    "same_operation_replays": {
+      "status": "REPLAYED",
+      "revision": 2
+    },
+    "different_operation_cannot_reimport": {
+      "status": "STALE_BASE"
+    }
+  },
+  "source_sha256": {
+    "tools/verify_sqlite_pending_recovery.py": "695fedd0cabc8bf5933594b57d8915ce9724feccbd31fadb49dee7a0bcbc93ae",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "tools/probes/SqlitePendingRecoveryFixture.java": "f881732c90082875c5c2b3ae2952260ac22e297aa8b0f3dc2a3db652790f4093",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/apple-sqlite-joint-checkpoint-20261117/verification.json": "b7bd43b8986756c0a141a4aa39ff80902077288f6be065143609db57940b1ae9",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+  }
+}
