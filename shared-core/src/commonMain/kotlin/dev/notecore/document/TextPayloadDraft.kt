@@ -16,10 +16,7 @@ internal class TextPayloadDraft private constructor(
     fun run(index: Int): TextRunDraft = entries[index]
 
     companion object {
-        private fun boundary(text: String, offset: Int) = offset in 0..text.length &&
-            !(offset > 0 && offset < text.length && text[offset - 1].isHighSurrogate() && text[offset].isLowSurrogate())
-
-        private fun valid(style: TextStyleDraft): Boolean = style.size.isFinite() && style.size > 0 &&
+        internal fun validStyle(style: TextStyleDraft): Boolean = style.size.isFinite() && style.size > 0 &&
             (style.fontRequest == null || (style.fontRequest.isNotBlank() && style.fontRequest.length <= 128 &&
                 style.fontRequest.hasValidUnicode()))
 
@@ -34,16 +31,16 @@ internal class TextPayloadDraft private constructor(
             if (text.length > budget.utf16Units || runs.size > budget.runs) return denied(TextPayloadFailure.CAPACITY)
             if (!text.hasValidUnicode()) return denied(TextPayloadFailure.UNICODE)
             if (!width.isFinite() || !height.isFinite() || width <= 0 || height <= 0) return denied(TextPayloadFailure.BOX)
-            if (!valid(defaultStyle)) return denied(TextPayloadFailure.STYLE)
+            if (!validStyle(defaultStyle)) return denied(TextPayloadFailure.STYLE)
             // Full coverage has no implicit platform-style gaps. Empty text keeps only its insertion style.
             if (text.isEmpty() != runs.isEmpty()) return denied(TextPayloadFailure.RUNS)
             var end = 0
             var charge = 128L + text.length.toLong() * 2 + styleBytes(defaultStyle)
             for (run in runs) {
-                if (run.start != end || run.end <= run.start || !boundary(text, run.start) || !boundary(text, run.end)) {
+                if (run.start != end || run.end <= run.start || !text.isTextBoundary(run.start) || !text.isTextBoundary(run.end)) {
                     return denied(TextPayloadFailure.RUNS)
                 }
-                if (!valid(run.style)) return denied(TextPayloadFailure.STYLE)
+                if (!validStyle(run.style)) return denied(TextPayloadFailure.STYLE)
                 charge += 32L + styleBytes(run.style)
                 end = run.end
             }

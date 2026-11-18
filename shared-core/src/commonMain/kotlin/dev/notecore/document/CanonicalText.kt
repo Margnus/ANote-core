@@ -11,3 +11,6 @@ internal fun String.hasValidUnicode(): Boolean {
     }
     return true
 }
+
+internal fun String.isTextBoundary(offset: Int): Boolean = offset in 0..length &&
+    !(offset > 0 && offset < length && this[offset - 1].isHighSurrogate() && this[offset].isLowSurrogate())
