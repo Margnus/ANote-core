@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Audit retained evidence bindings, not execution, device measurements or C1 approval."""
 import argparse
+from collections import Counter
 from functools import lru_cache
 import hashlib
 import json
@@ -123,6 +124,10 @@ class GitBindings:
                 files[relative.decode()] = oid if kind == 'blob' and mode.startswith('100') else None
         return files
 
+    def read(self, relative):
+        oid = self.blobs.get(relative)
+        return None if oid is None else self.git('cat-file', 'blob', oid)
+
     @lru_cache(maxsize=None)
     def digest(self, oid, normalize_lf):
         data = self.git('cat-file', 'blob', oid)
@@ -141,8 +146,10 @@ class GitBindings:
                 'expected': expected, 'actual': actual, 'origin': 'git_revision'}
 
 
-def audit(root, revision=None):
+def audit(root, revision=None, *, report_revision=None, names=None):
     git_bindings = GitBindings(root, revision) if revision else None
+    report_bindings = GitBindings(root, report_revision) if report_revision else None
+    selected = tuple(dict.fromkeys(names)) if names else (*HISTORICAL, *CURRENT)
 
     def inspect(relative, sha, normalized=False):
         if git_bindings:
@@ -151,12 +158,17 @@ def audit(root, revision=None):
 
     reports = {}
     errors = []
-    for name in (*HISTORICAL, *CURRENT):
-        path = root / 'reports' / (name + '.json')
-        if not path.is_file():
+    for name in selected:
+        relative = f'reports/{name}.json'
+        path = root / relative
+        if report_bindings:
+            raw_report = report_bindings.read(relative)
+        else:
+            raw_report = path.read_bytes() if path.is_file() else None
+        if raw_report is None:
             errors.append('Missing report: ' + name)
             continue
-        data = json.loads(path.read_text(encoding='utf-8'))
+        data = json.loads(raw_report)
         historical = name in HISTORICAL
         fields = ('source_sha256',) if historical else CURRENT[name]
         checks = []
@@ -174,16 +186,18 @@ def audit(root, revision=None):
             if field in data:
                 checks.append(inspect('.generated-fixtures/scale/' + relative, data[field]))
         mismatches = [item for item in checks if item['state'] != 'matched']
+        mismatch_causes = Counter(item.get('origin', 'worktree') + ':' + item['state'] for item in mismatches)
         evidence_status = data.get('evidence_status') if name == 'android-render-integration' else data.get('status')
         if evidence_status != 'passed':
             errors.append(name + ': report did not pass')
         if not historical and mismatches:
             errors.append(name + ': current evidence binding failed')
         reports[name] = {
-            'report_sha256': digest(path),
+            'report_sha256': hashlib.sha256(raw_report).hexdigest(),
             'role': 'historical_experiment' if historical else 'current_regression',
             'binding_state': 'historical_drift' if historical and mismatches else 'failed' if mismatches else 'matched',
-            'matched_bindings': len(checks) - len(mismatches), 'mismatches': mismatches,
+            'matched_bindings': len(checks) - len(mismatches),
+            'mismatch_causes': dict(sorted(mismatch_causes.items())), 'mismatches': mismatches,
             **({'matched_git_bindings': sum(item['state'] == 'matched' and item['origin'] == 'git_revision' for item in checks),
                 'matched_local_bindings': sum(item['state'] == 'matched' and item['origin'] == 'local_artifact' for item in checks)}
                if git_bindings else {}),
@@ -192,8 +206,10 @@ def audit(root, revision=None):
     return {
         'schema': 'c1-evidence-audit-1', 'status': 'failed' if errors else 'passed',
         'reports': reports, 'errors': errors,
+        'selected_reports': list(selected), 'full_inventory_requested': set(selected) == {*HISTORICAL, *CURRENT},
+        'report_revision': report_bindings.commit if report_bindings else None,
         **({'revision': git_bindings.commit, 'untracked_bindings_use_local_artifacts': True} if git_bindings else {}),
-        'scope': 'Read-only rehash of recorded inputs and retained artifacts; no rerun or completeness proof. Historical drift is explicit, never promoted to current benchmark evidence. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.',
+        'scope': 'Read-only rehash of selected reports and their recorded inputs; no rerun or completeness proof. Historical drift is explicit. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.',
         'ordinary_app_backend_integration_verified_by_this_audit': False, 'c1_gate_complete': False,
         'physical_device_or_heap_measured': False,
     }
@@ -203,8 +219,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / 'reports/c1-evidence-audit.json')
     parser.add_argument('--revision', help='Read tracked inputs from this Git commit and untracked artifacts locally')
+    parser.add_argument('--report-revision', help='Read the report JSON itself from this Git commit')
+    parser.add_argument('--report', action='append', choices=(*HISTORICAL, *CURRENT),
+                        help='Audit only this report; repeat to audit multiple reports')
     args = parser.parse_args()
-    report = audit(ROOT, args.revision)
+    report = audit(ROOT, args.revision, report_revision=args.report_revision, names=args.report)
     report['audit_tool_sha256'] = digest(Path(__file__))
     with args.output.open('w', encoding='utf-8', newline='\n') as output:
         output.write(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
