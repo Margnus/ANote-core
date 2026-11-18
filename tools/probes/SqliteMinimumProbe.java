@@ -1,5 +1,6 @@
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.os.Build;
 import android.os.Process;
 import org.json.JSONObject;
@@ -55,6 +56,71 @@ public final class SqliteMinimumProbe {
         return "COMMITTED";
     }
 
+    private static JSONObject rebuildWriter(SQLiteDatabase first, File path, int flags) throws Exception {
+        String readerRevision;
+        try (SQLiteDatabase contender = SQLiteDatabase.openDatabase(path.getPath(), null, flags, ignored -> {})) {
+            contender.execSQL("PRAGMA synchronous=FULL");
+            first.beginTransactionNonExclusive();
+            try {
+                verifyWriter(first);
+                first.execSQL("UPDATE document SET revision=9,payload='uncommitted' WHERE id=1");
+                readerRevision = query(contender, "SELECT revision FROM document WHERE id=1");
+                require("1".equals(readerRevision), "second pool observed uncommitted revision");
+                try {
+                    apply(contender, "new-checkpoint", "reopened-writer");
+                    throw new AssertionError("second pool acquired an occupied writer");
+                } catch (SQLiteDatabaseLockedException expected) {
+                    require("0".equals(query(contender, "SELECT count(*) FROM operations")),
+                            "blocked writer left an operation");
+                }
+            } finally {
+                first.endTransaction();
+            }
+        }
+        first.close();
+
+        try (SQLiteDatabase replacement = SQLiteDatabase.openDatabase(path.getPath(), null, flags, ignored -> {})) {
+            String reopenedMode;
+            replacement.beginTransactionNonExclusive();
+            try {
+                reopenedMode = query(replacement, "PRAGMA synchronous");
+            } finally {
+                replacement.endTransaction();
+            }
+
+            replacement.execSQL("PRAGMA synchronous=NORMAL");
+            try {
+                apply(replacement, "new-checkpoint", "reopened-writer");
+                throw new AssertionError("writer accepted NORMAL durability");
+            } catch (AssertionError error) {
+                require("writer must use FULL".equals(error.getMessage()), error.getMessage());
+            }
+            require("last-confirmed".equals(query(replacement, "SELECT payload FROM document WHERE id=1")),
+                    "writer refusal changed last confirmed content");
+            require("0".equals(query(replacement, "SELECT count(*) FROM operations")), "writer refusal wrote an operation");
+
+            replacement.execSQL("PRAGMA synchronous=FULL");
+            require("COMMITTED".equals(apply(replacement, "new-checkpoint", "reopened-writer")), "reopened writer commit");
+            replacement.beginTransactionNonExclusive();
+            try {
+                verifyWriter(replacement);
+                return new JSONObject().put("reader_revision_while_writer_held_lock", readerRevision)
+                        .put("contender_refused_busy", true)
+                        .put("reopened_default_synchronous", reopenedMode)
+                        .put("normal_replacement_refused", true)
+                        .put("writer_synchronous", query(replacement, "PRAGMA synchronous"))
+                        .put("journal_mode", query(replacement, "PRAGMA journal_mode"))
+                        .put("revision", query(replacement, "SELECT revision FROM document WHERE id=1"))
+                        .put("payload", query(replacement, "SELECT payload FROM document WHERE id=1"))
+                        .put("operation_count", query(replacement, "SELECT count(*) FROM operations"))
+                        .put("quick_check", query(replacement, "PRAGMA quick_check"))
+                        .put("sqlite", query(replacement, "SELECT sqlite_version()"));
+            } finally {
+                replacement.endTransaction();
+            }
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         require(args.length == 2, "expected isolated directory and stage");
         require(Build.VERSION.SDK_INT == 26 || Build.VERSION.SDK_INT == 27, "expected minimum OS");
@@ -63,10 +129,20 @@ public final class SqliteMinimumProbe {
                 "refusing non-fixture directory");
         require(directory.isDirectory(), "fixture directory missing");
         String stage = args[1];
-        require(stage.matches("init|verify|before-commit|after-commit|replay|conflict"), "invalid stage");
+        require(stage.matches("init|verify|before-commit|after-commit|replay|conflict|reopened-writer"), "invalid stage");
         File path = new File(directory, "probe.sqlite");
         int flags = SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
         if ("init".equals(stage)) flags |= SQLiteDatabase.CREATE_IF_NECESSARY;
+        if ("reopened-writer".equals(stage)) {
+            SQLiteDatabase first = SQLiteDatabase.openDatabase(path.getPath(), null, flags, ignored -> {});
+            try {
+                first.execSQL("PRAGMA synchronous=FULL");
+                emit(rebuildWriter(first, path, flags).put("stage", stage).put("status", "COMMITTED").put("pid", Process.myPid()));
+            } finally {
+                if (first.isOpen()) first.close();
+            }
+            return;
+        }
         try (SQLiteDatabase db = SQLiteDatabase.openDatabase(path.getPath(), null, flags, ignored -> {})) {
             String normalControl = null;
             if ("init".equals(stage)) {

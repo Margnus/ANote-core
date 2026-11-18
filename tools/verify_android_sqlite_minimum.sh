@@ -54,14 +54,19 @@ test "$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')" = 
 "$adb" -s "$serial" shell getprop ro.build.fingerprint > "$run/fingerprint.txt"
 "$adb" -s "$serial" shell getprop ro.product.cpu.abi > "$run/abi.txt"
 "$adb" -s "$serial" shell getenforce > "$run/selinux.txt"
-remote="/data/local/tmp/notecore-sqlite-minimum-$(uuidgen | tr -d '-' | tr 'A-F' 'a-f')"
-"$adb" -s "$serial" shell mkdir "$remote"
-"$adb" -s "$serial" push "$run/probe.jar" "$remote/probe.jar"
-actual=$("$adb" -s "$serial" shell sha256sum "$remote/probe.jar" | awk '{print $1}')
-test "$actual" = "$(shasum -a 256 "$run/probe.jar" | awk '{print $1}')"
+prepare_fixture() {
+    remote="/data/local/tmp/notecore-sqlite-minimum-$(uuidgen | tr -d '-' | tr 'A-F' 'a-f')"
+    "$adb" -s "$serial" shell mkdir "$remote"
+    "$adb" -s "$serial" push "$run/probe.jar" "$remote/probe.jar"
+    actual=$("$adb" -s "$serial" shell sha256sum "$remote/probe.jar" | awk '{print $1}')
+    test "$actual" = "$(shasum -a 256 "$run/probe.jar" | awk '{print $1}')"
+}
 
 index=0
-for stage in init before-commit verify after-commit verify replay conflict verify; do
+for stage in init before-commit verify after-commit verify replay conflict verify init reopened-writer replay; do
+    if test "$stage" = init; then
+        prepare_fixture
+    fi
     index=$((index+1))
     status=0
     "$adb" -s "$serial" shell "CLASSPATH=$remote/probe.jar /system/bin/app_process /system/bin SqliteMinimumProbe $remote $stage" \
@@ -83,7 +88,9 @@ prefix = 'NOTECORE_SQLITE_MINIMUM '
 expected = [('init', '1', '0', 'last-confirmed'), ('before-commit',),
             ('verify', '1', '0', 'last-confirmed'), ('after-commit',),
             ('verify', '2', '1', 'new-checkpoint'), ('replay', '2', '1', 'new-checkpoint'),
-            ('conflict', '2', '1', 'new-checkpoint'), ('verify', '2', '1', 'new-checkpoint')]
+            ('conflict', '2', '1', 'new-checkpoint'), ('verify', '2', '1', 'new-checkpoint'),
+            ('init', '1', '0', 'last-confirmed'), ('reopened-writer', '2', '1', 'new-checkpoint'),
+            ('replay', '2', '1', 'new-checkpoint')]
 observations = []
 for index, (stage, *state) in enumerate(expected, 1):
     text = (root / f'{index}-{stage}.log').read_text()
@@ -96,11 +103,14 @@ for index, (stage, *state) in enumerate(expected, 1):
         assert outcome['quick_check'] == 'ok'
         if stage == 'init':
             assert outcome['normal_control_synchronous'] == '1'
-        expected_status = {'replay': 'REPLAYED', 'conflict': 'REFUSED'}
+        if stage == 'reopened-writer':
+            assert outcome['reader_revision_while_writer_held_lock'] == '1'
+            assert outcome['contender_refused_busy'] and outcome['normal_replacement_refused']
+        expected_status = {'replay': 'REPLAYED', 'conflict': 'REFUSED', 'reopened-writer': 'COMMITTED'}
         assert outcome['status'] == expected_status.get(stage, stage)
     assert outcome['pid'] not in {item['pid'] for item in observations}
     outcome['exit'] = int((root / f'{index}.exit').read_text())
     observations.append(outcome)
 (root / 'observations.json').write_text(json.dumps(observations, indent=2) + '\n', encoding='utf-8')
-print('Confirmed API 26 WAL/FULL on the writer and both process recovery boundaries')
+print('Confirmed API 26 WAL/FULL on the writer across pool reopen, lock contention and both process recovery boundaries')
 PY
