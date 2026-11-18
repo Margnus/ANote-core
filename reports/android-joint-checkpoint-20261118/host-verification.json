@@ -1,0 +1,254 @@
+{
+  "status": "passed",
+  "scope": "Windows Gradle/JVM, architecture and prior AVD file-level preservation",
+  "core_source_baseline": "37e576882cc3c8c48d77ff942648f57e92cbe426",
+  "gradle": {
+    "command": "gradlew.bat verifyPrototype --offline --max-workers=3",
+    "jvm": {
+      "canvas-core": {
+        "tests": 243,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "shared-core": {
+        "tests": 446,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "tests_total": 689,
+    "test_result_xml_sha256": {
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BoundedOwnerExecutorTest.xml": "50140a341f462ce6ffe2e55f4dca0e66150d5ecac4b7862acb25fc6f82191416",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushEnvelopePocTest.xml": "ee7940f00c070594e9da561e3355b7679b37958971b633a55df20af1803418b2",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushGeometryGoldenTest.xml": "372b98d2b23557ce942d3dbce0eacfab633bc398075ccafc06bbd635ae5005f5",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushGeometryTest.xml": "7957d6cd7a50c91ca590ee7ea85542490402dc486d21c02f66395c9d6b605212",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushGoldenTest.xml": "aec42a099d3e566b83d3684fb14e7b127a571a4cf2e74c275da93d2a21d414f2",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushPathPlanTest.xml": "7d0dcf66980782155dd432f14b1eb2292c592ebe84e4306aceae6eb4b742c66d",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushPathPocTest.xml": "6c6aaa324902f67c6adb2868391cff38178c9a1da903ca008fb9d343d5b6a570",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushReductionPocTest.xml": "d3471a20e73ffe64eae2429bb443d553c86ed630a502de03589eb4d982a3070b",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushRenderExecutorPocTest.xml": "f1291c8b2f93efa4f06b8c38e193b917c9cafa48528f23ff9810a4491df46320",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushRenderOwnerPocTest.xml": "e1934e1c630a249530b974da3e968bb05e0131139c9266744ba0c15844f84245",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushTileCachePocTest.xml": "b7ea8eca729586b17eb15c0d68e7b429a0a3028a665a3e35ad084add366bc4e4",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.BrushTilePixelsPocTest.xml": "95cade1dd49189b44ff49f9b0dae45eccfcd2d1a6802017d66f96093a6893028",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.ChunkedBrushPocTest.xml": "c6044866f5dcfc3f1fe1ecbf02c874857f0bbd559e8ba5defdd3d4060d223617",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.DocumentCloseContractTest.xml": "36fa1c21362d15ad5aa529c419ff7772173517085f5be1319f30c04d1faafc58",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.GeometryContractTest.xml": "acd709930fd1dc3233b3572939e18cb86d0f2cbea8a91cbce6a3dbbca9481b37",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.IncrementalSpatialIndexPocTest.xml": "bf8121259a385bde36341bfa77ec028489965086b315a64001a7a9e167403082",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.InputArenaContractTest.xml": "fa7dd0ed553fc73bf67256135d1604960fd3d5d099e158bfb087f5dfbc93ec99",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.InputFixtureReplayTest.xml": "d6208a243a95f4e804cae697f07fc44b5d3bf8a523b457dec33747fed002a50f",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.InputReplayContractTest.xml": "f63941f5641f5628be333fa22058c9187750a6461ff530a9ab1f61fb52444a6a",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.InputScalarReplayTest.xml": "608e47e55580ea843791f5399891b8b3c2bdde795d2763eb3352a12530cccb13",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.PolylineGeometryTest.xml": "e125312cb66b311fba072e54e5b95d107487abada017f885f04710808c94a1cd",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.PresentationContractTest.xml": "aab8fe42281a209bd26cbd38cf86cf1e677ceb560a2edd623bce5d1706bcc36c",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.PreviewViewportContractTest.xml": "43f3f02fbd52c8b14e5384d4c9724db34d6fe8a20ba9519b4daf7e78c538bee1",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.ResourceLeaseContractTest.xml": "19a386c016dc2b2590f9ffb5c380e2637022c5a319a9411480159385557d0a68",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.ResourceScheduleContractTest.xml": "04a73a900dfb7082b70f4ccf733da713a82013c90ee16096150228e9b632c4d8",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.ScaleFixtureReplayTest.xml": "bf5eac504e904d2eaaa7e9f4aaa21f45d97af7fe0f03ff1a010d28b7203f58bf",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.SceneCompositionTest.xml": "b8050cb250dac993532fe403d9d173b8d6ae3d754ad55400108de87277779e07",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.SceneContractTest.xml": "02c771fa321cf783165e0ca2ecc4967c1f58dbad2e4edb643328e92a59344f13",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.SpatialIndexPocTest.xml": "3610945f283e8b6b8ef8fa9e50f2104d3ab6da9d5e051f1e825ad28348d2be4a",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.SubmissionQueueContractTest.xml": "d29b8816bfd2ffbbf8e4eed192cfbe15d0e128d37162fac30b2a4b79cf6ff2df",
+      "canvas-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.WeightedLruContractTest.xml": "275e9a82f84a7386122836c95ad9f297d43993a97f9f6c3d6e915117c6a531b5",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.canvas.prototype.PreviewSaveLedgerTest.xml": "fb3317a12fccadac48ad956dabc57301c58b021cd1c3dbe9d75a265a41630c49",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.CanonicalIdentityTest.xml": "9c3667e3bf4f6e69102c62b4a48252aa9c41663c8c94e6316f0f292f87568a0c",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.CanonicalTitleTest.xml": "c226d30ad8cebb66701462f86dfe3681b64395228cde0e4b2c60fdd3ba27b7f2",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentAuthorityTest.xml": "49fbfcc82ba935fc6d7fda169ff83758f8c8e571045f9274d7937e8d1b1c230b",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentBudgetCreationTest.xml": "18cc4386411e0512d814624069f842b1f98352be220567db04d67f22cdd3b77d",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentHistoryPreflightTest.xml": "c800fbcee7d70bd7eee5ed1495710377cc32ca25d9270f71f87267acad329508",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentHistoryTest.xml": "0678b669045494cf98146fd095f938b7450db63fb3272c277198912659b485e2",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.DocumentOwnerThreadTest.xml": "8ecaf8e54326bad5165dc7ab7de86a54d7484388f95cd7e44c78b10514dcd081",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.EraserRulesTest.xml": "7bac0f9e665e79234dbedee2a7597ffbe2aba496216698f527c6b2c804133540",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ImageDecodeRulesTest.xml": "0459ef127f82ba2df1613c3b7c9520407d211a88e7fdd3c57890ef84de5c265a",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ImageInsertRulesTest.xml": "7112356a5e5fce245d4b8bf72e284cd829fbad1b518c60781515f12447735d43",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ImageOrientationRulesTest.xml": "d620a2f591ba07bad99537c75042f855b79984632f270d0d6fb2f6f1087e7acc",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.LassoRulesTest.xml": "a51c6a3acdee9123b91564e7453715611ba8c5bcde0c5b8bd306a23f23286d52",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.LegacyPreviewReaderTest.xml": "d51c8c9d40992e97b6f5d5422c008941812c3dc0e2b827930f301124f9cbab4b",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.LegacyPreviewReadTest.xml": "c44fdd658bea77d98087d6c531e89cb030fa8688ebcf905b73bd74bc0e954a85",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ObjectOrderAuthorityTest.xml": "c213b3cc62a8d0e81c71fb7dd0c31009eb89863a0314241d67f4eaf3b60db80f",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ObjectOrderRulesTest.xml": "eca8c74e9df89af6498e095c422f8c18a5bf17a738e37eb61f949aff5a0244a6",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PageBookmarkRulesTest.xml": "c6f4d9392719e5a6034e802c769853a1144a6486530f80cfcb457c6774ed1b17",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PagedPreviewCodecTest.xml": "2f4a3699a82eb9eeb007b67ae21d700e5024e1cb37206b9bfb0b4099d01220e3",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PagedPreviewNotebookTest.xml": "8f13c642dbd88d55eeb44790d01cf14a922385eec3ff3dc53cc7a16d9f04b501",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PagedSaveLedgerTest.xml": "cdf8ada555c569e99844f2af557ff6de37a088d485f6ce23a940f9744d1aab92",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PageProjectionBudgetTest.xml": "9a974ed950766aa9f9e687b3b73091483482744a5605bf5f1ebe19d468fb8909",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PageTemplateRulesTest.xml": "ad617d37c0ff98f370406fda83836f55182db10e7134f330b62a64c4faa1e66e",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfAnnotationGeometryRulesTest.xml": "e52c6a2a51d170430687492445c2718aec4e26d6d99ae1e0ec1d4c2015c663dc",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfCompositeExportRulesTest.xml": "dabb7a0ba1f134dcd6bb32d833a53de3a5595bea5429274c7f0987371d5f2f08",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfDocumentModelRulesTest.xml": "1d3f949baf7b2d238a3fd42a0d71f1296afcfd04cea90c7651a958dd852ee12d",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfPageCatalogRulesTest.xml": "44bd05d82beb1ec91d0c03c145a615002f4946bf1d20dcd5d94414020908f02a",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfPageGeometryRulesTest.xml": "936099fc6969735fefd4bfeed20f02af88bbf80a311c145c09f86971f8a562d1",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PdfRenderSelectionRulesTest.xml": "f5dfcc7eeaf8aa491d6bb9260eba935efed4904b26d6758f88052668d6216a76",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewCatalogBudgetTest.xml": "2d9061a47889038af6578d7815e3cdbba3f4cdf885d039728fd336d11e0fef1c",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewCommitCapacityTest.xml": "871c561ae01ac4f9ca70fb75e0b2d4f35cdeb157e96553385210f823bda37636",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewDocumentReaderTest.xml": "b793d6d6ff98b38dca9f005f879b7b4993b861373381d84cdaeb2e28367d2181",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewEditTest.xml": "fbc5fd1d3c6beb160e2f539d6b92820cba661cc224c09d60445bea1a37597c6e",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputBudgetTest.xml": "ae984fd80a1f7daa02d2b1b86736bd20af545ad23964d3b141782db585f38c41",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputCapacityTest.xml": "7a8602282f829dd5c1e1e1eee854466a3d4debb6b75ba7f03e648208a447ecb2",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewInputTest.xml": "f6cd44fedc458f25095576fa231e821fccc2c0bb146c679938aa6c88e3391cc0",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewNotebookCreationTest.xml": "686cc5dc408c7731d472ea58c2ee5e412e7bb6b979eb82eb7b63d27eb1d90db4",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewNotebookOpenTest.xml": "f6263fbcb9649be5b10bd3ca8d3a8366e0fec5e9da581fced80a052b2267c5e6",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewPostAdmissionFaultTest.xml": "bf2a574b25d23b3faed4623a715cb61e046331df45f47c453c3676a07623f529",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewProjectionRetentionTest.xml": "8fbd8c49954513c77c27f24c3158fc71c29375c6d204f05114b7739a48f4288a",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewReadAllocationTest.xml": "3609cadf103ad1b02fcc68876f8a361dc9c1e95d4589571b9356fb48a398fe99",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewReadTraversalTest.xml": "2ea955ae1ab93f9f5bbbe1a3414038282d2c860891647ee4d97e29043ddf580f",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryReaderTest.xml": "41b2fe935a1dcb6dbb425b9f8a00a4ee151d9e4a4b9d569abd1b63c5816dbc51",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewRecoveryTest.xml": "220e280de916e809a65b2ba8f6c1fb195f28be86fca4f763842d42475242d30a",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewSaveDispatchExecutorTest.xml": "a14f10e56606e83ece4a866c67dc45ef118789c551dfbdcfad3c26448248104e",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.PreviewSaveDispatchTest.xml": "b6876d21c49067cf663baaf35a277c0bd78520b285f21fa0da615ce66a48405b",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ReadingPositionRulesTest.xml": "2139ff26c8b2413a6d274a5cb4aa47ed80bd257c580230b6ae820c7ba3622a94",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.ReadOnlyNotebookTest.xml": "85498e17df630d5aed27dc4d64c4a47a534a752137ecdd3a9838f8f859e00fdc",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.RetiredEditingStateTest.xml": "41bf93d2ed352e4624abfa73455509b5bed476956b0390a5c72eb1bad1f60a28",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.SceneObjectOrderTest.xml": "5cd40206a8a5560bac597d8566f4b4d5e5e5a93c9375da7c6743c8f8412b44ce",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.TextPayloadDraftTest.xml": "c924ef6e06539b42593ac6bde3123283e124c716a7565961b8b73ba85a53bdd1",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.document.TextReplacementRulesTest.xml": "08c966f40967f83166c0eb720818ce7a5bc36f84738fab991c907d36f51cc021",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryBatchRulesTest.xml": "6a8257c21b54b3383b559b28ecaad963f7ad76d48c51594a16f1b3024ffba2a5",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryFolderRulesTest.xml": "55dcaad148f41e26b9d5be6f4bb4c7045a345e5685ff634e04e191f378b85987",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryFolderTrashRulesTest.xml": "bdf3e80ed00cca45a6f9f2e2cde5564b405f12baf556c4525d35637141cd60c6",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryNoteMoveRulesTest.xml": "f735e3ac6ce9ca6abc029f79a095b11677656bd78b0d49e2ac01c0303f06b4cc",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibrarySearchNavigationTest.xml": "682b43957e6306ce80f630f7ded345065ae5ba758bb0b25f5b0d092a0d1c286d",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibrarySearchRulesTest.xml": "b76300c7154011cc9c4ed5b808ec68550aa163d721cd7418cf226a3a41996fcc",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryTrashRulesTest.xml": "0fa2dab07869c475fb541d872f031f86b20ffc4f0a2ed8dfc2eb168ac489e8ab",
+      "shared-core/build/test-results/jvmTest/TEST-dev.notecore.library.LibraryViewRulesTest.xml": "819ada3144235d32df43fb2a38e05735dd023893c3981cec9864a5d6bfad572e"
+    }
+  },
+  "host_jvm_oracle": {
+    "gradle_jars_sha256": {
+      "canvas-core-jvm.jar": "558cd160a015d3414af419705e351e6e5b53fedeab35898c8392c8dfec4d2d29",
+      "shared-core-jvm.jar": "607fd13fc16f58d120c2ca596ce6beebe03cbdd3806fa72d6cda2e5e75f02ee6"
+    },
+    "canonical_bytes_sha256_equal_to_pinned_reader_on_android": {
+      "legacy": "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+      "existing": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+    }
+  },
+  "checks": {
+    "check_architecture.py": {
+      "status": "passed",
+      "common_source_files": 64,
+      "imports_checked": 69,
+      "errors": [],
+      "modules": [
+        "canvas-core",
+        "shared-core"
+      ],
+      "project_dependency_direction": "shared-core -> canvas-core only",
+      "independent_sketch_host_project_dependencies": [
+        ":shared-core"
+      ],
+      "independent_apple_sketch_imports": [
+        "NoteCanvasPrototype",
+        "NoteCoreSketch",
+        "UIKit",
+        "XCTest"
+      ],
+      "retired_single_page_stack_absent": true,
+      "scope": "commonMain imports and direct project dependencies; not a transitive bytecode audit"
+    },
+    "verify_portable_inputs.py": {
+      "status": "passed",
+      "checks": [
+        "utf8_text_lf_crlf_same_verification_hash",
+        "binary_and_interchange_artifacts_remain_byte_exact",
+        "standalone_cr_is_not_silently_changed",
+        "tool_text_io_explicit_utf8",
+        "stamp_keys_use_platform_independent_forward_slashes"
+      ],
+      "text_reads": 252,
+      "text_writes": 167,
+      "windows_execution_verified": false,
+      "scope": "synthetic LF/CRLF and explicit UTF-8 code checks on current host; no native cross-OS build claim"
+    },
+    "validate_fixture_catalog.py": {
+      "status": "passed",
+      "scale_profiles": 3,
+      "synthetic_scale_points": 1200000,
+      "resource_commit_abrupt_cases": 5,
+      "resource_commit_integrity_cases": 4,
+      "resource_commit_cancellation_cases": 5,
+      "legacy_framing_refusals": 8,
+      "resource_gc_rule_cases": 18,
+      "resource_gc_reservation_cases": 6,
+      "resource_gc_query_mutations_rejected": 6,
+      "capture_contract_checks": 43,
+      "capture_origin": "synthetic",
+      "legacy_source_files": 15,
+      "legacy_anchors": 12,
+      "scope": "catalog hashes and selected cross-schema facts; no migration/legacy runtime/device validation"
+    }
+  },
+  "build_only_status": "built",
+  "android_ndk_archive": {
+    "revision": "21.4.7075529",
+    "windows_zip_sha1_checked_against_sdk_repository": "fc44fea8bb3f5a6789821f40f41dce2d2cd5dc30"
+  },
+  "newer_candidate_rebuild": {
+    "source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+    "runner_rejected_wrong_pin": true,
+    "aar_mismatch_excluded_from_platform_run": {
+      "canvas-core-android-0.0.0-c1.aar": {
+        "actual_windows_sha256": "f58d427ea2682389298c789d379bce051119177c587c92f0cdd97dde022f4375",
+        "required_archive_sha256": "4d80b415f483fdd707bc37248abd0cf93b39905d3e5167bb2452a1bfe567a2d4"
+      },
+      "shared-core-android-0.0.0-c1.aar": {
+        "actual_windows_sha256": "b696576f5bbfd87d7acdbfbda1f3c32579ebe2992dbf3d86758b5a353768f8b6",
+        "required_archive_sha256": "55bc9a3d861f7df1ef5bcc6967bbbbd26238c66dfd5ef583c77a98d8f332b112"
+      }
+    }
+  },
+  "original_preservation": {
+    "prior_avd": "NoteCoreMin26",
+    "avd_was_not_started": true,
+    "scope": "Original AVD file-level inventory including installed APK and App data backing disks",
+    "avd_file_count": 17,
+    "avd_before_sha256": {
+      "NoteCoreMin26.ini": "9060cb9d058791ed4531ccf450b7659999de566965f988bd9d4bdfec75c32a00",
+      "NoteCoreMin26.avd/bootcompleted.ini": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "NoteCoreMin26.avd/cache.img": "93219c83ba9245e347f23bd2e975a2458e29140041ea2ef6630d9168d2382cc6",
+      "NoteCoreMin26.avd/cache.img.qcow2": "67fe32e44315954ce7842648b164c102e2c96c1c87207cb08fd3d4de79315d2b",
+      "NoteCoreMin26.avd/config.ini": "fced14a966fd90c9cb6522b698d0988646f5fed39c8d433e0486feb8c11a42ba",
+      "NoteCoreMin26.avd/emu-launch-params.txt": "f51277c64820b84c9b843d287f2aa3c97905183eddf9fe08d449e21b3ff30d5f",
+      "NoteCoreMin26.avd/encryptionkey.img": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+      "NoteCoreMin26.avd/encryptionkey.img.qcow2": "5a11c16ffd4f3e39d2b645ad2a35e8687ebdd2c2dfcaa1e2f489f8331be143f5",
+      "NoteCoreMin26.avd/hardware-qemu.ini": "e4cb2228b4701041989418db86a52baf07436e89741f842e9a80912a2de630f5",
+      "NoteCoreMin26.avd/multiinstance.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "NoteCoreMin26.avd/qemu-version.txt": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "NoteCoreMin26.avd/read-snapshot.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "NoteCoreMin26.avd/userdata-qemu.img": "c753dcf583dab5d44f7078f1a42c4456a310bba2f11c444a467f1462d12097eb",
+      "NoteCoreMin26.avd/userdata-qemu.img.qcow2": "16bd8d0d3b9221c9767923dff963537a2e425b13252842c41142936b5fd2ebab",
+      "NoteCoreMin26.avd/version_num.cache": "32803c99ad478c7abacae8e9a129261ec2a79e0216fd86ee555c9172f21ae4b0",
+      "NoteCoreMin26.avd/hardware-qemu.ini.lock/pid": "9a818285021c053d089cfa7a1d5e1dbb69d334fc8769680fa1b1292c0922c8d5",
+      "NoteCoreMin26.avd/snapshots/default_boot/ram.img": "6f400f1ca55edb280824a50645e7034b5718eb7a4593e35a341ff20332d35d5f"
+    },
+    "avd_after_sha256": {
+      "NoteCoreMin26.ini": "9060cb9d058791ed4531ccf450b7659999de566965f988bd9d4bdfec75c32a00",
+      "NoteCoreMin26.avd/bootcompleted.ini": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "NoteCoreMin26.avd/cache.img": "93219c83ba9245e347f23bd2e975a2458e29140041ea2ef6630d9168d2382cc6",
+      "NoteCoreMin26.avd/cache.img.qcow2": "67fe32e44315954ce7842648b164c102e2c96c1c87207cb08fd3d4de79315d2b",
+      "NoteCoreMin26.avd/config.ini": "fced14a966fd90c9cb6522b698d0988646f5fed39c8d433e0486feb8c11a42ba",
+      "NoteCoreMin26.avd/emu-launch-params.txt": "f51277c64820b84c9b843d287f2aa3c97905183eddf9fe08d449e21b3ff30d5f",
+      "NoteCoreMin26.avd/encryptionkey.img": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+      "NoteCoreMin26.avd/encryptionkey.img.qcow2": "5a11c16ffd4f3e39d2b645ad2a35e8687ebdd2c2dfcaa1e2f489f8331be143f5",
+      "NoteCoreMin26.avd/hardware-qemu.ini": "e4cb2228b4701041989418db86a52baf07436e89741f842e9a80912a2de630f5",
+      "NoteCoreMin26.avd/multiinstance.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "NoteCoreMin26.avd/qemu-version.txt": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "NoteCoreMin26.avd/read-snapshot.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "NoteCoreMin26.avd/userdata-qemu.img": "c753dcf583dab5d44f7078f1a42c4456a310bba2f11c444a467f1462d12097eb",
+      "NoteCoreMin26.avd/userdata-qemu.img.qcow2": "16bd8d0d3b9221c9767923dff963537a2e425b13252842c41142936b5fd2ebab",
+      "NoteCoreMin26.avd/version_num.cache": "32803c99ad478c7abacae8e9a129261ec2a79e0216fd86ee555c9172f21ae4b0",
+      "NoteCoreMin26.avd/hardware-qemu.ini.lock/pid": "9a818285021c053d089cfa7a1d5e1dbb69d334fc8769680fa1b1292c0922c8d5",
+      "NoteCoreMin26.avd/snapshots/default_boot/ram.img": "6f400f1ca55edb280824a50645e7034b5718eb7a4593e35a341ff20332d35d5f"
+    },
+    "original_packaged_apk_matches_retained_sha256": "85fc37ae0269763c51c4d84dc13d5a26cba32e0d46f6280592b1a8d70f55e54e",
+    "adb_device_list_before": [
+      "List of devices attached",
+      ""
+    ],
+    "adb_device_list_after": [
+      "List of devices attached",
+      ""
+    ],
+    "disposable_avds_stopped": true
+  }
+}

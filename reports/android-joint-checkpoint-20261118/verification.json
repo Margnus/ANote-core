@@ -1,0 +1,1178 @@
+{
+  "milestone": "DEV-041",
+  "status": "passed",
+  "runtime": {
+    "api": "26",
+    "abi": "x86_64",
+    "fingerprint": "Android/sdk_phone_x86_64/generic_x86_64:8.0.0/OSR1.180418.004/4931640:userdebug/test-keys",
+    "kernel": "3.18.91+",
+    "selinux": "Enforcing",
+    "boot_completed": "1"
+  },
+  "package": "dev.notecore.probes.dev041.p82691828fdf546fda125589bc6b5b329",
+  "probe_apk_sha256": "0ee31d3016f7148b820d1499026e9dcec702bfd1ef34c56f67707fa8479b8267",
+  "native_sha256": "e5a57c6b129cbdfc0b63bc94faf86a18f21e7b26588ace8a99c1c5d4d4c5bbb2",
+  "abi": "x86_64",
+  "build_tools_sha256": {
+    "clang.exe": "7c0960b1c7c552255e734a7ea8ba9d240d8199c0b6632f9c62e0455d2da2c06c",
+    "d8.jar": "e0c2803fbf9a1258051c3202daad46a2e00f33a0eb91258ac9fd373df0a832ce",
+    "android.jar": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a"
+  },
+  "ndk": "Pkg.Desc = Android NDK\nPkg.Revision = 21.4.7075529",
+  "aar_pin_source": "reports/sdk-artifact-boundary.json",
+  "aar_source_commit": "ed282d4fdae6e567fab76344aac13911f7d01997",
+  "aar_pins": {
+    "shared-core-release.aar": "6921d63fd3e5d3b99707c47a959530696995e0501aaf0357518466f77d81e495",
+    "canvas-core-release.aar": "5926fe32897a6fe6efb72b81c8160904d42b86a77148732298d441b15da7d37b"
+  },
+  "stdlib_sha256": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+  "source_sha256": {
+    "tools/verify_android_joint_checkpoint.py": "56f03acec00c39865810401e284eca33c074a675dad76f46b5df0385e3d5f001",
+    "tools/probes/AndroidJointCheckpointProbe.java": "0c3f378201f3783049ded708d81eba91043580145f8d2241cdac40449d38c9a4",
+    "tools/probes/atomic_promote_probe.c": "f95ec907bf2dab644e71252bbba5c0d4b8c794ba75e2952e3fb26c5bdd93056f",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/sdk-artifact-boundary.json": "181e3087fc343156c5316e3473280b3111fc2f20d4821f067b5828196f96d1b0",
+    "tools/probes/SqliteLegacyFixture.java": "356baa2167a07ae2100ed4e8035109744ef0f2bbd8b7f421e13738376264d8a0",
+    "fixtures/storage/dev041-legacy-v1.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+    "fixtures/transfer/android-paged-v2.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "tools/verify_sqlite_checkpoint_fixture.py": "6c674d48427588fd4b5bf2b8238b0da2fb1d59fee24c8261a00a67c498397d47"
+  },
+  "host_oracle": {
+    "input_sha256": {
+      "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+      "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+      "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+      "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+    },
+    "canonical_legacy_sha256": "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+    "canonical_existing_sha256": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+  },
+  "production_connected": false,
+  "physical_verified": false,
+  "power_loss_verified": false,
+  "events": {
+    "seed": {
+      "status": "SEEDED",
+      "stage": "init",
+      "pid": 3088,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "normal_control": "1",
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "operations": [
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [],
+        "references": [],
+        "tasks": [],
+        "pins": [],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {},
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "first-publish-cut": {
+      "status": "CUT",
+      "stage": "resource-published",
+      "pid": 3117,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {
+        "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": {
+          "errno": 0,
+          "staged_inode": 99003
+        }
+      },
+      "inside_transaction": false
+    },
+    "reopen-after-first": {
+      "status": "INSPECTED",
+      "stage": "inspect",
+      "pid": 3152,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "operations": [
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [],
+        "references": [],
+        "tasks": [
+          [
+            "attach-legacy",
+            "legacy-fixture"
+          ]
+        ],
+        "pins": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "pending-conflict": {
+      "status": "OPERATION_CONFLICT",
+      "stage": "conflict",
+      "pid": 3181,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "operations": [
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [],
+        "references": [],
+        "tasks": [
+          [
+            "attach-legacy",
+            "legacy-fixture"
+          ]
+        ],
+        "pins": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "inject-occupied": {
+      "status": "INJECTED",
+      "stage": "inject-occupied",
+      "pid": 3210,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "operations": [
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [],
+        "references": [],
+        "tasks": [
+          [
+            "attach-legacy",
+            "legacy-fixture"
+          ]
+        ],
+        "pins": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "bf8e998ec271150bc9b170ef6ce7572f3a2300ad7ae7148f2a0e9165a5d2ddea",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "refuse-occupied": {
+      "status": "REPAIR_REQUIRED",
+      "stage": "replay",
+      "pid": 3239,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {
+        "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": {
+          "errno": 17,
+          "staged_inode": 99006,
+          "source_preserved": true
+        },
+        "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": {
+          "errno": 17,
+          "staged_inode": 99006,
+          "source_preserved": true
+        }
+      },
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "operations": [
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [],
+        "references": [],
+        "tasks": [
+          [
+            "attach-legacy",
+            "legacy-fixture"
+          ]
+        ],
+        "pins": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "bf8e998ec271150bc9b170ef6ce7572f3a2300ad7ae7148f2a0e9165a5d2ddea",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "remove-injected": {
+      "status": "INJECTED",
+      "stage": "remove-occupied",
+      "pid": 3268,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "operations": [
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [],
+        "references": [],
+        "tasks": [
+          [
+            "attach-legacy",
+            "legacy-fixture"
+          ]
+        ],
+        "pins": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "before-commit-cut": {
+      "status": "CUT",
+      "stage": "before-commit",
+      "pid": 3297,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {
+        "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": {
+          "errno": 17,
+          "staged_inode": 99005,
+          "source_preserved": true
+        },
+        "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": {
+          "errno": 0,
+          "staged_inode": 99005
+        }
+      },
+      "inside_transaction": true,
+      "uncommitted_state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ]
+        ],
+        "operations": [
+          [
+            "attach-legacy",
+            "legacy-fixture",
+            null,
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ],
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [
+          [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "references": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1"
+          ]
+        ],
+        "tasks": [],
+        "pins": []
+      }
+    },
+    "reopen-after-rollback": {
+      "status": "INSPECTED",
+      "stage": "inspect",
+      "pid": 3335,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "operations": [
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [],
+        "references": [],
+        "tasks": [
+          [
+            "attach-legacy",
+            "legacy-fixture"
+          ]
+        ],
+        "pins": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "after-commit-cut": {
+      "status": "CUT",
+      "stage": "after-commit",
+      "pid": 3364,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {
+        "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": {
+          "errno": 17,
+          "staged_inode": 99008,
+          "source_preserved": true
+        },
+        "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": {
+          "errno": 17,
+          "staged_inode": 99008,
+          "source_preserved": true
+        }
+      },
+      "inside_transaction": false
+    },
+    "reopen-after-commit": {
+      "status": "INSPECTED",
+      "stage": "inspect",
+      "pid": 3401,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ]
+        ],
+        "operations": [
+          [
+            "attach-legacy",
+            "legacy-fixture",
+            null,
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ],
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [
+          [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "references": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1"
+          ]
+        ],
+        "tasks": [],
+        "pins": [],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "exact-replay": {
+      "status": "REPLAYED",
+      "stage": "replay",
+      "pid": 3430,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ]
+        ],
+        "operations": [
+          [
+            "attach-legacy",
+            "legacy-fixture",
+            null,
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ],
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [
+          [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "references": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1"
+          ]
+        ],
+        "tasks": [],
+        "pins": [],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "committed-conflict": {
+      "status": "OPERATION_CONFLICT",
+      "stage": "conflict",
+      "pid": 3459,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ]
+        ],
+        "operations": [
+          [
+            "attach-legacy",
+            "legacy-fixture",
+            null,
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ],
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [
+          [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "references": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1"
+          ]
+        ],
+        "tasks": [],
+        "pins": [],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "damage-committed": {
+      "status": "INJECTED",
+      "stage": "damage-committed",
+      "pid": 3488,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ]
+        ],
+        "operations": [
+          [
+            "attach-legacy",
+            "legacy-fixture",
+            null,
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ],
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [
+          [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "references": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1"
+          ]
+        ],
+        "tasks": [],
+        "pins": [],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "bf8e998ec271150bc9b170ef6ce7572f3a2300ad7ae7148f2a0e9165a5d2ddea",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    },
+    "damaged-replay": {
+      "status": "REPAIR_REQUIRED",
+      "stage": "replay",
+      "pid": 3516,
+      "uid": 10065,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "publications": {},
+      "state": {
+        "documents": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b"
+          ]
+        ],
+        "sources": [
+          [
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ],
+          [
+            "legacy-fixture",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ]
+        ],
+        "operations": [
+          [
+            "attach-legacy",
+            "legacy-fixture",
+            null,
+            2,
+            "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+            "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9"
+          ],
+          [
+            "existing",
+            "19efdae2-e14b-44a7-a024-ecd87bf11476",
+            null,
+            11,
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+            "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3"
+          ]
+        ],
+        "resources": [
+          [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990
+          ],
+          [
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+            3870
+          ]
+        ],
+        "references": [
+          [
+            "attach-legacy",
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+          ],
+          [
+            "attach-legacy",
+            "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1"
+          ]
+        ],
+        "tasks": [],
+        "pins": [],
+        "sqlite": "3.18.2",
+        "journal_mode": "wal",
+        "writer_synchronous": "2",
+        "integrity": "ok",
+        "foreign_keys": [],
+        "schema_version": 2,
+        "resources_on_disk": {
+          "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7": [
+            "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+            3990,
+            99003
+          ],
+          "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1": [
+            "bf8e998ec271150bc9b170ef6ce7572f3a2300ad7ae7148f2a0e9165a5d2ddea",
+            3870,
+            99005
+          ]
+        },
+        "inputs": {
+          "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+          "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+          "resource-a.bin": "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+          "resource-b.bin": "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7"
+        }
+      }
+    }
+  },
+  "resource_manifest": [
+    [
+      "274bb35d9433deae00fe66be279d875808d960827f44a7ab70b7531c346fd8f7",
+      3990
+    ],
+    [
+      "422c4fd09080cc90b8cd5e56c064e96308078b974ee18239bb39218743bd08f1",
+      3870
+    ]
+  ],
+  "document_and_source_columns": "Final column is SHA-256 of the exact bytes compared in raw logs",
+  "installed_apk_sha256": "0ee31d3016f7148b820d1499026e9dcec702bfd1ef34c56f67707fa8479b8267",
+  "emulator_avd": "NoteCoreDev041Replay",
+  "emulator_package_inventory_unchanged": true,
+  "probe_removed": true,
+  "raw_logs_sha256": "f2428d58b976754f4ddad5d61da0010486f0e4b031e3e3ec966694e5c52d8749"
+}
