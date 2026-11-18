@@ -11,7 +11,10 @@ internal data class LibrarySearchHit(val target: LibrarySearchTarget, val title:
 internal sealed interface LibrarySearchFailure {
     data class Directory(val reason: LibraryFolderRejection) : LibrarySearchFailure
     data class Catalog(val reason: LibraryViewRejection) : LibrarySearchFailure
-    enum class Query : LibrarySearchFailure { IDENTITY_MISMATCH, INVALID_QUERY, RESULT_CAPACITY, NOT_FOUND }
+    enum class Query : LibrarySearchFailure {
+        IDENTITY_MISMATCH, INVALID_QUERY, RESULT_CAPACITY, NOT_FOUND,
+        STALE_HIT, TRASH_SCOPE_MISMATCH, INVALID_TRASH, TRASHED,
+    }
 }
 internal data class LibrarySearchResult(val hits: List<LibrarySearchHit> = emptyList(), val failure: LibrarySearchFailure? = null)
 internal data class LibrarySearchResolution(val hit: LibrarySearchHit? = null, val failure: LibrarySearchFailure? = null)
@@ -26,6 +29,10 @@ internal object LibrarySearchRules {
         }
         return null
     }
+    private fun sameDirectory(left: LibraryFolderSnapshot, right: LibraryFolderSnapshot): Boolean =
+        left.spaceId == right.spaceId && left.revision == right.revision && left.complete == right.complete &&
+            left.folders.toSet() == right.folders.toSet() && left.notes.toSet() == right.notes.toSet()
+
     // Deliberately locale-independent ASCII case folding; all other UTF-16 units stay exact.
     private fun fold(value: String) = buildString(value.length) {
         value.forEach { append(if (it in 'A'..'Z') it + 32 else it) }
@@ -66,5 +73,27 @@ internal object LibrarySearchRules {
             }
         }
         return LibrarySearchResolution(hit, if (hit == null) LibrarySearchFailure.Query.NOT_FOUND else null)
+    }
+
+    fun navigate(s: LibrarySearchSnapshot, trash: LibraryTrashSnapshot, candidate: LibrarySearchHit): LibrarySearchResolution {
+        val target = candidate.target
+        validate(s, target.spaceId, target.expectedRevision)?.let { return LibrarySearchResolution(failure = it) }
+        LibraryTrashRules.snapshotError(trash, target.spaceId, target.expectedRevision)?.let {
+            return LibrarySearchResolution(failure = LibrarySearchFailure.Directory(it))
+        }
+        if (!sameDirectory(s.directory, trash.active)) {
+            return LibrarySearchResolution(failure = LibrarySearchFailure.Query.TRASH_SCOPE_MISMATCH)
+        }
+        if (LibraryTrashRules.invalidTrash(trash)) {
+            return LibrarySearchResolution(failure = LibrarySearchFailure.Query.INVALID_TRASH)
+        }
+        val trashed = when (target.kind) {
+            LibrarySearchKind.NOTE -> trash.trash.any { it.noteId == target.id }
+            LibrarySearchKind.FOLDER -> trash.folderGroups.any { group -> group.folders.any { it.id == target.id } }
+        }
+        if (trashed) return LibrarySearchResolution(failure = LibrarySearchFailure.Query.TRASHED)
+        val resolved = resolve(s, target)
+        if (resolved.hit == null) return resolved
+        return if (resolved.hit == candidate) resolved else LibrarySearchResolution(failure = LibrarySearchFailure.Query.STALE_HIT)
     }
 }
