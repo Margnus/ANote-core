@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "scope": "Independent Apple Swift executable on the selected simulator runtime; iPhoneOS binary linked only",
+  "runtime": {
+    "identifier": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+    "version": "27.0",
+    "build": "24A434"
+  },
+  "selected_typed_channels_and_recovery": {
+    "budget_typed": "INPUT_BYTES",
+    "invalid_edit_preserved_pending": true,
+    "malformed_recovery_typed": "INVALID_OR_UNSUPPORTED_FORMAT",
+    "missing_index_is_nil": true,
+    "pid": 13145,
+    "recovery_admitted_bytes": 2248,
+    "recovery_refused_bytes": 2247,
+    "retry_preserved_checkpoint_bytes": true,
+    "unsupported_document_typed": "UNSUPPORTED_PREVIEW_CONTENT"
+  },
+  "compatibility_nserror_channels": {
+    "budget_constructor_nserror": "KotlinException",
+    "budget_copy_nserror": "KotlinException",
+    "malformed_recovery_nserror": "KotlinException"
+  },
+  "targets": {
+    "iosSimulatorArm64": {
+      "consumer_sha256": "a017ddc5d423d8eb56b959af0532b7e65b087dc62d61eec458736ed413db454d",
+      "framework_sha256": "4e213be7fe01123071b8fac323a37a0d79b816349843d6bfc14b342b43bc692e",
+      "header_sha256": "02ebfa1e089b4bc4e07bb198daf799dba74f4365bb1db30d79045eb62c451bbf",
+      "link_min_os": "17.0"
+    },
+    "iosArm64": {
+      "consumer_sha256": "eafc748acb2bbf92bd5d30c3442469e01f008038ee39d274c40d0df35c5b43e9",
+      "framework_sha256": "91cff4da9b9c73cbe363e6f2dbb40b16e422b6fb53602dee1fc0478ef2614847",
+      "header_sha256": "02ebfa1e089b4bc4e07bb198daf799dba74f4365bb1db30d79045eb62c451bbf",
+      "link_min_os": "17.0"
+    }
+  },
+  "simulator_deleted": true,
+  "existing_device_inventory_unchanged": true,
+  "ios17_runtime_verified": false,
+  "source_sha256": {
+    "tools/verify_c1_apple_failure_channels.py": "e06bfdcb1531c22c01a1a0efe4645dd013ffe224cfc74bbc12783499bfeeea2a",
+    "tools/probes/C1AppleFailureConsumer.swift": "8c1105489022293d7f1802d05e88f2c3817245019851b1a025e5d226111c9341",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e"
+  },
+  "raw_sha256": {
+    "boot.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "boot.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bootstatus.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bootstatus.stdout.log": "6cf0d9a80b1df22bb0932b5c9ab7a047e4e32a8db4b3944852505510231daafb",
+    "compile-iosArm64.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-iosArm64.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-iosSimulatorArm64.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-iosSimulatorArm64.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "consumer.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "consumer.stdout.log": "eefcf3c9a5bfada19af6169f77a2e8160babb72570b342861a933f492b64eb2a",
+    "create.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "create.stdout.log": "9676663d611fc1054f618489fc3c7a8b2e23ea7a1c66c0b7e719b5786cbf7648",
+    "delete.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "delete.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "devices-after.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "devices-after.stdout.log": "35af3692b30ead83e2ba6333bd738205ab06a059036763e1425f089244002a6a",
+    "devices-before.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "devices-before.stdout.log": "35af3692b30ead83e2ba6333bd738205ab06a059036763e1425f089244002a6a",
+    "link-iosArm64.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "link-iosArm64.stdout.log": "a0a88d27f74d75544652a5d0d8b63ccc5a96dcfc55c848cefaafc19b9c41c966",
+    "link-iosSimulatorArm64.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "link-iosSimulatorArm64.stdout.log": "f1fd2abf678b4465d21f8610136535d96b3063a17bfeddce3f158d48a3d41dd8",
+    "runtimes.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtimes.stdout.log": "67cd87bc47687532500d5c853a21c37a8a9a7440300a319cde0450ba256ad44b",
+    "shutdown.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "shutdown.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
