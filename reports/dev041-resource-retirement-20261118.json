@@ -1,0 +1,154 @@
+{
+  "status": "passed",
+  "scope": "Disposable host SQLite and filesystem with subprocess exits",
+  "sqlite_version": "3.54.0",
+  "crash_and_recovery": [
+    {
+      "stage": "reserved",
+      "observed_state": [
+        "retiring",
+        true,
+        false
+      ],
+      "process_receipts": [
+        {
+          "cut": "reserved",
+          "pid": 7037
+        },
+        {
+          "status": "RESOURCE_NOT_AVAILABLE",
+          "pid": 7038
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7039
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7040
+        }
+      ]
+    },
+    {
+      "stage": "linked",
+      "observed_state": [
+        "retiring",
+        true,
+        true
+      ],
+      "process_receipts": [
+        {
+          "cut": "linked",
+          "pid": 7041
+        },
+        {
+          "status": "RESOURCE_NOT_AVAILABLE",
+          "pid": 7042
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7045
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7046
+        }
+      ]
+    },
+    {
+      "stage": "source-removed",
+      "observed_state": [
+        "retiring",
+        false,
+        true
+      ],
+      "process_receipts": [
+        {
+          "cut": "source-removed",
+          "pid": 7047
+        },
+        {
+          "status": "RESOURCE_NOT_AVAILABLE",
+          "pid": 7048
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7049
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7050
+        }
+      ]
+    },
+    {
+      "stage": "delete-pending",
+      "observed_state": [
+        "delete-pending",
+        false,
+        true
+      ],
+      "process_receipts": [
+        {
+          "cut": "delete-pending",
+          "pid": 7051
+        },
+        {
+          "status": "RESOURCE_NOT_AVAILABLE",
+          "pid": 7052
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7053
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7055
+        }
+      ]
+    },
+    {
+      "stage": "tombstone-removed",
+      "observed_state": [
+        "delete-pending",
+        false,
+        false
+      ],
+      "process_receipts": [
+        {
+          "cut": "tombstone-removed",
+          "pid": 7056
+        },
+        {
+          "status": "RESOURCE_NOT_AVAILABLE",
+          "pid": 7057
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7058
+        },
+        {
+          "status": "RETIRED",
+          "pid": 7059
+        }
+      ]
+    }
+  ],
+  "reference_coordination": {
+    "stale_task_confirmed": false,
+    "task_pin_released_on_confirmation": true,
+    "live_reader_blocked_retirement_after_task_cancel": true,
+    "stale_reader_release_rejected": true,
+    "reader_verified_payload_before_release": true
+  },
+  "occupied_and_missing_paths": {
+    "same_bytes_different_inode_preserved": true,
+    "moved_and_delete_pending_inode_rechecked": true,
+    "unexpected_missing_paths_rejected": true
+  },
+  "power_loss_verified": false,
+  "source_sha256": {
+    "tools/verify_resource_retirement.py": "c8e1c5b757fb0382e30f5a4f255493f92cc5f6489054e61d935d2bbc8b55239d",
+    "tools/verify_resource_gc_rules.py": "5f506399cb6ad7b318f93d0f12178d58d7702ce6588cdf959203b098c1283dc7"
+  }
+}

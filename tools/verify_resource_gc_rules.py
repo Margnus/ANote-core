@@ -117,7 +117,9 @@ def retirement_checks(recipe):
                 else:
                     owner.execute('BEGIN IMMEDIATE');assert reserve(owner)==1
                     try:peer.execute('BEGIN IMMEDIATE')
-                    except sqlite3.OperationalError as error:assert error.sqlite_errorcode==sqlite3.SQLITE_BUSY
+                    except sqlite3.OperationalError as error:
+                        code = getattr(error, 'sqlite_errorcode', None)
+                        assert code == sqlite3.SQLITE_BUSY if code is not None else str(error) == 'database is locked'
                     else:raise AssertionError('Competing writer entered the reservation transaction')
                     owner.execute('ROLLBACK')
                     assert pin_and_read(peer)=='READ_ADMITTED' and reserve(owner)==0
@@ -155,6 +157,7 @@ def checks():
 def main():
     report=checks()
     report['source_and_artifact_sha256']={p.relative_to(ROOT).as_posix():sha(p) for p in (FIXTURE,Path(__file__))}
-    (ROOT/'reports/resource-gc-rules.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
+    with (ROOT/'reports/resource-gc-rules.json').open('w',encoding='utf-8',newline='\n') as output:
+        output.write(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k not in ('observations','retirement_observations','source_and_artifact_sha256')},ensure_ascii=False))
 if __name__=='__main__':main()
