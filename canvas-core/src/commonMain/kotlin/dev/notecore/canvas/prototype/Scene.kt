@@ -1,11 +1,19 @@
 package dev.notecore.canvas.prototype
 
 /** A small immutable reference snapshot. Map copying is not the planned production store. */
-class SceneSnapshot private constructor(val id: SceneId, val revision: Long, private val entries: Map<ObjectId, StrokeObject>, trusted: Unit) {
-    internal constructor(id: SceneId, revision: Long, objects: Map<ObjectId, StrokeObject>) : this(id, revision, objects.toMap(), Unit)
+class SceneSnapshot private constructor(val id: SceneId, val revision: Long, private val entries: Map<ObjectId, SceneObject>, trusted: Unit) {
+    internal constructor(id: SceneId, revision: Long, objects: Map<ObjectId, SceneObject>) : this(id, revision, objects.toMap(), Unit)
     val objectCount: Int get() = entries.size
-    fun find(id: ObjectId): StrokeObject? = entries[id]
-    fun objects(): List<StrokeObject> = entries.values.toList()
+    fun findObject(id: ObjectId): SceneObject? = entries[id]
+    fun find(id: ObjectId): StrokeObject? = when (val value = entries[id]) {
+        null -> null
+        is StrokeObject -> value
+        else -> throw IllegalArgumentException("Stroke-only read of a mixed scene")
+    }
+    fun sceneObjects(): List<SceneObject> = entries.values.toList()
+    fun objects(): List<StrokeObject> = entries.values.map {
+        require(it is StrokeObject) { "Stroke-only read of a mixed scene" }; it
+    }
     /** Immutable content comparison preserves draw order without two full-scene reference lists.
      * This is a read operation, not an authority or an unversioned cache identity.
      */
@@ -19,12 +27,16 @@ class SceneSnapshot private constructor(val id: SceneId, val revision: Long, pri
     /** Synchronous immutable inspection without a full-scene list copy; never exposes the map.
      * Unfrozen snapshot read surface. Callers own any references retained by their visitor.
      */
-    fun forEachObject(visit: (StrokeObject) -> Unit) { entries.values.forEach(visit) }
-    internal fun copyEntries(): MutableMap<ObjectId, StrokeObject> = entries.toMutableMap()
+    fun forEachSceneObject(visit: (SceneObject) -> Unit) { entries.values.forEach(visit) }
+    fun forEachObject(visit: (StrokeObject) -> Unit) = entries.values.forEach {
+        require(it is StrokeObject) { "Stroke-only read of a mixed scene" }; visit(it)
+    }
+    internal fun copyEntries(): MutableMap<ObjectId, SceneObject> = entries.toMutableMap()
     companion object {
         fun empty(id: SceneId): SceneSnapshot = SceneSnapshot(id, 0, emptyMap(), Unit)
         /** Validated codec/fixture entry, not a mutable authority or a claim of persisted durability. */
-        fun restored(id: SceneId, revision: Long, objects: List<StrokeObject>): SceneSnapshot {
+        fun restored(id: SceneId, revision: Long, objects: List<StrokeObject>): SceneSnapshot = restoredObjects(id, revision, objects)
+        fun restoredObjects(id: SceneId, revision: Long, objects: List<SceneObject>): SceneSnapshot {
             require(revision >= 0 && objects.size <= 100_000)
             require(objects.map { it.id }.toSet().size == objects.size)
             for (obj in objects) { require(obj.transform.inverseOrNull() != null); obj.bounds() }

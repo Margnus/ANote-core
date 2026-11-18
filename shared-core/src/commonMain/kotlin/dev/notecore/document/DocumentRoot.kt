@@ -20,7 +20,7 @@ class DocumentRoot private constructor(val title: String, val scene: SceneSnapsh
         require(directory.map { it.id }.toSet().size == directory.size && directory.map { it.layerId }.toSet().size == directory.size)
         require(directory.all { it.contentRevision <= revision })
         val layers = directory.map { it.layerId }.toSet()
-        scene.forEachObject { require(it.layerId in layers) { "Orphan canvas object" } }
+        scene.forEachSceneObject { require(it.layerId in layers) { "Orphan canvas object" } }
     }
     fun pages(): List<PageDescriptor> = directory.toList()
     fun page(index: Int): PageDescriptor = directory[index]

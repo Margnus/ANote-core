@@ -97,7 +97,7 @@ internal object ImageInsertRules {
         root.revision == Long.MAX_VALUE -> ImageInsertFailure.REVISION_EXHAUSTED
         !request.pageId.value.hasValidUnicode() || !request.objectId.value.hasValidUnicode() ||
             !request.operationId.value.hasValidUnicode() || !request.documentId.value.hasValidUnicode() -> ImageInsertFailure.INVALID_ID
-        root.scene.find(request.objectId) != null -> ImageInsertFailure.DUPLICATE_OBJECT
+        root.scene.findObject(request.objectId) != null -> ImageInsertFailure.DUPLICATE_OBJECT
         else -> null
     }
 }

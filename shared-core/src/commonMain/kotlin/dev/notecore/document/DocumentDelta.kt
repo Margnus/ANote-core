@@ -26,7 +26,7 @@ internal class DocumentDelta(operationId: CommandId, before: DocumentRoot, after
             if (ids.isEmpty()) return emptyMap()
             val positions = mutableMapOf<ObjectId, Int>()
             var index = 0
-            scene.forEachObject {
+            scene.forEachSceneObject {
                 if (it.id in ids) positions[it.id] = index
                 index++
             }
@@ -89,7 +89,7 @@ internal class PageObjectOrder(val pageId: PageId, before: List<ObjectId>, after
         val expected = if (undo) right else left
         var index = 0
         var matches = true
-        root.scene.forEachObject { if (it.layerId == page.layerId) {
+        root.scene.forEachSceneObject { if (it.layerId == page.layerId) {
             if (index >= expected.size || expected[index] != it.id) matches = false
             index++
         } }
@@ -98,7 +98,7 @@ internal class PageObjectOrder(val pageId: PageId, before: List<ObjectId>, after
     fun apply(scene: SceneSnapshot, layer: LayerId, undo: Boolean): SceneSnapshot {
         val target = if (undo) left else right
         var index = 0
-        val order = scene.objects().map { if (it.layerId == layer) target[index++] else it.id }
+        val order = scene.sceneObjects().map { if (it.layerId == layer) target[index++] else it.id }
         check(index == target.size)
         return SceneSnapshot.reordered(scene, order)
     }
@@ -106,7 +106,7 @@ internal class PageObjectOrder(val pageId: PageId, before: List<ObjectId>, after
         /** Both sides have the same membership; admission needs no full-scene identity array. */
         fun projectedCharge(root: DocumentRoot, page: PageDescriptor): Long {
             var bytes = 128L + page.id.value.length * 2L
-            root.scene.forEachObject { if (it.layerId == page.layerId) bytes += 2L * (48L + it.id.value.length * 2L) }
+            root.scene.forEachSceneObject { if (it.layerId == page.layerId) bytes += 2L * (48L + it.id.value.length * 2L) }
             return bytes
         }
     }

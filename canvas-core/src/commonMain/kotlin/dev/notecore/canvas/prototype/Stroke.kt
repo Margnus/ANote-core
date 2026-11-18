@@ -137,10 +137,18 @@ class StrokeSamples private constructor(
 /** Capture at stroke admission, never look up the current layer/tool during IO completion. */
 data class StrokeTarget(val sceneId: SceneId, val layerId: LayerId, val brush: BrushSpec)
 
+interface SceneObject {
+    val id: ObjectId
+    val objectRevision: Long
+    val layerId: LayerId
+    val transform: Affine2D
+    fun bounds(): BoundsD
+}
+
 data class StrokeObject(
-    val id: ObjectId, val objectRevision: Long, val layerId: LayerId,
-    val brush: BrushSpec, val samples: StrokeSamples, val transform: Affine2D = Affine2D(),
-) {
+    override val id: ObjectId, override val objectRevision: Long, override val layerId: LayerId,
+    val brush: BrushSpec, val samples: StrokeSamples, override val transform: Affine2D = Affine2D(),
+) : SceneObject {
     init { require(objectRevision > 0) }
-    fun bounds(): BoundsD = transform.mapBounds(samples.bounds(brush.width / 2.0))
+    override fun bounds(): BoundsD = transform.mapBounds(samples.bounds(brush.width / 2.0))
 }

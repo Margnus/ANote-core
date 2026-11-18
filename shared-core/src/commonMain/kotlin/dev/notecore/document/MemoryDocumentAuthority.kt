@@ -258,7 +258,7 @@ class MemoryDocumentAuthority @Throws(IllegalArgumentException::class) construct
                 })
                 plannedOrder = plan
                 val before = root.pageObjects(page.id).map { it.id }
-                val after = plan.objectIds().filter { root.scene.find(it)!!.layerId == page.layerId }
+                val after = plan.objectIds().filter { root.scene.findObject(it)!!.layerId == page.layerId }
                 objectOrder = PageObjectOrder(page.id, before, after)
                 pages[pages.indexOf(page)] = page.copy(contentRevision = nextRevision)
                 affected.add(page.id)

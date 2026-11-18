@@ -33,12 +33,12 @@ internal object ObjectOrderRules {
         val selection = selected.toSet()
         if (selection.size != selected.size) return ObjectOrderResult(failure = ObjectOrderFailure.INVALID_SELECTION)
         for (id in selection) {
-            val item = root.scene.find(id) ?: return ObjectOrderResult(failure = ObjectOrderFailure.MISSING_OBJECT)
+            val item = root.scene.findObject(id) ?: return ObjectOrderResult(failure = ObjectOrderFailure.MISSING_OBJECT)
             if (item.layerId != page.layerId) return ObjectOrderResult(failure = ObjectOrderFailure.WRONG_PAGE)
         }
         val global = ArrayList<ObjectId>(root.scene.objectCount)
         val pageOrder = mutableListOf<ObjectId>()
-        root.scene.forEachObject { item ->
+        root.scene.forEachSceneObject { item ->
             global.add(item.id)
             if (item.layerId == page.layerId) pageOrder.add(item.id)
         }
@@ -48,7 +48,7 @@ internal object ObjectOrderRules {
         val reordered = if (direction == ObjectOrderDirection.FRONT) other + chosen else chosen + other
         if (reordered == pageOrder) return ObjectOrderResult(failure = ObjectOrderFailure.NO_CHANGE)
         var cursor = 0
-        val result = global.map { id -> if (root.scene.find(id)!!.layerId == page.layerId) reordered[cursor++] else id }
+        val result = global.map { id -> if (root.scene.findObject(id)!!.layerId == page.layerId) reordered[cursor++] else id }
         return ObjectOrderResult(ObjectOrderPlan(root.id, root.revision, page.id, result))
     }
 
