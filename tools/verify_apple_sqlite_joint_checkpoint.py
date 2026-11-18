@@ -192,7 +192,7 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                 assert event['status'] == expected and event['stage'] == stage
             observations[label] = {**event, **launch_evidence}
 
-        def db_state():
+        def db_state(label=None):
             # SQLite recovery can touch WAL/SHM. Inspect only a scratch copy of the quiescent files.
             with tempfile.TemporaryDirectory(dir=work) as copy:
                 database = Path(copy) / 'checkpoint.sqlite'
@@ -205,6 +205,10 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                     assert db.execute('PRAGMA integrity_check').fetchone() == ('ok',)
                     assert db.execute('PRAGMA foreign_key_check').fetchall() == []
                     assert db.execute('PRAGMA user_version').fetchone() == (2,)
+                    if label:
+                        evidence = observations[label]
+                        evidence['retirement'] = db.execute('SELECT * FROM retirement ORDER BY 1').fetchall()
+                        evidence['retirement_readers'] = db.execute('SELECT * FROM retirement_reader ORDER BY 1').fetchall()
                     return {
                         'documents': db.execute('SELECT id,revision,checkpoint FROM document ORDER BY id').fetchall(),
                         'sources': db.execute('SELECT document_id,original FROM legacy_source ORDER BY document_id').fetchall(),
@@ -274,6 +278,10 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                 'tasks': [], 'pins': [],
             }
             assert db_state() == committed and file_state() == resources
+            if app_sandbox:
+                step('retire_committed_resource', 'retire', expected='PROTECTED')
+                assert db_state('retire_committed_resource') == committed and file_state() == resources
+                assert not observations['retire_committed_resource']['retirement']
             step('late_cancel_after_commit', 'cancel-request', expected='ALREADY_COMMITTED')
             assert db_state() == committed and file_state() == resources
             step('exact_replay', 'replay', expected='REPLAYED')
@@ -303,6 +311,13 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                 assert db_state() == pending and file_state() == retained
                 original = root / 'resources' / first
                 retained_inode = original.stat().st_ino
+                reserved_identity = f'{original.stat().st_dev}:{retained_inode}'
+                step('retire_active_task', 'retire', expected='PROTECTED')
+                assert db_state('retire_active_task') == pending and file_state() == retained
+                assert not observations['retire_active_task']['retirement']
+                step('reader_pin_before_cancel', 'retire-pin', expected='PINNED')
+                assert db_state('reader_pin_before_cancel') == pending and file_state() == retained
+                assert observations['reader_pin_before_cancel']['retirement_readers'] == [(first, 'reader-new')]
                 step('stale_cancel_after_stop', 'cancel-stale', expected='STALE_ATTEMPT')
                 assert db_state() == pending and file_state() == retained
                 step('request_cancel_after_stop', 'cancel-request', expected='CANCEL_REQUESTED')
@@ -312,6 +327,54 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                 step('retry_cancelled_after_stop', 'replay', expected='CANCELLED')
                 assert db_state() == cancelled_state('cancelled') and file_state() == retained
                 assert original.stat().st_ino == retained_inode
+                cancelled = cancelled_state('cancelled')
+                step('late_reader_release', 'retire-stale-release', expected='STALE_READER')
+                assert db_state('late_reader_release') == cancelled and file_state() == retained
+                assert observations['late_reader_release']['retirement_readers'] == [(first, 'reader-new')]
+                step('retire_reader_protected', 'retire', expected='PROTECTED')
+                assert db_state('retire_reader_protected') == cancelled and file_state() == retained
+                assert not observations['retire_reader_protected']['retirement']
+                step('release_reader', 'retire-release', expected='RELEASED')
+                assert db_state('release_reader') == cancelled and file_state() == retained
+                assert not observations['release_reader']['retirement_readers']
+
+                tombstone = root / 'retire-tombstone'
+
+                def file_identity(path):
+                    metadata = path.stat()
+                    return {'identity': f'{metadata.st_dev}:{metadata.st_ino}', 'sha256': sha(path.read_bytes())}
+
+                def check_retirement(label, metadata, expected_files, tomb=None):
+                    assert db_state(label) == cancelled and file_state() == expected_files
+                    evidence = observations[label]
+                    assert evidence['retirement'] == [(first, metadata, reserved_identity)]
+                    assert evidence['retirement_readers'] == []
+                    evidence['retirement_file'] = file_identity(tombstone) if tombstone.exists() else None
+                    assert evidence['retirement_file'] == tomb
+
+                step('retirement_reserved', 'retire-reserved', cut=True)
+                check_retirement('retirement_reserved', 'retiring', retained)
+                step('retiring_refuses_new_pin', 'retire-pin', expected='RESOURCE_NOT_AVAILABLE')
+                check_retirement('retiring_refuses_new_pin', 'retiring', retained)
+                tombstone.write_bytes(resources[first])
+                collision = file_identity(tombstone)
+                assert collision['identity'] != reserved_identity
+                step('same_bytes_different_inode', 'retire', expected='REPAIR_REQUIRED')
+                check_retirement('same_bytes_different_inode', 'retiring', retained, collision)
+                tombstone.unlink()  # Remove only the fixture-created collision.
+                tomb = {'identity': reserved_identity, 'sha256': first}
+                step('retirement_moved', 'retire-moved', cut=True)
+                check_retirement('retirement_moved', 'retiring', {}, tomb)
+                step('retirement_delete_pending', 'retire-delete-pending', cut=True)
+                check_retirement('retirement_delete_pending', 'delete-pending', {}, tomb)
+                step('retirement_unlinked', 'retire-unlinked', cut=True)
+                check_retirement('retirement_unlinked', 'delete-pending', {})
+                step('retirement_recovered', 'retire', expected='RETIRED')
+                check_retirement('retirement_recovered', 'retired', {})
+                step('retirement_replayed', 'retire', expected='RETIRED')
+                check_retirement('retirement_replayed', 'retired', {})
+                step('retired_refuses_new_pin', 'retire-pin', expected='RESOURCE_NOT_AVAILABLE')
+                check_retirement('retired_refuses_new_pin', 'retired', {})
                 assert all((root / name).read_bytes() == data for name, data in inputs.items())
 
                 root = start_case('dev041-apple-cancel-live')

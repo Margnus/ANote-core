@@ -249,6 +249,105 @@ private func importCheckpoint(_ db: DB, _ folder: URL, _ checkpoint: Checkpoint,
     return finalStatus
 }
 
+private func attachmentIdentity(_ file: URL, _ resource: Resource) throws -> String? {
+    var info = stat()
+    if lstat(file.path, &info) != 0 {
+        if errno == ENOENT { return nil }
+        throw Admission.repairRequired
+    }
+    guard info.st_mode & mode_t(S_IFMT) == mode_t(S_IFREG),
+          info.st_size == resource.payload.count, try Data(contentsOf: file) == resource.payload
+    else { throw Admission.repairRequired }
+    return "\(info.st_dev):\(info.st_ino)"
+}
+
+private func retirementStep(_ db: DB, _ folder: URL, _ resource: Resource, stage: String) throws -> String {
+    let source = resource.target
+    let tombstone = folder.appendingPathComponent("retire-tombstone")
+    let key = [resource.sha]
+    func state(_ connection: DB) throws -> String? {
+        try connection.query("SELECT state FROM retirement WHERE sha256=?", key)
+    }
+    func reservedIdentity(_ connection: DB) throws -> String {
+        guard let identity = try connection.query("SELECT identity FROM retirement WHERE sha256=?", key)
+        else { throw ProbeFailure.invariant }
+        return identity
+    }
+    func retire(_ connection: DB) throws -> String {
+        let reserved = try immediate(connection) {
+            if try state(connection) != nil { return true }
+            let guardQuery = """
+                SELECT EXISTS(SELECT 1 FROM resource WHERE sha256=?)
+                    OR EXISTS(SELECT 1 FROM retirement_reader WHERE sha256=?)
+                    OR EXISTS(SELECT 1 FROM import_task_resource r JOIN import_task t USING (operation_id)
+                              WHERE r.sha256=? AND t.cancel_state<>'cancelled')
+                """
+            if try connection.query(guardQuery, [resource.sha, resource.sha, resource.sha]) == "1" { return false }
+            guard let identity = try attachmentIdentity(source, resource),
+                  try attachmentIdentity(tombstone, resource) == nil else { throw Admission.repairRequired }
+            try connection.exec("INSERT INTO retirement VALUES(?,'retiring',?)", [resource.sha, identity])
+            return true
+        }
+        if !reserved { return "PROTECTED" }
+        if stage == "retire-reserved" { try stop(at: stage, folder: folder) }
+        try immediate(connection) {
+            guard try state(connection) == "retiring" else { return }
+            let expected = try reservedIdentity(connection)
+            if try attachmentIdentity(source, resource) == expected,
+               try attachmentIdentity(tombstone, resource) == nil {
+                guard renamex_np(source.path, tombstone.path, UInt32(RENAME_EXCL)) == 0
+                else { throw Admission.repairRequired }
+                if stage == "retire-moved" { try stop(at: stage, folder: folder) }
+            }
+            guard try attachmentIdentity(source, resource) == nil,
+                  try attachmentIdentity(tombstone, resource) == expected else { throw Admission.repairRequired }
+            try connection.exec("UPDATE retirement SET state='delete-pending' WHERE sha256=?", key)
+        }
+        if stage == "retire-delete-pending" { try stop(at: stage, folder: folder) }
+        return try immediate(connection) {
+            guard try attachmentIdentity(source, resource) == nil else { throw Admission.repairRequired }
+            let moved = try attachmentIdentity(tombstone, resource)
+            if try state(connection) == "retired" {
+                guard moved == nil else { throw Admission.repairRequired }
+                return "RETIRED"
+            }
+            try require(state(connection) == "delete-pending")
+            if let moved {
+                guard moved == (try reservedIdentity(connection)) else { throw Admission.repairRequired }
+                try FileManager.default.removeItem(at: tombstone)
+                if stage == "retire-unlinked" { try stop(at: stage, folder: folder) }
+            }
+            try connection.exec("UPDATE retirement SET state='retired' WHERE sha256=?", key)
+            return "RETIRED"
+        }
+    }
+
+    switch stage {
+    case "retire-pin":
+        let pinned = try immediate(db) {
+            if try state(db) != nil { return false }
+            guard try attachmentIdentity(source, resource) != nil else { throw Admission.repairRequired }
+            try db.exec("INSERT INTO retirement_reader VALUES(?,'reader-new')", key)
+            return true
+        }
+        if !pinned { return "RESOURCE_NOT_AVAILABLE" }
+        let reader = try FileHandle(forReadingFrom: source)
+        defer { try? reader.close() }
+        let collector = try openWriter(folder.appendingPathComponent("checkpoint.sqlite"))
+        defer { collector.close() }
+        try require(retire(collector) == "PROTECTED" && reader.readToEnd() == resource.payload)
+        return "PINNED"
+    case "retire-release", "retire-stale-release":
+        return try immediate(db) {
+            let owner = stage == "retire-release" ? "reader-new" : "reader-old"
+            try db.exec("DELETE FROM retirement_reader WHERE sha256=? AND owner=?", [resource.sha, owner])
+            return sqlite3_changes(db.handle) == 1 ? "RELEASED" : "STALE_READER"
+        }
+    default:
+        return try retire(db)
+    }
+}
+
 #if !DEV041_APP
 @main
 #endif
@@ -287,7 +386,9 @@ struct SqliteJointCheckpoint {
 
     private static func run(folder: URL, stage: String) throws -> [String: Any] {
         try require(["init", "resource-published", "before-commit", "after-commit", "replay", "conflict",
-                     "cancel-request", "cancel-stale", "cancel-live"].contains(stage))
+                     "cancel-request", "cancel-stale", "cancel-live", "retire", "retire-pin", "retire-release",
+                     "retire-stale-release", "retire-reserved", "retire-moved", "retire-delete-pending",
+                     "retire-unlinked"].contains(stage))
         try require(String(contentsOf: folder.appendingPathComponent(".fixture-scope"), encoding: .utf8) == "dev041-apple")
         let database = folder.appendingPathComponent("checkpoint.sqlite")
         try require(FileManager.default.fileExists(atPath: database.path) == (stage != "init"))
@@ -301,6 +402,8 @@ struct SqliteJointCheckpoint {
                 for statement in statements { try db.exec(statement) }
                 try db.exec("ALTER TABLE import_task ADD COLUMN active_attempt TEXT NOT NULL DEFAULT 'first'")
                 try db.exec("ALTER TABLE import_task ADD COLUMN cancel_state TEXT NOT NULL DEFAULT 'active'")
+                try db.exec("CREATE TABLE retirement(sha256 TEXT PRIMARY KEY, state TEXT NOT NULL, identity TEXT NOT NULL)")
+                try db.exec("CREATE TABLE retirement_reader(sha256 TEXT, owner TEXT, PRIMARY KEY(sha256,owner))")
                 try db.exec("PRAGMA user_version=2")
                 try record(db, "existing", checkpoint)
             }
@@ -313,8 +416,13 @@ struct SqliteJointCheckpoint {
             let files = stage == "conflict" ? ["resource-a.bin"] : ["resource-a.bin", "resource-b.bin"]
             let resources = try files.map { try Resource(folder: targets, source: folder.appendingPathComponent($0)) }
                 .sorted { $0.sha < $1.sha }
-            do { result["status"] = try importCheckpoint(db, folder, checkpoint, resources, stage: stage) }
-            catch Admission.conflict { result["status"] = "OPERATION_CONFLICT" }
+            do {
+                if stage.hasPrefix("retire") {
+                    result["status"] = try retirementStep(db, folder, resources[0], stage: stage)
+                } else {
+                    result["status"] = try importCheckpoint(db, folder, checkpoint, resources, stage: stage)
+                }
+            } catch Admission.conflict { result["status"] = "OPERATION_CONFLICT" }
             catch Admission.repairRequired { result["status"] = "REPAIR_REQUIRED" }
         }
         return result
