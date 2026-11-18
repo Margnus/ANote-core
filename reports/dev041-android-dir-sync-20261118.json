@@ -1,0 +1,844 @@
+{
+  "status": "passed",
+  "environment": {
+    "api": "26",
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "abi": "arm64-v8a",
+    "selinux": "Enforcing",
+    "kernel": "3.18.94+"
+  },
+  "avd": "NoteCoreJoint26-b01289c379d945d7ae2e8bcaec9e6db3",
+  "observations": {
+    "seeded": {
+      "status": "SEEDED",
+      "stage": "init",
+      "pid": 2701,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"SEEDED\",\"stage\":\"init\",\"pid\":2701,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "bc3e70a24fc7dafa9931cfaa225b157d7492c6ce7b2fe98b992d7c69abbbb536"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "partial_publish": {
+      "cut": "resource-published",
+      "pid": 2737,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "bc3e70a24fc7dafa9931cfaa225b157d7492c6ce7b2fe98b992d7c69abbbb536",
+        "checkpoint.sqlite-wal": "ca8f2ee2e96fef4e2e5e3df67359b2d20729772a29c5c5ad2793fb0b706de6e1"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "pending_conflict": {
+      "status": "OPERATION_CONFLICT",
+      "stage": "conflict",
+      "pid": 2788,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"OPERATION_CONFLICT\",\"stage\":\"conflict\",\"pid\":2788,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "057267329c0d26d3f309f50d7e18b13002cd29c7f4c0dd405b2e20089b4a8a76"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "uncommitted": {
+      "cut": "before-commit",
+      "pid": 2832,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "057267329c0d26d3f309f50d7e18b13002cd29c7f4c0dd405b2e20089b4a8a76",
+        "checkpoint.sqlite-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      },
+      "retirement_file": null
+    },
+    "occupied_corrupt": {
+      "status": "REPAIR_REQUIRED",
+      "stage": "replay",
+      "pid": 2896,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"REPAIR_REQUIRED\",\"stage\":\"replay\",\"pid\":2896,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "057267329c0d26d3f309f50d7e18b13002cd29c7f4c0dd405b2e20089b4a8a76"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "658753fe728e4b5a17703a609f7484569180580c14dbd781a0f23609882c2663"
+        }
+      },
+      "retirement_file": null
+    },
+    "committed_without_receipt": {
+      "cut": "after-commit",
+      "pid": 2958,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "057267329c0d26d3f309f50d7e18b13002cd29c7f4c0dd405b2e20089b4a8a76",
+        "checkpoint.sqlite-wal": "0bb41d62a5c3d3e070ea305c5db4bfbda2dcaa3b3c4d2686ee043d7d22fe1d71"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      },
+      "retirement_file": null
+    },
+    "retire_committed_resource": {
+      "status": "PROTECTED",
+      "stage": "retire",
+      "pid": 3013,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"PROTECTED\",\"stage\":\"retire\",\"pid\":3013,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "ddc8c24bc28529faca266c34fad2162c31ad3e252d489f31419e48c73bc3e97f"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      },
+      "retirement_file": null
+    },
+    "late_cancel_after_commit": {
+      "status": "ALREADY_COMMITTED",
+      "stage": "cancel-request",
+      "pid": 3064,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"ALREADY_COMMITTED\",\"stage\":\"cancel-request\",\"pid\":3064,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "ddc8c24bc28529faca266c34fad2162c31ad3e252d489f31419e48c73bc3e97f"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      },
+      "retirement_file": null
+    },
+    "replayed": {
+      "status": "REPLAYED",
+      "stage": "replay",
+      "pid": 3115,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"REPLAYED\",\"stage\":\"replay\",\"pid\":3115,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "ddc8c24bc28529faca266c34fad2162c31ad3e252d489f31419e48c73bc3e97f"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      },
+      "retirement_file": null
+    },
+    "committed_conflict": {
+      "status": "OPERATION_CONFLICT",
+      "stage": "conflict",
+      "pid": 3165,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"OPERATION_CONFLICT\",\"stage\":\"conflict\",\"pid\":3165,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "ddc8c24bc28529faca266c34fad2162c31ad3e252d489f31419e48c73bc3e97f"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+        }
+      },
+      "retirement_file": null
+    },
+    "committed_corruption": {
+      "status": "REPAIR_REQUIRED",
+      "stage": "replay",
+      "pid": 3221,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"REPAIR_REQUIRED\",\"stage\":\"replay\",\"pid\":3221,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "ddc8c24bc28529faca266c34fad2162c31ad3e252d489f31419e48c73bc3e97f"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115114,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        },
+        "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079": {
+          "inode": 115116,
+          "sha256": "658753fe728e4b5a17703a609f7484569180580c14dbd781a0f23609882c2663"
+        }
+      },
+      "retirement_file": null
+    },
+    "seed_cancel_after_stop": {
+      "status": "SEEDED",
+      "stage": "init",
+      "pid": 3323,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"SEEDED\",\"stage\":\"init\",\"pid\":3323,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "bc3e70a24fc7dafa9931cfaa225b157d7492c6ce7b2fe98b992d7c69abbbb536"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "cancel_after_stop_publish": {
+      "cut": "resource-published",
+      "pid": 3359,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "bc3e70a24fc7dafa9931cfaa225b157d7492c6ce7b2fe98b992d7c69abbbb536",
+        "checkpoint.sqlite-wal": "9a3bd28ea8d88cf5257e68642101c24a80deb1d7e0e00456e85e61abda0b057e"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "retire_active_task": {
+      "status": "PROTECTED",
+      "stage": "retire",
+      "pid": 3413,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"PROTECTED\",\"stage\":\"retire\",\"pid\":3413,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "057267329c0d26d3f309f50d7e18b13002cd29c7f4c0dd405b2e20089b4a8a76"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "reader_pin_before_cancel": {
+      "status": "PINNED",
+      "stage": "retire-pin",
+      "pid": 3458,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"PINNED\",\"stage\":\"retire-pin\",\"pid\":3458,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "reader-new"
+        ]
+      ],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c279269b8641d88b7a1c95fdb59173b1b1adc90383db60fe3ae9c00a19ebe439"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "stale_cancel_after_stop": {
+      "status": "STALE_ATTEMPT",
+      "stage": "cancel-stale",
+      "pid": 3502,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"STALE_ATTEMPT\",\"stage\":\"cancel-stale\",\"pid\":3502,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "reader-new"
+        ]
+      ],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c279269b8641d88b7a1c95fdb59173b1b1adc90383db60fe3ae9c00a19ebe439"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "request_cancel_after_stop": {
+      "status": "CANCEL_REQUESTED",
+      "stage": "cancel-request",
+      "pid": 3546,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"CANCEL_REQUESTED\",\"stage\":\"cancel-request\",\"pid\":3546,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "reader-new"
+        ]
+      ],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "1f85c2a9e3797f2b69d1e649a79357c455c9ba16ca99bc821ef27897a76f4b6b"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "ack_cancel_after_stop": {
+      "status": "CANCELLED",
+      "stage": "replay",
+      "pid": 3590,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"CANCELLED\",\"stage\":\"replay\",\"pid\":3590,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "reader-new"
+        ]
+      ],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c12059aa44cf3e9d00e04550a41b222ac0a393ede339ac2e38912ad6e5307ed6"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "retry_cancelled_after_stop": {
+      "status": "CANCELLED",
+      "stage": "replay",
+      "pid": 3634,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"CANCELLED\",\"stage\":\"replay\",\"pid\":3634,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "reader-new"
+        ]
+      ],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c12059aa44cf3e9d00e04550a41b222ac0a393ede339ac2e38912ad6e5307ed6"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "late_reader_release": {
+      "status": "STALE_READER",
+      "stage": "retire-stale-release",
+      "pid": 3677,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"STALE_READER\",\"stage\":\"retire-stale-release\",\"pid\":3677,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "reader-new"
+        ]
+      ],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c12059aa44cf3e9d00e04550a41b222ac0a393ede339ac2e38912ad6e5307ed6"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "retire_reader_protected": {
+      "status": "PROTECTED",
+      "stage": "retire",
+      "pid": 3720,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"PROTECTED\",\"stage\":\"retire\",\"pid\":3720,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "reader-new"
+        ]
+      ],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "c12059aa44cf3e9d00e04550a41b222ac0a393ede339ac2e38912ad6e5307ed6"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "release_reader": {
+      "status": "RELEASED",
+      "stage": "retire-release",
+      "pid": 3764,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"RELEASED\",\"stage\":\"retire-release\",\"pid\":3764,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "bb79afa99e54a6b1890c47febfc9dc95fb14e282197057f4581f820ab011d794"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "retirement_reserved": {
+      "cut": "retire-reserved",
+      "pid": 3808,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retiring",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "bb79afa99e54a6b1890c47febfc9dc95fb14e282197057f4581f820ab011d794",
+        "checkpoint.sqlite-wal": "dadf7784262c602d85a1e5707a8533607f3bef8dbff8f2518f50e85acb3803a2"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "retiring_refuses_new_pin": {
+      "status": "RESOURCE_NOT_AVAILABLE",
+      "stage": "retire-pin",
+      "pid": 3858,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"RESOURCE_NOT_AVAILABLE\",\"stage\":\"retire-pin\",\"pid\":3858,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retiring",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "9f3886ba0a42ec837383f2830a9b38b954e6c9ca90cdedaa5964c3652bd68795"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "same_bytes_different_inode": {
+      "status": "REPAIR_REQUIRED",
+      "stage": "retire",
+      "pid": 3911,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"REPAIR_REQUIRED\",\"stage\":\"retire\",\"pid\":3911,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retiring",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "9f3886ba0a42ec837383f2830a9b38b954e6c9ca90cdedaa5964c3652bd68795"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115127,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": {
+        "identity": "65056:115124",
+        "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+      }
+    },
+    "retirement_moved": {
+      "cut": "retire-moved",
+      "pid": 3964,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retiring",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "9f3886ba0a42ec837383f2830a9b38b954e6c9ca90cdedaa5964c3652bd68795",
+        "checkpoint.sqlite-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "resources": {},
+      "retirement_file": {
+        "identity": "65056:115127",
+        "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+      }
+    },
+    "move_directory_sync_failure": {
+      "status": "DIRECTORY_SYNC_FAILED",
+      "stage": "retire-move-sync-failure",
+      "pid": 4013,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "directory_sync_errno": 20,
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"DIRECTORY_SYNC_FAILED\",\"stage\":\"retire-move-sync-failure\",\"pid\":4013,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\",\"directory_sync_errno\":20}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retiring",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "9f3886ba0a42ec837383f2830a9b38b954e6c9ca90cdedaa5964c3652bd68795"
+      },
+      "resources": {},
+      "retirement_file": {
+        "identity": "65056:115127",
+        "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+      }
+    },
+    "retirement_delete_pending": {
+      "cut": "retire-delete-pending",
+      "pid": 4056,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "delete-pending",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "9f3886ba0a42ec837383f2830a9b38b954e6c9ca90cdedaa5964c3652bd68795",
+        "checkpoint.sqlite-wal": "84b92e96b508faf549cf70718badb3b5a53292c3e814d92b243ee1ab7d45d8e6"
+      },
+      "resources": {},
+      "retirement_file": {
+        "identity": "65056:115127",
+        "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+      }
+    },
+    "retirement_unlinked": {
+      "cut": "retire-unlinked",
+      "pid": 4105,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: shortMsg=Process crashed.\nINSTRUMENTATION_CODE: 0",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "delete-pending",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "9f3886ba0a42ec837383f2830a9b38b954e6c9ca90cdedaa5964c3652bd68795",
+        "checkpoint.sqlite-wal": "84b92e96b508faf549cf70718badb3b5a53292c3e814d92b243ee1ab7d45d8e6"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "unlink_directory_sync_failure": {
+      "status": "DIRECTORY_SYNC_FAILED",
+      "stage": "retire-unlink-sync-failure",
+      "pid": 4149,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "directory_sync_errno": 20,
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"DIRECTORY_SYNC_FAILED\",\"stage\":\"retire-unlink-sync-failure\",\"pid\":4149,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\",\"directory_sync_errno\":20}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "delete-pending",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "2865949c60f0de256d1c89759ad0c969fd7874467d96a28d421fd0dbf236db6e"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "retirement_recovered": {
+      "status": "RETIRED",
+      "stage": "retire",
+      "pid": 4187,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"RETIRED\",\"stage\":\"retire\",\"pid\":4187,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retired",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "83da2e3fbfae28e677fcde3aac7ea1660db3dc70e12b38391887824c73fc20ef"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "retirement_replayed": {
+      "status": "RETIRED",
+      "stage": "retire",
+      "pid": 4225,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"RETIRED\",\"stage\":\"retire\",\"pid\":4225,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retired",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "83da2e3fbfae28e677fcde3aac7ea1660db3dc70e12b38391887824c73fc20ef"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "retired_refuses_new_pin": {
+      "status": "RESOURCE_NOT_AVAILABLE",
+      "stage": "retire-pin",
+      "pid": 4263,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"RESOURCE_NOT_AVAILABLE\",\"stage\":\"retire-pin\",\"pid\":4263,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [
+        [
+          "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+          "retired",
+          "65056:115127"
+        ]
+      ],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "83da2e3fbfae28e677fcde3aac7ea1660db3dc70e12b38391887824c73fc20ef"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "seed_live_cancel": {
+      "status": "SEEDED",
+      "stage": "init",
+      "pid": 4353,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"SEEDED\",\"stage\":\"init\",\"pid\":4353,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "bc3e70a24fc7dafa9931cfaa225b157d7492c6ce7b2fe98b992d7c69abbbb536"
+      },
+      "resources": {},
+      "retirement_file": null
+    },
+    "request_while_producer_live": {
+      "status": "CANCELLED",
+      "stage": "cancel-live",
+      "pid": 4388,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"CANCELLED\",\"stage\":\"cancel-live\",\"pid\":4388,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "7290d8937b53158fab7b0225fa40e9991983c9cc4b82e71f2c085287061184f9"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115140,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    },
+    "retry_live_cancelled": {
+      "status": "CANCELLED",
+      "stage": "replay",
+      "pid": 4443,
+      "sqlite": "3.18.2",
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "instrumentation": "INSTRUMENTATION_RESULT: joint={\"status\":\"CANCELLED\",\"stage\":\"replay\",\"pid\":4443,\"sqlite\":\"3.18.2\",\"domain\":\"u:r:untrusted_app:s0:c512,c768\"}\nINSTRUMENTATION_CODE: -1",
+      "retirement": [],
+      "retirement_readers": [],
+      "db_and_wal_sha256": {
+        "checkpoint.sqlite": "7290d8937b53158fab7b0225fa40e9991983c9cc4b82e71f2c085287061184f9"
+      },
+      "resources": {
+        "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda": {
+          "inode": 115140,
+          "sha256": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda"
+        }
+      },
+      "retirement_file": null
+    }
+  },
+  "host_integrity_and_foreign_keys": "passed after all 36 stages",
+  "canonical_sha256": "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+  "inputs_sha256": {
+    "legacy.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+    "existing.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+    "schema.json": "680f815cfa16ddf54c32ef442ef1a8f1696217022fd48e52dbec40c7cc07f6a8",
+    "resource-a.bin": "72621c7df3457d99906142885469b197aca139696dee6bc7758009b5ff660cda",
+    "resource-b.bin": "ee8b32dd4b3dc7d3f419d954ce52cff3103d5cf5965f463b3d53ed2bdd236079"
+  },
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "aars_sha256": {
+    "canvas-core-android-0.0.0-c1.aar": "4d80b415f483fdd707bc37248abd0cf93b39905d3e5167bb2452a1bfe567a2d4",
+    "shared-core-android-0.0.0-c1.aar": "55bc9a3d861f7df1ef5bcc6967bbbbd26238c66dfd5ef583c77a98d8f332b112"
+  },
+  "apk_sha256": "749d3ed4f71b891b0cd3c5ca1e76a49af48d18578faacad8846ce53acaede408",
+  "atomic_apk_sha256": "6c214d2de85b5dee2c4c7263fc7abb5ec994c8d459345ab5b29c45f742e675c0",
+  "jni_sha256": "539834aaa8b90f15ba5872f72e24422f431b9c331681e4c8e5ba0e0857f7bfa1",
+  "source_sha256": {
+    "tools/verify_android_sqlite_joint_checkpoint.py": "a0be8cdadd9135dc92b8b0583a4cd5921862965b288dcc5f8af7e74c83f457da",
+    "tools/probes/AtomicPromoteProbe.java": "d362b84363f1b040e3e683f611006d2ce3f9fc977c78294ee19e35304574ced3",
+    "tools/probes/SqliteJointCheckpointAndroid.java": "a12ebb95be8aad6175dcedb5a00f3a9782d77bd82ebfd21c2cb3dcdf0bd16179",
+    "tools/probes/atomic-promote-AndroidManifest.xml": "d4bb3980917d8c225d4084e3c8bd3a231fe0f7082c226d66db5ac05c35896385",
+    "tools/probes/SqliteLegacyFixture.java": "356baa2167a07ae2100ed4e8035109744ef0f2bbd8b7f421e13738376264d8a0",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/android-atomic-promote-api26.json": "af627daf02026b1893734e7423ebb414f63068aaf320953af442398f7cd2a667"
+  }
+}

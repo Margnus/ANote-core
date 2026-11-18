@@ -6,10 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Process;
+import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import dev.notecore.document.PagedPreviewCodec;
+import java.io.FileDescriptor;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +32,7 @@ import org.json.JSONObject;
 public final class SqliteJointCheckpointAndroid extends Instrumentation {
     private static final String OP = "attach-legacy";
     private String stage, scope;
+    private Integer directorySyncErrno;
 
     private static final class Refused extends Exception {
         final String status;
@@ -252,6 +255,9 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
         AtomicPromoteProbe port = new AtomicPromoteProbe();
         for (Resource resource : resources) {
             resource.publish(folder, port);
+            // Retry also synchronizes directories for a file published by a prior attempt.
+            syncDirectory(resource.target.getParent());
+            syncDirectory(folder);
             if (stage.equals("resource-published")) cut(folder, stage);
             if (stage.equals("cancel-live")) {
                 // This second pool may request cancellation but the producer still owns the task.
@@ -293,6 +299,23 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
         } finally { db.endTransaction(); }
         if (stage.equals("after-commit")) cut(folder, stage);
         return "COMMITTED";
+    }
+
+    private void syncDirectory(Path directory) throws Refused {
+        try {
+            FileDescriptor fd = Os.open(directory.toString(),
+                    OsConstants.O_RDONLY | OsConstants.O_CLOEXEC, 0);
+            try {
+                if (!OsConstants.S_ISDIR(Os.fstat(fd).st_mode))
+                    throw new ErrnoException("directory type check", OsConstants.ENOTDIR);
+                Os.fsync(fd);
+            } finally {
+                Os.close(fd);
+            }
+        } catch (ErrnoException failure) {
+            directorySyncErrno = failure.errno;
+            throw new Refused("DIRECTORY_SYNC_FAILED");
+        }
     }
 
     private static String attachmentIdentity(Path file, Resource resource) throws Exception {
@@ -340,6 +363,8 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
                     moved = attachmentIdentity(tombstone, resource);
                 }
                 if (original != null || !expected.equals(moved)) throw new Refused("REPAIR_REQUIRED");
+                syncDirectory(source.getParent());
+                syncDirectory(stage.equals("retire-move-sync-failure") ? tombstone.resolve("sync-control") : folder);
                 db.execSQL("UPDATE retirement SET state='delete-pending' WHERE sha256=?", new Object[]{resource.sha});
             }
             db.setTransactionSuccessful();
@@ -363,6 +388,8 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
                 Files.delete(tombstone);
                 if (stage.equals("retire-unlinked")) cut(folder, stage);
             }
+            // Even if the tombstone is already absent, sync the directory before acknowledging removal.
+            syncDirectory(stage.equals("retire-unlink-sync-failure") ? folder.resolve("legacy.ncp").resolve("sync-control") : folder);
             db.execSQL("UPDATE retirement SET state='retired' WHERE sha256=?", new Object[]{resource.sha});
             db.setTransactionSuccessful();
             return "RETIRED";
@@ -418,7 +445,7 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
             Path folder = getTargetContext().getCacheDir().toPath().resolve(scope);
             require(scope.matches("dev041-joint-[0-9a-f-]{36}") && Files.isDirectory(folder), "isolated fixture");
             require(stage.matches("init|resource-published|before-commit|after-commit|replay|conflict|cancel-request|cancel-stale|cancel-live"
-                    + "|retire|retire-(pin|release|stale-release|reserved|moved|delete-pending|unlinked)"), "stage");
+                    + "|retire|retire-(pin|release|stale-release|reserved|moved|delete-pending|unlinked|move-sync-failure|unlink-sync-failure)"), "stage");
             Path path = folder.resolve("checkpoint.sqlite");
             boolean initial = stage.equals("init");
             require(Files.exists(path) != initial, "fixture database lifecycle");
@@ -463,7 +490,8 @@ public final class SqliteJointCheckpointAndroid extends Instrumentation {
                 sqlite = text(db, "SELECT sqlite_version()");
             }
             output.putString("joint", new JSONObject().put("status", status).put("stage", stage)
-                    .put("pid", Process.myPid()).put("sqlite", sqlite).put("domain", domain()).toString());
+                    .put("pid", Process.myPid()).put("sqlite", sqlite).put("domain", domain())
+                    .put("directory_sync_errno", directorySyncErrno).toString());
             finish(Activity.RESULT_OK, output);
         } catch (Exception | AssertionError failure) {
             output.putString("failure", android.util.Log.getStackTraceString(failure));

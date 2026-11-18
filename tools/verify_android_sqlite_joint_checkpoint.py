@@ -1,6 +1,7 @@
 """Build and run the isolated DEV-041 probe on a disposable API 26 ARM64 AVD."""
 import argparse
 from contextlib import closing
+import errno
 import hashlib
 import json
 import os
@@ -343,10 +344,16 @@ def verify(args, work):
             tomb = {'identity': retained_identity, 'sha256': first_resource}
             step('retirement_moved', 'retire-moved')
             check_retirement('retirement_moved', 'retiring', {}, tomb)
+            step('move_directory_sync_failure', 'retire-move-sync-failure', expected='DIRECTORY_SYNC_FAILED')
+            check_retirement('move_directory_sync_failure', 'retiring', {}, tomb)
+            assert observations['move_directory_sync_failure']['directory_sync_errno'] == errno.ENOTDIR
             step('retirement_delete_pending', 'retire-delete-pending')
             check_retirement('retirement_delete_pending', 'delete-pending', {}, tomb)
             step('retirement_unlinked', 'retire-unlinked')
             check_retirement('retirement_unlinked', 'delete-pending', {})
+            step('unlink_directory_sync_failure', 'retire-unlink-sync-failure', expected='DIRECTORY_SYNC_FAILED')
+            check_retirement('unlink_directory_sync_failure', 'delete-pending', {})
+            assert observations['unlink_directory_sync_failure']['directory_sync_errno'] == errno.ENOTDIR
             step('retirement_recovered', 'retire', expected='RETIRED')
             check_retirement('retirement_recovered', 'retired', {})
             step('retirement_replayed', 'retire', expected='RETIRED')
