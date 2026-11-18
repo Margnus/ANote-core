@@ -26,12 +26,16 @@ func previewFailureMessage(_ failure: PreviewSessionFailure?) -> String {
     }
 }
 
+/** Preview tool routing: pen strokes, whole-stroke eraser gestures, or lasso selection. */
+enum InkTool { case pen, eraser, lasso }
+
 struct NativeInkCanvas: UIViewRepresentable {
     let note: PagedPreviewNotebook
     let renderModel: PreviewModel
     let color: Int32
     let width: Double
     let kind: BrushKind
+    let tool: InkTool
     let finger: Bool
     let revision: Int64
     let viewportRequest: Int
@@ -48,9 +52,9 @@ struct NativeInkCanvas: UIViewRepresentable {
     func updateUIView(_ view: InkUIView, context: Context) {
         view.inputWindow = inputOwner
         inputOwner?.bindInput(view)
-        if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width || view.penKind != kind { view.cancelInk() }
+        if (!note.hasActiveStroke && view.hasInk) || view.fingerDrawing != finger || view.penColor != color || view.penWidth != width || view.penKind != kind || view.tool != tool { view.cancelInk() }
         view.refreshPage()
-        view.penColor = color; view.penWidth = width; view.penKind = kind; view.fingerDrawing = finger
+        view.penColor = color; view.penWidth = width; view.penKind = kind; view.fingerDrawing = finger; view.tool = tool
         if view.lastViewportRequest != viewportRequest {
             view.cancelInk(); view.lastViewportRequest = viewportRequest
             if viewportRatio == 0 { view.viewport.reset() }
@@ -106,6 +110,15 @@ final class InkUIView: UIView {
     var penColor: Int32 = Int32(bitPattern: 0xff253247)
     var penWidth: Double = 2.5
     var penKind: BrushKind = .monoline
+    var tool: InkTool = .pen
+    var eraserRadius: Double = 8.0
+    private var toolTouch: UITouch?
+    private var eraserPoints: [CGPoint] = []
+    private var eraserPath: UIBezierPath?
+    private var lassoPolygon: [CGPoint] = []
+    private var lassoPath: UIBezierPath?
+    private var lassoDragStart: CGPoint?
+    private var lassoDragCurrent: CGPoint?
     var fingerDrawing = true
     private var active: UITouch?
     private var inputOperation: String?
@@ -228,6 +241,22 @@ final class InkUIView: UIView {
             }
         }
         if ownsInput, let path = path { inkColor(BrushDisplayRules.shared.displayArgb(brush: BrushSpec(kind: penKind, algorithmVersion: 1, width: penWidth, argb: penColor))).setStroke(); path.lineWidth = penWidth; path.stroke() }
+        if let eraserPath = eraserPath {
+            UIColor(white: 0.53, alpha: 0.4).setStroke()
+            eraserPath.lineWidth = eraserRadius * 2; eraserPath.lineCapStyle = .round; eraserPath.lineJoinStyle = .round
+            eraserPath.stroke()
+        }
+        if let lassoPath = lassoPath {
+            UIColor(red: 0.21, green: 0.41, blue: 0.75, alpha: 1).setStroke()
+            lassoPath.lineWidth = 1.5 / scale; lassoPath.setLineDash([6, 6], count: 2, phase: 0); lassoPath.stroke()
+        }
+        if let b = selectionBounds() {
+            let dx = (lassoDragCurrent?.x ?? 0) - (lassoDragStart?.x ?? 0)
+            let dy = (lassoDragCurrent?.y ?? 0) - (lassoDragStart?.y ?? 0)
+            let border = UIBezierPath(rect: CGRect(x: b.minX + dx, y: b.minY + dy, width: b.width, height: b.height))
+            UIColor(red: 0.21, green: 0.41, blue: 0.75, alpha: 1).setStroke()
+            border.lineWidth = 1.5 / scale; border.setLineDash([8, 6], count: 2, phase: 0); border.stroke()
+        }
         c.restoreGState()
     }
     private struct RealSample { let point: CGPoint; let pressure: Float; let time: Int64 }
@@ -296,9 +325,28 @@ final class InkUIView: UIView {
         if active != nil && !ownsInput { cancelInk() }
         if active?.type == .pencil { return }
         let direct = fingers(event)
-        if navigating || direct.count >= 2 || (!fingerDrawing && !direct.isEmpty) {
+        if navigating || direct.count >= 2 || (tool == .pen && !fingerDrawing && !direct.isEmpty) {
             if !navigating { cancelInk(); navigating = true }
             navigate(direct, moving: false); return
+        }
+        if tool != .pen {
+            guard !note.hasActiveStroke else { failed("其他画布正在输入，请完成后重试"); return }
+            guard let touch = touches.first(where: { $0.type == .pencil || $0.type == .direct }) else { return }
+            let points = pagePoints(touch, event: event)
+            guard let p = points.first else { return }
+            toolTouch = touch
+            if tool == .eraser {
+                eraserPoints = points
+                eraserPath = UIBezierPath(); eraserPath?.move(to: p)
+                for q in points.dropFirst() { eraserPath?.addLine(to: q) }
+            } else if let b = selectionBounds(), p.x >= b.minX, p.x <= b.maxX, p.y >= b.minY, p.y <= b.maxY {
+                lassoDragStart = p; lassoDragCurrent = p
+            } else {
+                lassoPolygon = points
+                lassoPath = UIBezierPath(); lassoPath?.move(to: p)
+                for q in points.dropFirst() { lassoPath?.addLine(to: q) }
+            }
+            setNeedsDisplay(); return
         }
         guard active == nil, let touch = touches.first(where: { $0.type == .pencil || ($0.type == .direct && fingerDrawing) }) else { return }
         guard !note.hasActiveStroke else { failed("其他画布正在输入，请完成后重试"); return }
@@ -319,6 +367,19 @@ final class InkUIView: UIView {
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if navigating { navigate(fingers(event), moving: true); return }
+        if tool != .pen {
+            guard !suppressSequence, let touch = toolTouch, touches.contains(touch) else { return }
+            for p in pagePoints(touch, event: event) {
+                if tool == .eraser {
+                    eraserPoints.append(p); eraserPath?.addLine(to: p)
+                } else if lassoDragStart != nil {
+                    lassoDragCurrent = p
+                } else if let last = lassoPolygon.last, abs(p.x - last.x) + abs(p.y - last.y) > 1.0 {
+                    lassoPolygon.append(p); lassoPath?.addLine(to: p)
+                }
+            }
+            setNeedsDisplay(); return
+        }
         guard !suppressSequence, let active = active, touches.contains(active), ownsInput else { return }
         guard let samples = preparedSamples(active, event: event, phase: .move) else { return }
         let result = offerReal(samples, phase: .move)
@@ -334,6 +395,28 @@ final class InkUIView: UIView {
             if remaining.isEmpty { navigating = false; navTouches = [] } else { navigate(remaining, moving: false) }
             return
         }
+        if tool != .pen {
+            guard let touch = toolTouch, touches.contains(touch) else { return }
+            toolTouch = nil
+            if tool == .eraser, !eraserPoints.isEmpty {
+                let before = note.changeVersion
+                let path = eraserPoints.map { PointD(x: $0.x, y: $0.y) }
+                let result = note.edit(request: PreviewEditEraseStrokes(path: path, radius: eraserRadius))
+                if !result.accepted { failed(previewFailureMessage(result.failure)) }
+                else if result.rootRevision != before { changed() }
+            } else if let start = lassoDragStart, let current = lassoDragCurrent {
+                let dx = current.x - start.x, dy = current.y - start.y
+                if dx != 0 || dy != 0 {
+                    let result = note.edit(request: PreviewEditTransformSelection(dx: dx, dy: dy, scaleFactor: 1.0, anchor: PointD(x: 0.0, y: 0.0)))
+                    if !result.accepted { failed(previewFailureMessage(result.failure)) } else { changed() }
+                }
+            } else if lassoPolygon.count >= 3 {
+                let polygon = lassoPolygon.map { PointD(x: $0.x, y: $0.y) }
+                let result = note.edit(request: PreviewEditLassoSelect(polygon: polygon))
+                if !result.accepted { failed(previewFailureMessage(result.failure)) }
+            }
+            clearToolGesture(); setNeedsDisplay(); return
+        }
         if suppressSequence { if remaining.isEmpty { suppressSequence = false }; return }
         guard let active = active, touches.contains(active), ownsInput else { return }
         guard let samples = preparedSamples(active, event: event, phase: .up) else { return }
@@ -348,8 +431,41 @@ final class InkUIView: UIView {
         setNeedsDisplay()
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelInk() }
+    /** Page coordinates through the same viewport inverse as ink input, coalesced for density. */
+    private func pagePoints(_ touch: UITouch, event: UIEvent?) -> [CGPoint] {
+        guard scale > 0 else { return [] }
+        let auxiliary = event?.coalescedTouches(for: touch)
+        let touches = auxiliary?.isEmpty == false ? auxiliary! : [touch]
+        var points: [CGPoint] = []
+        for item in touches {
+            let raw = item.location(in: self)
+            let x = (raw.x - offsetX) / scale, y = (raw.y - offsetY) / scale
+            if x.isFinite, y.isFinite, abs(x) <= 1e9, abs(y) <= 1e9 { points.append(CGPoint(x: x, y: y)) }
+        }
+        return points
+    }
+    private func clearToolGesture() {
+        toolTouch = nil; eraserPoints = []; eraserPath = nil
+        lassoPolygon = []; lassoPath = nil; lassoDragStart = nil; lassoDragCurrent = nil
+    }
+    /// Page-space union bounds of the current lasso selection; nil when nothing is selected.
+    private func selectionBounds() -> CGRect? {
+        let ids = Set(note.selectedStrokeIds.map { $0.value })
+        if ids.isEmpty { return nil }
+        var result: CGRect? = nil
+        for i in 0..<note.strokeCount {
+            let stroke = note.stroke(index: i)
+            if ids.contains(stroke.id.value) {
+                let b = stroke.bounds()
+                let rect = CGRect(x: b.left, y: b.top, width: b.right - b.left, height: b.bottom - b.top)
+                result = result == nil ? rect : result!.union(rect)
+            }
+        }
+        return result
+    }
     func cancelInk() {
         if ownsInput { note.cancelStroke() }
+        clearToolGesture()
         active = nil; inputOperation = nil; path = nil; navigating = false; navTouches = []; suppressSequence = false; setNeedsDisplay()
     }
 }

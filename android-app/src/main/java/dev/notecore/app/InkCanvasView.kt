@@ -11,6 +11,9 @@ import kotlin.math.hypot
 
 /** Thin native input/render adapter. Paths are cached per committed revision, not rebuilt per MOVE. */
 @android.annotation.SuppressLint("ViewConstructor") // deliberately programmatic: a canonical notebook is mandatory
+/** Preview tool routing: pen strokes, whole-stroke eraser gestures, or lasso selection. */
+enum class InkTool { PEN, ERASER, LASSO }
+
 class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, private val changed: () -> Unit, private val error: (String) -> Unit) : View(context) {
     internal var renderStore: NoteStore? = null
     internal var surfaceHost: InkSurfaceHost? = null
@@ -18,6 +21,25 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     var penColor = 0xff253247.toInt()
     var penWidth = 2.5
     var penKind = BrushKind.MONOLINE
+    var tool = InkTool.PEN
+    var eraserRadius = 8.0
+    private val eraserPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; color = 0x66888888.toInt()
+    }
+    private val lassoPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; color = 0xff3568be.toInt(); strokeWidth = 1.5f
+        pathEffect = android.graphics.DashPathEffect(floatArrayOf(6f, 6f), 0f)
+    }
+    private val selectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; color = 0xff3568be.toInt(); strokeWidth = 1.5f
+        pathEffect = android.graphics.DashPathEffect(floatArrayOf(8f, 6f), 0f)
+    }
+    private var eraserPoints: MutableList<PointD>? = null
+    private var eraserPath: Path? = null
+    private var lassoPolygon: MutableList<PointD>? = null
+    private var lassoPath: Path? = null
+    private var lassoDragStart: PointD? = null
+    private var lassoDragCurrent: PointD? = null
     private val ink = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
     private val paper = Paint().apply { color = Color.WHITE }
     private val guide = Paint().apply { color = 0xffeaf0f5.toInt(); strokeWidth = 1f }
@@ -125,6 +147,13 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             ink.style = Paint.Style.STROKE; ink.color = BrushDisplayRules.displayArgb(BrushSpec(penKind, 1, penWidth, penColor)); ink.strokeWidth = penWidth.toFloat()
             if (moved) canvas.drawPath(it, ink) else { ink.style = Paint.Style.FILL; canvas.drawCircle(startX, startY, penWidth.toFloat() / 2, ink) }
         }
+        eraserPath?.let { eraserPaint.strokeWidth = (eraserRadius * 2).toFloat(); canvas.drawPath(it, eraserPaint) }
+        lassoPath?.let { canvas.drawPath(it, lassoPaint) }
+        selectionBounds()?.let { b ->
+            val dx = (lassoDragCurrent?.x ?: 0.0) - (lassoDragStart?.x ?: 0.0)
+            val dy = (lassoDragCurrent?.y ?: 0.0) - (lassoDragStart?.y ?: 0.0)
+            canvas.drawRect((b.left + dx).toFloat(), (b.top + dy).toFloat(), (b.right + dx).toFloat(), (b.bottom + dy).toFloat(), selectionPaint)
+        }
         canvas.restore()
     }
     internal fun paintStaticPaper(canvas: Canvas) {
@@ -212,6 +241,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             } else navigate(event, if (action == MotionEvent.ACTION_POINTER_UP) event.actionIndex else -1)
             invalidate(); return true
         }
+        if (tool != InkTool.PEN) { handleToolGesture(event, action, input); invalidate(); return true }
         when (action) {
             MotionEvent.ACTION_DOWN -> {
                 if (notebook.hasActiveStroke) { error("其他画布正在输入，请完成后重试"); return true }
@@ -258,8 +288,91 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         invalidate(); return true
     }
     override fun performClick(): Boolean { super.performClick(); return true }
+    /** Eraser and lasso gestures stay in page coordinates through the same input transform as ink. */
+    private fun handleToolGesture(event: MotionEvent, action: Int, input: InputTransform) {
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                if (notebook.hasActiveStroke) { error("其他画布正在输入，请完成后重试"); return }
+                val x = input.x(event.getX(0)); val y = input.y(event.getY(0))
+                if (!x.isFinite() || !y.isFinite()) return
+                if (tool == InkTool.ERASER) {
+                    eraserPoints = mutableListOf(PointD(x, y))
+                    eraserPath = Path().apply { moveTo(x.toFloat(), y.toFloat()) }
+                } else {
+                    val selection = selectionBounds()
+                    if (selection != null && x >= selection.left && x <= selection.right && y >= selection.top && y <= selection.bottom) {
+                        lassoDragStart = PointD(x, y); lassoDragCurrent = lassoDragStart
+                    } else {
+                        lassoPolygon = mutableListOf(PointD(x, y))
+                        lassoPath = Path().apply { moveTo(x.toFloat(), y.toFloat()) }
+                    }
+                }
+                parent.requestDisallowInterceptTouchEvent(true)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val history = event.historySize
+                for (i in 0..history) {
+                    val current = i == history
+                    val x = input.x(if (current) event.getX(0) else event.getHistoricalX(0, i))
+                    val y = input.y(if (current) event.getY(0) else event.getHistoricalY(0, i))
+                    if (!x.isFinite() || !y.isFinite()) continue
+                    if (tool == InkTool.ERASER) {
+                        eraserPoints?.add(PointD(x, y)); eraserPath?.lineTo(x.toFloat(), y.toFloat())
+                    } else if (lassoDragStart != null) {
+                        lassoDragCurrent = PointD(x, y)
+                    } else if (lassoPolygon != null) {
+                        val last = lassoPolygon!!.last()
+                        if (kotlin.math.abs(x - last.x) + kotlin.math.abs(y - last.y) > 1.0) {
+                            lassoPolygon!!.add(PointD(x, y)); lassoPath?.lineTo(x.toFloat(), y.toFloat())
+                        }
+                    }
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
+                if (action == MotionEvent.ACTION_CANCEL) { clearToolGesture(); parent.requestDisallowInterceptTouchEvent(false); return }
+                if (action == MotionEvent.ACTION_POINTER_UP && event.getPointerId(event.actionIndex) != 0) return
+                if (tool == InkTool.ERASER) {
+                    val points = eraserPoints
+                    if (points != null) {
+                        val before = notebook.changeVersion
+                        val result = notebook.edit(PreviewEdit.EraseStrokes(points.toList(), eraserRadius))
+                        if (!result.accepted) error(result.failure?.previewMessage() ?: "操作未完成，请重试")
+                        else if (result.rootRevision != before) changed()
+                    }
+                } else if (lassoDragStart != null && lassoDragCurrent != null) {
+                    val dx = lassoDragCurrent!!.x - lassoDragStart!!.x
+                    val dy = lassoDragCurrent!!.y - lassoDragStart!!.y
+                    if (dx != 0.0 || dy != 0.0) {
+                        val result = notebook.edit(PreviewEdit.TransformSelection(dx, dy))
+                        if (!result.accepted) error(result.failure?.previewMessage() ?: "操作未完成，请重试") else changed()
+                    }
+                } else if (lassoPolygon != null && lassoPolygon!!.size >= 3) {
+                    val result = notebook.edit(PreviewEdit.LassoSelect(lassoPolygon!!.toList()))
+                    if (!result.accepted) error(result.failure?.previewMessage() ?: "操作未完成，请重试")
+                }
+                clearToolGesture()
+                parent.requestDisallowInterceptTouchEvent(false); performClick()
+            }
+        }
+    }
+    private fun clearToolGesture() {
+        eraserPoints = null; eraserPath = null; lassoPolygon = null; lassoPath = null
+        lassoDragStart = null; lassoDragCurrent = null
+    }
+    /** Page-space union bounds of the current lasso selection; null when nothing is selected. */
+    private fun selectionBounds(): BoundsD? {
+        val ids = notebook.selectedStrokeIds.toSet()
+        if (ids.isEmpty()) return null
+        var bounds: BoundsD? = null
+        for (i in 0 until notebook.strokeCount) {
+            val stroke = notebook.stroke(i)
+            if (stroke.id in ids) bounds = bounds?.union(stroke.bounds()) ?: stroke.bounds()
+        }
+        return bounds
+    }
     fun cancelInk() {
         if (ownsInput) notebook.cancelStroke()
+        clearToolGesture()
         active = null; inputOperation = null; activePointer = -1; activeStylus = false; navigating = false; navIds = emptyList()
         parent?.requestDisallowInterceptTouchEvent(false); invalidate()
     }

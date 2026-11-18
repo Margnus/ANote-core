@@ -146,6 +146,22 @@ class MainActivity : Activity() {
             onEditAccepted(note.edit(PreviewEdit.Redo)) { canvas?.refreshPage(); save(); updateControls() }
         }
         tools.addView(undoButton); tools.addView(redoButton)
+        val toolNames = listOf("钢笔" to InkTool.PEN, "橡皮" to InkTool.ERASER, "套索" to InkTool.LASSO)
+        val toolButtonViews = mutableListOf<Button>()
+        toolNames.forEach { (name, value) ->
+            val b = button(if (value == InkTool.PEN) "$name✓" else name) {}
+            b.setOnClickListener {
+                canvas?.cancelInk()
+                canvas?.tool = value
+                toolButtonViews.forEachIndexed { index, view ->
+                    view.text = toolNames[index].first + if (toolNames[index].second == value) "✓" else ""
+                }
+            }
+            toolButtonViews.add(b); tools.addView(b)
+        }
+        tools.addView(button("删除选区") {
+            onEditAccepted(note.edit(PreviewEdit.DeleteSelection)) { canvas?.refreshPage(); save(); updateControls() }
+        })
         tools.addView(Switch(this).apply { text = "手指书写"; isChecked = true; setOnCheckedChangeListener { _, enabled -> canvas?.cancelInk(); canvas?.fingerDrawing = enabled } })
         root.addView(tools)
         val palette = row()

@@ -833,6 +833,7 @@ struct PreviewRoot: View {
     @State private var color: Int32 = Int32(bitPattern: 0xff253247)
     @State private var width: Double = 2.5
     @State private var kind: BrushKind = .monoline
+    @State private var tool: InkTool = .pen
     @State private var finger = true
     @State private var renaming = false
     @State private var title = ""
@@ -874,6 +875,10 @@ struct PreviewRoot: View {
                                 window.cancelInput()
                                 kind = kind == .highlighter ? .monoline : .highlighter
                             }.accessibilityLabel("荧光笔")
+                            Button(tool == .pen ? "钢笔✓" : "钢笔") { window.cancelInput(); tool = .pen }.accessibilityLabel("钢笔工具")
+                            Button(tool == .eraser ? "橡皮✓" : "橡皮") { window.cancelInput(); tool = .eraser }.accessibilityLabel("橡皮工具")
+                            Button(tool == .lasso ? "套索✓" : "套索") { window.cancelInput(); tool = .lasso }.accessibilityLabel("套索工具")
+                            Button("删选") { model.applyEdit(PreviewEditDeleteSelection.shared) }.accessibilityLabel("删除选区")
                         }.padding(.horizontal)
                     }.frame(height: 36)
                     HStack(spacing: 20) {
@@ -926,7 +931,7 @@ struct PreviewRoot: View {
                         }
                     }.padding(.horizontal).frame(minHeight: 44)
                     Text(model.status).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("note-status")
-                    NativeInkCanvas(note: note, renderModel: model, color: color, width: width, kind: kind, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
+                    NativeInkCanvas(note: note, renderModel: model, color: color, width: width, kind: kind, tool: tool, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
                         changed: { model.changed() }, failed: { model.status = $0 }, inputOwner: window)
                         .id(note.documentId)
                         .padding(.horizontal, 12).padding(.bottom, 8)
