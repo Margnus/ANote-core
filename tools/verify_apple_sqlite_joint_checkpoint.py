@@ -1,6 +1,7 @@
 """Verify DEV-041 on a disposable iOS simulator with the pinned Core framework."""
 import argparse
 from contextlib import closing
+import errno
 import hashlib
 import json
 import os
@@ -365,10 +366,16 @@ def verify(framework, runtime, device_type, output, *, fixed_stdlib=None, app_sa
                 tomb = {'identity': reserved_identity, 'sha256': first}
                 step('retirement_moved', 'retire-moved', cut=True)
                 check_retirement('retirement_moved', 'retiring', {}, tomb)
+                step('move_directory_sync_failure', 'retire-move-sync-failure', expected='DIRECTORY_SYNC_FAILED')
+                check_retirement('move_directory_sync_failure', 'retiring', {}, tomb)
+                assert observations['move_directory_sync_failure']['directory_sync_errno'] == errno.ENOTDIR
                 step('retirement_delete_pending', 'retire-delete-pending', cut=True)
                 check_retirement('retirement_delete_pending', 'delete-pending', {}, tomb)
                 step('retirement_unlinked', 'retire-unlinked', cut=True)
                 check_retirement('retirement_unlinked', 'delete-pending', {})
+                step('unlink_directory_sync_failure', 'retire-unlink-sync-failure', expected='DIRECTORY_SYNC_FAILED')
+                check_retirement('unlink_directory_sync_failure', 'delete-pending', {})
+                assert observations['unlink_directory_sync_failure']['directory_sync_errno'] == errno.ENOTDIR
                 step('retirement_recovered', 'retire', expected='RETIRED')
                 check_retirement('retirement_recovered', 'retired', {})
                 step('retirement_replayed', 'retire', expected='RETIRED')

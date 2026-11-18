@@ -1,0 +1,783 @@
+{
+  "status": "passed",
+  "milestone": "DEV-041",
+  "scope": "iOS simulator UIKit App sandbox with system SQLite and fixed Kotlin/Native codec",
+  "runtime": {
+    "identifier": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+    "version": "27.0",
+    "build": "24A434",
+    "device_type": "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+    "sqlite": "3.54.0"
+  },
+  "simulator_link_floor": "17.0",
+  "observations": {
+    "initial_document": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 9972,
+      "sqlite": "3.54.0",
+      "stage": "init",
+      "status": "SEEDED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 9972,
+      "terminated": true
+    },
+    "first_resource_published": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "resource-published",
+      "pid": 10000,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10000,
+      "terminated": true
+    },
+    "pending_manifest_conflict": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10012,
+      "sqlite": "3.54.0",
+      "stage": "conflict",
+      "status": "OPERATION_CONFLICT",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10012,
+      "terminated": true
+    },
+    "occupied_target_refuses_overwrite": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10033,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "REPAIR_REQUIRED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10033,
+      "terminated": true
+    },
+    "joint_sql_transaction_uncommitted": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "before-commit",
+      "pid": 10053,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10053,
+      "terminated": true
+    },
+    "committed_before_receipt": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "after-commit",
+      "pid": 10063,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10063,
+      "terminated": true
+    },
+    "retire_committed_resource": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10074,
+      "sqlite": "3.54.0",
+      "stage": "retire",
+      "status": "PROTECTED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10074,
+      "terminated": true,
+      "retirement": [],
+      "retirement_readers": []
+    },
+    "late_cancel_after_commit": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10093,
+      "sqlite": "3.54.0",
+      "stage": "cancel-request",
+      "status": "ALREADY_COMMITTED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10093,
+      "terminated": true
+    },
+    "exact_replay": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10112,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "REPLAYED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10112,
+      "terminated": true
+    },
+    "committed_manifest_conflict": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10132,
+      "sqlite": "3.54.0",
+      "stage": "conflict",
+      "status": "OPERATION_CONFLICT",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10132,
+      "terminated": true
+    },
+    "same_size_corruption_refuses_receipt": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10155,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "REPAIR_REQUIRED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10155,
+      "terminated": true
+    },
+    "seed_cancel_after_stop": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10176,
+      "sqlite": "3.54.0",
+      "stage": "init",
+      "status": "SEEDED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10176,
+      "terminated": true
+    },
+    "cancel_after_stop_publish": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "resource-published",
+      "pid": 10195,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10195,
+      "terminated": true
+    },
+    "retire_active_task": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10205,
+      "sqlite": "3.54.0",
+      "stage": "retire",
+      "status": "PROTECTED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10205,
+      "terminated": true,
+      "retirement": [],
+      "retirement_readers": []
+    },
+    "reader_pin_before_cancel": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10224,
+      "sqlite": "3.54.0",
+      "stage": "retire-pin",
+      "status": "PINNED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10224,
+      "terminated": true,
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "reader-new"
+        ]
+      ]
+    },
+    "stale_cancel_after_stop": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10261,
+      "sqlite": "3.54.0",
+      "stage": "cancel-stale",
+      "status": "STALE_ATTEMPT",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10261,
+      "terminated": true
+    },
+    "request_cancel_after_stop": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10285,
+      "sqlite": "3.54.0",
+      "stage": "cancel-request",
+      "status": "CANCEL_REQUESTED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10285,
+      "terminated": true
+    },
+    "ack_cancel_after_stop": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10311,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "CANCELLED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10311,
+      "terminated": true
+    },
+    "retry_cancelled_after_stop": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10334,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "CANCELLED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10334,
+      "terminated": true
+    },
+    "late_reader_release": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10356,
+      "sqlite": "3.54.0",
+      "stage": "retire-stale-release",
+      "status": "STALE_READER",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10356,
+      "terminated": true,
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "reader-new"
+        ]
+      ]
+    },
+    "retire_reader_protected": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10382,
+      "sqlite": "3.54.0",
+      "stage": "retire",
+      "status": "PROTECTED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10382,
+      "terminated": true,
+      "retirement": [],
+      "retirement_readers": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "reader-new"
+        ]
+      ]
+    },
+    "release_reader": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10405,
+      "sqlite": "3.54.0",
+      "stage": "retire-release",
+      "status": "RELEASED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10405,
+      "terminated": true,
+      "retirement": [],
+      "retirement_readers": []
+    },
+    "retirement_reserved": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "retire-reserved",
+      "pid": 10427,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10427,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retiring",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": null
+    },
+    "retiring_refuses_new_pin": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10440,
+      "sqlite": "3.54.0",
+      "stage": "retire-pin",
+      "status": "RESOURCE_NOT_AVAILABLE",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10440,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retiring",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": null
+    },
+    "same_bytes_different_inode": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10462,
+      "sqlite": "3.54.0",
+      "stage": "retire",
+      "status": "REPAIR_REQUIRED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10462,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retiring",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": {
+        "identity": "16777230:25790669",
+        "sha256": "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3"
+      }
+    },
+    "retirement_moved": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "retire-moved",
+      "pid": 10485,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10485,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retiring",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": {
+        "identity": "16777230:25788072",
+        "sha256": "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3"
+      }
+    },
+    "move_directory_sync_failure": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "directory_sync_errno": 20,
+      "pid": 10496,
+      "sqlite": "3.54.0",
+      "stage": "retire-move-sync-failure",
+      "status": "DIRECTORY_SYNC_FAILED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10496,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retiring",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": {
+        "identity": "16777230:25788072",
+        "sha256": "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3"
+      }
+    },
+    "retirement_delete_pending": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "retire-delete-pending",
+      "pid": 10518,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10518,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "delete-pending",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": {
+        "identity": "16777230:25788072",
+        "sha256": "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3"
+      }
+    },
+    "retirement_unlinked": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "cut": "retire-unlinked",
+      "pid": 10535,
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10535,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "delete-pending",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": null
+    },
+    "unlink_directory_sync_failure": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "directory_sync_errno": 20,
+      "pid": 10545,
+      "sqlite": "3.54.0",
+      "stage": "retire-unlink-sync-failure",
+      "status": "DIRECTORY_SYNC_FAILED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10545,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "delete-pending",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": null
+    },
+    "retirement_recovered": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10564,
+      "sqlite": "3.54.0",
+      "stage": "retire",
+      "status": "RETIRED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10564,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retired",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": null
+    },
+    "retirement_replayed": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10590,
+      "sqlite": "3.54.0",
+      "stage": "retire",
+      "status": "RETIRED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10590,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retired",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": null
+    },
+    "retired_refuses_new_pin": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10613,
+      "sqlite": "3.54.0",
+      "stage": "retire-pin",
+      "status": "RESOURCE_NOT_AVAILABLE",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10613,
+      "terminated": true,
+      "retirement": [
+        [
+          "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+          "retired",
+          "16777230:25788072"
+        ]
+      ],
+      "retirement_readers": [],
+      "retirement_file": null
+    },
+    "seed_live_cancel": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10633,
+      "sqlite": "3.54.0",
+      "stage": "init",
+      "status": "SEEDED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10633,
+      "terminated": true
+    },
+    "request_while_producer_live": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10653,
+      "sqlite": "3.54.0",
+      "stage": "cancel-live",
+      "status": "CANCELLED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10653,
+      "terminated": true
+    },
+    "retry_live_cancelled": {
+      "bundle": "dev.notecore.probes.sqlitejointapple.pdf8bc9e2a3d141f3b380be8b2d3737a5",
+      "pid": 10673,
+      "sqlite": "3.54.0",
+      "stage": "replay",
+      "status": "CANCELLED",
+      "data_container_uuid": "B0CA045A-CEDE-48F9-B118-DFC8D4A04EDE",
+      "simctl_launch_pid": 10673,
+      "terminated": true
+    }
+  },
+  "resource_manifest": [
+    [
+      "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3",
+      4152
+    ],
+    [
+      "ab916f7a748e994a4b04442d062c309cf493efdd3764d6f41a59969def47dc09",
+      4728
+    ]
+  ],
+  "native_checkpoint_matches_jvm_reference": true,
+  "canonical_sha256": "80381cc97e119e4be6ba20315ba818b7b13a0c9d5c78c4f01d796653d4329c5b",
+  "app_sandbox_verified": true,
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "retained_source_bytes_exact": true,
+  "pending_pins_transition_to_committed_references": true,
+  "resource_inode_reused": true,
+  "replayed_resource_inodes": {
+    "1b7001780d0cc8ea85d2c59e49c5a92bfb60549602cf45bffb570b276e1c7ca3": 25782623,
+    "ab916f7a748e994a4b04442d062c309cf493efdd3764d6f41a59969def47dc09": 25783927
+  },
+  "prior_dev038_stages_retested": 20,
+  "existing_simulator_inventory_unchanged": true,
+  "temporary_simulator_deleted": true,
+  "production_connected": false,
+  "physical_verified": false,
+  "power_loss_verified": false,
+  "framework_sha256": "4e213be7fe01123071b8fac323a37a0d79b816349843d6bfc14b342b43bc692e",
+  "probe_sha256": "c188521eb1bacf1b558c128cf4d5521bc75987ae6f11c237c83aa2addc494721",
+  "control_sha256": "8f3ceb841eb6138f8b2c494477190bc6c54b2207bb1210e1961d9761decc8961",
+  "host_jvm_sha256": {
+    "kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+    "canvas-core-android-0.0.0-c1.aar": "4d80b415f483fdd707bc37248abd0cf93b39905d3e5167bb2452a1bfe567a2d4",
+    "shared-core-android-0.0.0-c1.aar": "55bc9a3d861f7df1ef5bcc6967bbbbd26238c66dfd5ef583c77a98d8f332b112"
+  },
+  "source_sha256": {
+    "tools/verify_apple_sqlite_joint_checkpoint.py": "3dfc8a9f55d3260bbc88790ea994ea99f5771baa694946250c6486f9a1ea89eb",
+    "tools/probes/SqliteJointCheckpoint.swift": "ed0a9210fb3e697d84dfa9aaa6f132a9beb6f20f1782ecc8fc17fcd75aa0f35e",
+    "tools/probes/SqliteProbeSupport.swift": "a89000490611b9b4fe56f1038db07904152d9cf332f73db92b147ae943b8d827",
+    "tools/probes/SqliteCrashProbe.swift": "874ff20b74deaa10431f7aa871eef84f46c7eb50e8835c6b973c2ff160ad08a5",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "fixtures/storage/dev041-legacy-v1.ncp": "f4aee724613403f773fe194dd972d3ed03cc25d01642731e023e16acedfa91c9",
+    "fixtures/transfer/android-paged-v2.ncp": "b5df828070ca8fd08e6a0465e80148c65e633a552bb6172189cd06264a2785c3",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "tools/verify_sqlite_capabilities.py": "8e785d6c85d8d5da6e002bc8365d535ee02c52540f8ff0c34572749bbc581c41",
+    "tools/probes/SqliteLegacyFixture.java": "356baa2167a07ae2100ed4e8035109744ef0f2bbd8b7f421e13738376264d8a0",
+    "tools/probes/SqliteJointCheckpointApp.swift": "9a5e49b77c0017ee56e693e98499edb6be6f1419b02393229ae822cfcf0c6d66",
+    "reports/dev041-android-joint-checkpoint-20261117.json": "20e91ae759dc47e0bf6572021a1a527a28aa1c55c5ee328859be4fe307cc0f4b"
+  },
+  "raw_sha256": {
+    "ack_cancel_after_stop-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ack_cancel_after_stop-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ack_cancel_after_stop.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ack_cancel_after_stop.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ack_cancel_after_stop.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ack_cancel_after_stop.stdout.log": "9afef3665a2a19a415cfd82ee1fcbca3a008ed5dde3f3c79dc72abc00b9debc0",
+    "boot.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "boot.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bootstatus.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bootstatus.stdout.log": "5a13bd7afbd116684ecf705d64d8e14497895a6e1b7f039c3a1d9b57ba6631b9",
+    "cancel_after_stop_publish.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cancel_after_stop_publish.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cancel_after_stop_publish.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cancel_after_stop_publish.stdout.log": "64b3053a9f8ec9bc4810c3779800e37689d1fbe453ac74778bc08153a827f014",
+    "committed_before_receipt.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_before_receipt.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_before_receipt.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_before_receipt.stdout.log": "fd3d17b990605882f6b558695bba9ff5df627cddc19d67ad94b4fdc7303bf276",
+    "committed_manifest_conflict-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_manifest_conflict-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_manifest_conflict.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_manifest_conflict.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_manifest_conflict.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_manifest_conflict.stdout.log": "c867eb19f3f8ef56e79ecee77d6c905a6d14d9c711caec3a66b2fc9d421528c8",
+    "compile-control.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-control.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-joint.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-joint.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "create.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "create.stdout.log": "08a6e2821d92b8e133723af23ebb7dad6d03f754934f9b85f034cf9b0c9a6825",
+    "data-container.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data-container.stdout.log": "fed2a51b2343475853e743d288328d0818c29d810e9bc54bbf78c1c83aa74071",
+    "delete.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "delete.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dev038-regression.log": "37462e8cc53920dd962a4c3c079522e0ecc5e4194bb403630df555e19aac3fcb",
+    "devices-after.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "devices-after.stdout.log": "35af3692b30ead83e2ba6333bd738205ab06a059036763e1425f089244002a6a",
+    "devices-before.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "devices-before.stdout.log": "35af3692b30ead83e2ba6333bd738205ab06a059036763e1425f089244002a6a",
+    "exact_replay-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exact_replay-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exact_replay.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exact_replay.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exact_replay.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exact_replay.stdout.log": "432562271a0c54c6e3ff892904220d02aa9a5e699bea465e44ac63a3323db81a",
+    "first_resource_published.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "first_resource_published.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "first_resource_published.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "first_resource_published.stdout.log": "9b765af69933fa3a8e46f6dfbbef63bee7cc37b9cfd128b017124311639b203e",
+    "initial_document-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial_document-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial_document.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial_document.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial_document.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial_document.stdout.log": "2ff9dc793d25ff17c9d7153ed98ff0b92932e0a6750a0beab908724e0625f6e0",
+    "install.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "install.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "installed-app.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "installed-app.stdout.log": "c3914e5270a959edaf921717c9d151d0fbd473dca57da5ca6df3bd4a2caa68e5",
+    "joint_sql_transaction_uncommitted.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "joint_sql_transaction_uncommitted.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "joint_sql_transaction_uncommitted.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "joint_sql_transaction_uncommitted.stdout.log": "efb008efd7abc669b85a3f9585fa8a6c7ed6d0407684fd83e6683c939b022c94",
+    "late_cancel_after_commit-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_cancel_after_commit-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_cancel_after_commit.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_cancel_after_commit.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_cancel_after_commit.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_cancel_after_commit.stdout.log": "b6e0ed28e4ecd0b47219efc7e46f8804ffa24900b935366467970554137b1dfe",
+    "late_reader_release-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_reader_release-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_reader_release.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_reader_release.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_reader_release.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late_reader_release.stdout.log": "8094c21e8c6cea0c66b70947818f0e20a10b21030cf5d18c92b480ea5bfbcf94",
+    "link-platform.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "link-platform.stdout.log": "e7ae0c6656485878c96562e059b1c5d680c320e7ebb65ebb8a198acac686716c",
+    "move_directory_sync_failure-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "move_directory_sync_failure-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "move_directory_sync_failure.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "move_directory_sync_failure.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "move_directory_sync_failure.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "move_directory_sync_failure.stdout.log": "428d64a3ce4c5545c987e417bf2335b9b287e8f10a0a106e85115c1552d35199",
+    "occupied_target_refuses_overwrite-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "occupied_target_refuses_overwrite-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "occupied_target_refuses_overwrite.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "occupied_target_refuses_overwrite.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "occupied_target_refuses_overwrite.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "occupied_target_refuses_overwrite.stdout.log": "1c567dcc691c4ef1e143e1c5e5e1c2e4f8c6caf31341a94140bf6f243858b56c",
+    "pending_manifest_conflict-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pending_manifest_conflict-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pending_manifest_conflict.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pending_manifest_conflict.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pending_manifest_conflict.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pending_manifest_conflict.stdout.log": "4c86cab3c88656527548b237000e18504890394dfa0530d7dcf0474805e322d7",
+    "reader_pin_before_cancel-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reader_pin_before_cancel-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reader_pin_before_cancel.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reader_pin_before_cancel.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reader_pin_before_cancel.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reader_pin_before_cancel.stdout.log": "e4d95f726882b9b04d2a2487222144c8f6a4d9b92d71e0105edef8ab132b341e",
+    "release_reader-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release_reader-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release_reader.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release_reader.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release_reader.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release_reader.stdout.log": "58523e00903ea7e1973c633b3191becba4bf2694ce050c45e91c6faa3391e701",
+    "request_cancel_after_stop-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_cancel_after_stop-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_cancel_after_stop.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_cancel_after_stop.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_cancel_after_stop.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_cancel_after_stop.stdout.log": "8bb8189a69d5dfbd6f7d60e88467f3d64372d4374563064e34957d04654127b8",
+    "request_while_producer_live-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_while_producer_live-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_while_producer_live.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_while_producer_live.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_while_producer_live.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request_while_producer_live.stdout.log": "80c7865472fe38b033ac39b606c5a389598d7efd118a9a4aaca440ed3c897d20",
+    "retire_active_task-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_active_task-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_active_task.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_active_task.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_active_task.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_active_task.stdout.log": "d0c8d5a9fa882e06290c4a2b00df3d42e057cfe0a799606d254e77b3c2044815",
+    "retire_committed_resource-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_committed_resource-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_committed_resource.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_committed_resource.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_committed_resource.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_committed_resource.stdout.log": "014dc177a7004a118d92cad10cd9d67f40bd924ac7ad3cfe391962de6234ca11",
+    "retire_reader_protected-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_reader_protected-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_reader_protected.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_reader_protected.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_reader_protected.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_reader_protected.stdout.log": "910234e934482afe7801eeacfcd979e18326288a4ffb7a9d10abae7295985f86",
+    "retired_refuses_new_pin-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retired_refuses_new_pin-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retired_refuses_new_pin.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retired_refuses_new_pin.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retired_refuses_new_pin.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retired_refuses_new_pin.stdout.log": "8642f3cac85b1f8f51e9799a41ceba38485eb8228e54a1e664f8aa9935a8f707",
+    "retirement_delete_pending.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_delete_pending.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_delete_pending.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_delete_pending.stdout.log": "18d1e918b1a7d2d9c80a2c8853498d96e97c009e2e148086208fb28001ff65a7",
+    "retirement_moved.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_moved.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_moved.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_moved.stdout.log": "2e886ec6ea0cab9ec9b89cf01af45fc814c4c1e79a2a9b9bba08feb07120cb77",
+    "retirement_recovered-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_recovered-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_recovered.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_recovered.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_recovered.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_recovered.stdout.log": "5b2c4763f8977d0af96440cbaa8dedeb228644134574e4f0f805884a9ddd2d4e",
+    "retirement_replayed-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_replayed-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_replayed.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_replayed.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_replayed.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_replayed.stdout.log": "329cfbcc8cbdddca97883988dba100d768907681efc97b30b3a95f070ccaf935",
+    "retirement_reserved.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_reserved.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_reserved.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_reserved.stdout.log": "eb621cb406b54cf039b585622c3c3e550bb33144a2e88af0be25b9650f304d75",
+    "retirement_unlinked.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_unlinked.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_unlinked.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retirement_unlinked.stdout.log": "490d9f577f4e4c8b7131bea1e51f3b7ba72cc0556bd11aeece4d5ec4582965dd",
+    "retiring_refuses_new_pin-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retiring_refuses_new_pin-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retiring_refuses_new_pin.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retiring_refuses_new_pin.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retiring_refuses_new_pin.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retiring_refuses_new_pin.stdout.log": "9b7f95ffaa04e017ba25367cfeb237de4c53ce55e668aed41090b378f2f1a073",
+    "retry_cancelled_after_stop-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_cancelled_after_stop-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_cancelled_after_stop.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_cancelled_after_stop.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_cancelled_after_stop.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_cancelled_after_stop.stdout.log": "3b9c928ec1b77e6a505b019b3aa5abc99e432cb5b55cbedc52b33a8621d55ea7",
+    "retry_live_cancelled-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_live_cancelled-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_live_cancelled.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_live_cancelled.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_live_cancelled.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retry_live_cancelled.stdout.log": "fc8afa435a2edb8bf2f5f820d572cb65f3a29a4f28949ed3a95bcab6f6723a22",
+    "runtimes.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtimes.stdout.log": "a19c1c2dbcbf8355cc7e029cd5baa011eab74ef61efb82ba446a03ddf2b464c4",
+    "same_bytes_different_inode-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_bytes_different_inode-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_bytes_different_inode.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_bytes_different_inode.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_bytes_different_inode.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_bytes_different_inode.stdout.log": "4461654c3e7c528a21cf624150a71d1d274c513595b48336e40105b4252abff3",
+    "same_size_corruption_refuses_receipt-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_size_corruption_refuses_receipt-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_size_corruption_refuses_receipt.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_size_corruption_refuses_receipt.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_size_corruption_refuses_receipt.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "same_size_corruption_refuses_receipt.stdout.log": "e9a654d4bf1c170215ef867bb7958fd2f5a44a6e8f41a9365ad37da02f1a6723",
+    "seed_cancel_after_stop-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_cancel_after_stop-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_cancel_after_stop.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_cancel_after_stop.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_cancel_after_stop.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_cancel_after_stop.stdout.log": "fb4b619caf91a775d38492fcadf025b7a1af7809147b5e30e0f4e53f2dd7fd4b",
+    "seed_live_cancel-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_live_cancel-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_live_cancel.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_live_cancel.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_live_cancel.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seed_live_cancel.stdout.log": "eb454b041141ad9ce25a1ca103a51a3a338cac6931b32bd40b44a3ed316d7831",
+    "shutdown.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "shutdown.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sign-probe.stderr.log": "edfb573c84f37dcf7bcb126f07673adb186d1de1d19e1e7e1b3b4155b71a58b6",
+    "sign-probe.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stale_cancel_after_stop-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stale_cancel_after_stop-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stale_cancel_after_stop.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stale_cancel_after_stop.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stale_cancel_after_stop.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stale_cancel_after_stop.stdout.log": "a70f55293070d4732c7dab180466cfed047439c20f3c771335d03e59902eaa49",
+    "uninstall.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uninstall.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unlink_directory_sync_failure-terminate.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unlink_directory_sync_failure-terminate.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unlink_directory_sync_failure.app-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unlink_directory_sync_failure.app-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unlink_directory_sync_failure.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unlink_directory_sync_failure.stdout.log": "0441f000b1283cf58dd154ab4c167fbde53e673d52baf404dbd527d791d81c8c"
+  }
+}

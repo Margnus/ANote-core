@@ -5,7 +5,21 @@ import NoteCanvasPrototype
 import SQLite3
 
 // Simulator executable for the fixed DEV-041 synthetic migration workload.
-private enum Admission: Error { case conflict, repairRequired }
+private enum Admission: Error {
+    case conflict, repairRequired
+    case directorySyncFailed(Int32)
+}
+
+private func syncDirectory(_ directory: URL) throws {
+    let descriptor = open(directory.path, O_RDONLY | O_DIRECTORY | O_CLOEXEC)
+    guard descriptor >= 0 else { throw Admission.directorySyncFailed(errno) }
+    if fsync(descriptor) != 0 {
+        let code = errno
+        _ = close(descriptor)
+        throw Admission.directorySyncFailed(code)
+    }
+    guard close(descriptor) == 0 else { throw Admission.directorySyncFailed(errno) }
+}
 
 private func hash(_ bytes: Data) -> String {
     SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
@@ -218,6 +232,9 @@ private func importCheckpoint(_ db: DB, _ folder: URL, _ checkpoint: Checkpoint,
     if let initialStatus { return initialStatus }
     for resource in resources {
         try resource.publish(in: folder)
+        // An earlier process may have published the file without synchronizing its directory.
+        try syncDirectory(resource.target.deletingLastPathComponent())
+        try syncDirectory(folder)
         if stage == "resource-published" { try stop(at: stage, folder: folder) }
         if stage == "cancel-live" {
             // A separate SQLite connection records intent while this producer still owns its task.
@@ -301,6 +318,8 @@ private func retirementStep(_ db: DB, _ folder: URL, _ resource: Resource, stage
             }
             guard try attachmentIdentity(source, resource) == nil,
                   try attachmentIdentity(tombstone, resource) == expected else { throw Admission.repairRequired }
+            try syncDirectory(source.deletingLastPathComponent())
+            try syncDirectory(stage == "retire-move-sync-failure" ? tombstone : folder)
             try connection.exec("UPDATE retirement SET state='delete-pending' WHERE sha256=?", key)
         }
         if stage == "retire-delete-pending" { try stop(at: stage, folder: folder) }
@@ -317,6 +336,9 @@ private func retirementStep(_ db: DB, _ folder: URL, _ resource: Resource, stage
                 try FileManager.default.removeItem(at: tombstone)
                 if stage == "retire-unlinked" { try stop(at: stage, folder: folder) }
             }
+            // An absent tombstone still requires synchronizing its directory before the receipt.
+            let directory = stage == "retire-unlink-sync-failure" ? folder.appendingPathComponent("legacy.ncp") : folder
+            try syncDirectory(directory)
             try connection.exec("UPDATE retirement SET state='retired' WHERE sha256=?", key)
             return "RETIRED"
         }
@@ -388,7 +410,7 @@ struct SqliteJointCheckpoint {
         try require(["init", "resource-published", "before-commit", "after-commit", "replay", "conflict",
                      "cancel-request", "cancel-stale", "cancel-live", "retire", "retire-pin", "retire-release",
                      "retire-stale-release", "retire-reserved", "retire-moved", "retire-delete-pending",
-                     "retire-unlinked"].contains(stage))
+                     "retire-unlinked", "retire-move-sync-failure", "retire-unlink-sync-failure"].contains(stage))
         try require(String(contentsOf: folder.appendingPathComponent(".fixture-scope"), encoding: .utf8) == "dev041-apple")
         let database = folder.appendingPathComponent("checkpoint.sqlite")
         try require(FileManager.default.fileExists(atPath: database.path) == (stage != "init"))
@@ -424,6 +446,10 @@ struct SqliteJointCheckpoint {
                 }
             } catch Admission.conflict { result["status"] = "OPERATION_CONFLICT" }
             catch Admission.repairRequired { result["status"] = "REPAIR_REQUIRED" }
+            catch Admission.directorySyncFailed(let code) {
+                result["status"] = "DIRECTORY_SYNC_FAILED"
+                result["directory_sync_errno"] = code
+            }
         }
         return result
     }

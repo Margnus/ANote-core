@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Audit retained evidence bindings, not execution, device measurements or C1 approval."""
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -30,6 +31,9 @@ CURRENT = {
     'legacy-container-framing': ('source_and_artifact_sha256',),
     'resource-commit-rules': ('source_and_artifact_sha256',),
     'resource-gc-rules': ('source_and_artifact_sha256',),
+    'dev041-resource-retirement-20261118': ('source_sha256',),
+    'dev041-android-dir-sync-20261118': ('source_sha256',),
+    'dev041-ios-dir-sync-20261118': ('source_sha256',),
     'verification': ('source_sha256', 'verification_input_sha256'),
     'android-brush-common-tests': ('source_and_build_sha256',),
     'apple-brush-common-tests': ('source_and_build_sha256',),
@@ -141,10 +145,13 @@ def audit(root):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, default=ROOT / 'reports/c1-evidence-audit.json')
+    args = parser.parse_args()
     report = audit(ROOT)
     report['audit_tool_sha256'] = digest(Path(__file__))
-    (ROOT / 'reports/c1-evidence-audit.json').write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
+    with args.output.open('w', encoding='utf-8', newline='\n') as output:
+        output.write(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': report['status'], 'reports': {
         name: value['binding_state'] for name, value in report['reports'].items()}, 'errors': report['errors']}))
     if report['errors']:
