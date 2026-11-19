@@ -1938,7 +1938,7 @@ final class PagedHostTests: XCTestCase {
         let note = try XCTUnwrap(model.current), id = note.documentId
         draw(note); model.changed(); let first = note.currentPageId
         model.applyEdit(PreviewEditInsertPage.shared); XCTAssertEqual(note.pageCount, 2)
-        XCTAssertTrue(note.selectPen(argb: Int32(bitPattern: 0xff3568be), width: 5, kind: .monoline))
+        XCTAssertTrue(note.selectPen(argb: Int32(bitPattern: 0xff3568be), width: 5, kind: .highlighter))
         draw(note, x: 200); model.changed()
         let beforeSelection = note.snapshot()
         model.applyEdit(PreviewEditSelectPage(pageId: first.value), content: false)
@@ -1960,6 +1960,7 @@ final class PagedHostTests: XCTestCase {
             reopened.applyEdit(PreviewEditSelectPage(pageId: restored.page(index: index).id.value), content: false)
             XCTAssertEqual(restored.strokeCount, 1)
         }
+        XCTAssertTrue(encoded.contains("\tHIGHLIGHTER\t1\t"))
         reopened.close()
     }
     @MainActor func testLegacyNoEditPreservesBytesThenEditMigratesOriginalExtent() async throws {

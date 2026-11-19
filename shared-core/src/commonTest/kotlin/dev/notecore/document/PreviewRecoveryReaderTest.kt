@@ -1,10 +1,12 @@
 package dev.notecore.document
 
+import dev.notecore.canvas.prototype.BrushKind
 import kotlin.test.*
 
 class PreviewRecoveryReaderTest {
-    private fun checkpoint(withBaseStroke: Boolean = false): PagedPreviewSnapshot {
+    private fun checkpoint(withBaseStroke: Boolean = false, kind: BrushKind = BrushKind.MONOLINE): PagedPreviewSnapshot {
         val fault = PendingInputOwnerFault(nonce = "reader-pending")
+        assertTrue(fault.note.selectPen(0x7f123456, 2.5, kind))
         if (withBaseStroke) {
             assertTrue(fault.note.beginStroke(10.0, 20.0, .5f, 0)); assertTrue(fault.note.endStroke(11.0, 21.0, .75f, 0))
         }
@@ -24,6 +26,43 @@ class PreviewRecoveryReaderTest {
         assertTrue(note.hasPendingStroke); assertEquals(0, note.totalStrokeCount)
         assertTrue(note.retryPendingStroke()); assertTrue(note.retryPendingStroke()); assertEquals(1, note.totalStrokeCount)
         assertTrue(PreviewRecoveryCodec.read(note.capture().encode()).snapshot!!.pending == null)
+    }
+    @Test fun highlighterSavesAndReopensInOrdinaryAndStreamedRecoveryWithoutLosingBrush() {
+        val snapshot = checkpoint(withBaseStroke = true, kind = BrushKind.HIGHLIGHTER)
+        val expected = snapshot.root.scene.objects().single().brush
+        assertEquals(BrushKind.HIGHLIGHTER, expected.kind)
+        assertEquals(1, expected.algorithmVersion)
+        assertEquals(0x7f123456, expected.argb)
+        assertEquals(2.5, expected.width)
+
+        val committed = PagedPreviewCodec.encode(snapshot.root)
+        val ordinary = assertNotNull(PreviewDocumentReader.read(committed).root)
+        assertEquals(committed, PagedPreviewCodec.encode(ordinary))
+        val reopened = assertNotNull(PagedPreviewNotebook.open(ordinary, "highlighter-reopen").notebook)
+        assertEquals(expected, reopened.stroke(0).brush)
+
+        val envelope = snapshot.encode()
+        var offset = 0
+        val streamed = PreviewStreamReader.read(allowRecovery = true) { buffer ->
+            val count = minOf(7, envelope.length - offset)
+            if (count == 0) -1 else {
+                envelope.toCharArray(buffer, 0, offset, offset + count)
+                offset += count
+                count
+            }
+        }
+        for (result in listOf(PreviewRecoveryCodec.read(envelope), streamed)) {
+            assertNull(result.failure)
+            val recovery = assertNotNull(result.snapshot)
+            assertEquals(envelope, recovery.encode())
+            val note = assertNotNull(PagedPreviewNotebook.openRecovery(recovery, "highlighter-recovery").notebook)
+            assertEquals(expected, note.pendingInk()?.brush)
+            assertTrue(note.retryPendingStroke()); assertTrue(note.retryPendingStroke())
+            assertEquals(recovery.version + 1, note.changeVersion)
+            assertEquals(2, note.totalStrokeCount)
+            assertEquals(expected, note.stroke(1).brush)
+            assertEquals(note.capture().encode(), PreviewRecoveryCodec.read(note.capture().encode()).snapshot?.encode())
+        }
     }
     @Test fun ordinaryV1V2RemainReadableWithoutManufacturingPending() {
         val v2 = PagedPreviewNotebook.create("ordinary", "title", "session").capture().encode()

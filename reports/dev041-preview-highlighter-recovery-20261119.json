@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "scope": "Current preview HIGHLIGHTER/1 persistence in shared JVM and original Android/iOS App hosts",
+  "base_source_commit": "fd33a22e530f6c292838d89180f690687a28e50a",
+  "jvm": {
+    "canvas-core": {
+      "tests": 246,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "shared-core": {
+      "tests": 476,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "architecture_check": "passed",
+  "android": {
+    "api": 26,
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "storage_checks": [
+      "local_file_identity_refusal_preserves_owner_input_and_io",
+      "catalog_capacity_failure_preserves_owner_snapshot",
+      "derived_text_capacity_checkpoint_save_and_reopen",
+      "read_failure_classification_to_owner",
+      "pending_recovery_atomic_failure_retry_new_owner_and_canonical_reopen",
+      "import_refusal_preserves_source_and_retry_remaps_identity",
+      "backup_round_trip_preserves_source_and_remaps_ink_references",
+      "apple_ui_backup_import_preserves_two_pages_and_three_strokes",
+      "validated_creation_refusal_and_independent_authority",
+      "validated_open_refusal_preserves_original_store_owner",
+      "saved_unchanged_skips_io",
+      "changed_revision_failure_retained",
+      "repair_retries_exact_root",
+      "damaged_legacy_backup_preserves_original_during_list_and_open",
+      "catalog_ignores_directories_and_recovers_legacy_backup",
+      "legacy_backup_survives_failed_write_until_verified_replacement",
+      "catalog_retry_preserves_retained_edits_and_recovers_disk_list",
+      "catalog_preserves_unreadable_note_and_lists_valid_neighbor",
+      "staging_conflict_preserves_original_then_retries_and_reopens",
+      "export_target_failure_preserves_note_and_allows_retry",
+      "single_export_snapshot_preserves_original",
+      "export_picker_release_dispatches_waiting_save",
+      "late_capture_refused_after_latest_ack_without_disk_rollback",
+      "reopened_saved_marker_skips_stopped_backend",
+      "foreign_same_revision_is_not_acknowledged_as_saved",
+      "retained_reopen_observes_preceding_write_ack",
+      "retained_reopen_reserves_capture_at_exact_byte_boundary",
+      "superseded_open_acks_without_disk_retry_or_delivery",
+      "unrelated_save_does_not_retry_requested_open",
+      "same_note_save_supersedes_in_flight_read"
+    ],
+    "pending_recovery_brushes": [
+      "MONOLINE/1",
+      "HIGHLIGHTER/1"
+    ]
+  },
+  "apple": {
+    "runtime": "27.0",
+    "build": "24A434",
+    "passed": 1,
+    "xctest": "testPagedSaveCloseAndNewOwnerReadAllPages"
+  },
+  "source_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt": "5c62bb3873099d05f321307826a49d282930a95670963b3ed51309adc148d638",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "5396491b2e2cf6de31132a4d8f24d56e5406d01a00fc8d3104e59304c3e74b8a",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "e02da35a5c9e10fbe1c5a06f3d38cbd7adcd73c6af507e593ab612ddaef023bd",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "9808e1b3846aabb4a3187554cc927874f6ed0c0b4d29cfe904b4dc9581a14f66",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewDocumentReaderTest.kt": "5e8734a9130aa1708e0bb0bcf4f8c7dda04708050d95eb0b339b03334f2e15ae",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewRecoveryReaderTest.kt": "b95de4c72c5f977ba1ddb0d68e9031a24f8104e088ecf13fe19d3adc0253ed50"
+  },
+  "local_artifact_sha256": {
+    "build/codex-dev041-highlighter-recovery/build/highlighter-avd.i8QPAb/storage.log": "90255e35abcc2dc180e940f8a5ab1ac4a94f465187135bb99e74f10242a85967",
+    "build/codex-dev041-highlighter-recovery/build/highlighter-ios-summary.json": "69354e7bb8650acbd08fa87eed9f8f781e7bd7d474a0557339144fa03c9f2b38",
+    "build/codex-dev041-highlighter-recovery/build-highlighter-recovery.log": "a1e59dd6708df06fbf8dfe61ce24f1408f5f60ae11dbc2e19f7fffd4620a03c1",
+    "build/codex-dev041-highlighter-recovery/android-app/build/outputs/apk/debug/android-app-debug.apk": "0ccde85676ad2c371cf75350b6f6299f4fee317e99035d5fa6d13a46505a0f7e",
+    "build/codex-dev041-highlighter-recovery/android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "00d6a32f528f6be0e73a0d4e5a57aad83c69c0d48933a216b48c13a286a64a35",
+    "build/codex-dev041-highlighter-recovery/shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "06bfa44b34360e5259cae4066a5d03aecdfe7dc8ab1aae980d46dd8acad26cba"
+  },
+  "ios17_execution_verified": false,
+  "physical_device_verified": false,
+  "production_sqlite_connected": false
+}

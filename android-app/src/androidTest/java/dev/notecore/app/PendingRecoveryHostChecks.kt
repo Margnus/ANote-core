@@ -207,6 +207,11 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
         }
     }
     fun verify() {
+        verifyRecovery(BrushKind.MONOLINE)
+        verifyRecovery(BrushKind.HIGHLIGHTER)
+    }
+
+    private fun verifyRecovery(kind: BrushKind) {
         val dir = File(host.cacheDir, "pending-recovery-${java.util.UUID.randomUUID()}")
         dir.writeText("blocked directory")
         lateinit var store: NoteStore; lateinit var note: PagedPreviewNotebook
@@ -225,6 +230,7 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             store.attachActive(note)
             check(note.rename("pending title")) // Editing history must survive refusal, then retire after confirmed recovery IO.
             check(store.save(note.capture()) { _, _ -> oldCallbacks++ })
+            check(note.selectPen(0x7f123456, 2.5, kind))
             check(note.beginStroke(1.25, 2.5, .125f, 7)); check(note.appendStroke(3.0, 4.0, .625f, 9))
             armed = true
             try { note.endStroke(8.0, 6.0, 1f, 10); error("Expected owner fault") } catch (e: IllegalStateException) { check(!armed) }
@@ -295,7 +301,8 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             var opened = false
             main { store.open(recovery.documentId) { value, error ->
                 check(error == null); note = store.adopt(checkNotNull(value)); check(note.hasPendingStroke)
-                check(note.pendingStroke() == recovery.pending); check(note.totalStrokeCount == 0); opened = true
+                check(note.pendingStroke() == recovery.pending && note.pendingInk()?.brush?.kind == kind)
+                check(note.totalStrokeCount == 0); opened = true
             } }
             eventually("New owner did not restore exact pending") { opened }
             completed = false
@@ -309,7 +316,9 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             main { check(store.releaseActive(note)); store.stopTestBackend(); store = NoteStore.isolated(host, dir) }
             opened = false
             main { store.open(recovery.documentId) { value, error ->
-                check(error == null); note = store.adopt(checkNotNull(value)); check(!note.hasPendingStroke && note.totalStrokeCount == 1); opened = true
+                check(error == null); note = store.adopt(checkNotNull(value))
+                check(!note.hasPendingStroke && note.totalStrokeCount == 1 && note.stroke(0).brush.kind == kind)
+                opened = true
             } }
             eventually("Canonical replacement did not reopen") { opened }
             val valid = file.readText()
@@ -317,10 +326,13 @@ internal class PendingRecoveryHostChecks(private val test: Instrumentation, priv
             val signedOperation = rows[0] + "\n" + rows[1] + "\n" + frame[0] + "\t" + frame[1] + "\t-001" + frame[2].drop(4) + "\n" + rows[3]
             val signedLength = encoded.replace("\n${frame[0]}\t", "\n+${frame[0]}\t")
             main { check(store.releaseActive(note)); store.stopTestBackend(); store = NoteStore.isolated(host, dir) }
-            for ((corrupt, reason) in listOf(encoded.dropLast(1) to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
+            val malformed = listOf(encoded.dropLast(1) to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
                 signedOperation to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
-                signedLength to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT,
-                encoded.replace("MONOLINE", "PRESSURE") to PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)) {
+                signedLength to PreviewReadFailure.INVALID_OR_UNSUPPORTED_FORMAT)
+            val unsupported = if (kind == BrushKind.MONOLINE)
+                listOf(encoded.replace("MONOLINE", "PRESSURE") to PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)
+            else emptyList()
+            for ((corrupt, reason) in malformed + unsupported) {
                 val reading = PreviewRecoveryCodec.read(corrupt)
                 check(reading.snapshot == null && reading.failure == reason)
                 file.writeText(corrupt, Charsets.UTF_8)
