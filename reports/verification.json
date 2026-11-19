@@ -2,7 +2,7 @@
   "phase": "C0/C1 reference prototype",
   "status": "passed",
   "jvm_contract_tests": {
-    "tests": 749,
+    "tests": 755,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -171,62 +171,62 @@
     {
       "suite": "dev.notecore.canvas.prototype.PreviewSaveLedgerTest",
       "tests": 12,
-      "time_seconds": 0.1
+      "time_seconds": 0.136
     },
     {
       "suite": "dev.notecore.document.CanonicalIdentityTest",
       "tests": 4,
-      "time_seconds": 0.013
+      "time_seconds": 0.016
     },
     {
       "suite": "dev.notecore.document.CanonicalTitleTest",
       "tests": 4,
-      "time_seconds": 0.004
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.document.DocumentAuthorityTest",
       "tests": 20,
-      "time_seconds": 0.046
+      "time_seconds": 0.079
     },
     {
       "suite": "dev.notecore.document.DocumentBudgetCreationTest",
       "tests": 4,
-      "time_seconds": 0.002
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.DocumentHistoryPreflightTest",
       "tests": 4,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.DocumentHistoryTest",
       "tests": 14,
-      "time_seconds": 0.013
+      "time_seconds": 0.027
     },
     {
       "suite": "dev.notecore.document.DocumentOwnerThreadTest",
       "tests": 6,
-      "time_seconds": 0.053
+      "time_seconds": 0.089
     },
     {
       "suite": "dev.notecore.document.EraserNotebookTest",
       "tests": 6,
-      "time_seconds": 0.011
+      "time_seconds": 0.016
     },
     {
       "suite": "dev.notecore.document.EraserRulesTest",
       "tests": 14,
-      "time_seconds": 0.003
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.ImageDecodeRulesTest",
       "tests": 5,
-      "time_seconds": 0.001
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.ImageInsertRulesTest",
       "tests": 6,
-      "time_seconds": 0.004
+      "time_seconds": 0.007
     },
     {
       "suite": "dev.notecore.document.ImageOrientationRulesTest",
@@ -236,82 +236,87 @@
     {
       "suite": "dev.notecore.document.LassoNotebookTest",
       "tests": 8,
-      "time_seconds": 0.008
+      "time_seconds": 0.016
+    },
+    {
+      "suite": "dev.notecore.document.LassoPasteRulesTest",
+      "tests": 6,
+      "time_seconds": 0.069
     },
     {
       "suite": "dev.notecore.document.LassoRulesTest",
       "tests": 18,
-      "time_seconds": 0.005
+      "time_seconds": 0.009
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReaderTest",
       "tests": 13,
-      "time_seconds": 0.062
+      "time_seconds": 0.09
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReadTest",
       "tests": 3,
-      "time_seconds": 0.004
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.document.ObjectOrderAuthorityTest",
       "tests": 6,
-      "time_seconds": 0.008
+      "time_seconds": 0.014
     },
     {
       "suite": "dev.notecore.document.ObjectOrderRulesTest",
       "tests": 6,
-      "time_seconds": 0.003
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PageBookmarkRulesTest",
       "tests": 6,
-      "time_seconds": 0.005
+      "time_seconds": 0.007
     },
     {
       "suite": "dev.notecore.document.PagedPreviewCodecTest",
       "tests": 20,
-      "time_seconds": 0.232
+      "time_seconds": 0.292
     },
     {
       "suite": "dev.notecore.document.PagedPreviewNotebookTest",
       "tests": 14,
-      "time_seconds": 0.084
+      "time_seconds": 0.117
     },
     {
       "suite": "dev.notecore.document.PagedSaveLedgerTest",
       "tests": 11,
-      "time_seconds": 0.021
+      "time_seconds": 0.041
     },
     {
       "suite": "dev.notecore.document.PageProjectionBudgetTest",
       "tests": 4,
-      "time_seconds": 0.003
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PageTemplateRulesTest",
       "tests": 5,
-      "time_seconds": 0.005
+      "time_seconds": 0.01
     },
     {
       "suite": "dev.notecore.document.PdfAnnotationGeometryRulesTest",
       "tests": 5,
-      "time_seconds": 0.008
+      "time_seconds": 0.018
     },
     {
       "suite": "dev.notecore.document.PdfCompositeExportRulesTest",
       "tests": 8,
-      "time_seconds": 0.013
+      "time_seconds": 0.021
     },
     {
       "suite": "dev.notecore.document.PdfDocumentModelRulesTest",
       "tests": 10,
-      "time_seconds": 0.014
+      "time_seconds": 0.019
     },
     {
       "suite": "dev.notecore.document.PdfOutlineRulesTest",
       "tests": 10,
-      "time_seconds": 0.003
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PdfPageCatalogRulesTest",
@@ -321,7 +326,7 @@
     {
       "suite": "dev.notecore.document.PdfPageGeometryRulesTest",
       "tests": 6,
-      "time_seconds": 0.001
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.PdfRenderSelectionRulesTest",
@@ -331,12 +336,12 @@
     {
       "suite": "dev.notecore.document.PenSlotRulesTest",
       "tests": 7,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewCatalogBudgetTest",
       "tests": 3,
-      "time_seconds": 0.0
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.document.PreviewCommitCapacityTest",
@@ -346,17 +351,17 @@
     {
       "suite": "dev.notecore.document.PreviewDocumentReaderTest",
       "tests": 7,
-      "time_seconds": 0.02
+      "time_seconds": 0.025
     },
     {
       "suite": "dev.notecore.document.PreviewEditTest",
       "tests": 7,
-      "time_seconds": 0.002
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PreviewInputBudgetTest",
       "tests": 11,
-      "time_seconds": 0.004
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PreviewInputCapacityTest",
@@ -366,62 +371,62 @@
     {
       "suite": "dev.notecore.document.PreviewInputTest",
       "tests": 9,
-      "time_seconds": 0.006
+      "time_seconds": 0.014
     },
     {
       "suite": "dev.notecore.document.PreviewNotebookCreationTest",
       "tests": 4,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewNotebookOpenTest",
       "tests": 8,
-      "time_seconds": 0.007
+      "time_seconds": 0.011
     },
     {
       "suite": "dev.notecore.document.PreviewPostAdmissionFaultTest",
       "tests": 1,
-      "time_seconds": 0.001
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.PreviewProjectionRetentionTest",
       "tests": 6,
-      "time_seconds": 0.048
+      "time_seconds": 0.062
     },
     {
       "suite": "dev.notecore.document.PreviewReadAllocationTest",
       "tests": 4,
-      "time_seconds": 0.268
+      "time_seconds": 0.382
     },
     {
       "suite": "dev.notecore.document.PreviewReadTraversalTest",
       "tests": 3,
-      "time_seconds": 0.003
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryReaderTest",
       "tests": 6,
-      "time_seconds": 0.027
+      "time_seconds": 0.051
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryTest",
       "tests": 14,
-      "time_seconds": 0.126
+      "time_seconds": 0.215
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchExecutorTest",
       "tests": 6,
-      "time_seconds": 0.032
+      "time_seconds": 0.037
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchTest",
       "tests": 6,
-      "time_seconds": 0.002
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.ReadingPositionRulesTest",
       "tests": 7,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.ReadOnlyNotebookTest",
@@ -441,7 +446,7 @@
     {
       "suite": "dev.notecore.document.SelectPenKindTest",
       "tests": 4,
-      "time_seconds": 0.001
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.TextPayloadDraftTest",
@@ -451,22 +456,22 @@
     {
       "suite": "dev.notecore.document.TextReplacementRulesTest",
       "tests": 7,
-      "time_seconds": 0.003
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.library.LibraryBatchRulesTest",
       "tests": 9,
-      "time_seconds": 0.012
+      "time_seconds": 0.015
     },
     {
       "suite": "dev.notecore.library.LibraryFolderRulesTest",
       "tests": 10,
-      "time_seconds": 0.019
+      "time_seconds": 0.026
     },
     {
       "suite": "dev.notecore.library.LibraryFolderTrashRulesTest",
       "tests": 7,
-      "time_seconds": 0.008
+      "time_seconds": 0.009
     },
     {
       "suite": "dev.notecore.library.LibraryNoteMoveRulesTest",
@@ -476,7 +481,7 @@
     {
       "suite": "dev.notecore.library.LibraryPageRelocationTest",
       "tests": 5,
-      "time_seconds": 0.006
+      "time_seconds": 0.009
     },
     {
       "suite": "dev.notecore.library.LibraryPageRulesTest",
@@ -486,7 +491,7 @@
     {
       "suite": "dev.notecore.library.LibrarySearchDeliveryTest",
       "tests": 6,
-      "time_seconds": 0.005
+      "time_seconds": 0.006
     },
     {
       "suite": "dev.notecore.library.LibrarySearchNavigationTest",
@@ -496,27 +501,27 @@
     {
       "suite": "dev.notecore.library.LibrarySearchRulesTest",
       "tests": 9,
-      "time_seconds": 0.007
+      "time_seconds": 0.01
     },
     {
       "suite": "dev.notecore.library.LibraryTrashRulesTest",
       "tests": 10,
-      "time_seconds": 0.012
+      "time_seconds": 0.016
     },
     {
       "suite": "dev.notecore.library.LibraryViewRulesTest",
       "tests": 10,
-      "time_seconds": 0.006
+      "time_seconds": 0.008
     }
   ],
   "module_jvm_tests": {
     "canvas-core": 246,
-    "shared-core": 503
+    "shared-core": 509
   },
   "architecture": {
     "status": "passed",
-    "common_source_files": 68,
-    "imports_checked": 76,
+    "common_source_files": 69,
+    "imports_checked": 78,
     "errors": [],
     "modules": [
       "canvas-core",
@@ -601,6 +606,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageDecodeRules.kt": "c7191df444b403ee4331d52ba27d82b104ed0377edcec788dafd1f67db38e4bf",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageInsertRules.kt": "87b9c5145a0d009428f0a77420bb3aeea9d880b5e28f1349b32282c489fb92b1",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageOrientationRules.kt": "31175c1be9a5c69c972f3d65a804ae953bda007553c18989fb96f2264116d86c",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LassoPasteRules.kt": "cbde6b393357516d729f63e97e374fe666bf2ea492087557c92bf20649dabbbc",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LassoRules.kt": "90046fa1096e060ecc4df61fd074d6e75548f928c4023dacc60aee36ad2f7f08",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "e5653d5fcf61d9c67ae4a08e08a10ee7d4cc8629ebb573475b12321423e14309",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "9726d71760f6e7c4b9c4853ec68461a19d81e14f129ce8c35ea537d915124ef8",
@@ -727,6 +733,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageDecodeRules.kt": "c7191df444b403ee4331d52ba27d82b104ed0377edcec788dafd1f67db38e4bf",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageInsertRules.kt": "87b9c5145a0d009428f0a77420bb3aeea9d880b5e28f1349b32282c489fb92b1",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ImageOrientationRules.kt": "31175c1be9a5c69c972f3d65a804ae953bda007553c18989fb96f2264116d86c",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/LassoPasteRules.kt": "cbde6b393357516d729f63e97e374fe666bf2ea492087557c92bf20649dabbbc",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LassoRules.kt": "90046fa1096e060ecc4df61fd074d6e75548f928c4023dacc60aee36ad2f7f08",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/LegacyPreviewReader.kt": "e5653d5fcf61d9c67ae4a08e08a10ee7d4cc8629ebb573475b12321423e14309",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/MemoryDocumentAuthority.kt": "9726d71760f6e7c4b9c4853ec68461a19d81e14f129ce8c35ea537d915124ef8",
@@ -775,6 +782,7 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/ImageInsertRulesTest.kt": "90c7361347ae851d049dd4bf7a81bfbf9f33a08b2a61b8db113c4b6bdbada1bd",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/ImageOrientationRulesTest.kt": "072df600a0032e7e658e999f8fd38d3b59c38af27f3e8b778179b6f138d149fd",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/LassoNotebookTest.kt": "6e09c0d4689359f09cf2bbdeb3b3b48a72d6bfb29c8ef03d50b54dd28bd65864",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/LassoPasteRulesTest.kt": "8dbf97ee0a6e53a209b9de9624d333af75b3ba2d1234ff36969a271c1a5c26f2",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/LassoRulesTest.kt": "16b187a7cf84090607479ad365796ae9d4a603f3df08f80960c16ed38d6a973a",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/LegacyPreviewReaderTest.kt": "6d6b4306db4ebd59676a085e7c0fdbedfd8fabd8bd16dc44ff5a147f9dc33844",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/LegacyPreviewReadTest.kt": "7a8bc39198fdba8eec61b47d30acfbd515256f4801b240b889a7180ef4e7919a",
