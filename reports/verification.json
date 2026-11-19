@@ -2,7 +2,7 @@
   "phase": "C0/C1 reference prototype",
   "status": "passed",
   "jvm_contract_tests": {
-    "tests": 700,
+    "tests": 726,
     "failures": 0,
     "errors": 0,
     "skipped": 0
@@ -11,67 +11,72 @@
     {
       "suite": "dev.notecore.canvas.prototype.BoundedOwnerExecutorTest",
       "tests": 16,
-      "time_seconds": 0.12
+      "time_seconds": 0.113
+    },
+    {
+      "suite": "dev.notecore.canvas.prototype.BrushDisplayRulesTest",
+      "tests": 3,
+      "time_seconds": 0.0
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushEnvelopePocTest",
       "tests": 10,
-      "time_seconds": 0.049
+      "time_seconds": 0.047
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushGeometryGoldenTest",
       "tests": 1,
-      "time_seconds": 0.086
+      "time_seconds": 0.09
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushGeometryTest",
       "tests": 12,
-      "time_seconds": 0.025
+      "time_seconds": 0.023
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushGoldenTest",
       "tests": 1,
-      "time_seconds": 0.004
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushPathPlanTest",
       "tests": 7,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushPathPocTest",
       "tests": 6,
-      "time_seconds": 0.062
+      "time_seconds": 0.061
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushReductionPocTest",
       "tests": 7,
-      "time_seconds": 0.175
+      "time_seconds": 0.18
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushRenderExecutorPocTest",
       "tests": 7,
-      "time_seconds": 0.09
+      "time_seconds": 0.083
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushRenderOwnerPocTest",
       "tests": 14,
-      "time_seconds": 0.186
+      "time_seconds": 0.14
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushTileCachePocTest",
       "tests": 8,
-      "time_seconds": 0.015
+      "time_seconds": 0.036
     },
     {
       "suite": "dev.notecore.canvas.prototype.BrushTilePixelsPocTest",
       "tests": 4,
-      "time_seconds": 0.035
+      "time_seconds": 0.033
     },
     {
       "suite": "dev.notecore.canvas.prototype.ChunkedBrushPocTest",
       "tests": 9,
-      "time_seconds": 0.07
+      "time_seconds": 0.039
     },
     {
       "suite": "dev.notecore.canvas.prototype.DocumentCloseContractTest",
@@ -96,12 +101,12 @@
     {
       "suite": "dev.notecore.canvas.prototype.InputFixtureReplayTest",
       "tests": 1,
-      "time_seconds": 0.039
+      "time_seconds": 0.045
     },
     {
       "suite": "dev.notecore.canvas.prototype.InputReplayContractTest",
       "tests": 11,
-      "time_seconds": 0.013
+      "time_seconds": 0.014
     },
     {
       "suite": "dev.notecore.canvas.prototype.InputScalarReplayTest",
@@ -116,7 +121,7 @@
     {
       "suite": "dev.notecore.canvas.prototype.PresentationContractTest",
       "tests": 6,
-      "time_seconds": 0.0
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.canvas.prototype.PreviewViewportContractTest",
@@ -136,7 +141,7 @@
     {
       "suite": "dev.notecore.canvas.prototype.ScaleFixtureReplayTest",
       "tests": 3,
-      "time_seconds": 0.549
+      "time_seconds": 0.538
     },
     {
       "suite": "dev.notecore.canvas.prototype.SceneCompositionTest",
@@ -146,27 +151,27 @@
     {
       "suite": "dev.notecore.canvas.prototype.SceneContractTest",
       "tests": 9,
-      "time_seconds": 0.002
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.canvas.prototype.SpatialIndexPocTest",
       "tests": 6,
-      "time_seconds": 0.067
+      "time_seconds": 0.068
     },
     {
       "suite": "dev.notecore.canvas.prototype.SubmissionQueueContractTest",
       "tests": 15,
-      "time_seconds": 0.017
+      "time_seconds": 0.011
     },
     {
       "suite": "dev.notecore.canvas.prototype.WeightedLruContractTest",
       "tests": 6,
-      "time_seconds": 0.01
+      "time_seconds": 0.011
     },
     {
       "suite": "dev.notecore.canvas.prototype.PreviewSaveLedgerTest",
       "tests": 12,
-      "time_seconds": 0.098
+      "time_seconds": 0.095
     },
     {
       "suite": "dev.notecore.document.CanonicalIdentityTest",
@@ -176,12 +181,12 @@
     {
       "suite": "dev.notecore.document.CanonicalTitleTest",
       "tests": 4,
-      "time_seconds": 0.004
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.DocumentAuthorityTest",
       "tests": 20,
-      "time_seconds": 0.049
+      "time_seconds": 0.045
     },
     {
       "suite": "dev.notecore.document.DocumentBudgetCreationTest",
@@ -191,22 +196,27 @@
     {
       "suite": "dev.notecore.document.DocumentHistoryPreflightTest",
       "tests": 4,
-      "time_seconds": 0.003
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.DocumentHistoryTest",
       "tests": 14,
-      "time_seconds": 0.011
+      "time_seconds": 0.012
     },
     {
       "suite": "dev.notecore.document.DocumentOwnerThreadTest",
       "tests": 6,
-      "time_seconds": 0.054
+      "time_seconds": 0.062
+    },
+    {
+      "suite": "dev.notecore.document.EraserNotebookTest",
+      "tests": 6,
+      "time_seconds": 0.011
     },
     {
       "suite": "dev.notecore.document.EraserRulesTest",
       "tests": 14,
-      "time_seconds": 0.005
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.ImageDecodeRulesTest",
@@ -221,57 +231,62 @@
     {
       "suite": "dev.notecore.document.ImageOrientationRulesTest",
       "tests": 4,
-      "time_seconds": 0.001
+      "time_seconds": 0.0
+    },
+    {
+      "suite": "dev.notecore.document.LassoNotebookTest",
+      "tests": 8,
+      "time_seconds": 0.01
     },
     {
       "suite": "dev.notecore.document.LassoRulesTest",
       "tests": 12,
-      "time_seconds": 0.005
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReaderTest",
       "tests": 13,
-      "time_seconds": 0.058
+      "time_seconds": 0.061
     },
     {
       "suite": "dev.notecore.document.LegacyPreviewReadTest",
       "tests": 3,
-      "time_seconds": 0.004
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.ObjectOrderAuthorityTest",
       "tests": 6,
-      "time_seconds": 0.009
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.document.ObjectOrderRulesTest",
       "tests": 6,
-      "time_seconds": 0.003
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.PageBookmarkRulesTest",
       "tests": 6,
-      "time_seconds": 0.005
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PagedPreviewCodecTest",
       "tests": 20,
-      "time_seconds": 0.234
+      "time_seconds": 0.238
     },
     {
       "suite": "dev.notecore.document.PagedPreviewNotebookTest",
       "tests": 14,
-      "time_seconds": 0.107
+      "time_seconds": 0.084
     },
     {
       "suite": "dev.notecore.document.PagedSaveLedgerTest",
       "tests": 11,
-      "time_seconds": 0.024
+      "time_seconds": 0.023
     },
     {
       "suite": "dev.notecore.document.PageProjectionBudgetTest",
       "tests": 4,
-      "time_seconds": 0.003
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.PageTemplateRulesTest",
@@ -286,12 +301,12 @@
     {
       "suite": "dev.notecore.document.PdfCompositeExportRulesTest",
       "tests": 8,
-      "time_seconds": 0.011
+      "time_seconds": 0.012
     },
     {
       "suite": "dev.notecore.document.PdfDocumentModelRulesTest",
       "tests": 10,
-      "time_seconds": 0.014
+      "time_seconds": 0.013
     },
     {
       "suite": "dev.notecore.document.PdfPageCatalogRulesTest",
@@ -301,17 +316,17 @@
     {
       "suite": "dev.notecore.document.PdfPageGeometryRulesTest",
       "tests": 6,
-      "time_seconds": 0.002
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.document.PdfRenderSelectionRulesTest",
       "tests": 6,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewCatalogBudgetTest",
       "tests": 3,
-      "time_seconds": 0.0
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.document.PreviewCommitCapacityTest",
@@ -321,82 +336,82 @@
     {
       "suite": "dev.notecore.document.PreviewDocumentReaderTest",
       "tests": 7,
-      "time_seconds": 0.021
+      "time_seconds": 0.02
     },
     {
       "suite": "dev.notecore.document.PreviewEditTest",
       "tests": 7,
-      "time_seconds": 0.004
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewInputBudgetTest",
       "tests": 11,
-      "time_seconds": 0.003
+      "time_seconds": 0.004
     },
     {
       "suite": "dev.notecore.document.PreviewInputCapacityTest",
       "tests": 5,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewInputTest",
       "tests": 9,
-      "time_seconds": 0.008
+      "time_seconds": 0.007
     },
     {
       "suite": "dev.notecore.document.PreviewNotebookCreationTest",
       "tests": 4,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.document.PreviewNotebookOpenTest",
       "tests": 8,
-      "time_seconds": 0.007
+      "time_seconds": 0.011
     },
     {
       "suite": "dev.notecore.document.PreviewPostAdmissionFaultTest",
       "tests": 1,
-      "time_seconds": 0.002
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.document.PreviewProjectionRetentionTest",
       "tests": 6,
-      "time_seconds": 0.051
+      "time_seconds": 0.059
     },
     {
       "suite": "dev.notecore.document.PreviewReadAllocationTest",
       "tests": 4,
-      "time_seconds": 0.265
+      "time_seconds": 0.376
     },
     {
       "suite": "dev.notecore.document.PreviewReadTraversalTest",
       "tests": 3,
-      "time_seconds": 0.004
+      "time_seconds": 0.005
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryReaderTest",
       "tests": 6,
-      "time_seconds": 0.029
+      "time_seconds": 0.042
     },
     {
       "suite": "dev.notecore.document.PreviewRecoveryTest",
       "tests": 14,
-      "time_seconds": 0.13
+      "time_seconds": 0.159
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchExecutorTest",
       "tests": 6,
-      "time_seconds": 0.03
+      "time_seconds": 0.034
     },
     {
       "suite": "dev.notecore.document.PreviewSaveDispatchTest",
       "tests": 6,
-      "time_seconds": 0.003
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.ReadingPositionRulesTest",
       "tests": 7,
-      "time_seconds": 0.001
+      "time_seconds": 0.002
     },
     {
       "suite": "dev.notecore.document.ReadOnlyNotebookTest",
@@ -414,6 +429,11 @@
       "time_seconds": 0.002
     },
     {
+      "suite": "dev.notecore.document.SelectPenKindTest",
+      "tests": 4,
+      "time_seconds": 0.002
+    },
+    {
       "suite": "dev.notecore.document.TextPayloadDraftTest",
       "tests": 6,
       "time_seconds": 0.002
@@ -421,12 +441,12 @@
     {
       "suite": "dev.notecore.document.TextReplacementRulesTest",
       "tests": 7,
-      "time_seconds": 0.002
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.library.LibraryBatchRulesTest",
       "tests": 9,
-      "time_seconds": 0.013
+      "time_seconds": 0.012
     },
     {
       "suite": "dev.notecore.library.LibraryFolderRulesTest",
@@ -436,7 +456,7 @@
     {
       "suite": "dev.notecore.library.LibraryFolderTrashRulesTest",
       "tests": 7,
-      "time_seconds": 0.006
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.library.LibraryNoteMoveRulesTest",
@@ -444,9 +464,14 @@
       "time_seconds": 0.001
     },
     {
+      "suite": "dev.notecore.library.LibraryPageRelocationTest",
+      "tests": 5,
+      "time_seconds": 0.007
+    },
+    {
       "suite": "dev.notecore.library.LibraryPageRulesTest",
       "tests": 5,
-      "time_seconds": 0.01
+      "time_seconds": 0.003
     },
     {
       "suite": "dev.notecore.library.LibrarySearchDeliveryTest",
@@ -456,32 +481,32 @@
     {
       "suite": "dev.notecore.library.LibrarySearchNavigationTest",
       "tests": 5,
-      "time_seconds": 0.002
+      "time_seconds": 0.001
     },
     {
       "suite": "dev.notecore.library.LibrarySearchRulesTest",
       "tests": 9,
-      "time_seconds": 0.007
+      "time_seconds": 0.008
     },
     {
       "suite": "dev.notecore.library.LibraryTrashRulesTest",
       "tests": 10,
-      "time_seconds": 0.013
+      "time_seconds": 0.014
     },
     {
       "suite": "dev.notecore.library.LibraryViewRulesTest",
       "tests": 10,
-      "time_seconds": 0.007
+      "time_seconds": 0.006
     }
   ],
   "module_jvm_tests": {
-    "canvas-core": 243,
-    "shared-core": 457
+    "canvas-core": 246,
+    "shared-core": 480
   },
   "architecture": {
     "status": "passed",
-    "common_source_files": 65,
-    "imports_checked": 69,
+    "common_source_files": 66,
+    "imports_checked": 72,
     "errors": [],
     "modules": [
       "canvas-core",
@@ -526,14 +551,15 @@
       "tool_text_io_explicit_utf8",
       "stamp_keys_use_platform_independent_forward_slashes"
     ],
-    "text_reads": 252,
-    "text_writes": 167,
+    "text_reads": 254,
+    "text_writes": 180,
     "windows_execution_verified": false,
     "scope": "synthetic LF/CRLF and explicit UTF-8 code checks on current host; no native cross-OS build claim"
   },
   "verification_text_hash_policy": "UTF-8 text with CRLF normalized to LF; binary fixtures byte exact",
   "source_sha256": {
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "1dbb3e64c1e13f7b54de69ccff4d87c7c5900ca1ea3a98dc6033337f0ac54215",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushDisplayRules.kt": "c7c8eefe2946512293ce06a66e9adb8a46a189a887596ca09f744565b6ad6ef2",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushGeometry.kt": "eb9516d210d81e3e994a36831fa0847dfd142120848a92529e52c91bd5f4d918",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPlan.kt": "58893de61e0924fb3903b5243ea3ce14ce1be7e3c7fdd478602f69e476bf8ddd",
@@ -571,7 +597,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ObjectOrderRules.kt": "8bcc643bed9908fdc7bfe52107eaa6450bb31e1ae54f147784cd3455992afb21",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PageBookmarkRules.kt": "0939abb0449d493641ec49c4550bb98643f23eef6cf7c9ce7640895ccf8a8519",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "9aee1d127b7c5081e6c971f9a3857d8049d52759898571f20dff019cf70cc61e",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "33c4d5d7e0786ae663e9889329bd1f8f53e7fe7c85819d074c5ed952c9c928e6",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "c25ac1f28dc6accca74d401aa677b755061da17888885601550a192e78d81cd0",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PageTemplateRules.kt": "dd5fcf1b7d15e7e905fc6e88a1d58774d038bd249da1050d14745ab0b9be280c",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfAnnotationGeometryRules.kt": "530571eaea4b7f31559e721f305ff151a900681646a0cc54c999f76e75534ee7",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfCompositeExportRules.kt": "10cb3c87cd9b6a494b8f9ba9bb5fcb00d1fde7682190f801f545eee56a592b9a",
@@ -581,7 +607,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewAppRecoveryPreflight.kt": "fcf940f0a584800edc8ead6e1ddbbea25b2da698f221083b150165d54906aa8c",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewCatalogBudget.kt": "d9972bc5c6e9dd21a1fafde2df70560cc5086a1871f7acf55277250691596f64",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "c02a5f602b122f5d810ba8f0128c3f51d4ded077068deee123d74675e6a4836c",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "5cf5b31208809b2cb564aa147f829f20e0b6e6ddca80a20ed15a5b194a111f37",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "4914dc4d3919dec0381f2b19841d7c0a1c013003d18c56b0b3887d8db7c85b65",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "4ac2f0d7007755e0f569b05dcd6c028f29583b0672c2a0992357d082a5b1b273",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewNotebookOpen.kt": "2dd49c6902aff3050c38c84ab87d82ec7d9236d9748be1ecde6686d525e53015",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "e25d13fcc4b868d8170d9a78618b7526e06cddd64cb475a002dc163e0a0f805e",
@@ -594,7 +620,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderTrashRules.kt": "4d6841db43d8615ebedc8754c708b78a0165f13c2a9157bc3fd0b8fa7a06e37e",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryNoteMoveRules.kt": "dad6cd372805d4aa9325059dcd1978a5740df4768914ccd9f92a5b713c891006",
-    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryPageRules.kt": "46611268b0a4407f5b51cd045d25bd39a6c4f94d0c11259230719e69e762c248",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryPageRules.kt": "081bb09279bc8d3ac5f5b1ab498894bcac53b5f5d40d80f44bc7a95fe76a08ea",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibrarySearchRules.kt": "d7a140aaf39bb3b36c1b9122119114c51c6d0e12dd66914b31210d69f7e6b3ce",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryTrashRules.kt": "99ca8f2def5c0062c5e85ba6cc40158a1dbb7027f3acf35cf110f007e751a5df",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3"
@@ -607,6 +633,7 @@
     "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePoc.kt": "0895d5afbcab6901c29d0b8735b048deb1345fd6cabb7b04abbae0d1cb137647",
     "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidInkFrameExperiment.kt": "4e7cba4ddb48356f50fda105677c4f68f3f9109941055f83537c7758e9526309",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/preview/PreviewViewport.kt": "1dbb3e64c1e13f7b54de69ccff4d87c7c5900ca1ea3a98dc6033337f0ac54215",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushDisplayRules.kt": "c7c8eefe2946512293ce06a66e9adb8a46a189a887596ca09f744565b6ad6ef2",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushGeometry.kt": "eb9516d210d81e3e994a36831fa0847dfd142120848a92529e52c91bd5f4d918",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushPathPlan.kt": "58893de61e0924fb3903b5243ea3ce14ce1be7e3c7fdd478602f69e476bf8ddd",
@@ -629,6 +656,7 @@
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "ea9d7ed0eda8836b349a873cc1adf55c4f636bb2587341fde5b1c927bff53ba2",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/SubmissionQueue.kt": "d0b5c7fa0a01779225ae154694c021ef99cc198ffbc447e5206fbb1da5b3bb0d",
     "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushDisplayRulesTest.kt": "fcd1c75f84347aca0c1bbb7e73d57301a70292bcbe93728d7941fd1af1b4bb37",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePocTest.kt": "02da555d7fd409c97d5174976206a70c552cbd319c666e2a205b4f38da66b799",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushGeometryTest.kt": "8d438ea195c992d26cdeb3917465d3067f44d8460860278b1b6f4733e4d68a53",
     "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushPathPlanTest.kt": "8c8294a0584e33c1fa29d60110a09cc68e72277469716036904f713a2358e6f0",
@@ -693,7 +721,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/ObjectOrderRules.kt": "8bcc643bed9908fdc7bfe52107eaa6450bb31e1ae54f147784cd3455992afb21",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PageBookmarkRules.kt": "0939abb0449d493641ec49c4550bb98643f23eef6cf7c9ce7640895ccf8a8519",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "9aee1d127b7c5081e6c971f9a3857d8049d52759898571f20dff019cf70cc61e",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "33c4d5d7e0786ae663e9889329bd1f8f53e7fe7c85819d074c5ed952c9c928e6",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewNotebook.kt": "c25ac1f28dc6accca74d401aa677b755061da17888885601550a192e78d81cd0",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PageTemplateRules.kt": "dd5fcf1b7d15e7e905fc6e88a1d58774d038bd249da1050d14745ab0b9be280c",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfAnnotationGeometryRules.kt": "530571eaea4b7f31559e721f305ff151a900681646a0cc54c999f76e75534ee7",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfCompositeExportRules.kt": "10cb3c87cd9b6a494b8f9ba9bb5fcb00d1fde7682190f801f545eee56a592b9a",
@@ -703,7 +731,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewAppRecoveryPreflight.kt": "fcf940f0a584800edc8ead6e1ddbbea25b2da698f221083b150165d54906aa8c",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewCatalogBudget.kt": "d9972bc5c6e9dd21a1fafde2df70560cc5086a1871f7acf55277250691596f64",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "c02a5f602b122f5d810ba8f0128c3f51d4ded077068deee123d74675e6a4836c",
-    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "5cf5b31208809b2cb564aa147f829f20e0b6e6ddca80a20ed15a5b194a111f37",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewEdit.kt": "4914dc4d3919dec0381f2b19841d7c0a1c013003d18c56b0b3887d8db7c85b65",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewInput.kt": "4ac2f0d7007755e0f569b05dcd6c028f29583b0672c2a0992357d082a5b1b273",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewNotebookOpen.kt": "2dd49c6902aff3050c38c84ab87d82ec7d9236d9748be1ecde6686d525e53015",
     "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "e25d13fcc4b868d8170d9a78618b7526e06cddd64cb475a002dc163e0a0f805e",
@@ -716,7 +744,7 @@
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderRules.kt": "e79218ee3c7c7b58e7475572cbe6e4a2d42110cbec7213efafb3a7d3f126e4e7",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryFolderTrashRules.kt": "4d6841db43d8615ebedc8754c708b78a0165f13c2a9157bc3fd0b8fa7a06e37e",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryNoteMoveRules.kt": "dad6cd372805d4aa9325059dcd1978a5740df4768914ccd9f92a5b713c891006",
-    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryPageRules.kt": "46611268b0a4407f5b51cd045d25bd39a6c4f94d0c11259230719e69e762c248",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryPageRules.kt": "081bb09279bc8d3ac5f5b1ab498894bcac53b5f5d40d80f44bc7a95fe76a08ea",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibrarySearchRules.kt": "d7a140aaf39bb3b36c1b9122119114c51c6d0e12dd66914b31210d69f7e6b3ce",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryTrashRules.kt": "99ca8f2def5c0062c5e85ba6cc40158a1dbb7027f3acf35cf110f007e751a5df",
     "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryViewRules.kt": "4a05b557d2fd4ad6b38aa3843a71869d140bbb67ebe5fcdcfcd93bf7d4d4f3a3",
@@ -727,10 +755,12 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentBudgetCreationTest.kt": "97b66767aa7f18503ebdca8b3c86f5922074d868456fd9ce7f8a29ff5b5d7d1d",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentHistoryPreflightTest.kt": "4b7b893f760dfec24dbfac6923dffa7692e9514e16d7fc2878fb27f454b0dd22",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/DocumentHistoryTest.kt": "868fa5fa9381718502d1737d6db59d0585c6ecf8ec1e582f71250042790c30fa",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/EraserNotebookTest.kt": "4b6e0677c382b84b49fc7eef799b9a9210c98e1020b7bd8ecd04d9422517e30d",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/EraserRulesTest.kt": "42ab715621aa78c6f1e56dbf0ec06576baddc20039518e0dc7a76af8a9ea1676",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/ImageDecodeRulesTest.kt": "1089ebdd7a7ceb58e1425ed03cba71bd1abf18e99ed9c634dd9981e3781f128b",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/ImageInsertRulesTest.kt": "90c7361347ae851d049dd4bf7a81bfbf9f33a08b2a61b8db113c4b6bdbada1bd",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/ImageOrientationRulesTest.kt": "072df600a0032e7e658e999f8fd38d3b59c38af27f3e8b778179b6f138d149fd",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/LassoNotebookTest.kt": "6e09c0d4689359f09cf2bbdeb3b3b48a72d6bfb29c8ef03d50b54dd28bd65864",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/LassoRulesTest.kt": "33ef92b3c95810c31232c7d619a22cb14bd9b3c960cf73e0e289c4e7230e5f65",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/LegacyPreviewReaderTest.kt": "6d6b4306db4ebd59676a085e7c0fdbedfd8fabd8bd16dc44ff5a147f9dc33844",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/LegacyPreviewReadTest.kt": "7a8bc39198fdba8eec61b47d30acfbd515256f4801b240b889a7180ef4e7919a",
@@ -765,12 +795,14 @@
     "shared-core/src/commonTest/kotlin/dev/notecore/document/ReadOnlyNotebookTest.kt": "925b55c97a4dc8de962359b98fb0edcb0c30c0c73090fc2bc34c399c6d4e10fe",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/RetiredEditingStateTest.kt": "0209fe54c87e680863d2465fb5481a78cbc83db6f8e621b34d9413aa6dfb4318",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/SceneObjectOrderTest.kt": "70d47772e88c1a8c9236bee6c5da9cabc4635bf1f826c40ad905aa65e4d5d875",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/SelectPenKindTest.kt": "3eb65f5358850268d5f25eee9e87ffc5073d26945352e3752d42d540dcafb36e",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/TextPayloadDraftTest.kt": "c1467829c08ddc02293098464be467336cadf20153dbee9f4105c161e3853d9e",
     "shared-core/src/commonTest/kotlin/dev/notecore/document/TextReplacementRulesTest.kt": "4df232d8fb9c54897686d601bc71ad8939a66e1c66add8f9c5fe82e3e4450e45",
     "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryBatchRulesTest.kt": "b78592abed3fe727ff15ceb1d3bff190606a438bfb99a1f409496e2dbcce03cd",
     "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryFolderRulesTest.kt": "4dcdb35a198a491953a6967f168111e22ad27a6379217691d567fbd05790ed50",
     "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryFolderTrashRulesTest.kt": "c8167a1a0ca8a23a91fce51a8d420f1eec0e3b4a7e2d7fabc26e97a90ca7445a",
     "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryNoteMoveRulesTest.kt": "65b690ae054e602767ba8a23b76ac2029dc1c466bbeebe898ca7f1001bbf699f",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryPageRelocationTest.kt": "135ae79ae550c5e9ca82278a2d9bc84b946a9e8c958c8ebd1c22a7d3f8b35dd8",
     "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryPageRulesTest.kt": "4f1f55aa115c5c6f7a9c97e1d95abcb5bbb053b799efb4eea63ec03c20033b9e",
     "shared-core/src/commonTest/kotlin/dev/notecore/library/LibrarySearchDeliveryTest.kt": "972338e7154e2433e121db83c6d074b50d4867b33a4f3bdc133dc162b8d0ed88",
     "shared-core/src/commonTest/kotlin/dev/notecore/library/LibrarySearchNavigationTest.kt": "216400b5ad4850dd3df9521b7d2119a09f504885ee89e8f2e9057a6cdbe1a348",
@@ -804,7 +836,7 @@
     "tools/android_paged_smoke.py": "52f19a2fa8b0a9380e9609ae9051ab8c43b5df79cb5d800f549c0371477760d2",
     "tools/android_preview_smoke.py": "f2c71360b25e05011c69b5da2741f924edf399b7231416bc29f899184831cb8e",
     "tools/android_viewport_smoke.py": "a86bf64dae5b7df942e5984a956fa967a37397b1ad8705b02d270be6908e0ebf",
-    "tools/audit_c1_evidence.py": "e76139dcc8335ec72a923dce2001a60b3e758369ad3cd6749d10ab298ab093cd",
+    "tools/audit_c1_evidence.py": "eebc02bc69d0750200a92e56cf12d1d802a3697dfeb26c74ce459300ace092c1",
     "tools/audit_public_boundary.py": "66557595f8afb7486673b3e238ab5eb4e27110f0e5ff2e9783d60a18b52256ce",
     "tools/audit_read_traversal.py": "003ada835a25290ad8adc915dd6de97bfe04a73d84407ad10c3d9f8dc852999b",
     "tools/audit_sdk_type_closure.py": "97daab27242744c538f996465d8d1fddad5c100158724088cc75566bf1b2f45a",
@@ -831,7 +863,7 @@
     "tools/package_ios_preview.py": "a42af9de044e0cab3fdd0872fe012d3e125bd347caf63c308618ce5faec3316d",
     "tools/prepare_library_paging_platform.py": "dde83b165909bed3dcdc39e53489622fc0fead0294682282677ee0bd6858d977",
     "tools/preview_brush_geometry.py": "29ba0cbc604cee0f79af0da06f63dc361050a93aa906d175a98c6bb69d4ec817",
-    "tools/resource_commit_probe.py": "248687f5792c626d9e7a9cdbc44eb50f077aaf3cd7dcc4afc765e53d0e0a9983",
+    "tools/resource_commit_probe.py": "19f145371f9aea7848fa3fc6997ca2d5ed480710a93259771bfe5e81bc15c472",
     "tools/restore_ios_preview.py": "e1454fc86dd9a461ab22583d69deb926268be2d7ea7d7dfc98b62106646dc9bc",
     "tools/run_sketch_host.py": "a512c5424c95858e950dcf85c936e6a4589993ebb54cd5ff0df1434084cf046f",
     "tools/snapshot_legacy_schema.py": "81fb2467d2402791cf2a3e885f58b8af4441c953108a02ea4c1fbf62d69d70af",
@@ -848,7 +880,9 @@
     "tools/verify_android_joint_checkpoint.py": "56f03acec00c39865810401e284eca33c074a675dad76f46b5df0385e3d5f001",
     "tools/verify_android_m1_capture.py": "359456d40f00cc7d5f7ac01c1406aa453921c3bdecca951c2cd01efa659bc126",
     "tools/verify_android_render_target.py": "943f3807a5602d79c7ad0029bebceaf22828640742a675cb0a4f8553840ab037",
-    "tools/verify_apple_atomic_cut.py": "af8f81d7907949d3adf2c3defa9c50f1f911d4957172d13c46f5b4764add6e28",
+    "tools/verify_android_sqlite_joint_checkpoint.py": "a0be8cdadd9135dc92b8b0583a4cd5921862965b288dcc5f8af7e74c83f457da",
+    "tools/verify_android_sqlite_pending_recovery.py": "f9ae279336ef4f5bc377a674d1ea1f7ba1a04c7eae43cbb110cbbe0d93d0a0ef",
+    "tools/verify_apple_atomic_cut.py": "0fc91a06411eaafeb43e4b242cb9e9122f06dbe97df21d7d9b47615be44a9018",
     "tools/verify_apple_brush_common.py": "e96ebd56512545e2e42750e376852f66e0b45968015326f7507d90c19c2ee2da",
     "tools/verify_apple_executor.py": "d4d5e6e685734b575ebfe160f6ea77c7e90ed627111bb18e5716f2fd25d593c9",
     "tools/verify_apple_export_cancel_feedback.py": "763cfad951ca7a0db7661800d0284b07a5b35294f9dcfb463c2684f9ab246fa4",
@@ -856,7 +890,8 @@
     "tools/verify_apple_pdf_ci.py": "a510880ec1d0d022d0b2d994de4e7f28f89d2daa20c01d5e0d22938206209989",
     "tools/verify_apple_pdf_geometry.py": "9402357c0ac3c97643d76ef952bc1a8c2571df4c21fcc9d6e0b3c64f0a6cde07",
     "tools/verify_apple_pdf_metadata.py": "5383ac00e3711ef67260f8a69c0872e6ffbd8d814dc88b6a810228b36c084751",
-    "tools/verify_apple_sqlite_joint_checkpoint.py": "f1d33995d7167edecf9095cfbdba2cc753e513468ad487e2e586cbd21e970697",
+    "tools/verify_apple_sqlite_joint_checkpoint.py": "3dfc8a9f55d3260bbc88790ea994ea99f5771baa694946250c6486f9a1ea89eb",
+    "tools/verify_apple_sqlite_pending_recovery.py": "e66642186fbf1f1a41d8f9c9d25b15f9fe29c84fdb1222839d09792188300fd7",
     "tools/verify_apple_storage.py": "5dffedee7ea4cf5c9341eb3e5387052d1a64b0a61c43deb641cbf6e24f3e80cf",
     "tools/verify_apple_system_files.py": "eb23c57b2f0d53ab1efe9466dbc61dbc104ac3a4a53a1cda7765a4a9caaa40ef",
     "tools/verify_apple_window_attachments.py": "32094c7b3fe4564ab177fe6c3abe052ef9f35f8fddfd860e3928a2f396753f78",
@@ -864,6 +899,8 @@
     "tools/verify_brush_oracle_numeric.py": "f7a5b28a9862f6925849f519e8f2df490bb0d65fd21d24bd74e59347383a09e3",
     "tools/verify_brush_paths_android.py": "038c92af91896d887be2d4f1a01868e274b84e0b26442b99e833c061767e8717",
     "tools/verify_budget_creation.py": "aaeb2bb794403be5a2683e6e6d17574bf8daffed56e16172a914eafd6f07fd36",
+    "tools/verify_c1_android_failure_channels.py": "d9fc05a9adfb13204e0172145282a52b83cd9f46e227dab7db253b0bf16f9aab",
+    "tools/verify_c1_apple_failure_channels.py": "e06bfdcb1531c22c01a1a0efe4645dd013ffe224cfc74bbc12783499bfeeea2a",
     "tools/verify_candidate_boundary.py": "a931bdab8780b5eadc0ab8d44ad2fe3514ffaf6cfedfd5ee3fe56bf5b11fee96",
     "tools/verify_canonical_point_query.py": "544e83cb0b7e161a54be2db5248143751488208e173215700b21569025e88969",
     "tools/verify_canonical_title.py": "34218f9e6ea824b47a565e3e3402b2e18e9f80c55fa893e902b671ac5a77fc5f",
@@ -912,15 +949,18 @@
     "tools/verify_recovery_framing.py": "ce80f9774d6e1b9cb2dfab46a160e67151b04b0cb8aa0cc201658a863994eda7",
     "tools/verify_release_handoff.py": "48b744295b7e240ee75f442316392228c702be772e284df43bc4cc1cede48bd5",
     "tools/verify_render_viewport_trace.py": "d4b8a9e66fdf1e5a06800b0c72f737ae3ac1ae94d58a02d071799e77c3f93e81",
-    "tools/verify_resource_commit_rules.py": "eaf0b33a09d391e9d833d8ba3198889e03ae9c016c49b64ae5bc77aff6b5c068",
-    "tools/verify_resource_gc_rules.py": "24ce08006d4575ec2a8ffe188bd8d6f284ad0508532692cc0fdebdd53add4841",
+    "tools/verify_resource_commit_rules.py": "c0ee78e6a59fb5039d360e447c427815f9f623eadf035b06de474ee582abef28",
+    "tools/verify_resource_gc_rules.py": "5f506399cb6ad7b318f93d0f12178d58d7702ce6588cdf959203b098c1283dc7",
     "tools/verify_resource_promote_platform.py": "67c7aa2b9985949a259bbaec49714a4587bb217187fdfc81ac83670139dcaf9a",
+    "tools/verify_resource_retirement.py": "c8e1c5b757fb0382e30f5a4f255493f92cc5f6489054e61d935d2bbc8b55239d",
     "tools/verify_retired_editing_state.py": "27d1c8bdc5bdd844ae381a40fb08f803fa1d19882ab51000de7806ccdbc64483",
     "tools/verify_shared_native.py": "5871ec752495653e533c55392fb982a1ad26cd602688a8fbf048a28f0e837898",
     "tools/verify_sketch_host.py": "27647bc8e448c8abf478427c9fbb02fe8a7da833ad13fc9dde3387e5995d36db",
     "tools/verify_sketch_ios_host.py": "64a9f818fde22761da348a92b9ed04f79ab837001bfd47e035f6286aba305e57",
     "tools/verify_sqlite_capabilities.py": "8e785d6c85d8d5da6e002bc8365d535ee02c52540f8ff0c34572749bbc581c41",
+    "tools/verify_sqlite_capabilities_isolated.py": "ca5fb096a091d059d2dfffabeb057a7e190f52ca070f7e0cc0ae855b03a05d4e",
     "tools/verify_sqlite_checkpoint_fixture.py": "6c674d48427588fd4b5bf2b8238b0da2fb1d59fee24c8261a00a67c498397d47",
+    "tools/verify_sqlite_pending_recovery.py": "695fedd0cabc8bf5933594b57d8915ce9724feccbd31fadb49dee7a0bcbc93ae",
     "tools/verify_surface_input.py": "fe3512a50e81ceb465db69798603887aeb2e221c4802e51504f9377742fedce6",
     "tools/verify_typed_recovery_read.py": "977eb568dc9626fb13508c777f55e0387b73d95bc4217ad726f35855b65728a5",
     "tools/verify_validated_creation.py": "6b14f1f454261f4f785250fe1734a4e7343e13a22dac17d24a741cd39f944ac0",

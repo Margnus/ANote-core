@@ -1,5 +1,7 @@
 package dev.notecore.library
 
+import dev.notecore.document.hasValidUnicode
+
 internal data class LibraryPageQuery(
     val operation: LibrarySearchQuery,
     val sort: LibrarySort,
@@ -13,6 +15,7 @@ internal data class LibraryPage(
     val limit: Int,
     val rows: List<LibraryViewNote>,
     val nextCursor: LibraryPageCursor?,
+    val startAnchor: LibraryPageCursor? = null,
 )
 internal enum class LibraryPageFailure {
     INVALID_QUERY, WRONG_QUERY_CURSOR, INVALID_CURSOR, STALE_QUERY, CANCELLED, STALE_RESULT,
@@ -76,8 +79,39 @@ internal object LibraryPageRules {
             return LibraryPageResult(failure = LibraryPageFailure.CANCELLED)
         }
         if (page.query.operation != active) return LibraryPageResult(failure = LibraryPageFailure.STALE_QUERY)
-        val fresh = if (page.cursor == null) first(page.snapshot, page.query, page.limit)
-        else next(page.snapshot, page.query, page.cursor, page.limit)
+        val fresh = when {
+            page.cursor != null -> next(page.snapshot, page.query, page.cursor, page.limit)
+            page.startAnchor != null -> relocate(page.snapshot, page.query,
+                page.startAnchor.anchor.noteId, null, page.limit)
+            else -> first(page.snapshot, page.query, page.limit)
+        }
         return if (fresh == candidate) candidate else LibraryPageResult(failure = LibraryPageFailure.STALE_RESULT)
+    }
+
+    /** Relocates a fresh traversal at a stable noteId. A missing or now-filtered anchor falls
+     * back to the explicit index (negative refused, overflow clamped to the tail, null means head). */
+    fun relocate(snapshot: LibraryViewSnapshot, query: LibraryPageQuery, previousAnchorId: String,
+                 fallbackIndex: Int?, limit: Int): LibraryPageResult {
+        if (!valid(query, limit)) return LibraryPageResult(failure = LibraryPageFailure.INVALID_QUERY)
+        if (previousAnchorId.isBlank() || previousAnchorId.length > 128 || !previousAnchorId.hasValidUnicode()) {
+            return LibraryPageResult(failure = LibraryPageFailure.INVALID_CURSOR)
+        }
+        if (fallbackIndex != null && fallbackIndex < 0) return LibraryPageResult(failure = LibraryPageFailure.INVALID_QUERY)
+        val frozen = freeze(snapshot, query.sort)
+        val projection = LibraryViewRules.project(frozen, query.operation.spaceId,
+            query.operation.expectedRevision, query.favoritesOnly)
+        projection.rejection?.let { return LibraryPageResult(catalogFailure = it) }
+        val notes = frozen.notes.associateBy { it.noteId }
+        if (projection.noteIds.isEmpty()) {
+            return LibraryPageResult(LibraryPage(query, frozen, null, limit, emptyList(), null))
+        }
+        val startIndex = projection.noteIds.indexOf(previousAnchorId)
+        val start = if (startIndex >= 0) startIndex
+        else (fallbackIndex ?: 0).coerceAtMost(projection.noteIds.lastIndex)
+        val selected = projection.noteIds.drop(start).take(limit + 1)
+        val rows = selected.take(limit).map { notes.getValue(it) }
+        val next = if (selected.size > limit) LibraryPageCursor(query, rows.last()) else null
+        val startAnchor = LibraryPageCursor(query, rows.first())
+        return LibraryPageResult(LibraryPage(query, frozen, null, limit, rows, next, startAnchor))
     }
 }
