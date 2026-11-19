@@ -15,7 +15,8 @@ import uuid
 
 from sqlite_checkpoint_fixture import SCHEMA
 from verify_apple_sqlite_joint_checkpoint import wait_for_exit
-from verify_sqlite_pending_recovery import PIN, ROOT, sha
+from pending_recovery_profiles import load_pending_profile
+from verify_sqlite_pending_recovery import ROOT, sha
 
 APP = ROOT / 'tools/probes/SqlitePendingCheckpointApp.swift'
 SUPPORT = ROOT / 'tools/probes/SqliteProbeSupport.swift'
@@ -33,19 +34,23 @@ def verify(args, work):
             raise RuntimeError((label, result.returncode, result.stderr.decode(errors='replace')))
         return result.stdout
 
-    pin = json.loads(PIN.read_bytes())
-    android = json.loads(ANDROID.read_bytes())
-    assert android['status'] == 'passed' and android['candidate_source_commit'] == pin['candidate_source_commit']
-    fixtures = {Path(name).name: ROOT / name for name in pin['apple']['fixture_sha256']}
-    for path in fixtures.values():
-        assert sha(path) == pin['apple']['fixture_sha256'][path.relative_to(ROOT).as_posix()], path
-    original, canonical = (fixtures[key].read_bytes() for key in ('prepare.ncp', 'confirmed-final.ncp'))
+    pin, _, fixtures, source, inputs = load_pending_profile(args.current_build)
+    if args.current_build:
+        android_path = ROOT / 'reports/dev041-android-highlighter-migration-20261119.json'
+        framework = args.current_build / 'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework'
+    else:
+        android_path = ANDROID
+        framework = args.framework.resolve()
+    android = json.loads(android_path.read_bytes())
+    assert android['status'] == 'passed' and all(android.get(key) == value for key, value in source.items())
+    original, canonical = (fixtures[key] for key in ('prepare.ncp', 'confirmed-final.ncp'))
     assert hashlib.sha256(original).hexdigest() == android['source_archive_sha256']
     assert hashlib.sha256(canonical).hexdigest() == android['canonical_sha256']
-    framework = args.framework.resolve()
-    target = pin['apple']['targets']['iosSimulatorArm64']
-    assert sha(framework / 'NoteCanvasPrototype') == target['framework_sha256']
-    assert sha(framework / 'Headers/NoteCanvasPrototype.h') == target['header_sha256']
+    target = {'framework_sha256': sha(framework / 'NoteCanvasPrototype'),
+              'header_sha256': sha(framework / 'Headers/NoteCanvasPrototype.h')}
+    if not args.current_build:
+        expected = pin['apple']['targets']['iosSimulatorArm64']
+        assert all(expected[key] == value for key, value in target.items())
 
     suffix = uuid.uuid4().hex
     bundle = 'dev.notecore.probes.sqlitependingapple.p' + suffix
@@ -106,8 +111,8 @@ def verify(args, work):
         home = Path(run('data-container', *simctl, 'get_app_container', device, bundle, 'data').decode().strip())
         folder = home / 'Library/Caches/dev041-pending'
         folder.mkdir(parents=True)
-        for name, path in fixtures.items():
-            shutil.copyfile(path, folder / name)
+        for name, contents in fixtures.items():
+            (folder / name).write_bytes(contents)
         (folder / 'schema.json').write_text(json.dumps(SCHEMA), encoding='utf-8')
         marker = folder / 'result.json'
         committed = False
@@ -134,7 +139,7 @@ def verify(args, work):
             wait_for_exit(pid)
             committed |= stage == 'after-commit'
             validate_rows(folder, committed)
-            assert all((folder / name).read_bytes() == path.read_bytes() for name, path in fixtures.items())
+            assert all((folder / name).read_bytes() == contents for name, contents in fixtures.items())
             observations[key] = event
     finally:
         try:
@@ -146,16 +151,16 @@ def verify(args, work):
 
     return {
         'status': 'passed', 'scope': 'UIKit App sandbox and native SQLite on iOS simulator; process kills',
-        'candidate_source_commit': pin['candidate_source_commit'], 'runtime': {
+        **source, 'runtime': {
             'identifier': args.runtime, 'version': runtime['version'], 'build': runtime['buildversion']},
         'observations': observations, 'matches_android_cut_and_receipt_matrix': True,
         'source_archive_sha256': android['source_archive_sha256'], 'canonical_sha256': android['canonical_sha256'],
         'checkpoint_revision': android['checkpoint_revision'], 'source_unchanged': True,
-        'app_binary_sha256': sha(binary), 'framework_sha256': target['framework_sha256'],
+        'app_binary_sha256': sha(binary), **target,
         'deployment_target': '17.0', 'ios17_runtime_verified': runtime['version'].split('.')[0] == '17',
         'simulator_deleted': True, 'existing_device_inventory_unchanged': before == after,
         'input_sha256': {path.relative_to(ROOT).as_posix(): sha(path) for path in (
-            Path(__file__).resolve(), APP, SUPPORT, ANDROID, PIN, *fixtures.values(),
+            Path(__file__).resolve(), APP, SUPPORT, android_path, *inputs,
             ROOT / 'tools/sqlite_checkpoint_fixture.py', ROOT / 'tools/verify_apple_sqlite_joint_checkpoint.py')},
         'raw_sha256': {path.name: sha(path) for path in sorted(output.iterdir()) if path.is_file()},
     }
@@ -163,7 +168,10 @@ def verify(args, work):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--framework', type=Path, required=True)
+    decoder = parser.add_mutually_exclusive_group(required=True)
+    decoder.add_argument('--framework', type=Path, help='Use the fixed C1 framework')
+    decoder.add_argument('--current-build', type=lambda path: Path(path).resolve(),
+                         help='Use the framework built from the verified current preview commit')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--runtime', default='com.apple.CoreSimulator.SimRuntime.iOS-27-0')
     parser.add_argument('--device-type', default='com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro')

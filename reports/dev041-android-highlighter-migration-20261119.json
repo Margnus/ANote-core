@@ -1,0 +1,106 @@
+{
+  "status": "passed",
+  "scope": "Android API 26 instrumentation in a fresh App sandbox; process kills",
+  "preview_source_commit": "e959b3f4cb25d688cfbb2853009c2f6ec268b799",
+  "runtime": {
+    "api": "26",
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "abi": "arm64-v8a",
+    "selinux": "Enforcing"
+  },
+  "observations": {
+    "00-seed": {
+      "stage": "seed",
+      "pid": 2655,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "SEEDED",
+      "sqlite": "3.18.2"
+    },
+    "01-invalid": {
+      "stage": "invalid",
+      "pid": 2688,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "INVALID_SOURCE",
+      "sqlite": "3.18.2"
+    },
+    "02-capacity": {
+      "stage": "capacity",
+      "pid": 2719,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "INPUT_CAPACITY",
+      "sqlite": "3.18.2"
+    },
+    "03-before-commit": {
+      "stage": "before-commit",
+      "pid": 2752,
+      "domain": "u:r:untrusted_app:s0:c512,c768"
+    },
+    "04-empty": {
+      "stage": "empty",
+      "pid": 2788,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "EMPTY",
+      "sqlite": "3.18.2"
+    },
+    "05-after-commit": {
+      "stage": "after-commit",
+      "pid": 2820,
+      "domain": "u:r:untrusted_app:s0:c512,c768"
+    },
+    "06-present": {
+      "stage": "present",
+      "pid": 2855,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "PRESENT",
+      "sqlite": "3.18.2"
+    },
+    "07-replay": {
+      "stage": "replay",
+      "pid": 2889,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "REPLAYED",
+      "sqlite": "3.18.2"
+    },
+    "08-duplicate": {
+      "stage": "duplicate",
+      "pid": 2921,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "STALE_BASE",
+      "sqlite": "3.18.2"
+    },
+    "09-present": {
+      "stage": "present",
+      "pid": 2953,
+      "domain": "u:r:untrusted_app:s0:c512,c768",
+      "status": "PRESENT",
+      "sqlite": "3.18.2"
+    }
+  },
+  "source_unchanged": true,
+  "checkpoint_revision": 2,
+  "source_archive_sha256": "80856e980399bb748080d522190ec9ef810cc8d3571f3fc9007958c8beb2fe59",
+  "canonical_sha256": "72f31981554ce1d01452051144afc9f35c3d0f4d41e9d3802529e171cdb261a2",
+  "apk_sha256": "7997ec8a1df47691c527adb4e29ec2faf03602c75313a0d8d46d3f53589e1e20",
+  "aars_sha256": {
+    "canvas-core-debug.aar": "f4482152be4e47975b25151d44cbda8cfa699b2f351ece577aa084f060ba6177",
+    "shared-core-debug.aar": "e4f18d748146f5657f44f7f14530151216894cfbd9b3df68e9d6381da1a09255"
+  },
+  "stdlib_sha256": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd",
+  "inputs_sha256": {
+    "tools/verify_android_sqlite_pending_recovery.py": "9806db6b2672a9b720a280c84344a075c3366906d1ee21d5c271a3530421cdab",
+    "tools/probes/SqlitePendingCheckpointAndroid.java": "cd41fb045d888f7f0d871709a4228fba3a4034e5948c8e04c173aa57589b1472",
+    "tools/probes/atomic-promote-AndroidManifest.xml": "d4bb3980917d8c225d4084e3c8bd3a231fe0f7082c226d66db5ac05c35896385",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "reports/apple-sqlite-joint-checkpoint-20261117/verification.json": "b7bd43b8986756c0a141a4aa39ff80902077288f6be065143609db57940b1ae9",
+    "tools/pending_recovery_profiles.py": "91fc897197c31367018e656095170c4e243633f208b17043ee60bbe8c3ae0ecb",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/dev041-highlighter-migration-20261119.json": "972f342c789b1a7bf8bd6c18011a9a5b2f0a3d475539762fcc7aaeb595372b21",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+    "tools/verify_sqlite_pending_recovery.py": "481960f0f276679a2883ba10d1c164b4a9b7112d98ecdfc316864fd535db25af"
+  },
+  "raw_sha256": {
+    "commands.log": "52d2397bbd38ad72aa80b2fd8fd0047767eda04a6dcac16ad6f068fbe83fa7f3",
+    "emulator.log": "5c02b6986a3459274c0a64d9a3a4ff13a1634fe85eb7b96f0cf59fd4e7f64329"
+  }
+}

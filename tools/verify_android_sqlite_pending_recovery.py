@@ -1,5 +1,6 @@
 """Run the pending-preview SQLite migration in a disposable Android API 26 App sandbox."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -12,11 +13,11 @@ import uuid
 import zipfile
 
 from sqlite_checkpoint_fixture import SCHEMA
-from verify_sqlite_pending_recovery import ROOT, PIN, STDLIB_PIN, sha
+from pending_recovery_profiles import load_pending_profile
+from verify_sqlite_pending_recovery import ROOT, STDLIB_PIN, sha
 
 PROBE = ROOT / 'tools/probes/SqlitePendingCheckpointAndroid.java'
 MANIFEST = ROOT / 'tools/probes/atomic-promote-AndroidManifest.xml'
-HOST = ROOT / 'reports/dev041-pending-recovery-20261118.json'
 CLASS = 'dev.notecore.probes.SqlitePendingCheckpointAndroid'
 
 
@@ -38,17 +39,18 @@ def verify(args, work):
             raise RuntimeError(f'{shlex.join(command)} exited {result.returncode}; see {log}')
         return result.stdout if binary else result.stdout.decode().strip()
 
-    pin = json.loads(PIN.read_bytes())
-    host = json.loads(HOST.read_bytes())
-    assert host['candidate_source_commit'] == pin['candidate_source_commit'] and host['status'] == 'passed'
-    fixtures = {Path(name).name: ROOT / name for name in pin['apple']['fixture_sha256']}
-    for path in fixtures.values():
-        assert sha(path) == pin['apple']['fixture_sha256'][path.relative_to(ROOT).as_posix()], path
+    pin, host, fixtures, source, inputs = load_pending_profile(args.current_build)
+    if args.current_build:
+        paths = {f'{name}-debug.aar': args.current_build / name / 'build/outputs/aar' / f'{name}-debug.aar'
+                 for name in ('canvas-core', 'shared-core')}
+        specs = {name: {'artifact': path, 'sha256': sha(path)} for name, path in paths.items()}
+    else:
+        specs = pin['android']['rebuilt_aars']
     stdlib_sha = json.loads(STDLIB_PIN.read_bytes())['host_jvm_sha256']['kotlin-stdlib-2.2.21.jar']
     assert sha(args.stdlib) == stdlib_sha
     jars = [args.stdlib]
     aars = {}
-    for name, spec in pin['android']['rebuilt_aars'].items():
+    for name, spec in specs.items():
         artifact = ROOT / spec['artifact']
         aars[name] = sha(artifact)
         assert aars[name] == spec['sha256'], name
@@ -77,8 +79,8 @@ def verify(args, work):
         for name in compiled.namelist():
             if re.fullmatch(r'classes[0-9]*\.dex', name):
                 merged.writestr(name, compiled.read(name))
-        for name, path in fixtures.items():
-            merged.write(path, 'assets/' + name)
+        for name, contents in fixtures.items():
+            merged.writestr('assets/' + name, contents)
         merged.writestr('assets/schema.json', json.dumps(SCHEMA))
     run(jdk / 'bin/keytool', '-genkeypair', '-keystore', key, '-storepass', 'disposable', '-alias', 'probe',
         '-dname', 'CN=Disposable NoteCore Probe', '-keyalg', 'RSA', '-validity', '2')
@@ -148,7 +150,7 @@ def verify(args, work):
                 assert event['stage'] == stage and event['pid'] > 0
                 assert event['pid'] not in {entry['pid'] for entry in observations.values()}, event
                 assert re.fullmatch(r'u:r:untrusted_app(?:_[0-9]+)?:s0.*', event['domain']), event
-                assert private_file('legacy-recovery.ncp') == fixtures['prepare.ncp'].read_bytes()
+                assert private_file('legacy-recovery.ncp') == fixtures['prepare.ncp']
                 observations[f'{len(observations):02d}-{stage}'] = event
         finally:
             if emulator.poll() is None:
@@ -161,13 +163,14 @@ def verify(args, work):
 
     return {
         'status': 'passed', 'scope': 'Android API 26 instrumentation in a fresh App sandbox; process kills',
-        'candidate_source_commit': pin['candidate_source_commit'], 'runtime': runtime, 'observations': observations,
+        **source, 'runtime': runtime, 'observations': observations,
         'source_unchanged': True, 'checkpoint_revision': host['checkpoint_revision'],
-        'source_archive_sha256': sha(fixtures['prepare.ncp']), 'canonical_sha256': sha(fixtures['confirmed-final.ncp']),
+        'source_archive_sha256': hashlib.sha256(fixtures['prepare.ncp']).hexdigest(),
+        'canonical_sha256': hashlib.sha256(fixtures['confirmed-final.ncp']).hexdigest(),
         'apk_sha256': sha(apk), 'aars_sha256': aars, 'stdlib_sha256': stdlib_sha,
         'inputs_sha256': {path.relative_to(ROOT).as_posix(): sha(path) for path in (
             Path(__file__).resolve(), PROBE, MANIFEST, ROOT / 'tools/sqlite_checkpoint_fixture.py',
-            PIN, STDLIB_PIN, HOST, *fixtures.values())},
+            STDLIB_PIN, *inputs)},
         'raw_sha256': {path.name: sha(path) for path in sorted(args.output.iterdir())},
     }
 
@@ -178,6 +181,8 @@ if __name__ == '__main__':
     parser.add_argument('--stdlib', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--port', type=int, default=5588)
+    parser.add_argument('--current-build', type=lambda path: Path(path).resolve(),
+                        help='Use the debug AARs for the verified current preview commit')
     args = parser.parse_args()
     args.stdlib = args.stdlib.resolve()
     args.output.mkdir(parents=True)

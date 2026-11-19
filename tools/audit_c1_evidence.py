@@ -42,6 +42,8 @@ CURRENT = {
     'c1-android-failure-channels-20261118': ('source_sha256',),
     'dev041-pending-recovery-20261118': ('source_sha256',),
     'dev041-highlighter-migration-20261119': ('source_sha256',),
+    'dev041-android-highlighter-migration-20261119': ('inputs_sha256',),
+    'dev041-apple-highlighter-migration-20261119': ('input_sha256',),
     'dev041-android-pending-recovery-20261118': ('inputs_sha256',),
     'dev041-apple-pending-recovery-20261118': ('input_sha256',),
     'verification': ('source_sha256', 'verification_input_sha256'),
