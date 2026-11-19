@@ -2,6 +2,8 @@ package dev.notecore.document
 
 import dev.notecore.canvas.prototype.*
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 internal enum class LassoFailure {
     WRONG_DOCUMENT, STALE_ROOT, MISSING_PAGE, INVALID_PATH, INVALID_BUDGET, CAPACITY,
@@ -67,10 +69,11 @@ internal object LassoRules {
         return LassoSelectionResult(LassoSelectionPlan(root.id, root.revision, page.id, hits))
     }
 
-    /** Translate and uniformly scale the selection around an anchor, composed as one matrix per object. */
+    /** Translate, uniformly scale and rotate the selection around an anchor, composed as one matrix per object. */
     fun transform(root: DocumentRoot, documentId: SceneId, expectedRevision: Long, pageId: PageId,
                   selection: List<ObjectId>, dx: Double, dy: Double,
-                  scaleFactor: Double = 1.0, anchor: PointD = PointD(0.0, 0.0)): SelectionTransformResult {
+                  scaleFactor: Double = 1.0, anchor: PointD = PointD(0.0, 0.0),
+                  angleRadians: Double = 0.0): SelectionTransformResult {
         if (root.id != documentId) return SelectionTransformResult(failure = LassoFailure.WRONG_DOCUMENT)
         if (expectedRevision < 0 || root.revision != expectedRevision) return SelectionTransformResult(failure = LassoFailure.STALE_ROOT)
         val page = root.findPage(pageId) ?: return SelectionTransformResult(failure = LassoFailure.MISSING_PAGE)
@@ -79,13 +82,16 @@ internal object LassoRules {
             return SelectionTransformResult(failure = LassoFailure.INVALID_SELECTION)
         if (!dx.isFinite() || !dy.isFinite() || abs(dx) > 1e9 || abs(dy) > 1e9 ||
             !scaleFactor.isFinite() || scaleFactor !in 0.05..20.0 ||
+            !angleRadians.isFinite() || abs(angleRadians) > 1e6 ||
             !anchor.x.isFinite() || !anchor.y.isFinite() || abs(anchor.x) > 1e9 || abs(anchor.y) > 1e9)
             return SelectionTransformResult(failure = LassoFailure.INVALID_TRANSFORM)
-        if (dx == 0.0 && dy == 0.0 && scaleFactor == 1.0) return SelectionTransformResult(failure = LassoFailure.NO_CHANGE)
+        if (dx == 0.0 && dy == 0.0 && scaleFactor == 1.0 && angleRadians == 0.0)
+            return SelectionTransformResult(failure = LassoFailure.NO_CHANGE)
         if (selection.size > 100_000) return SelectionTransformResult(failure = LassoFailure.CAPACITY)
 
-        // Page-space edit: uniform scale around the anchor, then translation; applied after each old transform.
+        // Page-space edit: rotate, scale around the anchor, then translate; one composed matrix.
         val pageEdit = Affine2D(tx = -anchor.x, ty = -anchor.y)
+            .then(Affine2D(cos(angleRadians), sin(angleRadians), -sin(angleRadians), cos(angleRadians), 0.0, 0.0))
             .then(Affine2D(a = scaleFactor, d = scaleFactor))
             .then(Affine2D(tx = anchor.x + dx, ty = anchor.y + dy))
         if (pageEdit.inverseOrNull() == null) return SelectionTransformResult(failure = LassoFailure.INVALID_TRANSFORM)

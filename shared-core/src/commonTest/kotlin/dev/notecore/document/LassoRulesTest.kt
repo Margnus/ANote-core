@@ -140,4 +140,81 @@ class LassoRulesTest {
             listOf(ObjectId("s1")), 5.0, 5.0).plan)
         assertEquals(LassoFailure.STALE_ROOT, LassoRules.revalidate(advanced, transform))
     }
+
+    @Test fun quarterTurnRotationMovesPointAroundAnchor() {
+        val root = root(listOf(horizontal("s1", 100.0)))
+        val angle = kotlin.math.PI / 2
+        val result = LassoRules.transform(root, root.id, root.revision, pageA.id,
+            listOf(ObjectId("s1")), 0.0, 0.0, anchor = PointD(100.0, 100.0), angleRadians = angle)
+        val plan = assertNotNull(result.plan)
+        val (_, transform) = plan.changes().single()
+        // (200,100) rotated 90° around (100,100) → (100,200).
+        val moved = transform.map(PointD(200.0, 100.0))
+        assertEquals(100.0, moved.x, 1e-9)
+        assertEquals(200.0, moved.y, 1e-9)
+    }
+
+    @Test fun fullTurnIsApproximatelyIdentityAndOriginalInkUnchanged() {
+        val root = root(listOf(horizontal("s1", 100.0)))
+        val twoPi = kotlin.math.PI * 2
+        val result = LassoRules.transform(root, root.id, root.revision, pageA.id,
+            listOf(ObjectId("s1")), 0.0, 0.0, anchor = PointD(100.0, 100.0), angleRadians = twoPi)
+        val plan = assertNotNull(result.plan)
+        val (_, transform) = plan.changes().single()
+        val original = root.scene.find(ObjectId("s1"))!!
+        val p = PointD(original.samples.x(1), original.samples.y(1))
+        val moved = transform.map(p)
+        assertEquals(p.x, moved.x, 1e-6); assertEquals(p.y, moved.y, 1e-6)
+        assertEquals(original.transform, root.scene.find(ObjectId("s1"))!!.transform)
+    }
+
+    @Test fun rotationWithScaleAndTranslationComposesCorrectly() {
+        val root = root(listOf(horizontal("s1", 100.0)))
+        val angle = kotlin.math.PI / 2
+        val result = LassoRules.transform(root, root.id, root.revision, pageA.id,
+            listOf(ObjectId("s1")), 10.0, 0.0, scaleFactor = 2.0,
+            anchor = PointD(100.0, 100.0), angleRadians = angle)
+        val plan = assertNotNull(result.plan)
+        val (_, transform) = plan.changes().single()
+        // (200,100): rotate 90° around (100,100) → (100,200); scale 2x → (100,300); translate → (110,300).
+        val moved = transform.map(PointD(200.0, 100.0))
+        assertEquals(110.0, moved.x, 1e-9)
+        assertEquals(300.0, moved.y, 1e-9)
+    }
+
+    @Test fun rotationAroundNonOriginAnchorWithTranslation() {
+        val root = root(listOf(horizontal("s1", 100.0)))
+        val angle = kotlin.math.PI
+        val result = LassoRules.transform(root, root.id, root.revision, pageA.id,
+            listOf(ObjectId("s1")), 5.0, 0.0, anchor = PointD(150.0, 100.0), angleRadians = angle)
+        val plan = assertNotNull(result.plan)
+        val (_, transform) = plan.changes().single()
+        // (200,100) rotated 180° around (150,100) → (100,100); translate 5 → (105,100).
+        val moved = transform.map(PointD(200.0, 100.0))
+        assertEquals(105.0, moved.x, 1e-9)
+        assertEquals(100.0, moved.y, 1e-9)
+    }
+
+    @Test fun invalidAngleAndZeroRotationNoChange() {
+        val root = root(listOf(horizontal("s1", 100.0)))
+        assertEquals(LassoFailure.INVALID_TRANSFORM,
+            LassoRules.transform(root, root.id, root.revision, pageA.id,
+                listOf(ObjectId("s1")), 0.0, 0.0, angleRadians = Double.NaN).failure)
+        assertEquals(LassoFailure.INVALID_TRANSFORM,
+            LassoRules.transform(root, root.id, root.revision, pageA.id,
+                listOf(ObjectId("s1")), 0.0, 0.0, angleRadians = Double.POSITIVE_INFINITY).failure)
+        assertEquals(LassoFailure.NO_CHANGE,
+            LassoRules.transform(root, root.id, root.revision, pageA.id,
+                listOf(ObjectId("s1")), 0.0, 0.0, angleRadians = 0.0).failure)
+    }
+
+    @Test fun rotationDoesNotAffectUnselectedObjects() {
+        val s1 = horizontal("s1", 100.0); val s2 = horizontal("s2", 200.0)
+        val root = root(listOf(s1, s2))
+        val angle = kotlin.math.PI / 2
+        val result = LassoRules.transform(root, root.id, root.revision, pageA.id,
+            listOf(ObjectId("s1")), 0.0, 0.0, anchor = PointD(100.0, 100.0), angleRadians = angle)
+        assertNotNull(result.plan)
+        assertSame(s2, root.scene.find(ObjectId("s2")))
+    }
 }
