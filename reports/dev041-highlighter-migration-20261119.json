@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "scope": "Host SQLite and current JVM HIGHLIGHTER/1; synthetic source; isolated migration",
+  "sqlite_version": "3.54.0",
+  "checkpoint_revision": 2,
+  "recovery_admitted_bytes": 2248,
+  "source_unchanged": true,
+  "observations": {
+    "confirmed_document_requires_normal_import": {
+      "status": "INVALID_SOURCE"
+    },
+    "truncated_refused": {
+      "status": "INVALID_SOURCE"
+    },
+    "capacity_refused": {
+      "status": "INPUT_CAPACITY"
+    },
+    "dies_before_commit": {
+      "cut": "before-commit",
+      "pid": 4422
+    },
+    "dies_after_commit_before_receipt": {
+      "cut": "after-commit",
+      "pid": 4425
+    },
+    "same_operation_replays": {
+      "status": "REPLAYED",
+      "revision": 2
+    },
+    "different_operation_cannot_reimport": {
+      "status": "STALE_BASE"
+    }
+  },
+  "current_jvm_sha256": {
+    "canvas-main.jar": "d48bdedc823022419111a407bb71bc797f313a6036f833c4ae8eabe5d3b5ae3f",
+    "shared-main.jar": "9ada96edac3fa5fbebf2c455d26a403a929ef7f1f81fb7321b50c25e545ed571",
+    "kotlin-stdlib-2.2.21.jar": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd"
+  },
+  "offline_jvm_receipt_sha256": "cecca75af8ca10e1405a1e721b25c471ac4b5426f2d30e28fd3e16485e3ec81d",
+  "derived_fixture_sha256": {
+    "prepare.ncp": "80856e980399bb748080d522190ec9ef810cc8d3571f3fc9007958c8beb2fe59",
+    "confirmed-final.ncp": "72f31981554ce1d01452051144afc9f35c3d0f4d41e9d3802529e171cdb261a2"
+  },
+  "source_sha256": {
+    "tools/verify_sqlite_pending_recovery.py": "481960f0f276679a2883ba10d1c164b4a9b7112d98ecdfc316864fd535db25af",
+    "tools/sqlite_checkpoint_fixture.py": "0808025fddbf33c93f5821b2206e37f09a9b758cafd3e55c861a4021850fcebc",
+    "tools/probes/SqlitePendingRecoveryFixture.java": "f881732c90082875c5c2b3ae2952260ac22e297aa8b0f3dc2a3db652790f4093",
+    "reports/c1-pinned-sdk-20261117.json": "e76590af3c726bc59f24742b657b3f30f8f31a4c72f64ae96b510abc8e6face7",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp": "c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5",
+    "reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp": "0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e",
+    "tools/verify_sqlite_checkpoint_fixture.py": "6c674d48427588fd4b5bf2b8238b0da2fb1d59fee24c8261a00a67c498397d47",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt": "e02da35a5c9e10fbe1c5a06f3d38cbd7adcd73c6af507e593ab612ddaef023bd",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt": "9808e1b3846aabb4a3187554cc927874f6ed0c0b4d29cfe904b4dc9581a14f66"
+  },
+  "preview_source_commit": "e959b3f4cb25d688cfbb2853009c2f6ec268b799",
+  "offline_jvm_tests": 722,
+  "fixed_monoline_regression": {
+    "source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+    "same_outcomes": true,
+    "receipt_sha256": "f0ae7308ad065024784dfddf686652659cd8245e354b3bdde2792762538192f5"
+  }
+}
