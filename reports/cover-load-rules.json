@@ -1,0 +1,51 @@
+{
+  "phase": "LIB-09 internal cover asynchronous load plan",
+  "status": "passed",
+  "base_revision": "25d5b37b7214d9b0edc38c858b03e2dd729ac878",
+  "scope": "Detached clean worktree at base_revision plus only CoverLoadRules.kt and CoverLoadRulesTest.kt; verifyPrototype and collect_verification completed. No Android, Apple, real decoder, cache, database, App or device verification.",
+  "targeted_jvm_suite": {
+    "suite": "dev.notecore.library.CoverLoadRulesTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "jvm_contract_tests": {
+    "tests": 770,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "module_jvm_tests": {
+    "canvas-core": 246,
+    "shared-core": 524
+  },
+  "architecture": {
+    "status": "passed",
+    "common_source_files": 71,
+    "imports_checked": 79,
+    "errors": []
+  },
+  "fixture_catalog": {
+    "status": "passed",
+    "scale_profiles": 3,
+    "synthetic_scale_points": 1200000
+  },
+  "portable_inputs": {
+    "status": "passed",
+    "windows_execution_verified": false
+  },
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/CoverLoadRules.kt": "77b760f28d6f28a4ed335b45eb18235106a17aa78fbbe2b46277923e9fd2a4db",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/CoverLoadRulesTest.kt": "d4fb9e380c07866043c1fbbb754203b892a02cec8bcb1436bec30eae6e38015c"
+  },
+  "targeted_test_xml_sha256": "218f08a54979505993e04e1eab0d5e19fbfac172655d3c719320a1f6530bcf66",
+  "android_build_verified": false,
+  "apple_build_verified": false,
+  "real_cover_decode_verified": false,
+  "platform_cache_verified": false,
+  "database_or_app_integration_verified": false,
+  "device_performance_verified": false,
+  "lib_09_accepted": false,
+  "c1_architecture_gate_complete": false
+}
