@@ -27,7 +27,7 @@ internal data class LibraryPageResult(
 )
 
 internal object LibraryPageRules {
-    private fun valid(query: LibraryPageQuery, limit: Int) = !LibrarySearchRules.invalidOperation(query.operation) &&
+    private fun valid(query: LibraryPageQuery, limit: Int) = !LibraryOperationRules.invalid(query.operation) &&
         query.operation.input.isEmpty() && limit in 1..200
 
     private fun freeze(snapshot: LibraryViewSnapshot, sort: LibrarySort) = snapshot.copy(notes = snapshot.notes.toList(),
@@ -69,16 +69,15 @@ internal object LibraryPageRules {
     fun deliver(candidate: LibraryPageResult, active: LibrarySearchQuery?): LibraryPageResult {
         if (active == null) return LibraryPageResult(failure = LibraryPageFailure.CANCELLED)
         val page = candidate.page ?: return candidate
-        if (LibrarySearchRules.invalidOperation(page.query.operation) || LibrarySearchRules.invalidOperation(active)) {
-            return LibraryPageResult(failure = LibraryPageFailure.INVALID_QUERY)
+        when (LibraryOperationRules.deliveryFailure(page.query.operation, active)) {
+            LibraryOperationFailure.INVALID_OPERATION ->
+                return LibraryPageResult(failure = LibraryPageFailure.INVALID_QUERY)
+            LibraryOperationFailure.STALE_QUERY ->
+                return LibraryPageResult(failure = LibraryPageFailure.STALE_QUERY)
+            LibraryOperationFailure.CANCELLED ->
+                return LibraryPageResult(failure = LibraryPageFailure.CANCELLED)
+            null -> Unit
         }
-        if (page.query.operation.queryVersion != active.queryVersion) {
-            return LibraryPageResult(failure = LibraryPageFailure.STALE_QUERY)
-        }
-        if (page.query.operation.operationId != active.operationId) {
-            return LibraryPageResult(failure = LibraryPageFailure.CANCELLED)
-        }
-        if (page.query.operation != active) return LibraryPageResult(failure = LibraryPageFailure.STALE_QUERY)
         val fresh = when {
             page.cursor != null -> next(page.snapshot, page.query, page.cursor, page.limit)
             page.startAnchor != null -> relocate(page.snapshot, page.query,

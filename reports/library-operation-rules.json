@@ -1,0 +1,54 @@
+{
+  "phase": "L2 internal library operation convergence",
+  "status": "passed",
+  "base_revision": "f495b5eb14a7cef48c83b3cb8ce4d56f967c6425",
+  "scope": "Detached clean worktree at base_revision plus only LibraryOperationRules.kt, LibraryOperationRulesTest.kt and the LibrarySearchRules.kt/LibraryPageRules.kt refactor; verifyPrototype and collect_verification completed. No public API, App, database or device change or verification.",
+  "targeted_jvm_suite": {
+    "suite": "dev.notecore.library.LibraryOperationRulesTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "jvm_contract_tests": {
+    "tests": 775,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "module_jvm_tests": {
+    "canvas-core": 246,
+    "shared-core": 529
+  },
+  "architecture": {
+    "status": "passed",
+    "common_source_files": 72,
+    "imports_checked": 80,
+    "errors": []
+  },
+  "fixture_catalog": {
+    "status": "passed",
+    "scale_profiles": 3,
+    "synthetic_scale_points": 1200000
+  },
+  "portable_inputs": {
+    "status": "passed",
+    "windows_execution_verified": false
+  },
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryOperationRules.kt": "02554cd5d4ffe77178345f3e43b0726919e8bc10b8bc3533de3babe85645dc47",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryPageRules.kt": "29b1f74e310a0d50ced14074ec903a93f59e51a04a91cebed7cd2f63202acb36",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibrarySearchRules.kt": "5d50559eb768040d55662879f4007c30be6a124f0c39ff7cacd5ac16414547c8",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryOperationRulesTest.kt": "8d1a636273984b06cc2f0f8ab1eaf63aa8625761bac44b6bb4bb85288163d376"
+  },
+  "targeted_test_xml_sha256": "4ef6282353d73559fa00f4ac121b9fc884e6da9a2a79051da6a55ab5eec02400",
+  "public_api_changed": false,
+  "search_behavior_changed": false,
+  "paging_behavior_changed": false,
+  "cover_delivery_behavior_changed": false,
+  "android_build_verified": false,
+  "apple_build_verified": false,
+  "database_or_app_integration_verified": false,
+  "device_performance_verified": false,
+  "c1_architecture_gate_complete": false
+}

@@ -60,8 +60,7 @@ internal object LibrarySearchRules {
         return null
     }
 
-    internal fun invalidOperation(query: LibrarySearchQuery) = query.operationId.isBlank() ||
-        query.operationId.length > 128 || !query.operationId.hasValidUnicode() || query.queryVersion < 0
+    internal fun invalidOperation(query: LibrarySearchQuery) = LibraryOperationRules.invalid(query)
 
     private fun freeze(s: LibrarySearchSnapshot) = LibrarySearchSnapshot(
         s.directory.copy(folders = s.directory.folders.toList(), notes = s.directory.notes.toList()),
@@ -136,18 +135,14 @@ internal object LibrarySearchRules {
     }
 
     fun deliverQuery(candidate: LibrarySearchQueryPlan, activeQuery: LibrarySearchQuery?): LibrarySearchDelivery {
-        if (activeQuery == null) return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.CANCELLED)
-        if (invalidOperation(candidate.query) || invalidOperation(activeQuery)) {
-            return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.INVALID_OPERATION)
-        }
-        if (candidate.query.queryVersion != activeQuery.queryVersion) {
-            return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.STALE_QUERY)
-        }
-        if (candidate.query.operationId != activeQuery.operationId) {
-            return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.CANCELLED)
-        }
-        if (candidate.query != activeQuery) {
-            return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.STALE_QUERY)
+        when (LibraryOperationRules.deliveryFailure(candidate.query, activeQuery)) {
+            LibraryOperationFailure.INVALID_OPERATION ->
+                return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.INVALID_OPERATION)
+            LibraryOperationFailure.STALE_QUERY ->
+                return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.STALE_QUERY)
+            LibraryOperationFailure.CANCELLED ->
+                return LibrarySearchDelivery(failure = LibrarySearchDeliveryFailure.CANCELLED)
+            null -> Unit
         }
         val fresh = prepareQuery(candidate.snapshot, candidate.trash, candidate.query)
         fresh.failure?.let { return LibrarySearchDelivery(failure = it) }
@@ -156,7 +151,7 @@ internal object LibrarySearchRules {
     }
 
     fun cancelQuery(active: LibrarySearchQuery, operationId: String, queryVersion: Long): LibrarySearchQuery? =
-        if (active.operationId == operationId && active.queryVersion == queryVersion) null else active
+        LibraryOperationRules.cancel(active, operationId, queryVersion)
 
     fun navigate(s: LibrarySearchSnapshot, trash: LibraryTrashSnapshot, candidate: LibrarySearchHit): LibrarySearchResolution {
         val target = candidate.target
