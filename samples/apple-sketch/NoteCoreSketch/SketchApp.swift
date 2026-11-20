@@ -51,7 +51,7 @@ final class SketchSession {
         guard tools.indices.contains(index), !notebook.isReadOnly,
               !notebook.hasActiveStroke, !notebook.hasPendingStroke else { return false }
         let tool = tools[index]
-        guard notebook.edit(request: PreviewEditSelectPen(argb: tool.argb, width: tool.width)).accepted else { return false }
+        guard notebook.edit(request: PreviewEditSelectPen(argb: tool.argb, width: tool.width, kind: .monoline)).accepted else { return false }
         toolIndex = index
         return true
     }

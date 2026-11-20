@@ -63,7 +63,7 @@ final class SketchSession: ObservableObject {
         guard tools.indices.contains(index) else { return .invalidTool }
         guard !notebook.hasActiveStroke && !notebook.hasPendingStroke else { return .activeInk }
         let tool = tools[index]
-        guard notebook.edit(request: PreviewEditSelectPen(argb: tool.argb, width: tool.width)).accepted else { return .coreRejected }
+        guard notebook.edit(request: PreviewEditSelectPen(argb: tool.argb, width: tool.width, kind: .monoline)).accepted else { return .coreRejected }
         toolIndex = index; return nil
     }
     func setReadOnly(_ value: Bool) -> SketchRefusal? {

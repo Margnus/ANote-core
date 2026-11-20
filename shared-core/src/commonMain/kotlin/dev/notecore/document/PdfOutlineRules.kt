@@ -50,7 +50,7 @@ internal object PdfOutlineRules {
         val sourceToPosition = mutableMapOf<Int, PdfPagePosition>()
         for (position in projection.pages) {
             if (position.sourceSha256 == source.sha256 && position.sourceNumber != null) {
-                sourceToPosition.putIfAbsent(position.sourceNumber - 1, position)
+                sourceToPosition.getOrPut(position.sourceNumber - 1) { position }
             }
         }
         var skipped = 0

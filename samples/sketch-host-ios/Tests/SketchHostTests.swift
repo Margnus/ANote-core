@@ -157,7 +157,7 @@ final class SketchHostTests: XCTestCase {
         XCTAssertTrue(host.offer(.down, points: [point(10, 1), point(20, 2)]).accepted)
         let operation = note.activeInputOperationId, bytes = note.inputReservedByteCharge
         let unsupported: [PreviewEdit] = [PreviewEditRename(title: "unsupported"),
-            PreviewEditSetPaper(width: 500, height: 600, paper: .grid), PreviewEditSelectPen(argb: 1, width: 3),
+            PreviewEditSetPaper(width: 500, height: 600, paper: .grid), PreviewEditSelectPen(argb: 1, width: 3, kind: .monoline),
             PreviewEditInsertPage.shared, PreviewEditCopyPage.shared, PreviewEditDeletePage.shared,
             PreviewEditSelectPage(pageId: "missing"), PreviewEditMovePage(beforePageId: nil)]
         for request in unsupported {

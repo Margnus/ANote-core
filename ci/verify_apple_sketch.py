@@ -13,6 +13,7 @@ from gradle_download_retry import run_gradle
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'build/apple-sketch'
 SAMPLE = ROOT / 'samples/apple-sketch'
+SECONDARY_SAMPLE = ROOT / 'samples/sketch-host-ios'
 
 
 def sha(path):
@@ -20,7 +21,8 @@ def sha(path):
 
 
 def inputs():
-    paths = set(SAMPLE.rglob('*.swift')) | set(SAMPLE.rglob('*.pbxproj')) | set(SAMPLE.rglob('*.xcscheme'))
+    paths = {path for sample in (SAMPLE, SECONDARY_SAMPLE) for pattern in ('*.swift', '*.pbxproj', '*.xcscheme')
+             for path in sample.rglob(pattern)}
     for module in ('canvas-core', 'shared-core'):
         for source_set in ('commonMain', 'iosMain'):
             paths.update((ROOT/module/'src'/source_set).rglob('*.kt'))
@@ -76,6 +78,11 @@ def main():
             ':shared-core:linkDebugFrameworkIosSimulatorArm64'], 1500)
         framework = ROOT/'shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype'
         report['framework_sha256'] = sha(framework)
+        report['stage'] = 'secondary-host-build'
+        run('secondary-host-build', ['xcodebuild', '-quiet', '-project', str(SECONDARY_SAMPLE/'SketchHost.xcodeproj'),
+            '-scheme', 'SketchHost', '-sdk', 'iphonesimulator', '-destination', 'generic/platform=iOS Simulator',
+            '-derivedDataPath', str(OUTPUT/'secondary-xcode'), 'CODE_SIGNING_ALLOWED=NO', 'build-for-testing'], 900)
+        report['secondary_host_build_for_testing'] = True
         devices = json.loads(capture('xcrun', 'simctl', 'list', 'devices', 'available', '--json'))['devices']
         choices = [(rt, d) for rt, group in devices.items() if '.iOS-' in rt for d in group
                    if d.get('isAvailable') and d.get('deviceTypeIdentifier')]
@@ -152,7 +159,7 @@ def main():
     finally:
         report['evidence_sha256'] = {p.relative_to(OUTPUT).as_posix(): sha(p) for p in OUTPUT.rglob('*')
             if p.is_file() and (p.suffix in ('.json', '.log', '.png')) and p.name != 'report.json'
-            and not any(part in ('xcode', 'device-xcode', 'host.xcresult', 'ui.xcresult') for part in p.relative_to(OUTPUT).parts)}
+            and p.relative_to(OUTPUT).parts[0] not in ('xcode', 'secondary-xcode', 'device-xcode', 'host.xcresult', 'ui.xcresult')}
         (OUTPUT/'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
 
