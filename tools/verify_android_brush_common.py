@@ -23,12 +23,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--serial', required=True)
     parser.add_argument('--adb', required=True)
-    parser.add_argument('--avd', choices=('NoteCorePreview', 'NoteCoreWindows', 'NoteCoreCurrent35'), default='NoteCorePreview')
+    parser.add_argument('--avd', default='NoteCorePreview')
+    parser.add_argument('--expected-api')
+    parser.add_argument('--allow-custom-avd', action='store_true')
     parser.add_argument('--output', help='Fresh evidence directory; required for the current persistent API35 AVD')
     args = parser.parse_args()
     current = args.serial == 'emulator-5590' and args.avd == 'NoteCoreCurrent35'
-    assert current or (args.serial in ('emulator-5554', 'emulator-5580') and args.avd != 'NoteCoreCurrent35'), 'Use the dedicated emulator'
-    assert not current or args.output, 'Current runs must not overwrite historical evidence'
+    legacy = args.serial in ('emulator-5554', 'emulator-5580') and args.avd != 'NoteCoreCurrent35'
+    assert current or legacy or args.allow_custom_avd, 'Use the dedicated emulator or explicitly allow an isolated custom AVD'
+    assert not (current or args.allow_custom_avd) or args.output, 'Current and custom runs must not overwrite historical evidence'
     sources = sorted([*ROOT.glob('canvas-core/src/commonMain/**/*.kt'), *ROOT.glob('canvas-core/src/commonTest/**/*.kt'),
         *ROOT.glob('canvas-core/src/jvmAndAndroidMain/**/*.kt'), *ROOT.glob('canvas-core/src/jvmAndAndroidTest/**/*.kt'), *ROOT.glob('canvas-core/src/androidMain/**/*.kt'), *ROOT.glob('canvas-core/src/androidInstrumentedTest/**/*.kt'),
         ROOT/'build.gradle.kts', ROOT/'settings.gradle.kts', ROOT/'canvas-core/build.gradle.kts', ROOT/'gradle.properties', Path(__file__)])
@@ -47,7 +50,8 @@ def main():
     def adb(*command):
         return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT, capture_output=True,
             text=True, check=True, timeout=120).stdout
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').strip() == args.avd
+    avd_name = adb('shell', 'getprop', 'ro.kernel.qemu.avd_name').strip() or adb('shell', 'getprop', 'ro.boot.qemu.avd_name').strip()
+    assert avd_name == args.avd, (avd_name, args.avd)
     def original_notes():
         raw = subprocess.run([args.adb, '-s', args.serial, 'exec-out', 'run-as', 'dev.notecore.preview',
             'tar', 'cf', '-', 'files/preview-notes'], cwd=ROOT, capture_output=True, check=True, timeout=120).stdout
@@ -56,6 +60,8 @@ def main():
     notes_before = original_notes() if current else None
     if current:
         assert adb('shell', 'getprop', 'ro.build.version.sdk').strip() == '35'
+    if args.expected_api:
+        assert adb('shell', 'getprop', 'ro.build.version.sdk').strip() == args.expected_api
     adb('install', '-r', str(apk))
     remote = adb('shell', 'pm', 'path', 'dev.notecore.canvas.poc.test').strip().removeprefix('package:')
     assert re.fullmatch(r'/data/app/[a-zA-Z0-9_./=+~:-]+/base.apk', remote)

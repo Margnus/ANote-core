@@ -22,6 +22,10 @@ def sha(data):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--adb', required=True)
+    parser.add_argument('--serial', default='emulator-5590')
+    parser.add_argument('--avd', default='NoteCoreCurrent35')
+    parser.add_argument('--api', default='35')
+    parser.add_argument('--skip-original-notes', action='store_true')
     parser.add_argument('--output', default='build/document-order-art')
     parser.add_argument('--suite', choices=('document-order', 'text-payload', 'document-reader', 'folder-trash'), default='document-order')
     args = parser.parse_args()
@@ -31,15 +35,16 @@ def main():
     out = ROOT/args.output
     out.mkdir(parents=True, exist_ok=False)  # Never overwrite a previous baseline or build/run evidence.
     def adb(*command):
-        return subprocess.run([args.adb, '-s', 'emulator-5590', *command], cwd=ROOT,
+        return subprocess.run([args.adb, '-s', args.serial, *command], cwd=ROOT,
                               capture_output=True, check=True, timeout=120).stdout
-    assert adb('shell', 'getprop', 'ro.boot.qemu.avd_name').strip() == b'NoteCoreCurrent35'
-    assert adb('shell', 'getprop', 'ro.build.version.sdk').strip() == b'35'
+    avd_name = adb('shell', 'getprop', 'ro.kernel.qemu.avd_name') or adb('shell', 'getprop', 'ro.boot.qemu.avd_name')
+    assert avd_name.decode().strip() == args.avd
+    assert adb('shell', 'getprop', 'ro.build.version.sdk').decode().strip() == args.api
     def notes():
         data = adb('exec-out', 'run-as', 'dev.notecore.preview', 'tar', 'cf', '-', 'files/preview-notes')
         with tarfile.open(fileobj=io.BytesIO(data)) as archive:
             return {entry.name: sha(archive.extractfile(entry).read()) for entry in archive.getmembers() if entry.isfile()}
-    before = notes()
+    before = {} if args.skip_original_notes else notes()
     (out/'preview-notes-before.json').write_text(json.dumps(before, indent=2)+'\n', encoding='utf-8', newline='\n')
     paths = set()
     for module in ('canvas-core', 'shared-core'):
@@ -66,7 +71,7 @@ def main():
     raw = adb('shell', 'am', 'instrument', '-w', '-r', '-e', 'suite', args.suite,
               PACKAGE+'/dev.notecore.document.DocumentOrderInstrumentation')
     (out/'run.log').write_bytes(raw)
-    after = notes()
+    after = {} if args.skip_original_notes else notes()
     (out/'preview-notes-after.json').write_text(json.dumps(after, indent=2)+'\n', encoding='utf-8', newline='\n')
     test_package = 'library' if args.suite == 'folder-trash' else 'document'
     counts = {name: len(re.findall(r'@Test\s+fun\s+\w+\s*\(',
@@ -77,11 +82,12 @@ def main():
     assert before == after
     assert source == {p.relative_to(ROOT).as_posix(): sha(p.read_bytes()) for p in sorted(paths)}
     assert apk_hash == sha(apk.read_bytes())
-    report = {'status': 'passed', 'platform': 'API35 AOSP x86_64 ART independent library-test APK',
-        'avd': 'NoteCoreCurrent35', 'serial': 'emulator-5590', 'suites': counts,
+    report = {'status': 'passed', 'platform': f'API{args.api} AOSP ART independent library-test APK',
+        'avd': args.avd, 'serial': args.serial, 'suites': counts,
         'source_sha256': source, 'source_binding': 'raw local build inputs, checked unchanged across install/run; no Git EOL equivalence claim',
         'apk_sha256': apk_hash, 'installed_apk_sha256_verified': True,
         'preview_notes_before': before, 'preview_notes_after': after,
+        'original_notes_checked': not args.skip_original_notes,
         'evidence_sha256': {p.name: sha(p.read_bytes()) for p in out.iterdir() if p.name != 'report.json'},
         'scope': 'Original affected common model suites on ART; no preview UI integration, production storage, physical performance or C1 acceptance',
         'physical_m1_passed': False, 'c1_passed': False, 'requirement_accepted': False}

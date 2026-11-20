@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "candidate_source_commit": "4239213148d09237b1bb3b49bbbb37f8062fd5bb",
+  "scope": "Current-source isolated library-test APKs on Android 8.0 API 26 x86_64 ART; no ordinary App, user notes, physical performance or production acceptance",
+  "runtime": {
+    "api": "26",
+    "fingerprint": "Android/sdk_phone_x86_64/generic_x86_64:8.0.0/OSR1.180418.004/4931640:userdebug/test-keys",
+    "abi": "x86_64",
+    "selinux": "Enforcing",
+    "kernel": "3.18.91+",
+    "avd": "NoteCoreArt26",
+    "serial": "emulator-5590"
+  },
+  "canvas": {
+    "status": "passed",
+    "tests": 149,
+    "ignored": 0,
+    "test_apk_sha256": "ccc00ad42c3fe4a84ad78425c48d64ae84911e8a14b6890be36c4cace6dc5a08",
+    "installed_test_apk_sha256_verified": true,
+    "shared_geometry_and_chunk_mask_on_art_verified": true,
+    "native_canvas_mask_image_consumption_verified": true,
+    "native_image_lease_handoff_verified": true,
+    "real_bounded_executor_render_handoff_verified": true,
+    "shared_input_arena_on_art_verified": true,
+    "axis_aligned_tile_max_channel_delta": 0,
+    "rotated_pressure_tile_max_channel_delta": 4,
+    "arbitrary_transform_accepted": false,
+    "native_brush_path_rasterizer_verified": false,
+    "report_sha256": "bdec7fa1e1e486300e46eaf8ae0f2ee5c852369d4a0dbe5fb6067513006e4122"
+  },
+  "shared": {
+    "status": "passed",
+    "tests": 95,
+    "ignored": 0,
+    "test_apk_sha256": "d6e53db9da8b40baa0a483a6e69285beea4530a9e8e8090c3013b791d8ed7b47",
+    "installed_test_apk_sha256_verified": true,
+    "suites": {
+      "document-order": {
+        "tests": 50,
+        "report_sha256": "9b9d800f8df3dc5ddab60769b818e640f085823f66ec8b6f158ba138a2655a76"
+      },
+      "text-payload": {
+        "tests": 6,
+        "report_sha256": "0c23913bb0314c46109d189eec4e782ce86aa43e2ba4f7fda551dbefde5fc40b"
+      },
+      "document-reader": {
+        "tests": 13,
+        "report_sha256": "d6c08f643f1963d60310dea9ae79b443dd721c06c8996d13535d41924a09d707"
+      },
+      "folder-trash": {
+        "tests": 26,
+        "report_sha256": "ebc8d0b6744d405b80962afc5a52b8905fd573815b1f278e0fa9753b151f1458"
+      }
+    }
+  },
+  "total_tests": 244,
+  "total_ignored": 0,
+  "source_binding": "Each linked evidence report records the complete affected source and build-input hashes checked unchanged across build, install and execution",
+  "verification_tools_sha256": {
+    "tools/verify_android_brush_common.py": "e927154a2b1702221586c77ca6c283978f4349004730666ba4b1617822b84909",
+    "tools/verify_document_order_art.py": "81fdb676b07074b58d0deb83bd644aaeb49e8ad37367a8f09b20d8455e3e72f4"
+  },
+  "ordinary_app_verified": false,
+  "original_user_notes_accessed": false,
+  "temporary_avd_removed": true,
+  "physical_device_measured": false,
+  "physical_heap_measured": false,
+  "app_brush_integration_verified": false,
+  "c1_gate_complete": false,
+  "requirement_accepted": false
+}
