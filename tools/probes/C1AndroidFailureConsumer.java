@@ -1,6 +1,7 @@
 package dev.notecore.probes;
 
 import android.os.Process;
+import dev.notecore.canvas.prototype.BrushKind;
 import dev.notecore.document.DocumentBudget;
 import dev.notecore.document.DocumentBudgetCreation;
 import dev.notecore.document.DocumentBudgetFailure;
@@ -81,7 +82,7 @@ public final class C1AndroidFailureConsumer {
         long revision = notebook.getChangeVersion();
         check(notebook.pageAt(-1) == null && notebook.pageAt(notebook.getPageCount()) == null
                 && notebook.strokeAt(-1) == null && notebook.strokeAt(0) == null, "safe index");
-        PreviewEditResult edit = notebook.edit(new PreviewEdit.SelectPen(-1, Double.NaN));
+        PreviewEditResult edit = notebook.edit(new PreviewEdit.SelectPen(-1, Double.NaN, BrushKind.MONOLINE));
         check(!edit.getAccepted() && Objects.requireNonNull(edit.getFailure()).getKind() == PreviewFailureKind.INVALID_ARGUMENT
                 && edit.getRootRevision() == revision, "invalid pen");
         check(notebook.getInputReservedByteCharge() == 2248

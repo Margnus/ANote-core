@@ -64,6 +64,8 @@ Android包：`bash ci/package-android-preview.sh`（另需ANDROID_HOME）；iOS�
 
 同一核心验证入口可用于本地或CI：`bash ci/verify.sh`（需JAVA_HOME，Python可通过PYTHON_BIN指定）。未配置GitHub远程工作流或自动发布。
 
+Android候选公开面与独立消费者整包先构建 `sdkCandidate=true` 的 JVM/Android Maven 产物，再运行 `python3 tools/verify_android_sdk_candidate.py --image <系统镜像目录>`。工具覆盖禁止端口、外部 Maven APK、源码/历史二进制恢复、Java DEX 和可选隔离 ART；API 26 可用 `--output build/android-sdk-candidate-api26 --report reports/android-sdk-candidate-api26.json` 单独保留回执。需要 ANDROID_HOME、JAVA_HOME、GRADLE_USER_HOME 和对应系统镜像，不执行普通 App 或真实 UI 验收。
+
 测试HTML在canvas-core/build/reports/tests/jvmTest/index.html，机器报告在[reports/verification.json](reports/verification.json)。后者由实际Gradle XML生成；代码变化后应重新运行测试再生成报告。
 
 Apple编译入口单独开启：
