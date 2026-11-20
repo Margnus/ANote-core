@@ -34,12 +34,13 @@ final class SketchSession {
         precondition(Thread.isMainThread && !tools.isEmpty)
         self.tools = tools
         self.background = background
+        let budgetResult = DocumentBudget.companion.validated(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+            journalEntries: 128, journalBytes: 8 * 1024 * 1024, identityBytes: 2 * 1024 * 1024,
+            historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024)
+        guard let budget = budgetResult.budget else { preconditionFailure("Invalid fixed sketch budget") }
         let result = PagedPreviewNotebook.companion.createValidated(
             documentId: UUID().uuidString, title: "内存草图", sessionNonce: UUID().uuidString,
-            width: 595, height: 842, paper: .blank,
-            budget: DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
-                journalEntries: 128, journalBytes: 8 * 1024 * 1024, identityBytes: 2 * 1024 * 1024,
-                historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2 * 1024 * 1024),
+            width: 595, height: 842, paper: .blank, budget: budget,
             ownerCheck: { precondition(Thread.isMainThread) })
         precondition(result.failure == nil && result.notebook != nil)
         notebook = result.notebook!
