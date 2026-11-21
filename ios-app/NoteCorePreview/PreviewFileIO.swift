@@ -77,8 +77,10 @@ private struct BoundedUTF8Input {
             carry = Data(bytes.suffix(from: end))
             guard end > 0 else { continue }
             let prefix = bytes.prefix(end)
-            // Decode scalars without Foundation's platform-dependent BOM handling.
-            guard var text = String(validating: prefix, as: UTF8.self) else {
+            // Decode with the deployment-compatible stdlib API, then reject any repair.
+            // A malformed byte sequence cannot round-trip through replacement scalars.
+            var text = String(decoding: prefix, as: UTF8.self)
+            guard text.utf8.elementsEqual(prefix) else {
                 // Before streaming, byte capacity and filesystem failures took precedence over malformed UTF-8.
                 while try readBytes() != nil {}
                 throw TextReadRefusal.invalidUTF8
