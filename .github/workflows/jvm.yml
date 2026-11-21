@@ -1,0 +1,57 @@
+name: JVM shared contracts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/jvm.yml'
+      - 'canvas-core/**'
+      - 'shared-core/**'
+      - 'fixtures/**'
+      - 'tools/**'
+      - 'ci/verify.sh'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/wrapper/**'
+      - 'gradlew'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jvm-contracts-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Select bundled JDK 17
+        run: |
+          test -x "$JAVA_HOME_17_X64/bin/java"
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_17_X64/bin" >> "$GITHUB_PATH"
+      - name: Verify current shared contracts and source bindings
+        run: |
+          mkdir -p build/jvm-ci
+          git rev-parse HEAD > build/jvm-ci/commit.txt
+          bash ci/verify.sh > build/jvm-ci/verification.log 2>&1
+      - name: Retain source-bound results, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: jvm-contracts-${{ github.sha }}
+          path: |
+            build/jvm-ci/**
+            reports/verification.json
+            reports/gradle-verification.sha256
+            canvas-core/build/test-results/jvmTest/TEST-*.xml
+            shared-core/build/test-results/jvmTest/TEST-*.xml
+          if-no-files-found: error
+          retention-days: 14
