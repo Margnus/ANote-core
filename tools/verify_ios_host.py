@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import uuid
 from pathlib import Path
@@ -83,12 +84,26 @@ EXPECTED = {
     'testLateImportCannotReplaceNewActiveOwner()',
     'testImportFromDepartedWindowSavesCopyForLibraryReopen()',
     'testLateOpenCannotReplaceNewActiveOwner()',
-    'testStaleReadRetryCannotSupersedeNewerOpen()',
+    'testUnrelatedSaveDoesNotRetryCurrentOpen()',
+    'testLongAndroidCheckpointThroughOriginalAppleWorkerAndBudget()',
+    'testRetainedOpenUsesItsOwnWorkerByteBoundary()',
     'testLegacyNoEditPreservesBytesThenEditMigratesOriginalExtent()',
     'testNativeRendererChangesPageCacheAndAppliesFullAffineDotWidth()',
     'testPagedSaveCloseAndNewOwnerReadAllPages()',
     'testUnsupportedBrushAndCorruptUTF8DoNotCreateCopyOrChangeSource()',
 }
+
+
+def expected_host_tests():
+    names = []
+    for path in sorted((ROOT / 'ios-app/NoteCorePreviewTests').glob('*.swift')):
+        names.extend(name + '()' for name in re.findall(
+            r'^\s*(?:@MainActor\s+)?func\s+(test\w+)\s*\(', path.read_text(encoding='utf-8'), re.MULTILINE))
+    actual = set(names)
+    if not names or len(names) != len(actual) or actual != EXPECTED:
+        raise ValueError('Host test catalog differs from Swift source: missing=' + str(sorted(actual - EXPECTED)) +
+                         ', obsolete=' + str(sorted(EXPECTED - actual)) + ', duplicate_names=' + str(len(names) != len(actual)))
+    return set(EXPECTED)
 
 
 def digest(path):
@@ -109,6 +124,7 @@ def inputs():
 
 
 def main():
+    expected_host_tests()
     parser = argparse.ArgumentParser()
     parser.add_argument('--device', required=True)
     args = parser.parse_args()

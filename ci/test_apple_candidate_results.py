@@ -2,11 +2,33 @@
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import Mock
 
 from verify_apple_candidate import run_host_tests
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from verify_ios_host import expected_host_tests
+from unittest.mock import patch
+
+
+class HostCatalogTest(unittest.TestCase):
+    def test_current_source_matches_explicit_catalog(self):
+        self.assertTrue(expected_host_tests())
+
+    def test_missing_obsolete_and_duplicate_tests_are_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tests = root / 'ios-app/NoteCorePreviewTests'
+            tests.mkdir(parents=True)
+            for source, expected in [('func testNew() {}', {'testOld()'}),
+                                     ('func testSame() {}\nfunc testSame() {}', {'testSame()'}),
+                                     ('', set())]:
+                (tests / 'Probe.swift').write_text(source, encoding='utf-8')
+                with patch('verify_ios_host.ROOT', root), patch('verify_ios_host.EXPECTED', expected):
+                    with self.assertRaises(ValueError):
+                        expected_host_tests()
 
 
 class HostResultRetentionTest(unittest.TestCase):

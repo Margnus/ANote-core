@@ -114,6 +114,9 @@ def main():
 
     before = inputs()
     try:
+        sys.path.insert(0, str(ROOT / 'tools'))
+        from verify_ios_host import expected_host_tests
+        expected_host = expected_host_tests()
         report.update(commit=capture('git', 'rev-parse', 'HEAD').strip(), run_id=os.environ['GITHUB_RUN_ID'],
                       xcode=capture('xcodebuild', '-version').strip(), os=capture('sw_vers').strip(),
                       source_and_build_input_sha256=before)
@@ -159,13 +162,11 @@ def main():
                     yield node
                 yield from cases(node.get('children', []))
         actual = list(cases(tree['testNodes']))
-        sys.path.insert(0, str(ROOT / 'tools'))
-        from verify_ios_host import EXPECTED
-        assert {node['name'] for node in actual} == EXPECTED and all(node['result'] == 'Passed' for node in actual)
-        assert summary['result'] == 'Passed' and summary['totalTestCount'] == len(EXPECTED)
+        assert {node['name'] for node in actual} == expected_host and all(node['result'] == 'Passed' for node in actual)
+        assert summary['result'] == 'Passed' and summary['totalTestCount'] == len(expected_host)
         assert summary['failedTests'] == summary['skippedTests'] == summary['expectedFailures'] == 0
         assert any(d['device']['deviceId'] == device for d in summary['devicesAndConfigurations'])
-        report['app_host'] = {'tests': len(actual), 'checks': sorted(EXPECTED), 'summary': summary}
+        report['app_host'] = {'tests': len(actual), 'checks': sorted(expected_host), 'summary': summary}
         report['stage'] = 'ordinary_app_ui_tests'
         container = Path(capture('xcrun', 'simctl', 'get_app_container', device, 'dev.notecore.preview', 'data').strip())
         notes = container / 'Documents/PreviewNotes'
