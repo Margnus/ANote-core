@@ -1,0 +1,101 @@
+{
+  "milestone": "DEV-036/C1 item 1 Android bounded sampling",
+  "status": "collector-protocol-verified-device-pending",
+  "baseline_commit": "45e3c4dc366af0eca01f493f24c044b15c090520",
+  "checks": {
+    "tools/verify_android_m1_capture.py": {
+      "status": "passed",
+      "origin": "synthetic-fake-adb",
+      "checks": [
+        "matching_candidate_keeps_acceptance_false",
+        "emulator_refused_before_package_reads",
+        "wrong_candidate_refused_before_metrics",
+        "successful_command_without_metrics_refused",
+        "wrong_process_memory_refused",
+        "shell_syntax_in_observed_path_refused",
+        "split_package_refused",
+        "pid_change_refused",
+        "timeout_retains_partial_output_and_hashes",
+        "bounded_series_keeps_each_raw_sample_and_timing",
+        "multiple_pids_refused_before_metrics",
+        "malformed_stat_refused",
+        "pid_reuse_within_sample_refused",
+        "pid_reuse_between_samples_retains_first_sample",
+        "pid_change_between_samples_refused",
+        "installed_package_replacement_refused",
+        "installed_digest_changed_refused",
+        "interruption_retains_completed_sample",
+        "later_timeout_retains_prior_samples_and_partial_memory",
+        "invalid_parameters_refused_before_output_or_adb"
+      ],
+      "device_performance_verified": false
+    },
+    "tools/check_architecture.py": {
+      "status": "passed",
+      "common_source_files": 72,
+      "imports_checked": 80,
+      "errors": [],
+      "modules": [
+        "canvas-core",
+        "shared-core"
+      ],
+      "project_dependency_direction": "shared-core -> canvas-core only",
+      "independent_sketch_host_project_dependencies": [
+        ":shared-core"
+      ],
+      "independent_apple_sketch_imports": [
+        "NoteCanvasPrototype",
+        "NoteCoreSketch",
+        "UIKit",
+        "XCTest"
+      ],
+      "retired_single_page_stack_absent": true,
+      "scope": "commonMain imports and direct project dependencies; not a transitive bytecode audit"
+    },
+    "tools/verify_portable_inputs.py": {
+      "status": "passed",
+      "checks": [
+        "utf8_text_lf_crlf_same_verification_hash",
+        "binary_and_interchange_artifacts_remain_byte_exact",
+        "standalone_cr_is_not_silently_changed",
+        "tool_text_io_explicit_utf8",
+        "stamp_keys_use_platform_independent_forward_slashes"
+      ],
+      "text_reads": 256,
+      "text_writes": 189,
+      "windows_execution_verified": false,
+      "scope": "synthetic LF/CRLF and explicit UTF-8 code checks on current host; no native cross-OS build claim"
+    },
+    "tools/validate_fixture_catalog.py": {
+      "status": "passed",
+      "scale_profiles": 3,
+      "synthetic_scale_points": 1200000,
+      "resource_commit_abrupt_cases": 5,
+      "resource_commit_integrity_cases": 4,
+      "resource_commit_cancellation_cases": 5,
+      "legacy_framing_refusals": 8,
+      "resource_gc_rule_cases": 18,
+      "resource_gc_reservation_cases": 6,
+      "resource_gc_query_mutations_rejected": 6,
+      "capture_contract_checks": 43,
+      "capture_origin": "synthetic",
+      "legacy_source_files": 15,
+      "legacy_anchors": 12,
+      "scope": "catalog hashes and selected cross-schema facts; no migration/legacy runtime/device validation"
+    }
+  },
+  "host_inventory": {
+    "adb_devices": 0,
+    "scope": "adb devices -l returned an empty device list on this Windows host"
+  },
+  "m1_accepted": false,
+  "physical_verified": false,
+  "app_changed": false,
+  "scope": "Synthetic fake ADB and virtual clock. No physical memory peak, sampling perturbation, process-stat permission, device trace or pen latency verification. JVM and native app builds were not rerun for this Python-only diagnostic change.",
+  "sha256": {
+    "tools/capture_android_m1.py": "0ef3bf53cb739c447136b15e0fb840c3eaabeebaa3f65e683ba0f6dac1668b97",
+    "tools/verify_android_m1_capture.py": "2670e889439c0b3502851dda076e085346724edf1267dfe76815b3286b797c83",
+    "docs/M1真机采集.md": "83ca9ba5c245c4849d6521f5ca0305374ae623129d222893113ea71f046ef379"
+  },
+  "hash_scope": "UTF-8 source text with CRLF normalized to LF"
+}
