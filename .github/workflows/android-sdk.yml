@@ -1,0 +1,62 @@
+name: Android current SDK API26
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/android-sdk.yml'
+      - 'ci/verify_android_sdk.py'
+      - 'ci/gradle_download_retry.py'
+      - 'tools/verify_android_sdk_candidate.py'
+      - 'tools/probes/C1AndroidFailureConsumer.java'
+      - 'canvas-core/src/commonMain/**'
+      - 'canvas-core/src/androidMain/**'
+      - 'canvas-core/src/jvmAndAndroidMain/**'
+      - 'shared-core/src/commonMain/**'
+      - 'shared-core/src/androidMain/**'
+      - 'canvas-core/build.gradle.kts'
+      - 'shared-core/build.gradle.kts'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/wrapper/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-sdk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user-home
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Select bundled JDK 17
+        run: |
+          test -x "$JAVA_HOME_17_X64/bin/java"
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_17_X64/bin" >> "$GITHUB_PATH"
+      - name: Prepare isolated API26 runtime
+        run: |
+          mkdir -p build/android-sdk-ci
+          test -e /dev/kvm
+          sudo chmod 666 /dev/kvm
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'system-images;android-26;default;x86_64' > build/android-sdk-ci/sdk-install.log 2>&1
+      - name: Build candidate and execute original external consumers
+        run: python3 ci/verify_android_sdk.py
+      - name: Retain evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-sdk-${{ github.sha }}
+          path: build/android-sdk-ci/**
+          if-no-files-found: error
+          retention-days: 14
