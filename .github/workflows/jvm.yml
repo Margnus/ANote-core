@@ -28,6 +28,8 @@ jobs:
   verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user-home
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -42,6 +44,28 @@ jobs:
           mkdir -p build/jvm-ci
           git rev-parse HEAD > build/jvm-ci/commit.txt
           bash ci/verify.sh > build/jvm-ci/verification.log 2>&1
+      - name: Compile independent Java calls against current JVM classes
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path.cwd()
+          platforms = list((pathlib.Path(os.environ['ANDROID_HOME']) / 'platforms').glob('android-*/android.jar'))
+          assert platforms, 'No Android compile stubs installed on this runner'
+          android = max(platforms, key=lambda p: int(p.parent.name.split('-')[1]))
+          stdlibs = list(pathlib.Path(os.environ['GRADLE_USER_HOME']).glob('caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/*/kotlin-stdlib-2.2.21.jar'))
+          assert len(stdlibs) == 1, 'Expected the actual build Kotlin stdlib'
+          classes = [root / module / 'build/classes/kotlin/jvm/main' for module in ('canvas-core', 'shared-core')]
+          assert all(p.is_dir() for p in classes), 'Missing real JVM compilation outputs'
+          source = root / 'tools/probes/C1AndroidFailureConsumer.java'
+          output = root / 'build/jvm-ci/java-consumer'
+          output.mkdir()
+          subprocess.run([str(pathlib.Path(os.environ['JAVA_HOME']) / 'bin/javac'), '--release', '8',
+              '-cp', os.pathsep.join(map(str, [android, *classes, stdlibs[0]])), '-d', str(output), str(source)], check=True)
+          receipt = {'status': 'compiled', 'scope': 'Independent Java source signatures against current JVM classes and Android compile stubs; no AAR/DEX/ART or device runtime claim',
+              'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(), 'android_compile_stubs': str(android),
+              'art_runtime_verified': False}
+          (root / 'build/jvm-ci/java-consumer.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+          PY
       - name: Retain source-bound results, including failures
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

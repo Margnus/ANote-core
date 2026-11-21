@@ -47,7 +47,8 @@ public final class C1AndroidFailureConsumer {
     }
 
     public static void main(String[] args) throws Exception {
-        check(args.length == 2, "fixture paths");
+        check(args.length == 2 || (args.length == 3 && args[2].equals("--current-candidate")), "fixture paths and mode");
+        boolean currentCandidate = args.length == 3;
         String pending = new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8);
         String committed = new String(Files.readAllBytes(Paths.get(args[1])), StandardCharsets.UTF_8);
 
@@ -61,8 +62,14 @@ public final class C1AndroidFailureConsumer {
                 exact.getHistoryBytes(), -1));
         check(exact.getInputBytes() == 2248, "invalid copy did not change budget");
 
+        if (currentCandidate) {
+            PreviewDocumentRead highlight = PreviewDocumentReader.INSTANCE.read(
+                    committed.replace("\tMONOLINE\t", "\tHIGHLIGHTER\t"));
+            check(highlight.getFailure() == null && highlight.getRoot() != null, "current highlighter accepted");
+        }
+        String unsupportedKind = currentCandidate ? "PRESSURE" : "HIGHLIGHTER";
         PreviewDocumentRead unsupported = PreviewDocumentReader.INSTANCE.read(
-                committed.replace("\tMONOLINE\t", "\tHIGHLIGHTER\t"));
+                committed.replace("\tMONOLINE\t", "\t" + unsupportedKind + "\t"));
         check(unsupported.getFailure() == PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT && unsupported.getRoot() == null,
                 "typed document refusal");
         String malformed = "unrecognized checkpoint";

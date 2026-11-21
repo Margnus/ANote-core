@@ -259,7 +259,7 @@ def main():
                     assert device('shell', 'sha256sum', deployed).split()[0] == sha(path)
                 receipt = json.loads(device('shell', f'CLASSPATH={remote}/{dex.name} /system/bin/app_process /system/bin '
                                             f'dev.notecore.probes.C1AndroidFailureConsumer '
-                                            f'{remote}/prepare.ncp {remote}/confirmed-final.ncp'))
+                                            f'{remote}/prepare.ncp {remote}/confirmed-final.ncp --current-candidate'))
                 package = 'dev.notecore.candidateconsumer'
                 device('install', '-r', retained_apk, timeout=120)
                 launch = device('shell', 'am', 'start', '-W', f'{package}/.MainActivity', timeout=60)
