@@ -16,9 +16,9 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def verify(framework_dir, runtime, device_type, output):
+def verify(framework_dir, runtime, device_type, output, pin_path=PIN, current_candidate=False):
     output.mkdir(parents=True)
-    pin = json.loads(PIN.read_bytes())
+    pin = json.loads(pin_path.read_bytes())
     fixture_paths = {Path(name).name: ROOT / name for name in pin['apple']['fixture_sha256']}
     for name, digest in pin['apple']['fixture_sha256'].items():
         assert sha(ROOT / name) == digest, name
@@ -45,7 +45,8 @@ def verify(framework_dir, runtime, device_type, output):
             expected = pin['apple']['targets'][target]
             assert sha(library) == expected['framework_sha256'] and sha(header) == expected['header_sha256']
             binary = work / target
-            run(f'compile-{target}', 'xcrun', '--sdk', sdk, 'swiftc', '-target', triple, '-F', framework.parent,
+            defines = ['-D', 'CURRENT_CANDIDATE'] if current_candidate else []
+            run(f'compile-{target}', 'xcrun', '--sdk', sdk, 'swiftc', *defines, '-target', triple, '-F', framework.parent,
                 '-module-cache-path', work / ('modules-' + target), CONSUMER, '-o', binary)
             linked = run(f'link-{target}', 'xcrun', 'vtool', '-show-build', binary).decode()
             assert 'minos 17.0' in linked and f'platform {platform}\n' in linked
@@ -76,6 +77,7 @@ def verify(framework_dir, runtime, device_type, output):
 
     report = {
         'status': 'passed', 'candidate_source_commit': pin['candidate_source_commit'],
+        'current_candidate_mode': current_candidate,
         'scope': 'Independent Apple Swift executable on the selected simulator runtime; iPhoneOS binary linked only',
         'runtime': {'identifier': runtime, 'version': configured['version'], 'build': configured['buildversion']},
         'selected_typed_channels_and_recovery': {key: value for key, value in receipt.items() if 'nserror' not in key},
@@ -83,7 +85,7 @@ def verify(framework_dir, runtime, device_type, output):
         'targets': targets, 'simulator_deleted': True, 'existing_device_inventory_unchanged': before == after,
         'ios17_runtime_verified': configured['version'].split('.')[0] == '17',
         'source_sha256': {path.relative_to(ROOT).as_posix(): sha(path)
-                          for path in (Path(__file__).resolve(), CONSUMER, PIN, *fixture_paths.values())},
+                          for path in (Path(__file__).resolve(), CONSUMER, pin_path, *fixture_paths.values())},
         'raw_sha256': {path.name: sha(path) for path in sorted(output.iterdir())},
     }
     (output / 'verification.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
@@ -96,5 +98,8 @@ if __name__ == '__main__':
     parser.add_argument('--runtime', default='com.apple.CoreSimulator.SimRuntime.iOS-27-0')
     parser.add_argument('--device-type', default='com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro')
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--pin', type=Path, default=PIN, help='Exact source/artifact descriptor; historical pin remains the default')
+    parser.add_argument('--current-candidate', action='store_true', help='Compile current signatures; accept HIGHLIGHTER and refuse PRESSURE')
     args = parser.parse_args()
-    verify(args.framework_dir.resolve(), args.runtime, args.device_type, args.output.resolve())
+    verify(args.framework_dir.resolve(), args.runtime, args.device_type, args.output.resolve(),
+           args.pin.resolve(), args.current_candidate)

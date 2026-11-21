@@ -42,8 +42,16 @@ let copyDomain = expectNSError {
 }
 precondition(exactBudget.inputBytes == 2248)
 
-let unsupported = PreviewDocumentReader.shared.read(
+#if CURRENT_CANDIDATE
+let supportedHighlight = PreviewDocumentReader.shared.read(
     text: committedText.replacingOccurrences(of: "\tMONOLINE\t", with: "\tHIGHLIGHTER\t"))
+precondition(supportedHighlight.failure == nil && supportedHighlight.root != nil)
+let unsupportedKind = "PRESSURE"
+#else
+let unsupportedKind = "HIGHLIGHTER"
+#endif
+let unsupported = PreviewDocumentReader.shared.read(
+    text: committedText.replacingOccurrences(of: "\tMONOLINE\t", with: "\t\(unsupportedKind)\t"))
 precondition(unsupported.failure == .unsupportedPreviewContent && unsupported.root == nil)
 let invalidRecovery = PreviewRecoveryCodec.shared.read(text: "unrecognized checkpoint")
 precondition(invalidRecovery.failure == .invalidOrUnsupportedFormat && invalidRecovery.snapshot == nil)
@@ -62,7 +70,11 @@ let notebook = opened.notebook!
 let originalRevision = notebook.changeVersion
 precondition(notebook.pageAt(index: -1) == nil && notebook.pageAt(index: notebook.pageCount) == nil)
 precondition(notebook.strokeAt(index: -1) == nil && notebook.strokeAt(index: 0) == nil)
+#if CURRENT_CANDIDATE
+let edit = notebook.edit(request: PreviewEditSelectPen(argb: -1, width: .nan, kind: .monoline))
+#else
 let edit = notebook.edit(request: PreviewEditSelectPen(argb: -1, width: .nan))
+#endif
 precondition(!edit.accepted && edit.failure?.kind == .invalidArgument && edit.rootRevision == originalRevision)
 precondition(notebook.inputReservedByteCharge == 2248 && notebook.pendingInk()?.samples.size == 4)
 let preserved = try notebook.captureRecovery().encode()
