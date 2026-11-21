@@ -50,8 +50,9 @@ jobs:
           import hashlib, json, os, pathlib, subprocess
           root = pathlib.Path.cwd()
           platforms = list((pathlib.Path(os.environ['ANDROID_HOME']) / 'platforms').glob('android-*/android.jar'))
+          platforms = [p for p in platforms if all(part.isdigit() for part in p.parent.name[8:].split('.'))]
           assert platforms, 'No Android compile stubs installed on this runner'
-          android = max(platforms, key=lambda p: int(p.parent.name.split('-')[1]))
+          android = max(platforms, key=lambda p: tuple(map(int, p.parent.name[8:].split('.'))))
           stdlibs = list(pathlib.Path(os.environ['GRADLE_USER_HOME']).glob('caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/*/kotlin-stdlib-2.2.21.jar'))
           assert len(stdlibs) == 1, 'Expected the actual build Kotlin stdlib'
           classes = [root / module / 'build/classes/kotlin/jvm/main' for module in ('canvas-core', 'shared-core')]
