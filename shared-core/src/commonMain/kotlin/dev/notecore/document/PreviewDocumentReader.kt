@@ -1,6 +1,7 @@
 package dev.notecore.document
 
 import dev.notecore.canvas.prototype.BrushKind
+import dev.notecore.canvas.prototype.BrushSpec
 import dev.notecore.canvas.prototype.Affine2D
 import kotlin.math.abs
 
@@ -13,6 +14,8 @@ class PreviewDocumentRead internal constructor(val root: DocumentRoot?, val fail
  * Invalid interchange is a typed refusal; platform IO/owner/programmer failures are not caught here.
  */
 object PreviewDocumentReader {
+    internal fun supportedBrush(brush: BrushSpec): Boolean = brush.algorithmVersion == 1 &&
+        (brush.kind == BrushKind.MONOLINE || brush.kind == BrushKind.HIGHLIGHTER)
     private fun supportedCoefficient(value: Double) = value.isFinite() && abs(value) <= 1e12
     fun read(text: String): PreviewDocumentRead {
         if (text.length > PagedPreviewCodec.MAX_CHARACTERS)
@@ -28,7 +31,7 @@ object PreviewDocumentReader {
         var supported = true
         root.scene.forEachObject { stroke ->
             val m = stroke.transform
-            if (stroke.brush.kind != BrushKind.MONOLINE || stroke.brush.algorithmVersion != 1 ||
+            if (!supportedBrush(stroke.brush) ||
                 !supportedCoefficient(m.a) || !supportedCoefficient(m.b) || !supportedCoefficient(m.c) ||
                 !supportedCoefficient(m.d) || !supportedCoefficient(m.tx) || !supportedCoefficient(m.ty))
                 { supported = false; return@forEachObject }

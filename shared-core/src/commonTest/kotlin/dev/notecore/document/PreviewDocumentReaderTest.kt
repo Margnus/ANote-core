@@ -36,7 +36,7 @@ class PreviewDocumentReaderTest {
     }
     @Test fun validCanonicalBrushesUnsupportedByPreviewAreRefusedWithoutLossyConversion() {
         val original = text()
-        for (brush in listOf("PRESSURE", "HIGHLIGHTER")) {
+        for (brush in listOf("PRESSURE")) {
             val encoded = original.replace("MONOLINE", brush)
             val canonical = PagedPreviewCodec.decode(encoded)
             assertEquals(brush, canonical.scene.objects().single().brush.kind.name)

@@ -49,7 +49,7 @@ object PreviewRecoveryCodec {
         require(root.findPage(pending.pageId)?.layerId == stroke.target.layerId)
         require(root.scene.find(stroke.objectId) == null)
         PagedPreviewCodec.validateCompletedStrokeCapacity(root, stroke.objectId, stroke.target.layerId, stroke.samples.size)
-        require(stroke.target.brush.kind == BrushKind.MONOLINE && stroke.target.brush.algorithmVersion == 1)
+        require(PreviewDocumentReader.supportedBrush(stroke.target.brush))
         require(pending.id.value.hasValidUnicode() && pending.pageId.value.hasValidUnicode())
         require(PreviewDocumentReader.accept(payload(root, pending)).failure == null)
     }

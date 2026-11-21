@@ -54,7 +54,7 @@ class PreviewRecoveryReaderTest {
         val fault = PendingInputOwnerFault(nonce = "unsupported")
         assertTrue(fault.note.beginStroke(1.0, 2.0, .5f, 1)); assertTrue(fault.note.endStroke(3.0, 4.0, .5f, 2))
         val text = fault.note.capture().encode()
-        for (brush in listOf("PRESSURE", "HIGHLIGHTER")) {
+        for (brush in listOf("PRESSURE")) {
             val unsupported = text.replace("MONOLINE", brush)
             assertNotNull(PagedPreviewCodec.decode(unsupported))
             refused(unsupported, PreviewReadFailure.UNSUPPORTED_PREVIEW_CONTENT)
