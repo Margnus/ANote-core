@@ -1090,6 +1090,11 @@ final class PagedHostTests: XCTestCase {
         let interiorBOM = String(repeating: "b", count: 8192) + "\u{feff}末"
         try Data(interiorBOM.utf8).write(to: file)
         XCTAssertEqual(try PreviewFileIO.readUTF8(file), interiorBOM)
+          let repeatedBOM = String(repeating: "b", count: 8192) + "\u{feff}\u{feff}末"
+          try Data(repeatedBOM.utf8).write(to: file)
+          XCTAssertEqual(try PreviewFileIO.readUTF8(file), repeatedBOM)
+          try Data("\u{feff}\u{feff}末".utf8).write(to: file)
+          XCTAssertEqual(try PreviewFileIO.readUTF8(file), "\u{feff}末")
         let valid = "NCPREVIEW\t2\nD\tread-failures\ttitle\t1\t0\t0\nG\tpage\tlayer\t595.0\t842.0\tBLANK\t0\nEND\n"
         let snapshot = try XCTUnwrap(PreviewRecoveryCodec.shared.read(text: valid).snapshot)
         try Data(("\u{feff}" + valid).utf8).write(to: file)

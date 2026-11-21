@@ -77,14 +77,16 @@ private struct BoundedUTF8Input {
             carry = Data(bytes.suffix(from: end))
             guard end > 0 else { continue }
             let prefix = bytes.prefix(end)
-            guard let text = String(data: prefix, encoding: .utf8) else {
+            // Decode scalars without Foundation's platform-dependent BOM handling.
+            guard var text = String(validating: prefix, as: UTF8.self) else {
                 // Before streaming, byte capacity and filesystem failures took precedence over malformed UTF-8.
                 while try readBytes() != nil {}
                 throw TextReadRefusal.invalidUTF8
             }
             defer { first = false }
-            // Foundation strips a leading BOM from each chunk. Only the BOM at file start is a signature.
-            if !first, prefix.starts(with: [0xef, 0xbb, 0xbf]) { return "\u{feff}" + text }
+            // Only one BOM at the beginning of the file is a transport signature.
+            // Interior/chunk-leading BOMs are canonical content, preserved exactly once.
+            if first, text.hasPrefix("\u{feff}") { text.removeFirst() }
             if !text.isEmpty { return text }
         }
         guard carry.isEmpty else { throw TextReadRefusal.invalidUTF8 }
