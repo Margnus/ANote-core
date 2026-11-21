@@ -84,7 +84,35 @@ precondition(notebook.changeVersion == 2 && notebook.strokeCount == 1 && noteboo
 let recovered = try notebook.capture().encode()
 precondition(Data(recovered.utf8) == committed)
 
-let result: [String: Any] = [
+#if CURRENT_CANDIDATE
+// Raw PointD construction requires finite values. Exercise typed request validation
+// and one-command history through the original notebook, not a second authority.
+let anchor = PointD(x: 0, y: 0)
+let polygon = [PointD(x: 90, y: 190), PointD(x: 140, y: 190),
+               PointD(x: 140, y: 230), PointD(x: 90, y: 230)]
+let invalidErase = notebook.edit(request: PreviewEditEraseStrokes(path: [], radius: 1))
+precondition(!invalidErase.accepted && invalidErase.failure?.kind == .invalidArgument)
+let emptyDelete = notebook.edit(request: PreviewEditDeleteSelection.shared)
+precondition(!emptyDelete.accepted && emptyDelete.failure?.kind == .emptySelection)
+precondition(notebook.edit(request: PreviewEditLassoSelect(polygon: polygon)).accepted)
+precondition(notebook.changeVersion == 2)
+let invalidTransform = notebook.edit(request: PreviewEditTransformSelection(dx: .nan, dy: 0, scaleFactor: 1, anchor: anchor))
+precondition(!invalidTransform.accepted && invalidTransform.failure?.kind == .invalidArgument)
+let afterRejectedTool = try notebook.capture().encode()
+precondition(Data(afterRejectedTool.utf8) == committed)
+precondition(notebook.edit(request: PreviewEditTransformSelection(dx: 5, dy: 7, scaleFactor: 1, anchor: anchor)).accepted)
+precondition(notebook.pointX(index: 0, point: 0) == 105)
+precondition(notebook.edit(request: PreviewEditUndo.shared).accepted)
+precondition(notebook.pointX(index: 0, point: 0) == 100)
+precondition(notebook.edit(request: PreviewEditLassoSelect(polygon: polygon)).accepted)
+precondition(notebook.edit(request: PreviewEditDeleteSelection.shared).accepted && notebook.strokeCount == 0)
+precondition(notebook.edit(request: PreviewEditUndo.shared).accepted && notebook.strokeCount == 1)
+precondition(notebook.edit(request: PreviewEditEraseStrokes(path: [PointD(x: 100, y: 200), PointD(x: 130, y: 215)], radius: 1)).accepted)
+precondition(notebook.strokeCount == 0)
+precondition(notebook.edit(request: PreviewEditUndo.shared).accepted && notebook.strokeCount == 1)
+#endif
+
+var result: [String: Any] = [
     "pid": ProcessInfo.processInfo.processIdentifier,
     "budget_typed": "INPUT_BYTES",
     "budget_constructor_nserror": constructorDomain,
@@ -98,5 +126,8 @@ let result: [String: Any] = [
     "invalid_edit_preserved_pending": true,
     "retry_preserved_checkpoint_bytes": true,
 ]
+#if CURRENT_CANDIDATE
+result["tool_commands_verified"] = true
+#endif
 let receipt = try JSONSerialization.data(withJSONObject: result, options: [.sortedKeys])
 print(String(decoding: receipt, as: UTF8.self))

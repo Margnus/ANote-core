@@ -22,6 +22,10 @@ EDIT_VARIANTS = {
     'NCPPreviewEditSelectPage', 'NCPPreviewEditSelectPen', 'NCPPreviewEditSetPaper',
     'NCPPreviewEditUndo',
 }
+CURRENT_EDIT_VARIANTS = EDIT_VARIANTS | {
+    'NCPPreviewEditEraseStrokes', 'NCPPreviewEditLassoSelect',
+    'NCPPreviewEditTransformSelection', 'NCPPreviewEditDeleteSelection',
+}
 # Supplementary members needed to obtain/use the selected values. This profile
 # excludes the App's legacy compatibility, catalog, save ledger and render ports.
 VALUE_MEMBERS = {
@@ -62,7 +66,7 @@ def parse_header(header):
     return declarations
 
 
-def selected_members(declarations):
+def selected_members(declarations, current_candidate=False):
     result = {name: set(members) for name, members in VALUE_MEMBERS.items()}
     for group in (CANDIDATE_METHODS, CANDIDATE_PROPERTIES):
         for name, members in group.items():
@@ -70,7 +74,11 @@ def selected_members(declarations):
     # The typed request protocol alone cannot create a request. Select the
     # public constructors of the actual edit variants and enum case getters.
     variants = {name for name, item in declarations.items() if '<NCPPreviewEdit>' in item['inheritance']}
-    assert variants == EDIT_VARIANTS, ('review changed typed edit variants', variants ^ EDIT_VARIANTS)
+    expected_variants = CURRENT_EDIT_VARIANTS if current_candidate else EDIT_VARIANTS
+    assert variants == expected_variants, ('review changed typed edit variants', variants ^ expected_variants)
+    if current_candidate:
+        # Finite PointD construction is a raw precondition, not a typed/NSError-safe factory.
+        result['NCPPointD'] = {'init(x:y:)', 'x', 'y'}
     for name in sorted(variants):
         members = declarations[name]['members']
         if 'shared' in members:
@@ -115,7 +123,7 @@ def closure(declarations, roots, members_for, consumer_edges):
     return dict(sorted(paths.items()))
 
 
-def audit(header):
+def audit(header, current_candidate=False):
     declarations = parse_header(header)
     inventory = inspect_header(header)
     assert set(declarations) == {item['objc_name'] for item in inventory}
@@ -124,12 +132,13 @@ def audit(header):
             member['swift_name'] for member in item['methods'] + item['properties']}
     methods = check_candidate_channels(inventory)
     properties = check_property_channels(inventory, CANDIDATE_PROPERTIES)
-    selected = selected_members(declarations)
+    selected = selected_members(declarations, current_candidate)
     roots = set(CANDIDATE_METHODS) | set(CANDIDATE_PROPERTIES)
     # Protocol conformance is one-way in the generated declaration. The
     # consumer must construct the typed edit variants.
     consumer_edges = {
-        'NCPPreviewEdit': [('<typed request construction>', name) for name in sorted(EDIT_VARIANTS)],
+        'NCPPreviewEdit': [('<typed request construction>', name) for name in
+                           sorted(CURRENT_EDIT_VARIANTS if current_candidate else EDIT_VARIANTS)],
     }
     for protocol, edges in consumer_edges.items():
         assert all('<'+protocol+'>' in declarations[target]['inheritance'] for _, target in edges)
@@ -153,6 +162,8 @@ def audit(header):
         if name in full_paths and name not in selected_paths:
             types[name]['full_path'] = full_paths[name]
     return {
+        'profile': 'current-unfrozen' if current_candidate else 'historical-reviewed',
+        'point_constructor_precondition_remaining': current_candidate,
         'structural_methods': len(methods), 'structural_properties': len(properties),
         'roots': sorted(roots), 'declared_types': len(types), 'selected_types': len(selected_paths),
         'all_members_reachable_types': len(full_paths),
@@ -193,11 +204,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('header', type=Path)
     parser.add_argument('--projected-header', type=Path)
+    parser.add_argument('--current-candidate', action='store_true')
     args = parser.parse_args()
     if args.projected_header and args.projected_header.resolve() == args.header.resolve():
         parser.error('projected header must be written to a different path')
     header = args.header.read_bytes()
-    result = audit(header.decode('utf-8'))
+    result = audit(header.decode('utf-8'), args.current_candidate)
     result['header_sha256'] = hashlib.sha256(header).hexdigest()
     if args.projected_header:
         projection = projected_header(header.decode('utf-8'), result)
