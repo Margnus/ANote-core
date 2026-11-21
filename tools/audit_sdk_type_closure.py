@@ -134,7 +134,9 @@ def audit(header, current_candidate=False):
     methods = check_candidate_channels(inventory)
     properties = check_property_channels(inventory, CANDIDATE_PROPERTIES)
     if current_candidate:
-        point_type = next(item for item in inventory if item['objc_name'] == 'NCPPointDCompanion')
+        point_types = [item for item in inventory if item['objc_name'] == 'NCPPointDCompanion']
+        assert len(point_types) == 1, 'Missing/duplicate point factory companion'
+        point_type = point_types[0]
         factories = [m for m in point_type['methods'] if m['swift_name'] == 'validated(x:y:)']
         assert len(factories) == 1 and factories[0]['nullable_return'] and not factories[0]['declares_nserror'], 'Changed point factory refusal channel'
     selected = selected_members(declarations, current_candidate)

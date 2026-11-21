@@ -49,6 +49,8 @@ def main():
     parser.add_argument('--port', type=int, default=5588)
     parser.add_argument('--output', type=Path, default=ROOT / 'build/android-sdk-candidate-current')
     parser.add_argument('--report', type=Path, default=ROOT / 'reports/android-sdk-candidate-current.json')
+    parser.add_argument('--resolve-build-dependencies', action='store_true',
+                        help='Allow Gradle to fetch external app build tools; candidate artifacts still come from the local generated repository')
     args = parser.parse_args()
     sdk = Path(os.environ['ANDROID_HOME'])
     jdk = Path(os.environ['JAVA_HOME'])
@@ -196,7 +198,8 @@ def main():
         'kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }\n'
         'dependencies { implementation("dev.notecore.probe:shared-core:0.0.0-c1") }\n', encoding='utf-8')
     wrapper = ['cmd', '/c', ROOT / 'gradlew.bat'] if os.name == 'nt' else [ROOT / 'gradlew']
-    insight = run(*wrapper, '--offline', '--no-daemon', '--console=plain', '-p', consumer_root,
+    dependency_mode = [] if args.resolve_build_dependencies else ['--offline']
+    insight = run(*wrapper, *dependency_mode, '--no-daemon', '--console=plain', '-p', consumer_root,
                   'assembleDebug', 'dependencyInsight', '--configuration', 'debugRuntimeClasspath',
                   '--dependency', 'canvas-core', timeout=300)
     assert 'dev.notecore.probe:canvas-core' in insight
@@ -308,6 +311,7 @@ def main():
         'status': 'passed',
         'candidate_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'candidate_version': version,
+        'external_build_dependencies_online': args.resolve_build_dependencies,
         'scope': 'Current-source JVM/Android candidate artifacts, forbidden-port audit, independent source and historical-binary recovery consumers, Java failure-channel DEX; optional isolated ART execution',
         'forbidden_port_audits': {'aar_bytecode': True, 'maven_source_archives': True,
                                   'external_compilation_refused': refusal_results},

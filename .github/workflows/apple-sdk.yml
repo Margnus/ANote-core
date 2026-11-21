@@ -9,6 +9,8 @@ on:
       - 'ci/verify_apple_sdk.py'
       - 'ci/gradle_download_retry.py'
       - 'tools/verify_c1_apple_failure_channels.py'
+      - 'tools/audit_sdk_type_closure.py'
+      - 'tools/audit_public_boundary.py'
       - 'tools/probes/C1AppleFailureConsumer.swift'
       - 'canvas-core/src/commonMain/**'
       - 'canvas-core/src/iosMain/**'

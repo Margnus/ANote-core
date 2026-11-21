@@ -49,7 +49,7 @@ def main():
         with (OUTPUT / 'verify.log').open('w', encoding='utf-8', newline='\n') as log:
             subprocess.run([sys.executable, str(ROOT / 'tools/verify_android_sdk_candidate.py'),
                 '--image', str(image), '--port', '5588', '--output', str(OUTPUT / 'consumer'),
-                '--report', str(OUTPUT / 'candidate.json')], cwd=ROOT, stdout=log,
+                '--report', str(OUTPUT / 'candidate.json'), '--resolve-build-dependencies'], cwd=ROOT, stdout=log,
                 stderr=subprocess.STDOUT, timeout=1200, check=True)
         candidate = json.loads((OUTPUT / 'candidate.json').read_text(encoding='utf-8'))
         assert candidate['status'] == 'passed' and candidate['art']['minimum_api26_verified']
