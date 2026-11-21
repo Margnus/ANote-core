@@ -7,6 +7,40 @@ import NoteCanvasPrototype
 
 /// Runs in the real iOS app host. API/file/render tests, not UI taps or real Pencil evidence.
 final class PagedHostTests: XCTestCase {
+    @MainActor func testHighlighterOriginalModelSavesAndFreshModelReopensCanonicalInk() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir)
+        model.create()
+        let note = try XCTUnwrap(model.current)
+        let originalColor: Int32 = 0x7f123456
+        XCTAssertTrue(note.selectPen(argb: originalColor, width: 6, kind: .highlighter))
+        XCTAssertTrue(note.beginStroke(x: 1.25, y: 2.5, pressure: 0.25, timeMicros: 1))
+        XCTAssertTrue(note.endStroke(x: 3.5, y: 4.75, pressure: 0.75, timeMicros: 2))
+        let expected = try note.capture().encode()
+        model.changed(); model.close()
+        try await eventually("original highlighter write is acknowledged") {
+            model.current == nil && model.ownerRetirementStatus.pendingWrites == 0
+        }
+        let file = dir.appendingPathComponent(note.documentId + ".ncp")
+        XCTAssertEqual(try PreviewFileIO.readUTF8(file), expected)
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("original highlighter owner retires") { model.ownerRetirementStatus.phase == .retired }
+        let fresh = PreviewModel(directory: dir)
+        fresh.open(note.documentId)
+        try await eventually("fresh model reads highlighter from disk") { fresh.current != nil }
+        let reopened = try XCTUnwrap(fresh.current)
+        XCTAssertEqual(try reopened.capture().encode(), expected)
+        XCTAssertEqual(reopened.totalStrokeCount, 1)
+        let stroke = reopened.stroke(index: 0)
+        XCTAssertEqual(stroke.brush.kind, .highlighter)
+        XCTAssertEqual(stroke.brush.argb, originalColor)
+        XCTAssertEqual(stroke.brush.width, 6)
+        XCTAssertEqual(stroke.samples.size, 2)
+        fresh.close()
+        XCTAssertEqual(fresh.beginOwnerRetirement(), .started)
+        try await eventually("fresh highlighter owner retires") { fresh.ownerRetirementStatus.phase == .retired }
+        XCTAssertEqual(try Data(contentsOf: file), Data(expected.utf8))
+    }
     @MainActor func testInvalidLocalFileIdentityRefusesBeforeIOAndPreservesCurrentInput() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
