@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/apple-candidate.yml'
       - 'ci/verify_apple_candidate.py'
+      - 'ci/test_apple_candidate_results.py'
       - 'ci/gradle_download_retry.py'
       - 'ci/test_gradle_download_retry.py'
       - 'canvas-core/**'
@@ -43,6 +44,8 @@ jobs:
           echo "$JAVA_HOME_17_arm64/bin" >> "$GITHUB_PATH"
       - name: Verify bounded download retry
         run: python3 -m unittest discover -s ci -p test_gradle_download_retry.py
+      - name: Verify host failure evidence retention
+        run: python3 -m unittest discover -s ci -p test_apple_candidate_results.py
       - name: Build and test current Apple candidate
         run: python3 ci/verify_apple_candidate.py
       - name: Retain evidence, including failures

@@ -33,7 +33,7 @@ def inputs():
         'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',
         'gradlew', 'gradle/wrapper/gradle-wrapper.properties', 'gradle/wrapper/gradle-wrapper.jar',
         '.github/workflows/apple-candidate.yml', 'ci/verify_apple_candidate.py', 'ci/gradle_download_retry.py',
-        'ci/test_gradle_download_retry.py', 'tools/verify_ios_host.py'))
+        'ci/test_gradle_download_retry.py', 'ci/test_apple_candidate_results.py', 'tools/verify_ios_host.py'))
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(paths)}
 
 
@@ -63,6 +63,29 @@ def capture_ui_result(capture, result, output):
     capture('xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(result),
             '--output-path', str(output / 'ui-attachments'))
     return payloads
+
+
+def capture_host_result(capture, result, output):
+    payloads = []
+    for kind, name in (('summary', 'xctest-summary.json'), ('tests', 'xctest-tests.json')):
+        payload = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', kind,
+                                     '--path', str(result), '--format', 'json'))
+        (output / name).write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8', newline='\n')
+        payloads.append(payload)
+    return payloads
+
+
+def run_host_tests(run, capture, command, result, output, report):
+    try:
+        run('app-host', command, 900)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        if result.is_dir():
+            try:
+                capture_host_result(capture, result, output)
+            except (subprocess.SubprocessError, ValueError, OSError) as capture_error:
+                report['host_result_capture_error'] = repr(capture_error)
+        raise
+    return capture_host_result(capture, result, output)
 
 
 def main():
@@ -125,15 +148,11 @@ def main():
             report['native'][module] = {'tests': len(passed), 'checks': sorted(expected), 'binary_sha256': sha(binary)}
         report['stage'] = 'swift_app_host_tests'
         result = OUTPUT / 'host.xcresult'
-        run('app-host', ['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
+        summary, tree = run_host_tests(run, capture, ['xcodebuild', '-quiet', '-project', 'ios-app/NoteCorePreview.xcodeproj',
             '-scheme', 'NoteCorePreview', '-sdk', 'iphonesimulator', '-destination', 'platform=iOS Simulator,id=' + device,
             '-derivedDataPath', str(OUTPUT / 'xcode'), 'CODE_SIGNING_ALLOWED=NO',
             '-resultBundlePath', str(result), '-collect-test-diagnostics', 'never',
-            '-only-testing:NoteCorePreviewTests', '-parallel-testing-enabled', 'NO', 'test'], 900)
-        summary = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(result), '--format', 'json'))
-        tree = json.loads(capture('xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(result), '--format', 'json'))
-        (OUTPUT / 'xctest-summary.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8', newline='\n')
-        (OUTPUT / 'xctest-tests.json').write_text(json.dumps(tree, indent=2) + '\n', encoding='utf-8', newline='\n')
+            '-only-testing:NoteCorePreviewTests', '-parallel-testing-enabled', 'NO', 'test'], result, OUTPUT, report)
         def cases(nodes):
             for node in nodes:
                 if node.get('nodeType') == 'Test Case':
