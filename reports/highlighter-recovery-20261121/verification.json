@@ -1,0 +1,48 @@
+{
+  "status": "shared-highlighter-recovery-verified-ordinary-apple-app-pending",
+  "jvm": {
+    "run_id": 44910275175,
+    "commit": "31ed94ff4163800b98eba4109784c61297b548d3",
+    "tests": {
+      "tests": 777,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "report": "jvm-verification.json",
+    "selected_xml": [
+      "TEST-dev.notecore.document.SelectPenKindTest.xml"
+    ]
+  },
+  "native": {
+    "run_id": 44909159807,
+    "commit": "fedc999f039ae8bfc6baef03e4ec22520e87dda9",
+    "canvas_tests": 224,
+    "shared_tests": 510,
+    "kotlin_inputs_matching_current": 174,
+    "ordinary_app_host_failed": true,
+    "failure_scope": "Known BOM duplication; subsequent fix is pending platform regression.",
+    "report": "native-and-host.json"
+  },
+  "independent_apple": {
+    "run_id": 44909159716,
+    "commit": "fedc999f039ae8bfc6baef03e4ec22520e87dda9",
+    "status": "passed",
+    "host_tests": 6,
+    "ui_tests": 1,
+    "unsigned_device_build": true,
+    "device_installed": false,
+    "report": "independent-sketch.json"
+  },
+  "m1_accepted": false,
+  "c1_complete": false,
+  "ordinary_app_verified": false,
+  "scope": "Real hosted Linux JVM and Apple simulator results, separate scopes and source bindings. No device performance, iOS17 runtime, production storage or full requirement acceptance.",
+  "artifact_sha256": {
+    "gradle-verification.sha256": "8c9bd1ee543943e79560f0a3a7707704ada465a53a88a11cbba084185f7259c5",
+    "independent-sketch.json": "9dbdbb517e3d4154c9e8623454cde3acbb8b3ab15b750d73417455e31790123d",
+    "jvm-verification.json": "ec02c84fb889da1e3b6a0469cd2eb5ad9555ea89b6072f7460b72d6104b01e5f",
+    "native-and-host.json": "f282395fa52acc92f28193eab270589dfbcb321dfc32c8444bde819e925a64dd",
+    "TEST-dev.notecore.document.SelectPenKindTest.xml": "41157c18327fe19feede1235047d89f70f2ec08cda68ab8c70b1885686c8a20c"
+  }
+}
