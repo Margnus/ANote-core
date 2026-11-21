@@ -7,6 +7,11 @@ import kotlin.math.min
 /** C1 reference geometry, not a frozen public API or a rendering implementation. */
 data class PointD(val x: Double, val y: Double) {
     init { require(x.isFinite() && y.isFinite()) { "Non-finite point" } }
+    companion object {
+        /** Recoverable raw-input boundary; does not clamp or reinterpret finite coordinates. */
+        fun validated(x: Double, y: Double): PointD? =
+            if (x.isFinite() && y.isFinite()) PointD(x, y) else null
+    }
 }
 
 data class BoundsD(val left: Double, val top: Double, val right: Double, val bottom: Double) {

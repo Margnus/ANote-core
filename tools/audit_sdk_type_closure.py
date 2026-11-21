@@ -77,8 +77,9 @@ def selected_members(declarations, current_candidate=False):
     expected_variants = CURRENT_EDIT_VARIANTS if current_candidate else EDIT_VARIANTS
     assert variants == expected_variants, ('review changed typed edit variants', variants ^ expected_variants)
     if current_candidate:
-        # Finite PointD construction is a raw precondition, not a typed/NSError-safe factory.
-        result['NCPPointD'] = {'init(x:y:)', 'x', 'y'}
+        # Select the recoverable factory, never the raw constructor's precondition.
+        result['NCPPointD'] = {'companion', 'x', 'y'}
+        result['NCPPointDCompanion'] = {'validated(x:y:)'}
     for name in sorted(variants):
         members = declarations[name]['members']
         if 'shared' in members:
@@ -132,6 +133,10 @@ def audit(header, current_candidate=False):
             member['swift_name'] for member in item['methods'] + item['properties']}
     methods = check_candidate_channels(inventory)
     properties = check_property_channels(inventory, CANDIDATE_PROPERTIES)
+    if current_candidate:
+        point_type = next(item for item in inventory if item['objc_name'] == 'NCPPointDCompanion')
+        factories = [m for m in point_type['methods'] if m['swift_name'] == 'validated(x:y:)']
+        assert len(factories) == 1 and factories[0]['nullable_return'] and not factories[0]['declares_nserror'], 'Changed point factory refusal channel'
     selected = selected_members(declarations, current_candidate)
     roots = set(CANDIDATE_METHODS) | set(CANDIDATE_PROPERTIES)
     # Protocol conformance is one-way in the generated declaration. The
@@ -164,6 +169,7 @@ def audit(header, current_candidate=False):
     return {
         'profile': 'current-unfrozen' if current_candidate else 'historical-reviewed',
         'point_constructor_precondition_remaining': current_candidate,
+        'selected_point_factory_nullable_checked': current_candidate,
         'structural_methods': len(methods), 'structural_properties': len(properties),
         'roots': sorted(roots), 'declared_types': len(types), 'selected_types': len(selected_paths),
         'all_members_reachable_types': len(full_paths),

@@ -85,11 +85,17 @@ let recovered = try notebook.capture().encode()
 precondition(Data(recovered.utf8) == committed)
 
 #if CURRENT_CANDIDATE
-// Raw PointD construction requires finite values. Exercise typed request validation
-// and one-command history through the original notebook, not a second authority.
-let anchor = PointD(x: 0, y: 0)
-let polygon = [PointD(x: 90, y: 190), PointD(x: 140, y: 190),
-               PointD(x: 140, y: 230), PointD(x: 90, y: 230)]
+// Construct tool coordinates through the recoverable boundary, not raw preconditions.
+precondition(PointD.companion.validated(x: .nan, y: 0) == nil)
+precondition(PointD.companion.validated(x: 0, y: .infinity) == nil)
+func point(_ x: Double, _ y: Double) -> PointD {
+    guard let value = PointD.companion.validated(x: x, y: y) else { preconditionFailure("Valid point refused") }
+    return value
+}
+let negativeZero = point(-0.0, 0)
+precondition(negativeZero.x.bitPattern == (-0.0 as Double).bitPattern)
+let anchor = point(0, 0)
+let polygon = [point(90, 190), point(140, 190), point(140, 230), point(90, 230)]
 let invalidErase = notebook.edit(request: PreviewEditEraseStrokes(path: [], radius: 1))
 precondition(!invalidErase.accepted && invalidErase.failure?.kind == .invalidArgument)
 let emptyDelete = notebook.edit(request: PreviewEditDeleteSelection.shared)
@@ -107,7 +113,7 @@ precondition(notebook.pointX(index: 0, point: 0) == 100)
 precondition(notebook.edit(request: PreviewEditLassoSelect(polygon: polygon)).accepted)
 precondition(notebook.edit(request: PreviewEditDeleteSelection.shared).accepted && notebook.strokeCount == 0)
 precondition(notebook.edit(request: PreviewEditUndo.shared).accepted && notebook.strokeCount == 1)
-precondition(notebook.edit(request: PreviewEditEraseStrokes(path: [PointD(x: 100, y: 200), PointD(x: 130, y: 215)], radius: 1)).accepted)
+precondition(notebook.edit(request: PreviewEditEraseStrokes(path: [point(100, 200), point(130, 215)], radius: 1)).accepted)
 precondition(notebook.strokeCount == 0)
 precondition(notebook.edit(request: PreviewEditUndo.shared).accepted && notebook.strokeCount == 1)
 #endif
@@ -128,6 +134,7 @@ var result: [String: Any] = [
 ]
 #if CURRENT_CANDIDATE
 result["tool_commands_verified"] = true
+result["point_factory_invalid_values_refused"] = true
 #endif
 let receipt = try JSONSerialization.data(withJSONObject: result, options: [.sortedKeys])
 print(String(decoding: receipt, as: UTF8.self))

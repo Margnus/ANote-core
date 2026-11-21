@@ -80,6 +80,7 @@ def main():
         verify(directory, runtime, device['deviceTypeIdentifier'], OUTPUT / 'consumer', pin_path, True)
         consumer = json.loads((OUTPUT / 'consumer/verification.json').read_text(encoding='utf-8'))
         assert consumer['selected_typed_channels_and_recovery']['tool_commands_verified'] is True
+        assert consumer['selected_typed_channels_and_recovery']['point_factory_invalid_values_refused'] is True
         assert inputs() == before, 'Source changed during SDK verification'
         report.update(status='passed', stage='complete')
     except BaseException as error:
