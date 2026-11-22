@@ -1,0 +1,70 @@
+{
+  "status": "passed",
+  "baseline_source_commit": "dc25078433b1a6c60aeabf432026ba56e7d2e05e",
+  "scope": "Fresh JVM compilation and original common implementation differential tests; no rasterization, ART, Apple runtime or physical measurement",
+  "decisions": {
+    "candidate2_as_direct_swept_disc_production_replacement": "discard",
+    "candidate2_as_separate_experiment": "retain",
+    "algorithm_number_only_migration": "discard",
+    "explicit_profile_identity": "adopt"
+  },
+  "observed": {
+    "opaque_highlighter": {
+      "preview_alpha_byte": 127,
+      "oracle_normalized_alpha": 0.25,
+      "candidate2_alpha_byte": 96
+    },
+    "translucent_highlighter_input_alpha_byte": 32,
+    "translucent_preview_alpha_byte": 16,
+    "translucent_candidate2_alpha_byte": 32,
+    "dot_width": 128,
+    "dot_probe": [
+      62,
+      12
+    ],
+    "dot_oracle_contains": true,
+    "dot_candidate2_contains": false,
+    "dot_radial_deficit_target_units_at_scale4": 4.91896821677301,
+    "pressure_probe": [
+      5,
+      2.6
+    ],
+    "pressure_oracle_contains": true,
+    "pressure_candidate2_contains": false
+  },
+  "new_tests": [
+    "highlighterProfilesHaveDifferentOpacityEvenBeforeRasterization",
+    "fixedSixteenSidedDotDoesNotPreserveRoundCoverageAtSupportedWidth",
+    "perpendicularPressureBridgeIsNotContinuousTaperedDiscCoverage"
+  ],
+  "jvm_tests": 725,
+  "failures": 0,
+  "codec_unknown_algorithm_rejection_regression": "PagedPreviewCodecTest.unknownFormatsPaperBrushAndAlgorithmVersionsFailExplicitly executed within the suite",
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushGeometry.kt": "eb9516d210d81e3e994a36831fa0847dfd142120848a92529e52c91bd5f4d918",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushDisplayRules.kt": "c7c8eefe2946512293ce06a66e9adb8a46a189a887596ca09f744565b6ad6ef2",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushEnvelopePoc.kt": "8b38795244071a157822a577be9cc4f4af6e7942f3be00c70725922f5aefc889",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Stroke.kt": "ea9d7ed0eda8836b349a873cc1adf55c4f636bb2587341fde5b1c927bff53ba2",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushCandidateSeparationTest.kt": "f101b03a809427b1088a8ff411b8bc91afd06ae73169fcc0f89ca08b059914ad",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PagedPreviewCodec.kt": "9aee1d127b7c5081e6c971f9a3857d8049d52759898571f20dff019cf70cc61e",
+    "shared-core/src/commonTest/kotlin/dev/notecore/document/PagedPreviewCodecTest.kt": "af32c5f4e5b69be0d124004b0802d1dc176e4e3fb552b01a69fb1e52a45d3b0f"
+  },
+  "suite_report_sha256": "419cba83e604ccfa9d223d2eebd96bcb0c2790a3a64af78cfb29aa24c4dffe16",
+  "raw_archive_sha256": "13287ba2a0b2fba5b1019973f27399983b19153e019291074ae9685a8173500e",
+  "raw_entry_sha256": {
+    "junit.log": "f1a53d4fe5a39ae868565769121c15041959a5f82b0ab93cfa9908bf49306067",
+    "verification-run.log": "c5c5ef98aa9e8f90e287d39b65e0cf82e941f441a14dd84827f9578587873e94",
+    "architecture.log": "f611f2bc3a994a2e93fc6e5412018a1cb181295cf9ee8d69a98afcff80df37fe",
+    "portability.log": "9aa04b0ddfa5c9e17992d3b48d34db0e909c89bf8b2b933933bde3260b2e3bb6"
+  },
+  "production_changed": false,
+  "algorithm_version_changed": false,
+  "c1_frozen": false,
+  "remaining": [
+    "formal coverage/tail/color/AA/version contract and matching geometry",
+    "platform consumers and explicit migration compatibility",
+    "minimum iOS runtime",
+    "physical M-1, heap and stylus",
+    "complete C1 before production SQLite"
+  ]
+}
