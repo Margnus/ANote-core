@@ -1,0 +1,89 @@
+{
+  "status": "passed",
+  "scope": "Original Android View and UIKit callbacks using synthetic native events on isolated emulators",
+  "baseline_source_commit": "30286ee09b799ecb584f729486d39d1a99341261",
+  "baseline_observed": {
+    "android": "Eraser ignored UP endpoint without MOVE",
+    "ios": [
+      {
+        "failureText": "XCTAssertEqual failed: (\"1\") is not equal to (\"0\") - Eraser ignored terminal endpoint",
+        "targetName": "NoteCorePreviewTests",
+        "testIdentifier": 2,
+        "testIdentifierString": "PagedHostTests/testToolGesturesConsumeUpWithoutMove()",
+        "testIdentifierURL": "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewTests/PagedHostTests/testToolGesturesConsumeUpWithoutMove",
+        "testName": "testToolGesturesConsumeUpWithoutMove()"
+      }
+    ]
+  },
+  "android": {
+    "api": 26,
+    "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+    "checks": {
+      "erase_up_without_move": true,
+      "lasso_drag_up_without_move": true,
+      "erase_up_history": true,
+      "cancel_does_not_commit": true,
+      "each_gesture_one_change": true,
+      "undo_restores_transform": true
+    },
+    "before_apk_sha256": {
+      "android-app-debug-androidTest.apk": "8a69c66aee7d6ce91cc1855ed97fc064d14849eaed543335474648821587a9d1",
+      "android-app-debug.apk": "0ccde85676ad2c371cf75350b6f6299f4fee317e99035d5fa6d13a46505a0f7e"
+    },
+    "after_apk_sha256": {
+      "android-app-debug-androidTest.apk": "3e6a4d94e75c97008133b28a7af2cf41d696b864c65540e541e7247801ccafa5",
+      "android-app-debug.apk": "9a621c3456c2e5075e17bfec88e6af79775a692e114701bf0579a1ca3c8b017b"
+    }
+  },
+  "apple": {
+    "runtime": {
+      "architecture": "arm64",
+      "deviceId": "01D971FD-C97B-41C2-8F07-2BC8E4280F1B",
+      "deviceName": "NoteCore-SourceHandoff-cd1d515056b747e68109e832d43ffb4f",
+      "modelName": "iPhone 18 Pro",
+      "osBuildNumber": "24A434",
+      "osVersion": "27.0",
+      "platform": "iOS Simulator"
+    },
+    "passed_tests": 2,
+    "failed_tests": 0,
+    "tests": [
+      "testToolGesturesConsumeUpWithoutMove",
+      "testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions"
+    ],
+    "framework_sha256": "06bfa44b34360e5259cae4066a5d03aecdfe7dc8ab1aae980d46dd8acad26cba"
+  },
+  "source_sha256": {
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "426144e6602a6e5a171efe01ea376807cabea8be880b8c2018f8226ad4536504",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "34935d847934e70b647a86eb5d56940ee5f7c27f9f45d9f18929cd4b4530fe05",
+    "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt": "4f08348474957edcb5d47fbb20e2f2598eb6cbc03d71487ede90c5e2f3b61638",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "5a26ef092430c8c31987e23871e32a7cdda1300a53ec4074ad51a539866f8ec2",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "f8cf72ce031e90fd4d8e6357efbefa6c9e1d9e5a1146296223e4795bf7be71cf",
+    "tools/verify_ios_host.py": "0b161dc239d0e4cb9d3230598fbe96d31ecb2d1af54262b16143e56b057aa607"
+  },
+  "baseline_production_source_sha256": {
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "7cbe1aac4183f7b35d1373150adb4c780135b75a37450f8fc497ae31125ea9ee",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "83f84d0635400ed62d5b97af7119db0eb1e232d8458502e620487669f71a7e74"
+  },
+  "raw_archive_sha256": "fd3321781f2d73563c9ce73d93c385867ccada2e2a01513544008561b22b4dc7",
+  "raw_entry_sha256": {
+    "android-before.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "android-before-crash.log": "ecc9eb6b0c74364dd1d8ff0d9ee9b0307e849f10afc62bd24e8ed6d056328c87",
+    "android-after.log": "d0b44415c5ea1125d1ad1a13f703c7a5b431013a6517ced18a8ce970291002fe",
+    "android-build-before.log": "52126c833b84da5243e5cd47f4affd39fca57aa148dc5ef1f8327dd388609875",
+    "android-build-after.log": "23dafc7738b000cb28ea4d5cb8c7e8a175cf97615d8842bf5b9f3eb369f6bdca",
+    "android-runner.sh": "8a4410b083da988edaad9c22c7cb779116fb3f8e2fe603159316b338e1b40251",
+    "ios-before-summary.json": "fa5c1d3b1ee5c24ea8d94e0cc0be6152a5078c9aa6d6410ba9516247ced543e3",
+    "ios-after-summary.json": "c5fee4b4d73fb0bc857f2a17f761eb2e9e3fbc971446b7c66f74c06dd312ace0",
+    "ios-after-tests.json": "1a3b99ca144c4c87999ec80194863e826567fb689a63e50e9a50687f56b48691",
+    "ios-before-build.log": "8ca7488f45823c569b4b05f5c6b7e469e5f38789b424eb1bc94c1569020f5acd",
+    "ios-after-build.log": "fcd2e8ebc11f8ac068133409c6eba777ccd25c98dd33fcddd7c77518fd63404a",
+    "ios-runner.py": "ad36c6bd03e3999ca1223a09b30bc7af6804b26023d99bc962233cee0815a99f"
+  },
+  "temporary_devices_removed": true,
+  "existing_apple_devices_unchanged": true,
+  "physical_stylus_verified": false,
+  "ordinary_ui_gesture_verified": false,
+  "c1_complete": false,
+  "decision": "Adopt terminal real samples before committing an eraser or lasso gesture, preserving one command per gesture and cancellation behavior."
+}

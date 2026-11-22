@@ -100,6 +100,48 @@ internal class AndroidInputHostChecks(private val host: Activity) {
         }
     }
 
+    fun verifyToolTerminalSamples(): String {
+        val note = PagedPreviewNotebook(DocumentRoot.empty(SceneId("terminal-tools"), "Tool endpoints",
+            PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0)), "tool-session")
+        val errors = mutableListOf<String>()
+        var changes = 0
+        val view = InkCanvasView(host, note, { changes++ }, { errors.add(it) })
+        FrameLayout(host).addView(view)
+        view.layout(0, 0, 595, 842)
+        check(note.beginStroke(100.0, 100.0, .5f, 1))
+        check(note.endStroke(200.0, 100.0, .5f, 2))
+        view.tool = InkTool.ERASER
+        send(view, MotionEvent.ACTION_DOWN, listOf(Sample(150f, 50f, 1000)))
+        send(view, MotionEvent.ACTION_UP, listOf(Sample(150f, 150f, 1001)))
+        check(note.totalStrokeCount == 0) { "Eraser ignored UP endpoint without MOVE" }
+        check(changes == 1 && errors.isEmpty())
+        check(note.undo() && note.capture().root.scene.objectCount == 1)
+        // Selection uses the original page-space path. Drag has no MOVE callback.
+        check(note.edit(PreviewEdit.LassoSelect(listOf(
+            dev.notecore.canvas.prototype.PointD(90.0, 90.0), dev.notecore.canvas.prototype.PointD(210.0, 90.0),
+            dev.notecore.canvas.prototype.PointD(210.0, 110.0), dev.notecore.canvas.prototype.PointD(90.0, 110.0)))).accepted)
+        view.tool = InkTool.LASSO
+        send(view, MotionEvent.ACTION_DOWN, listOf(Sample(150f, 100f, 2000)))
+        send(view, MotionEvent.ACTION_UP, listOf(Sample(180f, 120f, 2001)))
+        val moved = note.stroke(0).transform
+        check(moved.tx == 30.0 && moved.ty == 20.0) { "Lasso ignored UP endpoint without MOVE" }
+        check(changes == 2 && errors.isEmpty())
+        check(note.undo())
+        check(note.stroke(0).transform.tx == 0.0 && note.stroke(0).transform.ty == 0.0)
+        view.tool = InkTool.ERASER
+        send(view, MotionEvent.ACTION_DOWN, listOf(Sample(150f, 50f, 3000)))
+        send(view, MotionEvent.ACTION_UP, listOf(Sample(150f, 150f, 3001), Sample(250f, 50f, 3002)))
+        check(note.totalStrokeCount == 0 && changes == 3) { "Eraser ignored UP history" }
+        check(note.undo())
+        val beforeCancel = note.capture().encode()
+        send(view, MotionEvent.ACTION_DOWN, listOf(Sample(150f, 50f, 4000)))
+        send(view, MotionEvent.ACTION_CANCEL, listOf(Sample(150f, 150f, 4001)))
+        check(note.capture().encode() == beforeCancel && changes == 3)
+        return JSONObject().put("erase_up_without_move", true).put("lasso_drag_up_without_move", true)
+            .put("erase_up_history", true).put("cancel_does_not_commit", true)
+            .put("each_gesture_one_change", true).put("undo_restores_transform", true).toString()
+    }
+
     fun verify(): String {
         check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
         val checks = mutableListOf<String>()

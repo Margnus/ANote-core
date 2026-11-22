@@ -2453,6 +2453,54 @@ final class PagedHostTests: XCTestCase {
         XCTAssertFalse(note.hasActiveStroke); XCTAssertEqual(note.inputReservedByteCharge, 0)
         XCTAssertTrue(note.retire())
     }
+    @MainActor func testToolGesturesConsumeUpWithoutMove() throws {
+        let view = try inputView(), note = view.note
+        XCTAssertTrue(note.beginStroke(x: 50, y: 100, pressure: 0.5, timeMicros: 1))
+        XCTAssertTrue(note.endStroke(x: 150, y: 100, pressure: 0.5, timeMicros: 2))
+        var changes = 0
+        view.changed = { changes += 1 }
+        view.tool = .eraser
+        let erase = SyntheticInkTouch(100, 1)
+        erase.position.y = 50
+        view.touchesBegan([erase], with: nil)
+        erase.position.y = 150; erase.seconds = 1.1
+        view.touchesEnded([erase], with: nil)
+        XCTAssertEqual(note.totalStrokeCount, 0, "Eraser ignored terminal endpoint")
+        guard note.totalStrokeCount == 0 else { return }
+        XCTAssertEqual(changes, 1)
+        XCTAssertTrue(note.undo())
+        XCTAssertTrue(note.edit(request: PreviewEditLassoSelect(polygon: [
+            PointD(x: 40, y: 90), PointD(x: 160, y: 90),
+            PointD(x: 160, y: 110), PointD(x: 40, y: 110)])).accepted)
+        view.tool = .lasso
+        let drag = SyntheticInkTouch(100, 2)
+        view.touchesBegan([drag], with: nil)
+        drag.position = CGPoint(x: 130, y: 120); drag.seconds = 2.1
+        view.touchesEnded([drag], with: nil)
+        XCTAssertEqual(note.stroke(index: 0).transform.tx, 30)
+        XCTAssertEqual(note.stroke(index: 0).transform.ty, 20)
+        XCTAssertEqual(changes, 2)
+        XCTAssertTrue(note.undo())
+        XCTAssertEqual(note.stroke(index: 0).transform.tx, 0)
+        XCTAssertEqual(note.stroke(index: 0).transform.ty, 0)
+        view.tool = .eraser
+        let curved = SyntheticInkTouch(100, 3); curved.position.y = 50
+        view.touchesBegan([curved], with: nil)
+        let middle = SyntheticInkTouch(100, 3.1); middle.position.y = 150
+        curved.position = CGPoint(x: 190, y: 50); curved.seconds = 3.2
+        let event = SyntheticInkEvent(); event.real = [middle, curved]
+        view.touchesEnded([curved], with: event)
+        XCTAssertEqual(note.totalStrokeCount, 0, "Eraser ignored coalesced terminal points")
+        XCTAssertEqual(changes, 3)
+        XCTAssertTrue(note.undo())
+        let beforeCancel = try note.capture().encode()
+        let cancelled = SyntheticInkTouch(100, 4); cancelled.position.y = 50
+        view.touchesBegan([cancelled], with: nil)
+        cancelled.position.y = 150
+        view.touchesCancelled([cancelled], with: nil)
+        XCTAssertEqual(try note.capture().encode(), beforeCancel)
+        XCTAssertEqual(changes, 3)
+    }
     @MainActor func testCoalescedDownMoveUpRetainsEveryRealSampleAndNoPredictions() throws {
         let view = try inputView(), note = view.note
         let main = SyntheticInkTouch(30, 0.003)

@@ -29,6 +29,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var storageRetentionOnly = false
     private var pendingWorkBudgetOnly = false
     private var sqliteSourceHandoffOnly = false
+    private var toolTerminalOnly = false
     private var recoveryOpenBudgetOnly = false
     private var recoveryOpenFixture: String? = null
     private var catalogRetryOnly = false
@@ -70,6 +71,7 @@ class ViewportInstrumentation : Instrumentation() {
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
         pendingWorkBudgetOnly = arguments?.getString("notecore_case") == "pending_work_budget"
         sqliteSourceHandoffOnly = arguments?.getString("notecore_case") == "sqlite_source_handoff"
+        toolTerminalOnly = arguments?.getString("notecore_case") == "tool_terminal"
         recoveryOpenBudgetOnly = arguments?.getString("notecore_case") == "recovery_open_budget"
         recoveryOpenFixture = arguments?.getString("recovery_open_base64")
         catalogRetryOnly = arguments?.getString("notecore_case") == "catalog_retry"
@@ -125,6 +127,11 @@ class ViewportInstrumentation : Instrumentation() {
                 val bytes = android.util.Base64.decode(checkNotNull(recoveryOpenFixture), android.util.Base64.DEFAULT)
                 result.putString("recovery_open_budget", PendingRecoveryHostChecks(this, host).verifyOpenBudget(bytes))
                 result.putString("recovery_open_budget_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
+            if (toolTerminalOnly) {
+                runOnMainSync { result.putString("tool_terminal", AndroidInputHostChecks(host).verifyToolTerminalSamples()) }
+                result.putString("tool_terminal_status", "passed")
                 finish(Activity.RESULT_OK, result); return
             }
             if (sqliteSourceHandoffOnly) {
