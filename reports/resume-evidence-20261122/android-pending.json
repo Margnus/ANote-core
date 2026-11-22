@@ -1,0 +1,30 @@
+{
+  "schema": "c1-evidence-audit-1",
+  "status": "passed",
+  "reports": {
+    "dev041-android-pending-recovery-20261118": {
+      "report_sha256": "8647f0c17bd4c102a20dd0539bcb9009977927dce599a573e0cd7984584a7430",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 9,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 9,
+      "matched_local_bindings": 0,
+      "scope": "Android API 26 instrumentation in a fresh App sandbox; process kills"
+    }
+  },
+  "errors": [],
+  "selected_reports": [
+    "dev041-android-pending-recovery-20261118"
+  ],
+  "full_inventory_requested": false,
+  "report_revision": "67e47872f43c03bd084aa4a182442da27ba5213a",
+  "revision": "67e47872f43c03bd084aa4a182442da27ba5213a",
+  "untracked_bindings_use_local_artifacts": true,
+  "scope": "Read-only rehash of selected reports and their recorded inputs; no rerun or completeness proof. Historical drift is explicit. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.",
+  "ordinary_app_backend_integration_verified_by_this_audit": false,
+  "c1_gate_complete": false,
+  "physical_device_or_heap_measured": false,
+  "audit_tool_sha256": "5a1d35693bac8e74293f2d2c11acb13adeb5353006b07921cc41c2899754b57c"
+}

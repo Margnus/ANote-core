@@ -1,0 +1,30 @@
+{
+  "schema": "c1-evidence-audit-1",
+  "status": "passed",
+  "reports": {
+    "dev041-original-atomic-revalidation-20261118": {
+      "report_sha256": "059e6ecc3fb1a76c6196f1a47da42a9c4106cd72c0f553e62d28723a00f931ff",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 268,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 268,
+      "matched_local_bindings": 0,
+      "scope": "Original Android and Apple App owners and workers with synthetic files on disposable simulators"
+    }
+  },
+  "errors": [],
+  "selected_reports": [
+    "dev041-original-atomic-revalidation-20261118"
+  ],
+  "full_inventory_requested": false,
+  "report_revision": "d7e8067c6dd3eb6736dfc3589fb24831d45d8d01",
+  "revision": "d7e8067c6dd3eb6736dfc3589fb24831d45d8d01",
+  "untracked_bindings_use_local_artifacts": true,
+  "scope": "Read-only rehash of selected reports and their recorded inputs; no rerun or completeness proof. Historical drift is explicit. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.",
+  "ordinary_app_backend_integration_verified_by_this_audit": false,
+  "c1_gate_complete": false,
+  "physical_device_or_heap_measured": false,
+  "audit_tool_sha256": "5a1d35693bac8e74293f2d2c11acb13adeb5353006b07921cc41c2899754b57c"
+}

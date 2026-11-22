@@ -1,0 +1,199 @@
+{
+  "schema": "c1-evidence-audit-1",
+  "status": "failed",
+  "reports": {
+    "dev041-sqlite-capabilities-20261118": {
+      "report_sha256": "ca614a62a2b7963306d26f2996b497a8c3613ba40b976a06182cf9824bb38d38",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 5,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 5,
+      "matched_local_bindings": 0,
+      "scope": "Native SQLite recovery and refusal matrix on disposable simulators"
+    },
+    "dev041-original-atomic-revalidation-20261118": {
+      "report_sha256": "059e6ecc3fb1a76c6196f1a47da42a9c4106cd72c0f553e62d28723a00f931ff",
+      "role": "current_regression",
+      "binding_state": "failed",
+      "matched_bindings": 258,
+      "mismatch_causes": {
+        "git_revision:changed": 10
+      },
+      "mismatches": [
+        {
+          "path": "android-app/src/androidTest/java/dev/notecore/app/PendingRecoveryHostChecks.kt",
+          "state": "changed",
+          "expected": "7089df3ea0cc0a3bbc05eb532fff0d8a5150688f5f269bc1652212c8d55d1446",
+          "actual": "5c62bb3873099d05f321307826a49d282930a95670963b3ed51309adc148d638",
+          "origin": "git_revision"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt",
+          "state": "changed",
+          "expected": "dad66d127bcd97abd7d24671fcf8e79255c753816ac6cb3152f2869bed4e9439",
+          "actual": "7cbe1aac4183f7b35d1373150adb4c780135b75a37450f8fc497ae31125ea9ee",
+          "origin": "git_revision"
+        },
+        {
+          "path": "android-app/src/main/java/dev/notecore/app/MainActivity.kt",
+          "state": "changed",
+          "expected": "6a217b21886d1fa418f96b4088a73dfb25d58322afd68fbdd4eaf29e05a62534",
+          "actual": "fc3a363f104b32f4cf722f7150d18525f84c093ec5aaa456781d53e9fd343629",
+          "origin": "git_revision"
+        },
+        {
+          "path": "ios-app/NoteCorePreview/NativeInkCanvas.swift",
+          "state": "changed",
+          "expected": "0c0c83687fa5f1d5cfb10c18f2c48db285298e9b2db31b0f8e52c7ba14e9f3d7",
+          "actual": "83f84d0635400ed62d5b97af7119db0eb1e232d8458502e620487669f71a7e74",
+          "origin": "git_revision"
+        },
+        {
+          "path": "ios-app/NoteCorePreview/NoteCorePreviewApp.swift",
+          "state": "changed",
+          "expected": "a88851ac54bd225aa48012118adabdf8cafb0c431a51da5b3f3ef9ca9c64bb37",
+          "actual": "a4308fea00090b8a60d9dc679fae73c0f3cfd71687fd070dc2825f8648e63557",
+          "origin": "git_revision"
+        },
+        {
+          "path": "ios-app/NoteCorePreviewTests/PagedHostTests.swift",
+          "state": "changed",
+          "expected": "6111456d6c220221dab661c802c409557c001caa15273b86f0314ea712c13bf6",
+          "actual": "5396491b2e2cf6de31132a4d8f24d56e5406d01a00fc8d3104e59304c3e74b8a",
+          "origin": "git_revision"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewDocumentReader.kt",
+          "state": "changed",
+          "expected": "c02a5f602b122f5d810ba8f0128c3f51d4ded077068deee123d74675e6a4836c",
+          "actual": "e02da35a5c9e10fbe1c5a06f3d38cbd7adcd73c6af507e593ab612ddaef023bd",
+          "origin": "git_revision"
+        },
+        {
+          "path": "shared-core/src/commonMain/kotlin/dev/notecore/document/PreviewRecoveryCodec.kt",
+          "state": "changed",
+          "expected": "e25d13fcc4b868d8170d9a78618b7526e06cddd64cb475a002dc163e0a0f805e",
+          "actual": "9808e1b3846aabb4a3187554cc927874f6ed0c0b4d29cfe904b4dc9581a14f66",
+          "origin": "git_revision"
+        },
+        {
+          "path": "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewDocumentReaderTest.kt",
+          "state": "changed",
+          "expected": "4465c6e8f25a79a045f6d10f2c31932c1c7d21108d01077d8749d4fee88f3e73",
+          "actual": "5e8734a9130aa1708e0bb0bcf4f8c7dda04708050d95eb0b339b03334f2e15ae",
+          "origin": "git_revision"
+        },
+        {
+          "path": "shared-core/src/commonTest/kotlin/dev/notecore/document/PreviewRecoveryReaderTest.kt",
+          "state": "changed",
+          "expected": "0c60fd394811d995607a71848f17dadd10403246b746358000732f18ebfd8639",
+          "actual": "b95de4c72c5f977ba1ddb0d68e9031a24f8104e088ecf13fe19d3adc0253ed50",
+          "origin": "git_revision"
+        }
+      ],
+      "matched_git_bindings": 258,
+      "matched_local_bindings": 0,
+      "scope": "Original Android and Apple App owners and workers with synthetic files on disposable simulators"
+    },
+    "dev041-android-pending-recovery-20261118": {
+      "report_sha256": "8647f0c17bd4c102a20dd0539bcb9009977927dce599a573e0cd7984584a7430",
+      "role": "current_regression",
+      "binding_state": "failed",
+      "matched_bindings": 8,
+      "mismatch_causes": {
+        "git_revision:changed": 1
+      },
+      "mismatches": [
+        {
+          "path": "tools/verify_android_sqlite_pending_recovery.py",
+          "state": "changed",
+          "expected": "f9ae279336ef4f5bc377a674d1ea1f7ba1a04c7eae43cbb110cbbe0d93d0a0ef",
+          "actual": "9806db6b2672a9b720a280c84344a075c3366906d1ee21d5c271a3530421cdab",
+          "origin": "git_revision"
+        }
+      ],
+      "matched_git_bindings": 8,
+      "matched_local_bindings": 0,
+      "scope": "Android API 26 instrumentation in a fresh App sandbox; process kills"
+    },
+    "dev041-apple-pending-recovery-20261118": {
+      "report_sha256": "57f6c13187a9a8350c8e495fd4ea4b975565982226b4cd3f47d4e9581bd7b53f",
+      "role": "current_regression",
+      "binding_state": "failed",
+      "matched_bindings": 8,
+      "mismatch_causes": {
+        "git_revision:changed": 1
+      },
+      "mismatches": [
+        {
+          "path": "tools/verify_apple_sqlite_pending_recovery.py",
+          "state": "changed",
+          "expected": "e66642186fbf1f1a41d8f9c9d25b15f9fe29c84fdb1222839d09792188300fd7",
+          "actual": "bf23eec0ac90ea27794e8b156a26b0801e5d80e7b463a5edc20a316b880df115",
+          "origin": "git_revision"
+        }
+      ],
+      "matched_git_bindings": 8,
+      "matched_local_bindings": 0,
+      "scope": "UIKit App sandbox and native SQLite on iOS simulator; process kills"
+    },
+    "dev041-highlighter-migration-20261119": {
+      "report_sha256": "972f342c789b1a7bf8bd6c18011a9a5b2f0a3d475539762fcc7aaeb595372b21",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 9,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 9,
+      "matched_local_bindings": 0,
+      "scope": "Host SQLite and current JVM HIGHLIGHTER/1; synthetic source; isolated migration"
+    },
+    "dev041-android-highlighter-migration-20261119": {
+      "report_sha256": "d6aefe6d215ef3a6136c726f33fe7fc247beeeff993ec8307f1b778600eb6aa3",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 11,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 11,
+      "matched_local_bindings": 0,
+      "scope": "Android API 26 instrumentation in a fresh App sandbox; process kills"
+    },
+    "dev041-apple-highlighter-migration-20261119": {
+      "report_sha256": "382e90fd563ec4cabacae593575a23400b034821d67b6cee8c9c773cf3efc087",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 12,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 12,
+      "matched_local_bindings": 0,
+      "scope": "UIKit App sandbox and native SQLite on iOS simulator; process kills"
+    }
+  },
+  "errors": [
+    "dev041-original-atomic-revalidation-20261118: current evidence binding failed",
+    "dev041-android-pending-recovery-20261118: current evidence binding failed",
+    "dev041-apple-pending-recovery-20261118: current evidence binding failed"
+  ],
+  "selected_reports": [
+    "dev041-sqlite-capabilities-20261118",
+    "dev041-original-atomic-revalidation-20261118",
+    "dev041-android-pending-recovery-20261118",
+    "dev041-apple-pending-recovery-20261118",
+    "dev041-highlighter-migration-20261119",
+    "dev041-android-highlighter-migration-20261119",
+    "dev041-apple-highlighter-migration-20261119"
+  ],
+  "full_inventory_requested": false,
+  "report_revision": "d3d4600161446b6e3e09629411240573d12e3431",
+  "revision": "d3d4600161446b6e3e09629411240573d12e3431",
+  "untracked_bindings_use_local_artifacts": true,
+  "scope": "Read-only rehash of selected reports and their recorded inputs; no rerun or completeness proof. Historical drift is explicit. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.",
+  "ordinary_app_backend_integration_verified_by_this_audit": false,
+  "c1_gate_complete": false,
+  "physical_device_or_heap_measured": false,
+  "audit_tool_sha256": "5a1d35693bac8e74293f2d2c11acb13adeb5353006b07921cc41c2899754b57c"
+}
