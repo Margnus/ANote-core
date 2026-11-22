@@ -7,10 +7,28 @@ import org.junit.runner.JUnitCore
 
 /** Test-only library host: actual common algorithms on ART, with no app UI or SDK probe API. */
 class CoreBrushInstrumentation : Instrumentation() {
-    override fun onCreate(arguments: Bundle?) { super.onCreate(arguments); start() }
+    private var sweptDiscOnly = false
+    override fun onCreate(arguments: Bundle?) {
+        super.onCreate(arguments)
+        sweptDiscOnly = arguments?.getString("notecore_case") == "swept_disc"
+        start()
+    }
     override fun onStart() {
         val output = Bundle()
         try {
+            if (sweptDiscOnly) {
+                val result = JUnitCore.runClasses(SweptDiscGeometryPocTest::class.java,
+                    BrushCandidateSeparationTest::class.java, BrushEnvelopePocTest::class.java,
+                    BrushGeometryTest::class.java, BrushPathPlanTest::class.java)
+                check(result.wasSuccessful() && result.runCount == 38 && result.ignoreCount == 0) {
+                    "run=${result.runCount} ignored=${result.ignoreCount} failures=${result.failures.joinToString { it.trace }}"
+                }
+                output.putInt("swept_disc_tests", result.runCount)
+                output.putInt("swept_disc_ignored", result.ignoreCount)
+                output.putString("swept_disc_status", "passed")
+                finish(Activity.RESULT_OK, output)
+                return
+            }
             BrushTileBitmapTest.observations.clear()
             val result = JUnitCore.runClasses(GeometryContractTest::class.java, BrushEnvelopePocTest::class.java, BrushPathPocTest::class.java,
                 BrushReductionPocTest::class.java, ChunkedBrushPocTest::class.java,
