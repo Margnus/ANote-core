@@ -35,7 +35,20 @@ def main():
                      'com.apple.CoreSimulator.SimDeviceType.iPhone-15', report['runtime_identifier']).strip()
         uuid.UUID(device)
         run('boot', 'xcrun', 'simctl', 'boot', device)
-        run('bootstatus', 'xcrun', 'simctl', 'bootstatus', device, '-b', timeout=240)
+        try:
+            run('bootstatus', 'xcrun', 'simctl', 'bootstatus', device, '-b', timeout=240)
+        except subprocess.TimeoutExpired:
+            # The observer timed out, not necessarily the booted simulator. Inspect
+            # the same UUID before continuing observation; never recreate/reboot it.
+            report['initial_boot_observer_timed_out'] = True
+            inventory = json.loads(run('devices-after-observer-timeout', 'xcrun', 'simctl', 'list', 'devices', '--json'))
+            matches = [d for group in inventory['devices'].values() for d in group if d['udid'] == device]
+            report['device_after_observer_timeout'] = matches
+            if len(matches) != 1 or matches[0].get('state') != 'Booted':
+                raise
+            # Booted is necessary, not sufficient. Only an actual bootstatus success
+            # can pass this preflight; a second timeout remains a real failure.
+            run('bootstatus-continued', 'xcrun', 'simctl', 'bootstatus', device, '-b', timeout=240)
         report.update(status='runtime-boot-verified', device=device)
     except BaseException as error:
         report.update(status='failed', error=repr(error))
