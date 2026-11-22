@@ -1,0 +1,40 @@
+{
+ "schema": "android-e4c-adb-ui-1",
+ "status": "passed",
+ "date": "2026-11-22",
+ "base_core": "fd33a22",
+ "milestone": "E4c",
+ "scope": "ordinary Android app process, authorized ADB input, read-only uiautomator observation",
+ "device": {
+  "serial": "emulator-5554",
+  "avd": "NoteCorePreview",
+  "api": "36",
+  "image": "google_apis_playstore/arm64-v8a",
+  "screen": "1080x1920@420",
+  "headless": true
+ },
+ "input_method": "Explicitly user-authorized ADB system input (input tap / input motionevent sequences); uiautomator dump for read-only observation",
+ "verified_cases": {
+  "pen_motionevent_stroke_committed": {"before": "0笔", "after": "1笔", "status": "passed"},
+  "eraser_tool_toggle": {"button": "橡皮✓", "status": "passed"},
+  "eraser_gesture_whole_stroke_delete": {"before": "1笔", "after": "0笔", "saved_status": "已保存到本机 · 0 笔", "status": "passed"},
+  "eraser_delete_undo_restores": {"before": "0笔", "after": "1笔", "status": "passed"},
+  "second_pen_stroke": {"before": "1笔", "after": "2笔", "status": "passed"},
+  "lasso_tool_toggle": {"button": "套索✓", "status": "passed"},
+  "lasso_polygon_select_two_strokes": {"selection": "presentation-only; stroke count unchanged as designed", "status": "passed"},
+  "lasso_drag_transform_no_crash": {"moved": "450,1350 -> 520,1380", "strokes_after": "2笔", "status": "passed"},
+  "lasso_delete_selection": {"before": "2笔", "after": "0笔", "saved_status": "已保存到本机 · 0 笔", "status": "passed"},
+  "single_undo_restores_whole_selection_delete": {"before": "0笔", "after": "2笔", "status": "passed", "note": "one undo entry for the whole delete command"},
+  "save_back_list_reopen_persists": {"after_reopen": "2笔", "saved_status": "已保存到本机 · 2 笔", "status": "passed"}
+ },
+ "observations": {
+  "input_swipe_produces_no_stroke": "input swipe batches events in a way the per-batch admission rejects; input motionevent sequences and taps work. Not a product defect: real touch streams differ from input swipe injection. Recorded for future ADB scripts.",
+  "toolbar_overflow": "荧光笔/后移/纸张 buttons overflow past screen width with the new tool buttons; horizontal scroll or grouping is a follow-up preview-UI task."
+ },
+ "screenshot_retained": "e4c-final.png (session temp, not committed)",
+ "windows_capture_verified": false,
+ "physical_device_verified": false,
+ "real_stylus_verified": false,
+ "multi_touch_verified": false,
+ "ios_runtime_verified": false
+}
