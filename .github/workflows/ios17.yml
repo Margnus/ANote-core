@@ -1,0 +1,30 @@
+name: Minimum iOS17 runtime readiness
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ios17.yml'
+      - 'ci/prepare_ios17.py'
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: macos-15
+    timeout-minutes: 25
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Acquire and boot requested iOS17 runtime
+        run: python3 ci/prepare_ios17.py
+      - name: Retain actual runtime results, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ios17-preflight-${{ github.sha }}
+          path: build/ios17-preflight/**
+          if-no-files-found: error
+          retention-days: 14
