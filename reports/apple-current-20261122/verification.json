@@ -1,0 +1,88 @@
+{
+  "status": "passed",
+  "run_id": 44915626575,
+  "commit": "3be25da997df2fdf471809ad318f4c4519f37c3e",
+  "compiled_source_bindings_matching_current": 183,
+  "native_tests": {
+    "canvas-core": 227,
+    "shared-core": 510
+  },
+  "host_tests": 80,
+  "ordinary_ui": {
+    "tests": 1,
+    "checks": [
+      "testTwoPageInkHistoryBackgroundSaveAndProcessReopen()"
+    ],
+    "summary": {
+      "devicesAndConfigurations": [
+        {
+          "device": {
+            "architecture": "arm64",
+            "deviceId": "8BE5BF0F-A016-4853-B7CD-0929620D9A10",
+            "deviceName": "NoteCoreCI-b8675fc2fa09",
+            "modelName": "iPad Pro 11-inch (M4)",
+            "osBuildNumber": "22F77",
+            "osVersion": "18.5",
+            "platform": "iOS Simulator"
+          },
+          "expectedFailures": 0,
+          "failedTests": 0,
+          "passedTests": 1,
+          "skippedTests": 0,
+          "testPlanConfiguration": {
+            "configurationId": "1",
+            "configurationName": "Test Scheme Action"
+          }
+        }
+      ],
+      "environmentDescription": "NoteCorePreview \u8def Built with macOS 15.8.2",
+      "expectedFailures": 0,
+      "failedTests": 0,
+      "finishTime": 1795273161.717,
+      "passedTests": 1,
+      "result": "Passed",
+      "skippedTests": 0,
+      "startTime": 1795272980.842,
+      "statistics": [],
+      "testFailures": [],
+      "title": "Test - NoteCorePreview",
+      "topInsights": [],
+      "totalTestCount": 1
+    },
+    "original_files_sha256": {},
+    "final_files_sha256": {
+      "4A367FA6-17DD-4AD8-85EA-2A5053D77E0F.ncp": "b0b21e5c2048056f76d62a3ff6c5e332a9cf64e00c0d2b2c7ff72ca9198f91e6"
+    },
+    "saved_note_sha256": "b0b21e5c2048056f76d62a3ff6c5e332a9cf64e00c0d2b2c7ff72ca9198f91e6",
+    "pages": 2,
+    "strokes_per_page": [
+      2,
+      1
+    ],
+    "scope": "Separate XCUITest process, ordinary App UI, simulated finger input; saved-write process reopen only. No Pencil, in-flight IO kill or physical performance claim."
+  },
+  "physical_device_verified": false,
+  "ios17_runtime_verified": false,
+  "c1_complete": false,
+  "scope": "Real iOS18.5 simulator Native, App host and XCUITest after PointD factory. Simulated finger and acknowledged-save reopen, not physical input or in-flight kill.",
+  "sha256": {
+    "app-host.log": "23b56847e2b01ad152db38a0a3c41c362826fa16e7fa5ef855f7c7b494d6362f",
+    "canvas-core-native.log": "04c704cde769856b03ec1e8502b388e5e8b662934311849637b7f4e6cb88d11a",
+    "native-build.attempt-1.log": "5eb747c0c207a1f018dcb7fc40805ea88378b1f8738769838ada0ca15f0f8ee4",
+    "native-build.log": "5eb747c0c207a1f018dcb7fc40805ea88378b1f8738769838ada0ca15f0f8ee4",
+    "ordinary-ui-note.ncp": "b0b21e5c2048056f76d62a3ff6c5e332a9cf64e00c0d2b2c7ff72ca9198f91e6",
+    "ordinary-ui.log": "b8d8c649867752c54c88fbd57db351ba636dfb6706dfec7fb187cfec34b071f2",
+    "report.json": "0d6157d140b9a57faa8cf2b874264172be72e1d3ebf4d69fc1d44cff62caede0",
+    "shared-core-native.log": "3a89f7663595ce9dd288d27e630860d9f75b953f6548e403c700c662d9895b9b",
+    "simulator-boot.log": "e1b44e2ff298014a48b57d864829bae3f209999f351e7ce16e07d63828a33d93",
+    "ui-attachments/44B41A5C-6271-4B1B-9275-DA198B5FBC61.png": "022c13a0cc6b0b1d1485a0bcf50b08df578d0ef8f0f7b763b689f0af21fe7cd7",
+    "ui-attachments/715C9537-D924-4304-B259-C150F312AE9A.png": "59c212c49d8e84d6e202b2e93974e537ad6c11e59c28534f33dcd6a6febb05c4",
+    "ui-attachments/8A58DED0-AFCF-48A5-B5C6-8CB3148080A0.png": "d70aead5ddc3cb901f735c2d5dfcd6b3f5eb552c5a8dae922553d76b6814ac4d",
+    "ui-attachments/AFC29484-3063-4A87-A53D-AD58B5F4A9E3.png": "04004c5a202c15806bd333ac0bb4d3cbd4dc28c41dab78aaf3b057a32ea4b03c",
+    "ui-attachments/manifest.json": "27516d42e0e2551eaa1f75888ea27a455e2d4030e9a28342276fe0969a8c997a",
+    "ui-summary.json": "0c7e32a5ed9e78f0c5caa2a131b3f7975ca0e76d37cb68ce5273d10b6d7acf24",
+    "ui-tests.json": "c630ec24a23a0a09226c6ca495dcc6578ef7441b08ca7514a4ac2a33a236fd9c",
+    "xctest-summary.json": "f29a8eb8190ee96fabdf348f75f39836c2ba69131af30169f93a9ab83f02c478",
+    "xctest-tests.json": "ce89e7c1e3426fe8299a355a256975e9561d866c422ebc03f126258f7d8f6228"
+  }
+}
