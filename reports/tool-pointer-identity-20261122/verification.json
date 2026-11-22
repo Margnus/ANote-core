@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "scope": "Original Android View callbacks with synthetic MotionEvent in isolated API26 ARM64 emulator; no ordinary OS gesture or physical stylus claim",
+  "baseline_source_commit": "29d10c973261c0b553a71cd49a6734560c5bb5ac",
+  "baseline_observed": "Secondary finger committed an eraser gesture",
+  "baseline_apk_retained": false,
+  "baseline_production_source_sha256": {
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "426144e6602a6e5a171efe01ea376807cabea8be880b8c2018f8226ad4536504"
+  },
+  "checks": {
+    "secondary_pointer_cannot_commit": true,
+    "nonzero_pointer_up_commits": true,
+    "erase_up_without_move": true,
+    "lasso_drag_up_without_move": true,
+    "erase_up_history": true,
+    "cancel_does_not_commit": true,
+    "each_gesture_one_change": true,
+    "undo_restores_transform": true
+  },
+  "source_sha256": {
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "5463e5547205b3e8888c7f8c76da50d987cbe476e041130064c59ae88b77ffaf",
+    "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt": "6a10344d099060ad0c974a1818150b99183806c5e0b7bea074e906157f8b8075",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "5a26ef092430c8c31987e23871e32a7cdda1300a53ec4074ad51a539866f8ec2"
+  },
+  "after_apk_sha256": {
+    "android-app-debug-androidTest.apk": "18e75e2ab49d5440550e0a8e6f7b2fe2232b3cb70aaca268f77138f27d26f974",
+    "android-app-debug.apk": "36e028c08a85e1f1b92e68f3cb101c59107ce9e260b6263043d8c6135f0e9023"
+  },
+  "fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+  "raw_archive_sha256": "1bda912c91e7715e515182c3ed069d190767faef428383e2d1637d47e3ae569f",
+  "raw_entry_sha256": {
+    "before-instrument.log": "cc376fcd260b55a01f82c04af5e0a9ead88516f600131a38bdea1a3e05b10a8d",
+    "before-crash.log": "582e3b189c56834ea5bf5fbccd0e475443b85ad2179a9a076cfcec453ac493d1",
+    "after-instrument.log": "a636ba003e9e723fa967754b06ec5b6cd3d97833b2781d038c9f4b9f84a39e2e",
+    "after-crash.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before-build.log": "b5e6a401654dd416b3e88e64444afd7d09df25c1b34ad62feb03077a2553a483",
+    "after-build.log": "bf5fa85efc3d42a5eddc58cbabd49d7ad79bee204fedde7d2763d941368f9934",
+    "after-run.log": "dfea1eb74033f985a64d335f6888d76f23d1fb2bc9a3af9474624efc73aa4a28",
+    "runner.sh": "8a4410b083da988edaad9c22c7cb779116fb3f8e2fe603159316b338e1b40251",
+    "fingerprint.txt": "26810751a272e4ea481416f938e3a7c91cac2c34b64f1feea3ba0108b19b923d",
+    "selinux.txt": "4fefafd0dcddf54b31a0fef448083e7b77576d86a9ec97c14bfd92479c404290"
+  },
+  "startup_retry": "First after-fix emulator exited before instrumentation. No test result credited; fresh isolated retry passed.",
+  "temporary_avds_removed": true,
+  "decision": "Adopt start-pointer ownership for eraser/lasso sample lookup and terminal commit. Discard hardcoded pointer ID/index zero.",
+  "not_verified": [
+    "physical stylus and palm rejection",
+    "ordinary OS gestures",
+    "complete multi-pointer and lasso ownership matrix",
+    "C1 and physical M-1",
+    "production SQLite"
+  ]
+}

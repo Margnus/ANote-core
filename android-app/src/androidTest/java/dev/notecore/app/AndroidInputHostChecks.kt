@@ -100,7 +100,50 @@ internal class AndroidInputHostChecks(private val host: Activity) {
         }
     }
 
+    private fun verifyToolPointerIdentity() {
+        val note = PagedPreviewNotebook(DocumentRoot.empty(SceneId("tool-pointer"), "Pointer identity",
+            PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0)), "tool-pointer-session")
+        check(note.beginStroke(100.0, 100.0, .5f, 1))
+        check(note.endStroke(200.0, 100.0, .5f, 2))
+        val original = note.capture().encode()
+        var changes = 0
+        val view = InkCanvasView(host, note, { changes++ }, { error(it) })
+        FrameLayout(host).addView(view); view.layout(0, 0, 595, 842)
+        view.tool = InkTool.ERASER
+        fun event(action: Int, ids: IntArray, positions: List<Pair<Float, Float>>) {
+            val properties = ids.map { id -> MotionEvent.PointerProperties().apply {
+                this.id = id
+                toolType = if (id == 7) MotionEvent.TOOL_TYPE_STYLUS else MotionEvent.TOOL_TYPE_FINGER
+            } }.toTypedArray()
+            val coords = positions.map { (x, y) -> MotionEvent.PointerCoords().apply {
+                this.x = x; this.y = y; pressure = .5f; size = 1f
+            } }.toTypedArray()
+            val native = MotionEvent.obtain(1000, 1001, action, ids.size, properties, coords,
+                0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_STYLUS, 0)
+            try { check(view.onTouchEvent(native)) } finally { native.recycle() }
+        }
+        event(MotionEvent.ACTION_DOWN, intArrayOf(7), listOf(300f to 50f))
+        event(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            intArrayOf(7, 0), listOf(300f to 50f, 150f to 100f))
+        // Index order changes, but the secondary finger remains ID 0.
+        event(MotionEvent.ACTION_POINTER_UP, intArrayOf(0, 7), listOf(150f to 100f, 300f to 150f))
+        check(note.capture().encode() == original && changes == 0) { "Secondary finger committed an eraser gesture" }
+        event(MotionEvent.ACTION_UP, intArrayOf(7), listOf(300f to 150f))
+        check(note.capture().encode() == original && changes == 0)
+        // The actual non-zero owner must also commit when it leaves a multi-pointer event.
+        event(MotionEvent.ACTION_DOWN, intArrayOf(7), listOf(150f to 50f))
+        event(MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            intArrayOf(7, 0), listOf(150f to 50f, 400f to 400f))
+        event(MotionEvent.ACTION_POINTER_UP or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            intArrayOf(0, 7), listOf(400f to 400f, 150f to 150f))
+        check(note.totalStrokeCount == 0 && changes == 1) { "Non-zero owner pointer-up was ignored" }
+        event(MotionEvent.ACTION_UP, intArrayOf(0), listOf(150f to 100f))
+        check(changes == 1)
+        check(note.undo() && note.totalStrokeCount == 1)
+    }
+
     fun verifyToolTerminalSamples(): String {
+        verifyToolPointerIdentity()
         val note = PagedPreviewNotebook(DocumentRoot.empty(SceneId("terminal-tools"), "Tool endpoints",
             PageDescriptor(PageId("page"), LayerId("layer"), 595.0, 842.0)), "tool-session")
         val errors = mutableListOf<String>()
@@ -137,7 +180,8 @@ internal class AndroidInputHostChecks(private val host: Activity) {
         send(view, MotionEvent.ACTION_DOWN, listOf(Sample(150f, 50f, 4000)))
         send(view, MotionEvent.ACTION_CANCEL, listOf(Sample(150f, 150f, 4001)))
         check(note.capture().encode() == beforeCancel && changes == 3)
-        return JSONObject().put("erase_up_without_move", true).put("lasso_drag_up_without_move", true)
+        return JSONObject().put("secondary_pointer_cannot_commit", true).put("nonzero_pointer_up_commits", true)
+            .put("erase_up_without_move", true).put("lasso_drag_up_without_move", true)
             .put("erase_up_history", true).put("cancel_does_not_commit", true)
             .put("each_gesture_one_change", true).put("undo_restores_transform", true).toString()
     }
