@@ -1,0 +1,4 @@
+gradle.beforeProject { p ->
+    def segment = p.path == ':' ? 'root' : p.path.substring(1).replace(':', '/')
+    p.layout.buildDirectory.set(new File(p.rootDir, 'build/source-handoff-20261122/artifacts/' + segment))
+}

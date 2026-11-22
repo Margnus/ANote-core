@@ -28,6 +28,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var editOnly = false
     private var storageRetentionOnly = false
     private var pendingWorkBudgetOnly = false
+    private var sqliteSourceHandoffOnly = false
     private var recoveryOpenBudgetOnly = false
     private var recoveryOpenFixture: String? = null
     private var catalogRetryOnly = false
@@ -68,6 +69,7 @@ class ViewportInstrumentation : Instrumentation() {
         ownerRetirementOnly = arguments?.getString("notecore_case") == "owner_retirement"
         storageRetentionOnly = arguments?.getString("notecore_case") == "storage_retention"
         pendingWorkBudgetOnly = arguments?.getString("notecore_case") == "pending_work_budget"
+        sqliteSourceHandoffOnly = arguments?.getString("notecore_case") == "sqlite_source_handoff"
         recoveryOpenBudgetOnly = arguments?.getString("notecore_case") == "recovery_open_budget"
         recoveryOpenFixture = arguments?.getString("recovery_open_base64")
         catalogRetryOnly = arguments?.getString("notecore_case") == "catalog_retry"
@@ -123,6 +125,11 @@ class ViewportInstrumentation : Instrumentation() {
                 val bytes = android.util.Base64.decode(checkNotNull(recoveryOpenFixture), android.util.Base64.DEFAULT)
                 result.putString("recovery_open_budget", PendingRecoveryHostChecks(this, host).verifyOpenBudget(bytes))
                 result.putString("recovery_open_budget_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
+            if (sqliteSourceHandoffOnly) {
+                result.putString("sqlite_source_handoff", SqliteSourceHandoffChecks(this, host).verify())
+                result.putString("sqlite_source_handoff_status", "passed")
                 finish(Activity.RESULT_OK, result); return
             }
             if (pendingWorkBudgetOnly) {
