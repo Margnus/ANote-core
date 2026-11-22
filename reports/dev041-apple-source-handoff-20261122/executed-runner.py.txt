@@ -1,0 +1,33 @@
+from pathlib import Path
+import json,subprocess,uuid
+root=Path.cwd()
+out=root/'build/apple-source-handoff-20261122-retry'
+out.mkdir(exist_ok=False)
+def run(label,args,timeout=60,allowed=(0,)):
+ r=subprocess.run(list(map(str,args)),capture_output=True,timeout=timeout)
+ (out/(label+'.stdout.log')).write_bytes(r.stdout)
+ (out/(label+'.stderr.log')).write_bytes(r.stderr)
+ if r.returncode not in allowed: raise RuntimeError((label,r.returncode,r.stderr[-1600:],r.stdout[-1600:]))
+ return r.stdout.decode()
+before=json.loads(run('devices-before',['xcrun','simctl','list','devices','-j']))
+uid=run('create',['xcrun','simctl','create','NoteCore-SourceHandoff-'+uuid.uuid4().hex,
+ 'com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro','com.apple.CoreSimulator.SimRuntime.iOS-27-0']).strip()
+try:
+ run('boot',['xcrun','simctl','boot',uid])
+ run('bootstatus',['xcrun','simctl','bootstatus',uid,'-b'],180)
+ framework=root/'build/codex-dev041-highlighter-recovery/shared-core/build/bin/iosSimulatorArm64/debugFramework'
+ args=['xcodebuild','-quiet','-project','ios-app/NoteCorePreview.xcodeproj','-scheme','NoteCorePreview',
+       '-sdk','iphonesimulator','-destination','platform=iOS Simulator,id='+uid,
+       '-derivedDataPath',out/'DerivedData','-resultBundlePath',out/'tests.xcresult',
+       'CODE_SIGNING_ALLOWED=NO','FRAMEWORK_SEARCH_PATHS='+str(framework),
+       '-only-testing:NoteCorePreviewTests/PagedHostTests/testOriginalModelSourceCheckpointSurvivesSqliteRollback',
+       '-only-testing:NoteCorePreviewTests/PagedHostTests/testPendingRecoveryOriginalModelFailureRetryNewOwnerAndCanonicalReopen',
+       '-collect-test-diagnostics','never','test']
+ run('test',args,600)
+ run('summary',['xcrun','xcresulttool','get','test-results','summary','--path',out/'tests.xcresult','--format','json'])
+finally:
+ try:run('shutdown',['xcrun','simctl','shutdown',uid],allowed=(0,1,149))
+ finally:run('delete',['xcrun','simctl','delete',uid])
+after=json.loads(run('devices-after',['xcrun','simctl','list','devices','-j']))
+assert before==after
+print('Selected source handoff and existing recovery host tests passed')

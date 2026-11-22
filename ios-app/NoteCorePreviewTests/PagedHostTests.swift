@@ -1,4 +1,5 @@
 import CryptoKit
+import SQLite3
 import XCTest
 import UIKit
 import SwiftUI
@@ -41,6 +42,119 @@ final class PagedHostTests: XCTestCase {
         try await eventually("fresh highlighter owner retires") { fresh.ownerRetirementStatus.phase == .retired }
         XCTAssertEqual(try Data(contentsOf: file), Data(expected.utf8))
     }
+
+    @MainActor func testOriginalModelSourceCheckpointSurvivesSqliteRollback() async throws {
+        let (pendingBytes, canonicalBytes) = try androidViewWorkerFiles()
+        let checkpoint = try PreviewRecoveryCodec.shared.decode(text: String(decoding: pendingBytes, as: UTF8.self))
+        let folder = directory()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let file = folder.appendingPathComponent(checkpoint.documentId + ".ncp")
+        let entered = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+        defer { release.signal() }
+        let budget = try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+            journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
+            historyEntries: 128, historyBytes: 0, inputBytes: 2248)
+        let model = PreviewModel(directory: folder, documentBudget: budget, observeWriteBoundary: { boundary in
+            if boundary == .beforeAtomicWrite {
+                entered.signal()
+                release.wait()
+            }
+        })
+        try model.adopt(checkpoint.root, persisted: false, recovery: checkpoint)
+        let source = try XCTUnwrap(model.current)
+        XCTAssertTrue(model.save())
+        var writing = false
+        try await eventually("source worker reaches atomic write") {
+            if !writing { writing = entered.wait(timeout: .now()) == .success }
+            return writing
+        }
+        model.close()
+        XCTAssertTrue(model.current === source)
+        XCTAssertTrue(source.captureRecovery().sameContent(other: checkpoint))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        release.signal()
+        try await eventually("source file receipt drains ledger") { model.ownerRetirementStatus.pendingWrites == 0 }
+        XCTAssertEqual(try Data(contentsOf: file), pendingBytes)
+        model.close()
+        XCTAssertNil(model.current)
+        XCTAssertFalse(source.retryPendingStroke())
+        XCTAssertEqual(model.beginOwnerRetirement(), .started)
+        try await eventually("source owner retires before SQLite recovery") { model.ownerRetirementStatus.phase == .retired }
+
+        func recoveredCanonical(_ nonce: String) throws -> Data {
+            let decoded = try PreviewRecoveryCodec.shared.decode(text: PreviewFileIO.readUTF8(file))
+            let result = PagedPreviewNotebook.companion.openRecovery(snapshot: decoded, sessionNonce: nonce,
+                budget: try DocumentBudget(maxPages: 128, maxObjects: 5000, liveBytes: 8 * 1024 * 1024,
+                    journalEntries: 4096, journalBytes: 32 * 1024 * 1024, identityBytes: 4 * 1024 * 1024,
+                    historyEntries: 128, historyBytes: 8 * 1024 * 1024, inputBytes: 2248),
+                ownerCheck: { precondition(Thread.isMainThread) })
+            let recovered = try XCTUnwrap(result.notebook)
+            XCTAssertTrue(recovered.retryPendingStroke())
+            XCTAssertTrue(recovered.retryPendingStroke())
+            XCTAssertEqual(recovered.totalStrokeCount, 1)
+            XCTAssertEqual(recovered.changeVersion, checkpoint.version + 1)
+            let canonical = Data(try recovered.capture().encode().utf8)
+            XCTAssertTrue(recovered.retire())
+            return canonical
+        }
+        XCTAssertEqual(try recoveredCanonical("first-sqlite-attempt"), canonicalBytes)
+        let database = folder.appendingPathComponent("isolated.sqlite")
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(database.path, &db), SQLITE_OK)
+        defer { if let db { sqlite3_close_v2(db) } }
+        func execute(_ sql: String) throws {
+            guard sqlite3_exec(db, sql, nil, nil, nil) == SQLITE_OK else {
+                throw NSError(domain: "SQLiteSourceHandoffTest", code: Int(sqlite3_errcode(db)))
+            }
+        }
+        func scalar(_ sql: String) throws -> String {
+            var statement: OpaquePointer?
+            XCTAssertEqual(sqlite3_prepare_v2(db, sql, -1, &statement, nil), SQLITE_OK)
+            defer { sqlite3_finalize(statement) }
+            guard sqlite3_step(statement) == SQLITE_ROW, let value = sqlite3_column_text(statement, 0) else {
+                throw NSError(domain: "SQLiteSourceHandoffTest", code: Int(sqlite3_errcode(db)))
+            }
+            return String(cString: value)
+        }
+        try execute("PRAGMA journal_mode=WAL")
+        try execute("PRAGMA synchronous=FULL")
+        XCTAssertEqual(try scalar("PRAGMA journal_mode"), "wal")
+        XCTAssertEqual(try scalar("PRAGMA synchronous"), "2")
+        try execute("CREATE TABLE migration(op TEXT PRIMARY KEY NOT NULL, original BLOB NOT NULL, canonical BLOB NOT NULL)")
+        func insertMigration() throws {
+            var statement: OpaquePointer?
+            XCTAssertEqual(sqlite3_prepare_v2(db, "INSERT INTO migration VALUES('source-import',?,?)", -1, &statement, nil), SQLITE_OK)
+            defer { sqlite3_finalize(statement) }
+            let transient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+            for (index, bytes) in [pendingBytes, canonicalBytes].enumerated() {
+                let bound = bytes.withUnsafeBytes {
+                    sqlite3_bind_blob(statement, Int32(index + 1), $0.baseAddress, Int32($0.count), transient)
+                }
+                XCTAssertEqual(bound, SQLITE_OK)
+            }
+            XCTAssertEqual(sqlite3_step(statement), SQLITE_DONE)
+        }
+        try execute("BEGIN IMMEDIATE")
+        try insertMigration()
+        try execute("ROLLBACK")
+        XCTAssertEqual(try scalar("SELECT count(*) FROM migration"), "0")
+        XCTAssertEqual(try Data(contentsOf: file), pendingBytes)
+        XCTAssertEqual(try recoveredCanonical("retry-after-sqlite-rollback"), canonicalBytes)
+        try execute("BEGIN IMMEDIATE")
+        try insertMigration()
+        try execute("COMMIT")
+        XCTAssertEqual(sqlite3_close_v2(db), SQLITE_OK)
+        db = nil
+        XCTAssertEqual(sqlite3_open_v2(database.path, &db, SQLITE_OPEN_READONLY, nil), SQLITE_OK)
+        XCTAssertEqual(try scalar("SELECT lower(hex(original)) FROM migration WHERE op='source-import'"),
+                       pendingBytes.map { String(format: "%02x", $0) }.joined())
+        XCTAssertEqual(try scalar("SELECT lower(hex(canonical)) FROM migration WHERE op='source-import'"),
+                       canonicalBytes.map { String(format: "%02x", $0) }.joined())
+        XCTAssertEqual(try scalar("PRAGMA quick_check"), "ok")
+        XCTAssertEqual(try Data(contentsOf: file), pendingBytes)
+    }
+
     @MainActor func testInvalidLocalFileIdentityRefusesBeforeIOAndPreservesCurrentInput() async throws {
         let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

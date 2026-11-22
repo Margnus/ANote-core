@@ -1,0 +1,119 @@
+Writing result bundle at path:
+	/Users/lixiaofan/StudioProjects/notecore/build/apple-source-handoff-20261122-retry/tests.xcresult
+
+error: the following command failed with exit code 0 but produced no further output
+SwiftCompile normal arm64 /Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreview/NoteCorePreviewApp.swift (in target 'NoteCorePreview' from project 'NoteCorePreview')
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreview/NoteCorePreviewApp.swift:512:50: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+504 |             guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
+505 |             return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)
+506 |         }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
+    |                                                     |- note: 'self' implicitly strongly captured here
+    |                                                     `- note: add 'self' as a capture list item to silence
+507 |             guard self.navigationEpoch == navigation, self.current === previous, isRequested() else { return }
+508 |             let latest = self.ledger.latest(documentId: id)
+    :
+510 |             if let latest, latest !== retained {
+511 |                 // Retry the pure read after ACK; no old notebook payload is placed on a callback queue.
+512 |                 DispatchQueue.main.async { [weak self, weak previous] in
+    |                                                  |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+    |                                                  `- note: explicitly assign the capture list item to silence
+513 |                     guard let self, self.navigationEpoch == navigation, self.current === previous else { return }
+514 |                     self.openDocument(id, replacingIdle: replacingIdle, isRequested: isRequested, opened: opened)
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreview/NoteCorePreviewApp.swift:512:61: warning: 'weak' ownership of capture 'previous' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+504 |             guard input.2 == nil else { throw CocoaError(.fileReadCorruptFile) }
+505 |             return try PreviewFileIO.readRecovery(input.0, documentId: input.1, beforeRead: input.3)
+506 |         }, rejected: { status = "后台队列繁忙，请重新打开笔记" }) { result in
+    |                                                     |- note: 'previous' implicitly strongly captured here
+    |                                                     `- note: add 'previous' as a capture list item to silence
+507 |             guard self.navigationEpoch == navigation, self.current === previous, isRequested() else { return }
+508 |             let latest = self.ledger.latest(documentId: id)
+    :
+510 |             if let latest, latest !== retained {
+511 |                 // Retry the pure read after ACK; no old notebook payload is placed on a callback queue.
+512 |                 DispatchQueue.main.async { [weak self, weak previous] in
+    |                                                             |- warning: 'weak' ownership of capture 'previous' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+    |                                                             `- note: explicitly assign the capture list item to silence
+513 |                     guard let self, self.navigationEpoch == navigation, self.current === previous else { return }
+514 |                     self.openDocument(id, replacingIdle: replacingIdle, isRequested: isRequested, opened: opened)
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+error: the following command failed with exit code 0 but produced no further output
+SwiftCompile normal arm64 /Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift (in target 'NoteCorePreviewTests' from project 'NoteCorePreview')
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:369:18: warning: weak variable 'goneInput' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 367 |         inputView?.touchesBegan([SyntheticInkTouch(80, 3)], with: nil)
+ 368 |         XCTAssertTrue(reopened.hasActiveStroke)
+ 369 |         weak var goneInput = inputView
+     |                  `- warning: weak variable 'goneInput' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+ 370 |         inputView = nil; XCTAssertNil(goneInput)
+ 371 |         a.cancelInput() // Explicit cancellation uses its original operation, never ARC as a receipt.
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:1349:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1347 |         let note = try XCTUnwrap(model?.current); draw(note); model?.changed()
+1348 |         let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+1349 |         weak var observer = model
+     |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1350 |         var finished = false
+1351 |         XCTAssertEqual(model?.beginOwnerRetirement { status in
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:1371:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1369 |         let identity = ObjectIdentifier(try XCTUnwrap(model))
+1370 |         let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+1371 |         weak var observer = model
+     |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1372 |         model = nil
+1373 |         try await eventually("original owner retains failed accepted write before retirement") {
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/PagedHostTests.swift:1397:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1395 |         let note = try XCTUnwrap(model?.current); draw(note); model?.changed()
+1396 |         let expected = try note.capture().encode(), file = dir.appendingPathComponent(note.documentId + ".ncp")
+1397 |         weak var observer = model
+     |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1398 |         var finished = false
+1399 |         XCTAssertEqual(model?.beginOwnerRetirement { status in
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[#WeakMutability]: <https://docs.swift.org/compiler/documentation/diagnostics/weak-mutability>
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:108:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+106 |         var model: PreviewModel? = fixture?.0
+107 |         var view: InkUIView? = fixture?.1; fixture = nil
+108 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+109 |         let identity = ObjectIdentifier(try XCTUnwrap(model))
+110 |         _ = viewImage(try XCTUnwrap(view))
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:140:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+138 |         var model: PreviewModel? = fixture?.0
+139 |         var view: InkUIView? = fixture?.1; fixture = nil
+140 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+141 |         _ = viewImage(try XCTUnwrap(view))
+142 |         try await eventually { (model?.inkFramePublications ?? 0) > 0 }
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:159:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+157 |         var model: PreviewModel? = fixture?.0
+158 |         var view: InkUIView? = fixture?.1; fixture = nil
+159 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+160 |         _ = viewImage(try XCTUnwrap(view))
+161 |         try await eventually { (model?.inkFramePublications ?? 0) > 0 }
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:186:18: warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+184 |         var model: PreviewModel? = fixture?.0
+185 |         var view: InkUIView? = fixture?.1; fixture = nil
+186 |         weak var observer = model
+    |                  `- warning: weak variable 'observer' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+187 |         _ = viewImage(try XCTUnwrap(view))
+188 |         try await eventually { started.wait(timeout: .now()) == .success }
+
+/Users/lixiaofan/StudioProjects/notecore/ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift:277:18: warning: weak variable 'goneView' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+275 |         })
+276 |         let model = try XCTUnwrap(captured).0
+277 |         weak var goneView = captured?.1
+    |                  `- warning: weak variable 'goneView' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+278 |         var view: InkUIView? = captured?.1; captured = nil
+279 |         _ = viewImage(try XCTUnwrap(view))
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[#WeakMutability]: <https://docs.swift.org/compiler/documentation/diagnostics/weak-mutability>
+Testing started
