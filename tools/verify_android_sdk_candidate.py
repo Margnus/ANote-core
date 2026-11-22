@@ -216,6 +216,8 @@ def main():
         assert (image / 'system.img').exists(), image
         adb = sdk_executable(sdk, 'platform-tools/adb')
         emulator_binary = sdk_executable(sdk, 'emulator/emulator')
+        if not emulator_binary.is_file():
+            raise RuntimeError(f'Android Emulator executable is missing: {emulator_binary}; install the emulator SDK package')
         serial = f'emulator-{args.port}'
         assert not any(line.split()[:1] == [serial] for line in run(adb, 'devices').splitlines())
         name = 'NoteCoreCandidate-' + uuid.uuid4().hex

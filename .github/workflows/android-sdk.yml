@@ -49,7 +49,8 @@ jobs:
           mkdir -p build/android-sdk-ci
           test -e /dev/kvm
           sudo chmod 666 /dev/kvm
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'system-images;android-26;default;x86_64' > build/android-sdk-ci/sdk-install.log 2>&1
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platform-tools' 'emulator' 'platforms;android-36' 'build-tools;36.0.0' 'system-images;android-26;default;x86_64' > build/android-sdk-ci/sdk-install.log 2>&1
+          test -x "$ANDROID_HOME/emulator/emulator"
       - name: Build candidate and execute original external consumers
         run: python3 ci/verify_android_sdk.py
       - name: Retain evidence, including failures
