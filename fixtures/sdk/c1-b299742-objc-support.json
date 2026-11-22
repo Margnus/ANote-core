@@ -1,0 +1,616 @@
+{
+  "schema": "c1-supported-objc-profile-1",
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "candidate_version": "0.0.0-c1",
+  "header_sha256": "02ebfa1e089b4bc4e07bb198daf799dba74f4365bb1db30d79045eb62c451bbf",
+  "adoption": "Selected Objective-C signatures for the fixed candidate, including their transitive value/protocol types.",
+  "support": {
+    "NCPAffine2D": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "a": "@property (readonly) double a __attribute__((swift_name(\"a\")));",
+        "b": "@property (readonly) double b __attribute__((swift_name(\"b\")));",
+        "c": "@property (readonly) double c __attribute__((swift_name(\"c\")));",
+        "d": "@property (readonly) double d __attribute__((swift_name(\"d\")));",
+        "tx": "@property (readonly) double tx __attribute__((swift_name(\"tx\")));",
+        "ty": "@property (readonly) double ty __attribute__((swift_name(\"ty\")));"
+      }
+    },
+    "NCPApplePreviewInput": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)": "- (NCPPreviewInputResult *)offerNotebook:(NCPPagedPreviewNotebook *)notebook phase:(NCPPointerPhase *)phase eventTimeMicros:(int64_t)eventTimeMicros xs:(NSData *)xs ys:(NSData *)ys pressures:(NSData *)pressures times:(NSData *)times __attribute__((swift_name(\"offer(notebook:phase:eventTimeMicros:xs:ys:pressures:times:)\")));",
+        "shared": "@property (class, readonly, getter=shared) NCPApplePreviewInput *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPBase": {
+      "inheritance": ": NSObject",
+      "members": {}
+    },
+    "NCPBrushSpec": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "argb": "@property (readonly) int32_t argb __attribute__((swift_name(\"argb\")));",
+        "width": "@property (readonly) double width __attribute__((swift_name(\"width\")));"
+      }
+    },
+    "NCPDocumentBudget": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "companion": "@property (class, readonly, getter=companion) NCPDocumentBudgetCompanion *companion __attribute__((swift_name(\"companion\")));"
+      }
+    },
+    "NCPDocumentBudgetCompanion": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)": "- (NCPDocumentBudgetCreation *)validatedMaxPages:(int32_t)maxPages maxObjects:(int32_t)maxObjects liveBytes:(int64_t)liveBytes journalEntries:(int32_t)journalEntries journalBytes:(int64_t)journalBytes identityBytes:(int64_t)identityBytes historyEntries:(int32_t)historyEntries historyBytes:(int64_t)historyBytes inputBytes:(int64_t)inputBytes __attribute__((swift_name(\"validated(maxPages:maxObjects:liveBytes:journalEntries:journalBytes:identityBytes:historyEntries:historyBytes:inputBytes:)\")));"
+      }
+    },
+    "NCPDocumentBudgetCreation": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "budget": "@property (readonly) NCPDocumentBudget * _Nullable budget __attribute__((swift_name(\"budget\")));",
+        "failure": "@property (readonly) NCPDocumentBudgetFailure * _Nullable failure __attribute__((swift_name(\"failure\")));"
+      }
+    },
+    "NCPDocumentBudgetFailure": {
+      "inheritance": ": NCPKotlinEnum<NCPDocumentBudgetFailure *>",
+      "members": {
+        "entries": "@property (class, readonly) NSArray<NCPDocumentBudgetFailure *> *entries __attribute__((swift_name(\"entries\")));",
+        "historyBytes": "@property (class, readonly) NCPDocumentBudgetFailure *historyBytes __attribute__((swift_name(\"historyBytes\")));",
+        "historyEntries": "@property (class, readonly) NCPDocumentBudgetFailure *historyEntries __attribute__((swift_name(\"historyEntries\")));",
+        "identityBytes": "@property (class, readonly) NCPDocumentBudgetFailure *identityBytes __attribute__((swift_name(\"identityBytes\")));",
+        "inputBytes": "@property (class, readonly) NCPDocumentBudgetFailure *inputBytes __attribute__((swift_name(\"inputBytes\")));",
+        "journalBytes": "@property (class, readonly) NCPDocumentBudgetFailure *journalBytes __attribute__((swift_name(\"journalBytes\")));",
+        "journalEntries": "@property (class, readonly) NCPDocumentBudgetFailure *journalEntries __attribute__((swift_name(\"journalEntries\")));",
+        "liveBytes": "@property (class, readonly) NCPDocumentBudgetFailure *liveBytes __attribute__((swift_name(\"liveBytes\")));",
+        "maxObjects": "@property (class, readonly) NCPDocumentBudgetFailure *maxObjects __attribute__((swift_name(\"maxObjects\")));",
+        "maxPages": "@property (class, readonly) NCPDocumentBudgetFailure *maxPages __attribute__((swift_name(\"maxPages\")));"
+      }
+    },
+    "NCPDocumentRejection": {
+      "inheritance": ": NCPKotlinEnum<NCPDocumentRejection *>",
+      "members": {
+        "closed": "@property (class, readonly) NCPDocumentRejection *closed __attribute__((swift_name(\"closed\")));",
+        "entries": "@property (class, readonly) NSArray<NCPDocumentRejection *> *entries __attribute__((swift_name(\"entries\")));",
+        "historyCapacity": "@property (class, readonly) NCPDocumentRejection *historyCapacity __attribute__((swift_name(\"historyCapacity\")));",
+        "historyConflict": "@property (class, readonly) NCPDocumentRejection *historyConflict __attribute__((swift_name(\"historyConflict\")));",
+        "historyEmpty": "@property (class, readonly) NCPDocumentRejection *historyEmpty __attribute__((swift_name(\"historyEmpty\")));",
+        "historyTarget": "@property (class, readonly) NCPDocumentRejection *historyTarget __attribute__((swift_name(\"historyTarget\")));",
+        "identityCapacity": "@property (class, readonly) NCPDocumentRejection *identityCapacity __attribute__((swift_name(\"identityCapacity\")));",
+        "invalidIdentity": "@property (class, readonly) NCPDocumentRejection *invalidIdentity __attribute__((swift_name(\"invalidIdentity\")));",
+        "invalidPage": "@property (class, readonly) NCPDocumentRejection *invalidPage __attribute__((swift_name(\"invalidPage\")));",
+        "invalidTitle": "@property (class, readonly) NCPDocumentRejection *invalidTitle __attribute__((swift_name(\"invalidTitle\")));",
+        "journalCapacity": "@property (class, readonly) NCPDocumentRejection *journalCapacity __attribute__((swift_name(\"journalCapacity\")));",
+        "liveByteCapacity": "@property (class, readonly) NCPDocumentRejection *liveByteCapacity __attribute__((swift_name(\"liveByteCapacity\")));",
+        "missingPage": "@property (class, readonly) NCPDocumentRejection *missingPage __attribute__((swift_name(\"missingPage\")));",
+        "noChange": "@property (class, readonly) NCPDocumentRejection *noChange __attribute__((swift_name(\"noChange\")));",
+        "objectCapacity": "@property (class, readonly) NCPDocumentRejection *objectCapacity __attribute__((swift_name(\"objectCapacity\")));",
+        "pageCapacity": "@property (class, readonly) NCPDocumentRejection *pageCapacity __attribute__((swift_name(\"pageCapacity\")));",
+        "reusedIdentity": "@property (class, readonly) NCPDocumentRejection *reusedIdentity __attribute__((swift_name(\"reusedIdentity\")));",
+        "reusedOperationId": "@property (class, readonly) NCPDocumentRejection *reusedOperationId __attribute__((swift_name(\"reusedOperationId\")));",
+        "revisionExhausted": "@property (class, readonly) NCPDocumentRejection *revisionExhausted __attribute__((swift_name(\"revisionExhausted\")));",
+        "sceneRejected": "@property (class, readonly) NCPDocumentRejection *sceneRejected __attribute__((swift_name(\"sceneRejected\")));",
+        "stalePage": "@property (class, readonly) NCPDocumentRejection *stalePage __attribute__((swift_name(\"stalePage\")));",
+        "staleRoot": "@property (class, readonly) NCPDocumentRejection *staleRoot __attribute__((swift_name(\"staleRoot\")));",
+        "theCopyMapping": "@property (class, readonly) NCPDocumentRejection *theCopyMapping __attribute__((swift_name(\"theCopyMapping\")));",
+        "wrongDocument": "@property (class, readonly) NCPDocumentRejection *wrongDocument __attribute__((swift_name(\"wrongDocument\")));",
+        "wrongLayer": "@property (class, readonly) NCPDocumentRejection *wrongLayer __attribute__((swift_name(\"wrongLayer\")));"
+      }
+    },
+    "NCPDocumentRoot": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "id": "@property (readonly) NCPSceneId *id __attribute__((swift_name(\"id\")));",
+        "pageAt(index:)": "- (NCPPageDescriptor * _Nullable)pageAtIndex:(int32_t)index __attribute__((swift_name(\"pageAt(index:)\")));",
+        "pageCount": "@property (readonly) int32_t pageCount __attribute__((swift_name(\"pageCount\")));",
+        "revision": "@property (readonly) int64_t revision __attribute__((swift_name(\"revision\")));",
+        "title": "@property (readonly) NSString *title __attribute__((swift_name(\"title\")));"
+      }
+    },
+    "NCPInputRejection": {
+      "inheritance": ": NCPKotlinEnum<NCPInputRejection *>",
+      "members": {
+        "capacity": "@property (class, readonly) NCPInputRejection *capacity __attribute__((swift_name(\"capacity\")));",
+        "closed": "@property (class, readonly) NCPInputRejection *closed __attribute__((swift_name(\"closed\")));",
+        "entries": "@property (class, readonly) NSArray<NCPInputRejection *> *entries __attribute__((swift_name(\"entries\")));",
+        "eventOrder": "@property (class, readonly) NCPInputRejection *eventOrder __attribute__((swift_name(\"eventOrder\")));",
+        "invalidBatch": "@property (class, readonly) NCPInputRejection *invalidBatch __attribute__((swift_name(\"invalidBatch\")));",
+        "noActivePointer": "@property (class, readonly) NCPInputRejection *noActivePointer __attribute__((swift_name(\"noActivePointer\")));",
+        "pointerBusy": "@property (class, readonly) NCPInputRejection *pointerBusy __attribute__((swift_name(\"pointerBusy\")));"
+      }
+    },
+    "NCPInputSample": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "pressure": "@property (readonly) float pressure __attribute__((swift_name(\"pressure\")));",
+        "timeMicros": "@property (readonly) int64_t timeMicros __attribute__((swift_name(\"timeMicros\")));",
+        "x": "@property (readonly) double x __attribute__((swift_name(\"x\")));",
+        "y": "@property (readonly) double y __attribute__((swift_name(\"y\")));"
+      }
+    },
+    "NCPKotlinComparable": {
+      "inheritance": "",
+      "members": {}
+    },
+    "NCPKotlinEnum": {
+      "inheritance": "<E> : NCPBase <NCPKotlinComparable>",
+      "members": {}
+    },
+    "NCPLayerId": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "value": "@property (readonly) NSString *value __attribute__((swift_name(\"value\")));"
+      }
+    },
+    "NCPPageDescriptor": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "contentRevision": "@property (readonly) int64_t contentRevision __attribute__((swift_name(\"contentRevision\")));",
+        "height": "@property (readonly) double height __attribute__((swift_name(\"height\")));",
+        "id": "@property (readonly) NCPPageId *id __attribute__((swift_name(\"id\")));",
+        "layerId": "@property (readonly) NCPLayerId *layerId __attribute__((swift_name(\"layerId\")));",
+        "paper": "@property (readonly) NCPPaperKind *paper __attribute__((swift_name(\"paper\")));",
+        "width": "@property (readonly) double width __attribute__((swift_name(\"width\")));"
+      }
+    },
+    "NCPPageId": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "value": "@property (readonly) NSString *value __attribute__((swift_name(\"value\")));"
+      }
+    },
+    "NCPPagedPreviewNotebook": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "activeInputOperationId": "@property (readonly) NSString * _Nullable activeInputOperationId __attribute__((swift_name(\"activeInputOperationId\")));",
+        "cancelStroke()": "- (void)cancelStroke __attribute__((swift_name(\"cancelStroke()\")));",
+        "capture()": "- (NCPPagedPreviewSnapshot *)capture __attribute__((swift_name(\"capture()\")));",
+        "captureRecovery()": "- (NCPPagedPreviewSnapshot *)captureRecovery __attribute__((swift_name(\"captureRecovery()\")));",
+        "changeVersion": "@property (readonly) int64_t changeVersion __attribute__((swift_name(\"changeVersion\")));",
+        "companion": "@property (class, readonly, getter=companion) NCPPagedPreviewNotebookCompanion *companion __attribute__((swift_name(\"companion\")));",
+        "currentPage": "@property (readonly) NCPPageDescriptor *currentPage __attribute__((swift_name(\"currentPage\")));",
+        "edit(request:)": "- (NCPPreviewEditResult *)editRequest:(id<NCPPreviewEdit>)request __attribute__((swift_name(\"edit(request:)\")));",
+        "hasActiveStroke": "@property (readonly) BOOL hasActiveStroke __attribute__((swift_name(\"hasActiveStroke\")));",
+        "hasPendingStroke": "@property (readonly) BOOL hasPendingStroke __attribute__((swift_name(\"hasPendingStroke\")));",
+        "inputBatchLimit": "@property (readonly) int32_t inputBatchLimit __attribute__((swift_name(\"inputBatchLimit\")));",
+        "inputReservedByteCharge": "@property (readonly) int64_t inputReservedByteCharge __attribute__((swift_name(\"inputReservedByteCharge\")));",
+        "isReadOnly": "@property (readonly) BOOL isReadOnly __attribute__((swift_name(\"isReadOnly\")));",
+        "lastFailure": "@property (readonly) NCPPreviewSessionFailure * _Nullable lastFailure __attribute__((swift_name(\"lastFailure\")));",
+        "page(index:)": "- (NCPPageDescriptor *)pageIndex:(int32_t)index __attribute__((swift_name(\"page(index:)\")));",
+        "pageAt(index:)": "- (NCPPageDescriptor * _Nullable)pageAtIndex:(int32_t)index __attribute__((swift_name(\"pageAt(index:)\")));",
+        "pageCount": "@property (readonly) int32_t pageCount __attribute__((swift_name(\"pageCount\")));",
+        "pendingInk()": "- (NCPPreviewPendingInk * _Nullable)pendingInk __attribute__((swift_name(\"pendingInk()\")));",
+        "pointCount(index:)": "- (int32_t)pointCountIndex:(int32_t)index __attribute__((swift_name(\"pointCount(index:)\")));",
+        "pointPressure(index:point:)": "- (float)pointPressureIndex:(int32_t)index point:(int32_t)point __attribute__((swift_name(\"pointPressure(index:point:)\")));",
+        "pointX(index:point:)": "- (double)pointXIndex:(int32_t)index point:(int32_t)point __attribute__((swift_name(\"pointX(index:point:)\")));",
+        "pointY(index:point:)": "- (double)pointYIndex:(int32_t)index point:(int32_t)point __attribute__((swift_name(\"pointY(index:point:)\")));",
+        "prepareRealBatch(phase:count:)": "- (NCPPreviewInputResult * _Nullable)prepareRealBatchPhase:(NCPPointerPhase *)phase count:(int32_t)count __attribute__((swift_name(\"prepareRealBatch(phase:count:)\")));",
+        "retire()": "- (BOOL)retire __attribute__((swift_name(\"retire()\")));",
+        "retireAfterRecovery(snapshot:)": "- (BOOL)retireAfterRecoverySnapshot:(NCPPagedPreviewSnapshot *)snapshot __attribute__((swift_name(\"retireAfterRecovery(snapshot:)\")));",
+        "retryPendingStroke()": "- (BOOL)retryPendingStroke __attribute__((swift_name(\"retryPendingStroke()\")));",
+        "setReadOnly(value:)": "- (BOOL)setReadOnlyValue:(BOOL)value __attribute__((swift_name(\"setReadOnly(value:)\")));",
+        "snapshot()": "- (NCPDocumentRoot *)snapshot __attribute__((swift_name(\"snapshot()\")));",
+        "stroke(index:)": "- (NCPStrokeObject *)strokeIndex:(int32_t)index __attribute__((swift_name(\"stroke(index:)\")));",
+        "strokeAt(index:)": "- (NCPStrokeObject * _Nullable)strokeAtIndex:(int32_t)index __attribute__((swift_name(\"strokeAt(index:)\")));",
+        "strokeCount": "@property (readonly) int32_t strokeCount __attribute__((swift_name(\"strokeCount\")));"
+      }
+    },
+    "NCPPagedPreviewNotebookCompanion": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)": "- (NCPPreviewNotebookOpen *)createValidatedDocumentId:(NSString *)documentId title:(NSString *)title sessionNonce:(NSString *)sessionNonce width:(double)width height:(double)height paper:(NCPPaperKind *)paper budget:(NCPDocumentBudget *)budget ownerCheck:(void (^)(void))ownerCheck __attribute__((swift_name(\"createValidated(documentId:title:sessionNonce:width:height:paper:budget:ownerCheck:)\")));",
+        "open(initial:sessionNonce:budget:ownerCheck:)": "- (NCPPreviewNotebookOpen *)openInitial:(NCPDocumentRoot *)initial sessionNonce:(NSString *)sessionNonce budget:(NCPDocumentBudget *)budget ownerCheck:(void (^)(void))ownerCheck __attribute__((swift_name(\"open(initial:sessionNonce:budget:ownerCheck:)\")));",
+        "openRecovery(snapshot:sessionNonce:budget:ownerCheck:)": "- (NCPPreviewNotebookOpen *)openRecoverySnapshot:(NCPPagedPreviewSnapshot *)snapshot sessionNonce:(NSString *)sessionNonce budget:(NCPDocumentBudget *)budget ownerCheck:(void (^)(void))ownerCheck __attribute__((swift_name(\"openRecovery(snapshot:sessionNonce:budget:ownerCheck:)\")));"
+      }
+    },
+    "NCPPagedPreviewSnapshot": {
+      "inheritance": ": NCPBase <NCPPreviewSaveSnapshot>",
+      "members": {
+        "documentId": "@property (readonly) NSString *documentId __attribute__((swift_name(\"documentId\")));",
+        "encode()": "- (NSString * _Nullable)encodeAndReturnError:(NSError * _Nullable * _Nullable)error __attribute__((swift_name(\"encode()\")));",
+        "encodingWorkByteCharge": "@property (readonly) int64_t encodingWorkByteCharge __attribute__((swift_name(\"encodingWorkByteCharge\")));",
+        "retainedByteCharge": "@property (readonly) int64_t retainedByteCharge __attribute__((swift_name(\"retainedByteCharge\")));",
+        "root": "@property (readonly) NCPDocumentRoot *root __attribute__((swift_name(\"root\")));",
+        "sameContent(other:)": "- (BOOL)sameContentOther:(id<NCPPreviewSaveSnapshot>)other __attribute__((swift_name(\"sameContent(other:)\")));",
+        "title": "@property (readonly) NSString *title __attribute__((swift_name(\"title\")));",
+        "version": "@property (readonly) int64_t version __attribute__((swift_name(\"version\")));"
+      }
+    },
+    "NCPPaperKind": {
+      "inheritance": ": NCPKotlinEnum<NCPPaperKind *>",
+      "members": {
+        "blank": "@property (class, readonly) NCPPaperKind *blank __attribute__((swift_name(\"blank\")));",
+        "dots": "@property (class, readonly) NCPPaperKind *dots __attribute__((swift_name(\"dots\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPaperKind *> *entries __attribute__((swift_name(\"entries\")));",
+        "grid": "@property (class, readonly) NCPPaperKind *grid __attribute__((swift_name(\"grid\")));",
+        "ruled": "@property (class, readonly) NCPPaperKind *ruled __attribute__((swift_name(\"ruled\")));"
+      }
+    },
+    "NCPPointerPhase": {
+      "inheritance": ": NCPKotlinEnum<NCPPointerPhase *>",
+      "members": {
+        "cancel": "@property (class, readonly) NCPPointerPhase *cancel __attribute__((swift_name(\"cancel\")));",
+        "down": "@property (class, readonly) NCPPointerPhase *down __attribute__((swift_name(\"down\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPointerPhase *> *entries __attribute__((swift_name(\"entries\")));",
+        "move": "@property (class, readonly) NCPPointerPhase *move __attribute__((swift_name(\"move\")));",
+        "up": "@property (class, readonly) NCPPointerPhase *up __attribute__((swift_name(\"up\")));"
+      }
+    },
+    "NCPPreviewDocumentRead": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "failure": "@property (readonly) NCPPreviewReadFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "root": "@property (readonly) NCPDocumentRoot * _Nullable root __attribute__((swift_name(\"root\")));"
+      }
+    },
+    "NCPPreviewDocumentReader": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "accept(root:)": "- (NCPPreviewDocumentRead *)acceptRoot:(NCPDocumentRoot *)root __attribute__((swift_name(\"accept(root:)\")));",
+        "read(text:)": "- (NCPPreviewDocumentRead *)readText:(NSString *)text __attribute__((swift_name(\"read(text:)\")));",
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewDocumentReader *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPPreviewEdit": {
+      "inheritance": "",
+      "members": {}
+    },
+    "NCPPreviewEditCopyPage": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditCopyPage *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPPreviewEditDeletePage": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditDeletePage *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPPreviewEditInsertPage": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditInsertPage *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPPreviewEditMovePage": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "init(beforePageId:)": "- (instancetype)initWithBeforePageId:(NSString * _Nullable)beforePageId __attribute__((swift_name(\"init(beforePageId:)\"))) __attribute__((objc_designated_initializer));"
+      }
+    },
+    "NCPPreviewEditRedo": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditRedo *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPPreviewEditRename": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "init(title:)": "- (instancetype)initWithTitle:(NSString *)title __attribute__((swift_name(\"init(title:)\"))) __attribute__((objc_designated_initializer));"
+      }
+    },
+    "NCPPreviewEditResult": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "accepted": "@property (readonly) BOOL accepted __attribute__((swift_name(\"accepted\")));",
+        "failure": "@property (readonly) NCPPreviewSessionFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "rootRevision": "@property (readonly) int64_t rootRevision __attribute__((swift_name(\"rootRevision\")));"
+      }
+    },
+    "NCPPreviewEditSelectPage": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "init(pageId:)": "- (instancetype)initWithPageId:(NSString *)pageId __attribute__((swift_name(\"init(pageId:)\"))) __attribute__((objc_designated_initializer));"
+      }
+    },
+    "NCPPreviewEditSelectPen": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "init(argb:width:)": "- (instancetype)initWithArgb:(int32_t)argb width:(double)width __attribute__((swift_name(\"init(argb:width:)\"))) __attribute__((objc_designated_initializer));"
+      }
+    },
+    "NCPPreviewEditSetPaper": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "init(width:height:paper:)": "- (instancetype)initWithWidth:(double)width height:(double)height paper:(NCPPaperKind *)paper __attribute__((swift_name(\"init(width:height:paper:)\"))) __attribute__((objc_designated_initializer));"
+      }
+    },
+    "NCPPreviewEditUndo": {
+      "inheritance": ": NCPBase <NCPPreviewEdit>",
+      "members": {
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewEditUndo *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPPreviewFailureKind": {
+      "inheritance": ": NCPKotlinEnum<NCPPreviewFailureKind *>",
+      "members": {
+        "activeStroke": "@property (class, readonly) NCPPreviewFailureKind *activeStroke __attribute__((swift_name(\"activeStroke\")));",
+        "capacity": "@property (class, readonly) NCPPreviewFailureKind *capacity __attribute__((swift_name(\"capacity\")));",
+        "closed": "@property (class, readonly) NCPPreviewFailureKind *closed __attribute__((swift_name(\"closed\")));",
+        "documentRejected": "@property (class, readonly) NCPPreviewFailureKind *documentRejected __attribute__((swift_name(\"documentRejected\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewFailureKind *> *entries __attribute__((swift_name(\"entries\")));",
+        "historyEmpty": "@property (class, readonly) NCPPreviewFailureKind *historyEmpty __attribute__((swift_name(\"historyEmpty\")));",
+        "identityExhausted": "@property (class, readonly) NCPPreviewFailureKind *identityExhausted __attribute__((swift_name(\"identityExhausted\")));",
+        "inputBatchCapacity": "@property (class, readonly) NCPPreviewFailureKind *inputBatchCapacity __attribute__((swift_name(\"inputBatchCapacity\")));",
+        "invalidArgument": "@property (class, readonly) NCPPreviewFailureKind *invalidArgument __attribute__((swift_name(\"invalidArgument\")));",
+        "invalidInput": "@property (class, readonly) NCPPreviewFailureKind *invalidInput __attribute__((swift_name(\"invalidInput\")));",
+        "missingPage": "@property (class, readonly) NCPPreviewFailureKind *missingPage __attribute__((swift_name(\"missingPage\")));",
+        "noActiveStroke": "@property (class, readonly) NCPPreviewFailureKind *noActiveStroke __attribute__((swift_name(\"noActiveStroke\")));",
+        "pendingStroke": "@property (class, readonly) NCPPreviewFailureKind *pendingStroke __attribute__((swift_name(\"pendingStroke\")));",
+        "readOnly": "@property (class, readonly) NCPPreviewFailureKind *readOnly __attribute__((swift_name(\"readOnly\")));"
+      }
+    },
+    "NCPPreviewInputDisposition": {
+      "inheritance": ": NCPKotlinEnum<NCPPreviewInputDisposition *>",
+      "members": {
+        "accepted": "@property (class, readonly) NCPPreviewInputDisposition *accepted __attribute__((swift_name(\"accepted\")));",
+        "cancelled": "@property (class, readonly) NCPPreviewInputDisposition *cancelled __attribute__((swift_name(\"cancelled\")));",
+        "committed": "@property (class, readonly) NCPPreviewInputDisposition *committed __attribute__((swift_name(\"committed\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewInputDisposition *> *entries __attribute__((swift_name(\"entries\")));",
+        "pendingCommit": "@property (class, readonly) NCPPreviewInputDisposition *pendingCommit __attribute__((swift_name(\"pendingCommit\")));",
+        "rejected": "@property (class, readonly) NCPPreviewInputDisposition *rejected __attribute__((swift_name(\"rejected\")));"
+      }
+    },
+    "NCPPreviewInputResult": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "acceptedSamples": "@property (readonly) int32_t acceptedSamples __attribute__((swift_name(\"acceptedSamples\")));",
+        "activeSamples": "@property (readonly) int32_t activeSamples __attribute__((swift_name(\"activeSamples\")));",
+        "admitted": "@property (readonly) BOOL admitted __attribute__((swift_name(\"admitted\")));",
+        "disposition": "@property (readonly) NCPPreviewInputDisposition *disposition __attribute__((swift_name(\"disposition\")));",
+        "failure": "@property (readonly) NCPPreviewSessionFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "inputReason": "@property (readonly) NCPInputRejection * _Nullable inputReason __attribute__((swift_name(\"inputReason\")));"
+      }
+    },
+    "NCPPreviewNotebookOpen": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "documentReason": "@property (readonly) NCPDocumentRejection * _Nullable documentReason __attribute__((swift_name(\"documentReason\")));",
+        "failure": "@property (readonly) NCPPreviewOpenFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "notebook": "@property (readonly) NCPPagedPreviewNotebook * _Nullable notebook __attribute__((swift_name(\"notebook\")));"
+      }
+    },
+    "NCPPreviewOpenFailure": {
+      "inheritance": ": NCPKotlinEnum<NCPPreviewOpenFailure *>",
+      "members": {
+        "documentCapacity": "@property (class, readonly) NCPPreviewOpenFailure *documentCapacity __attribute__((swift_name(\"documentCapacity\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewOpenFailure *> *entries __attribute__((swift_name(\"entries\")));",
+        "inputCapacity": "@property (class, readonly) NCPPreviewOpenFailure *inputCapacity __attribute__((swift_name(\"inputCapacity\")));",
+        "invalidContent": "@property (class, readonly) NCPPreviewOpenFailure *invalidContent __attribute__((swift_name(\"invalidContent\")));",
+        "invalidDocumentId": "@property (class, readonly) NCPPreviewOpenFailure *invalidDocumentId __attribute__((swift_name(\"invalidDocumentId\")));",
+        "invalidPage": "@property (class, readonly) NCPPreviewOpenFailure *invalidPage __attribute__((swift_name(\"invalidPage\")));",
+        "invalidSessionNonce": "@property (class, readonly) NCPPreviewOpenFailure *invalidSessionNonce __attribute__((swift_name(\"invalidSessionNonce\")));",
+        "invalidTitle": "@property (class, readonly) NCPPreviewOpenFailure *invalidTitle __attribute__((swift_name(\"invalidTitle\")));",
+        "unsupportedBudget": "@property (class, readonly) NCPPreviewOpenFailure *unsupportedBudget __attribute__((swift_name(\"unsupportedBudget\")));",
+        "unsupportedContent": "@property (class, readonly) NCPPreviewOpenFailure *unsupportedContent __attribute__((swift_name(\"unsupportedContent\")));"
+      }
+    },
+    "NCPPreviewPendingInk": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "brush": "@property (readonly) NCPBrushSpec *brush __attribute__((swift_name(\"brush\")));",
+        "samples": "@property (readonly) NCPStrokeSamples *samples __attribute__((swift_name(\"samples\")));"
+      }
+    },
+    "NCPPreviewReadFailure": {
+      "inheritance": ": NCPKotlinEnum<NCPPreviewReadFailure *>",
+      "members": {
+        "characterCapacity": "@property (class, readonly) NCPPreviewReadFailure *characterCapacity __attribute__((swift_name(\"characterCapacity\")));",
+        "entries": "@property (class, readonly) NSArray<NCPPreviewReadFailure *> *entries __attribute__((swift_name(\"entries\")));",
+        "invalidOrUnsupportedFormat": "@property (class, readonly) NCPPreviewReadFailure *invalidOrUnsupportedFormat __attribute__((swift_name(\"invalidOrUnsupportedFormat\")));",
+        "unsupportedPreviewContent": "@property (class, readonly) NCPPreviewReadFailure *unsupportedPreviewContent __attribute__((swift_name(\"unsupportedPreviewContent\")));"
+      }
+    },
+    "NCPPreviewRecoveryCodec": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "read(text:)": "- (NCPPreviewRecoveryRead *)readText:(NSString *)text __attribute__((swift_name(\"read(text:)\")));",
+        "shared": "@property (class, readonly, getter=shared) NCPPreviewRecoveryCodec *shared __attribute__((swift_name(\"shared\")));"
+      }
+    },
+    "NCPPreviewRecoveryRead": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "failure": "@property (readonly) NCPPreviewReadFailure * _Nullable failure __attribute__((swift_name(\"failure\")));",
+        "snapshot": "@property (readonly) NCPPagedPreviewSnapshot * _Nullable snapshot __attribute__((swift_name(\"snapshot\")));"
+      }
+    },
+    "NCPPreviewSaveSnapshot": {
+      "inheritance": "",
+      "members": {}
+    },
+    "NCPPreviewSessionFailure": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "documentReason": "@property (readonly) NCPDocumentRejection * _Nullable documentReason __attribute__((swift_name(\"documentReason\")));",
+        "kind": "@property (readonly) NCPPreviewFailureKind *kind __attribute__((swift_name(\"kind\")));"
+      }
+    },
+    "NCPSceneId": {
+      "inheritance": ": NCPBase",
+      "members": {}
+    },
+    "NCPStrokeObject": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "brush": "@property (readonly) NCPBrushSpec *brush __attribute__((swift_name(\"brush\")));",
+        "samples": "@property (readonly) NCPStrokeSamples *samples __attribute__((swift_name(\"samples\")));",
+        "transform": "@property (readonly) NCPAffine2D *transform __attribute__((swift_name(\"transform\")));"
+      }
+    },
+    "NCPStrokeSamples": {
+      "inheritance": ": NCPBase",
+      "members": {
+        "pressure(index:)": "- (float)pressureIndex:(int32_t)index __attribute__((swift_name(\"pressure(index:)\")));",
+        "sampleAt(index:)": "- (NCPInputSample * _Nullable)sampleAtIndex:(int32_t)index __attribute__((swift_name(\"sampleAt(index:)\")));",
+        "size": "@property (readonly) int32_t size __attribute__((swift_name(\"size\")));",
+        "timeMicros(index:)": "- (int64_t)timeMicrosIndex:(int32_t)index __attribute__((swift_name(\"timeMicros(index:)\")));",
+        "x(index:)": "- (double)xIndex:(int32_t)index __attribute__((swift_name(\"x(index:)\")));",
+        "y(index:)": "- (double)yIndex:(int32_t)index __attribute__((swift_name(\"y(index:)\")));"
+      }
+    }
+  },
+  "type_classification": {
+    "NCPAffine2D": "selected_signature_or_value",
+    "NCPApplePreviewInput": "selected_signature_or_value",
+    "NCPBase": "selected_signature_or_value",
+    "NCPBoolean": "outside_candidate_signature_graph",
+    "NCPBoundsD": "reachable_only_via_other_members",
+    "NCPBrushBlendMode": "outside_candidate_signature_graph",
+    "NCPBrushFillRule": "outside_candidate_signature_graph",
+    "NCPBrushGeometry": "outside_candidate_signature_graph",
+    "NCPBrushGeometryBudget": "outside_candidate_signature_graph",
+    "NCPBrushGeometryBuilder": "outside_candidate_signature_graph",
+    "NCPBrushGeometryRejection": "outside_candidate_signature_graph",
+    "NCPBrushGeometryResult": "outside_candidate_signature_graph",
+    "NCPBrushGeometryResultReady": "outside_candidate_signature_graph",
+    "NCPBrushGeometryResultRejected": "outside_candidate_signature_graph",
+    "NCPBrushKind": "reachable_only_via_other_members",
+    "NCPBrushPathPlan": "outside_candidate_signature_graph",
+    "NCPBrushPathPlanResult": "outside_candidate_signature_graph",
+    "NCPBrushPathPlanResultReady": "outside_candidate_signature_graph",
+    "NCPBrushPathPlanResultRejected": "outside_candidate_signature_graph",
+    "NCPBrushPathPlanner": "outside_candidate_signature_graph",
+    "NCPBrushPathPrecision": "outside_candidate_signature_graph",
+    "NCPBrushPathRejection": "outside_candidate_signature_graph",
+    "NCPBrushSpec": "selected_signature_or_value",
+    "NCPByte": "outside_candidate_signature_graph",
+    "NCPCanvasCommand": "reachable_only_via_other_members",
+    "NCPCanvasCommandAddStroke": "outside_candidate_signature_graph",
+    "NCPCanvasCommandDeleteStroke": "outside_candidate_signature_graph",
+    "NCPCanvasCommandTransformStroke": "outside_candidate_signature_graph",
+    "NCPCommandId": "reachable_only_via_other_members",
+    "NCPCommitReceipt": "outside_candidate_signature_graph",
+    "NCPCommitResult": "outside_candidate_signature_graph",
+    "NCPCommitResultAccepted": "outside_candidate_signature_graph",
+    "NCPCommitResultRejected": "outside_candidate_signature_graph",
+    "NCPCompletedInput": "outside_candidate_signature_graph",
+    "NCPDocumentAuthorityStatus": "reachable_only_via_other_members",
+    "NCPDocumentBudget": "selected_signature_or_value",
+    "NCPDocumentBudgetCompanion": "selected_signature_or_value",
+    "NCPDocumentBudgetCreation": "selected_signature_or_value",
+    "NCPDocumentBudgetFailure": "selected_signature_or_value",
+    "NCPDocumentCommand": "reachable_only_via_other_members",
+    "NCPDocumentCommandCanvas": "reachable_only_via_other_members",
+    "NCPDocumentCommandCopyPage": "outside_candidate_signature_graph",
+    "NCPDocumentCommandDeletePage": "outside_candidate_signature_graph",
+    "NCPDocumentCommandInsertPage": "outside_candidate_signature_graph",
+    "NCPDocumentCommandMovePage": "outside_candidate_signature_graph",
+    "NCPDocumentCommandPreparedCanvas": "outside_candidate_signature_graph",
+    "NCPDocumentCommandRedo": "outside_candidate_signature_graph",
+    "NCPDocumentCommandRename": "outside_candidate_signature_graph",
+    "NCPDocumentCommandSetPaper": "outside_candidate_signature_graph",
+    "NCPDocumentCommandUndo": "outside_candidate_signature_graph",
+    "NCPDocumentCommit": "outside_candidate_signature_graph",
+    "NCPDocumentCommitAccepted": "outside_candidate_signature_graph",
+    "NCPDocumentCommitRejected": "outside_candidate_signature_graph",
+    "NCPDocumentReceipt": "outside_candidate_signature_graph",
+    "NCPDocumentRejection": "selected_signature_or_value",
+    "NCPDocumentRoot": "selected_signature_or_value",
+    "NCPDocumentRootCompanion": "reachable_only_via_other_members",
+    "NCPDouble": "reachable_only_via_other_members",
+    "NCPDurability": "outside_candidate_signature_graph",
+    "NCPFloat": "reachable_only_via_other_members",
+    "NCPInputBatch": "outside_candidate_signature_graph",
+    "NCPInputRejection": "selected_signature_or_value",
+    "NCPInputReplaySession": "outside_candidate_signature_graph",
+    "NCPInputReplaySessionCompanion": "outside_candidate_signature_graph",
+    "NCPInputResult": "outside_candidate_signature_graph",
+    "NCPInputResultCancelled": "outside_candidate_signature_graph",
+    "NCPInputResultCompleted": "outside_candidate_signature_graph",
+    "NCPInputResultIgnoredNavigation": "outside_candidate_signature_graph",
+    "NCPInputResultPreview": "outside_candidate_signature_graph",
+    "NCPInputResultRejected": "outside_candidate_signature_graph",
+    "NCPInputSample": "selected_signature_or_value",
+    "NCPInt": "reachable_only_via_other_members",
+    "NCPKotlinArray": "reachable_only_via_other_members",
+    "NCPKotlinComparable": "selected_signature_or_value",
+    "NCPKotlinDoubleArray": "reachable_only_via_other_members",
+    "NCPKotlinDoubleIterator": "reachable_only_via_other_members",
+    "NCPKotlinEnum": "selected_signature_or_value",
+    "NCPKotlinEnumCompanion": "reachable_only_via_other_members",
+    "NCPKotlinException": "outside_candidate_signature_graph",
+    "NCPKotlinFloatArray": "reachable_only_via_other_members",
+    "NCPKotlinFloatIterator": "reachable_only_via_other_members",
+    "NCPKotlinIllegalArgumentException": "outside_candidate_signature_graph",
+    "NCPKotlinIterator": "reachable_only_via_other_members",
+    "NCPKotlinLongArray": "reachable_only_via_other_members",
+    "NCPKotlinLongIterator": "reachable_only_via_other_members",
+    "NCPKotlinRuntimeException": "outside_candidate_signature_graph",
+    "NCPKotlinThrowable": "outside_candidate_signature_graph",
+    "NCPLayerId": "selected_signature_or_value",
+    "NCPLong": "reachable_only_via_other_members",
+    "NCPMemoryDocumentAuthority": "outside_candidate_signature_graph",
+    "NCPMemorySceneCoordinator": "outside_candidate_signature_graph",
+    "NCPMutableDictionary": "outside_candidate_signature_graph",
+    "NCPMutableSet": "outside_candidate_signature_graph",
+    "NCPNumber": "reachable_only_via_other_members",
+    "NCPObjectChange": "outside_candidate_signature_graph",
+    "NCPObjectId": "reachable_only_via_other_members",
+    "NCPPageDescriptor": "selected_signature_or_value",
+    "NCPPageId": "selected_signature_or_value",
+    "NCPPagedPreviewCodec": "outside_candidate_signature_graph",
+    "NCPPagedPreviewHeader": "reachable_only_via_other_members",
+    "NCPPagedPreviewNotebook": "selected_signature_or_value",
+    "NCPPagedPreviewNotebookCompanion": "selected_signature_or_value",
+    "NCPPagedPreviewSnapshot": "selected_signature_or_value",
+    "NCPPagedPreviewSnapshotCompanion": "reachable_only_via_other_members",
+    "NCPPaperKind": "selected_signature_or_value",
+    "NCPPointD": "reachable_only_via_other_members",
+    "NCPPointerPhase": "selected_signature_or_value",
+    "NCPPointerTool": "outside_candidate_signature_graph",
+    "NCPPrepareResult": "outside_candidate_signature_graph",
+    "NCPPrepareResultPrepared": "outside_candidate_signature_graph",
+    "NCPPrepareResultRejected": "outside_candidate_signature_graph",
+    "NCPPreviewCatalogBudget": "outside_candidate_signature_graph",
+    "NCPPreviewDocumentRead": "selected_signature_or_value",
+    "NCPPreviewDocumentReader": "selected_signature_or_value",
+    "NCPPreviewEdit": "selected_signature_or_value",
+    "NCPPreviewEditCopyPage": "selected_signature_or_value",
+    "NCPPreviewEditDeletePage": "selected_signature_or_value",
+    "NCPPreviewEditInsertPage": "selected_signature_or_value",
+    "NCPPreviewEditMovePage": "selected_signature_or_value",
+    "NCPPreviewEditRedo": "selected_signature_or_value",
+    "NCPPreviewEditRename": "selected_signature_or_value",
+    "NCPPreviewEditResult": "selected_signature_or_value",
+    "NCPPreviewEditSelectPage": "selected_signature_or_value",
+    "NCPPreviewEditSelectPen": "selected_signature_or_value",
+    "NCPPreviewEditSetPaper": "selected_signature_or_value",
+    "NCPPreviewEditUndo": "selected_signature_or_value",
+    "NCPPreviewFailureKind": "selected_signature_or_value",
+    "NCPPreviewInputDisposition": "selected_signature_or_value",
+    "NCPPreviewInputResult": "selected_signature_or_value",
+    "NCPPreviewNotebookOpen": "selected_signature_or_value",
+    "NCPPreviewOpenFailure": "selected_signature_or_value",
+    "NCPPreviewPendingInk": "selected_signature_or_value",
+    "NCPPreviewReadFailure": "selected_signature_or_value",
+    "NCPPreviewRecoveryCodec": "selected_signature_or_value",
+    "NCPPreviewRecoveryRead": "selected_signature_or_value",
+    "NCPPreviewSaveSnapshot": "selected_signature_or_value",
+    "NCPPreviewSessionFailure": "selected_signature_or_value",
+    "NCPPreviewViewport": "outside_candidate_signature_graph",
+    "NCPRejection": "outside_candidate_signature_graph",
+    "NCPSceneApplication": "outside_candidate_signature_graph",
+    "NCPSceneApplicationApplied": "outside_candidate_signature_graph",
+    "NCPSceneApplicationRejected": "outside_candidate_signature_graph",
+    "NCPSceneId": "selected_signature_or_value",
+    "NCPScenePatch": "outside_candidate_signature_graph",
+    "NCPSceneReducer": "outside_candidate_signature_graph",
+    "NCPSceneSnapshot": "reachable_only_via_other_members",
+    "NCPSceneSnapshotCompanion": "reachable_only_via_other_members",
+    "NCPShort": "outside_candidate_signature_graph",
+    "NCPStrokeObject": "selected_signature_or_value",
+    "NCPStrokeSamples": "selected_signature_or_value",
+    "NCPStrokeSamplesCompanion": "reachable_only_via_other_members",
+    "NCPStrokeTarget": "outside_candidate_signature_graph",
+    "NCPUByte": "outside_candidate_signature_graph",
+    "NCPUInt": "outside_candidate_signature_graph",
+    "NCPULong": "outside_candidate_signature_graph",
+    "NCPUShort": "outside_candidate_signature_graph"
+  },
+  "scope": "Signature boundary only. Semantic conformance and compatibility retain their individual report scopes. Candidate is not frozen for production.",
+  "c1_frozen": false
+}

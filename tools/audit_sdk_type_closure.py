@@ -213,12 +213,31 @@ def main():
     parser.add_argument('header', type=Path)
     parser.add_argument('--projected-header', type=Path)
     parser.add_argument('--current-candidate', action='store_true')
+    parser.add_argument('--support-profile', type=Path,
+                        help='Check the selected signature boundary against a reviewed fixed candidate profile')
     args = parser.parse_args()
     if args.projected_header and args.projected_header.resolve() == args.header.resolve():
         parser.error('projected header must be written to a different path')
     header = args.header.read_bytes()
     result = audit(header.decode('utf-8'), args.current_candidate)
     result['header_sha256'] = hashlib.sha256(header).hexdigest()
+    if args.support_profile:
+        profile_bytes = args.support_profile.read_bytes()
+        profile = json.loads(profile_bytes)
+        assert profile['schema'] == 'c1-supported-objc-profile-1', 'Unknown support profile'
+        declarations = parse_header(header.decode('utf-8'))
+        supported = {name: {'inheritance': declarations[name]['inheritance'], 'members': item['selected_members']}
+                     for name, item in result['types'].items()
+                     if item['classification'] == 'selected_signature_or_value'}
+        assert supported == profile['support'], 'Selected SDK signature contract differs from reviewed profile'
+        classified = {name: item['classification'] for name, item in result['types'].items()}
+        assert classified == profile['type_classification'], 'Exported SDK type classification requires review'
+        assert result['header_sha256'] == profile['header_sha256'], 'Candidate header differs from fixed profile'
+        result['support_profile'] = {
+            'sha256': hashlib.sha256(profile_bytes).hexdigest(),
+            'candidate_source_commit': profile['candidate_source_commit'],
+            'selected_signatures_matched': True,
+        }
     if args.projected_header:
         projection = projected_header(header.decode('utf-8'), result)
         expected = {name: set(item['selected_members']) for name, item in result['types'].items()

@@ -1,0 +1,55 @@
+{
+  "status": "passed",
+  "milestone": "DEV-036/C1 item 3 selected signature profile",
+  "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+  "profile": "fixtures/sdk/c1-b299742-objc-support.json",
+  "profile_sha256": "2073506b3849ac6c7c21daa356df0ed404d28005680f6437d7b69011399d9f8c",
+  "selected_members": 203,
+  "targets": {
+    "iosArm64": {
+      "header_sha256": "02ebfa1e089b4bc4e07bb198daf799dba74f4365bb1db30d79045eb62c451bbf",
+      "selected_types": 50,
+      "declared_types": 156,
+      "all_members_reachable_types": 79,
+      "outside_full_graph_types": 77,
+      "support_profile": {
+        "sha256": "2073506b3849ac6c7c21daa356df0ed404d28005680f6437d7b69011399d9f8c",
+        "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+        "selected_signatures_matched": true
+      }
+    },
+    "iosSimulatorArm64": {
+      "header_sha256": "02ebfa1e089b4bc4e07bb198daf799dba74f4365bb1db30d79045eb62c451bbf",
+      "selected_types": 50,
+      "declared_types": 156,
+      "all_members_reachable_types": 79,
+      "outside_full_graph_types": 77,
+      "support_profile": {
+        "sha256": "2073506b3849ac6c7c21daa356df0ed404d28005680f6437d7b69011399d9f8c",
+        "candidate_source_commit": "b2997428d4d3953bfc2a94f11a05205360bc01bf",
+        "selected_signatures_matched": true
+      }
+    }
+  },
+  "negative_controls": [
+    "missing_selected_member",
+    "changed_inheritance",
+    "changed_classification",
+    "different_candidate_header"
+  ],
+  "decision": "Adopt the fixed 50-type Objective-C signature closure for the existing preview/recovery candidate. Other declarations retain experimental classification.",
+  "scope": "Exact signature and declaration classification check against fixed candidate headers. Semantic and ABI runtime coverage remain scoped to existing consumers.",
+  "references": [
+    "reports/c1-pinned-sdk-20261117.json",
+    "reports/c1-android-failure-channels-20261118.json",
+    "reports/c1-apple-failure-channels-20261118.json"
+  ],
+  "semantic_runtime_rerun": false,
+  "c1_frozen": false,
+  "physical_verified": false,
+  "source_sha256": {
+    "tools/audit_sdk_type_closure.py": "28ac66c44840c7f11648c4bf49bb321c2422706ec2f52333edc8db88ca007be4",
+    "tools/audit_public_boundary.py": "66557595f8afb7486673b3e238ab5eb4e27110f0e5ff2e9783d60a18b52256ce",
+    "fixtures/sdk/c1-b299742-objc-support.json": "2073506b3849ac6c7c21daa356df0ed404d28005680f6437d7b69011399d9f8c"
+  }
+}
