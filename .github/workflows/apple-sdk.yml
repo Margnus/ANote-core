@@ -8,6 +8,8 @@ on:
       - '.github/workflows/apple-sdk.yml'
       - 'ci/verify_apple_sdk.py'
       - 'ci/gradle_download_retry.py'
+      - 'ci/apple_runtime.py'
+      - 'ci/test_apple_runtime.py'
       - 'tools/verify_c1_apple_failure_channels.py'
       - 'tools/audit_sdk_type_closure.py'
       - 'tools/audit_public_boundary.py'
@@ -45,6 +47,8 @@ jobs:
           test -x "$JAVA_HOME_17_arm64/bin/java"
           echo "JAVA_HOME=$JAVA_HOME_17_arm64" >> "$GITHUB_ENV"
           echo "$JAVA_HOME_17_arm64/bin" >> "$GITHUB_PATH"
+      - name: Verify exact runtime selection
+        run: python3 -m unittest discover -s ci -p test_apple_runtime.py
       - name: Verify bounded download retry
         run: python3 -m unittest discover -s ci -p test_gradle_download_retry.py
       - name: Build isolated SDK and verify independent consumer

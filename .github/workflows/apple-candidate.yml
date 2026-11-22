@@ -9,6 +9,8 @@ on:
       - 'ci/verify_apple_candidate.py'
       - 'ci/test_apple_candidate_results.py'
       - 'ci/gradle_download_retry.py'
+      - 'ci/apple_runtime.py'
+      - 'ci/test_apple_runtime.py'
       - 'ci/test_gradle_download_retry.py'
       - 'canvas-core/**'
       - 'shared-core/**'
@@ -42,6 +44,8 @@ jobs:
           test -x "$JAVA_HOME_17_arm64/bin/java"
           echo "JAVA_HOME=$JAVA_HOME_17_arm64" >> "$GITHUB_ENV"
           echo "$JAVA_HOME_17_arm64/bin" >> "$GITHUB_PATH"
+      - name: Verify exact runtime selection
+        run: python3 -m unittest discover -s ci -p test_apple_runtime.py
       - name: Verify bounded download retry
         run: python3 -m unittest discover -s ci -p test_gradle_download_retry.py
       - name: Verify host failure evidence retention

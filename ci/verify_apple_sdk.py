@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 from gradle_download_retry import run_gradle
+from apple_runtime import select_runtime
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'build/apple-sdk-current'
@@ -29,9 +30,9 @@ def inputs():
     paths.update(ROOT / p for p in ('build.gradle.kts', 'settings.gradle.kts', 'gradle.properties',
         'canvas-core/build.gradle.kts', 'shared-core/build.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties',
         'gradle/wrapper/gradle-wrapper.jar', 'gradlew', 'tools/verify_c1_apple_failure_channels.py',
-        'tools/probes/C1AppleFailureConsumer.swift', 'ci/verify_apple_sdk.py', 'ci/gradle_download_retry.py',
+        'tools/probes/C1AppleFailureConsumer.swift', 'ci/verify_apple_sdk.py', 'ci/gradle_download_retry.py', 'ci/apple_runtime.py', 'ci/test_apple_runtime.py',
         'tools/audit_sdk_type_closure.py', 'tools/audit_public_boundary.py',
-        '.github/workflows/apple-sdk.yml'))
+        '.github/workflows/apple-sdk.yml', '.github/workflows/ios17.yml', 'ci/prepare_ios17.py'))
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(paths)}
 
 
@@ -72,13 +73,15 @@ def main():
         pin_path = OUTPUT / 'current-sdk.json'
         pin_path.write_text(json.dumps(descriptor, indent=2) + '\n', encoding='utf-8', newline='\n')
         devices = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '--json']))['devices']
-        choices = [(rt, d) for rt, group in devices.items() if '.iOS-' in rt
-                   for d in group if d.get('isAvailable') and d.get('deviceTypeIdentifier')]
-        assert choices, 'No available simulator runtime'
-        runtime, device = next((p for p in choices if 'iPad' in p[1]['name']), choices[0])
+        runtimes = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'runtimes', '--json']))['runtimes']
+        required = os.environ.get('NOTECORE_REQUIRED_IOS_RUNTIME')
+        runtime, device = select_runtime(devices, runtimes, required)
+        report.update(required_runtime=required, selected_runtime=runtime)
         report['stage'] = 'independent-consumer'
         verify(directory, runtime, device['deviceTypeIdentifier'], OUTPUT / 'consumer', pin_path, True)
         consumer = json.loads((OUTPUT / 'consumer/verification.json').read_text(encoding='utf-8'))
+        assert consumer['runtime']['identifier'] == runtime
+        report['ios17_runtime_verified'] = consumer['ios17_runtime_verified']
         assert consumer['selected_typed_channels_and_recovery']['tool_commands_verified'] is True
         assert consumer['selected_typed_channels_and_recovery']['point_factory_invalid_values_refused'] is True
         assert inputs() == before, 'Source changed during SDK verification'

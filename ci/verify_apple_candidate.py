@@ -10,6 +10,7 @@ import subprocess
 import sys
 import uuid
 from gradle_download_retry import run_gradle
+from apple_runtime import select_runtime, verify_test_runtime
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'build/apple-candidate'
@@ -32,7 +33,7 @@ def inputs():
         'ios-app/NoteCorePreview.xcodeproj/project.pbxproj',
         'ios-app/NoteCorePreview.xcodeproj/xcshareddata/xcschemes/NoteCorePreview.xcscheme',
         'gradlew', 'gradle/wrapper/gradle-wrapper.properties', 'gradle/wrapper/gradle-wrapper.jar',
-        '.github/workflows/apple-candidate.yml', 'ci/verify_apple_candidate.py', 'ci/gradle_download_retry.py',
+        '.github/workflows/apple-candidate.yml', '.github/workflows/ios17.yml', 'ci/prepare_ios17.py', 'ci/verify_apple_candidate.py', 'ci/gradle_download_retry.py', 'ci/apple_runtime.py', 'ci/test_apple_runtime.py',
         'ci/test_gradle_download_retry.py', 'ci/test_apple_candidate_results.py', 'tools/verify_ios_host.py'))
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(paths)}
 
@@ -131,10 +132,11 @@ def main():
         report['framework_sha256'] = sha(framework)
         report['stage'] = 'isolated_simulator'
         devices = json.loads(capture('xcrun', 'simctl', 'list', 'devices', 'available', '--json'))['devices']
-        choices = [(runtime, d) for runtime, group in devices.items() if '.iOS-' in runtime
-                   for d in group if d.get('isAvailable') and d.get('deviceTypeIdentifier')]
-        assert choices, 'No installed available iOS runtime/device combination'
-        runtime, template = next(((rt, d) for rt, d in choices if 'iPad' in d['name']), choices[0])
+        runtimes = json.loads(capture('xcrun', 'simctl', 'list', 'runtimes', '--json'))['runtimes']
+        required = os.environ.get('NOTECORE_REQUIRED_IOS_RUNTIME')
+        runtime, template = select_runtime(devices, runtimes, required)
+        runtime_info, = [r for r in runtimes if r['identifier'] == runtime and r.get('isAvailable')]
+        report.update(required_runtime=required, selected_runtime=runtime_info)
         name = 'NoteCoreCI-' + uuid.uuid4().hex[:12]
         device = capture('xcrun', 'simctl', 'create', name, template['deviceTypeIdentifier'], runtime).strip()
         report['device'] = {'udid': device, 'name': name, 'runtime': runtime, 'type': template['deviceTypeIdentifier']}
@@ -165,7 +167,7 @@ def main():
         assert {node['name'] for node in actual} == expected_host and all(node['result'] == 'Passed' for node in actual)
         assert summary['result'] == 'Passed' and summary['totalTestCount'] == len(expected_host)
         assert summary['failedTests'] == summary['skippedTests'] == summary['expectedFailures'] == 0
-        assert any(d['device']['deviceId'] == device for d in summary['devicesAndConfigurations'])
+        verify_test_runtime(summary, device, runtime_info)
         report['app_host'] = {'tests': len(actual), 'checks': sorted(expected_host), 'summary': summary}
         report['stage'] = 'ordinary_app_ui_tests'
         container = Path(capture('xcrun', 'simctl', 'get_app_container', device, 'dev.notecore.preview', 'data').strip())
@@ -192,7 +194,7 @@ def main():
         assert {c['name'] for c in ui_cases} == ui_expected and all(c['result'] == 'Passed' for c in ui_cases)
         assert ui_summary['result'] == 'Passed' and ui_summary['totalTestCount'] == 1
         assert ui_summary['failedTests'] == ui_summary['skippedTests'] == ui_summary['expectedFailures'] == 0
-        assert any(d['device']['deviceId'] == device for d in ui_summary['devicesAndConfigurations'])
+        verify_test_runtime(ui_summary, device, runtime_info)
         assert list((OUTPUT / 'ui-attachments').rglob('*.png')), 'No UI screenshots retained'
         # Re-resolve the installed container rather than assuming its path survived launch.
         container = Path(capture('xcrun', 'simctl', 'get_app_container', device, 'dev.notecore.preview', 'data').strip())
@@ -215,6 +217,7 @@ def main():
             'saved_note_sha256': sha(actual_file), 'pages': 2, 'strokes_per_page': [2, 1],
             'scope': 'Separate XCUITest process, ordinary App UI, simulated finger input; saved-write process reopen only. No Pencil, in-flight IO kill or physical performance claim.'}
         report['ordinary_ui_verified'] = True
+        report['ios17_runtime_verified'] = runtime_info['version'].split('.')[0] == '17'
         assert before == inputs(), 'Inputs changed during candidate verification'
         assert sha(framework) == report['framework_sha256']
         report.update(status='passed', stage='complete')
