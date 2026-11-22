@@ -1,0 +1,119 @@
+{
+  "status": "reviewed",
+  "milestone": "DEV-041 isolated slice",
+  "requirements": [
+    "DATA-04",
+    "DATA-05",
+    "DATA-08",
+    "DATA-09",
+    "ENG-05",
+    "PERF-06"
+  ],
+  "decisions": [
+    {
+      "id": "transaction",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-sqlite-capabilities-20261118.json",
+      "report_revision": "77c9a75f52d5e188d5e1b2f35baedc6f10a533eb",
+      "report_sha256": "ca614a62a2b7963306d26f2996b497a8c3613ba40b976a06182cf9824bb38d38",
+      "environment": "Android API26 / iOS27",
+      "adopted_scope": "WAL/FULL、事务回滚、容量、未知版本、幂等操作与提交前后强停"
+    },
+    {
+      "id": "resource_commit_android",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-android-joint-checkpoint-20261117.json",
+      "report_revision": "076cd991405cc4bf4b41babfdbc85bc9c63350c0",
+      "report_sha256": "20e91ae759dc47e0bf6572021a1a527a28aa1c55c5ee328859be4fe307cc0f4b",
+      "environment": "Android API26 App sandbox",
+      "adopted_scope": "任务先登记、无覆盖发布、正文/原件/资源/操作联合提交、冲突和损坏拒绝"
+    },
+    {
+      "id": "resource_commit_apple",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-apple-app-joint-checkpoint-20261118.json",
+      "report_revision": "2a1f14e71258439e4532a062f5cd766147dbac06",
+      "report_sha256": "600938086e1bb96eef9ba3f0ae38ddaba8314e093abcbf3cc69fd31137827571",
+      "environment": "iOS27 App sandbox",
+      "adopted_scope": "同一联合写序、新进程恢复及原源字节"
+    },
+    {
+      "id": "resource_retirement_android",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-android-dir-sync-20261118.json",
+      "report_revision": "48914a5517f7edad707c40ebd5344f1517a668ee",
+      "report_sha256": "f34e56532d9f04627dd4e04996f4f1773bf78dc20ed0efd4e5f003d05901b9f8",
+      "environment": "Android API26 App sandbox",
+      "adopted_scope": "读者/任务保护、退休预留至文件移除、目录同步失败保留与重试"
+    },
+    {
+      "id": "resource_retirement_apple",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-ios-dir-sync-20261118.json",
+      "report_revision": "d149257617c2cf36b7577768e96da33c5ac14a11",
+      "report_sha256": "440db398594deb32ec59bc3fc30f24243d81a25ce7e3ec882408d803c269ec2a",
+      "environment": "iOS27 App sandbox",
+      "adopted_scope": "相同退休和目录同步矩阵"
+    },
+    {
+      "id": "pending_migration_android",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-android-highlighter-migration-20261119.json",
+      "report_revision": "d3d4600161446b6e3e09629411240573d12e3431",
+      "report_sha256": "d6aefe6d215ef3a6136c726f33fe7fc247beeeff993ec8307f1b778600eb6aa3",
+      "environment": "Android API26 App sandbox",
+      "adopted_scope": "当前荧光笔信封显式恢复迁入、提交前后强停与重复迁入拒绝"
+    },
+    {
+      "id": "pending_migration_apple",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-apple-highlighter-migration-20261119.json",
+      "report_revision": "d3d4600161446b6e3e09629411240573d12e3431",
+      "report_sha256": "382e90fd563ec4cabacae593575a23400b034821d67b6cee8c9c773cf3efc087",
+      "environment": "iOS27 App sandbox",
+      "adopted_scope": "当前荧光笔信封与相同规范摘要"
+    },
+    {
+      "id": "source_handoff_android",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-android-source-handoff-20261122/verification.json",
+      "report_revision": "6906cb42281e0221ef5520e6fc28511220c4729b",
+      "report_sha256": "b9e27b2ee083b9cb17e323741e1088a9faabfd16eb9b2ccc3e1abd56b0b0ea53",
+      "environment": "Android API26 original App host",
+      "adopted_scope": "源文件确认前禁止退休、确认后交接、目标回滚保留、重试及重开"
+    },
+    {
+      "id": "source_handoff_apple",
+      "decision": "adopt_for_isolated_scope",
+      "report": "reports/dev041-apple-source-handoff-20261122/verification.json",
+      "report_revision": "6dabc822b1513ec673be589a33cdfe3a8ed24bc8",
+      "report_sha256": "0d058113e5beb3c3e87d6c21b7e148d7a2cf1ba1d91ac8e5b43b8fc8cf0e265b",
+      "environment": "iOS27 original App XCTest host",
+      "adopted_scope": "相同源 Model 责任顺序；与旧 pending 恢复回归两项通过"
+    }
+  ],
+  "source_handoff_audit_sha256": "014712e7f7e836e4bce5d738e310d9d8951684d245e9cd60b2dbfc7caf53d12a",
+  "audit_negative_controls": [
+    "changed raw log refused",
+    "missing raw log refused",
+    "missing raw_sha256 binding map refused"
+  ],
+  "completion_scope": "Requested isolated write, opId, process restart, failure retention and old preview migration have corresponding scoped evidence. Platform ports and original-source bridges remain test-only.",
+  "next_order": [
+    "C1 remaining geometry/version and supported SDK contract decisions",
+    "minimum iOS17 execution and physical M-1/heap/stylus evidence",
+    "complete C1 review",
+    "production SQLite schema, resource lifecycle and original owner integration",
+    "DEV-042/043/044/045 P0, then M4/M5 P1"
+  ],
+  "remaining": [
+    "iOS17 actual runtime",
+    "physical target workload and heap, stylus, GPU release and power-loss",
+    "complete C1 geometry/version and SDK support review",
+    "production schema, unified resource lifecycle and durable receipt UI"
+  ],
+  "whole_requirement_accepted": false,
+  "c1_frozen": false,
+  "production_connected": false,
+  "platform_tests_rerun_during_review": false
+}

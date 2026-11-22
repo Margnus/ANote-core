@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ('spatial-index-poc', 'brush-path-costs', 'brush-reduction-costs',
               'chunked-brush-costs', 'brush-tile-cache-costs')
 CURRENT = {
+    'dev041-android-source-handoff-20261122': ('source_sha256', 'raw_sha256'),
+    'dev041-apple-source-handoff-20261122': ('source_sha256', 'raw_sha256'),
     'remote-integration-20261029': ('source_and_artifact_sha256',),
     'android-local-file-identity': ('source_and_artifact_sha256',),
     'apple-local-file-identity': ('source_and_artifact_sha256',),
@@ -89,6 +91,10 @@ CURRENT = {
     'incremental-spatial-index': ('source_and_artifact_sha256',),
     'pdf-platform-capabilities': ('source_and_artifact_sha256', 'sdk_contract_sha256'),
 }
+REPORT_PATHS = {
+    'dev041-android-source-handoff-20261122': 'reports/dev041-android-source-handoff-20261122/verification.json',
+    'dev041-apple-source-handoff-20261122': 'reports/dev041-apple-source-handoff-20261122/verification.json',
+}
 ARTIFACTS = {
     'android-brush-common-tests': (('test_apk_sha256', None),
         ('test_output_sha256', 'canvas-core/build/android-brush-tests/run.log')),
@@ -164,7 +170,8 @@ def audit(root, revision=None, *, report_revision=None, names=None):
     reports = {}
     errors = []
     for name in selected:
-        relative = f'reports/{name}.json'
+        relative = REPORT_PATHS.get(name, f'reports/{name}.json')
+        report_folder = Path(relative).parent
         path = root / relative
         if report_bindings:
             raw_report = report_bindings.read(relative)
@@ -182,6 +189,8 @@ def audit(root, revision=None, *, report_revision=None, names=None):
             if not recorded:
                 errors.append(name + ': missing binding map ' + field)
             for relative, sha in recorded.items():
+                if field == 'raw_sha256':
+                    relative = (report_folder / relative).as_posix()
                 checks.append(inspect(relative, sha, normalized=name == 'verification'))
         for field, relative in ARTIFACTS.get(name, ()):
             checks.append(inspect(relative or data['test_apk'], data[field]))

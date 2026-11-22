@@ -1,0 +1,42 @@
+{
+  "schema": "c1-evidence-audit-1",
+  "status": "passed",
+  "reports": {
+    "dev041-android-source-handoff-20261122": {
+      "report_sha256": "b9e27b2ee083b9cb17e323741e1088a9faabfd16eb9b2ccc3e1abd56b0b0ea53",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 247,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 247,
+      "matched_local_bindings": 0,
+      "scope": "Original Android View, Store, ledger and file worker to isolated SQLite; synthesized MotionEvents on API26 emulator"
+    },
+    "dev041-apple-source-handoff-20261122": {
+      "report_sha256": "0d058113e5beb3c3e87d6c21b7e148d7a2cf1ba1d91ac8e5b43b8fc8cf0e265b",
+      "role": "current_regression",
+      "binding_state": "matched",
+      "matched_bindings": 87,
+      "mismatch_causes": {},
+      "mismatches": [],
+      "matched_git_bindings": 87,
+      "matched_local_bindings": 0,
+      "scope": "Original iOS PreviewModel, ledger and worker to synthetic SQLite; XCTest App host on simulator"
+    }
+  },
+  "errors": [],
+  "selected_reports": [
+    "dev041-android-source-handoff-20261122",
+    "dev041-apple-source-handoff-20261122"
+  ],
+  "full_inventory_requested": false,
+  "report_revision": "6dabc822b1513ec673be589a33cdfe3a8ed24bc8",
+  "revision": "6dabc822b1513ec673be589a33cdfe3a8ed24bc8",
+  "untracked_bindings_use_local_artifacts": true,
+  "scope": "Read-only rehash of selected reports and their recorded inputs; no rerun or completeness proof. Historical drift is explicit. Current binding failure blocks this audit. Decisions remain in ADR-0020 and C1未决事项.md.",
+  "ordinary_app_backend_integration_verified_by_this_audit": false,
+  "c1_gate_complete": false,
+  "physical_device_or_heap_measured": false,
+  "audit_tool_sha256": "df297819320971d1c53a6f313b66910bb97efdd794e186bdaca7e6203b08e231"
+}
