@@ -1,0 +1,243 @@
+1 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -cp /home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -no-reflect -jvm-target 17 -cp /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar -d /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/AppPorts.jar /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/AppPorts.kt
+build/android-sdk-ci/consumer/AppPorts.kt:2:36: error: unresolved reference 'PreviewSaveLedger'.
+import dev.notecore.canvas.preview.PreviewSaveLedger
+                                   ^^^^^^^^^^^^^^^^^
+build/android-sdk-ci/consumer/AppPorts.kt:5:30: error: unresolved reference 'previewEditorAdmissionFailure'.
+import dev.notecore.document.previewEditorAdmissionFailure
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+build/android-sdk-ci/consumer/AppPorts.kt:7:22: error: unresolved reference 'PreviewSaveLedger'.
+fun savePort(ledger: PreviewSaveLedger) = ledger
+                     ^^^^^^^^^^^^^^^^^
+build/android-sdk-ci/consumer/AppPorts.kt:9:5: error: unresolved reference 'previewEditorAdmissionFailure'.
+    previewEditorAdmissionFailure(snapshot, budget)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -cp /home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -no-reflect -jvm-target 17 -cp /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar -d /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/RenderPort.jar /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/RenderPort.kt
+build/android-sdk-ci/consumer/RenderPort.kt:2:38: error: unresolved reference 'AndroidInkFrameExperiment'.
+import dev.notecore.canvas.prototype.AndroidInkFrameExperiment
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+build/android-sdk-ci/consumer/RenderPort.kt:3:23: error: unresolved reference 'AndroidInkFrameExperiment'.
+fun renderPort(value: AndroidInkFrameExperiment) = value
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -cp /home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -no-reflect -jvm-target 17 -cp /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar -d /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/LibraryPort.jar /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/LibraryPort.kt
+build/android-sdk-ci/consumer/LibraryPort.kt:2:21: error: unresolved reference 'library'.
+import dev.notecore.library.LibrarySearchRules
+                    ^^^^^^^
+build/android-sdk-ci/consumer/LibraryPort.kt:3:14: error: unresolved reference 'LibrarySearchRules'.
+fun port() = LibrarySearchRules
+             ^^^^^^^^^^^^^^^^^^
+
+1 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -cp /home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -no-reflect -jvm-target 17 -cp /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar -d /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/ExecutorPort.jar /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/ExecutorPort.kt
+build/android-sdk-ci/consumer/ExecutorPort.kt:2:38: error: unresolved reference 'BoundedOwnerExecutor'.
+import dev.notecore.canvas.prototype.BoundedOwnerExecutor
+                                     ^^^^^^^^^^^^^^^^^^^^
+build/android-sdk-ci/consumer/ExecutorPort.kt:3:14: error: unresolved reference 'BoundedOwnerExecutor'.
+fun port() = BoundedOwnerExecutor::class
+             ^^^^^^^^^^^^^^^^^^^^
+
+0 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -cp /home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -no-reflect -jvm-target 17 -cp /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar -d /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/recovery-current.jar /home/runner/work/ANote-core/ANote-core/reports/sdk-artifact-boundary-20261107/android/RecoveryConsumer.kt
+
+0 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -cp /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/recovery-current.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar dev.notecore.probe.RecoveryConsumerKt /home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp /home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp
+AAR consumer recovered one stroke / four points / revision 2; both checkpoint byte sequences matched
+
+0 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -cp /home/runner/work/ANote-core/ANote-core/reports/sdk-artifact-boundary-20261107/android/recovery-consumer.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar dev.notecore.probe.RecoveryConsumerKt /home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp /home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp
+AAR consumer recovered one stroke / four points / revision 2; both checkpoint byte sequences matched
+
+0 /usr/lib/jvm/temurin-17-jdk-amd64/bin/javac --release 8 -cp /usr/local/lib/android/sdk/platforms/android-36/android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar:/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar:/home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar -d /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/java-classes /home/runner/work/ANote-core/ANote-core/tools/probes/C1AndroidFailureConsumer.java
+
+0 /usr/lib/jvm/temurin-17-jdk-amd64/bin/java -Xmx512m -cp /usr/local/lib/android/sdk/build-tools/36.1.0/lib/d8.jar com.android.tools.r8.D8 --min-api 26 --lib /usr/local/lib/android/sdk/platforms/android-36/android.jar --output /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/failure-consumer.jar /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/java-classes/dev/notecore/probes/C1AndroidFailureConsumer.class /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/canvas-core-android.jar /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/shared-core-android.jar /home/runner/work/ANote-core/ANote-core/.gradle-user-home/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar
+
+0 /home/runner/work/ANote-core/ANote-core/gradlew --no-daemon --console=plain -p /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/maven-consumer assembleDebug dependencyInsight --configuration debugRuntimeClasspath --dependency canvas-core
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :preBuild UP-TO-DATE
+> Task :preDebugBuild UP-TO-DATE
+> Task :mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :generateDebugResValues
+> Task :checkDebugAarMetadata
+> Task :mapDebugSourceSetPaths
+> Task :generateDebugResources
+> Task :mergeDebugResources
+> Task :packageDebugResources
+> Task :createDebugCompatibleScreenManifests
+> Task :extractDeepLinksDebug
+> Task :parseDebugLocalResources
+> Task :processDebugMainManifest
+> Task :processDebugManifest
+> Task :javaPreCompileDebug
+> Task :mergeDebugShaders
+> Task :compileDebugShaders NO-SOURCE
+> Task :generateDebugAssets UP-TO-DATE
+> Task :mergeDebugAssets
+> Task :compressDebugAssets
+> Task :desugarDebugFileDependencies
+> Task :processDebugManifestForPackage
+> Task :checkDebugDuplicateClasses
+> Task :processDebugResources
+> Task :mergeExtDexDebug
+> Task :mergeDebugJniLibFolders
+> Task :mergeLibDexDebug
+> Task :mergeDebugNativeLibs NO-SOURCE
+> Task :stripDebugDebugSymbols NO-SOURCE
+> Task :validateSigningDebug
+> Task :writeDebugAppMetadata
+> Task :writeDebugSigningConfigVersions
+
+> Task :dependencyInsight
+dev.notecore.probe:canvas-core:0.0.0-c1
+  Variant releaseRuntimeElements-published:
+    | Attribute Name                                  | Provided     | Requested    |
+    |-------------------------------------------------|--------------|--------------|
+    | org.gradle.status                               | release      |              |
+    | org.gradle.category                             | library      | library      |
+    | org.gradle.jvm.environment                      | android      | android      |
+    | org.gradle.usage                                | java-runtime | java-runtime |
+    | org.jetbrains.kotlin.platform.type              | androidJvm   | androidJvm   |
+    | com.android.build.api.attributes.AgpVersionAttr |              | 8.10.1       |
+    | com.android.build.api.attributes.BuildTypeAttr  |              | debug        |
+
+dev.notecore.probe:canvas-core:0.0.0-c1
+\--- dev.notecore.probe:shared-core-android:0.0.0-c1
+     \--- dev.notecore.probe:shared-core:0.0.0-c1
+          \--- debugRuntimeClasspath
+
+dev.notecore.probe:canvas-core-android:0.0.0-c1
+  Variant releaseRuntimeElements-published:
+    | Attribute Name                                  | Provided     | Requested    |
+    |-------------------------------------------------|--------------|--------------|
+    | org.gradle.status                               | release      |              |
+    | org.gradle.category                             | library      | library      |
+    | org.gradle.jvm.environment                      | android      | android      |
+    | org.gradle.usage                                | java-runtime | java-runtime |
+    | org.jetbrains.kotlin.platform.type              | androidJvm   | androidJvm   |
+    | com.android.build.api.attributes.AgpVersionAttr |              | 8.10.1       |
+    | com.android.build.api.attributes.BuildTypeAttr  |              | debug        |
+
+dev.notecore.probe:canvas-core-android:0.0.0-c1
+\--- dev.notecore.probe:canvas-core:0.0.0-c1
+     \--- dev.notecore.probe:shared-core-android:0.0.0-c1
+          \--- dev.notecore.probe:shared-core:0.0.0-c1
+               \--- debugRuntimeClasspath
+
+A web-based, searchable dependency report is available by adding the --scan option.
+
+> Task :compileDebugKotlin
+> Task :compileDebugJavaWithJavac NO-SOURCE
+> Task :dexBuilderDebug
+> Task :mergeDebugGlobalSynthetics
+> Task :processDebugJavaRes
+> Task :mergeProjectDexDebug
+> Task :mergeDebugJavaResource
+> Task :packageDebug
+> Task :createDebugApkListingFileRedirect
+> Task :assembleDebug
+
+[Incubating] Problems report is available at: file:///home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/maven-consumer/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 28s
+34 actionable tasks: 34 executed
+
+0 /usr/local/lib/android/sdk/platform-tools/adb devices
+List of devices attached
+
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
+
+1 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+adb: device 'emulator-5588' not found
+
+1 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+adb: device offline
+
+1 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+adb: device offline
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop sys.boot_completed
+1
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop ro.build.version.sdk
+26
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop ro.build.fingerprint
+Android/sdk_phone_x86_64/generic_x86_64:8.0.0/OSR1.180418.004/4931640:userdebug/test-keys
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getprop ro.product.cpu.abi
+x86_64
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell getenforce
+Enforcing
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell uname -r
+3.18.91+
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell mkdir /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 push /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/failure-consumer.jar /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/failure-consumer.jar
+/home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/failure-consumer.jar: 1 file pushed, 0 skipped. 1914.8 MB/s (977725 bytes in 0.000s)
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell sha256sum /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/failure-consumer.jar
+ac7074946e93b20e8bb7bc221afe2d36ffcabb39763fab61c340a4871bb24d9f  /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/failure-consumer.jar
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 push /home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/prepare.ncp
+/home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/prepare.ncp: 1 file pushed, 0 skipped. 6.3 MB/s (503 bytes in 0.000s)
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell sha256sum /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/prepare.ncp
+c423570f4ddd500c5465b03c963af2d9851a6bbb2e71e656efeb53f5d620afc5  /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/prepare.ncp
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 push /home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/confirmed-final.ncp
+/home/runner/work/ANote-core/ANote-core/reports/view-pending-process-20261106/process-checkpoint-8c0eba7a-2fab-470d-8f94-7b9510b3b0e2/confirmed-final.ncp: 1 file pushed, 0 skipped. 6.9 MB/s (282 bytes in 0.000s)
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell sha256sum /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/confirmed-final.ncp
+0d063cf9a0d29051f55fa3f439898c04d6b8542243949ebe599f0d73eb897b7e  /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/confirmed-final.ncp
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell 'CLASSPATH=/data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/failure-consumer.jar /system/bin/app_process /system/bin dev.notecore.probes.C1AndroidFailureConsumer /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/prepare.ncp /data/local/tmp/NoteCoreCandidate-666b44910fb34af3af8cb06a83c5e8ce/confirmed-final.ncp --current-candidate'
+{"pid":2624,"budget_typed":"INPUT_BYTES","budget_constructor_exception":"IllegalArgumentException","budget_copy_exception":"IllegalArgumentException","unsupported_document_typed":"UNSUPPORTED_PREVIEW_CONTENT","malformed_recovery_typed":"INVALID_OR_UNSUPPORTED_FORMAT","malformed_recovery_exception":"ContentRefusal","recovery_refused_bytes":2247,"recovery_admitted_bytes":2248,"missing_index_is_nil":true,"invalid_edit_preserved_pending":true,"retry_preserved_checkpoint_bytes":true}
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 install -r /home/runner/work/ANote-core/ANote-core/build/android-sdk-ci/consumer/external-consumer.apk
+Performing Streamed Install
+Success
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell am start -W dev.notecore.candidateconsumer/.MainActivity
+Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=dev.notecore.candidateconsumer/.MainActivity }
+Status: ok
+Activity: dev.notecore.candidateconsumer/.MainActivity
+ThisTime: 551
+TotalTime: 551
+WaitTime: 563
+Complete
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell pidof dev.notecore.candidateconsumer
+2872
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 shell am force-stop dev.notecore.candidateconsumer
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 uninstall dev.notecore.candidateconsumer
+Success
+
+0 /usr/local/lib/android/sdk/platform-tools/adb -s emulator-5588 emu kill
+OK: killing emulator, bye bye
+OK
+
