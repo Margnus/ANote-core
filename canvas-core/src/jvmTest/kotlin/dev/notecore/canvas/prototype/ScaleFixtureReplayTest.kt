@@ -61,7 +61,10 @@ class ScaleFixtureReplayTest {
                     assertEquals(p.x, accepted.samples.x(index)); assertEquals(p.y, accepted.samples.y(index))
                     assertEquals(p.pressure, accepted.samples.pressure(index)); assertEquals(p.timeMicros, accepted.samples.timeMicros(index))
                 }
-                if (id == "S9-ink-long-stroke") verifyBoundedGeometry(accepted.samples)
+                if (id == "S9-ink-long-stroke") {
+                    verifyBoundedGeometry(accepted.samples)
+                    verifyVisibleTileWork(accepted.samples)
+                }
                 session.close()
             }
             assertEquals(-1, stream.read()) // truncation throws, trailing records also fail
@@ -91,6 +94,28 @@ class ScaleFixtureReplayTest {
             }
             assertEquals(samples.size - 1, edges)
             println("S9 segmented: kind=$kind segments=$count edges=$edges peakSingleLogicalBytes=$peakBytes")
+        }
+    }
+
+
+    private fun verifyVisibleTileWork(samples: StrokeSamples) {
+        val frame = FrameToken(SceneId("s9-visible"), 1, 1, 1, 1, 1)
+        val transform = Affine2D(a = 0.8, b = 0.6, c = -0.6, d = 0.8)
+        for (kind in BrushKind.entries) {
+            val stroke = StrokeObject(ObjectId("s9"), 1, LayerId("ink"),
+                BrushSpec(kind, 1, 10.0, -1), samples, transform)
+            val catalog = assertIs<ChunkedBrushBuild.Ready>(ChunkedBrushPoc.build(frame, stroke)).catalog
+            for (sample in listOf(128, 25_000, 50_048, 99_999)) {
+                val point = transform.map(PointD(samples.x(sample), samples.y(sample)))
+                val grid = BrushTileGridPoc(PointD(point.x - 4.125, point.y - 4.125), 32, 32,
+                    pixelSize = 0.25, samplesPerAxis = 2)
+                val brute = (0 until catalog.chunkCount).filter { catalog.chunkBounds(it).overlaps(grid.bounds) }.toSet()
+                val ready = assertIs<BrushTileBuild.Ready>(catalog.renderSwept(frame, grid), "$kind at $sample")
+                assertEquals(brute.size, ready.candidateChunks)
+                assertTrue(ready.candidateChunks in 1 until catalog.chunkCount)
+                assertTrue(ready.tile.alphaByte(16, 16) > 0)
+                println("S9 visible: kind=$kind sample=$sample candidates=${ready.candidateChunks} built=${ready.builtChunks} vertices=${ready.generatedVertices} edgeTests=${ready.edgeTests} peakLogicalBytes=${ready.peakWorkingLogicalBytes}")
+            }
         }
     }
 

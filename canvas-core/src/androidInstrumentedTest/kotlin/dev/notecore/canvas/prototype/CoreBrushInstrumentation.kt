@@ -20,7 +20,7 @@ class CoreBrushInstrumentation : Instrumentation() {
                 val result = JUnitCore.runClasses(SweptDiscGeometryPocTest::class.java, SweptDiscTileUnionTest::class.java,
                     BrushCandidateSeparationTest::class.java, BrushEnvelopePocTest::class.java,
                     BrushGeometryTest::class.java, BrushPathPlanTest::class.java)
-                check(result.wasSuccessful() && result.runCount == 41 && result.ignoreCount == 0) {
+                check(result.wasSuccessful() && result.runCount == 42 && result.ignoreCount == 0) {
                     "run=${result.runCount} ignored=${result.ignoreCount} failures=${result.failures.joinToString { it.trace }}"
                 }
                 output.putInt("swept_disc_tests", result.runCount)
