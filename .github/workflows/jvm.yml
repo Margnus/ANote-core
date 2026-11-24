@@ -56,7 +56,7 @@ jobs:
           run_gradle([
               './gradlew', '--no-daemon', '--console=plain', '-PenableAndroidTargets=true',
               ':android-app:compileDebugKotlin', ':android-app:testDebugUnitTest',
-          ], Path.cwd(), Path('build/jvm-ci/android-app.log'), 900)
+          ], Path.cwd(), Path('build/jvm-ci/android-app.log'), 900, retry_delay=30)
           PY
       - name: Compile independent Java calls against current JVM classes
         run: |

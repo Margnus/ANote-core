@@ -10,7 +10,7 @@ def retryable_download(text):
     return bool(transient and not diagnostic)
 
 
-def run_gradle(command, cwd, path, timeout):
+def run_gradle(command, cwd, path, timeout, *, retry_delay=0):
     deadline = time.monotonic() + timeout
     for attempt in (1, 2):
         remaining = deadline - time.monotonic()
@@ -29,4 +29,8 @@ def run_gradle(command, cwd, path, timeout):
             return
         if attempt == 2 or not retryable_download(path.read_text(encoding='utf-8')):
             raise subprocess.CalledProcessError(result.returncode, command)
+        if deadline - time.monotonic() <= retry_delay:
+            raise subprocess.TimeoutExpired(command, timeout)
         print(f'{path.stem}: explicit transient download failure; retrying identical command once', flush=True)
+        if retry_delay:
+            time.sleep(retry_delay)

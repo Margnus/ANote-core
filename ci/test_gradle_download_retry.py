@@ -9,7 +9,7 @@ from gradle_download_retry import run_gradle
 
 
 class GradleDownloadRetryTest(unittest.TestCase):
-    def execute(self, outcomes):
+    def execute(self, outcomes, **options):
         calls = []
 
         def child(command, **kwargs):
@@ -25,7 +25,7 @@ class GradleDownloadRetryTest(unittest.TestCase):
             error = None
             with patch('gradle_download_retry.subprocess.run', side_effect=child):
                 try:
-                    run_gradle(['./gradlew', ':shared-core:linkDebugFrameworkIosArm64'], Path(tmp), path, 10)
+                    run_gradle(['./gradlew', ':shared-core:linkDebugFrameworkIosArm64'], Path(tmp), path, 10, **options)
                 except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as failure:
                     error = failure
             logs = {p.name: p.read_text() for p in Path(tmp).glob('*.log')}
@@ -45,6 +45,21 @@ class GradleDownloadRetryTest(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertIsInstance(error, subprocess.CalledProcessError)
         self.assertEqual(logs['framework.log'], logs['framework.attempt-2.log'])
+
+    def test_configured_delay_is_applied_before_retry(self):
+        with patch('gradle_download_retry.time.sleep') as sleep:
+            calls, _, error = self.execute([(1, 'Received status code 429 from server'), (0, 'success')],
+                                           retry_delay=3)
+        self.assertIsNone(error)
+        self.assertEqual(len(calls), 2)
+        sleep.assert_called_once_with(3)
+
+    def test_retry_delay_cannot_exceed_total_timeout(self):
+        with patch('gradle_download_retry.time.sleep') as sleep:
+            calls, _, error = self.execute([(1, 'Received status code 429 from server')], retry_delay=10)
+        self.assertEqual(len(calls), 1)
+        self.assertIsInstance(error, subprocess.TimeoutExpired)
+        sleep.assert_not_called()
 
     def test_compile_or_test_failure_does_not_retry_even_with_http_text(self):
         for diagnostic in ('e: file:///source.kt: invalid input', 'There were failing tests', 'AssertionError'):
