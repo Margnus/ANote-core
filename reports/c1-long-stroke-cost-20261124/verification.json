@@ -1,0 +1,144 @@
+{
+  "status": "probe_completed",
+  "code_baseline": "0032dbb",
+  "execution": "Desktop JVM against cached canvas-main.jar verified byte-for-byte against the pinned report; not a current rebase build",
+  "observations": [
+    {
+      "case": "S2",
+      "kind": "MONOLINE",
+      "points": 1000000,
+      "rejected": 0,
+      "vertices": 35960000,
+      "sum_output_logical_bytes": 585920000,
+      "peak_single_output_logical_bytes": 58592,
+      "build_ns": 295441650
+    },
+    {
+      "case": "S2",
+      "kind": "PRESSURE",
+      "points": 1000000,
+      "rejected": 0,
+      "vertices": 19720000,
+      "sum_output_logical_bytes": 325840000,
+      "peak_single_output_logical_bytes": 32584,
+      "build_ns": 173175560
+    },
+    {
+      "case": "S2",
+      "kind": "HIGHLIGHTER",
+      "points": 1000000,
+      "rejected": 0,
+      "vertices": 35960000,
+      "sum_output_logical_bytes": 585920000,
+      "peak_single_output_logical_bytes": 58592,
+      "build_ns": 264619806
+    },
+    {
+      "case": "late-pressure-prefix",
+      "before_sides": 16,
+      "after_sides": 32,
+      "earlier_geometry_changed": true
+    },
+    {
+      "case": "S9-prefix",
+      "points": 100,
+      "scale": 1.0,
+      "result": "ready:3596:58592",
+      "build_ns": 3649500
+    },
+    {
+      "case": "S9-prefix",
+      "points": 100,
+      "scale": 4.0,
+      "result": "ready:6796:109792",
+      "build_ns": 560792
+    },
+    {
+      "case": "S9-prefix",
+      "points": 1000,
+      "scale": 1.0,
+      "result": "ready:35996:584192",
+      "build_ns": 1676958
+    },
+    {
+      "case": "S9-prefix",
+      "points": 1000,
+      "scale": 4.0,
+      "result": "ready:67996:1096192",
+      "build_ns": 2584666
+    },
+    {
+      "case": "S9-prefix",
+      "points": 5000,
+      "scale": 1.0,
+      "result": "ready:179996:2920192",
+      "build_ns": 2397708
+    },
+    {
+      "case": "S9-prefix",
+      "points": 5000,
+      "scale": 4.0,
+      "result": "ready:339996:5480192",
+      "build_ns": 3322667
+    },
+    {
+      "case": "S9-prefix",
+      "points": 10000,
+      "scale": 1.0,
+      "result": "ready:359996:5840192",
+      "build_ns": 3304583
+    },
+    {
+      "case": "S9-prefix",
+      "points": 10000,
+      "scale": 4.0,
+      "result": "VERTEX_CAPACITY",
+      "build_ns": 409750
+    },
+    {
+      "case": "S9-prefix",
+      "points": 20000,
+      "scale": 1.0,
+      "result": "VERTEX_CAPACITY",
+      "build_ns": 171209
+    },
+    {
+      "case": "S9-prefix",
+      "points": 20000,
+      "scale": 4.0,
+      "result": "VERTEX_CAPACITY",
+      "build_ns": 1485459
+    },
+    {
+      "case": "S9-prefix",
+      "points": 100000,
+      "scale": 1.0,
+      "result": "SAMPLE_CAPACITY",
+      "build_ns": 6666
+    },
+    {
+      "case": "S9-prefix",
+      "points": 100000,
+      "scale": 4.0,
+      "result": "SAMPLE_CAPACITY",
+      "build_ns": 6417
+    },
+    {
+      "case": "late-pressure-prefix",
+      "before_sides": 16,
+      "after_sides": 32,
+      "earlier_geometry_changed": true
+    }
+  ],
+  "decision": "Do not promote the whole-stroke adaptive builder directly to incremental input rendering. Late maximum-pressure growth retessellates earlier discs; long-stroke capacity needs bounded segmentation and complete-frame union. Preserve source samples and explicit refusals.",
+  "scope": "Sequential S2 outputs discarded per stroke. Logical byte sums are cumulative production, not resident heap. Timings exclude file reads/sample copies and have no physical frame threshold.",
+  "rebased_baseline": "9c94219",
+  "geometry_source_matches_rebased_baseline": true,
+  "raw_sha256": {
+    "CostProbe.kt": "dbeb65b7a625b08ceff18a0976c1be5a67852d209c911264236b4ae4a1661e6b",
+    "bindings.json": "2522ce07d7dfe55637c8385cc30e159801db649e2d66ff58f5c8d78fdc10a480",
+    "compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results.jsonl": "bf46c58bb82ccb471b898ed761442a36816dde7c36831504a0936bf299bc4d03",
+    "runner.py.txt": "c75184b87d3c71d44c20ee2b1d17360046a56927026346ec6207738a2590eba0"
+  }
+}

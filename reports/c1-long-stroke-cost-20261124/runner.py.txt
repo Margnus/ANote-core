@@ -1,0 +1,21 @@
+from pathlib import Path
+import subprocess,hashlib,json,os
+root=Path.cwd();out=Path('/private/tmp/notecore-c1-cost-20261124');cache=root/'.gradle-user-home/caches/modules-2/files-2.1'
+report=json.loads(subprocess.check_output(['git','show','0032dbb:reports/offline-jvm-verification.json']))
+jar=root/'canvas-core/build/offline-jvm/canvas-main.jar'
+assert hashlib.sha256(jar.read_bytes()).hexdigest()==report['output_jar_sha256'][jar.relative_to(root).as_posix()]
+def dep(g,a,v):return next((cache/g/a/v).glob('*/'+a+'-'+v+'.jar'))
+stdlib=dep('org.jetbrains.kotlin','kotlin-stdlib','2.2.21')
+compiler=[dep('org.jetbrains.kotlin',a,v) for a,v in [('kotlin-compiler-embeddable','2.2.21'),('kotlin-script-runtime','2.2.21'),('kotlin-reflect','1.6.10'),('kotlin-daemon-embeddable','2.2.21')]]+[stdlib,dep('org.jetbrains.kotlinx','kotlinx-coroutines-core-jvm','1.8.0'),dep('org.jetbrains','annotations','13.0')]
+java=Path(subprocess.check_output(['/usr/libexec/java_home','-v','17'],text=True).strip())/'bin/java'
+subprocess.run([str(java),'-cp',':'.join(map(str,compiler)),'org.jetbrains.kotlin.cli.jvm.K2JVMCompiler','-no-stdlib','-no-reflect','-jvm-target','17','-classpath',str(jar)+':'+str(stdlib),'-Xfriend-paths='+str(jar),'-d',str(out/'probe.jar'),str(out/'CostProbe.kt')],check=True,stdout=(out/'compile.log').open('w'),stderr=subprocess.STDOUT)
+manifest=json.loads((root/'fixtures/scale/manifest.json').read_text())
+bindings={}
+with (out/'results.jsonl').open('w') as log:
+ for name in ['S2-ink-dense-page','S9-ink-long-stroke']:
+  p=root/'.generated-fixtures/scale'/(name+'.bin');h=hashlib.sha256(p.read_bytes()).hexdigest()
+  assert h==next(x['sha256'] for x in manifest['profiles'] if x['id']==name)
+  bindings[str(p)]=h
+  subprocess.run([str(java),'-Xmx1g','-cp',str(out/'probe.jar')+':'+str(jar)+':'+str(stdlib),'dev.notecore.canvas.prototype.CostProbe',str(p)],check=True,stdout=log,stderr=subprocess.STDOUT)
+(out/'bindings.json').write_text(json.dumps({'source_revision':'0032dbb','canvas_jar_sha256':hashlib.sha256(jar.read_bytes()).hexdigest(),'fixtures':bindings,'probe_source_sha256':hashlib.sha256((out/'CostProbe.kt').read_bytes()).hexdigest(),'scope':'One-pass desktop JVM; output released per stroke; IO/sample copies excluded. Not native preparation, incremental implementation, heap or physical performance.'},indent=2)+'\n')
+print((out/'results.jsonl').read_text())
