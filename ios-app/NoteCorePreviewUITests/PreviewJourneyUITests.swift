@@ -60,7 +60,7 @@ final class PreviewJourneyUITests: XCTestCase {
         app.buttons["重做"].tap()
         value(canvas, "2笔")
         // Exercise actual eraser input and history through ordinary UI.
-        app.buttons["橡皮"].tap()
+        app.buttons["橡皮工具"].tap()
         let eraseStart = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.35, dy: 0.30))
         let eraseEnd = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.55, dy: 0.46))
         eraseStart.press(forDuration: 0.05, thenDragTo: eraseEnd)
@@ -72,7 +72,7 @@ final class PreviewJourneyUITests: XCTestCase {
         value(canvas, "1笔")
         app.buttons["撤销"].tap()
         value(canvas, "2笔")
-        app.buttons["钢笔"].tap()
+        app.buttons["钢笔工具"].tap()
         screenshot("page-one-two-strokes")
 
         app.buttons["加页"].tap()
