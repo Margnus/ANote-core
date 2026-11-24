@@ -880,7 +880,7 @@ struct PreviewRoot: View {
                             Button(tool == .lasso ? "套索✓" : "套索") { window.cancelInput(); tool = .lasso }.accessibilityLabel("套索工具")
                             Button("删选") { model.applyEdit(PreviewEditDeleteSelection.shared) }.accessibilityLabel("删除选区")
                         }.padding(.horizontal)
-                    }.frame(height: 36)
+                    }.frame(height: 36).accessibilityIdentifier("ink-tools")
                     HStack(spacing: 20) {
                         Button("缩小") { viewportRatio = 1.0 / 1.5; viewportRequest += 1 }
                         Button("放大") { viewportRatio = 1.5; viewportRequest += 1 }

@@ -23,6 +23,17 @@ final class PreviewJourneyUITests: XCTestCase {
         add(attachment)
     }
 
+    private func chooseTool(_ name: String, reveal: (XCUIElement) -> Void) {
+        let toolbar = app.scrollViews["ink-tools"]
+        let button = toolbar.buttons[name]
+        XCTAssertTrue(toolbar.waitForExistence(timeout: 10))
+        for _ in 0..<4 where !button.isHittable {
+            reveal(toolbar)
+        }
+        XCTAssertTrue(button.isHittable, "Tool remains outside the visible toolbar: \(name)")
+        button.tap()
+    }
+
     private func draw(_ y: CGFloat) {
         let canvas = app.otherElements["note-canvas"]
         XCTAssertTrue(canvas.waitForExistence(timeout: 10))
@@ -60,7 +71,7 @@ final class PreviewJourneyUITests: XCTestCase {
         app.buttons["重做"].tap()
         value(canvas, "2笔")
         // Exercise actual eraser input and history through ordinary UI.
-        app.buttons["橡皮工具"].tap()
+        chooseTool("橡皮工具") { $0.swipeLeft() }
         let eraseStart = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.35, dy: 0.30))
         let eraseEnd = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.55, dy: 0.46))
         eraseStart.press(forDuration: 0.05, thenDragTo: eraseEnd)
@@ -72,7 +83,7 @@ final class PreviewJourneyUITests: XCTestCase {
         value(canvas, "1笔")
         app.buttons["撤销"].tap()
         value(canvas, "2笔")
-        app.buttons["钢笔工具"].tap()
+        chooseTool("钢笔工具") { $0.swipeRight() }
         screenshot("page-one-two-strokes")
 
         app.buttons["加页"].tap()
