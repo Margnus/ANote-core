@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "run_id": 45392669833,
+  "commit": "0eab2cc6ee118b27ccd54799ef8eb26691897924",
+  "android_unit_tests": {
+    "tests": 42,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "checks": [
+    "overflowingEraserDoesNotCommitAndExactLimitCanRetry",
+    "overflowingLassoPreservesSelectionAndExactLimitCanSelectAnotherStroke"
+  ],
+  "scope": "Original Android InkCanvasView synthetic MotionEvent callbacks under API 35 Robolectric",
+  "source_git_blob_sha256": {
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "25ddbf870944bc4b4c0990c69130a723cc0aba049cf00cff5ed266ef1a10e708",
+    "android-app/src/test/java/dev/notecore/app/InkToolPathLimitTest.kt": "4f1619bf7fca3a4120c071cda122e3db384ceaa20b8a9ed59981001c1c7f2c63"
+  },
+  "artifact_zip_sha256": "9ad942096602f13c527be1cd36fc03e1e77ff9eff2280a119d591ba3fde5f115",
+  "sha256": {
+    "android-app.attempt-1.log": "5dc3f69afe913fe5aec64940275b0826a3212e1779617710fa2ef34dc31e7e0f",
+    "android-app.log": "5dc3f69afe913fe5aec64940275b0826a3212e1779617710fa2ef34dc31e7e0f",
+    "commit.txt": "ea1540277d4e3019a3a1738d01b2c7400ab36ada646c42e2bd5c4635dae2641b",
+    "TEST-dev.notecore.app.InkToolPathLimitTest.xml": "1a19bc5c0fd912a96d432bf9b6fc81dd5696449b47ac7221509f15d4b763e668"
+  }
+}
