@@ -30,6 +30,7 @@ EXPECTED = {
     'testLateWindowOpenCannotReplaceEditorOrAttachAfterDisappearance()',
     'testSiblingSurfaceCannotCancelOrAppendAnotherAcceptedInput()',
     'testEraserRejectsOversizedTouchBatchesAndRetriesAtExactLimit()',
+    'testLassoOverflowPreservesSelectionAndExactLimitCanRetry()',
     'testOwnerReferenceDropKeepsFailedWriteUntilOriginalRetirement()',
     'testOwnerReferenceDropKeepsProviderUntilOriginalRetirement()',
     'testCatalogCapacityPreservesCompleteOldRowsAndChargesRetainedOverlay()',

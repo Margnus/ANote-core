@@ -2135,6 +2135,67 @@ final class PagedHostTests: XCTestCase {
         XCTAssertTrue(note.undo())
         XCTAssertEqual(note.strokeCount, 1)
     }
+    @MainActor func testLassoOverflowPreservesSelectionAndExactLimitCanRetry() throws {
+        let view = try inputView(), note = view.note
+        var messages: [String] = []
+        var changes = 0
+        view.failed = { messages.append($0) }
+        view.changed = { changes += 1 }
+        let touch = SyntheticInkTouch(50, 1)
+
+        func draw(at y: CGFloat, start: TimeInterval) {
+            touch.position = CGPoint(x: 50, y: y)
+            touch.seconds = start
+            view.touchesBegan([touch], with: nil)
+            touch.position.x = 150
+            touch.seconds = start + 0.1
+            view.touchesEnded([touch], with: nil)
+        }
+        draw(at: 100, start: 1)
+        draw(at: 150, start: 2)
+        XCTAssertEqual(note.strokeCount, 2)
+        let first = note.stroke(index: 0).id.value
+        let second = note.stroke(index: 1).id.value
+        let revision = note.changeVersion
+        view.tool = .lasso
+
+        let event = SyntheticInkEvent()
+        func enclose(from top: CGFloat, to bottom: CGFloat, points: Int) {
+            touch.position = CGPoint(x: 30, y: top)
+            view.touchesBegan([touch], with: nil)
+            let corners = [CGPoint(x: 170, y: top), CGPoint(x: 170, y: bottom),
+                           CGPoint(x: 30, y: bottom)]
+            let padding = (0..<(points - 4)).map {
+                CGPoint(x: $0.isMultiple(of: 2) ? 40 : 30, y: bottom)
+            }
+            event.real = (corners + padding).map { position in
+                let sample = SyntheticInkTouch(0, 3)
+                sample.position = position
+                return sample
+            }
+            view.touchesMoved([touch], with: event)
+        }
+        enclose(from: 80, to: 120, points: 4)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(note.selectedStrokeIds.map { $0.value }, [first])
+
+        enclose(from: 130, to: 180, points: 4096)
+        XCTAssertTrue(messages.isEmpty)
+        touch.position = CGPoint(x: 40, y: 180)
+        view.touchesMoved([touch], with: nil)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(messages.count, 1)
+        XCTAssertTrue(messages.last?.contains("4096") == true)
+        XCTAssertEqual(note.selectedStrokeIds.map { $0.value }, [first])
+        XCTAssertEqual(note.changeVersion, revision)
+
+        enclose(from: 130, to: 180, points: 4096)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(note.selectedStrokeIds.map { $0.value }, [second])
+        XCTAssertEqual(note.changeVersion, revision)
+        XCTAssertEqual(changes, 2)
+        XCTAssertEqual(messages.count, 1)
+    }
     @MainActor func testSiblingSurfaceCannotCancelOrAppendAnotherAcceptedInput() throws {
         let a = try inputView(), note = a.note
         let touchA = SyntheticInkTouch(10, 1)
