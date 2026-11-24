@@ -29,6 +29,7 @@ EXPECTED = {
     'testExportResultRoutesOnlyToRequestWindowAndCancelsOnDisappearance()',
     'testLateWindowOpenCannotReplaceEditorOrAttachAfterDisappearance()',
     'testSiblingSurfaceCannotCancelOrAppendAnotherAcceptedInput()',
+    'testEraserRejectsOversizedTouchBatchesAndRetriesAtExactLimit()',
     'testOwnerReferenceDropKeepsFailedWriteUntilOriginalRetirement()',
     'testOwnerReferenceDropKeepsProviderUntilOriginalRetirement()',
     'testCatalogCapacityPreservesCompleteOldRowsAndChargesRetainedOverlay()',

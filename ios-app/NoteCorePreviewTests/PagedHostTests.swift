@@ -2090,6 +2090,51 @@ final class PagedHostTests: XCTestCase {
         view.frame = CGRect(x: 0, y: 0, width: 200, height: 200); view.layoutIfNeeded()
         return view
     }
+    @MainActor func testEraserRejectsOversizedTouchBatchesAndRetriesAtExactLimit() throws {
+        let view = try inputView(), note = view.note
+        var messages: [String] = []
+        var changes = 0
+        view.failed = { messages.append($0) }
+        view.changed = { changes += 1 }
+        let touch = SyntheticInkTouch(50, 1)
+        view.touchesBegan([touch], with: nil)
+        touch.position.x = 150
+        touch.seconds = 2
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(note.strokeCount, 1)
+        XCTAssertEqual(changes, 1)
+        let revision = note.changeVersion
+        view.tool = .eraser
+        touch.position.x = 100
+        let event = SyntheticInkEvent()
+        let batch = (0..<4097).map { SyntheticInkTouch(100, 3 + Double($0) / 10_000) }
+
+        event.real = batch
+        view.touchesBegan([touch], with: event)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(messages.count, 1)
+        XCTAssertTrue(messages.last?.contains("4096") == true)
+
+        view.touchesBegan([touch], with: nil)
+        event.real = Array(batch.prefix(4095))
+        view.touchesMoved([touch], with: event)
+        XCTAssertEqual(messages.count, 1)
+        view.touchesMoved([touch], with: nil)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(messages.count, 2)
+        XCTAssertEqual(note.changeVersion, revision)
+        XCTAssertEqual(note.strokeCount, 1)
+        XCTAssertEqual(changes, 1)
+
+        view.touchesBegan([touch], with: nil)
+        view.touchesMoved([touch], with: event)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(messages.count, 2)
+        XCTAssertEqual(note.strokeCount, 0)
+        XCTAssertEqual(changes, 2)
+        XCTAssertTrue(note.undo())
+        XCTAssertEqual(note.strokeCount, 1)
+    }
     @MainActor func testSiblingSurfaceCannotCancelOrAppendAnotherAcceptedInput() throws {
         let a = try inputView(), note = a.note
         let touchA = SyntheticInkTouch(10, 1)
