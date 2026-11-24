@@ -12,6 +12,7 @@ on:
       - 'fixtures/**'
       - 'tools/**'
       - 'ci/verify.sh'
+      - 'ci/gradle_download_retry.py'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle.properties'
@@ -48,7 +49,15 @@ jobs:
       - name: Compile and test current Android App adapter
         run: |
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36"
-          ./gradlew --no-daemon --console=plain -PenableAndroidTargets=true :android-app:compileDebugKotlin :android-app:testDebugUnitTest > build/jvm-ci/android-app.log 2>&1
+          PYTHONPATH=ci python3 - <<'PY'
+          from pathlib import Path
+          from gradle_download_retry import run_gradle
+
+          run_gradle([
+              './gradlew', '--no-daemon', '--console=plain', '-PenableAndroidTargets=true',
+              ':android-app:compileDebugKotlin', ':android-app:testDebugUnitTest',
+          ], Path.cwd(), Path('build/jvm-ci/android-app.log'), 900)
+          PY
       - name: Compile independent Java calls against current JVM classes
         run: |
           python3 - <<'PY'
