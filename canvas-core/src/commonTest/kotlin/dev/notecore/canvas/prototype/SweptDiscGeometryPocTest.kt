@@ -35,6 +35,32 @@ class SweptDiscGeometryPocTest {
         return result
     }
 
+    @Test fun finishedSegmentKeepsVerticesWhenHigherPressureAppendsAcrossBoundary() {
+        val edges = SweptDiscGeometryPoc.SEGMENT_EDGES
+        val prior = samples(DoubleArray(edges + 1) { it * 10.0 }, pressures = FloatArray(edges + 1))
+        val extended = samples(DoubleArray(edges + 2) { it * 10.0 },
+            pressures = FloatArray(edges + 2) { if (it == edges + 1) 1f else 0f })
+        val pressure = brush(BrushKind.PRESSURE, width = 10.0)
+        val before = assertIs<SweptDiscBuild.Ready>(SweptDiscGeometryPoc.buildSegment(prior, 0, pressure))
+        val after = assertIs<SweptDiscBuild.Ready>(SweptDiscGeometryPoc.buildSegment(extended, 0, pressure))
+        val tail = assertIs<SweptDiscBuild.Ready>(SweptDiscGeometryPoc.buildSegment(extended, 1, pressure))
+        assertEquals(1, SweptDiscGeometryPoc.segmentCount(prior))
+        assertEquals(2, SweptDiscGeometryPoc.segmentCount(extended))
+        assertEquals(before.discVertices, after.discVertices)
+        assertEquals(before.geometry.vertexCount, after.geometry.vertexCount)
+        for (i in 0 until before.geometry.vertexCount) {
+            assertEquals(before.geometry.x(i), after.geometry.x(i))
+            assertEquals(before.geometry.y(i), after.geometry.y(i))
+        }
+        assertEquals(PointD(edges * 10.0, 0.0), tail.geometry.origin)
+        assertTrue(tail.discVertices > after.discVertices)
+        assertTrue(contains(after.geometry, tail.geometry.origin))
+        assertTrue(contains(tail.geometry, PointD(5.0, 0.0))) // The bridge across the segment boundary.
+        assertFailsWith<IllegalArgumentException> { SweptDiscGeometryPoc.buildSegment(extended, 2, pressure) }
+        assertEquals(SweptDiscBuild.Rejected(BrushGeometryRejection.SAMPLE_CAPACITY),
+            SweptDiscGeometryPoc.buildSegment(extended, 1, pressure, budget = BrushGeometryBudget(maxSamples = 1)))
+    }
+
     @Test fun knownRoundDotAndPressureBridgeCounterexamplesNowHaveCoverage() {
         val dot = ready(samples(doubleArrayOf(0.0)), brush(width = 128.0), Affine2D(a = 4.0, d = 4.0))
         assertTrue(contains(dot.geometry, PointD(62.0, 12.0)))

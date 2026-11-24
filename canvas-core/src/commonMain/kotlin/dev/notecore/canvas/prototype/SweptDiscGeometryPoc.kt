@@ -20,10 +20,37 @@ internal object SweptDiscGeometryPoc {
 
     fun build(samples: StrokeSamples, brush: BrushSpec, sceneToTarget: Affine2D = Affine2D(),
               maxTargetDeviation: Double = 0.125, budget: BrushGeometryBudget = BrushGeometryBudget()): SweptDiscBuild {
+        return buildRange(samples, 0, samples.size, brush, sceneToTarget, maxTargetDeviation, budget)
+    }
+
+    // Adjacent segments share one sample, so each connecting bridge is emitted exactly once.
+    const val SEGMENT_EDGES = 128
+
+    fun segmentCount(samples: StrokeSamples): Int = maxOf(1, (samples.size - 2) / SEGMENT_EDGES + 1)
+
+    /**
+     * Reads a bounded range of the original immutable samples. A completed segment's tessellation
+     * only depends on that range and the supplied brush/target, even if the stroke grows later.
+     * Consumers must union coverage before applying stroke alpha. Drawing each segment separately
+     * would darken overlaps, including at the shared endpoint.
+     */
+    fun buildSegment(samples: StrokeSamples, index: Int, brush: BrushSpec,
+                     sceneToTarget: Affine2D = Affine2D(), maxTargetDeviation: Double = 0.125,
+                     budget: BrushGeometryBudget = BrushGeometryBudget()): SweptDiscBuild {
+        require(index in 0 until segmentCount(samples))
+        val start = index * SEGMENT_EDGES
+        val end = minOf(samples.size, start + SEGMENT_EDGES + 1)
+        return buildRange(samples, start, end, brush, sceneToTarget, maxTargetDeviation, budget)
+    }
+
+    private fun buildRange(samples: StrokeSamples, start: Int, end: Int, brush: BrushSpec,
+                           sceneToTarget: Affine2D, maxTargetDeviation: Double,
+                           budget: BrushGeometryBudget): SweptDiscBuild {
         require(maxTargetDeviation.isFinite() && maxTargetDeviation > 0.0)
+        val sampleCount = end - start
         fun reject(reason: BrushGeometryRejection) = SweptDiscBuild.Rejected(reason)
         if (brush.algorithmVersion != 1) return reject(BrushGeometryRejection.UNSUPPORTED_ALGORITHM)
-        if (samples.size > budget.maxSamples) return reject(BrushGeometryRejection.SAMPLE_CAPACITY)
+        if (sampleCount > budget.maxSamples) return reject(BrushGeometryRejection.SAMPLE_CAPACITY)
         if (sceneToTarget.inverseOrNull() == null) return reject(BrushGeometryRejection.NUMERIC_RANGE)
         val matrixScale = maxOf(abs(sceneToTarget.a), abs(sceneToTarget.b), abs(sceneToTarget.c), abs(sceneToTarget.d))
         val a = sceneToTarget.a / matrixScale; val b = sceneToTarget.b / matrixScale
@@ -34,14 +61,14 @@ internal object SweptDiscGeometryPoc {
         fun radius(i: Int) = brush.width / 2.0 *
             if (brush.kind == BrushKind.PRESSURE) 0.25 + 0.75 * samples.pressure(i).toDouble() else 1.0
         var maxRadius = 0.0
-        for (i in 0 until samples.size) {
+        for (i in start until end) {
             val r = radius(i)
             if (r == 0.0) return reject(BrushGeometryRejection.NUMERIC_RANGE)
             maxRadius = max(maxRadius, r)
         }
         var coordinateMagnitude = maxRadius
-        for (i in 0 until samples.size) {
-            coordinateMagnitude = max(coordinateMagnitude, max(abs(samples.x(i) - samples.x(0)), abs(samples.y(i) - samples.y(0))) + maxRadius)
+        for (i in start until end) {
+            coordinateMagnitude = max(coordinateMagnitude, max(abs(samples.x(i) - samples.x(start)), abs(samples.y(i) - samples.y(start))) + maxRadius)
         }
         // Conservative cancellation guard, separate from the analytic polygon deficit.
         val numericGuard = coordinateMagnitude * norm * (64.0 * 2.220446049250313e-16)
@@ -50,7 +77,7 @@ internal object SweptDiscGeometryPoc {
         fun deficit(vertices: Int) = maxRadius * 2.0 * sin(PI / (2.0 * vertices)).let { it * it } * norm
         var sides = 16
         while (deficit(sides) + numericGuard > maxTargetDeviation) {
-            if (sides.toLong() * 2 * samples.size > budget.maxVertices) return reject(BrushGeometryRejection.VERTEX_CAPACITY)
+            if (sides.toLong() * 2 * sampleCount > budget.maxVertices) return reject(BrushGeometryRejection.VERTEX_CAPACITY)
             sides *= 2
         }
         if (deficit(sides) == 0.0) return reject(BrushGeometryRejection.NUMERIC_RANGE)
@@ -62,16 +89,16 @@ internal object SweptDiscGeometryPoc {
             return abs(radius(i) - radius(i - 1)) < distance
         }
         var bridges = 0
-        for (i in 1 until samples.size) if (needsBridge(i)) bridges++
-        val vertices = samples.size.toLong() * sides + bridges.toLong() * 4
+        for (i in start + 1 until end) if (needsBridge(i)) bridges++
+        val vertices = sampleCount.toLong() * sides + bridges.toLong() * 4
         if (vertices > budget.maxVertices) return reject(BrushGeometryRejection.VERTEX_CAPACITY)
-        val contours = samples.size + bridges
+        val contours = sampleCount + bridges
         val charge = 256L + vertices * 16 + (contours.toLong() + 1) * 4
         if (charge > budget.logicalBytes) return reject(BrushGeometryRejection.BYTE_CAPACITY)
 
         val positions = DoubleArray(vertices.toInt() * 2)
         val offsets = IntArray(contours + 1)
-        val origin = PointD(samples.x(0), samples.y(0))
+        val origin = PointD(samples.x(start), samples.y(start))
         var vertex = 0; var contour = 0
         var left = Double.POSITIVE_INFINITY; var top = left
         var right = Double.NEGATIVE_INFINITY; var bottom = right
@@ -94,14 +121,14 @@ internal object SweptDiscGeometryPoc {
             offsets[++contour] = vertex
             return true
         }
-        for (i in 0 until samples.size) {
+        for (i in start until end) {
             val x = samples.x(i) - origin.x; val y = samples.y(i) - origin.y; val r = radius(i)
             for (j in 0 until sides) {
                 val angle = 2 * PI * j / sides
                 point(x + r * cos(angle), y + r * sin(angle))
             }
             if (!finish()) return reject(BrushGeometryRejection.NUMERIC_RANGE)
-            if (i == 0 || !needsBridge(i)) continue
+            if (i == start || !needsBridge(i)) continue
             val px = samples.x(i - 1) - origin.x; val py = samples.y(i - 1) - origin.y
             val pr = radius(i - 1)
             val dx = samples.x(i) - samples.x(i - 1); val dy = samples.y(i) - samples.y(i - 1)
@@ -118,7 +145,7 @@ internal object SweptDiscGeometryPoc {
             if (!finish()) return reject(BrushGeometryRejection.NUMERIC_RANGE)
         }
         check(vertex == vertices.toInt() && contour == contours)
-        return SweptDiscBuild.Ready(BrushGeometry(origin, brush, samples.size, BrushDisplayRules.displayArgb(brush),
+        return SweptDiscBuild.Ready(BrushGeometry(origin, brush, sampleCount, BrushDisplayRules.displayArgb(brush),
             positions, offsets, BoundsD(left, top, right, bottom), charge), RULE_ID, sides, deficit(sides) + numericGuard)
     }
 }

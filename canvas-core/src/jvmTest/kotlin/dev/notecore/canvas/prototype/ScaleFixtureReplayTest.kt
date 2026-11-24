@@ -61,6 +61,7 @@ class ScaleFixtureReplayTest {
                     assertEquals(p.x, accepted.samples.x(index)); assertEquals(p.y, accepted.samples.y(index))
                     assertEquals(p.pressure, accepted.samples.pressure(index)); assertEquals(p.timeMicros, accepted.samples.timeMicros(index))
                 }
+                if (id == "S9-ink-long-stroke") verifyBoundedGeometry(accepted.samples)
                 session.close()
             }
             assertEquals(-1, stream.read()) // truncation throws, trailing records also fail
@@ -69,4 +70,28 @@ class ScaleFixtureReplayTest {
         profile.getValue("bounds_scene_points").jsonArray.forEachIndexed { i, value -> assertEquals(value.jsonPrimitive.double, bounds[i]) }
         assertEquals(profile.getValue("sha256").jsonPrimitive.content, digest.digest().joinToString("") { "%02x".format(it) })
     }
+
+    private fun verifyBoundedGeometry(samples: StrokeSamples) {
+        val transform = Affine2D(a = 4.0, d = 4.0)
+        val budget = BrushGeometryBudget(maxSamples = 129, maxVertices = 10_000, logicalBytes = 160_000)
+        for (kind in BrushKind.entries) {
+            val brush = BrushSpec(kind, 1, 10.0, -1)
+            assertEquals(SweptDiscBuild.Rejected(BrushGeometryRejection.SAMPLE_CAPACITY),
+                SweptDiscGeometryPoc.build(samples, brush, transform))
+            val count = SweptDiscGeometryPoc.segmentCount(samples)
+            var edges = 0
+            var peakBytes = 0L
+            for (index in 0 until count) {
+                val segment = assertIs<SweptDiscBuild.Ready>(
+                    SweptDiscGeometryPoc.buildSegment(samples, index, brush, transform, budget = budget),
+                    "$kind segment $index")
+                edges += segment.geometry.sourcePointCount - 1
+                peakBytes = maxOf(peakBytes, segment.geometry.logicalByteCharge)
+                assertTrue(segment.targetDeviationBound <= 0.125)
+            }
+            assertEquals(samples.size - 1, edges)
+            println("S9 segmented: kind=$kind segments=$count edges=$edges peakSingleLogicalBytes=$peakBytes")
+        }
+    }
+
 }
