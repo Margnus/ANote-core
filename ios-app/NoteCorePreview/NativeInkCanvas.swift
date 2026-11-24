@@ -113,6 +113,8 @@ final class InkUIView: UIView {
     var tool: InkTool = .pen
     var eraserRadius: Double = 8.0
     private var toolTouch: UITouch?
+    // Same point ceiling as shared EraserRules/LassoRules, before native retention.
+    private let maxToolPathPoints = 4096
     private var eraserPoints: [CGPoint] = []
     private var eraserPath: UIBezierPath?
     private var lassoPolygon: [CGPoint] = []
@@ -333,6 +335,7 @@ final class InkUIView: UIView {
             guard !note.hasActiveStroke else { failed("其他画布正在输入，请完成后重试"); return }
             guard let touch = touches.first(where: { $0.type == .pencil || $0.type == .direct }) else { return }
             let points = pagePoints(touch, event: event)
+            guard points.count <= maxToolPathPoints else { rejectToolGesture(); return }
             guard let p = points.first else { return }
             toolTouch = touch
             if tool == .eraser {
@@ -371,10 +374,12 @@ final class InkUIView: UIView {
             guard !suppressSequence, let touch = toolTouch, touches.contains(touch) else { return }
             for p in pagePoints(touch, event: event) {
                 if tool == .eraser {
+                    guard eraserPoints.count < maxToolPathPoints else { rejectToolGesture(); return }
                     eraserPoints.append(p); eraserPath?.addLine(to: p)
                 } else if lassoDragStart != nil {
                     lassoDragCurrent = p
                 } else if let last = lassoPolygon.last, abs(p.x - last.x) + abs(p.y - last.y) > 1.0 {
+                    guard lassoPolygon.count < maxToolPathPoints else { rejectToolGesture(); return }
                     lassoPolygon.append(p); lassoPath?.addLine(to: p)
                 }
             }
@@ -443,6 +448,11 @@ final class InkUIView: UIView {
             if x.isFinite, y.isFinite, abs(x) <= 1e9, abs(y) <= 1e9 { points.append(CGPoint(x: x, y: y)) }
         }
         return points
+    }
+    private func rejectToolGesture() {
+        clearToolGesture()
+        setNeedsDisplay()
+        failed("工具轨迹超过4096点，本次操作未提交，请分段重试")
     }
     private func clearToolGesture() {
         toolTouch = nil; eraserPoints = []; eraserPath = nil

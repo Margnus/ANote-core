@@ -34,6 +34,8 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         style = Paint.Style.STROKE; color = 0xff3568be.toInt(); strokeWidth = 1.5f
         pathEffect = android.graphics.DashPathEffect(floatArrayOf(8f, 6f), 0f)
     }
+    // Same point ceiling as shared EraserRules/LassoRules; refuse before native retention.
+    private val maxToolPathPoints = 4096
     private var eraserPoints: MutableList<PointD>? = null
     private var eraserPath: Path? = null
     private var lassoPolygon: MutableList<PointD>? = null
@@ -317,12 +319,14 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                     val y = input.y(if (current) event.getY(0) else event.getHistoricalY(0, i))
                     if (!x.isFinite() || !y.isFinite()) continue
                     if (tool == InkTool.ERASER) {
+                        if ((eraserPoints?.size ?: 0) >= maxToolPathPoints) { rejectToolGesture(); return }
                         eraserPoints?.add(PointD(x, y)); eraserPath?.lineTo(x.toFloat(), y.toFloat())
                     } else if (lassoDragStart != null) {
                         lassoDragCurrent = PointD(x, y)
                     } else if (lassoPolygon != null) {
                         val last = lassoPolygon!!.last()
                         if (kotlin.math.abs(x - last.x) + kotlin.math.abs(y - last.y) > 1.0) {
+                            if (lassoPolygon!!.size >= maxToolPathPoints) { rejectToolGesture(); return }
                             lassoPolygon!!.add(PointD(x, y)); lassoPath?.lineTo(x.toFloat(), y.toFloat())
                         }
                     }
@@ -354,6 +358,13 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 parent.requestDisallowInterceptTouchEvent(false); performClick()
             }
         }
+    }
+    private fun rejectToolGesture() {
+        clearToolGesture()
+        suppressSequence = true
+        parent.requestDisallowInterceptTouchEvent(false)
+        invalidate()
+        error("工具轨迹超过4096点，本次操作未提交，请分段重试")
     }
     private fun clearToolGesture() {
         eraserPoints = null; eraserPath = null; lassoPolygon = null; lassoPath = null

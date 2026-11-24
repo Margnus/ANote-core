@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/jvm.yml'
       - 'canvas-core/**'
+      - 'android-app/**'
       - 'shared-core/**'
       - 'fixtures/**'
       - 'tools/**'
@@ -44,6 +45,10 @@ jobs:
           mkdir -p build/jvm-ci
           git rev-parse HEAD > build/jvm-ci/commit.txt
           bash ci/verify.sh > build/jvm-ci/verification.log 2>&1
+      - name: Compile and test current Android App adapter
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36"
+          ./gradlew --no-daemon --console=plain -PenableAndroidTargets=true :android-app:compileDebugKotlin :android-app:testDebugUnitTest > build/jvm-ci/android-app.log 2>&1
       - name: Compile independent Java calls against current JVM classes
         run: |
           python3 - <<'PY'
@@ -76,6 +81,7 @@ jobs:
             build/jvm-ci/**
             reports/verification.json
             reports/gradle-verification.sha256
+            android-app/build/test-results/testDebugUnitTest/TEST-*.xml
             canvas-core/build/test-results/jvmTest/TEST-*.xml
             shared-core/build/test-results/jvmTest/TEST-*.xml
           if-no-files-found: error
