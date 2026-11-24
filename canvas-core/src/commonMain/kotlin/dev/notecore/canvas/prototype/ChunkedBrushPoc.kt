@@ -54,8 +54,8 @@ internal class BrushTileMaskPoc internal constructor(
     val frame: FrameToken, val geometryKey: GeometryCacheKey, val ownerLayer: LayerId,
     val grid: BrushTileGridPoc, private val coverage: IntArray, val sourceAlpha: Double,
     val sceneTolerance: Double, val segmentsPerChunk: Int,
+    val ruleId: String = "chunked-subpixel-union-draft-1",
 ) {
-    val ruleId = "chunked-subpixel-union-draft-1"
     val logicalBytes: Long get() = coverage.size * 4L
     fun coverageBits(x: Int, y: Int): Int { require(x in 0 until grid.width && y in 0 until grid.height); return coverage[y * grid.width + x] }
     fun alphaByte(x: Int, y: Int) = (coverageBits(x, y).countOneBits() * sourceAlpha * 255 / (grid.samplesPerAxis * grid.samplesPerAxis)).roundToInt()
@@ -92,7 +92,26 @@ internal class ChunkedBrushPoc private constructor(
         maxWorkingBytes: Long = 1024 * 1024, maxCandidateChunks: Int = 128, maxEdgeTests: Long = 20_000_000,
         cancelled: () -> Boolean = { false },
     ): BrushTileBuild {
-        require(maxWorkingBytes > 0 && maxCandidateChunks > 0 && maxEdgeTests > 0)
+        return renderUnion(frame, grid, sceneTolerance, maxWorkingBytes, maxCandidateChunks, maxEdgeTests,
+            Long.MAX_VALUE, swept = false, cancelled = cancelled)
+    }
+
+    /** Isolated swept-disc consumer. The original tile cache and App never call this entry. */
+    fun renderSwept(frame: FrameToken, grid: BrushTileGridPoc, maxTargetDeviation: Double = 0.125,
+        maxWorkingBytes: Long = 1024 * 1024, maxCandidateChunks: Int = 128,
+        maxEdgeTests: Long = 20_000_000, maxGeneratedVertices: Long = 400_000,
+        cancelled: () -> Boolean = { false },
+    ): BrushTileBuild {
+        if (segmentsPerChunk != SweptDiscGeometryPoc.SEGMENT_EDGES) return BrushTileBuild.Rejected("segment-layout")
+        return renderUnion(frame, grid, maxTargetDeviation, maxWorkingBytes, maxCandidateChunks,
+            maxEdgeTests, maxGeneratedVertices, swept = true, cancelled = cancelled)
+    }
+
+    private fun renderUnion(frame: FrameToken, grid: BrushTileGridPoc, sceneTolerance: Double,
+        maxWorkingBytes: Long, maxCandidateChunks: Int, maxEdgeTests: Long, maxGeneratedVertices: Long,
+        swept: Boolean, cancelled: () -> Boolean,
+    ): BrushTileBuild {
+        require(maxWorkingBytes > 0 && maxCandidateChunks > 0 && maxEdgeTests > 0 && maxGeneratedVertices > 0)
         require(sceneTolerance.isFinite() && sceneTolerance in 0.0001..4.0)
         if (cancelled()) return BrushTileBuild.Cancelled
         if (frame.sceneId != captured.sceneId || frame.sceneRevision != captured.sceneRevision) return BrushTileBuild.Rejected("content-frame-mismatch")
@@ -104,42 +123,82 @@ internal class ChunkedBrushPoc private constructor(
         val mask = IntArray(grid.width * grid.height)
         var vertices = 0L; var work = 0L; var peakWorking = stableBytes; var built = 0; var fullPixels = 0
         val ss = grid.samplesPerAxis; val full = (1 shl (ss * ss)) - 1
-        fun alpha() = (stroke.brush.argb ushr 24) / 255.0 * if (stroke.brush.kind == BrushKind.HIGHLIGHTER) 0.25 else 1.0
+        val alpha = if (swept) (BrushDisplayRules.displayArgb(stroke.brush) ushr 24) / 255.0
+            else (stroke.brush.argb ushr 24) / 255.0 * if (stroke.brush.kind == BrushKind.HIGHLIGHTER) 0.25 else 1.0
+        val t = stroke.transform
 
         for (id in candidates) {
             if (fullPixels == mask.size) break // Union is complete at every subpixel; later chunks cannot change it.
             if (cancelled()) return BrushTileBuild.Cancelled
-            val start = chunkStart(id); val end = chunkEnd(id); val count = end - start + 1
-            // Caller input is already canonical/owned. Account both temporary projection copies.
-            val projectionBytes = count * 56L
-            val available = maxWorkingBytes - stableBytes - projectionBytes
-            if (available <= 0) return BrushTileBuild.Rejected("working-budget")
-            val xs = DoubleArray(count); val ys = DoubleArray(count)
-            val pressure = FloatArray(count); val time = LongArray(count)
-            repeat(count) { i ->
-                xs[i] = stroke.samples.x(start + i); ys[i] = stroke.samples.y(start + i)
-                pressure[i] = stroke.samples.pressure(start + i); time[i] = stroke.samples.timeMicros(start + i)
+            val xAt: (Int) -> Double
+            val yAt: (Int) -> Double
+            val contourStart: (Int) -> Int
+            val contourEnd: (Int) -> Int
+            val contourCount: Int
+            if (swept) {
+                val available = maxWorkingBytes - stableBytes
+                if (available <= 0) return BrushTileBuild.Rejected("working-budget")
+                val remaining = maxGeneratedVertices - vertices
+                if (remaining < 3) return BrushTileBuild.Rejected("generated-vertex-budget")
+                val pixel = grid.pixelSize
+                val pixelTransform = Affine2D(t.a / pixel, t.b / pixel, t.c / pixel, t.d / pixel)
+                val budget = BrushGeometryBudget(maxVertices = minOf(400_000L, remaining).toInt(),
+                    logicalBytes = minOf(available, 64L * 1024 * 1024))
+                val geometry = when (val result = SweptDiscGeometryPoc.buildSegment(stroke.samples, id, stroke.brush,
+                    pixelTransform, sceneTolerance, budget)) {
+                    is SweptDiscBuild.Ready -> result.geometry
+                    is SweptDiscBuild.Rejected -> return BrushTileBuild.Rejected(when (result.reason) {
+                        BrushGeometryRejection.VERTEX_CAPACITY -> "generated-vertex-budget"
+                        BrushGeometryRejection.BYTE_CAPACITY -> "working-budget"
+                        else -> result.reason.name
+                    })
+                }
+                val path = when (val result = BrushPathPlanner.prepare(geometry, t, BrushPathPrecision.FLOAT64)) {
+                    is BrushPathPlanResult.Ready -> result.plan
+                    is BrushPathPlanResult.Rejected -> return BrushTileBuild.Rejected(result.reason.name)
+                }
+                peakWorking = maxOf(peakWorking, stableBytes + geometry.logicalByteCharge)
+                vertices += path.vertexCount
+                contourCount = path.contourCount
+                contourStart = path::contourStart; contourEnd = path::contourEnd
+                xAt = path::x; yAt = path::y
+            } else {
+                val start = chunkStart(id); val end = chunkEnd(id); val count = end - start + 1
+                // Caller input is already canonical/owned. Account both temporary projection copies.
+                val projectionBytes = count * 56L
+                val available = maxWorkingBytes - stableBytes - projectionBytes
+                if (available <= 0) return BrushTileBuild.Rejected("working-budget")
+                val xs = DoubleArray(count); val ys = DoubleArray(count)
+                val pressure = FloatArray(count); val time = LongArray(count)
+                repeat(count) { i ->
+                    xs[i] = stroke.samples.x(start + i); ys[i] = stroke.samples.y(start + i)
+                    pressure[i] = stroke.samples.pressure(start + i); time[i] = stroke.samples.timeMicros(start + i)
+                }
+                val input = StrokeSamples.copyOf(xs, ys, pressure, time)
+                val produced = when (val result = ReducedBrushPathPoc.build(input, stroke.brush, stroke.transform,
+                    sceneTolerance, maxWorkingBytes = available, cancelled = cancelled)) {
+                    is ReducedBrushPathBuild.Ready -> result
+                    is ReducedBrushPathBuild.Rejected -> return BrushTileBuild.Rejected(result.reason)
+                    ReducedBrushPathBuild.Cancelled -> return BrushTileBuild.Cancelled
+                }
+                val path = produced.path
+                peakWorking = maxOf(peakWorking, stableBytes + projectionBytes + produced.workingLogicalBytes)
+                vertices += path.vertexCount
+                contourCount = path.contourCount
+                contourStart = path::contourStart; contourEnd = path::contourEnd
+                xAt = path::x; yAt = path::y
             }
-            val input = StrokeSamples.copyOf(xs, ys, pressure, time)
-            val produced = when (val result = ReducedBrushPathPoc.build(input, stroke.brush, stroke.transform,
-                sceneTolerance, maxWorkingBytes = available, cancelled = cancelled)) {
-                is ReducedBrushPathBuild.Ready -> result
-                is ReducedBrushPathBuild.Rejected -> return BrushTileBuild.Rejected(result.reason)
-                ReducedBrushPathBuild.Cancelled -> return BrushTileBuild.Cancelled
-            }
-            val path = produced.path
-            peakWorking = maxOf(peakWorking, stableBytes + projectionBytes + produced.workingLogicalBytes)
-            vertices += path.vertexCount; built++
+            built++
 
-            for (contour in 0 until path.contourCount) {
-                val first = path.contourStart(contour); val last = path.contourEnd(contour)
+            for (contour in 0 until contourCount) {
+                val first = contourStart(contour); val last = contourEnd(contour)
                 var left = Double.POSITIVE_INFINITY; var top = Double.POSITIVE_INFINITY
                 var right = Double.NEGATIVE_INFINITY; var bottom = Double.NEGATIVE_INFINITY
                 for (i in first until last) {
                     if (work >= maxEdgeTests) return BrushTileBuild.Rejected("raster-work-budget")
                     if (work++ % 256 == 0L && cancelled()) return BrushTileBuild.Cancelled
-                    left = minOf(left, path.x(i)); top = minOf(top, path.y(i))
-                    right = maxOf(right, path.x(i)); bottom = maxOf(bottom, path.y(i))
+                    left = minOf(left, xAt(i)); top = minOf(top, yAt(i))
+                    right = maxOf(right, xAt(i)); bottom = maxOf(bottom, yAt(i))
                 }
                 val x0 = floor((left - grid.origin.x) / grid.pixelSize).coerceIn(0.0, grid.width.toDouble()).toInt()
                 val x1 = floor((right - grid.origin.x) / grid.pixelSize).coerceIn(-1.0, grid.width - 1.0).toInt()
@@ -158,9 +217,9 @@ internal class ChunkedBrushPoc private constructor(
                             if (work >= maxEdgeTests) return BrushTileBuild.Rejected("raster-work-budget")
                             if (work++ % 256 == 0L && cancelled()) return BrushTileBuild.Cancelled
                             val j = if (i + 1 == last) first else i + 1
-                            val cross = (path.x(j) - path.x(i)) * (py - path.y(i)) - (px - path.x(i)) * (path.y(j) - path.y(i))
-                            if (path.y(i) <= py && path.y(j) > py && cross > 0) winding++
-                            if (path.y(i) > py && path.y(j) <= py && cross < 0) winding--
+                            val cross = (xAt(j) - xAt(i)) * (py - yAt(i)) - (px - xAt(i)) * (yAt(j) - yAt(i))
+                            if (yAt(i) <= py && yAt(j) > py && cross > 0) winding++
+                            if (yAt(i) > py && yAt(j) <= py && cross < 0) winding--
                         }
                         if (winding != 0) {
                             val before = mask[pixel]
@@ -172,7 +231,8 @@ internal class ChunkedBrushPoc private constructor(
             }
         }
         if (cancelled()) return BrushTileBuild.Cancelled
-        return BrushTileBuild.Ready(BrushTileMaskPoc(frame, geometryKey, stroke.layerId, grid, mask, alpha(), sceneTolerance, segmentsPerChunk), candidates.size, built, vertices, work, peakWorking)
+        return BrushTileBuild.Ready(BrushTileMaskPoc(frame, geometryKey, stroke.layerId, grid, mask, alpha, sceneTolerance, segmentsPerChunk,
+            if (swept) "swept-disc-subpixel-union-draft-1" else "chunked-subpixel-union-draft-1"), candidates.size, built, vertices, work, peakWorking)
     }
 
     companion object {
