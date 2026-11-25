@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "baseline": "498ef3949c9bee21f55c91c3a88b5bb89a9194f5",
+  "decision": "Adopt existing serial executor and Android software Bitmap holder for isolated swept tile lifecycle control.",
+  "jvm_tests": 796,
+  "jvm_suite_report_sha256": "19c89401dc5c49f5d3cea8bd86a62296963af11d8f6431730d6fb8316d9c0a55",
+  "android": {
+    "api": 26,
+    "tests": 45,
+    "ignored": 0,
+    "apk_sha256": "df58992abd97d39b987998e7448ba6ebc9b7f947a712b9c2560e89bffa8a5ef5"
+  },
+  "initial_attempts": {
+    "jvm": "Corrected test assumption: only queue head becomes DELIVERY_BLOCKED.",
+    "android": "Test initially supplied only Bitmap bytes; holder refused before allocation. Retry reserves Bitmap plus staging."
+  },
+  "verified_behavior": [
+    "charged in running and queued states",
+    "blocked head keeps later result READY and both peaks charged",
+    "obsolete raster results discarded after retry",
+    "current frame draws alpha 127",
+    "real Android Bitmap allocation 2048 bytes",
+    "closed owner keeps 6144 bytes until Bitmap recycle and lease return"
+  ],
+  "scope": "Isolated software raster on real JVM/ART worker thread and software Android Bitmap. No Apple resource exercise, production app wiring, GPU behavior, physical heap or frame latency.",
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "8ad686ba19de6debfe98a3db6bee0a550e1f72128a5bd6f17d192edf35fd8915",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BrushRenderExecutorPoc.kt": "ca434b694904045e7c1d97bb1e5bc5deb1aa0c15974e52c2fb393bc1040d0edb",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "4906c53bd2f3ad95681d8fe1561cf2e3f8296201c67fe43a6dda7b4185f9ccae",
+    "canvas-core/src/androidMain/kotlin/dev/notecore/canvas/prototype/AndroidBrushImagePoc.kt": "0895d5afbcab6901c29d0b8735b048deb1345fd6cabb7b04abbae0d1cb137647",
+    "canvas-core/src/jvmAndAndroidTest/kotlin/dev/notecore/canvas/prototype/SweptDiscExecutorTest.kt": "da9616b1e677fa30588e4c8fd615cdb6e7de418473c724a482479f92f2b5a5e7",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/SweptDiscBitmapReleaseTest.kt": "dad408238a9f5c68076e5e149961175a6cfe48919c914750089d46fab918ed64",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "9e59bcb86cc4fc9ed60059b826ed403bf4dcb1b401cced5860a0815075ecc096"
+  },
+  "raw_archive_sha256": "0d2b2e052b97fe1c06abfd4341e0641a4aca39f82a3d618cbe3113c446dcfa39",
+  "raw_entry_sha256": {
+    "junit.log": "63f4d04476500e417bcf7577d5debaeb88c09ba01aff4a7558c77636180098cb",
+    "jvm-run.log": "a9cfed5757281898d5f2d285ca846137e26d64eb9df5b643883e393bfce51332",
+    "android-build.log": "a7ca3b41bf5e8fc2db11b4939b26529582b8ef77a11a201d8ce60f1885f2fc60",
+    "isolate-android.gradle": "9d6a683e9f788c9f2968ba62b6ceac5bd472f63367a88313a89a75fd023762c3",
+    "android-runner.sh": "5673b9895751e0157b6162d00654f176637daa373b401429c3c3ff28d79b9829",
+    "android/instrument.log": "e52ceb8fccad381962e4335aa927837fca1a780c5a37c2f20f83893f6c978ec9",
+    "android/fingerprint.txt": "26810751a272e4ea481416f938e3a7c91cac2c34b64f1feea3ba0108b19b923d",
+    "android/install-tests.log": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "android/crash.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "first-jvm-tests.log": "e6b04b7ac5cdb63ed8b0bb9e186feba18e121373d2074b8e9ee5c3d44581aea4",
+    "first-jvm-run.log": "932cb994c73005d5e5e5cbf26f767d29c78e9c551fffef52d6f3ed99da27c5f1",
+    "first-android-instrument.log": "0c1c571da21e4f347f6b7219ea55e7dee59822508004b42c5a2670d4b609091d",
+    "first-android-build.log": "294ffafe2bdca7eeadb1f7a5c01a37ab10891f0991a08fd57983f4fedff9c73e",
+    "first-android-apk.sha256": "a327d4c6a04d2562effc7ca062f4dd731b5d7a8fb82dba54643245b0844de448",
+    "check_architecture.py.log": "99762ea96103b2f62aecac049c1fea9eecf052023038431f6f4310ac8ffb9bc8",
+    "verify_portable_inputs.py.log": "71df64734ac1205b5b5fad6af0fd2b1973e09ce474786db47437beb634a444a2"
+  }
+}

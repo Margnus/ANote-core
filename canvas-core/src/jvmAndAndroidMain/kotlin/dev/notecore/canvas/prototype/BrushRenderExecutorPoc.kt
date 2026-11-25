@@ -36,6 +36,14 @@ internal class BrushRenderExecutorPoc(
         val admission = owner.admit(catalog, frame, layer, grid, rgb, workingBytes, nativeCopyAllowanceBytes)
         return dispatch(admission)
     }
+    fun submitSwept(catalog: ChunkedBrushPoc, frame: FrameToken, layer: LayerId, grid: BrushTileGridPoc,
+        rgb: Int, workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
+        maxEdgeTests: Long = 20_000_000,
+    ): BrushRenderAdmissionPoc {
+        executor.checkOwnerThread()
+        return dispatch(owner.admitSwept(catalog, frame, layer, grid, rgb, workingBytes,
+            nativeCopyAllowanceBytes, maxEdgeTests))
+    }
     fun submitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId, grid: BrushPixelGridPoc,
         workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
         maxEdgeTests: Long = 20_000_000,
