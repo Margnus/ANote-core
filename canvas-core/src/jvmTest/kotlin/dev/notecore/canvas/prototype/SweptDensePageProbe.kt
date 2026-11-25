@@ -10,6 +10,13 @@ import java.security.MessageDigest
 object SweptDensePageProbe {
     private val layer = LayerId("ink")
     private val grid = BrushFrameGridPoc(PointD(-8.0, -8.0), 32, 512, pixelSize = 4.0, samplesPerAxis = 2)
+    private const val WORK_LIMIT = 20_000_000L
+    private const val CACHE_BYTES = 48L * 1024
+
+    private data class TilePlan(val grid: BrushTileGridPoc, val candidates: List<Int>, val stamp: LongArray)
+    private data class CachedTile(val stamp: LongArray, val rgba: ByteArray) {
+        val logicalBytes: Long get() = rgba.size + stamp.size * 8L
+    }
     private data class Item(val bounds: BoundsD, val stroke: StrokeObject?, val rgb: Int)
     private data class Totals(
         var pairs: Int = 0,
@@ -18,18 +25,21 @@ object SweptDensePageProbe {
         var compositeChannels: Long = 0,
         var rectangleSamples: Long = 0,
         var peakTransient: Long = 0,
-    )
+    ) {
+        val work: Long get() = steps + compositeChannels + rectangleSamples
+    }
 
     @JvmStatic
     fun main(args: Array<String>) {
         val source = read(File(args.single()))
         val moved = source.mapIndexed { index, stroke ->
-            if (index < 1_000) stroke.copy(transform = Affine2D(tx = 32.0, ty = 8.0)) else stroke
+            if (index < 1_000) stroke.copy(objectRevision = 2, transform = Affine2D(tx = 32.0, ty = 8.0)) else stroke
         }
         check(source.zip(moved).count { (a, b) -> a.transform != b.transform } == 1_000)
         check(source.zip(moved).all { (a, b) -> a.samples === b.samples })
-        measure("base", 1, source)
-        measure("moved-1000", 2, moved)
+        val cache = WeightedLruCache<Int, CachedTile>(CACHE_BYTES) { it.logicalBytes }
+        measure("base", 1, source, cache, listOf(0, 32, 64, 32, 0))
+        measure("moved-1000", 2, moved, cache, listOf(64, 0, 32, 96, 128, 160, 64))
     }
 
     private fun read(file: File): List<StrokeObject> = DataInputStream(file.inputStream().buffered()).use { input ->
@@ -59,7 +69,9 @@ object SweptDensePageProbe {
         strokes
     }
 
-    private fun measure(label: String, revision: Long, strokes: List<StrokeObject>) {
+    private fun measure(label: String, revision: Long, strokes: List<StrokeObject>,
+        cache: WeightedLruCache<Int, CachedTile>, trace: List<Int>,
+    ) {
         val start = System.nanoTime()
         val frame = FrameToken(SceneId("s2-dense-raster"), revision, 1, 1, 1, 1)
         val items = buildList {
@@ -82,32 +94,24 @@ object SweptDensePageProbe {
         val sampleBytes = strokes.sumOf { it.samples.size * 28L }
         // Explicit payload model for item bounds plus tree bounds. JVM headers, collections and GC are outside this model.
         val boundBytes = (items.size + index.nodeCount) * 32L
-        for (top in 0 until grid.height step 32) {
+        val plans = (0 until grid.height step 32).associateWith { top ->
             val tile = BrushTileGridPoc(PointD(grid.origin.x, grid.origin.y + top * grid.pixelSize),
                 grid.width, minOf(32, grid.height - top), grid.pixelSize, grid.samplesPerAxis)
             val candidates = index.query(tile.bounds).ids
             check(candidates == entries.filter { it.bounds.overlaps(tile.bounds) }.map { it.id }.toSet())
-            for (id in candidates.sorted()) {
-                val item = items[id]
+            val ordered = candidates.sorted()
+            // This experiment has fixed scene/grid/profile and immutable proxy rectangles.
+            // Each ordered pair records the canonical position and stroke revision.
+            val stamp = LongArray(ordered.size * 2)
+            ordered.forEachIndexed { i, id ->
+                stamp[i * 2] = id.toLong()
+                stamp[i * 2 + 1] = items[id].stroke?.objectRevision ?: 0L
                 visited[id] = true
-                totals.pairs++
-                totals.compositeChannels += tile.width * tile.height * 4L
-                val mask = if (item.stroke == null) {
-                    totals.rectangleSamples += tile.width * tile.height * tile.samplesPerAxis * tile.samplesPerAxis.toLong()
-                    totals.peakTransient = maxOf(totals.peakTransient, tile.width * tile.height * 4L)
-                    rectangle(frame, tile, id, item.bounds)
-                } else {
-                    val catalog = assertCatalog(frame, item.stroke)
-                    val ready = catalog.renderSwept(frame, tile)
-                    check(ready is BrushTileBuild.Ready) { "$label id=$id top=$top $ready" }
-                    totals.vertices += ready.generatedVertices
-                    totals.steps += ready.edgeTests
-                    totals.peakTransient = maxOf(totals.peakTransient,
-                        ready.peakWorkingLogicalBytes + catalog.boundsPayloadBytes)
-                    ready.tile
-                }
-                check(output.over(mask, item.rgb, { false }, destY = top))
             }
+            TilePlan(tile, ordered, stamp)
+        }
+        plans.forEach { (top, plan) ->
+            check(composeTile(frame, items, plan, output, totals, Long.MAX_VALUE, top))
         }
         check(visited.all { it })
         val pixels = output.finish()
@@ -119,6 +123,100 @@ object SweptDensePageProbe {
             "edgeTests=${totals.steps} compositeChannels=${totals.compositeChannels} rectangleSamples=${totals.rectangleSamples} sampleBytes=$sampleBytes boundBytes=$boundBytes atlasBytes=$atlasBytes " +
             "peakTransientLogicalBytes=${totals.peakTransient} measuredLogicalSubtotal=${sampleBytes + boundBytes + atlasBytes + totals.peakTransient} " +
             "indexNs=${indexed - start} renderingAndDigestNs=${rendered - indexed} rgbaSha256=$hash")
+        verifyTrace(label, frame, items, plans, pixels, cache, trace)
+    }
+
+    private fun composeTile(frame: FrameToken, items: List<Item>, plan: TilePlan,
+        output: BrushTilePixelsPoc.Companion.Composition, totals: Totals, workLimit: Long, destY: Int = 0,
+    ): Boolean {
+        val tile = plan.grid
+        val channelSteps = tile.width * tile.height * 4L
+        val sampleSteps = tile.width * tile.height * tile.samplesPerAxis * tile.samplesPerAxis.toLong()
+        for (id in plan.candidates) {
+            val item = items[id]
+            val remaining = workLimit - totals.work - channelSteps
+            if (remaining <= 0) return false
+            val mask = if (item.stroke == null) {
+                if (remaining < sampleSteps) return false
+                totals.rectangleSamples += sampleSteps
+                totals.peakTransient = maxOf(totals.peakTransient, tile.width * tile.height * 4L)
+                rectangle(frame, tile, id, item.bounds)
+            } else {
+                val catalog = assertCatalog(frame, item.stroke)
+                val ready = when (val rendered = catalog.renderSwept(frame, tile,
+                    maxEdgeTests = minOf(remaining, WORK_LIMIT))) {
+                    is BrushTileBuild.Ready -> rendered
+                    is BrushTileBuild.Rejected -> {
+                        check(rendered.reason == "raster-work-budget") { rendered.reason }
+                        return false
+                    }
+                    BrushTileBuild.Cancelled -> error("Unexpected cancellation")
+                }
+                totals.vertices += ready.generatedVertices
+                totals.steps += ready.edgeTests
+                totals.peakTransient = maxOf(totals.peakTransient,
+                    ready.peakWorkingLogicalBytes + catalog.boundsPayloadBytes)
+                ready.tile
+            }
+            totals.pairs++
+            totals.compositeChannels += channelSteps
+            check(output.over(mask, item.rgb, { false }, destY = destY))
+        }
+        return true
+    }
+
+    private fun renderTile(frame: FrameToken, items: List<Item>, plan: TilePlan, workLimit: Long,
+        totals: Totals,
+    ): CachedTile? {
+        val output = BrushTilePixelsPoc.Companion.Composition(frame, layer, plan.grid)
+        if (!composeTile(frame, items, plan, output, totals, workLimit)) return null
+        val pixels = output.finish()
+        return CachedTile(plan.stamp, ByteArray(pixels.logicalBytes.toInt()) { pixels.byteAt(it).toByte() })
+    }
+
+    private fun verifyTrace(label: String, frame: FrameToken, items: List<Item>, plans: Map<Int, TilePlan>,
+        coldPage: BrushTilePixelsPoc, cache: WeightedLruCache<Int, CachedTile>, trace: List<Int>,
+    ) {
+        var hits = 0
+        var misses = 0
+        var stale = 0
+        var evictions = 0
+        var peakResident = cache.residentBytes
+        var maxTileWork = 0L
+        var totalWork = 0L
+        for (top in trace) {
+            val plan = plans.getValue(top)
+            val cached = cache.get(top)
+            val result = if (cached != null && cached.stamp.contentEquals(plan.stamp)) {
+                hits++
+                cached
+            } else {
+                misses++
+                if (cached != null) stale++
+                val totals = Totals()
+                val fresh = checkNotNull(renderTile(frame, items, plan, WORK_LIMIT, totals)) { "budget $label top=$top" }
+                val stored = cache.put(top, fresh)
+                check(stored is CacheAdmission.Stored)
+                evictions += stored.displaced.count { it.key != top }
+                peakResident = maxOf(peakResident, cache.residentBytes)
+                maxTileWork = maxOf(maxTileWork, totals.work)
+                totalWork += totals.work
+                if (misses == 1) {
+                    val exact = checkNotNull(renderTile(frame, items, plan, totals.work, Totals()))
+                    check(exact.rgba.contentEquals(fresh.rgba))
+                    check(renderTile(frame, items, plan, totals.work - 1, Totals()) == null)
+                }
+                fresh
+            }
+            val byteOffset = top * grid.width * 4
+            result.rgba.forEachIndexed { i, byte -> check(byte.toInt() and 255 == coldPage.byteAt(byteOffset + i)) }
+        }
+        check(peakResident <= CACHE_BYTES && maxTileWork <= WORK_LIMIT)
+        check(hits > 0 && misses > 0)
+        if (label == "moved-1000") check(stale == 2 && evictions > 0)
+        println("S2 visible label=$label requests=${trace.size} hits=$hits misses=$misses invalidated=$stale " +
+            "evictions=$evictions peakResidentBytes=$peakResident maxTileWork=$maxTileWork totalWork=$totalWork " +
+            "coldByteChecks=${trace.size * grid.width * 32 * 4} exactAndMinusOne=true")
     }
 
     private fun assertCatalog(frame: FrameToken, stroke: StrokeObject): ChunkedBrushPoc {

@@ -1,0 +1,105 @@
+{
+  "status": "passed",
+  "base_commit": "f60bd536e8b8917164c69c40bc5d3986a05f47b7",
+  "adoption": "Adopt bounded visible-tile work as the next S2 candidate at the tested scale. Keep ordered revision signature as an isolated control for fixed corpus. Production cache identity and live leases need separate evidence.",
+  "resident_cap_bytes": 49152,
+  "work_cap_per_tile": 20000000,
+  "trace_tile_origins_y_pixels": [
+    [
+      0,
+      32,
+      64,
+      32,
+      0
+    ],
+    [
+      64,
+      0,
+      32,
+      96,
+      128,
+      160,
+      64
+    ]
+  ],
+  "observations": [
+    {
+      "label": "base",
+      "requests": 5,
+      "hits": 2,
+      "misses": 3,
+      "invalidated": 0,
+      "evictions": 0,
+      "peakResidentBytes": 44944,
+      "maxTileWork": 15694420,
+      "totalWork": 45598720,
+      "coldByteChecks": 20480,
+      "exactAndMinusOne": "true"
+    },
+    {
+      "label": "moved-1000",
+      "requests": 7,
+      "hits": 1,
+      "misses": 6,
+      "invalidated": 2,
+      "evictions": 4,
+      "peakResidentBytes": 46864,
+      "maxTileWork": 16644668,
+      "totalWork": 92675792,
+      "coldByteChecks": 28672,
+      "exactAndMinusOne": "true"
+    }
+  ],
+  "cold_page_reference": [
+    {
+      "label": "base",
+      "objects": 10100,
+      "pairs": 11009,
+      "vertices": 21669208,
+      "edgeTests": 199424584,
+      "compositeChannels": 45092864,
+      "rectangleSamples": 446464,
+      "sampleBytes": 28000000,
+      "boundBytes": 344832,
+      "atlasBytes": 65536,
+      "peakTransientLogicalBytes": 37124,
+      "measuredLogicalSubtotal": 28447492,
+      "indexNs": 47260417,
+      "renderingAndDigestNs": 4170869125,
+      "rgbaSha256": "c0487c89936e0a61f754fc9da906c4cc683e5cb778d8631200b3b37e410d0a2a"
+    },
+    {
+      "label": "moved-1000",
+      "objects": 10100,
+      "pairs": 11009,
+      "vertices": 21669208,
+      "edgeTests": 199424584,
+      "compositeChannels": 45092864,
+      "rectangleSamples": 446464,
+      "sampleBytes": 28000000,
+      "boundBytes": 344832,
+      "atlasBytes": 65536,
+      "peakTransientLogicalBytes": 37124,
+      "measuredLogicalSubtotal": 28447492,
+      "indexNs": 7230875,
+      "renderingAndDigestNs": 3825169750,
+      "rgbaSha256": "0a2ad5e0740b8103a13c11e47ea84577edd79bc3890412d6a6be1036c237d4e3"
+    }
+  ],
+  "historical_cold_page_pixels_match": true,
+  "scope": "JVM software probe with same S2 ink and fixed rectangle proxies at 4 scene units/pixel. Cache charges signature and RGBA arrays only. Excludes in-flight and retired resources, scheduling latency, actual text/image objects, native or physical validation.",
+  "jvm_tests": 794,
+  "jvm_suite_report_sha256": "41e19cd629eea0a42452b784bdcf49d48fd2f9e5d6c832a0494cc66f6055abb9",
+  "source_sha256": {
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/SweptDensePageProbe.kt": "2764102a91303ee6b22e0447d74fddb4d133fa77772bf2e59c6b610e47c875a0",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "e6d88fea4a3342d1b00c59fc94acf22b753ad53fb7754941e1d0d1d2d3e60852",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "55c13cd2680c7f034a61d401ab6f113ebedfc893899762190caffc7a1f94e5f5",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/WeightedLruCache.kt": "30cc0afffbd4caca0b4e049f6cb0de11e08e88b9e36e9cf057ce008e078e60a8",
+    "tools/verify_offline_jvm.py": "b0b6d2f3049998e5a86b90818d17b0d4a01d6d8884fabfc8040c52af446ad272",
+    "fixtures/scale/manifest.json": "6f8f33488894ea52701603f294b2b5a8b2035cf5a5260c87f3eb82926e2330e6"
+  },
+  "fixture_sha256": "22eea352e0ded47f34cabc0c8b543de0126a658377a6ea286cf60130a17c6725",
+  "raw_sha256": {
+    "swept-dense-page.log": "d946c6feeb60845bb64d751bd21ae31aa4ca41786120e7c1280b2ce3431aa7b4"
+  }
+}
