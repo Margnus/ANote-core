@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "original_local_head": "13743547f07ed21bdf06c0ddaf3b309919f2e9aa",
+  "upstream_head": "52ab4ef70a14df052a547fbb8e507e7c86cf5ec0",
+  "rebased_source_head_before_test_edits": "bfd929fc4e2b7bed81d38c03aa73cb3c792661e7",
+  "resolved_source_and_test_sha256": {
+    "android-app/src/main/java/dev/notecore/app/InkCanvasView.kt": "97b7954488a97a6442c3d40bd371d4cd08817027f744f68f244c61224e5e3f4b",
+    "android-app/src/test/java/dev/notecore/app/InkToolPathLimitTest.kt": "aaf7451f0f2488b77f26079e061b1237f06ba69fa7821f9b2a24b7b1e1062167",
+    "android-app/src/androidTest/java/dev/notecore/app/AndroidInputHostChecks.kt": "6a10344d099060ad0c974a1818150b99183806c5e0b7bea074e906157f8b8075",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "5a26ef092430c8c31987e23871e32a7cdda1300a53ec4074ad51a539866f8ec2",
+    "ios-app/NoteCorePreview/NativeInkCanvas.swift": "2831e89c81afb72cf410bef79048f115be8615b9a753bdabe958659c5de12857",
+    "ios-app/NoteCorePreviewTests/PagedHostTests.swift": "604f6c02a4904a6ba1ed53c35ce24d601fdc7cb62299f6498b5a3b31a9791738"
+  },
+  "shared_jvm": {
+    "tests": 798,
+    "failures": 0
+  },
+  "android_unit": {
+    "tests": 42,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_api26": {
+    "secondary_pointer_cannot_commit": true,
+    "nonzero_pointer_up_commits": true,
+    "erase_up_without_move": true,
+    "lasso_drag_up_without_move": true,
+    "erase_up_history": true,
+    "cancel_does_not_commit": true,
+    "each_gesture_one_change": true,
+    "undo_restores_transform": true
+  },
+  "android_preview_apk_sha256": "f82fe31d20f3b56631e23da340dbf8652bf7f5cf96ea66305f224f00d76e041c",
+  "apple_host": {
+    "runtime": "iOS 27.0 simulator (24A434)",
+    "passed_tests": 4,
+    "failed_tests": 0
+  },
+  "raw_artifact_sha256": {
+    "shared-jvm.log": "b2c56f82c6e0ca7024019b1a624b30e4f860bc73ebfd095bc7b0fc1531f83a26",
+    "android-build.log": "8d738c273d9445dea41b6784177031ca8a94ea991cc56f6fe454f9ada9aa957a",
+    "android-tool-limit.xml": "9f70443a51d47f00d76c27901bac5c61b0366ffe972682c414de9ca82fbc1396",
+    "android-api26-instrumentation.log": "a636ba003e9e723fa967754b06ec5b6cd3d97833b2781d038c9f4b9f84a39e2e",
+    "android-api26-fingerprint.txt": "26810751a272e4ea481416f938e3a7c91cac2c34b64f1feea3ba0108b19b923d",
+    "ios27-summary.json": "ea4d74bf3df4a4f607b604244dd17d9f296200d2948058b54dc64568d925f54e",
+    "ios27-build.log": "a852cbd6e613034285c657a92eef246c9c34f7096df3322a20aa2cad1ff58c7a",
+    "ios27-build.stderr.log": "baf85a4b16cfc7ebb7841e80565cb4ef45bbc17ec3cba54fe21d76505b93f2fb"
+  },
+  "archive_sha256": "04501413c16410e81a3085ed51580f543ff0c8bf818c1a33f0a1cf3678408549",
+  "scope": "Post-rebase shared JVM, Android app unit tests, original Android API 26 MotionEvent host and selected original iOS 27 UIKit host tests. No device performance or product acceptance."
+}
