@@ -1,0 +1,73 @@
+{
+  "status": "measurement_completed",
+  "base_commit": "ea92692370b22252884c70dbecd0bd8d4e098b55",
+  "adoption": "Keep bounded software tiles as a reference. Reject synchronous whole-page rebuild using the existing 20M page-work reference at this workload. Evaluate visible-tile scheduling and bounded reuse.",
+  "page_budget_reference_steps": 20000000,
+  "page_budget_comparison": "edgeTests + compositeChannels exceeds reference in both passes, before rectangle sampling. This is a comparison, not execution of the production page worker.",
+  "synthetic_objects": {
+    "ink_strokes": 10000,
+    "ink_points": 1000000,
+    "mixed_proxies": 100,
+    "moved_strokes": 1000,
+    "transform": "translate(32,8)",
+    "samples_retained_by_identity": true
+  },
+  "grid": {
+    "width": 32,
+    "height": 512,
+    "tile_height": 32,
+    "scene_units_per_pixel": 4,
+    "samples_per_axis": 2
+  },
+  "observations": [
+    {
+      "label": "base",
+      "objects": 10100,
+      "pairs": 11009,
+      "vertices": 21669208,
+      "edgeTests": 199424584,
+      "compositeChannels": 45092864,
+      "rectangleSamples": 446464,
+      "sampleBytes": 28000000,
+      "boundBytes": 344832,
+      "atlasBytes": 65536,
+      "peakTransientLogicalBytes": 37124,
+      "measuredLogicalSubtotal": 28447492,
+      "indexNs": 60831666,
+      "renderingAndDigestNs": 4483189125,
+      "rgbaSha256": "c0487c89936e0a61f754fc9da906c4cc683e5cb778d8631200b3b37e410d0a2a"
+    },
+    {
+      "label": "moved-1000",
+      "objects": 10100,
+      "pairs": 11009,
+      "vertices": 21669208,
+      "edgeTests": 199424584,
+      "compositeChannels": 45092864,
+      "rectangleSamples": 446464,
+      "sampleBytes": 28000000,
+      "boundBytes": 344832,
+      "atlasBytes": 65536,
+      "peakTransientLogicalBytes": 37124,
+      "measuredLogicalSubtotal": 28447492,
+      "indexNs": 9829209,
+      "renderingAndDigestNs": 4171594583,
+      "rgbaSha256": "0a2ad5e0740b8103a13c11e47ea84577edd79bc3890412d6a6be1036c237d4e3"
+    }
+  ],
+  "scope": "Desktop JVM isolated ordered composition with rectangle proxies, conservative spatial queries checked against brute box sets. Fixed 1000-stroke transform, no lasso command/undo, text or image payload rendering. Index time includes bounds preparation. Logical subtotal excludes JVM headers and collections, index-build scratch, dedup/GC, other in-flight jobs, native surface and physical heap.",
+  "jvm_tests": 794,
+  "jvm_suite_report_sha256": "d6aabc2a81a6a7d2ea833253151c983aac6595202ad3296297abb7941923498c",
+  "source_sha256": {
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/SweptDensePageProbe.kt": "751b660097651114a8d4dd9ec35a78f8d37931f7ccaf303c2f4b31f35108d1dc",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ChunkedBrushPoc.kt": "e6d88fea4a3342d1b00c59fc94acf22b753ad53fb7754941e1d0d1d2d3e60852",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "55c13cd2680c7f034a61d401ab6f113ebedfc893899762190caffc7a1f94e5f5",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "1a400ca096b963410cf51d09fde8cdeea30a6b995a29b51825156d8f25a2e521",
+    "tools/verify_offline_jvm.py": "b0b6d2f3049998e5a86b90818d17b0d4a01d6d8884fabfc8040c52af446ad272",
+    "fixtures/scale/manifest.json": "6f8f33488894ea52701603f294b2b5a8b2035cf5a5260c87f3eb82926e2330e6"
+  },
+  "fixture_sha256": "22eea352e0ded47f34cabc0c8b543de0126a658377a6ea286cf60130a17c6725",
+  "raw_sha256": {
+    "swept-dense-page.log": "b0d425f2548817ac76043757cc0396a214fb45d704a4ab94648e3bc433fa6cae"
+  }
+}
