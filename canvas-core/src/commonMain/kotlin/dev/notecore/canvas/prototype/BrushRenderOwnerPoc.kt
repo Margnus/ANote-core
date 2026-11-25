@@ -21,7 +21,7 @@ internal class BrushRenderJobPoc internal constructor(
     val id: BrushRenderIdPoc, catalog: ChunkedBrushPoc?, val frame: FrameToken,
     val layer: LayerId, val grid: BrushPixelGridPoc, val rgb: Int, val workingBytes: Long,
     val nativeCopyAllowanceBytes: Long, val peakBytes: Long, val maxEdgeTests: Long,
-    scene: SceneSnapshot? = null,
+    scene: SceneSnapshot? = null, private val swept: Boolean = false,
 ) {
     private var input: ChunkedBrushPoc? = catalog
     private var pageInput: SceneSnapshot? = scene
@@ -32,8 +32,12 @@ internal class BrushRenderJobPoc internal constructor(
         }
         val catalog = checkNotNull(input) { "Job has already executed or was not dispatched" }
         try {
-            val mask = when (val built = catalog.render(frame, grid as BrushTileGridPoc, maxWorkingBytes = workingBytes,
-                maxEdgeTests = maxEdgeTests, cancelled = cancelled)) {
+            val tile = grid as BrushTileGridPoc
+            val built = if (swept) catalog.renderSwept(frame, tile, maxWorkingBytes = workingBytes,
+                maxEdgeTests = maxEdgeTests, cancelled = cancelled)
+            else catalog.render(frame, tile, maxWorkingBytes = workingBytes,
+                maxEdgeTests = maxEdgeTests, cancelled = cancelled)
+            val mask = when (built) {
                 is BrushTileBuild.Ready -> built.tile
                 is BrushTileBuild.Rejected -> return BrushRenderComputationPoc.completed(id, null, built.reason)
                 BrushTileBuild.Cancelled -> return BrushRenderComputationPoc.completed(id, null, "cancelled")
@@ -171,8 +175,24 @@ internal class BrushRenderOwnerPoc(
         rgb: Int, workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
         maxEdgeTests: Long = 20_000_000,
     ): BrushRenderAdmissionPoc {
+        return admitTile(catalog, frame, expectedLayer, grid, rgb, workingBytes, nativeCopyAllowanceBytes,
+            maxEdgeTests, swept = false)
+    }
+
+    /** Isolated candidate using the same worker input, publication gate and total resource pool. */
+    fun admitSwept(catalog: ChunkedBrushPoc, frame: FrameToken, expectedLayer: LayerId, grid: BrushTileGridPoc,
+        rgb: Int, workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
+        maxEdgeTests: Long = 20_000_000,
+    ): BrushRenderAdmissionPoc = admitTile(catalog, frame, expectedLayer, grid, rgb, workingBytes,
+        nativeCopyAllowanceBytes, maxEdgeTests, swept = true)
+
+    private fun admitTile(catalog: ChunkedBrushPoc, frame: FrameToken, expectedLayer: LayerId, grid: BrushTileGridPoc,
+        rgb: Int, workingBytes: Long, nativeCopyAllowanceBytes: Long, maxEdgeTests: Long, swept: Boolean,
+    ): BrushRenderAdmissionPoc {
         checkOwner(); require(workingBytes > 0 && nativeCopyAllowanceBytes >= 0 && maxEdgeTests > 0)
         if (closed) return BrushRenderAdmissionPoc.Rejected("closed")
+        if (swept && catalog.segmentsPerChunk != SweptDiscGeometryPoc.SEGMENT_EDGES)
+            return BrushRenderAdmissionPoc.Rejected("segment-layout")
         if (!gate.canPublish(frame) || expectedLayer != layer || catalog.ownerLayer != layer ||
             catalog.contentFrame.sceneId != frame.sceneId || catalog.contentFrame.sceneRevision != frame.sceneRevision ||
             catalog.contentFrame.sessionGeneration != frame.sessionGeneration) return BrushRenderAdmissionPoc.Rejected("content-owner-mismatch")
@@ -189,7 +209,7 @@ internal class BrushRenderOwnerPoc(
             is ReservationResult.Rejected -> return BrushRenderAdmissionPoc.Rejected("pool-${reserved.reason.name.lowercase()}")
         }
         val job = BrushRenderJobPoc(BrushRenderIdPoc(), catalog, frame, layer, grid, rgb, workingBytes,
-            nativeCopyAllowanceBytes, peak, maxEdgeTests)
+            nativeCopyAllowanceBytes, peak, maxEdgeTests, swept = swept)
         pending[job.id] = Pending(job, reservation)
         return BrushRenderAdmissionPoc.Accepted(job)
     }
