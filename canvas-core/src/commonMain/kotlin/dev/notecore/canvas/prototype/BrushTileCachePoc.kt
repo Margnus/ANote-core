@@ -19,13 +19,13 @@ internal class BrushTileReaderPoc internal constructor(
 }
 
 /** Synchronous single-owner CPU experiment. No worker/GPU ownership or native image cache implied.
- * Only packed mask bytes are charged; job temporaries have render's independent working budget.
- * Catalog identities are deliberately conservative: a rebuilt catalog misses even with equal IDs.
+ * Legacy masks use catalog identity and charge the packed output. Swept masks use immutable
+ * content identity across rebuilt catalogs and reserve the declared working peak before generation.
  * The owner must return every reader; copying pixels or retaining value references outside its
  * lease is not supported. Dropping pool references does not confirm actual GC/heap reclamation.
  */
 internal class BrushTileCachePoc(residentBudget: Long, totalBudget: Long, maxResources: Int = 256, maxReaders: Int = 1024) {
-    private data class Key(val catalog: Any, val grid: BrushTileGridPoc, val tolerance: Double)
+    private data class Key(val content: Any, val grid: BrushTileGridPoc, val tolerance: Double)
     private val pool = ResourceLeasePool<Key, BrushTileMaskPoc>(residentBudget, totalBudget,
         maxResources, maxReaders, ResourceLane.OWNER)
     val chargedBytes: Long get() = pool.chargedBytes
@@ -39,6 +39,23 @@ internal class BrushTileCachePoc(residentBudget: Long, totalBudget: Long, maxRes
         sceneTolerance: Double = 0.05, maxWorkingBytes: Long = 1024 * 1024,
         maxCandidateChunks: Int = 128, maxEdgeTests: Long = 20_000_000,
         cancelled: () -> Boolean = { false },
+    ): CachedBrushTileBuild = acquireMask(catalog, frame, layer, grid, sceneTolerance, maxWorkingBytes,
+        maxCandidateChunks, maxEdgeTests, swept = false, cancelled = cancelled)
+
+    fun acquireSwept(catalog: ChunkedBrushPoc, frame: FrameToken, layer: LayerId, grid: BrushTileGridPoc,
+        maxTargetDeviation: Double = 0.125, maxWorkingBytes: Long = 1024 * 1024,
+        maxCandidateChunks: Int = 128, maxEdgeTests: Long = 20_000_000,
+        cancelled: () -> Boolean = { false },
+    ): CachedBrushTileBuild {
+        if (catalog.segmentsPerChunk != SweptDiscGeometryPoc.SEGMENT_EDGES)
+            return CachedBrushTileBuild.Rejected("segment-layout")
+        return acquireMask(catalog, frame, layer, grid, maxTargetDeviation, maxWorkingBytes,
+            maxCandidateChunks, maxEdgeTests, swept = true, cancelled = cancelled)
+    }
+
+    private fun acquireMask(catalog: ChunkedBrushPoc, frame: FrameToken, layer: LayerId, grid: BrushTileGridPoc,
+        sceneTolerance: Double, maxWorkingBytes: Long, maxCandidateChunks: Int, maxEdgeTests: Long,
+        swept: Boolean, cancelled: () -> Boolean,
     ): CachedBrushTileBuild {
         require(sceneTolerance.isFinite() && sceneTolerance in 0.0001..4.0)
         require(maxWorkingBytes > 0 && maxCandidateChunks > 0 && maxEdgeTests > 0)
@@ -47,7 +64,8 @@ internal class BrushTileCachePoc(residentBudget: Long, totalBudget: Long, maxRes
             frame.sessionGeneration != captured.sessionGeneration || layer != catalog.ownerLayer)
             return CachedBrushTileBuild.Rejected("content-owner-mismatch")
         if (cancelled()) return CachedBrushTileBuild.Cancelled
-        val key = Key(catalog.cacheIdentity, grid, sceneTolerance)
+        val content = if (swept) catalog.sweptMaskContentKey() else catalog.cacheIdentity
+        val key = Key(content, grid, sceneTolerance)
         when (val existing = pool.borrow(key)) {
             is ResourceBorrow.Borrowed -> return CachedBrushTileBuild.Ready(BrushTileReaderPoc(frame, existing.lease), true)
             ResourceBorrow.Closed -> return CachedBrushTileBuild.Rejected("closed")
@@ -57,21 +75,29 @@ internal class BrushTileCachePoc(residentBudget: Long, totalBudget: Long, maxRes
         // Do not render and evict useful entries when no result reader can be admitted.
         if (pool.outstandingLeases >= pool.maxLeases) return CachedBrushTileBuild.Rejected("reader-budget")
         releaseUnused()
-        val reservation = when (val reserved = pool.reserve(grid.width * grid.height * 4L)) {
+        val outputBytes = grid.width * grid.height * 4L
+        if (swept && maxWorkingBytes < outputBytes) return CachedBrushTileBuild.Rejected("working-budget")
+        val peak = if (swept) maxWorkingBytes else outputBytes
+        val reservation = when (val reserved = pool.reservePeak(peak, outputBytes)) {
             is ReservationResult.Reserved -> reserved.reservation
             is ReservationResult.Rejected -> return CachedBrushTileBuild.Rejected("cache-${reserved.reason.name.lowercase()}")
         }
-        // Failed/cancelled render owns and drops all private job allocations. No cache output is
-        // transferred in that case; the reservation concerns retained output, not transient heap.
+        // Release the active reservation on failure. A completed working peak settles to the
+        // immutable mask only after the renderer exits and its private arrays leave scope.
+        var activeReservation = reservation
         var transferred = false
         try {
-            val tile = when (val result = catalog.render(frame, grid, sceneTolerance, maxWorkingBytes,
-                maxCandidateChunks, maxEdgeTests, cancelled)) {
+            val result = if (swept) catalog.renderSwept(frame, grid, sceneTolerance, maxWorkingBytes,
+                maxCandidateChunks, maxEdgeTests, cancelled = cancelled)
+            else catalog.render(frame, grid, sceneTolerance, maxWorkingBytes,
+                maxCandidateChunks, maxEdgeTests, cancelled)
+            val tile = when (result) {
                 is BrushTileBuild.Ready -> result.tile
                 is BrushTileBuild.Rejected -> return CachedBrushTileBuild.Rejected(result.reason)
                 BrushTileBuild.Cancelled -> return CachedBrushTileBuild.Cancelled
             }
-            val publication = pool.publish(reservation, key, tile)
+            if (peak != outputBytes) activeReservation = checkNotNull(pool.settleReservation(reservation, tile.logicalBytes))
+            val publication = pool.publish(activeReservation, key, tile)
             transferred = publication is ResourcePublication.Resident || publication is ResourcePublication.RetiredAfterClose
             check(transferred) { "Exclusive reservation lost" }
             releaseUnused()
@@ -81,7 +107,7 @@ internal class BrushTileCachePoc(residentBudget: Long, totalBudget: Long, maxRes
                 else -> error("Single-owner reader admission changed during render")
             }
         } finally {
-            if (!transferred) pool.cancelUnallocated(reservation)
+            if (!transferred) pool.cancelUnallocated(activeReservation)
         }
     }
 

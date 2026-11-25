@@ -18,6 +18,8 @@ class StrokeSamples private constructor(
     private val xs: DoubleArray, private val ys: DoubleArray,
     private val pressures: FloatArray, private val timesMicros: LongArray,
 ) {
+    // Cache keys can share this identity without retaining the samples or their arrays.
+    internal val cacheIdentity = Any()
     val size: Int get() = xs.size
     /** Declared primitive payload plus sample header; not a measured heap allocation. */
     val logicalByteCharge: Long get() = 128L + size * 28L

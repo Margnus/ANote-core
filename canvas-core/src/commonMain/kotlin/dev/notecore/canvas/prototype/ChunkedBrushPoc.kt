@@ -62,6 +62,15 @@ internal class BrushTileMaskPoc internal constructor(
     fun canPublish(gate: FramePublicationGate, expectedLayer: LayerId) = ownerLayer == expectedLayer && gate.canPublish(frame)
 }
 
+internal data class SweptMaskContentKey(
+    val geometry: GeometryCacheKey,
+    val sessionGeneration: Long,
+    val ownerLayer: LayerId,
+    val brush: BrushSpec,
+    val transform: Affine2D,
+    val samplesIdentity: Any,
+)
+
 /** Immutable per-stroke chunk bounds/index. Shared boundary sample covers every original edge.
  * Not a second Scene, a render planner, global cache or app rendering backend.
  */
@@ -80,6 +89,8 @@ internal class ChunkedBrushPoc private constructor(
     val boundsPayloadBytes: Long get() = boxes.size * 8L
     val indexNodeCount: Int get() = index.nodeCount
     val geometryKey = GeometryCacheKey(captured.sceneId, stroke.id, stroke.objectRevision, stroke.brush.kind, stroke.brush.algorithmVersion)
+    internal fun sweptMaskContentKey() = SweptMaskContentKey(geometryKey, captured.sessionGeneration,
+        ownerLayer, stroke.brush, stroke.transform, stroke.samples.cacheIdentity)
     fun chunkStart(id: Int): Int { require(id in 0 until chunkCount); return id * segmentsPerChunk }
     fun chunkEnd(id: Int) = minOf(stroke.samples.size - 1, chunkStart(id) + segmentsPerChunk)
     fun chunkBounds(id: Int): BoundsD {
