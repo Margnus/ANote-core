@@ -1,0 +1,60 @@
+{
+  "devices": [
+    {
+      "architecture": "arm64",
+      "deviceId": "E43121E7-DE61-454C-8F1D-649BE1077823",
+      "deviceName": "NoteCoreCI-63558b48a015",
+      "modelName": "iPhone 15",
+      "osBuildNumber": "21F79",
+      "osVersion": "17.5",
+      "platform": "iOS Simulator"
+    }
+  ],
+  "testNodes": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "name": "PreviewJourneyUITests.swift:30: Failed to determine hittability of \"\u6a61\u76ae\u5de5\u5177\" Button: Activation point invalid and no suggested hit points based on element frame",
+                      "nodeType": "Failure Message",
+                      "result": "Failed"
+                    }
+                  ],
+                  "duration": "1m 12s",
+                  "durationInSeconds": 72.53517007827759,
+                  "name": "testTwoPageInkHistoryBackgroundSaveAndProcessReopen()",
+                  "nodeIdentifier": "PreviewJourneyUITests/testTwoPageInkHistoryBackgroundSaveAndProcessReopen()",
+                  "nodeIdentifierURL": "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewUITests/PreviewJourneyUITests/testTwoPageInkHistoryBackgroundSaveAndProcessReopen",
+                  "nodeType": "Test Case",
+                  "result": "Failed"
+                }
+              ],
+              "name": "PreviewJourneyUITests",
+              "nodeIdentifierURL": "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewUITests/PreviewJourneyUITests",
+              "nodeType": "Test Suite",
+              "result": "Failed"
+            }
+          ],
+          "name": "NoteCorePreviewUITests",
+          "nodeIdentifierURL": "test://com.apple.xcode/NoteCorePreview/NoteCorePreviewUITests",
+          "nodeType": "UI test bundle",
+          "result": "Failed"
+        }
+      ],
+      "name": "NoteCorePreview",
+      "nodeType": "Test Plan",
+      "result": "Failed"
+    }
+  ],
+  "testPlanConfigurations": [
+    {
+      "configurationId": "1",
+      "configurationName": "Test Scheme Action"
+    }
+  ]
+}

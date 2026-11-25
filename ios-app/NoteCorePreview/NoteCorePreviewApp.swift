@@ -875,12 +875,17 @@ struct PreviewRoot: View {
                                 window.cancelInput()
                                 kind = kind == .highlighter ? .monoline : .highlighter
                             }.accessibilityLabel("荧光笔")
-                            Button(tool == .pen ? "钢笔✓" : "钢笔") { window.cancelInput(); tool = .pen }.accessibilityLabel("钢笔工具")
-                            Button(tool == .eraser ? "橡皮✓" : "橡皮") { window.cancelInput(); tool = .eraser }.accessibilityLabel("橡皮工具")
-                            Button(tool == .lasso ? "套索✓" : "套索") { window.cancelInput(); tool = .lasso }.accessibilityLabel("套索工具")
-                            Button("删选") { model.applyEdit(PreviewEditDeleteSelection.shared) }.accessibilityLabel("删除选区")
                         }.padding(.horizontal)
-                    }.frame(height: 36).accessibilityIdentifier("ink-tools")
+                    }.frame(height: 36)
+                    HStack {
+                        Button(tool == .pen ? "钢笔✓" : "钢笔") { window.cancelInput(); tool = .pen }.accessibilityLabel("钢笔工具")
+                        Spacer()
+                        Button(tool == .eraser ? "橡皮✓" : "橡皮") { window.cancelInput(); tool = .eraser }.accessibilityLabel("橡皮工具")
+                        Spacer()
+                        Button(tool == .lasso ? "套索✓" : "套索") { window.cancelInput(); tool = .lasso }.accessibilityLabel("套索工具")
+                        Spacer()
+                        Button("删选") { model.applyEdit(PreviewEditDeleteSelection.shared) }.accessibilityLabel("删除选区")
+                    }.padding(.horizontal)
                     HStack(spacing: 20) {
                         Button("缩小") { viewportRatio = 1.0 / 1.5; viewportRequest += 1 }
                         Button("放大") { viewportRatio = 1.5; viewportRequest += 1 }
