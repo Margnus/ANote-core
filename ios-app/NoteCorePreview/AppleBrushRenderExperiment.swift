@@ -39,6 +39,16 @@ final class AppleBrushRenderExperiment {
             width: width, height: height, pixelSize: pixelSize, workingBytes: 65536, nativeAllowance: nativeAllowance) else { return nil }
         return try dispatch(job, beforeCompute: beforeCompute, permitDelivery: permitDelivery)
     }
+    @discardableResult func submitSwept(stroke: StrokeObject, frame: FrameToken,
+        originX: Double, originY: Double, width: Int32, height: Int32, pixelSize: Double,
+        nativeAllowance: Int64, permitDelivery: @escaping () throws -> Bool = { true }
+    ) throws -> AppleBrushDispatchExperiment? {
+        try executor.checkOwner()
+        guard let job = owner.admitSwept(stroke: stroke, frame: frame, originX: originX, originY: originY,
+            width: width, height: height, pixelSize: pixelSize, workingBytes: 65536,
+            nativeAllowance: nativeAllowance) else { return nil }
+        return try dispatch(job, beforeCompute: {}, permitDelivery: permitDelivery)
+    }
     @discardableResult func submitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId,
         originX: Double = 0.25, originY: Double = 8, width: Int32 = 64, height: Int32 = 32,
         pixelSize: Double = 0.5, nativeAllowance: Int64 = 16384,

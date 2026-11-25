@@ -325,6 +325,64 @@ final class BrushRenderHostTests: XCTestCase {
         _ = viewImage(view); model.close()
         try await eventually { !model.inkOwnerRetained }
     }
+    @MainActor func testSweptWorkerDiscardsObsoleteRasterAndWaitsForProviderRelease() async throws {
+        let points = (0...256).map { i in
+            "P\t\(4.0 + Double(min(i, 256 - i)) / 8.0)\t8\t1\t\(i)\n"
+        }.joined()
+        let text = "NCPREVIEW\t2\nD\tswept-image\tSwept\t1\t1\t1\nG\tfirst\tink\t32\t16\tBLANK\t1\n" +
+            "S\tretrace\tink\t1\tHIGHLIGHTER\t1\t-1\t8\t257\t1\t0\t0\t1\t0\t0\n" + points + "END\n"
+        let root = try PagedPreviewCodec.shared.decode(text: text)
+        let stroke = try XCTUnwrap(root.scene.objects().first)
+        let initial = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision,
+            viewportVersion: 1, sessionGeneration: 1, surfaceGeneration: 1, requestSequence: 1)
+        let current = FrameToken(sceneId: root.scene.id, sceneRevision: root.scene.revision,
+            viewportVersion: 2, sessionGeneration: 1, surfaceGeneration: 1, requestSequence: 2)
+        let adapter = try AppleBrushRenderExperiment(frame: initial, layer: stroke.layerId)
+        defer { try? adapter.close() }
+        var permit = false
+        let old = try XCTUnwrap(adapter.submitSwept(stroke: stroke, frame: initial, originX: 0, originY: 0,
+            width: 32, height: 16, pixelSize: 1, nativeAllowance: 4096, permitDelivery: { permit }))
+        try await ready(adapter)
+        XCTAssertEqual(try adapter.drain(), [])
+        XCTAssertEqual(adapter.chargedBytes, old.job.peakBytes)
+        try adapter.expect(current, layer: stroke.layerId)
+        permit = true
+        XCTAssertTrue(try adapter.retry(old))
+        XCTAssertEqual(try adapter.drain(), ["DISCARDED"])
+        XCTAssertEqual(adapter.chargedBytes, 0)
+        XCTAssertNil(adapter.owner.borrowNative(job: old.job))
+
+        let active = try XCTUnwrap(adapter.submitSwept(stroke: stroke, frame: current, originX: 0, originY: 0,
+            width: 32, height: 16, pixelSize: 1, nativeAllowance: 4096))
+        try await ready(adapter)
+        XCTAssertEqual(try adapter.drain(), ["PUBLISHED"])
+        var ownerNotified = false
+        guard case .ready(let holder) = try AppleBrushImageExperiment.create(adapter, active, trackedSource: true,
+            onSourceRelease: { XCTAssertTrue(Thread.isMainThread); ownerNotified = true })
+        else { return XCTFail("Swept provider missing") }
+        nonisolated(unsafe) var retained: CGDataProvider?
+        try holder.retainSourceForTesting { retained = $0 }
+        XCTAssertNotNil(retained)
+        let target = try XCTUnwrap(CGContext(data: nil, width: 32, height: 16, bitsPerComponent: 8,
+            bytesPerRow: 128, space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+        XCTAssertTrue(try holder.drawUIKit(target, in: CGRect(x: 0, y: 0, width: 32, height: 16)))
+        let bytes = try XCTUnwrap(target.data).assumingMemoryBound(to: UInt8.self)
+        XCTAssertEqual(bytes[(8 * 32 + 16) * 4 + 3], 127)
+        XCTAssertEqual(holder.rowStorageUpperBytes, 2048)
+
+        try await stop(adapter)
+        XCTAssertFalse(try holder.close())
+        XCTAssertEqual(adapter.chargedBytes, 6144)
+        XCTAssertFalse(adapter.isDrained)
+        XCTAssertFalse(try holder.drawUIKit(target, in: .zero))
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().async { retained = nil; continuation.resume() }
+        }
+        try await eventually { holder.released && ownerNotified }
+        XCTAssertTrue(adapter.isDrained)
+        XCTAssertEqual(adapter.chargedBytes, 0)
+    }
     @MainActor func testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner() async throws {
         let (frame, stroke) = try fixture()
         let a = try AppleBrushRenderExperiment(frame: frame, layer: stroke.layerId)

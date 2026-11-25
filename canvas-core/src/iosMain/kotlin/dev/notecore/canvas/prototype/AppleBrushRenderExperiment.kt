@@ -33,15 +33,27 @@ class AppleBrushOwnerExperiment(
     // Bounded catalog preparation on owner; only job.execute crosses to the existing worker.
     fun admit(stroke: StrokeObject, frame: FrameToken, originX: Double, originY: Double,
         width: Int, height: Int, pixelSize: Double, workingBytes: Long, nativeAllowance: Long,
+    ): AppleBrushJobExperiment? = admitTile(stroke, frame, originX, originY, width, height, pixelSize,
+        workingBytes, nativeAllowance, swept = false)
+
+    fun admitSwept(stroke: StrokeObject, frame: FrameToken, originX: Double, originY: Double,
+        width: Int, height: Int, pixelSize: Double, workingBytes: Long, nativeAllowance: Long,
+    ): AppleBrushJobExperiment? = admitTile(stroke, frame, originX, originY, width, height, pixelSize,
+        workingBytes, nativeAllowance, swept = true)
+
+    private fun admitTile(stroke: StrokeObject, frame: FrameToken, originX: Double, originY: Double,
+        width: Int, height: Int, pixelSize: Double, workingBytes: Long, nativeAllowance: Long, swept: Boolean,
     ): AppleBrushJobExperiment? {
         check()
         if (workingBytes <= 0 || nativeAllowance < 0 || width !in 1..128 || height !in 1..128 ||
             !originX.isFinite() || !originY.isFinite() || kotlin.math.abs(originX) > 1e9 || kotlin.math.abs(originY) > 1e9 ||
             !pixelSize.isFinite() || pixelSize !in 0.0001..1e6) return null
-        val catalog = (ChunkedBrushPoc.build(frame, stroke, segmentsPerChunk = 1) as? ChunkedBrushBuild.Ready)?.catalog ?: return null
-        val admission = owner.admit(catalog, frame, stroke.layerId,
-            BrushTileGridPoc(PointD(originX, originY), width, height, pixelSize, 4),
-            stroke.brush.argb and 0xffffff, workingBytes, nativeAllowance)
+        val segments = if (swept) SweptDiscGeometryPoc.SEGMENT_EDGES else 1
+        val catalog = (ChunkedBrushPoc.build(frame, stroke, segmentsPerChunk = segments) as? ChunkedBrushBuild.Ready)?.catalog ?: return null
+        val grid = BrushTileGridPoc(PointD(originX, originY), width, height, pixelSize, 4)
+        val rgb = stroke.brush.argb and 0xffffff
+        val admission = if (swept) owner.admitSwept(catalog, frame, stroke.layerId, grid, rgb, workingBytes, nativeAllowance)
+        else owner.admit(catalog, frame, stroke.layerId, grid, rgb, workingBytes, nativeAllowance)
         return (admission as? BrushRenderAdmissionPoc.Accepted)?.let { AppleBrushJobExperiment(it.job) }
     }
     fun reject(job: AppleBrushJobExperiment): Boolean = owner.rejectDispatch(job.job)

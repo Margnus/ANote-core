@@ -1,0 +1,94 @@
+{
+  "status": "passed",
+  "baseline": "3c8f6ed20c19efee8a73a53f64474c9c7debd9b9",
+  "decision": "Adopt the existing Swift executor and tracked provider for the isolated swept tile lifecycle.",
+  "tests": [
+    "testSweptWorkerDiscardsObsoleteRasterAndWaitsForProviderRelease",
+    "testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner"
+  ],
+  "summary": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "A1B436AF-0CF0-4B4D-93FF-090A0AB6CBE1",
+          "deviceName": "NoteCore-SourceHandoff-3e2bb8c84f1d4d6f98ad8badc25e18fc",
+          "modelName": "iPhone 18 Pro",
+          "osBuildNumber": "24A434",
+          "osVersion": "27.0",
+          "platform": "iOS Simulator"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 2,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "NoteCorePreview \u00b7 Built with macOS 27.2.1",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1795606746.932,
+    "passedTests": 2,
+    "result": "Passed",
+    "runtimeWarnings": [],
+    "skippedTests": 0,
+    "startTime": 1795606702.408,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - NoteCorePreview",
+    "topInsights": [],
+    "totalTestCount": 2
+  },
+  "host_catalog_test_count": 83,
+  "verified_behavior": [
+    "blocked result retains peak until acknowledgement",
+    "obsolete viewport result discarded on retry",
+    "current frame draws alpha 127 in bitmap context via CGImage",
+    "2048 bytes provider payload",
+    "6144 logical bytes held after owner close",
+    "CoreGraphics provider release on foreign queue triggers main-owner settlement"
+  ],
+  "scope": "Two selected real Swift App-host XCTest cases on iOS 27 simulator. Isolated swept path, software CGContext only. No iOS 17 runtime, ordinary UI, GPU, physical heap, latency or production hookup proof.",
+  "framework_sha256": "2a6e7ddbf7806ea3b011e1e60133007785e253f6d62296d61a58e96ec64a3f06",
+  "framework_header_sha256": "5fff4020ae71e862b6ddc077c07b6d32e8beae54326343725f033046cdbf7be3",
+  "source_sha256": {
+    "canvas-core/src/iosMain/kotlin/dev/notecore/canvas/prototype/AppleBrushRenderExperiment.kt": "a5830d36f105ffc9ac305858d2d610b8771df6d0cbdfa00d8aba843e4d1bcab4",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushRenderOwnerPoc.kt": "8ad686ba19de6debfe98a3db6bee0a550e1f72128a5bd6f17d192edf35fd8915",
+    "ios-app/NoteCorePreview/AppleBrushRenderExperiment.swift": "06e67791c8b1c845f6fbc90239d255337c039fbc0d135149fc3a53970ff783d8",
+    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "ba9177f2b4ff20a7d540b4e4d95c85c44f3aaaa0ce68aa441e87bccbf738e226",
+    "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "b5dbacb34834054bdf48ada5dd277b8f1063018bf8716bb7864a9f41422b2a58",
+    "tools/verify_ios_host.py": "b696495488704179f539b364ad4a9c09ba455d0ecdbac67462e768adff7ef1b6"
+  },
+  "raw_archive_sha256": "8275dd0ca59b1fe00b4a23a329e346917b041176faed2ed65e74bafa45b72bf2",
+  "raw_entry_sha256": {
+    "framework-build.log": "d0793c2ffe29d7866c3d58b5461e9e093617b065412f32f2a8abf9f6dd6125d1",
+    "architecture.json": "99762ea96103b2f62aecac049c1fea9eecf052023038431f6f4310ac8ffb9bc8",
+    "isolate.gradle": "e5b135b7535d2dd4057f132aff1650fe23b55850b1661921da7da75044a3870d",
+    "run-host.py": "5c25dceaabdf6745546711e2552bc4a12ec78a173600320ae395a092c5fdbd8d",
+    "portability.json": "71df64734ac1205b5b5fad6af0fd2b1973e09ce474786db47437beb634a444a2",
+    "host/shutdown.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/devices-before.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/boot.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/delete.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/create.stdout.log": "c5ad0cf6127986a84752cc49f1b6122604742352315e7c951afd876902a6812e",
+    "host/devices-after.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/tests-tree.stdout.log": "c9744f4c1a05d1fb6c99b0356c2f763f31208afcb05495bea2f50db362dc9973",
+    "host/test.stdout.log": "dd19d589d5ee8c9ddeaa67f763ccd4549c06684341bfff9ae48280f29be28164",
+    "host/bootstatus.stdout.log": "20963b875c49e9e93db7dd943c67a79b63156cdea476f2682ed39db88e676700",
+    "host/summary.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/shutdown.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/devices-before.stdout.log": "42768487140a338417eeb2bddad05c28ae1b310c163cc4a97fb386789f20ddbe",
+    "host/create.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/delete.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/tests-tree.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/devices-after.stdout.log": "42768487140a338417eeb2bddad05c28ae1b310c163cc4a97fb386789f20ddbe",
+    "host/boot.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "host/summary.stdout.log": "0541e0a85289e346b08465f62ae73b38153972c05b114424b82ed7843a3916dc",
+    "host/test.stderr.log": "44d8c862b31be7a279e457fe5bf715e2e422b873b8017564beb53dba8068704e",
+    "host/bootstatus.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

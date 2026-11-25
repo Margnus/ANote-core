@@ -66,6 +66,7 @@ EXPECTED = {
     'testCoordinateSnapshotAndResizeCancelRejectsLateUp()',
     'testPreviewRetainedProviderSurvivesCloseAndBlocksNewPoolUntilCallback()',
     'testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner()',
+    'testSweptWorkerDiscardsObsoleteRasterAndWaitsForProviderRelease()',
     'testProviderUnknownReconciliationRequiresRealReleaseReceipt()',
     'testPreviewUIViewConsumesSharedFrameThenDetachKeepsStorageUsable()',
     'testPreviewViewDisappearsWhileRenderRunsAndModelAcknowledgesAfterClose()',
