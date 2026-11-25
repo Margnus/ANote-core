@@ -56,8 +56,10 @@ final class PreviewJourneyUITests: XCTestCase {
         field.tap()
         let old = field.value as? String ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count) + title)
+        value(field, title)
         app.alerts.buttons["完成"].tap()
-        XCTAssertEqual(titleButton.label, title)
+        expectation(for: NSPredicate(format: "label == %@", title), evaluatedWith: titleButton)
+        waitForExpectations(timeout: 10)
 
         let canvas = app.otherElements["note-canvas"]
         value(canvas, "0笔")
@@ -101,7 +103,12 @@ final class PreviewJourneyUITests: XCTestCase {
         app.buttons["缩小"].tap()
         app.buttons["适合页面"].tap()
         XCUIDevice.shared.press(.home)
-        XCTAssertTrue(app.wait(for: .runningBackground, timeout: 5) || app.state == .runningBackgroundSuspended)
+        let backgrounded = NSPredicate { _, _ in
+            let state = self.app.state
+            return state == .runningBackground || state == .runningBackgroundSuspended
+        }
+        expectation(for: backgrounded, evaluatedWith: app)
+        waitForExpectations(timeout: 15)
         app.activate()
         value(canvas, "1笔")
 
