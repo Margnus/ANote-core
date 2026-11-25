@@ -67,6 +67,31 @@ jobs:
               ':android-app:compileDebugKotlin', ':android-app:testDebugUnitTest',
           ], Path.cwd(), Path('build/jvm-ci/android-app.log'), 900, retry_delay=30)
           PY
+      - name: Build source-bound Android preview APK
+        run: |
+          PYTHONPATH=ci python3 - <<'PY'
+          from pathlib import Path
+          from gradle_download_retry import run_gradle
+
+          run_gradle([
+              './gradlew', '--no-daemon', '--console=plain', '-PenableAndroidTargets=true',
+              ':android-app:verifyPreviewAndroid',
+          ], Path.cwd(), Path('build/jvm-ci/android-preview.log'), 900, retry_delay=30)
+          PY
+          python3 tools/package_android_preview.py
+      - name: Retain preview APK and build receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-preview-${{ github.sha }}
+          path: |
+            dist/NoteCore-0.1.0-preview.apk
+            dist/SHA256SUMS
+            build/jvm-ci/commit.txt
+            reports/preview-build.json
+            reports/android-build-inputs.sha256
+            android-app/build/reports/lint-results-debug.xml
+          if-no-files-found: error
+          retention-days: 14
       - name: Compile independent Java calls against current JVM classes
         run: |
           python3 - <<'PY'
