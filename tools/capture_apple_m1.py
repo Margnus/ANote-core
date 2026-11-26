@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import plistlib
 import re
+import stat
 import subprocess
 import uuid
 import zipfile
@@ -13,12 +14,44 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def sha256(path):
+def stream_sha256(stream):
     digest = hashlib.sha256()
-    with path.open('rb') as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
-            digest.update(chunk)
+    for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+        digest.update(chunk)
     return digest.hexdigest()
+
+
+def sha256(path):
+    with path.open('rb') as stream:
+        return stream_sha256(stream)
+
+
+def read_candidate(path):
+    with path.open('rb') as package, zipfile.ZipFile(package) as archive:
+        entries = archive.infolist()
+        manifests = [entry for entry in entries if re.fullmatch(r'Payload/[^/]+\.app/Info\.plist', entry.filename)]
+        if len(manifests) != 1:
+            raise ValueError('expected one device app in IPA')
+        manifest = manifests[0]
+        info = plistlib.loads(archive.read(manifest))
+        executable = info['CFBundleExecutable']
+        if info['CFBundleIdentifier'] != 'dev.notecore.preview' or 'iPhoneOS' not in info['CFBundleSupportedPlatforms']:
+            raise ValueError('expected the NoteCore iPhoneOS preview')
+        if manifest.filename.split('/')[1] != executable + '.app':
+            raise ValueError('expected matching app directory and executable names')
+        executable_path = manifest.filename.removesuffix('Info.plist') + executable
+        binaries = [entry for entry in entries if entry.filename == executable_path]
+        if (len(binaries) != 1 or binaries[0].file_size == 0
+                or stat.S_IFMT(binaries[0].external_attr >> 16) not in (0, stat.S_IFREG)):
+            raise ValueError('expected one nonempty preview executable in IPA')
+        with archive.open(binaries[0]) as binary:
+            binary_digest = stream_sha256(binary)
+        package.seek(0)
+        return executable, {
+            'bundle': info['CFBundleIdentifier'], 'build': info['CFBundleVersion'],
+            'version': info['CFBundleShortVersionString'], 'ipa_sha256': stream_sha256(package),
+            'ipa_executable_sha256': binary_digest,
+        }
 
 
 def capture(args):
@@ -56,23 +89,11 @@ def capture(args):
         return matches[0]['executable']
 
     try:
-        with zipfile.ZipFile(args.ipa) as archive:
-            infos = [name for name in archive.namelist() if re.fullmatch(r'Payload/[^/]+\.app/Info\.plist', name)]
-            if len(infos) != 1:
-                raise ValueError('expected one device app in IPA')
-            info = plistlib.loads(archive.read(infos[0]))
-            executable = info['CFBundleExecutable']
-            if info['CFBundleIdentifier'] != 'dev.notecore.preview' or 'iPhoneOS' not in info['CFBundleSupportedPlatforms']:
-                raise ValueError('expected the NoteCore iPhoneOS preview')
-            if infos[0].split('/')[1] != executable + '.app':
-                raise ValueError('expected matching app directory and executable names')
-        report['candidate'] = {
-            'bundle': info['CFBundleIdentifier'], 'build': info['CFBundleVersion'],
-            'version': info['CFBundleShortVersionString'], 'ipa_sha256': sha256(args.ipa),
-        }
+        executable, candidate = read_candidate(args.ipa)
+        report['candidate'] = candidate
         run('xcode', 'xcodebuild', '-version')
         device_info('device', 'details')
-        device_info('installed', 'apps', '--search', info['CFBundleIdentifier'])
+        device_info('installed', 'apps', '--search', candidate['bundle'])
         before = process('process-before')
         trace = args.output / 'recording.trace'
         run('record', 'xcrun', 'xctrace', 'record', '--device', args.device, '--attach', str(args.pid),
@@ -81,8 +102,11 @@ def capture(args):
         if process('process-after') != before:
             raise ValueError('preview executable changed during trace')
         run('trace-toc', 'xcrun', 'xctrace', 'export', '--input', str(trace), '--toc')
+        if sha256(args.ipa) != candidate['ipa_sha256']:
+            raise ValueError('candidate IPA changed during trace')
         report['status'] = 'trace-collected'
-    except (OSError, ValueError, KeyError, subprocess.SubprocessError, zipfile.BadZipFile) as error:
+    except (OSError, ValueError, KeyError, plistlib.InvalidFileException,
+            subprocess.SubprocessError, zipfile.BadZipFile) as error:
         report['error'] = str(error)
         raise
     finally:
