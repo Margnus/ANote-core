@@ -11,6 +11,7 @@ on:
       - 'ci/verify_apple_candidate.py'
       - 'ci/verify_apple_sdk.py'
       - 'tools/verify_c1_apple_failure_channels.py'
+      - 'tools/verify_ios_host.py'
       - 'tools/probes/C1AppleFailureConsumer.swift'
       - 'canvas-core/**'
       - 'shared-core/**'
@@ -31,6 +32,8 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+      - name: Verify host test catalog before downloading runtime
+        run: PYTHONPATH=tools python3 -c 'from verify_ios_host import expected_host_tests; print(len(expected_host_tests()))'
       - name: Acquire and boot requested iOS17 runtime
         run: python3 ci/prepare_ios17.py
       - name: Select bundled JDK 17
