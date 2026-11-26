@@ -42,6 +42,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     private var lassoPath: Path? = null
     private var lassoDragStart: PointD? = null
     private var lassoDragCurrent: PointD? = null
+    private var toolPointer = -1
     private val ink = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
     private val paper = Paint().apply { color = Color.WHITE }
     private val guide = Paint().apply { color = 0xffeaf0f5.toInt(); strokeWidth = 1f }
@@ -294,9 +295,11 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     private fun handleToolGesture(event: MotionEvent, action: Int, input: InputTransform) {
         when (action) {
             MotionEvent.ACTION_DOWN -> {
+                clearToolGesture()
                 if (notebook.hasActiveStroke) { error("其他画布正在输入，请完成后重试"); return }
                 val x = input.x(event.getX(0)); val y = input.y(event.getY(0))
                 if (!x.isFinite() || !y.isFinite()) return
+                toolPointer = event.getPointerId(0)
                 if (tool == InkTool.ERASER) {
                     eraserPoints = mutableListOf(PointD(x, y))
                     eraserPath = Path().apply { moveTo(x.toFloat(), y.toFloat()) }
@@ -312,29 +315,22 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 parent.requestDisallowInterceptTouchEvent(true)
             }
             MotionEvent.ACTION_MOVE -> {
+                val index = event.findPointerIndex(toolPointer)
+                if (index < 0) return
                 val history = event.historySize
                 for (i in 0..history) {
                     val current = i == history
-                    val x = input.x(if (current) event.getX(0) else event.getHistoricalX(0, i))
-                    val y = input.y(if (current) event.getY(0) else event.getHistoricalY(0, i))
-                    if (!x.isFinite() || !y.isFinite()) continue
-                    if (tool == InkTool.ERASER) {
-                        if ((eraserPoints?.size ?: 0) >= maxToolPathPoints) { rejectToolGesture(); return }
-                        eraserPoints?.add(PointD(x, y)); eraserPath?.lineTo(x.toFloat(), y.toFloat())
-                    } else if (lassoDragStart != null) {
-                        lassoDragCurrent = PointD(x, y)
-                    } else if (lassoPolygon != null) {
-                        val last = lassoPolygon!!.last()
-                        if (kotlin.math.abs(x - last.x) + kotlin.math.abs(y - last.y) > 1.0) {
-                            if (lassoPolygon!!.size >= maxToolPathPoints) { rejectToolGesture(); return }
-                            lassoPolygon!!.add(PointD(x, y)); lassoPath?.lineTo(x.toFloat(), y.toFloat())
-                        }
-                    }
+                    val x = input.x(if (current) event.getX(index) else event.getHistoricalX(index, i))
+                    val y = input.y(if (current) event.getY(index) else event.getHistoricalY(index, i))
+                    if (x.isFinite() && y.isFinite() && !appendToolPoint(PointD(x, y))) return
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
                 if (action == MotionEvent.ACTION_CANCEL) { clearToolGesture(); parent.requestDisallowInterceptTouchEvent(false); return }
-                if (action == MotionEvent.ACTION_POINTER_UP && event.getPointerId(event.actionIndex) != 0) return
+                val index = event.actionIndex
+                if (event.getPointerId(index) != toolPointer) return
+                val x = input.x(event.getX(index)); val y = input.y(event.getY(index))
+                if (x.isFinite() && y.isFinite() && !appendToolPoint(PointD(x, y), lift = true)) return
                 if (tool == InkTool.ERASER) {
                     val points = eraserPoints
                     if (points != null) {
@@ -359,6 +355,26 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
             }
         }
     }
+    private fun appendToolPoint(point: PointD, lift: Boolean = false): Boolean {
+        eraserPoints?.let { points ->
+            if (lift && point.x == points.last().x && point.y == points.last().y) return true
+            if (points.size >= maxToolPathPoints) { rejectToolGesture(); return false }
+            points.add(point)
+            eraserPath?.lineTo(point.x.toFloat(), point.y.toFloat())
+            return true
+        }
+        if (lassoDragStart != null) {
+            lassoDragCurrent = point
+            return true
+        }
+        val polygon = lassoPolygon ?: return true
+        val last = polygon.last()
+        if (kotlin.math.abs(point.x - last.x) + kotlin.math.abs(point.y - last.y) <= 1.0) return true
+        if (polygon.size >= maxToolPathPoints) { rejectToolGesture(); return false }
+        polygon.add(point)
+        lassoPath?.lineTo(point.x.toFloat(), point.y.toFloat())
+        return true
+    }
     private fun rejectToolGesture() {
         clearToolGesture()
         suppressSequence = true
@@ -367,6 +383,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         error("工具轨迹超过4096点，本次操作未提交，请分段重试")
     }
     private fun clearToolGesture() {
+        toolPointer = -1
         eraserPoints = null; eraserPath = null; lassoPolygon = null; lassoPath = null
         lassoDragStart = null; lassoDragCurrent = null
     }

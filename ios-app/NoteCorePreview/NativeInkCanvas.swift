@@ -373,15 +373,7 @@ final class InkUIView: UIView {
         if tool != .pen {
             guard !suppressSequence, let touch = toolTouch, touches.contains(touch) else { return }
             for p in pagePoints(touch, event: event) {
-                if tool == .eraser {
-                    guard eraserPoints.count < maxToolPathPoints else { rejectToolGesture(); return }
-                    eraserPoints.append(p); eraserPath?.addLine(to: p)
-                } else if lassoDragStart != nil {
-                    lassoDragCurrent = p
-                } else if let last = lassoPolygon.last, abs(p.x - last.x) + abs(p.y - last.y) > 1.0 {
-                    guard lassoPolygon.count < maxToolPathPoints else { rejectToolGesture(); return }
-                    lassoPolygon.append(p); lassoPath?.addLine(to: p)
-                }
+                guard appendToolPoint(p) else { return }
             }
             setNeedsDisplay(); return
         }
@@ -402,6 +394,7 @@ final class InkUIView: UIView {
         }
         if tool != .pen {
             guard let touch = toolTouch, touches.contains(touch) else { return }
+            if let endpoint = pagePoints(touch, event: nil).first, !appendToolPoint(endpoint, lift: true) { return }
             toolTouch = nil
             if tool == .eraser, !eraserPoints.isEmpty {
                 let before = note.changeVersion
@@ -453,6 +446,19 @@ final class InkUIView: UIView {
         clearToolGesture()
         setNeedsDisplay()
         failed("工具轨迹超过4096点，本次操作未提交，请分段重试")
+    }
+    private func appendToolPoint(_ point: CGPoint, lift: Bool = false) -> Bool {
+        if tool == .eraser {
+            if lift && eraserPoints.last == point { return true }
+            guard eraserPoints.count < maxToolPathPoints else { rejectToolGesture(); return false }
+            eraserPoints.append(point); eraserPath?.addLine(to: point)
+        } else if lassoDragStart != nil {
+            lassoDragCurrent = point
+        } else if let last = lassoPolygon.last, abs(point.x - last.x) + abs(point.y - last.y) > 1.0 {
+            guard lassoPolygon.count < maxToolPathPoints else { rejectToolGesture(); return false }
+            lassoPolygon.append(point); lassoPath?.addLine(to: point)
+        }
+        return true
     }
     private func clearToolGesture() {
         toolTouch = nil; eraserPoints = []; eraserPath = nil

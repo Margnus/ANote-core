@@ -2128,12 +2128,29 @@ final class PagedHostTests: XCTestCase {
 
         view.touchesBegan([touch], with: nil)
         view.touchesMoved([touch], with: event)
+        touch.position.x = 105
         view.touchesEnded([touch], with: nil)
-        XCTAssertEqual(messages.count, 2)
+        XCTAssertEqual(messages.count, 3)
+        XCTAssertTrue(messages.last?.contains("4096") == true)
+        XCTAssertEqual(note.changeVersion, revision)
+        XCTAssertEqual(note.strokeCount, 1)
+
+        touch.position.x = 100
+        view.touchesBegan([touch], with: nil)
+        view.touchesMoved([touch], with: event)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(messages.count, 3)
         XCTAssertEqual(note.strokeCount, 0)
         XCTAssertEqual(changes, 2)
         XCTAssertTrue(note.undo())
         XCTAssertEqual(note.strokeCount, 1)
+
+        touch.position.x = 20
+        view.touchesBegan([touch], with: nil)
+        touch.position.x = 100
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(note.strokeCount, 0)
+        XCTAssertEqual(changes, 3)
     }
     @MainActor func testLassoOverflowPreservesSelectionAndExactLimitCanRetry() throws {
         let view = try inputView(), note = view.note
@@ -2174,6 +2191,7 @@ final class PagedHostTests: XCTestCase {
                 return sample
             }
             view.touchesMoved([touch], with: event)
+            touch.position = padding.last ?? CGPoint(x: 30, y: bottom)
         }
         enclose(from: 80, to: 120, points: 4)
         view.touchesEnded([touch], with: nil)
@@ -2195,6 +2213,14 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(note.changeVersion, revision)
         XCTAssertEqual(changes, 2)
         XCTAssertEqual(messages.count, 1)
+
+        let before = note.stroke(index: 1).transform
+        touch.position = CGPoint(x: 100, y: 150)
+        view.touchesBegan([touch], with: nil)
+        touch.position.x = 120
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(note.stroke(index: 1).transform.tx, before.tx + 20, accuracy: 1e-6)
+        XCTAssertEqual(changes, 3)
     }
     @MainActor func testSiblingSurfaceCannotCancelOrAppendAnotherAcceptedInput() throws {
         let a = try inputView(), note = a.note

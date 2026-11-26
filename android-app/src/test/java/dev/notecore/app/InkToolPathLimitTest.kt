@@ -80,12 +80,24 @@ class InkToolPathLimitTest {
         assertEquals(1, changes)
 
         fillToLimit()
+        touch(MotionEvent.ACTION_UP, 305f)
+        assertEquals(2, errors.size)
+        assertTrue(errors.last().contains("4096"))
+        assertEquals(revision, note.changeVersion)
+        assertEquals(stroke, note.stroke(0).id)
+
+        fillToLimit()
         touch(MotionEvent.ACTION_UP, 300f)
-        assertEquals(1, errors.size)
+        assertEquals(2, errors.size)
         assertEquals(0, note.strokeCount)
         assertEquals(2, changes)
         assertTrue(note.undo())
         assertEquals(stroke, note.stroke(0).id)
+
+        touch(MotionEvent.ACTION_DOWN, 200f)
+        touch(MotionEvent.ACTION_UP, 300f)
+        assertEquals(0, note.strokeCount)
+        assertEquals(3, changes)
     }
 
     @Test
@@ -126,5 +138,11 @@ class InkToolPathLimitTest {
         assertEquals(revision, note.changeVersion)
         assertEquals(2, changes)
         assertEquals(1, errors.size)
+
+        val before = note.stroke(1).transform
+        touch(MotionEvent.ACTION_DOWN, 300f, 600f)
+        touch(MotionEvent.ACTION_UP, 320f, 600f)
+        assertEquals(before.tx + 20.0, note.stroke(1).transform.tx, 1e-6)
+        assertEquals(3, changes)
     }
 }
