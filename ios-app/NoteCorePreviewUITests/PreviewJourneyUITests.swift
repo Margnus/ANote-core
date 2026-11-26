@@ -54,8 +54,9 @@ final class PreviewJourneyUITests: XCTestCase {
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count) + title)
         value(field, title)
         app.alerts.buttons["完成"].tap()
-        expectation(for: NSPredicate(format: "label == %@", title), evaluatedWith: titleButton)
-        waitForExpectations(timeout: 10)
+        // SwiftUI may replace the accessibility element when the alert closes.
+        let renamed = app.buttons.matching(NSPredicate(format: "identifier == %@ AND label == %@", "note-title", title))
+        XCTAssertTrue(renamed.firstMatch.waitForExistence(timeout: 15))
 
         let canvas = app.otherElements["note-canvas"]
         value(canvas, "0笔")
