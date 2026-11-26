@@ -163,6 +163,57 @@
           }
         }
       }
+    },
+    {
+      "run": 45774632709,
+      "artifact": 15097260027,
+      "zip_sha256": "51aa4e6f06cca6352c90c2cff6bb13cd973e4ea9c436d838594dd3c01e659bb2",
+      "reports": {
+        "apple-sdk-current/report.json": {
+          "commit": "cdedcc0036235529a2f68fcb0d0bf54e4dc2eb1d",
+          "status": "passed",
+          "stage": "complete",
+          "report_sha256": "7c09bcd636055152a0d3f027bfe331cb99a9bbf7c23d40205381184ab93639e4",
+          "source_hashes_verified": 95,
+          "output_hashes_verified": 34,
+          "ios17_runtime_verified": true
+        },
+        "apple-candidate/report.json": {
+          "commit": "cdedcc0036235529a2f68fcb0d0bf54e4dc2eb1d",
+          "status": "passed",
+          "stage": "complete",
+          "report_sha256": "42b5fc629364ad87d634a23e45b2697200013bc0fcb48ec75488a67ff35d48a2",
+          "source_hashes_verified": 220,
+          "output_hashes_verified": 18,
+          "ios17_runtime_verified": true,
+          "native_test_counts": {
+            "canvas-core": 227,
+            "shared-core": 510
+          },
+          "app_host": {
+            "tests": 82,
+            "device": {
+              "modelName": "iPhone 15",
+              "osVersion": "17.5",
+              "osBuildNumber": "21F79"
+            }
+          },
+          "ordinary_ui": {
+            "tests": 1,
+            "pages": 2,
+            "strokes_per_page": [
+              2,
+              1
+            ],
+            "saved_note_sha256": "4550d1919a5081daedf9f816379c2f9e9016d44fd997e45da9751ab95f99db03",
+            "device": {
+              "modelName": "iPhone 15",
+              "osVersion": "17.5",
+              "osBuildNumber": "21F79"
+            }
+          }
+        }
+      }
     }
   ]
 }
