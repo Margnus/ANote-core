@@ -56,7 +56,7 @@ class InkToolPathLimitTest {
             view.layout(0, 0, 600, 800)
         }
 
-        fun touch(action: Int, x: Float, y: Float = 400f, secondaryX: Float? = null) {
+        fun touch(action: Int, x: Float, y: Float = 400f, secondaryX: Float? = null, history: Int = 0) {
             if (action == MotionEvent.ACTION_DOWN) downTime = time
             fun position(screenX: Float) = MotionEvent.PointerCoords().apply {
                 this.x = screenX; this.y = y; pressure = 1f; size = 1f
@@ -66,6 +66,8 @@ class InkToolPathLimitTest {
             val event = MotionEvent.obtain(downTime, time++, action, pointers.size, pointers, positions,
                 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0)
             try {
+                repeat(history) { event.addBatch(time++, x, y, 1f, 1f, 0) }
+                assertEquals(history, event.historySize)
                 assertTrue(view.onTouchEvent(event))
             } finally {
                 event.recycle()
@@ -76,6 +78,20 @@ class InkToolPathLimitTest {
             touch(MotionEvent.ACTION_MOVE, 300f, y)
             touch(MotionEvent.ACTION_UP, 350f, y)
         }
+    }
+
+    @Test
+    fun lassoRejectsOversizedRawBatchEvenWhenAllSamplesRepeat() = with(GestureFixture()) {
+        drawStroke(400f)
+        val revision = note.changeVersion
+        view.tool = InkTool.LASSO
+        touch(MotionEvent.ACTION_DOWN, 220f, 350f)
+        touch(MotionEvent.ACTION_MOVE, 220f, 350f, history = 4096)
+        touch(MotionEvent.ACTION_UP, 220f, 350f)
+        assertTrue(errors.single().contains("4096"))
+        assertEquals(revision, note.changeVersion)
+        assertEquals(1, note.strokeCount)
+        assertTrue(note.selectedStrokeIds.isEmpty())
     }
 
     @Test

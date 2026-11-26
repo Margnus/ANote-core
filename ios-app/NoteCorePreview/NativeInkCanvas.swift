@@ -335,8 +335,7 @@ final class InkUIView: UIView {
             guard toolTouch == nil else { return }
             guard !note.hasActiveStroke else { failed("其他画布正在输入，请完成后重试"); return }
             guard let touch = touches.first(where: { $0.type == .pencil || $0.type == .direct }) else { return }
-            let points = pagePoints(touch, event: event)
-            guard points.count <= maxToolPathPoints else { rejectToolGesture(); return }
+            guard let points = pagePoints(touch, event: event) else { rejectToolGesture(); return }
             guard let p = points.first else { return }
             toolTouch = touch
             if tool == .eraser {
@@ -373,7 +372,8 @@ final class InkUIView: UIView {
         if navigating { navigate(fingers(event), moving: true); return }
         if tool != .pen {
             guard !suppressSequence, let touch = toolTouch, touches.contains(touch) else { return }
-            for p in pagePoints(touch, event: event) {
+            guard let points = pagePoints(touch, event: event) else { rejectToolGesture(); return }
+            for p in points {
                 guard appendToolPoint(p) else { return }
             }
             setNeedsDisplay(); return
@@ -395,7 +395,7 @@ final class InkUIView: UIView {
         }
         if tool != .pen {
             guard let touch = toolTouch, touches.contains(touch) else { return }
-            if let endpoint = pagePoints(touch, event: nil).first, !appendToolPoint(endpoint, lift: true) { return }
+            if let endpoint = pagePoint(touch), !appendToolPoint(endpoint, lift: true) { return }
             toolTouch = nil
             if tool == .eraser, !eraserPoints.isEmpty {
                 let before = note.changeVersion
@@ -434,17 +434,20 @@ final class InkUIView: UIView {
         cancelInk()
     }
     /** Page coordinates through the same viewport inverse as ink input, coalesced for density. */
-    private func pagePoints(_ touch: UITouch, event: UIEvent?) -> [CGPoint] {
+    private func pagePoints(_ touch: UITouch, event: UIEvent?) -> [CGPoint]? {
         guard scale > 0 else { return [] }
-        let auxiliary = event?.coalescedTouches(for: touch)
-        let touches = auxiliary?.isEmpty == false ? auxiliary! : [touch]
-        var points: [CGPoint] = []
-        for item in touches {
-            let raw = item.location(in: self)
-            let x = (raw.x - offsetX) / scale, y = (raw.y - offsetY) / scale
-            if x.isFinite, y.isFinite, abs(x) <= 1e9, abs(y) <= 1e9 { points.append(CGPoint(x: x, y: y)) }
+        guard let touches = event?.coalescedTouches(for: touch), !touches.isEmpty else {
+            return pagePoint(touch).map { [$0] } ?? []
         }
-        return points
+        guard touches.count <= maxToolPathPoints else { return nil }
+        return touches.compactMap(pagePoint)
+    }
+    private func pagePoint(_ touch: UITouch) -> CGPoint? {
+        guard scale > 0 else { return nil }
+        let raw = touch.location(in: self)
+        let x = (raw.x - offsetX) / scale, y = (raw.y - offsetY) / scale
+        guard x.isFinite, y.isFinite, abs(x) <= 1e9, abs(y) <= 1e9 else { return nil }
+        return CGPoint(x: x, y: y)
     }
     private func rejectToolGesture() {
         clearToolGesture()

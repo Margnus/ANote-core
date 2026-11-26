@@ -318,6 +318,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
                 val index = event.findPointerIndex(toolPointer)
                 if (index < 0) return
                 val history = event.historySize
+                if (history >= maxToolPathPoints) { rejectToolGesture(); return }
                 for (i in 0..history) {
                     val current = i == history
                     val x = input.x(if (current) event.getX(index) else event.getHistoricalX(index, i))
