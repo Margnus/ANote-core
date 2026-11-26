@@ -2152,6 +2152,31 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(note.strokeCount, 0)
         XCTAssertEqual(changes, 3)
     }
+    @MainActor func testSecondaryFingerCannotTakeOverOrCancelPencilEraser() throws {
+        let view = try inputView(), note = view.note
+        let pencil = SyntheticInkTouch(50, 1)
+        view.touchesBegan([pencil], with: nil)
+        pencil.position.x = 150; pencil.seconds = 2
+        view.touchesEnded([pencil], with: nil)
+        let original = note.changeVersion
+        XCTAssertEqual(note.strokeCount, 1)
+
+        view.tool = .eraser
+        pencil.position.x = 20
+        view.touchesBegan([pencil], with: nil)
+        let finger = SyntheticInkTouch(120, 3)
+        finger.touchType = .direct
+        view.touchesBegan([finger], with: nil)
+        view.touchesEnded([finger], with: nil)
+        XCTAssertEqual(note.changeVersion, original)
+        view.touchesBegan([finger], with: nil)
+        view.touchesCancelled([finger], with: nil)
+        XCTAssertEqual(note.changeVersion, original)
+        pencil.position.x = 100
+        view.touchesEnded([pencil], with: nil)
+        XCTAssertEqual(note.strokeCount, 0)
+        XCTAssertEqual(note.changeVersion, original + 1)
+    }
     @MainActor func testLassoOverflowPreservesSelectionAndExactLimitCanRetry() throws {
         let view = try inputView(), note = view.note
         var messages: [String] = []
@@ -2462,7 +2487,8 @@ private final class SyntheticInkTouch: UITouch {
     var seconds: TimeInterval
     init(_ x: Double, _ seconds: TimeInterval) { self.position = CGPoint(x: x, y: 100); self.seconds = seconds; super.init() }
     override var timestamp: TimeInterval { seconds }
-    override var type: UITouch.TouchType { .pencil }
+    var touchType: UITouch.TouchType = .pencil
+    override var type: UITouch.TouchType { touchType }
     var forceValue: CGFloat = 0.5
     private(set) var locationReads = 0
     var maximumValue: CGFloat = 1

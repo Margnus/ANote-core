@@ -332,6 +332,7 @@ final class InkUIView: UIView {
             navigate(direct, moving: false); return
         }
         if tool != .pen {
+            guard toolTouch == nil else { return }
             guard !note.hasActiveStroke else { failed("其他画布正在输入，请完成后重试"); return }
             guard let touch = touches.first(where: { $0.type == .pencil || $0.type == .direct }) else { return }
             let points = pagePoints(touch, event: event)
@@ -428,7 +429,10 @@ final class InkUIView: UIView {
         }
         setNeedsDisplay()
     }
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { cancelInk() }
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let toolTouch, !touches.contains(toolTouch) { return }
+        cancelInk()
+    }
     /** Page coordinates through the same viewport inverse as ink input, coalesced for density. */
     private func pagePoints(_ touch: UITouch, event: UIEvent?) -> [CGPoint] {
         guard scale > 0 else { return [] }

@@ -46,16 +46,24 @@ class InkToolPathLimitTest {
             id = 4
             toolType = MotionEvent.TOOL_TYPE_FINGER
         }
+        private val secondFinger = MotionEvent.PointerProperties().apply {
+            id = 7
+            toolType = MotionEvent.TOOL_TYPE_FINGER
+        }
 
         init {
             FrameLayout(context).addView(view)
             view.layout(0, 0, 600, 800)
         }
 
-        fun touch(action: Int, x: Float, y: Float = 400f) {
+        fun touch(action: Int, x: Float, y: Float = 400f, secondaryX: Float? = null) {
             if (action == MotionEvent.ACTION_DOWN) downTime = time
-            val point = MotionEvent.PointerCoords().apply { this.x = x; this.y = y; pressure = 1f; size = 1f }
-            val event = MotionEvent.obtain(downTime, time++, action, 1, arrayOf(finger), arrayOf(point),
+            fun position(screenX: Float) = MotionEvent.PointerCoords().apply {
+                this.x = screenX; this.y = y; pressure = 1f; size = 1f
+            }
+            val pointers = if (secondaryX == null) arrayOf(finger) else arrayOf(finger, secondFinger)
+            val positions = if (secondaryX == null) arrayOf(position(x)) else arrayOf(position(x), position(secondaryX))
+            val event = MotionEvent.obtain(downTime, time++, action, pointers.size, pointers, positions,
                 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0)
             try {
                 assertTrue(view.onTouchEvent(event))
@@ -68,6 +76,29 @@ class InkToolPathLimitTest {
             touch(MotionEvent.ACTION_MOVE, 300f, y)
             touch(MotionEvent.ACTION_UP, 350f, y)
         }
+    }
+
+    @Test
+    fun twoFingerNavigationCancelsAnUncommittedEraserGesture() = with(GestureFixture()) {
+        drawStroke(400f)
+        val revision = note.changeVersion
+        val stroke = note.stroke(0)
+        view.tool = InkTool.ERASER
+        touch(MotionEvent.ACTION_DOWN, 200f)
+        touch(MotionEvent.ACTION_MOVE, 320f)
+        val secondPointer = 1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT
+        touch(MotionEvent.ACTION_POINTER_DOWN or secondPointer, 320f, secondaryX = 400f)
+        touch(MotionEvent.ACTION_POINTER_UP or secondPointer, 320f, secondaryX = 400f)
+        touch(MotionEvent.ACTION_UP, 320f)
+        assertEquals(revision, note.changeVersion)
+        assertEquals(stroke, note.stroke(0))
+        assertEquals(1, changes)
+
+        touch(MotionEvent.ACTION_DOWN, 200f)
+        touch(MotionEvent.ACTION_UP, 320f)
+        assertEquals(0, note.strokeCount)
+        assertEquals(2, changes)
+        assertTrue(errors.isEmpty())
     }
 
     private fun await(description: String, ready: () -> Boolean) {
