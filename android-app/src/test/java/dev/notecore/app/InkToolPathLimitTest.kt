@@ -1,5 +1,6 @@
 package dev.notecore.app
 
+import android.view.InputDevice
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import dev.notecore.canvas.prototype.LayerId
@@ -32,6 +33,10 @@ class InkToolPathLimitTest {
         val view = InkCanvasView(context, note, { changes++ }, { errors.add(it) })
         private var time = 1000L
         private var downTime = time
+        private val finger = MotionEvent.PointerProperties().apply {
+            id = 4
+            toolType = MotionEvent.TOOL_TYPE_FINGER
+        }
 
         init {
             FrameLayout(context).addView(view)
@@ -40,7 +45,9 @@ class InkToolPathLimitTest {
 
         fun touch(action: Int, x: Float, y: Float = 400f) {
             if (action == MotionEvent.ACTION_DOWN) downTime = time
-            val event = MotionEvent.obtain(downTime, time++, action, x, y, 0)
+            val point = MotionEvent.PointerCoords().apply { this.x = x; this.y = y; pressure = 1f; size = 1f }
+            val event = MotionEvent.obtain(downTime, time++, action, 1, arrayOf(finger), arrayOf(point),
+                0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0)
             try {
                 assertTrue(view.onTouchEvent(event))
             } finally {
@@ -52,6 +59,32 @@ class InkToolPathLimitTest {
             touch(MotionEvent.ACTION_MOVE, 300f, y)
             touch(MotionEvent.ACTION_UP, 350f, y)
         }
+    }
+
+    @Test
+    fun disabledFingerWritingStillAllowsEraserAndLasso() = with(GestureFixture()) {
+        drawStroke(400f)
+        val stroke = note.stroke(0).id
+        val revision = note.changeVersion
+        view.fingerDrawing = false
+        drawStroke(600f)
+        assertEquals(1, note.strokeCount)
+        assertEquals(revision, note.changeVersion)
+
+        view.tool = InkTool.LASSO
+        touch(MotionEvent.ACTION_DOWN, 220f, 350f)
+        touch(MotionEvent.ACTION_MOVE, 380f, 350f)
+        touch(MotionEvent.ACTION_MOVE, 380f, 450f)
+        touch(MotionEvent.ACTION_UP, 220f, 450f)
+        assertEquals(listOf(stroke), note.selectedStrokeIds)
+        assertEquals(revision, note.changeVersion)
+
+        view.tool = InkTool.ERASER
+        touch(MotionEvent.ACTION_DOWN, 200f)
+        touch(MotionEvent.ACTION_UP, 300f)
+        assertEquals(0, note.strokeCount)
+        assertEquals(2, changes)
+        assertTrue(errors.isEmpty())
     }
 
     @Test

@@ -237,7 +237,7 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
         if (suppressSequence) { if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) suppressSequence = false; return true }
         val fingers = (0 until event.pointerCount).count { event.getToolType(it) == MotionEvent.TOOL_TYPE_FINGER }
         // A pencil keeps a stable transform; secondary fingers never move paper under its nib.
-        if (!activeStylus && (navigating || fingers >= 2 || (!fingerDrawing && fingers > 0))) {
+        if (!activeStylus && (navigating || fingers >= 2 || (tool == InkTool.PEN && !fingerDrawing && fingers > 0))) {
             if (!navigating) { cancelInk(); navigating = true; parent.requestDisallowInterceptTouchEvent(true) }
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 navigating = false; navIds = emptyList(); parent.requestDisallowInterceptTouchEvent(false)
