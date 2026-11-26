@@ -1,0 +1,126 @@
+{
+  "runs": [
+    {
+      "run": 44720899113,
+      "artifact": 14622381820,
+      "zip_sha256": "7b302f2ebca84d86a9cf7184f703cdc336a9c32daee1cb225ac810f888577b74",
+      "reports": {
+        "report.json": {
+          "commit": "45e3c4dc366af0eca01f493f24c044b15c090520",
+          "status": "passed",
+          "stage": "complete",
+          "report_sha256": "bd0579eb02d72e762d0ab593697eda88795058204c4540f9ec474d8238d70676",
+          "source_hashes_verified": 100,
+          "output_hashes_verified": 15,
+          "secondary_host_build_for_testing": true,
+          "host": {
+            "tests": 6,
+            "device": {
+              "modelName": "iPad Pro 11-inch (M4)",
+              "osVersion": "18.5",
+              "osBuildNumber": "22F77"
+            }
+          },
+          "ui": {
+            "tests": 1,
+            "device": {
+              "modelName": "iPad Pro 11-inch (M4)",
+              "osVersion": "18.5",
+              "osBuildNumber": "22F77"
+            }
+          },
+          "unsigned_device_build": {
+            "framework_sha256": "38aaf554346a4749b4c84e110015859cc1e4b11e14b61e288880ea11f50bfcc1",
+            "app_binary_sha256": "5f48e88117571128ffc6e750b3368e35c0a5c2c9df312fa0e8a6171c29fec471",
+            "platform": "/Users/runner/work/ANote-core/ANote-core/build/apple-sketch/device-xcode/Build/Products/Debug-iphoneos/NoteCoreSketch.app/NoteCoreSketch:\nLoad command 11\n      cmd LC_BUILD_VERSION\n  cmdsize 32\n platform IOS\n    minos 17.0\n      sdk 18.5\n   ntools 1\n     tool LD\n  version 1167.5\n",
+            "installed": false,
+            "physical_device_verified": false
+          }
+        }
+      }
+    },
+    {
+      "run": 45608763201,
+      "artifact": 15020982288,
+      "zip_sha256": "538668dd2895d35a51d16fd898e1363328999678832c702cf91fc4bb34e62635",
+      "reports": {
+        "apple-sdk-current/report.json": {
+          "commit": "cdc4ac88099b98b5721e9a65fcf252701263689f",
+          "status": "passed",
+          "stage": "complete",
+          "report_sha256": "a8c579d1e0bd72164226f130170d5713528b85dba7249ee3f65f3548e7bcbfed",
+          "source_hashes_verified": 95,
+          "output_hashes_verified": 34,
+          "ios17_runtime_verified": true
+        },
+        "apple-candidate/report.json": {
+          "commit": "cdc4ac88099b98b5721e9a65fcf252701263689f",
+          "status": "passed",
+          "stage": "complete",
+          "report_sha256": "69e6c1e4131c8bbc56a7adbe2a9723f9a858d375c30b75621edf89825302275c",
+          "source_hashes_verified": 220,
+          "output_hashes_verified": 18,
+          "ios17_runtime_verified": true,
+          "native_test_counts": {
+            "canvas-core": 227,
+            "shared-core": 510
+          },
+          "app_host": {
+            "tests": 82,
+            "device": {
+              "modelName": "iPhone 15",
+              "osVersion": "17.5",
+              "osBuildNumber": "21F79"
+            }
+          },
+          "ordinary_ui": {
+            "tests": 1,
+            "pages": 2,
+            "strokes_per_page": [
+              2,
+              1
+            ],
+            "saved_note_sha256": "36bf015f4087f6add5793089027626cea28688af4978129a25e611b6e8b00cee",
+            "device": {
+              "modelName": "iPhone 15",
+              "osVersion": "17.5",
+              "osBuildNumber": "21F79"
+            }
+          }
+        }
+      }
+    },
+    {
+      "run": 45608763264,
+      "artifact": 15020296357,
+      "zip_sha256": "8f02408bb73563774da27719f79e26e2badb84ae249f7200ecfc084202665493",
+      "reports": {
+        "report.json": {
+          "commit": "cdc4ac88099b98b5721e9a65fcf252701263689f",
+          "status": "failed",
+          "stage": "ordinary_app_ui_tests",
+          "report_sha256": "947310a5f75a0dda9194ae5bbbb290d1becc774f4932512fcdb368923eb0d12c",
+          "source_hashes_verified": 220,
+          "output_hashes_verified": 21,
+          "native_test_counts": {
+            "canvas-core": 227,
+            "shared-core": 510
+          },
+          "app_host": {
+            "tests": 82,
+            "device": {
+              "modelName": "iPad Pro 11-inch (M4)",
+              "osVersion": "18.5",
+              "osBuildNumber": "22F77"
+            }
+          }
+        }
+      },
+      "rename_failure_attachment": {
+        "sha256": "86a2e407c9a7d7ca6b0574d856a1e9b5f51523efc9ff671a947f8346a0e61f6e",
+        "waited_element_label": "未命名笔记",
+        "fresh_query_contains_expected_title": true
+      }
+    }
+  ]
+}
