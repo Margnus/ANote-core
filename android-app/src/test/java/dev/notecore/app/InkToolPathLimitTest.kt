@@ -1,5 +1,6 @@
 package dev.notecore.app
 
+import android.os.Looper
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.widget.FrameLayout
@@ -9,28 +10,36 @@ import dev.notecore.document.DocumentRoot
 import dev.notecore.document.PageDescriptor
 import dev.notecore.document.PageId
 import dev.notecore.document.PagedPreviewNotebook
+import dev.notecore.document.PagedPreviewCodec
+import dev.notecore.document.PaperKind
+import java.nio.file.Files
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class InkToolPathLimitTest {
-    private class GestureFixture {
-        private val context = RuntimeEnvironment.getApplication()
-        val note = PagedPreviewNotebook(
+    private class GestureFixture(
+        val note: PagedPreviewNotebook = PagedPreviewNotebook(
             DocumentRoot.empty(SceneId("tool-limit"), "Tool limit",
                 PageDescriptor(PageId("page"), LayerId("layer"), 600.0, 800.0)),
             "tool-limit",
-        )
+        ),
+        onChanged: () -> Unit = {},
+    ) {
+        private val context = RuntimeEnvironment.getApplication()
         val errors = mutableListOf<String>()
         var changes = 0
             private set
-        val view = InkCanvasView(context, note, { changes++ }, { errors.add(it) })
+        val view = InkCanvasView(context, note, { changes++; onChanged() }, { errors.add(it) })
         private var time = 1000L
         private var downTime = time
         private val finger = MotionEvent.PointerProperties().apply {
@@ -58,6 +67,79 @@ class InkToolPathLimitTest {
             touch(MotionEvent.ACTION_DOWN, 250f, y)
             touch(MotionEvent.ACTION_MOVE, 300f, y)
             touch(MotionEvent.ACTION_UP, 350f, y)
+        }
+    }
+
+    private fun await(description: String, ready: () -> Boolean) {
+        val loop = shadowOf(Looper.getMainLooper())
+        val deadline = System.nanoTime() + 5_000_000_000L
+        while (System.nanoTime() < deadline) {
+            loop.idle()
+            if (ready()) return
+            Thread.sleep(10)
+        }
+        assertTrue(ready(), description)
+    }
+
+    @Test
+    fun lassoMoveCanUndoRedoAndSurvivesStoreReopen() {
+        val context = RuntimeEnvironment.getApplication()
+        val directory = Files.createTempDirectory("notecore-lasso-").toFile()
+        val store = NoteStore.isolated(context, directory)
+        try {
+            val note = store.create()
+            assertTrue(note.setPaper(600.0, 800.0, PaperKind.BLANK))
+            var saved = -1L
+            fun save() {
+                assertTrue(store.save(note.capture()) { revision, failure ->
+                    assertNull(failure)
+                    saved = revision
+                })
+            }
+            with(GestureFixture(note, ::save)) {
+                drawStroke(400f)
+                drawStroke(600f)
+                val first = note.stroke(0)
+                val second = note.stroke(1)
+                view.tool = InkTool.LASSO
+                touch(MotionEvent.ACTION_DOWN, 220f, 350f)
+                touch(MotionEvent.ACTION_MOVE, 380f, 350f)
+                touch(MotionEvent.ACTION_MOVE, 380f, 450f)
+                touch(MotionEvent.ACTION_UP, 220f, 450f)
+                assertEquals(listOf(first.id), note.selectedStrokeIds)
+                touch(MotionEvent.ACTION_DOWN, 300f)
+                touch(MotionEvent.ACTION_UP, 320f)
+                assertEquals(first.transform.tx + 20.0, note.stroke(0).transform.tx, 1e-6)
+                assertEquals(second, note.stroke(1))
+                val moved = note.stroke(0).transform
+                assertTrue(note.undo())
+                assertEquals(first.transform, note.stroke(0).transform)
+                assertTrue(note.redo())
+                assertEquals(moved, note.stroke(0).transform)
+                assertTrue(errors.isEmpty())
+            }
+            save()
+            await("redone transform saved") { saved == note.changeVersion }
+            val id = note.documentId
+            val expected = PagedPreviewCodec.encode(note.snapshot())
+            assertTrue(store.releaseActive(note))
+            val reader = NoteStore.isolated(context, directory)
+            try {
+                var reopened: OpenedDocument? = null
+                reader.open(id) { result, failure ->
+                    assertNull(failure)
+                    reopened = assertNotNull(result)
+                }
+                await("fresh store read the saved note") { reopened != null }
+                assertEquals(expected, PagedPreviewCodec.encode(checkNotNull(reopened).root))
+            } finally {
+                reader.stopTestBackend()
+                await("reader stopped") { reader.ownerRetirementStatus().workerStopped }
+            }
+        } finally {
+            store.stopTestBackend()
+            await("writer stopped") { store.ownerRetirementStatus().workerStopped }
+            directory.deleteRecursively()
         }
     }
 

@@ -2222,6 +2222,53 @@ final class PagedHostTests: XCTestCase {
         XCTAssertEqual(note.stroke(index: 1).transform.tx, before.tx + 20, accuracy: 1e-6)
         XCTAssertEqual(changes, 3)
     }
+    @MainActor func testLassoMoveCanUndoRedoAndSurvivesModelReopen() async throws {
+        let dir = directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        let model = PreviewModel(directory: dir); model.create()
+        let note = try XCTUnwrap(model.current), id = note.documentId
+        model.applyEdit(PreviewEditSetPaper(width: 200, height: 200, paper: .blank))
+        let view = InkUIView(note: note)
+        view.frame = CGRect(x: 0, y: 0, width: 200, height: 200); view.layoutIfNeeded()
+        view.changed = { model.changed() }
+        view.failed = { XCTFail($0) }
+        let touch = SyntheticInkTouch(50, 1)
+        for (index, y) in [100.0, 150.0].enumerated() {
+            touch.position = CGPoint(x: 50, y: CGFloat(y)); touch.seconds = Double(index + 1)
+            view.touchesBegan([touch], with: nil)
+            touch.position.x = 150; touch.seconds += 0.1
+            view.touchesEnded([touch], with: nil)
+        }
+        XCTAssertEqual(note.strokeCount, 2)
+        let first = note.stroke(index: 0), second = note.stroke(index: 1)
+        view.tool = .lasso
+        touch.position = CGPoint(x: 30, y: 80)
+        view.touchesBegan([touch], with: nil)
+        for corner in [CGPoint(x: 170, y: 80), CGPoint(x: 170, y: 120)] {
+            touch.position = corner
+            view.touchesMoved([touch], with: nil)
+        }
+        touch.position = CGPoint(x: 30, y: 120)
+        view.touchesEnded([touch], with: nil)
+        XCTAssertEqual(note.selectedStrokeIds.map { $0.value }, [first.id.value])
+        touch.position = CGPoint(x: 100, y: 100)
+        view.touchesBegan([touch], with: nil)
+        touch.position.x = 120
+        view.touchesEnded([touch], with: nil)
+        let moved = note.stroke(index: 0).transform.tx
+        XCTAssertEqual(moved, first.transform.tx + 20, accuracy: 1e-6)
+        XCTAssertTrue(note.stroke(index: 1) === second)
+        model.applyEdit(PreviewEditUndo.shared)
+        XCTAssertEqual(note.stroke(index: 0).transform.tx, first.transform.tx)
+        model.applyEdit(PreviewEditRedo.shared)
+        XCTAssertEqual(note.stroke(index: 0).transform.tx, moved)
+        let expected = try note.capture().encode(), file = dir.appendingPathComponent(id + ".ncp")
+        try await eventually("redone transform saved") { (try? String(contentsOf: file, encoding: .utf8)) == expected && model.status.hasPrefix("已保存") }
+        model.close(); XCTAssertNil(model.current)
+        let reopened = PreviewModel(directory: dir); reopened.open(id)
+        try await eventually("new owner receives lasso edit") { reopened.current != nil }
+        XCTAssertEqual(try XCTUnwrap(reopened.current).capture().encode(), expected)
+        reopened.close()
+    }
     @MainActor func testSiblingSurfaceCannotCancelOrAppendAnotherAcceptedInput() throws {
         let a = try inputView(), note = a.note
         let touchA = SyntheticInkTouch(10, 1)
