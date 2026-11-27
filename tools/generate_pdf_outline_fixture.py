@@ -11,6 +11,20 @@ RECIPE = ROOT / 'fixtures/pdf/outline-recipe.json'
 OUTPUT = ROOT / 'fixtures/pdf/outline-destinations.pdf'
 
 
+def read_outline(reader):
+    def read(entries):
+        nodes = []
+        for entry in entries:
+            if isinstance(entry, list):
+                nodes[-1]['children'] = read(entry)
+            else:
+                nodes.append({'title': entry.title, 'source_index': reader.get_destination_page_number(entry),
+                              'children': []})
+        return nodes
+
+    return read(reader.outline)
+
+
 def main():
     original = SOURCE.read_bytes()
     src = PdfReader(io.BytesIO(original))
@@ -30,16 +44,7 @@ def main():
     data = buffer.getvalue()
     result = PdfReader(io.BytesIO(data))
 
-    def observed(entries):
-        nodes = []
-        for entry in entries:
-            if isinstance(entry, list):
-                nodes[-1]['children'] = observed(entry)
-            else:
-                nodes.append({'title': entry.title, 'source_index': result.get_destination_page_number(entry), 'children': []})
-        return nodes
-
-    assert observed(result.outline) == expected
+    assert read_outline(result) == expected
     assert len(src.pages) == len(result.pages) == 4
     for before, after in zip(src.pages, result.pages):
         assert before.get_contents().get_data() == after.get_contents().get_data()

@@ -8,6 +8,7 @@ import subprocess
 
 from PIL import Image
 from pypdf import PdfReader
+import generate_pdf_outline_fixture as outline_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -109,6 +110,19 @@ def main():
               'scope': 'Actual isolated iOS simulator CoreGraphics metadata/rendering for original three fixed PDFs. No shared runtime adapter, App import/annotation/export, owner/cancellation or physical acceptance.',
               'app_integration': False, 'c1_complete': False, 'goal_complete': False}
     result['aes256_r6_password_verified'] = password_verified
+    if 'fixtures/pdf/outline-destinations.pdf' in report['source_sha256']:
+        outline = PdfReader(io.BytesIO(source('fixtures/pdf/outline-destinations.pdf')))
+
+        expected = json.loads(source('fixtures/pdf/outline-recipe.json'))
+        assert outline_fixture.read_outline(outline) == expected == report['outline_observations']
+        assert report['outline_destinations_verified'] is True
+        assert len(outline.pages) == len(streams)
+        for page, stream, expected_page in zip(outline.pages, streams, recipe['expected_pages']):
+            assert page.get_contents().get_data() == stream
+            assert list(page.cropbox) == recipe['crop_box'] and page.rotation == expected_page['rotation']
+        result['outline_destinations_verified'] = True
+        result['outline'] = expected
+        result['outline_oracle_sha256'] = sha(Path(outline_fixture.__file__).read_bytes())
     (folder / 'verification.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(json.dumps({'status': result['status'], 'pages': len(checks), 'metadata_passed': sum(c['metadata_matches_source'] for c in checks),
                       'image_checks_passed': sum(i['anchors_match'] for c in checks for i in c['images'])}))
