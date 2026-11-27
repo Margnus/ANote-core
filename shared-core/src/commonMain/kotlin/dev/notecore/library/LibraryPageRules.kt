@@ -66,10 +66,10 @@ internal object LibraryPageRules {
         return LibraryPageResult(slice(query, frozen, cursor, limit, projection.noteIds, index + 1))
     }
 
-    fun deliver(candidate: LibraryPageResult, active: LibrarySearchQuery?): LibraryPageResult {
+    fun deliver(candidate: LibraryPageResult, active: LibraryPageQuery?): LibraryPageResult {
         if (active == null) return LibraryPageResult(failure = LibraryPageFailure.CANCELLED)
         val page = candidate.page ?: return candidate
-        when (LibraryOperationRules.deliveryFailure(page.query.operation, active)) {
+        when (LibraryOperationRules.deliveryFailure(page.query.operation, active.operation)) {
             LibraryOperationFailure.INVALID_OPERATION ->
                 return LibraryPageResult(failure = LibraryPageFailure.INVALID_QUERY)
             LibraryOperationFailure.STALE_QUERY ->
@@ -78,6 +78,7 @@ internal object LibraryPageRules {
                 return LibraryPageResult(failure = LibraryPageFailure.CANCELLED)
             null -> Unit
         }
+        if (page.query != active) return LibraryPageResult(failure = LibraryPageFailure.STALE_QUERY)
         val fresh = when {
             page.cursor != null -> next(page.snapshot, page.query, page.cursor, page.limit)
             page.startAnchor != null -> relocate(page.snapshot, page.query,

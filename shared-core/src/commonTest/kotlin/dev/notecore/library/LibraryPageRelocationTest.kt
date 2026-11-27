@@ -73,13 +73,13 @@ class LibraryPageRelocationTest {
     @Test fun deliveredRelocationRecomputesIdempotentlyAndRejectsTampering() {
         val q = query(LibrarySort.NAME)
         val candidate = LibraryPageRules.relocate(catalog, q, "n2", null, 2)
-        assertEquals(candidate, LibraryPageRules.deliver(candidate, q.operation))
-        assertEquals(candidate, LibraryPageRules.deliver(candidate, q.operation))
+        assertEquals(candidate, LibraryPageRules.deliver(candidate, q))
+        assertEquals(candidate, LibraryPageRules.deliver(candidate, q))
         val page = assertNotNull(candidate.page)
         assertEquals(LibraryPageFailure.STALE_QUERY,
-            LibraryPageRules.deliver(candidate, q.operation.copy(queryVersion = 9)).failure)
+            LibraryPageRules.deliver(candidate, q.copy(operation = q.operation.copy(queryVersion = 9))).failure)
         assertEquals(LibraryPageFailure.CANCELLED,
-            LibraryPageRules.deliver(candidate, q.operation.copy(operationId = "other")).failure)
+            LibraryPageRules.deliver(candidate, q.copy(operation = q.operation.copy(operationId = "other"))).failure)
         assertNull(LibrarySearchRules.cancelQuery(q.operation, "paging", 8))
         assertEquals(LibraryPageFailure.CANCELLED, LibraryPageRules.deliver(candidate, null).failure)
         for (tampered in listOf(
@@ -89,10 +89,10 @@ class LibraryPageRelocationTest {
             candidate.copy(page = page.copy(snapshot = page.snapshot.copy(notes = page.snapshot.notes.map {
                 if (it.noteId == "n2") it.copy(title = "replacement") else it
             }))))) {
-            assertEquals(LibraryPageFailure.STALE_RESULT, LibraryPageRules.deliver(tampered, q.operation).failure)
-            assertNull(LibraryPageRules.deliver(tampered, q.operation).page)
+            assertEquals(LibraryPageFailure.STALE_RESULT, LibraryPageRules.deliver(tampered, q).failure)
+            assertNull(LibraryPageRules.deliver(tampered, q).page)
         }
-        assertEquals(candidate, LibraryPageRules.deliver(candidate, q.operation))
+        assertEquals(candidate, LibraryPageRules.deliver(candidate, q))
     }
 
     @Test fun relocationContinuesAcrossNewerValidRevisionWithFreshQuery() {
@@ -106,7 +106,7 @@ class LibraryPageRelocationTest {
         val relocated = assertNotNull(LibraryPageRules.relocate(mutated, freshQuery, "n2", null, 2).page)
         assertEquals(listOf("n2", "n0"), relocated.rows.map { it.noteId })
         assertEquals(16, relocated.query.operation.expectedRevision)
-        assertEquals(relocated, LibraryPageRules.deliver(LibraryPageResult(relocated), freshQuery.operation).page)
+        assertEquals(relocated, LibraryPageRules.deliver(LibraryPageResult(relocated), freshQuery).page)
         val continued = assertNotNull(LibraryPageRules.next(mutated, freshQuery, relocated.nextCursor!!, 2).page)
         assertEquals(listOf("n4"), continued.rows.map { it.noteId })
         assertEquals(5, mutated.notes.size)

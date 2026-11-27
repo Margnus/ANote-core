@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "command": "gradlew verifyPrototype --offline --console=plain",
+  "scope": "Shared JVM paging delivery and batch cover admission",
+  "totals": {
+    "tests": 798,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "affected_suites": {
+    "dev.notecore.library.CoverLoadRulesTest": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dev.notecore.library.LibraryOperationRulesTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dev.notecore.library.LibraryPageRelocationTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dev.notecore.library.LibraryPageRulesTest": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/LibraryPageRules.kt": "2bb81864b6c22a973ae878f719cdd094a139fb1590f307d3749c733673c0d135",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/CoverLoadRules.kt": "46ba06a29ccea5f64961910e9cfa198903f6b78c3c04ed8f5c99f5302766fa40",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryPageRulesTest.kt": "4e393aeec88e661fbcfc6086bffe1c04fabfb7b36170a3e06daa2eb0ae052a92",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryPageRelocationTest.kt": "b09fb95a9d30ff72e98849355fcb217f583eea2e5b15724540231886d3424baf",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/LibraryOperationRulesTest.kt": "4e5d8b62e9269a6e3f2ac4dd9f63f0a4787dda32dc32a063b5da6acfebf935e0",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/CoverLoadRulesTest.kt": "e313abbe8e04a25957c2f4e2107728bc6e4baafee30a9ca2346bc59558f0ae8c"
+  },
+  "native_decode_verified": false,
+  "app_delivery_verified": false
+}

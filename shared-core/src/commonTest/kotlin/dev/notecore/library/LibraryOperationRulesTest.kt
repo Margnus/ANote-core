@@ -49,6 +49,6 @@ class LibraryOperationRulesTest {
     @Test fun pageWithoutPayloadKeepsOriginalCancellationAndFailureBehavior() {
         val failed = LibraryPageResult(failure = LibraryPageFailure.INVALID_QUERY)
         assertEquals(LibraryPageFailure.CANCELLED, LibraryPageRules.deliver(failed, null).failure)
-        assertSame(failed, LibraryPageRules.deliver(failed, query))
+        assertSame(failed, LibraryPageRules.deliver(failed, LibraryPageQuery(query, LibrarySort.NAME, false)))
     }
 }

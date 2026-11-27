@@ -17,6 +17,18 @@ class LibraryPageRulesTest {
     private fun query(sort: LibrarySort, favorites: Boolean = false) = LibraryPageQuery(
         LibrarySearchQuery("paging", 7, "local", 15, ""), sort, favorites)
 
+    @Test fun deliveryRejectsResultsFromAnOldSortOrFavoriteFilterWithSameOperation() {
+        val initial = query(LibrarySort.NAME)
+        val oldPage = LibraryPageRules.first(catalog, initial, 2)
+        for (active in listOf(initial.copy(sort = LibrarySort.UPDATED), initial.copy(favoritesOnly = true))) {
+            assertEquals(LibraryPageResult(failure = LibraryPageFailure.STALE_QUERY),
+                LibraryPageRules.deliver(oldPage, active))
+            val fresh = LibraryPageRules.first(catalog, active, 2)
+            assertNotNull(fresh.page)
+            assertEquals(fresh, LibraryPageRules.deliver(fresh, active))
+        }
+    }
+
     private fun collect(query: LibraryPageQuery): Pair<List<String>, Int> {
         val ids = mutableListOf<String>()
         var pages = 0
@@ -81,21 +93,21 @@ class LibraryPageRulesTest {
     @Test fun deliveryRequiresCurrentOperationAndCancellationOnlyMatchesExactIdentity() {
         val query = query(LibrarySort.NAME)
         val candidate = LibraryPageRules.first(catalog, query, 2)
-        assertEquals(candidate, LibraryPageRules.deliver(candidate, query.operation))
+        assertEquals(candidate, LibraryPageRules.deliver(candidate, query))
         assertEquals(LibraryPageFailure.STALE_QUERY,
-            LibraryPageRules.deliver(candidate, query.operation.copy(queryVersion = 8)).failure)
+            LibraryPageRules.deliver(candidate, query.copy(operation = query.operation.copy(queryVersion = 8))).failure)
         assertEquals(LibraryPageFailure.CANCELLED,
-            LibraryPageRules.deliver(candidate, query.operation.copy(operationId = "other")).failure)
+            LibraryPageRules.deliver(candidate, query.copy(operation = query.operation.copy(operationId = "other"))).failure)
         assertEquals(LibraryPageFailure.STALE_QUERY,
-            LibraryPageRules.deliver(candidate, query.operation.copy(input = "changed")).failure)
+            LibraryPageRules.deliver(candidate, query.copy(operation = query.operation.copy(input = "changed"))).failure)
         assertSame(query.operation, LibrarySearchRules.cancelQuery(query.operation, "other", 7))
         assertSame(query.operation, LibrarySearchRules.cancelQuery(query.operation, "paging", 8))
         assertNull(LibrarySearchRules.cancelQuery(query.operation, "paging", 7))
         assertEquals(LibraryPageFailure.CANCELLED, LibraryPageRules.deliver(candidate, null).failure)
         val invalid = candidate.copy(page = candidate.page!!.copy(
             query = candidate.page.query.copy(operation = query.operation.copy(queryVersion = -1))))
-        assertEquals(LibraryPageFailure.INVALID_QUERY, LibraryPageRules.deliver(invalid, query.operation).failure)
-        assertEquals(candidate, LibraryPageRules.deliver(candidate, query.operation))
+        assertEquals(LibraryPageFailure.INVALID_QUERY, LibraryPageRules.deliver(invalid, query).failure)
+        assertEquals(candidate, LibraryPageRules.deliver(candidate, query))
     }
 
     @Test fun tamperedRowsCursorOrMetadataCannotBeDelivered() {
@@ -112,10 +124,10 @@ class LibraryPageRulesTest {
             }))),
         )
         for (tampered in changed) {
-            assertNull(LibraryPageRules.deliver(tampered, query.operation).page)
-            assertEquals(LibraryPageFailure.STALE_RESULT, LibraryPageRules.deliver(tampered, query.operation).failure)
+            assertNull(LibraryPageRules.deliver(tampered, query).page)
+            assertEquals(LibraryPageFailure.STALE_RESULT, LibraryPageRules.deliver(tampered, query).failure)
         }
-        assertEquals(candidate, LibraryPageRules.deliver(candidate, query.operation))
+        assertEquals(candidate, LibraryPageRules.deliver(candidate, query))
     }
 
     @Test fun preparedPageOwnsSnapshotAndResultLists() {
@@ -127,7 +139,7 @@ class LibraryPageRulesTest {
         assertEquals(6, page.snapshot.notes.size)
         assertEquals(2, page.rows.size)
         assertEquals("n5", page.nextCursor?.anchor?.noteId)
-        assertEquals(candidate, LibraryPageRules.deliver(candidate, query.operation))
+        assertEquals(candidate, LibraryPageRules.deliver(candidate, query))
         assertEquals(6, notes.size)
     }
 }
