@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "base_commit": "67caa5ac9716ea4b13973d7b91fedff335cd5676",
+  "observations": {
+    "api": 26,
+    "same_scene_revision": 1,
+    "backdrop_sha256": "16d291d267b2d075ad29799d3c6391ab62db6d27559e747451b9765b2098e610",
+    "frames": [
+      {
+        "request": 1,
+        "locale": "ja-JP",
+        "hits": []
+      },
+      {
+        "request": 1,
+        "locale": "ja-JP",
+        "hits": [
+          "IMAGE",
+          "MIXED"
+        ]
+      },
+      {
+        "request": 2,
+        "locale": "zh-CN",
+        "hits": [
+          "IMAGE"
+        ]
+      },
+      {
+        "request": 2,
+        "locale": "zh-CN",
+        "hits": [
+          "IMAGE",
+          "MIXED"
+        ]
+      },
+      {
+        "request": 3,
+        "locale": "zh-CN",
+        "hits": [
+          "IMAGE"
+        ]
+      }
+    ],
+    "cold_tile_comparisons": 10,
+    "same_text_and_primary_raster_difference": true,
+    "tile_bytes": 24576,
+    "peak_charged_tile_bytes": 73728,
+    "recycled_tiles": 4,
+    "stale_frame_rejected": true
+  },
+  "runtime_fingerprint": "Android/sdk_phone_arm64/generic_arm64:8.0.0/OSR1.180418.028.A2/10042266:userdebug/test-keys",
+  "jvm_tests": 822,
+  "android_art_shared_tests": 2,
+  "apple_native_shared_tests": {
+    "status": "passed",
+    "tests": 2,
+    "checks": [
+      "dev.notecore.canvas.prototype.CompositionTileKeyPocTest.captureKeepsTheOriginalDependenciesAndSeparatesOwnersAndConfigurations",
+      "dev.notecore.canvas.prototype.CompositionTileKeyPocTest.unresolvedPixelsStayWithinTheirRequestAndResolvedPixelsKeepCanonicalOrder"
+    ],
+    "device": "3800FE45-9B03-48F4-B69C-B59BFB153970",
+    "runtime": "iOS 27.0 Simulator arm64",
+    "binary_sha256": "1c3e36bde1152bdf6ea45e80d9d89e60181dac0f963fde9b8fce155391e2a365"
+  },
+  "s2_historical_work_and_cache_counts_match": true,
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTileCachePoc.kt": "d75f3e4c050155a706866f1deaad94adc10e90b8b0062f4a9ad0da44cef7d7ee",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/CompositionTileKeyPocTest.kt": "e3c441185c4e208dfa94489db098e434137c487d4f541042c64a9467595594bf",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "74ce88661349c7cdf06c9ee5e0159177bdc1b77f7f51abb70e5f86d5f832ea6d",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/LegacyTextTileArtChecks.kt": "9181430179f1e9f6c9f07b9d745448c17b10eba4850c0748f2b6f972d8aaab39"
+  },
+  "executable_sha256": {
+    "build/c1-swept-cache-20261125/android-artifacts/canvas-core/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk": "626e6919b5b7a199c7bbfc79dfb688f399039b235bd0268ba148dcfb574c3448",
+    "build/c1-swept-cache-20261125/android-artifacts/canvas-core/bin/iosSimulatorArm64/debugTest/test.kexe": "1c3e36bde1152bdf6ea45e80d9d89e60181dac0f963fde9b8fce155391e2a365"
+  },
+  "raw_evidence_sha256": {
+    "android-api26-instrumentation.log": "e9e5471c83d178ad3611799e6fc5319b186c21d0e3dcf2606d1d06136fe59ff4",
+    "android-api26-fingerprint.txt": "26810751a272e4ea481416f938e3a7c91cac2c34b64f1feea3ba0108b19b923d",
+    "android-api26-install.log": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "android-api26-crash.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apple-native-shared-tests.log": "6c4a5eee83f6d8aaf0495d6631484beff2c7ce3c4813fe5247fcdee053c2b7b4",
+    "jvm-tests.log": "f40478031ff94df18c7f66dc8068de531463768225e84687992e320931e1c191",
+    "s2-cold-trace.log": "4b2fbb0d8eab048382806e5f176e1e4b04020adc78fa45804ecd008c017a63de",
+    "gradle-native-build.log": "29cb5d2d2cc319883d0f208c6739f1dec83aa84d215f778c0e0ed75891307bc6"
+  },
+  "archive_sha256": "1c40bb7dfc6c364cc9e339d8c43bcdcf417bdd3f54a040025f750957630698fa",
+  "adoption": "If any contributor lacks a stable resolved raster dependency, bind the composited tile to the exact request. A separately keyed image-only tile remains eligible for cross-request reuse.",
+  "scope": "Native Android API 26 software Canvas renders the unchanged CJK text and primary Typeface with different locale inputs. Pixel differences are observed, actual glyph font files are not identified. Apple exercises the common key rules. Reported bytes cover only admitted output bitmaps, including retired and replacement outputs. App integration, larger mixed workload and physical performance remain open."
+}

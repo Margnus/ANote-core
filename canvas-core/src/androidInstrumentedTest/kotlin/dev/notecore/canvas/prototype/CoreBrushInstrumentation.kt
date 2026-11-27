@@ -7,16 +7,27 @@ import org.junit.runner.JUnitCore
 
 /** Test-only library host: actual common algorithms on ART, with no app UI or SDK probe API. */
 class CoreBrushInstrumentation : Instrumentation() {
-    private var sweptDiscOnly = false
+    private var selectedCase: String? = null
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
-        sweptDiscOnly = arguments?.getString("notecore_case") == "swept_disc"
+        selectedCase = arguments?.getString("notecore_case")
         start()
     }
     override fun onStart() {
         val output = Bundle()
         try {
-            if (sweptDiscOnly) {
+            if (selectedCase == "legacy_text_tile") {
+                val result = JUnitCore.runClasses(CompositionTileKeyPocTest::class.java)
+                check(result.wasSuccessful() && result.runCount == 2 && result.ignoreCount == 0) {
+                    result.failures.joinToString { it.trace }
+                }
+                output.putString("legacy_text_tile", LegacyTextTileArtChecks.verify())
+                output.putInt("composition_key_tests", result.runCount)
+                output.putString("legacy_text_tile_status", "passed")
+                finish(Activity.RESULT_OK, output)
+                return
+            }
+            if (selectedCase == "swept_disc") {
                 val result = JUnitCore.runClasses(SweptDiscGeometryPocTest::class.java, SweptDiscTileUnionTest::class.java, SweptDiscRenderOwnerTest::class.java,
                     SweptDiscExecutorTest::class.java, SweptDiscBitmapReleaseTest::class.java, SweptDiscCacheIdentityTest::class.java,
                     BrushCandidateSeparationTest::class.java, BrushEnvelopePocTest::class.java,

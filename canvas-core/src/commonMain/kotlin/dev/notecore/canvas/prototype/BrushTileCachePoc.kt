@@ -128,3 +128,24 @@ internal class BrushTileCachePoc(residentBudget: Long, totalBudget: Long, maxRes
 
     fun close() { pool.close(); releaseUnused() }
 }
+
+/** Scene/grid/renderer scoped composition identity. A missing dependency scopes the entire
+ * composited tile to its producing request. The owner assigns a new token before changing any
+ * pixel input. Non-null dependencies must be immutable and cover canonical identity and all
+ * renderer inputs for that contributor, in composition order.
+ */
+@ConsistentCopyVisibility
+internal data class CompositionTileKeyPoc<T : Any> private constructor(
+    private val scene: SceneId, private val sessionGeneration: Long, private val grid: BrushTileGridPoc,
+    private val renderer: String, private val ordered: List<T?>, private val exactRequest: FrameToken?,
+) {
+    companion object {
+        fun <T : Any> capture(frame: FrameToken, grid: BrushTileGridPoc, renderer: String,
+            ordered: List<T?>,
+        ): CompositionTileKeyPoc<T> {
+            val snapshot = ordered.toList()
+            return CompositionTileKeyPoc(frame.sceneId, frame.sessionGeneration, grid, renderer,
+                snapshot, frame.takeIf { snapshot.any { dependency -> dependency == null } })
+        }
+    }
+}
