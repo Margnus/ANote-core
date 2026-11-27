@@ -1,0 +1,57 @@
+{
+  "runtime": {
+    "api": "35",
+    "fingerprint": "Android/sdk_phone64_x86_64/emu64x:15/AE3A.240806.019/12368160:userdebug/test-keys",
+    "abi": "x86_64",
+    "avd": "NoteCorePdfOutline35"
+  },
+  "pypdf_version": "6.16.1",
+  "input_sha256": {
+    "outline-only.pdf": "d85d52eacb8e0a9a80b1980d79630e63dabbb28adfbfb8b801f722560f98d8e8",
+    "outline-with-page-link.pdf": "0f13f1b3af20e702386eba788fe36d9adbe85f63de548ab8e5d785c21436379f",
+    "probe.zip": "3ddf9c0c8986ede8a52cb36b1280f70fb5b5f10e47d7f0b8bf757324b4fd9b81"
+  },
+  "probe_source_sha256": "90f19bf8dc1dd76ae92631065ec33811b858e35b7fdd622bc53d2372c43c42c2",
+  "runner_source_sha256": "c88cfb1af2fd039ed27d43888a97f9fdef90392ef317768ae376f214af64ef03",
+  "expected_document_outline": [
+    {
+      "title": "第一章",
+      "source_index": 0,
+      "children": [
+        {
+          "title": "Rotated page",
+          "source_index": 1,
+          "children": [
+            {
+              "title": "末页",
+              "source_index": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Same page, another entry",
+      "source_index": 1,
+      "children": []
+    }
+  ],
+  "page_link_destinations": {
+    "outline_only": [
+      [],
+      [],
+      [],
+      []
+    ],
+    "outline_with_page_link": [
+      [
+        2
+      ],
+      [],
+      [],
+      []
+    ]
+  },
+  "scope": "Android 35 PdfRenderer.Page.getGotoLinks and same-outline positive control"
+}
