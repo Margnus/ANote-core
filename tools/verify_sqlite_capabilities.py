@@ -46,6 +46,8 @@ def matrix(invoke, log):
         if stage in ('unknown_schema','corrupt_readonly'): assert value['refused_without_modification'] is True
         if stage in ('conflict','stale','replay_base_conflict'): assert value['refused'] is True
         if stage == 'capacity_full': assert value['sqlite_capacity_full'] is True
+        if stage == 'refuse_damaged_head': assert value['write_status'] == value['replay_status'] == 'repair_required'
+        if stage == 'restore_head_and_write': assert value['write_status'] == 'committed'
         observations.append(value)
     step('init',1,'A')
     step('kill_uncommitted',crash='uncommitted'); step('verify',1,'A')
@@ -56,6 +58,9 @@ def matrix(invoke, log):
         step(stage); step('verify',2,'B')
     step('kill_after_receipt',crash='after_receipt'); step('verify',3,'C')
     step('replay_final',3,'C'); step('verify',3,'C')
+    step('damage_head',3,'X')
+    step('refuse_damaged_head',3,'X'); step('verify',3,'X')
+    step('restore_head_and_write',4,'D'); step('verify',4,'D')
     return observations
 
 

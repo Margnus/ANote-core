@@ -47,6 +47,11 @@ public final class SqliteCrashProbe {
         Process.killProcess(Process.myPid());
         throw new AssertionError("SIGKILL returned");
     }
+    private static boolean headMatchesOperation(SQLiteDatabase db) {
+        return number(db, "SELECT count(*) FROM root r LEFT JOIN operations o ON o.revision=r.revision "
+                + "WHERE r.id=1 AND ((r.revision=0 AND r.payload='empty') "
+                + "OR CAST(r.payload AS BLOB)=CAST(o.payload AS BLOB))") == 1;
+    }
     private static String apply(SQLiteDatabase db, String op, long base, String payload, String crash) throws Exception {
         db.beginTransactionNonExclusive();
         try {
@@ -54,11 +59,13 @@ public final class SqliteCrashProbe {
             try (Cursor cursor = db.rawQuery("SELECT payload,revision FROM operations WHERE op_id=?", new String[]{op})) {
                 if (cursor.moveToFirst()) {
                     check(payload.equals(cursor.getString(0)) && cursor.getLong(1)==base+1);
+                    if (!headMatchesOperation(db)) return "repair_required";
                     db.setTransactionSuccessful();
                     return "replayed";
                 }
             }
             check(number(db,"SELECT revision FROM root WHERE id=1") == base);
+            if (!headMatchesOperation(db)) return "repair_required";
             db.execSQL("INSERT INTO operations(op_id,revision,payload) VALUES(?,?,?)",new Object[]{op,base+1,payload});
             db.execSQL("UPDATE root SET revision=?,payload=? WHERE id=1",new Object[]{base+1,payload});
             if ("uncommitted".equals(crash)) crash(crash);
@@ -105,6 +112,14 @@ public final class SqliteCrashProbe {
                 apply(db,"op3",2,"C",""); emit(new JSONObject().put("receipt_revision",3)); crash("after_receipt");
             } else if ("replay".equals(stage)) check("replayed".equals(apply(db,"op2",1,"B","")));
             else if ("replay_final".equals(stage)) check("replayed".equals(apply(db,"op3",2,"C","")));
+            else if ("damage_head".equals(stage)) db.execSQL("UPDATE root SET payload='X' WHERE id=1 AND revision=3");
+            else if ("refuse_damaged_head".equals(stage)) {
+                result.put("write_status", apply(db,"op4",3,"D",""));
+                result.put("replay_status", apply(db,"op3",2,"C",""));
+            } else if ("restore_head_and_write".equals(stage)) {
+                db.execSQL("UPDATE root SET payload=(SELECT payload FROM operations WHERE revision=3) WHERE id=1 AND revision=3");
+                result.put("write_status", apply(db,"op4",3,"D",""));
+            }
             else if ("conflict".equals(stage) || "stale".equals(stage) || "replay_base_conflict".equals(stage)) {
                 boolean refused = false;
                 try { apply(db,"stale".equals(stage)?"op3":"op2",0,"replay_base_conflict".equals(stage)?"B":"wrong",""); }

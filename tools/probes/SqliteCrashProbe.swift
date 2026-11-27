@@ -5,15 +5,23 @@ import Darwin
 func crash(_ stage: String) throws -> Never {
     try emit(["crash_point":stage]); kill(getpid(),SIGKILL); exit(99)
 }
+func headMatchesOperation(_ db: DB) throws -> Bool {
+    try db.number("""
+        SELECT count(*) FROM root r LEFT JOIN operations o ON o.revision=r.revision
+        WHERE r.id=1 AND ((r.revision=0 AND r.payload='empty') OR CAST(r.payload AS BLOB)=CAST(o.payload AS BLOB))
+        """) == 1
+}
 func apply(_ db: DB, _ op: String, _ base: Int, _ payload: String, crashAt: String = "") throws -> String {
     try db.exec("BEGIN IMMEDIATE")
     do {
         if let previous = try db.query("SELECT payload FROM operations WHERE op_id=?",[op]) {
             let revision = try db.query("SELECT revision FROM operations WHERE op_id=?",[op])
             try require(previous==payload && revision==String(base+1))
+            guard try headMatchesOperation(db) else { try db.exec("ROLLBACK"); return "repair_required" }
             try db.exec("COMMIT"); return "replayed"
         }
         try require(db.number("SELECT revision FROM root WHERE id=1")==base)
+        guard try headMatchesOperation(db) else { try db.exec("ROLLBACK"); return "repair_required" }
         try db.exec("INSERT INTO operations(op_id,revision,payload) VALUES(?,?,?)",[op,String(base+1),payload])
         try db.exec("UPDATE root SET revision=?,payload=? WHERE id=1",[String(base+1),payload])
         if crashAt == "uncommitted" { try crash(crashAt) }
@@ -58,6 +66,14 @@ func runCrashProbe() throws {
     else if stage == "kill_after_receipt" { _ = try apply(db,"op3",2,"C"); try emit(["receipt_revision":3]); try crash("after_receipt") }
     else if stage == "replay" { try require(apply(db,"op2",1,"B")=="replayed") }
     else if stage == "replay_final" { try require(apply(db,"op3",2,"C")=="replayed") }
+    else if stage == "damage_head" { try db.exec("UPDATE root SET payload='X' WHERE id=1 AND revision=3") }
+    else if stage == "refuse_damaged_head" {
+        result["write_status"] = try apply(db,"op4",3,"D")
+        result["replay_status"] = try apply(db,"op3",2,"C")
+    } else if stage == "restore_head_and_write" {
+        try db.exec("UPDATE root SET payload=(SELECT payload FROM operations WHERE revision=3) WHERE id=1 AND revision=3")
+        result["write_status"] = try apply(db,"op4",3,"D")
+    }
     else if stage == "conflict" || stage == "stale" || stage == "replay_base_conflict" {
         var refused = false
         do { _ = try apply(db,stage == "stale" ? "op3":"op2",0,stage == "replay_base_conflict" ? "B":"wrong") }

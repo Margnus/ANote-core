@@ -1,0 +1,240 @@
+{
+  "status": "passed",
+  "scope": "Native SQLite recovery and refusal matrix on disposable simulators",
+  "android": {
+    "runtime": {
+      "api": "26",
+      "fingerprint": "Android/sdk_phone_x86_64/generic_x86_64:8.0.0/OSR1.180418.004/4931640:userdebug/test-keys",
+      "abi": "x86_64",
+      "selinux": "Enforcing"
+    },
+    "app_uid": "uid=10065(u0_a65) gid=10065(u0_a65) groups=10065(u0_a65) context=u:r:untrusted_app:s0:c512,c768",
+    "probe_apk_sha256": "c0d8ea62714cd8412f7bf17921745821c9a7937a4443ddef8c90b24f1020c8ab",
+    "observations": [
+      {
+        "stage": "init",
+        "sqlite_version": "3.18.2",
+        "revision": 1,
+        "payload": "A",
+        "operation_count": 1,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_uncommitted",
+        "writer_exit": 137,
+        "crash_point": "uncommitted"
+      },
+      {
+        "stage": "verify",
+        "revision": 1,
+        "payload": "A",
+        "operation_count": 1,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_committed",
+        "writer_exit": 137,
+        "crash_point": "committed_no_receipt"
+      },
+      {
+        "stage": "verify",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "replay",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "conflict",
+        "refused": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "replay_base_conflict",
+        "refused": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "stale",
+        "refused": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "rollback",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "migration_failure",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "capacity_full",
+        "sqlite_capacity_full": true,
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "unknown_schema",
+        "refused_without_modification": true
+      },
+      {
+        "stage": "verify",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "corrupt_readonly",
+        "refused_without_modification": true
+      },
+      {
+        "stage": "verify",
+        "revision": 2,
+        "payload": "B",
+        "operation_count": 2,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "kill_after_receipt",
+        "writer_exit": 137,
+        "crash_point": "after_receipt"
+      },
+      {
+        "stage": "verify",
+        "revision": 3,
+        "payload": "C",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "replay_final",
+        "revision": 3,
+        "payload": "C",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "verify",
+        "revision": 3,
+        "payload": "C",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "damage_head",
+        "revision": 3,
+        "payload": "X",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "refuse_damaged_head",
+        "write_status": "repair_required",
+        "replay_status": "repair_required",
+        "revision": 3,
+        "payload": "X",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "verify",
+        "revision": 3,
+        "payload": "X",
+        "operation_count": 3,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "restore_head_and_write",
+        "write_status": "committed",
+        "revision": 4,
+        "payload": "D",
+        "operation_count": 4,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      },
+      {
+        "stage": "verify",
+        "revision": 4,
+        "payload": "D",
+        "operation_count": 4,
+        "schema": 1,
+        "journal_mode": "wal",
+        "synchronous": 2
+      }
+    ]
+  },
+  "source_sha256": {
+    "tools/verify_sqlite_capabilities_isolated.py": "71a15753e93109f570cb2a32288101ac994f8e10c818d1ce73285cd23c01830c",
+    "tools/verify_sqlite_capabilities.py": "df6fae9ae8f9c7a40f57b338c3c8606e11163511b631b1791f4701d72a2f9895",
+    "android-app/src/androidTest/java/dev/notecore/app/probes/SqliteCrashProbe.java": "a993289edba3dfdbebe9a7e63f3669b27f6ee2e48f34b87cb4884edf3ad5bbd5",
+    "tools/probes/SqliteCrashProbe.swift": "105c32019456346070c642c607aa49ec0551aa6cede31c85d55f3a5ff82c3115",
+    "tools/probes/SqliteProbeSupport.swift": "a89000490611b9b4fe56f1038db07904152d9cf332f73db92b147ae943b8d827"
+  },
+  "retained_artifact_sha256": {
+    "android-matrix.log": "2cf3ed7cf35bcd04d7542c0f361b9e574d18c93030aa1035ac98bf34b9edb0de",
+    "emulator.log": "4f4527efeb102741f541a68d6f2eb0c4fc2d0d02c196a63af245505da5980512",
+    "sqlite-probe.apk": "c0d8ea62714cd8412f7bf17921745821c9a7937a4443ddef8c90b24f1020c8ab",
+    "sqlite-probe.apk.idsig": "530c0f5660ea1d7bc59a35147cd1266be2a2b13e36a1807594cd13107028cdbc"
+  }
+}

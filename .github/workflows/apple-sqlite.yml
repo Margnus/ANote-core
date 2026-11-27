@@ -1,0 +1,39 @@
+name: Apple SQLite recovery capability
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apple-sqlite.yml'
+      - 'tools/verify_sqlite_capabilities*.py'
+      - 'tools/probes/SqliteCrashProbe.swift'
+      - 'tools/probes/SqliteProbeSupport.swift'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: macos-15
+    timeout-minutes: 12
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check native SQLite recovery in iOS Simulator
+        run: >-
+          python3 tools/verify_sqlite_capabilities_isolated.py --platform apple
+          --runtime com.apple.CoreSimulator.SimRuntime.iOS-18-5
+          --device-type com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro
+          --output build/apple-sqlite
+      - name: Retain verification artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: apple-sqlite-${{ github.sha }}
+          path: build/apple-sqlite/
+          if-no-files-found: error
+          retention-days: 14
