@@ -27,7 +27,9 @@ class PdfCompositeExportRulesTest {
         target: PdfCompositeTarget = PdfCompositeTarget.PDF_DOCUMENT,
         scale: Double = 2.0,
         maxPixels: Long = 300_000,
-    ) = PdfCompositeExportRequest(operation, target, ranges, scale, maxPixels)
+        retention: PdfCompositeRasterRetention = PdfCompositeRasterRetention.ONE_PAGE_AT_A_TIME,
+        maxRetainedBytes: Long = Long.MAX_VALUE,
+    ) = PdfCompositeExportRequest(operation, target, ranges, scale, maxPixels, retention, maxRetainedBytes)
 
     private fun plan(
         root: DocumentRoot,
@@ -157,6 +159,27 @@ class PdfCompositeExportRulesTest {
         val admitted = assertNotNull(plan(expanded, catalog, request(maxPixels = 280_000), resolver = ::resolver).plan)
         assertEquals(catalog.references, reads)
         assertEquals(1_120_000L, admitted.tasks[1].argbByteUpperBound)
+    }
+
+    @Test fun separatelyAccountsRetainingWriterAndPageAtATimeWriterBeforeMetadataReads() {
+        val (root, catalog) = model()
+        val blank = root.page(1).copy(height = 120.0)
+        val sample = DocumentRoot.compose(root.title, root.scene, listOf(root.page(0), blank, root.page(2)))
+        for ((mode, exact) in listOf(PdfCompositeRasterRetention.ONE_PAGE_AT_A_TIME to 864_000L,
+                                     PdfCompositeRasterRetention.UNTIL_EXPORT_FINISHED to 2_112_000L)) {
+            val denied = plan(sample, catalog, request(retention = mode, maxRetainedBytes = exact - 1)) {
+                error("over-budget export must not read source metadata")
+            }
+            assertEquals(PdfCompositeExportFailure.RETAINED_ARGB_CAPACITY, denied.failure)
+            assertNull(denied.plan)
+
+            val accepted = assertNotNull(plan(sample, catalog, request(retention = mode, maxRetainedBytes = exact)).plan)
+            assertEquals(exact, accepted.retainedArgbByteUpperBound)
+            assertEquals(accepted, PdfCompositeExportRules.revalidate(accepted, accepted.operationId).plan)
+            val tampered = accepted.copy(retainedArgbByteUpperBound = exact - 1)
+            assertEquals(PdfCompositeExportFailure.STALE_PLAN,
+                PdfCompositeExportRules.revalidate(tampered, tampered.operationId).failure)
+        }
     }
 
     @Test fun metadataCallbackCannotChangeTheCatalogAndSelectionUsedByThePlan() {

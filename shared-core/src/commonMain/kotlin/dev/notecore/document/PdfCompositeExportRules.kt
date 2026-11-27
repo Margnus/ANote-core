@@ -4,6 +4,7 @@ import dev.notecore.canvas.prototype.CommandId
 import kotlin.math.ceil
 
 internal enum class PdfCompositeTarget { PDF_DOCUMENT, PAGE_IMAGES }
+internal enum class PdfCompositeRasterRetention { ONE_PAGE_AT_A_TIME, UNTIL_EXPORT_FINISHED }
 internal data class PdfPageRange(val first: Int, val last: Int)
 internal data class PdfCompositeExportRequest(
     val operationId: CommandId,
@@ -11,6 +12,8 @@ internal data class PdfCompositeExportRequest(
     val ranges: List<PdfPageRange>,
     val pixelsPerPageUnit: Double,
     val maxPagePixels: Long,
+    val rasterRetention: PdfCompositeRasterRetention,
+    val maxRetainedArgbBytes: Long,
 )
 internal data class PdfCompositeExportDisclosure(
     val editableObjects: Boolean = false,
@@ -32,6 +35,7 @@ internal data class PdfCompositeExportPlan(
     val request: PdfCompositeExportRequest,
     val disclosure: PdfCompositeExportDisclosure,
     val tasks: List<PdfCompositePageTask>,
+    val retainedArgbByteUpperBound: Long,
 ) {
     val operationId: CommandId get() = request.operationId
     val documentRevision: Long get() = root.revision
@@ -39,7 +43,7 @@ internal data class PdfCompositeExportPlan(
 }
 internal enum class PdfCompositeExportFailure {
     INVALID_OPERATION, EMPTY_SELECTION, INVALID_RANGES, RANGE_CAPACITY, PAGE_CAPACITY,
-    INVALID_QUALITY, INVALID_PIXEL_BUDGET, PIXEL_CAPACITY, MISSING_SOURCE_METADATA,
+    INVALID_QUALITY, INVALID_PIXEL_BUDGET, PIXEL_CAPACITY, RETAINED_ARGB_CAPACITY, MISSING_SOURCE_METADATA,
     SOURCE_GEOMETRY_REJECTED, CANCELLED, STALE_PLAN,
 }
 internal data class PdfCompositeExportResult(
@@ -75,7 +79,7 @@ internal object PdfCompositeExportRules {
         if (!request.pixelsPerPageUnit.isFinite() || request.pixelsPerPageUnit !in 0.25..4.0) {
             return PdfCompositeExportResult(failure = PdfCompositeExportFailure.INVALID_QUALITY)
         }
-        if (request.maxPagePixels <= 0 || request.maxPagePixels > Long.MAX_VALUE / 4) {
+        if (request.maxPagePixels <= 0 || request.maxPagePixels > Long.MAX_VALUE / 4 || request.maxRetainedArgbBytes <= 0) {
             return PdfCompositeExportResult(failure = PdfCompositeExportFailure.INVALID_PIXEL_BUDGET)
         }
         val normalized = mutableListOf<PdfPageRange>()
@@ -93,6 +97,7 @@ internal object PdfCompositeExportRules {
         val projection = PdfPageCatalogRules.project(root, catalog, space, metadataRevision)
         projection.failure?.let { return PdfCompositeExportResult(catalogFailure = it) }
         val tasks = mutableListOf<PdfCompositePageTask>()
+        var retainedBytes = 0L
         // The entire selection must fit before asking the source reader for any metadata.
         for (position in projection.pages) {
             if (normalized.none { position.displayNumber in it.first..it.last }) continue
@@ -107,8 +112,14 @@ internal object PdfCompositeExportRules {
             if (pixels > request.maxPagePixels) {
                 return PdfCompositeExportResult(failure = PdfCompositeExportFailure.PIXEL_CAPACITY)
             }
+            val bytes = pixels * 4
+            val alreadyRetained = if (request.rasterRetention == PdfCompositeRasterRetention.UNTIL_EXPORT_FINISHED) retainedBytes else 0L
+            if (bytes > request.maxRetainedArgbBytes - alreadyRetained) {
+                return PdfCompositeExportResult(failure = PdfCompositeExportFailure.RETAINED_ARGB_CAPACITY)
+            }
+            retainedBytes = maxOf(retainedBytes, alreadyRetained + bytes)
             tasks.add(PdfCompositePageTask(tasks.size + 1, position.displayNumber, page, null,
-                width.toInt(), height.toInt(), pixels * 4))
+                width.toInt(), height.toInt(), bytes))
         }
         if (tasks.isEmpty()) return PdfCompositeExportResult(failure = PdfCompositeExportFailure.EMPTY_SELECTION)
         val snapshotCatalog = catalog.copy(sources = catalog.sources.toList(), references = catalog.references.toList())
@@ -128,7 +139,7 @@ internal object PdfCompositeExportRules {
             tasks[index] = task.copy(background = background)
         }
         return PdfCompositeExportResult(plan = PdfCompositeExportPlan(root, snapshotCatalog,
-            request.copy(ranges = normalized.toList()), PdfCompositeExportDisclosure(), tasks.toList()))
+            request.copy(ranges = normalized.toList()), PdfCompositeExportDisclosure(), tasks.toList(), retainedBytes))
     }
 
     fun revalidate(candidate: PdfCompositeExportPlan, activeOperation: CommandId): PdfCompositeExportResult {
