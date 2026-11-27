@@ -106,6 +106,17 @@ def main():
         for path in root.glob('password-*.png'):
             shutil.copyfile(path, OUTPUT / path.name)
         assert len(list(OUTPUT.glob('password-*.png'))) == 8
+        report['stage'] = 'composite_export_observations'
+        text = run('composite', ['xcrun', 'simctl', 'spawn', device, str(binary), str(root), '--composite'], 120)
+        lines = [line.removeprefix('NOTECORE_PDF_COMPOSITE ') for line in text.splitlines()
+                 if line.startswith('NOTECORE_PDF_COMPOSITE ')]
+        assert len(lines) == 1 and json.loads(lines[0]) == {'cancelled_before_publish': True}
+        report['composite_observations'] = json.loads(lines[0])
+        assert sha(root / NAMES[0]) == before['android-app/src/androidTest/assets/pdf/' + NAMES[0]]
+        for scale in (1, 2):
+            name = f'quality-{scale}.pdf'
+            for entry in [name, *(f'{name}.{index}.png' for index in range(3))]:
+                shutil.copyfile(root / entry, OUTPUT / entry)
         assert before == {p: sha(ROOT / p) for p in inputs}
         report.update(status='collected_pending_pixel_verification', stage='complete')
     except BaseException as error:

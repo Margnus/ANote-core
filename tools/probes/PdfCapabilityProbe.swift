@@ -177,9 +177,74 @@ func outlineMain() throws {
     let data = try JSONSerialization.data(withJSONObject: try children(of: root, depth: 0), options: [.sortedKeys])
     FileHandle.standardOutput.write(Data("NOTECORE_PDF_OUTLINE ".utf8) + data + Data("\n".utf8))
 }
+
+func compositeMain() throws {
+    let root = URL(fileURLWithPath: CommandLine.arguments[1]).standardizedFileURL
+    try require(root.path.contains("/build/pdf-capability-"))
+    let source = try open(root.appendingPathComponent("crop-rotations.pdf"))
+    try require(source.numberOfPages == 4)
+    let pages: [(sourceIndex: Int?, width: Int, height: Int)] = [(3, 180, 300), (nil, 200, 120), (0, 300, 180)]
+
+    func export(_ name: String, scale: Int, cancelled: Bool) throws {
+        let output = root.appendingPathComponent(name)
+        let staging = root.appendingPathComponent("composite-\(UUID().uuidString).stage")
+        let files = FileManager.default
+        try require(!files.fileExists(atPath: output.path))
+        defer { if files.fileExists(atPath: staging.path) { try? files.removeItem(at: staging) } }
+        do {
+            guard let pdf = CGContext(staging as CFURL, mediaBox: nil, nil) else { throw ProbeFailure.invariant }
+            defer { pdf.closePDF() }
+            for spec in pages {
+                var bounds = CGRect(x: 0, y: 0, width: spec.width, height: spec.height)
+                let width = spec.width * scale, height = spec.height * scale
+                guard let raster = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8,
+                        bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                        bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
+                else { throw ProbeFailure.invariant }
+                raster.scaleBy(x: CGFloat(scale), y: CGFloat(scale))
+                raster.setFillColor(CGColor(gray: 1, alpha: 1))
+                raster.fill(bounds)
+                if let index = spec.sourceIndex {
+                    guard let page = source.page(at: index + 1) else { throw ProbeFailure.invariant }
+                    raster.saveGState()
+                    raster.concatenate(page.getDrawingTransform(.cropBox, rect: bounds, rotate: 0, preserveAspectRatio: true))
+                    raster.drawPDFPage(page)
+                    raster.restoreGState()
+                }
+                raster.setFillColor(red: 0, green: 1, blue: 1, alpha: 1)
+                raster.fill(CGRect(x: 45, y: spec.height - 65, width: 20, height: 20))
+                guard let image = raster.makeImage() else { throw ProbeFailure.invariant }
+                let box = Data(bytes: &bounds, count: MemoryLayout<CGRect>.size)
+                pdf.beginPDFPage([kCGPDFContextMediaBox as String: box] as CFDictionary)
+                pdf.draw(image, in: bounds)
+                pdf.endPDFPage()
+            }
+        }
+        let staged = try open(staging)
+        try require(staged.numberOfPages == pages.count)
+        if !cancelled { try files.moveItem(at: staging, to: output) }
+    }
+
+    for scale in [1, 2] {
+        let name = "quality-\(scale).pdf"
+        try export(name, scale: scale, cancelled: false)
+        let document = try open(root.appendingPathComponent(name))
+        try require(document.numberOfPages == pages.count)
+        for index in pages.indices {
+            guard let page = document.page(at: index + 1) else { throw ProbeFailure.invariant }
+            _ = try render(page, root.appendingPathComponent("\(name).\(index).png"))
+        }
+    }
+    try export("cancelled.pdf", scale: 1, cancelled: true)
+    let names = try FileManager.default.contentsOfDirectory(atPath: root.path)
+    try require(!names.contains("cancelled.pdf") && !names.contains { $0.hasSuffix(".stage") })
+    print("NOTECORE_PDF_COMPOSITE {\"cancelled_before_publish\":true}")
+}
+
 do {
     if CommandLine.arguments.count == 3 && CommandLine.arguments[2] == "--password" { try passwordMain() }
     else if CommandLine.arguments.count == 3 && CommandLine.arguments[2] == "--outline" { try outlineMain() }
+    else if CommandLine.arguments.count == 3 && CommandLine.arguments[2] == "--composite" { try compositeMain() }
     else if CommandLine.arguments.count == 3 { try metadataMain() }
     else { try main() }
 } catch {fputs("Synthetic PDF probe failed: \(error)\n",stderr);exit(2)}

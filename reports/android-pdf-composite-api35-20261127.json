@@ -1,0 +1,115 @@
+{
+  "status": "passed",
+  "runtime": {
+    "api": "35",
+    "fingerprint": "Android/sdk_phone64_x86_64/emu64x:15/AE3A.240806.019/12368160:userdebug/test-keys",
+    "abi": "x86_64",
+    "avd": "NoteCorePdfExport35"
+  },
+  "input_sha256": {
+    "source.pdf": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+    "probe.zip": "a64f1123d2b7b9720b4dfbcb9c9c60dccef0779d6ae2ed05038bfd5da2d3e142"
+  },
+  "source_sha256": {
+    "tools/probes/AndroidPdfCompositeProbe.java": "fa279ee9e14bd945810d46706b01220eda04c866a50ebb9920de626d93e8b3c3",
+    "tools/verify_android_pdf_composite.py": "9cc1ac12dc6585eeff7e1c32ad8b5d5badefb3d157987e9c14b2d46e7aa2bf60",
+    "fixtures/pdf/recipe.json": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8"
+  },
+  "output_sha256": {
+    "quality-1.pdf": "7ea308202fc705e17f740e11b34528ca08b35f21b12c00c1f328557b36515532",
+    "quality-1.pdf.0.png": "3b7a7cd1413ff7f9fb7e765f52275c5ce965c1cfc28648f4e50ef6a2ab495f23",
+    "quality-1.pdf.1.png": "969bba58f349074d4b0d64df2f3fde1563df841524824c6c991b83ce6d57b57c",
+    "quality-1.pdf.2.png": "444a89670f500839c2233c7d09be6b63edc154560e2b465c9b1f7270c91efff6",
+    "quality-2.pdf": "7096930e6d4fddf8386854720d93969929bcd5e92a4f340b93be86fe3d316cef",
+    "quality-2.pdf.0.png": "26558081ca36845b0a7d64a3e89d5bb086d46f8e0da58562f9067b31db9dfa29",
+    "quality-2.pdf.1.png": "969bba58f349074d4b0d64df2f3fde1563df841524824c6c991b83ce6d57b57c",
+    "quality-2.pdf.2.png": "79890354abae33640b7c3c19ded919dad6d3893e89d7803a786a0bbddfafd0c5",
+    "native.json": "3a9f26a505b1916a49d6463430486e0f1e28438be4eaf4dea68c93d07b6e8306"
+  },
+  "qualities": {
+    "1": {
+      "pages": [
+        {
+          "source_index": 3,
+          "page_points": [
+            180,
+            300
+          ],
+          "image_pixels": [
+            180,
+            300
+          ],
+          "matched_pixel_anchors": 5
+        },
+        {
+          "source_index": null,
+          "page_points": [
+            200,
+            120
+          ],
+          "image_pixels": [
+            200,
+            120
+          ],
+          "matched_pixel_anchors": 2
+        },
+        {
+          "source_index": 0,
+          "page_points": [
+            300,
+            180
+          ],
+          "image_pixels": [
+            300,
+            180
+          ],
+          "matched_pixel_anchors": 5
+        }
+      ],
+      "retained_bitmap_bytes": 528000
+    },
+    "2": {
+      "pages": [
+        {
+          "source_index": 3,
+          "page_points": [
+            180,
+            300
+          ],
+          "image_pixels": [
+            360,
+            600
+          ],
+          "matched_pixel_anchors": 5
+        },
+        {
+          "source_index": null,
+          "page_points": [
+            200,
+            120
+          ],
+          "image_pixels": [
+            400,
+            240
+          ],
+          "matched_pixel_anchors": 2
+        },
+        {
+          "source_index": 0,
+          "page_points": [
+            300,
+            180
+          ],
+          "image_pixels": [
+            600,
+            360
+          ],
+          "matched_pixel_anchors": 5
+        }
+      ],
+      "retained_bitmap_bytes": 2112000
+    }
+  },
+  "cancelled_before_publish": true,
+  "scope": "Android 35 isolated native raster PDF export, no App or aggregate native heap claim"
+}

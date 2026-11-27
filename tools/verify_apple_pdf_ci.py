@@ -9,6 +9,7 @@ import subprocess
 from PIL import Image
 from pypdf import PdfReader
 import generate_pdf_outline_fixture as outline_fixture
+from verify_android_pdf_composite import verify_file as verify_composite_file
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -123,6 +124,10 @@ def main():
         result['outline_destinations_verified'] = True
         result['outline'] = expected
         result['outline_oracle_sha256'] = sha(Path(outline_fixture.__file__).read_bytes())
+    if 'composite_observations' in report:
+        assert report['composite_observations'] == {'cancelled_before_publish': True}
+        result['composite_export'] = {str(scale): verify_composite_file(folder, scale, recipe) for scale in (1, 2)}
+        result['composite_cancelled_before_publish'] = True
     (folder / 'verification.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(json.dumps({'status': result['status'], 'pages': len(checks), 'metadata_passed': sum(c['metadata_matches_source'] for c in checks),
                       'image_checks_passed': sum(i['anchors_match'] for c in checks for i in c['images'])}))
