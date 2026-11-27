@@ -62,6 +62,33 @@ class BrushTilePixelsPocTest {
         cache.returnReader(full); cache.close(); assertTrue(cache.isDrained)
     }
 
+    @Test fun resumeCopiesExactPrefixAndRejectsAnIncompatibleOwnerOrGrid() {
+        val catalog = f.catalog()
+        val next = f.frame.copy(requestSequence = 2)
+        val oldMask = assertIs<BrushTileBuild.Ready>(catalog.render(f.frame, f.grid)).tile
+        val nextMask = assertIs<BrushTileBuild.Ready>(catalog.render(next, f.grid)).tile
+        val initial = BrushTilePixelsPoc.Companion.Composition(f.frame, f.layer, f.grid)
+        assertTrue(initial.over(oldMask, 0xcc431a, { false }))
+        val prefix = initial.finish()
+        val original = IntArray(prefix.logicalBytes.toInt(), prefix::byteAt)
+        val resumed = BrushTilePixelsPoc.Companion.Composition(next, f.layer, f.grid, prefix)
+        assertTrue(resumed.over(nextMask, 0x127be3, { false }))
+        val cold = BrushTilePixelsPoc.Companion.Composition(next, f.layer, f.grid)
+        assertTrue(cold.over(nextMask, 0xcc431a, { false }))
+        assertTrue(cold.over(nextMask, 0x127be3, { false }))
+        val actual = resumed.finish()
+        val expected = cold.finish()
+        assertEquals(next, actual.frame)
+        assertContentEquals(IntArray(original.size, expected::byteAt), IntArray(original.size, actual::byteAt))
+        assertContentEquals(original, IntArray(original.size, prefix::byteAt))
+        assertFailsWith<IllegalArgumentException> {
+            BrushTilePixelsPoc.Companion.Composition(next.copy(sessionGeneration = 2), f.layer, f.grid, prefix)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            BrushTilePixelsPoc.Companion.Composition(next, f.layer, f.grid.copy(origin = PointD(1.0, 8.0)), prefix)
+        }
+    }
+
     @Test fun gutterAdmissionDoesNotClampOrChangePixelSizeAndSampling() {
         assertEquals(f.grid, f.grid.withGutter(0))
         val expanded = f.grid.withGutter(1)!!

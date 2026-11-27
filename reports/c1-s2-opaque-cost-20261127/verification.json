@@ -1,0 +1,185 @@
+{
+  "status": "passed",
+  "base_commit": "b163f5bfe40d5e1e90a030018e2d971915672f5c",
+  "suite": "JVM dense comparison and targeted platform regression",
+  "observations": [
+    {
+      "order": "interleaved",
+      "strategy": "whole",
+      "request": 1,
+      "fullHits": 0,
+      "prefixHits": 0,
+      "work": 45598720,
+      "maxTileWork": 15694420,
+      "residentLogicalBytes": 44944,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "interleaved",
+      "strategy": "prefix",
+      "request": 1,
+      "fullHits": 0,
+      "prefixHits": 0,
+      "work": 45606912,
+      "maxTileWork": 15696028,
+      "residentLogicalBytes": 27440,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "interleaved",
+      "strategy": "whole",
+      "request": 2,
+      "fullHits": 1,
+      "prefixHits": 0,
+      "work": 29904300,
+      "maxTileWork": 15691932,
+      "residentLogicalBytes": 44944,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "interleaved",
+      "strategy": "prefix",
+      "request": 2,
+      "fullHits": 1,
+      "prefixHits": 2,
+      "work": 24610908,
+      "maxTileWork": 12782428,
+      "residentLogicalBytes": 27440,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "interleaved",
+      "strategy": "whole",
+      "request": 3,
+      "fullHits": 1,
+      "prefixHits": 0,
+      "work": 29904300,
+      "maxTileWork": 15691932,
+      "residentLogicalBytes": 44944,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "interleaved",
+      "strategy": "prefix",
+      "request": 3,
+      "fullHits": 1,
+      "prefixHits": 2,
+      "work": 24610908,
+      "maxTileWork": 12782428,
+      "residentLogicalBytes": 27440,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "tail",
+      "strategy": "whole",
+      "request": 1,
+      "fullHits": 0,
+      "prefixHits": 0,
+      "work": 45598720,
+      "maxTileWork": 15694420,
+      "residentLogicalBytes": 44944,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "tail",
+      "strategy": "prefix",
+      "request": 1,
+      "fullHits": 0,
+      "prefixHits": 0,
+      "work": 45606912,
+      "maxTileWork": 15696028,
+      "residentLogicalBytes": 44800,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "tail",
+      "strategy": "whole",
+      "request": 2,
+      "fullHits": 1,
+      "prefixHits": 0,
+      "work": 29904300,
+      "maxTileWork": 15691932,
+      "residentLogicalBytes": 44944,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "tail",
+      "strategy": "prefix",
+      "request": 2,
+      "fullHits": 1,
+      "prefixHits": 2,
+      "work": 81920,
+      "maxTileWork": 61440,
+      "residentLogicalBytes": 44800,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "tail",
+      "strategy": "whole",
+      "request": 3,
+      "fullHits": 1,
+      "prefixHits": 0,
+      "work": 29904300,
+      "maxTileWork": 15691932,
+      "residentLogicalBytes": 44944,
+      "coldByteChecks": 12288
+    },
+    {
+      "order": "tail",
+      "strategy": "prefix",
+      "request": 3,
+      "fullHits": 1,
+      "prefixHits": 2,
+      "work": 81920,
+      "maxTileWork": 61440,
+      "residentLogicalBytes": 44800,
+      "coldByteChecks": 12288
+    }
+  ],
+  "historic_s2_work_pixel_and_visible_counts_match": true,
+  "jvm_tests": 825,
+  "apple_native": {
+    "status": "passed",
+    "tests": 7,
+    "checks": [
+      "dev.notecore.canvas.prototype.BrushTilePixelsPocTest.expandedGridIncludesTrueNeighborsAndKeepsWorldSubpixelLattice",
+      "dev.notecore.canvas.prototype.BrushTilePixelsPocTest.gutterAdmissionDoesNotClampOrChangePixelSizeAndSampling",
+      "dev.notecore.canvas.prototype.BrushTilePixelsPocTest.pixelBudgetAndCancellationDoNotPublishPartialPayloadOrReturnReader",
+      "dev.notecore.canvas.prototype.BrushTilePixelsPocTest.resumeCopiesExactPrefixAndRejectsAnIncompatibleOwnerOrGrid",
+      "dev.notecore.canvas.prototype.BrushTilePixelsPocTest.rgbaPremultipliesOnceAndRemainsOwnedAfterReaderReturn",
+      "dev.notecore.canvas.prototype.CompositionTileKeyPocTest.captureKeepsTheOriginalDependenciesAndSeparatesOwnersAndConfigurations",
+      "dev.notecore.canvas.prototype.CompositionTileKeyPocTest.unresolvedPixelsStayWithinTheirRequestAndResolvedPixelsKeepCanonicalOrder"
+    ],
+    "device": "A225CC65-CAD9-4E93-8B57-F4CBF0040CA5",
+    "runtime": "iOS 27.0 Simulator arm64",
+    "binary_sha256": "784b57b5621c745bc8c5a2b083a0fae2e49a1106f03af21e002ae2ba0774f252"
+  },
+  "android_api26": {
+    "status": "unverified"
+  },
+  "source_sha256": {
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPoc.kt": "19956591e43ac1d5772aab19125bd5daa4ffa95182d5cfb16cef1318f7bfbb71",
+    "canvas-core/src/commonTest/kotlin/dev/notecore/canvas/prototype/BrushTilePixelsPocTest.kt": "f041c7942dfe8cba5de240509e45ab143246a975e7004f2475df6829fcdcf208",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/SweptDensePageProbe.kt": "bd43d5512528dbd8c3569f0662c229e8faa3efd6ae0d04b2cfdffde1d12d330b",
+    "canvas-core/src/androidInstrumentedTest/kotlin/dev/notecore/canvas/prototype/CoreBrushInstrumentation.kt": "6384b2aebbb55956b25a6f2071b1821f08c7220f1d2e697509bb7bd191d6d4a1"
+  },
+  "executable_sha256": {
+    "build/c1-swept-cache-20261125/android-artifacts/canvas-core/bin/iosSimulatorArm64/debugTest/test.kexe": "784b57b5621c745bc8c5a2b083a0fae2e49a1106f03af21e002ae2ba0774f252",
+    "build/c1-swept-cache-20261125/android-artifacts/canvas-core/outputs/apk/androidTest/debug/canvas-core-debug-androidTest.apk": "ebccdc527bf84021ae3521a345ad17d3fc3af07b4297f0e1761368646bfd4c1b"
+  },
+  "raw_evidence_sha256": {
+    "jvm-tests.log": "99372d5058b23efc1704f6e52b8853243ed1a1c1ba28607337ac134389ed9683",
+    "s2-opaque.log": "c7893f42756857dd5c5d35c95e65a9136e51ee8c8dc343666985d8e0bdd1e547",
+    "architecture.log": "86716dec9b02de90b40cfe2af88c2f35693d237d7a328b9e6b2a8a522de2a358",
+    "portable-inputs.log": "1c1567780b0090d32dec71050d899eb7ca3e28797495c7f16cc32e6effe4b5da",
+    "gradle-native-build.log": "7a55d67fcb3cbd680577f9b80987a454309075671ffd872166fa6a1bb8f5e71c",
+    "apple-devices-before.json": "cf167ed859f127ef94057d14959ff4eecb1371ae4598e9465fc43fd915da1d59",
+    "apple-devices-after.json": "966a314a703616671bb553ad2511ed0ce1d56185d1fe216bc3ceb098c60abafc",
+    "apple-native.log": "b587fd8c402b4b6d713eac6c83106efb80291cd81aeff55c2c8dd644591a9eba",
+    "s2-opaque.twwHR5-boot.log": "826a19f4ce181c34de58c720dd299cc1a9f2f4c42f1e66720f8d6e129c457c92",
+    "s2-opaque.tRmbgh-boot.log": "3c5c8169d4a05a7d4fe9f48c396d52c4533c6e9d2b138c7c4f5f4941900a8e0c"
+  },
+  "archive_sha256": "da6f113ac6598befdf4b0623ee7d0f7580a72a27f93ed0815db6e09f1854d203",
+  "adoption": "Use a complete stable canonical prefix as a checkpoint when it saves meaningful work. Preserve existing composition order and source-over rounding by copying prefix bytes. Do not permit unknown content to hit a complete cached tile across requests. Interleaving can leave most ink cost in the suffix; keep it under per-tile admission and schedule the visible rebuild.",
+  "scope": "Full historical S2 stroke corpus with rectangle proxies, priced on three fixed visible tiles and deterministic work counts. The tail stress control explicitly changes experimental order. Cache charges count RGBA and 16 bytes per dependency element; JVM object overhead, actual mixed platform text/image workload, physical heap and frame latency are not measured."
+}

@@ -25,15 +25,22 @@ object SweptDensePageProbe {
         val rgb: Int,
     )
     private data class TraceResult(val hits: Int, val invalidated: Int, val evictions: Int)
+    private data class StableDependency(val id: Int, val revision: Long)
+    private data class LayerCheckpoint(val key: CompositionTileKeyPoc<StableDependency>, val pixels: BrushTilePixelsPoc,
+        val keyEntries: Int,
+    ) {
+        val logicalBytes: Long get() = pixels.logicalBytes + keyEntries * 16L
+    }
     private data class Totals(
         var pairs: Int = 0,
         var vertices: Long = 0,
         var steps: Long = 0,
         var compositeChannels: Long = 0,
         var rectangleSamples: Long = 0,
+        var copiedChannels: Long = 0,
         var peakTransient: Long = 0,
     ) {
-        val work: Long get() = steps + compositeChannels + rectangleSamples
+        val work: Long get() = steps + compositeChannels + rectangleSamples + copiedChannels
     }
 
     @JvmStatic
@@ -83,16 +90,7 @@ object SweptDensePageProbe {
     ): TraceResult {
         val start = System.nanoTime()
         val frame = FrameToken(SceneId("s2-dense-raster"), revision, 1, 1, 1, 1)
-        val items = buildList {
-            strokes.forEachIndexed { index, stroke ->
-                val bounds = assertCatalog(frame, stroke).chunkBounds(0)
-                add(Item(size, stroke.objectRevision, bounds, stroke, stroke.brush.argb and 0xffffff))
-                if ((index + 1) % 100 == 0) {
-                    val y = index / 100 * 20.0
-                    add(Item(size, 1, BoundsD(16.0, y, 40.0, y + 8.0), null, 0x903424))
-                }
-            }
-        }
+        val items = denseItems(strokes, frame)
         val entries = items.mapIndexed { id, item -> SpatialEntry(id, item.bounds) }
         val index = PackedRTreePoc(entries)
         val indexed = System.nanoTime()
@@ -120,7 +118,19 @@ object SweptDensePageProbe {
             "indexNs=${indexed - start} renderingAndDigestNs=${rendered - indexed} rgbaSha256=$hash")
         val result = verifyTrace(label, frame, items, plans, pixels, cache, trace)
         check(result.hits in 1 until trace.size)
+        if (label == "base") verifyUnresolvedCosts(items)
         return result
+    }
+
+    private fun denseItems(strokes: List<StrokeObject>, frame: FrameToken): List<Item> = buildList {
+        strokes.forEachIndexed { index, stroke ->
+            val bounds = assertCatalog(frame, stroke).chunkBounds(0)
+            add(Item(size, stroke.objectRevision, bounds, stroke, stroke.brush.argb and 0xffffff))
+            if ((index + 1) % 100 == 0) {
+                val y = index / 100 * 20.0
+                add(Item(size, 1, BoundsD(16.0, y, 40.0, y + 8.0), null, 0x903424))
+            }
+        }
     }
 
     private fun planTiles(items: List<Item>, entries: List<SpatialEntry>, index: PackedRTreePoc,
@@ -187,14 +197,96 @@ object SweptDensePageProbe {
         }
     }
 
+    private fun verifyUnresolvedCosts(source: List<Item>) {
+        // Dense brush workload is unchanged. A subset of the existing rectangles models an
+        // opaque renderer whose output can change without changing the document revision.
+        fun unresolved(item: Item) = item.stroke == null && item.bounds.top < 160
+        val tops = listOf(0, 32, 64)
+        for (tailOnly in listOf(false, true)) {
+            val label = if (tailOnly) "tail" else "interleaved"
+            val items = if (tailOnly) source.filterNot(::unresolved) + source.filter(::unresolved) else source
+            val changed = items.map { if (unresolved(it)) it.copy(rgb = 0x246e94) else it }
+            val entries = items.mapIndexed { i, item -> SpatialEntry(i, item.bounds) }
+            val plans = planTiles(items, entries, PackedRTreePoc(entries), tops)
+            val priorCold = mutableMapOf<Int, BrushTilePixelsPoc>()
+            val strategies = listOf(false, true).associateWith {
+                WeightedLruCache<Int, LayerCheckpoint>(CACHE_BYTES) { it.logicalBytes }
+            }
+            for (sequence in 1L..3L) {
+                val frame = FrameToken(SceneId("s2-opaque-$label"), 1, 1, 1, 1, sequence)
+                val content = if (sequence == 1L) items else changed
+                val cold = plans.mapValues { (top, plan) ->
+                    val output = BrushTilePixelsPoc.Companion.Composition(frame, layer, plan.grid)
+                    check(composeTile(frame, content, plan, output, Totals(), WORK_LIMIT))
+                    output.finish().also { current ->
+                        val old = priorCold.put(top, current)
+                        if (old != null) {
+                            val changedPixels = (0 until current.logicalBytes.toInt())
+                                .any { old.byteAt(it) != current.byteAt(it) }
+                            check(changedPixels == (sequence == 2L && top != 64))
+                        }
+                    }
+                }
+                for ((prefixOnly, cache) in strategies) {
+                    var fullHits = 0
+                    var prefixHits = 0
+                    var work = 0L
+                    var maxTileWork = 0L
+                    for ((top, plan) in plans) {
+                        val dependencies = plan.candidates.map { position ->
+                            val item = content[position]
+                            if (unresolved(item)) null else StableDependency(item.id, item.revision)
+                        }
+                        val firstUnknown = dependencies.indexOf(null).let { if (it < 0) dependencies.size else it }
+                        val cut = if (prefixOnly) firstUnknown else dependencies.size
+                        check((firstUnknown < dependencies.size) == (top != 64))
+                        val key = CompositionTileKeyPoc.capture(frame, plan.grid, "s2-rgba8",
+                            dependencies.take(cut))
+                        val totals = Totals()
+                        val prior = cache.get(top)
+                        val checkpoint = if (prior?.key == key) {
+                            if (cut == dependencies.size) fullHits++ else prefixHits++
+                            prior
+                        } else {
+                            val prefix = BrushTilePixelsPoc.Companion.Composition(frame, layer, plan.grid)
+                            check(composeTile(frame, content, plan, prefix, totals, WORK_LIMIT, end = cut))
+                            LayerCheckpoint(key, prefix.finish(), cut).also {
+                                check(cache.put(top, it) is CacheAdmission.Stored)
+                            }
+                        }
+                        val pixels = if (cut == dependencies.size) checkpoint.pixels else {
+                            totals.copiedChannels += checkpoint.pixels.logicalBytes
+                            val resumed = BrushTilePixelsPoc.Companion.Composition(frame, layer, plan.grid,
+                                checkpoint.pixels)
+                            check(composeTile(frame, content, plan, resumed, totals, WORK_LIMIT, from = cut))
+                            resumed.finish()
+                        }
+                        val expected = cold.getValue(top)
+                        check((0 until pixels.logicalBytes.toInt()).all { pixels.byteAt(it) == expected.byteAt(it) })
+                        check(totals.work <= WORK_LIMIT)
+                        work += totals.work
+                        maxTileWork = maxOf(maxTileWork, totals.work)
+                    }
+                    if (sequence > 1) {
+                        check(fullHits == 1 && prefixHits == if (prefixOnly) 2 else 0)
+                    }
+                    println("S2 opaque order=$label strategy=${if (prefixOnly) "prefix" else "whole"} " +
+                        "request=$sequence fullHits=$fullHits prefixHits=$prefixHits " +
+                        "work=$work maxTileWork=$maxTileWork residentLogicalBytes=${cache.residentBytes} coldByteChecks=12288")
+                }
+            }
+        }
+    }
+
     private fun composeTile(frame: FrameToken, items: List<Item>, plan: TilePlan,
         output: BrushTilePixelsPoc.Companion.Composition, totals: Totals, workLimit: Long, destY: Int = 0,
+        from: Int = 0, end: Int = plan.candidates.size,
     ): Boolean {
         val tile = plan.grid
         val channelSteps = tile.width * tile.height * 4L
         val sampleSteps = tile.width * tile.height * tile.samplesPerAxis * tile.samplesPerAxis.toLong()
-        for (id in plan.candidates) {
-            val item = items[id]
+        for (position in from until end) {
+            val item = items[plan.candidates[position]]
             val remaining = workLimit - totals.work - channelSteps
             if (remaining <= 0) return false
             val mask = if (item.stroke == null) {

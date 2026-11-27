@@ -31,9 +31,15 @@ internal class BrushTilePixelsPoc private constructor(
     companion object {
         /** Worker-local complete-region composition. No partial buffer can escape on failure. */
         internal class Composition(private val frame: FrameToken, private val layer: LayerId,
-            private val grid: BrushPixelGridPoc,
+            private val grid: BrushPixelGridPoc, prefix: BrushTilePixelsPoc? = null,
         ) {
-            private val rgba = ByteArray(grid.width * grid.height * 4)
+            // The caller must confirm that this exact canonical prefix is still valid.
+            // Resume from the bytes to preserve per-contributor source-over rounding.
+            private val rgba = if (prefix == null) ByteArray(grid.width * grid.height * 4) else {
+                require(prefix.grid == grid && prefix.ownerLayer == layer &&
+                    prefix.frame.sceneId == frame.sceneId && prefix.frame.sessionGeneration == frame.sessionGeneration)
+                prefix.rgba.copyOf()
+            }
             private var finished = false
             fun over(mask: BrushTileMaskPoc, rgb: Int, cancelled: () -> Boolean, destX: Int = 0, destY: Int = 0): Boolean {
                 check(!finished)
