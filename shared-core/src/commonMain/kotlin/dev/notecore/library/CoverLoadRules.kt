@@ -1,7 +1,10 @@
 package dev.notecore.library
 
+import dev.notecore.document.PageId
+
 internal data class CoverPageMetadata(
     val noteId: String,
+    val firstPageId: PageId,
     val firstPageRevision: Long,
 )
 
@@ -34,7 +37,7 @@ internal data class CoverLoadCompletion(
 
 internal enum class CoverLoadFailure {
     INVALID_PAGE, INVALID_REQUEST, INVALID_METADATA, CACHE_REJECTED, TASK_CAPACITY, PIXEL_CAPACITY,
-    CANCELLED, STALE_QUERY, STALE_REQUEST, STALE_PAGE, STALE_PLAN,
+    CANCELLED, STALE_QUERY, STALE_REQUEST, STALE_PAGE, STALE_PLAN, STALE_COVER,
 }
 
 internal data class CoverLoadPlanResult(
@@ -53,8 +56,7 @@ internal object CoverLoadRules {
 
     private fun validRequest(request: CoverLoadRequest): Boolean {
         if (request.maxTasks !in 1..MAX_TASKS || request.maxCoverBytes <= 0 || request.maxBatchBytes <= 0) return false
-        return CoverCacheRules.derive("cover-request", 0, request.targetWidth,
-            request.targetHeight, request.scale).key != null
+        return CoverCacheRules.sizeFailure(request.targetWidth, request.targetHeight, request.scale) == null
     }
 
     private fun checkedPage(page: LibraryPage, active: LibraryPageQuery): LibraryPageResult =
@@ -66,25 +68,27 @@ internal object CoverLoadRules {
         else -> CoverLoadFailure.STALE_PAGE
     }
 
+    private fun metadataByNote(page: LibraryPage, metadata: List<CoverPageMetadata>): Map<String, CoverPageMetadata>? {
+        if (metadata.size != page.rows.size) return null
+        val byId = metadata.associateBy { it.noteId }
+        return byId.takeIf { it.keys == page.rows.map { row -> row.noteId }.toSet() }
+    }
+
     fun prepare(page: LibraryPage, metadata: List<CoverPageMetadata>,
                 request: CoverLoadRequest): CoverLoadPlanResult {
         if (!validRequest(request)) return CoverLoadPlanResult(failure = CoverLoadFailure.INVALID_REQUEST)
         val checked = checkedPage(page, page.query)
         if (checked.page != page) return CoverLoadPlanResult(failure = CoverLoadFailure.INVALID_PAGE)
-        if (metadata.size != page.rows.size) return CoverLoadPlanResult(failure = CoverLoadFailure.INVALID_METADATA)
-        val ids = metadata.map { it.noteId }
-        if (ids.toSet().size != ids.size || ids.toSet() != page.rows.map { it.noteId }.toSet()) {
-            return CoverLoadPlanResult(failure = CoverLoadFailure.INVALID_METADATA)
-        }
+        val byId = metadataByNote(page, metadata)
+            ?: return CoverLoadPlanResult(failure = CoverLoadFailure.INVALID_METADATA)
         if (page.rows.size > request.maxTasks) {
             return CoverLoadPlanResult(failure = CoverLoadFailure.TASK_CAPACITY)
         }
-        val byId = metadata.associateBy { it.noteId }
         val ordered = page.rows.map { byId.getValue(it.noteId) }
         val tasks = mutableListOf<CoverLoadTask>()
         var usedBytes = 0L
         for (item in ordered) {
-            val derived = CoverCacheRules.derive(item.noteId, item.firstPageRevision,
+            val derived = CoverCacheRules.derive(page.snapshot.spaceId, item.noteId, item.firstPageId, item.firstPageRevision,
                 request.targetWidth, request.targetHeight, request.scale)
             val key = derived.key ?: return CoverLoadPlanResult(
                 failure = CoverLoadFailure.CACHE_REJECTED, cacheFailure = derived.failure)
@@ -99,7 +103,8 @@ internal object CoverLoadRules {
     }
 
     fun deliver(candidate: CoverLoadCompletion, currentPage: LibraryPage?,
-                activeQuery: LibraryPageQuery?, currentRequest: CoverLoadRequest): CoverLoadDelivery {
+                activeQuery: LibraryPageQuery?, currentRequest: CoverLoadRequest,
+                currentMetadata: List<CoverPageMetadata>): CoverLoadDelivery {
         if (currentPage == null || activeQuery == null) {
             return CoverLoadDelivery(failure = CoverLoadFailure.CANCELLED)
         }
@@ -115,6 +120,13 @@ internal object CoverLoadRules {
         val fresh = prepare(activePage, candidate.plan.metadata, currentRequest)
         if (fresh.plan != candidate.plan || candidate.task !in fresh.plan.tasks) {
             return CoverLoadDelivery(failure = CoverLoadFailure.STALE_PLAN)
+        }
+        val byId = metadataByNote(activePage, currentMetadata)
+            ?: return CoverLoadDelivery(failure = CoverLoadFailure.INVALID_METADATA)
+        val key = candidate.task.key
+        val current = byId.getValue(key.noteId)
+        if (current.firstPageId != key.firstPageId || current.firstPageRevision != key.firstPageRevision) {
+            return CoverLoadDelivery(failure = CoverLoadFailure.STALE_COVER)
         }
         return CoverLoadDelivery(task = candidate.task)
     }

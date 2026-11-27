@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "command": "gradlew verifyPrototype --offline --console=plain",
+  "scope": "Shared JVM cover key and delivery against current visible metadata",
+  "totals": {
+    "tests": 801,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "affected_suites": {
+    "dev.notecore.library.CoverCacheRulesTest": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dev.notecore.library.CoverLoadRulesTest": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "source_sha256": {
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/CoverCacheRules.kt": "62f1913f34d16445441d5648a916fb16ac3f47e4c4fd8d2f082298f5fdaca941",
+    "shared-core/src/commonMain/kotlin/dev/notecore/library/CoverLoadRules.kt": "5600c3ef29022e58087a5af9dfae08de4fd36cc1310dd279e8c6a56f3108c0e2",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/CoverCacheRulesTest.kt": "56ef788f5d359ffa01651bd6b3d3fb278b06399660f6c665c743ed6802bafbab",
+    "shared-core/src/commonTest/kotlin/dev/notecore/library/CoverLoadRulesTest.kt": "4689e7eeaf21d49d9bf1470034187425c1af28087f1e7dc3ecf5f57e4049691d"
+  },
+  "native_decode_verified": false,
+  "app_delivery_verified": false
+}

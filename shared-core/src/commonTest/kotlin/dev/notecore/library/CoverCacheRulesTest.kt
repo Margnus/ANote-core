@@ -1,11 +1,13 @@
 package dev.notecore.library
 
+import dev.notecore.document.PageId
 import kotlin.test.*
 
 class CoverCacheRulesTest {
     private fun derive(noteId: String = "note-1", revision: Long = 5,
-                       width: Int = 200, height: Int = 260, scale: Double = 1.0) =
-        CoverCacheRules.derive(noteId, revision, width, height, scale)
+                       width: Int = 200, height: Int = 260, scale: Double = 1.0,
+                       spaceId: String = "local", pageId: PageId = PageId("p1")) =
+        CoverCacheRules.derive(spaceId, noteId, pageId, revision, width, height, scale)
 
     @Test fun sameInputsProduceSameKey() {
         val a = assertNotNull(derive().key)
@@ -27,6 +29,17 @@ class CoverCacheRulesTest {
         val b = assertNotNull(derive(noteId = "note-2").key)
         assertTrue(CoverCacheRules.isStale(a, b))
         assertFalse(CoverCacheRules.sameBucket(a, b))
+    }
+
+    @Test fun replacingFirstPageOrChangingSpaceSeparatesEqualRevisionsAndSizes() {
+        val original = assertNotNull(derive(revision = 0).key)
+        for (other in listOf(derive(revision = 0, pageId = PageId("p2")), derive(revision = 0, spaceId = "other"))) {
+            val key = assertNotNull(other.key)
+            assertTrue(CoverCacheRules.isStale(original, key))
+            assertFalse(CoverCacheRules.sameBucket(original, key))
+        }
+        assertEquals(CoverCacheFailure.INVALID_SPACE_ID, derive(spaceId = " ").failure)
+        assertEquals(CoverCacheFailure.INVALID_PAGE_ID, derive(pageId = PageId("\uD800")).failure)
     }
 
     @Test fun scaleWithinSameBucketSharesKey() {

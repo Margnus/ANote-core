@@ -1,5 +1,6 @@
 package dev.notecore.library
 
+import dev.notecore.document.PageId
 import kotlin.test.*
 
 class CoverLoadRulesTest {
@@ -20,7 +21,7 @@ class CoverLoadRulesTest {
         assertNotNull(LibraryPageRules.first(source, query(), limit).page)
 
     private fun metadata(page: LibraryPage, firstRevision: Long = 5) =
-        page.rows.mapIndexed { index, row -> CoverPageMetadata(row.noteId, firstRevision + index) }
+        page.rows.mapIndexed { index, row -> CoverPageMetadata(row.noteId, PageId("first-${row.noteId}"), firstRevision + index) }
 
     private fun request(
         maxCoverBytes: Long = 327680,
@@ -34,6 +35,10 @@ class CoverLoadRulesTest {
     private fun plan(page: LibraryPage = firstPage(), input: List<CoverPageMetadata> = metadata(page),
                      loadRequest: CoverLoadRequest = request()) =
         assertNotNull(CoverLoadRules.prepare(page, input, loadRequest).plan)
+
+    private fun deliver(completion: CoverLoadCompletion, page: LibraryPage?, query: LibraryPageQuery?,
+                        request: CoverLoadRequest, current: List<CoverPageMetadata> = page?.let { metadata(it) }.orEmpty()) =
+        CoverLoadRules.deliver(completion, page, query, request, current)
 
     @Test fun visibleRowsBecomeBoundedTasksAndEmptyPageNeedsNoMetadata() {
         val page = firstPage()
@@ -84,10 +89,10 @@ class CoverLoadRulesTest {
         val completion = CoverLoadCompletion(plan, plan.tasks.first())
         assertEquals(655360L, plan.totalArgbByteUpperBound)
         assertEquals(CoverLoadFailure.STALE_REQUEST,
-            CoverLoadRules.deliver(completion, page, page.query, tooSmall).failure)
+            deliver(completion, page, page.query, tooSmall).failure)
         val tampered = completion.copy(plan = plan.copy(totalArgbByteUpperBound = 327680L))
         assertEquals(CoverLoadFailure.STALE_PLAN,
-            CoverLoadRules.deliver(tampered, page, page.query, accepted).failure)
+            deliver(tampered, page, page.query, accepted).failure)
     }
 
     @Test fun metadataMustExactlyMatchVisibleRowsAndRevisions() {
@@ -95,9 +100,9 @@ class CoverLoadRulesTest {
         val input = metadata(page)
         val malformed = listOf(
             input.drop(1),
-            input + CoverPageMetadata("n2", 7),
+            input + CoverPageMetadata("n2", PageId("first-n2"), 7),
             listOf(input[0], input[0]),
-            listOf(input[0], CoverPageMetadata("missing", 6)),
+            listOf(input[0], CoverPageMetadata("missing", PageId("first-missing"), 6)),
         )
         for (bad in malformed) {
             val result = CoverLoadRules.prepare(page, bad, request())
@@ -129,8 +134,8 @@ class CoverLoadRulesTest {
         assertEquals(2, candidate.metadata.size)
         assertEquals(2, candidate.tasks.size)
         val completion = CoverLoadCompletion(candidate, candidate.tasks.first())
-        val first = CoverLoadRules.deliver(completion, page, page.query, request())
-        val second = CoverLoadRules.deliver(completion, page, page.query, request())
+        val first = deliver(completion, page, page.query, request())
+        val second = deliver(completion, page, page.query, request())
         assertNull(first.failure)
         assertSame(completion.task, first.task)
         assertEquals(first, second)
@@ -143,20 +148,20 @@ class CoverLoadRulesTest {
         val candidate = plan(page)
         val completion = CoverLoadCompletion(candidate, candidate.tasks.first())
         assertEquals(CoverLoadFailure.CANCELLED,
-            CoverLoadRules.deliver(completion, null, page.query, request()).failure)
+            deliver(completion, null, page.query, request()).failure)
         assertEquals(CoverLoadFailure.CANCELLED,
-            CoverLoadRules.deliver(completion, page, null, request()).failure)
+            deliver(completion, page, null, request()).failure)
         assertEquals(CoverLoadFailure.CANCELLED,
-            CoverLoadRules.deliver(completion, page, query(operationId = "other"), request()).failure)
+            deliver(completion, page, query(operationId = "other"), request()).failure)
         for (active in listOf(query(version = 8), query(input = "changed"),
                               page.query.copy(sort = LibrarySort.UPDATED), page.query.copy(favoritesOnly = true))) {
             assertEquals(CoverLoadFailure.STALE_QUERY,
-                CoverLoadRules.deliver(completion, page, active, request()).failure)
+                deliver(completion, page, active, request()).failure)
         }
         assertSame(page.query.operation,
             LibrarySearchRules.cancelQuery(page.query.operation, "other", 7))
         assertNull(LibrarySearchRules.cancelQuery(page.query.operation, "covers", 7))
-        assertNotNull(CoverLoadRules.deliver(completion, page, page.query, request()).task)
+        assertNotNull(deliver(completion, page, page.query, request()).task)
     }
 
     @Test fun pageSwitchOrDisplayRequestChangeInvalidatesOldCompletion() {
@@ -165,10 +170,40 @@ class CoverLoadRulesTest {
         val completion = CoverLoadCompletion(candidate, candidate.tasks.first())
         val next = assertNotNull(LibraryPageRules.next(catalog, query(), page.nextCursor!!, 2).page)
         assertEquals(CoverLoadFailure.STALE_PAGE,
-            CoverLoadRules.deliver(completion, next, page.query, request()).failure)
+            deliver(completion, next, page.query, request()).failure)
         assertEquals(CoverLoadFailure.STALE_REQUEST,
-            CoverLoadRules.deliver(completion, page, page.query, request(scale = 2.0)).failure)
-        assertNotNull(CoverLoadRules.deliver(completion, page, page.query, request()).task)
+            deliver(completion, page, page.query, request(scale = 2.0)).failure)
+        assertNotNull(deliver(completion, page, page.query, request()).task)
+    }
+
+    @Test fun editedOrReplacedFirstPageRejectsOnlyItsOldCover() {
+        val page = firstPage()
+        val original = metadata(page, firstRevision = 0)
+        val plan = plan(page, original)
+        val oldCover = CoverLoadCompletion(plan, plan.tasks[0])
+        val unchangedCover = CoverLoadCompletion(plan, plan.tasks[1])
+
+        for (changed in listOf(original[0].copy(firstPageRevision = 1),
+                               original[0].copy(firstPageId = PageId("new-first")))) {
+            val current = listOf(original[1], changed)
+            assertEquals(CoverLoadDelivery(failure = CoverLoadFailure.STALE_COVER),
+                deliver(oldCover, page, page.query, request(), current))
+            assertSame(unchangedCover.task, deliver(unchangedCover, page, page.query, request(), current).task)
+            val replanned = plan(page, current)
+            val updated = CoverLoadCompletion(replanned, replanned.tasks.first())
+            assertSame(updated.task, deliver(updated, page, page.query, request(), current).task)
+        }
+    }
+
+    @Test fun completionRequiresCurrentMetadataForEachVisibleRow() {
+        val page = firstPage()
+        val metadata = metadata(page)
+        val plan = plan(page, metadata)
+        val completion = CoverLoadCompletion(plan, plan.tasks.first())
+        for (bad in listOf(metadata.take(1), listOf(metadata[0], metadata[0]))) {
+            assertEquals(CoverLoadDelivery(failure = CoverLoadFailure.INVALID_METADATA),
+                deliver(completion, page, page.query, request(), bad))
+        }
     }
 
     @Test fun forgedPagesMetadataAndTasksCannotBeDelivered() {
@@ -182,18 +217,18 @@ class CoverLoadRulesTest {
         val forgedTask = original.task.copy(key = original.task.key.copy(firstPageRevision = 99))
         for (completion in listOf(original.copy(plan = changedMetadata),
                                   original.copy(plan = reversedTasks), original.copy(task = forgedTask))) {
-            assertNull(CoverLoadRules.deliver(completion, page, page.query, request()).task)
+            assertNull(deliver(completion, page, page.query, request()).task)
             assertEquals(CoverLoadFailure.STALE_PLAN,
-                CoverLoadRules.deliver(completion, page, page.query, request()).failure)
+                deliver(completion, page, page.query, request()).failure)
         }
         val reversedRows = page.copy(rows = page.rows.reversed())
         assertEquals(CoverLoadFailure.STALE_PAGE,
-            CoverLoadRules.deliver(original, reversedRows, page.query, request()).failure)
+            deliver(original, reversedRows, page.query, request()).failure)
         val changedSnapshot = page.copy(snapshot = page.snapshot.copy(notes = page.snapshot.notes.map {
             if (it.noteId == "n0") it.copy(title = "replacement") else it
         }))
         assertEquals(CoverLoadFailure.STALE_PAGE,
-            CoverLoadRules.deliver(original, changedSnapshot, page.query, request()).failure)
-        assertNotNull(CoverLoadRules.deliver(original, page, page.query, request()).task)
+            deliver(original, changedSnapshot, page.query, request()).failure)
+        assertNotNull(deliver(original, page, page.query, request()).task)
     }
 }
