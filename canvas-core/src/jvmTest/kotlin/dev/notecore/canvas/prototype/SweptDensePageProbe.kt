@@ -17,7 +17,14 @@ object SweptDensePageProbe {
     private data class CachedTile(val stamp: LongArray, val rgba: ByteArray) {
         val logicalBytes: Long get() = rgba.size + stamp.size * 8L
     }
-    private data class Item(val bounds: BoundsD, val stroke: StrokeObject?, val rgb: Int)
+    private data class Item(
+        val id: Int,
+        val revision: Long,
+        val bounds: BoundsD,
+        val stroke: StrokeObject?,
+        val rgb: Int,
+    )
+    private data class TraceResult(val hits: Int, val invalidated: Int, val evictions: Int)
     private data class Totals(
         var pairs: Int = 0,
         var vertices: Long = 0,
@@ -39,7 +46,9 @@ object SweptDensePageProbe {
         check(source.zip(moved).all { (a, b) -> a.samples === b.samples })
         val cache = WeightedLruCache<Int, CachedTile>(CACHE_BYTES) { it.logicalBytes }
         measure("base", 1, source, cache, listOf(0, 32, 64, 32, 0))
-        measure("moved-1000", 2, moved, cache, listOf(64, 0, 32, 96, 128, 160, 64))
+        val result = measure("moved-1000", 2, moved, cache, listOf(64, 0, 32, 96, 128, 160, 64))
+        check(result.invalidated == 2 && result.evictions > 0)
+        verifyCompositionDependencies()
     }
 
     private fun read(file: File): List<StrokeObject> = DataInputStream(file.inputStream().buffered()).use { input ->
@@ -71,16 +80,16 @@ object SweptDensePageProbe {
 
     private fun measure(label: String, revision: Long, strokes: List<StrokeObject>,
         cache: WeightedLruCache<Int, CachedTile>, trace: List<Int>,
-    ) {
+    ): TraceResult {
         val start = System.nanoTime()
         val frame = FrameToken(SceneId("s2-dense-raster"), revision, 1, 1, 1, 1)
         val items = buildList {
             strokes.forEachIndexed { index, stroke ->
                 val bounds = assertCatalog(frame, stroke).chunkBounds(0)
-                add(Item(bounds, stroke, stroke.brush.argb and 0xffffff))
+                add(Item(size, stroke.objectRevision, bounds, stroke, stroke.brush.argb and 0xffffff))
                 if ((index + 1) % 100 == 0) {
                     val y = index / 100 * 20.0
-                    add(Item(BoundsD(16.0, y, 40.0, y + 8.0), null, 0x903424))
+                    add(Item(size, 1, BoundsD(16.0, y, 40.0, y + 8.0), null, 0x903424))
                 }
             }
         }
@@ -89,28 +98,14 @@ object SweptDensePageProbe {
         val indexed = System.nanoTime()
         val output = BrushTilePixelsPoc.Companion.Composition(frame, layer, grid)
         val totals = Totals()
-        val visited = BooleanArray(items.size)
         val atlasBytes = grid.width.toLong() * grid.height * 4
         val sampleBytes = strokes.sumOf { it.samples.size * 28L }
         // Explicit payload model for item bounds plus tree bounds. JVM headers, collections and GC are outside this model.
         val boundBytes = (items.size + index.nodeCount) * 32L
-        val plans = (0 until grid.height step 32).associateWith { top ->
-            val tile = BrushTileGridPoc(PointD(grid.origin.x, grid.origin.y + top * grid.pixelSize),
-                grid.width, minOf(32, grid.height - top), grid.pixelSize, grid.samplesPerAxis)
-            val candidates = index.query(tile.bounds).ids
-            check(candidates == entries.filter { it.bounds.overlaps(tile.bounds) }.map { it.id }.toSet())
-            val ordered = candidates.sorted()
-            // This experiment has fixed scene/grid/profile and immutable proxy rectangles.
-            // Each ordered pair records the canonical position and stroke revision.
-            val stamp = LongArray(ordered.size * 2)
-            ordered.forEachIndexed { i, id ->
-                stamp[i * 2] = id.toLong()
-                stamp[i * 2 + 1] = items[id].stroke?.objectRevision ?: 0L
-                visited[id] = true
-            }
-            TilePlan(tile, ordered, stamp)
-        }
+        val plans = planTiles(items, entries, index, (0 until grid.height step 32).toList())
+        val visited = BooleanArray(items.size)
         plans.forEach { (top, plan) ->
+            plan.candidates.forEach { visited[it] = true }
             check(composeTile(frame, items, plan, output, totals, Long.MAX_VALUE, top))
         }
         check(visited.all { it })
@@ -123,7 +118,73 @@ object SweptDensePageProbe {
             "edgeTests=${totals.steps} compositeChannels=${totals.compositeChannels} rectangleSamples=${totals.rectangleSamples} sampleBytes=$sampleBytes boundBytes=$boundBytes atlasBytes=$atlasBytes " +
             "peakTransientLogicalBytes=${totals.peakTransient} measuredLogicalSubtotal=${sampleBytes + boundBytes + atlasBytes + totals.peakTransient} " +
             "indexNs=${indexed - start} renderingAndDigestNs=${rendered - indexed} rgbaSha256=$hash")
-        verifyTrace(label, frame, items, plans, pixels, cache, trace)
+        val result = verifyTrace(label, frame, items, plans, pixels, cache, trace)
+        check(result.hits in 1 until trace.size)
+        return result
+    }
+
+    private fun planTiles(items: List<Item>, entries: List<SpatialEntry>, index: PackedRTreePoc,
+        tops: List<Int>,
+    ): Map<Int, TilePlan> = tops.associateWith { top ->
+        val tile = BrushTileGridPoc(PointD(grid.origin.x, grid.origin.y + top * grid.pixelSize),
+            grid.width, minOf(32, grid.height - top), grid.pixelSize, grid.samplesPerAxis)
+        val candidates = index.query(tile.bounds).ids
+        check(candidates == entries.filter { it.bounds.overlaps(tile.bounds) }.map { it.id }.toSet())
+        val ordered = candidates.sorted()
+        // The index returns positions in the current canonical order. Cache identity uses stable
+        // item IDs, with a revision covering every pixel dependency within this fixed-grid probe.
+        val stamp = LongArray(ordered.size * 2)
+        ordered.forEachIndexed { offset, position ->
+            val item = items[position]
+            stamp[offset * 2] = item.id.toLong()
+            stamp[offset * 2 + 1] = item.revision
+        }
+        TilePlan(tile, ordered, stamp)
+    }
+
+    private fun verifyCompositionDependencies() {
+        val scene = SceneId("s2-composite-identity")
+        val samples = StrokeSamples.copyOf(doubleArrayOf(12.0, 36.0), doubleArrayOf(20.0, 20.0),
+            floatArrayOf(0.5f, 0.5f), longArrayOf(0, 1))
+        fun stroke(id: Int, color: Int): Item {
+            val ink = StrokeObject(ObjectId("identity-$id"), 1, layer,
+                BrushSpec(BrushKind.HIGHLIGHTER, 1, 12.0, color), samples, Affine2D())
+            val frame = FrameToken(scene, 1, 1, 1, 1, 1)
+            return Item(id, ink.objectRevision, assertCatalog(frame, ink).chunkBounds(0), ink, color and 0xffffff)
+        }
+        val blue = stroke(11, 0xff0039cf.toInt())
+        val red = stroke(12, 0xffc93300.toInt())
+        val proxy = Item(20, 1, BoundsD(16.0, 16.0, 40.0, 24.0), null, 0x205888)
+        val unrelated = Item(21, 1, BoundsD(16.0, 136.0, 40.0, 144.0), null, 0x226644)
+        val changedProxy = proxy.copy(revision = 2, rgb = 0x4366b8)
+        val baseline = listOf(blue, proxy, red, unrelated)
+        val reordered = listOf(red, proxy, blue, unrelated)
+        val positionsChanged = listOf(unrelated, red, proxy, blue)
+        val replaced = listOf(unrelated, red, changedProxy, blue)
+        val versions = listOf(baseline, baseline, reordered, positionsChanged, replaced, replaced)
+        val expected = listOf(
+            TraceResult(0, 0, 0), TraceResult(2, 0, 0), TraceResult(1, 1, 0),
+            TraceResult(2, 0, 0), TraceResult(1, 1, 0), TraceResult(2, 0, 0),
+        )
+        val cache = WeightedLruCache<Int, CachedTile>(CACHE_BYTES) { it.logicalBytes }
+        val tops = listOf(0, 32)
+        val pixelBytes = tops.size * 32 * grid.width * 4
+        var previous: BrushTilePixelsPoc? = null
+        versions.forEachIndexed { version, items ->
+            val frame = FrameToken(scene, version + 1L, 1, 1, 1, 1)
+            val entries = items.mapIndexed { position, item -> SpatialEntry(position, item.bounds) }
+            val plans = planTiles(items, entries, PackedRTreePoc(entries), tops)
+            val output = BrushTilePixelsPoc.Companion.Composition(frame, layer, grid)
+            plans.forEach { (top, plan) -> check(composeTile(frame, items, plan, output, Totals(), WORK_LIMIT, top)) }
+            val cold = output.finish()
+            previous?.let { before ->
+                val split = pixelBytes / 2
+                check((0 until split).any { before.byteAt(it) != cold.byteAt(it) } == (version == 2 || version == 4))
+                check((split until pixelBytes).all { before.byteAt(it) == cold.byteAt(it) })
+            }
+            check(verifyTrace("composition-${version + 1}", frame, items, plans, cold, cache, tops) == expected[version])
+            previous = cold
+        }
     }
 
     private fun composeTile(frame: FrameToken, items: List<Item>, plan: TilePlan,
@@ -140,7 +201,7 @@ object SweptDensePageProbe {
                 if (remaining < sampleSteps) return false
                 totals.rectangleSamples += sampleSteps
                 totals.peakTransient = maxOf(totals.peakTransient, tile.width * tile.height * 4L)
-                rectangle(frame, tile, id, item.bounds)
+                rectangle(frame, tile, item)
             } else {
                 val catalog = assertCatalog(frame, item.stroke)
                 val ready = when (val rendered = catalog.renderSwept(frame, tile,
@@ -176,7 +237,7 @@ object SweptDensePageProbe {
 
     private fun verifyTrace(label: String, frame: FrameToken, items: List<Item>, plans: Map<Int, TilePlan>,
         coldPage: BrushTilePixelsPoc, cache: WeightedLruCache<Int, CachedTile>, trace: List<Int>,
-    ) {
+    ): TraceResult {
         var hits = 0
         var misses = 0
         var stale = 0
@@ -212,11 +273,10 @@ object SweptDensePageProbe {
             result.rgba.forEachIndexed { i, byte -> check(byte.toInt() and 255 == coldPage.byteAt(byteOffset + i)) }
         }
         check(peakResident <= CACHE_BYTES && maxTileWork <= WORK_LIMIT)
-        check(hits > 0 && misses > 0)
-        if (label == "moved-1000") check(stale == 2 && evictions > 0)
         println("S2 visible label=$label requests=${trace.size} hits=$hits misses=$misses invalidated=$stale " +
             "evictions=$evictions peakResidentBytes=$peakResident maxTileWork=$maxTileWork totalWork=$totalWork " +
-            "coldByteChecks=${trace.size * grid.width * 32 * 4} exactAndMinusOne=true")
+            "coldByteChecks=${trace.size * grid.width * 32 * 4} exactAndMinusOne=${misses > 0}")
+        return TraceResult(hits, stale, evictions)
     }
 
     private fun assertCatalog(frame: FrameToken, stroke: StrokeObject): ChunkedBrushPoc {
@@ -226,7 +286,8 @@ object SweptDensePageProbe {
         return result.catalog
     }
 
-    private fun rectangle(frame: FrameToken, tile: BrushTileGridPoc, id: Int, bounds: BoundsD): BrushTileMaskPoc {
+    private fun rectangle(frame: FrameToken, tile: BrushTileGridPoc, item: Item): BrushTileMaskPoc {
+        val bounds = item.bounds
         val ss = tile.samplesPerAxis
         val coverage = IntArray(tile.width * tile.height)
         for (y in 0 until tile.height) for (x in 0 until tile.width) for (sy in 0 until ss) for (sx in 0 until ss) {
@@ -237,7 +298,7 @@ object SweptDensePageProbe {
                 coverage[offset] = coverage[offset] or (1 shl (sy * ss + sx))
             }
         }
-        return BrushTileMaskPoc(frame, GeometryCacheKey(frame.sceneId, ObjectId("rect-$id"), 1, BrushKind.MONOLINE, 1),
+        return BrushTileMaskPoc(frame, GeometryCacheKey(frame.sceneId, ObjectId("rect-${item.id}"), item.revision, BrushKind.MONOLINE, 1),
             layer, tile, coverage, 0.5, 0.125, 128, "synthetic-rectangle")
     }
 }
