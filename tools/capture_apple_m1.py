@@ -9,9 +9,12 @@ import re
 import stat
 import subprocess
 import uuid
+import xml.etree.ElementTree as ET
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+CAPTURE_FILES = frozenset({'xcode', 'device', 'installed', 'process-before', 'record', 'process-after', 'trace-toc'})
+HARDWARE_UDID = re.compile(r'(?:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}|[0-9A-Fa-f]{40})')
 
 
 def stream_sha256(stream):
@@ -24,6 +27,39 @@ def stream_sha256(stream):
 def sha256(path):
     with path.open('rb') as stream:
         return stream_sha256(stream)
+
+
+def capture_artifacts(directory):
+    artifacts = {}
+    for path in sorted(directory.rglob('*')):
+        if path.is_symlink():
+            raise ValueError(f'unexpected symlink in capture: {path}')
+        if path.is_file() and path != directory / 'capture.json':
+            artifacts[path.relative_to(directory).as_posix()] = sha256(path)
+    return artifacts
+
+
+def validate_trace(directory):
+    trace = directory / 'recording.trace'
+    if not trace.is_dir() or trace.is_symlink() or not any(
+        path.is_file() and not path.is_symlink() and path.stat().st_size > 0 for path in trace.rglob('*')
+    ):
+        raise ValueError('missing or empty Instruments trace')
+    try:
+        toc = ET.parse(directory / 'trace-toc.stdout').getroot()
+    except ET.ParseError as error:
+        raise ValueError('invalid Instruments trace TOC') from error
+    if toc.tag != 'trace-toc' or toc.find('./run/data/table') is None:
+        raise ValueError('Instruments trace TOC has no recorded tables')
+
+
+def preview_process(payload, executable, pid):
+    rows = json.loads(payload)['result']['runningProcesses']
+    matches = [row for row in rows if row['processIdentifier'] == pid
+               and row['executable'].endswith(f'/{executable}.app/{executable}')]
+    if len(matches) != 1:
+        raise ValueError('running process does not match preview executable and PID')
+    return matches[0]['executable']
 
 
 def read_candidate(path):
@@ -57,7 +93,7 @@ def read_candidate(path):
 def capture(args):
     args.output.mkdir(parents=True, exist_ok=False)
     report = {
-        'status': 'incomplete', 'm1_accepted': False,
+        'schema': 2, 'status': 'incomplete', 'm1_accepted': False,
         'device_udid': args.device, 'pid': args.pid, 'steps': {},
         'installed_binary_sha256_verified': False,
         'started_utc': datetime.now(timezone.utc).isoformat(),
@@ -75,25 +111,20 @@ def capture(args):
         return (args.output / (label + '.stdout')).read_bytes()
 
     def device_info(label, topic, *options):
-        return json.loads(run(
+        return run(
             label, 'xcrun', 'devicectl', 'device', 'info', topic,
             '--device', args.device, '--timeout', '25', '--json-output', '-', *options,
-        ))['result']
+        )
 
     def process(label):
-        rows = device_info(label, 'processes', '--search', executable)['runningProcesses']
-        matches = [row for row in rows if row['processIdentifier'] == args.pid
-                   and row['executable'].endswith(f'/{executable}.app/{executable}')]
-        if len(matches) != 1:
-            raise ValueError('running process does not match preview executable and PID')
-        return matches[0]['executable']
+        return preview_process(device_info(label, 'processes', '--search', executable), executable, args.pid)
 
     try:
         executable, candidate = read_candidate(args.ipa)
         report['candidate'] = candidate
         run('xcode', 'xcodebuild', '-version')
-        device_info('device', 'details')
-        device_info('installed', 'apps', '--search', candidate['bundle'])
+        json.loads(device_info('device', 'details'))['result']
+        json.loads(device_info('installed', 'apps', '--search', candidate['bundle']))['result']
         before = process('process-before')
         trace = args.output / 'recording.trace'
         run('record', 'xcrun', 'xctrace', 'record', '--device', args.device, '--attach', str(args.pid),
@@ -104,6 +135,8 @@ def capture(args):
         run('trace-toc', 'xcrun', 'xctrace', 'export', '--input', str(trace), '--toc')
         if sha256(args.ipa) != candidate['ipa_sha256']:
             raise ValueError('candidate IPA changed during trace')
+        validate_trace(args.output)
+        report['artifact_sha256'] = capture_artifacts(args.output)
         report['status'] = 'trace-collected'
     except (OSError, ValueError, KeyError, plistlib.InvalidFileException,
             subprocess.SubprocessError, zipfile.BadZipFile) as error:
@@ -111,10 +144,11 @@ def capture(args):
         raise
     finally:
         report['finished_utc'] = datetime.now(timezone.utc).isoformat()
-        report['artifact_sha256'] = {
-            path.relative_to(args.output).as_posix(): sha256(path)
-            for path in sorted(args.output.rglob('*')) if path.is_file() and not path.is_symlink()
-        }
+        if 'artifact_sha256' not in report:
+            try:
+                report['artifact_sha256'] = capture_artifacts(args.output)
+            except (OSError, ValueError) as artifact_error:
+                report['artifact_hash_error'] = str(artifact_error)
         (args.output / 'capture.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
 
 
@@ -127,7 +161,7 @@ def main():
     parser.add_argument('--seconds', type=int, default=310)
     parser.add_argument('--output', type=Path, default=ROOT / 'build' / f'apple-m1-{uuid.uuid4()}')
     args = parser.parse_args()
-    if not re.fullmatch(r'(?:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}|[0-9A-Fa-f]{40})', args.device):
+    if not HARDWARE_UDID.fullmatch(args.device):
         parser.error('--device must be a hardware UDID')
     if args.pid < 1 or args.seconds < 1:
         parser.error('--pid and --seconds must be positive')
