@@ -7,6 +7,7 @@ import platform
 import shutil
 import subprocess
 import uuid
+from gradle_download_retry import run_gradle
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'build/apple-pdf'
@@ -31,6 +32,8 @@ def main():
                'android-app/src/androidTest/assets/pdf/password-manifest.json', 'tools/generate_pdf_password_fixture.py',
                'tools/verify_apple_pdf_metadata.py']
     inputs += [OUTLINE, OUTLINE_RECIPE, 'tools/generate_pdf_outline_fixture.py']
+    inputs += ['shared-core/build.gradle.kts', 'shared-core/src/jvmTest/kotlin/dev/notecore/document/PdfCompositeProbePlan.kt',
+               'shared-core/src/commonMain/kotlin/dev/notecore/document/PdfCompositeExportRules.kt']
     before = {p: sha(ROOT / p) for p in inputs}
     report = {'status': 'running', 'stage': 'environment', 'source_sha256': before,
               'pixel_verification_complete': False, 'app_integration': False, 'c1_complete': False}
@@ -50,6 +53,10 @@ def main():
         report.update(commit=capture('git', 'rev-parse', 'HEAD').strip(), run_id=os.environ['GITHUB_RUN_ID'],
                       xcode=capture('xcodebuild', '-version').strip(), os=capture('sw_vers').strip())
         assert report['commit'] == os.environ['GITHUB_SHA']
+        report['stage'] = 'shared_composite_plan'
+        run_gradle(['./gradlew', ':shared-core:writePdfCompositeProbePlan', '--no-daemon', '--console=plain'],
+                   ROOT, OUTPUT / 'composite-plan-build.log', 300, retry_delay=5)
+        generated_plan = ROOT / 'build/pdf-composite-plan.json'
         report['stage'] = 'compile'
         binary = OUTPUT / 'PdfCapabilityProbe'
         run('compile', ['xcrun', '--sdk', 'iphonesimulator', 'swiftc', '-target',
@@ -107,11 +114,15 @@ def main():
             shutil.copyfile(path, OUTPUT / path.name)
         assert len(list(OUTPUT.glob('password-*.png'))) == 8
         report['stage'] = 'composite_export_observations'
+        shutil.copyfile(generated_plan, root / 'composite-plan.json')
+        shutil.copyfile(generated_plan, OUTPUT / 'composite-plan.json')
         text = run('composite', ['xcrun', 'simctl', 'spawn', device, str(binary), str(root), '--composite'], 120)
         lines = [line.removeprefix('NOTECORE_PDF_COMPOSITE ') for line in text.splitlines()
                  if line.startswith('NOTECORE_PDF_COMPOSITE ')]
-        assert len(lines) == 1 and json.loads(lines[0]) == {'cancelled_before_publish': True}
+        assert len(lines) == 1
         report['composite_observations'] = json.loads(lines[0])
+        assert report['composite_observations']['plan_sha256'] == sha(generated_plan) == sha(root / 'composite-plan.json')
+        assert report['composite_observations']['cancelled_before_publish'] is True
         assert sha(root / NAMES[0]) == before['android-app/src/androidTest/assets/pdf/' + NAMES[0]]
         for scale in (1, 2):
             name = f'quality-{scale}.pdf'

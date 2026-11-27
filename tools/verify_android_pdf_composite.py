@@ -21,6 +21,29 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def verify_plan(plan_bytes, source_digest, recipe):
+    plan = json.loads(plan_bytes)
+    assert plan['source_sha256'] == source_digest
+    assert plan['source_page_count'] == len(recipe['expected_pages'])
+    assert [quality['scale'] for quality in plan['qualities']] == [1, 2]
+    for quality in plan['qualities']:
+        tasks = quality['tasks']
+        assert [task['page_id'] for task in tasks] == ['rotated', 'blank', 'first']
+        assert [task['source_index'] for task in tasks] == list(SELECTION)
+        assert [task['display_number'] for task in tasks] == [1, 2, 4]
+        assert [task['output_number'] for task in tasks] == [1, 2, 3]
+        for task in tasks:
+            index = task['source_index']
+            source = recipe['expected_pages'][index] if index is not None else None
+            width, height = (source['width'], source['height']) if source else (200, 120)
+            assert (task['page_width'], task['page_height']) == (width, height)
+            scale = quality['scale']
+            assert (task['pixel_width'], task['pixel_height']) == (width * scale, height * scale)
+            assert task['argb_bytes'] == width * height * scale * scale * 4
+        assert quality['retained_argb_bytes'] == sum(task['argb_bytes'] for task in tasks)
+    return plan
+
+
 def verify_file(folder, scale, recipe):
     name = f'quality-{scale}.pdf'
     reader = PdfReader(folder / name)
@@ -52,6 +75,7 @@ def main():
     parser.add_argument('--jdk', type=Path, required=True)
     parser.add_argument('--serial', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--plan', type=Path, default=ROOT / 'build/pdf-composite-plan.json')
     args = parser.parse_args()
     if not args.serial.startswith('emulator-') or not args.serial.removeprefix('emulator-').isdigit():
         parser.error('--serial must identify a dedicated Android emulator')
@@ -84,8 +108,10 @@ def main():
     run(args.jdk / f'bin/java{suffix}', '-cp', d8_jar, 'com.android.tools.r8.D8', '--min-api', '35',
         '--lib', sdk_jar, '--output', dex, *sorted(classes.rglob('*.class')))
 
-    inputs = {'source.pdf': SOURCE, dex.name: dex}
+    inputs = {'source.pdf': SOURCE, 'composite-plan.json': args.plan, dex.name: dex}
     input_digests = {name: sha(path.read_bytes()) for name, path in inputs.items()}
+    recipe = json.loads(RECIPE.read_bytes())
+    plan = verify_plan(args.plan.read_bytes(), input_digests['source.pdf'], recipe)
     names = [name for scale in (1, 2) for name in
              [f'quality-{scale}.pdf', *(f'quality-{scale}.pdf.{index}.png' for index in range(len(SELECTION)))] ]
     remote = '/data/local/tmp/notecore-pdf-export-' + uuid.uuid4().hex
@@ -106,16 +132,19 @@ def main():
         adb('shell', 'rmdir', remote)
 
     assert observed['cancelled_before_publish'] is True
+    assert observed['plan_sha256'] == input_digests['composite-plan.json']
     assert sha(SOURCE.read_bytes()) == input_digests['source.pdf']
-    recipe = json.loads(RECIPE.read_bytes())
     result = {}
-    for scale in (1, 2):
+    for quality in plan['qualities']:
+        scale = quality['scale']
         rows = verify_file(folder, scale, recipe)
         native = observed[f'quality_{scale}']
+        ids = [task['page_id'] for task in quality['tasks']]
+        assert native['page_ids'] == ids
         assert native['pages'] == [row['page_points'] for row in rows]
         packed_bytes = sum(row['image_pixels'][0] * row['image_pixels'][1] * 4 for row in rows)
-        assert native['retained_bitmap_bytes'] == packed_bytes
-        result[str(scale)] = {'pages': rows, 'retained_bitmap_bytes': packed_bytes}
+        assert native['retained_bitmap_bytes'] == packed_bytes == quality['retained_argb_bytes']
+        result[str(scale)] = {'pages': rows, 'page_ids': ids, 'retained_bitmap_bytes': packed_bytes}
     report = {'status': 'passed', 'runtime': runtime, 'input_sha256': input_digests,
               'source_sha256': {str(path.relative_to(ROOT).as_posix()): sha(path.read_bytes())
                                 for path in (PROBE, Path(__file__).resolve(), RECIPE)},

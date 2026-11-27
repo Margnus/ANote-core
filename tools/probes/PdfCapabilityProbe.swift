@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import CryptoKit
 import ImageIO
 import PDFKit
 import UniformTypeIdentifiers
@@ -178,14 +179,41 @@ func outlineMain() throws {
     FileHandle.standardOutput.write(Data("NOTECORE_PDF_OUTLINE ".utf8) + data + Data("\n".utf8))
 }
 
+private struct CompositeProbePlan: Decodable {
+    struct Quality: Decodable {
+        struct Task: Decodable {
+            let pageId: String
+            let outputNumber: Int
+            let sourceIndex: Int?
+            let pageWidth: Int
+            let pageHeight: Int
+            let pixelWidth: Int
+            let pixelHeight: Int
+            let argbBytes: Int
+        }
+        let scale: Int
+        let retainedArgbBytes: Int
+        let tasks: [Task]
+    }
+    let sourceSha256: String
+    let sourcePageCount: Int
+    let qualities: [Quality]
+}
+
 func compositeMain() throws {
     let root = URL(fileURLWithPath: CommandLine.arguments[1]).standardizedFileURL
     try require(root.path.contains("/build/pdf-capability-"))
-    let source = try open(root.appendingPathComponent("crop-rotations.pdf"))
-    try require(source.numberOfPages == 4)
-    let pages: [(sourceIndex: Int?, width: Int, height: Int)] = [(3, 180, 300), (nil, 200, 120), (0, 300, 180)]
+    func digest(_ data: Data) -> String { SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined() }
+    let planBytes = try Data(contentsOf: root.appendingPathComponent("composite-plan.json"))
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+    let plan = try decoder.decode(CompositeProbePlan.self, from: planBytes)
+    let original = root.appendingPathComponent("crop-rotations.pdf")
+    try require(try digest(Data(contentsOf: original)) == plan.sourceSha256)
+    let source = try open(original)
+    try require(source.numberOfPages == plan.sourcePageCount && plan.qualities.count == 2)
 
-    func export(_ name: String, scale: Int, cancelled: Bool) throws {
+    func export(_ name: String, quality: CompositeProbePlan.Quality, cancelled: Bool) throws {
         let output = root.appendingPathComponent(name)
         let staging = root.appendingPathComponent("composite-\(UUID().uuidString).stage")
         let files = FileManager.default
@@ -194,25 +222,34 @@ func compositeMain() throws {
         do {
             guard let pdf = CGContext(staging as CFURL, mediaBox: nil, nil) else { throw ProbeFailure.invariant }
             defer { pdf.closePDF() }
-            for spec in pages {
-                var bounds = CGRect(x: 0, y: 0, width: spec.width, height: spec.height)
-                let width = spec.width * scale, height = spec.height * scale
+            var packedBytes = 0
+            for (index, spec) in quality.tasks.enumerated() {
+                try require(spec.outputNumber == index + 1)
+                var bounds = CGRect(x: 0, y: 0, width: spec.pageWidth, height: spec.pageHeight)
+                let width = spec.pixelWidth, height = spec.pixelHeight
                 guard let raster = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8,
                         bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
                         bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
                 else { throw ProbeFailure.invariant }
-                raster.scaleBy(x: CGFloat(scale), y: CGFloat(scale))
+                let allocation = raster.bytesPerRow * height
+                try require(allocation == spec.argbBytes && allocation <= quality.retainedArgbBytes - packedBytes)
+                packedBytes += allocation
+                raster.scaleBy(x: CGFloat(quality.scale), y: CGFloat(quality.scale))
                 raster.setFillColor(CGColor(gray: 1, alpha: 1))
                 raster.fill(bounds)
                 if let index = spec.sourceIndex {
                     guard let page = source.page(at: index + 1) else { throw ProbeFailure.invariant }
+                    let crop = page.getBoxRect(.cropBox)
+                    let rotated = page.rotationAngle % 180 != 0
+                    try require((rotated ? crop.height : crop.width) == bounds.width &&
+                        (rotated ? crop.width : crop.height) == bounds.height)
                     raster.saveGState()
                     raster.concatenate(page.getDrawingTransform(.cropBox, rect: bounds, rotate: 0, preserveAspectRatio: true))
                     raster.drawPDFPage(page)
                     raster.restoreGState()
                 }
                 raster.setFillColor(red: 0, green: 1, blue: 1, alpha: 1)
-                raster.fill(CGRect(x: 45, y: spec.height - 65, width: 20, height: 20))
+                raster.fill(CGRect(x: 45, y: spec.pageHeight - 65, width: 20, height: 20))
                 guard let image = raster.makeImage() else { throw ProbeFailure.invariant }
                 let box = Data(bytes: &bounds, count: MemoryLayout<CGRect>.size)
                 pdf.beginPDFPage([kCGPDFContextMediaBox as String: box] as CFDictionary)
@@ -221,24 +258,28 @@ func compositeMain() throws {
             }
         }
         let staged = try open(staging)
-        try require(staged.numberOfPages == pages.count)
+        try require(staged.numberOfPages == quality.tasks.count)
         if !cancelled { try files.moveItem(at: staging, to: output) }
     }
 
-    for scale in [1, 2] {
-        let name = "quality-\(scale).pdf"
-        try export(name, scale: scale, cancelled: false)
+    var pageIds = [String: [String]]()
+    for quality in plan.qualities {
+        let name = "quality-\(quality.scale).pdf"
+        try export(name, quality: quality, cancelled: false)
         let document = try open(root.appendingPathComponent(name))
-        try require(document.numberOfPages == pages.count)
-        for index in pages.indices {
+        try require(document.numberOfPages == quality.tasks.count)
+        for index in quality.tasks.indices {
             guard let page = document.page(at: index + 1) else { throw ProbeFailure.invariant }
             _ = try render(page, root.appendingPathComponent("\(name).\(index).png"))
         }
+        pageIds[String(quality.scale)] = quality.tasks.map(\.pageId)
     }
-    try export("cancelled.pdf", scale: 1, cancelled: true)
+    try export("cancelled.pdf", quality: plan.qualities[0], cancelled: true)
     let names = try FileManager.default.contentsOfDirectory(atPath: root.path)
     try require(!names.contains("cancelled.pdf") && !names.contains { $0.hasSuffix(".stage") })
-    print("NOTECORE_PDF_COMPOSITE {\"cancelled_before_publish\":true}")
+    let result: [String: Any] = ["cancelled_before_publish": true, "plan_sha256": digest(planBytes), "page_ids": pageIds]
+    let data = try JSONSerialization.data(withJSONObject: result, options: [.sortedKeys])
+    FileHandle.standardOutput.write(Data("NOTECORE_PDF_COMPOSITE ".utf8) + data + Data("\n".utf8))
 }
 
 do {

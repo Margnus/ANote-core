@@ -1,0 +1,130 @@
+{
+  "status": "passed",
+  "runtime": {
+    "api": "35",
+    "fingerprint": "Android/sdk_phone64_x86_64/emu64x:15/AE3A.240806.019/12368160:userdebug/test-keys",
+    "abi": "x86_64",
+    "avd": "NoteCorePdfExport35"
+  },
+  "input_sha256": {
+    "source.pdf": "8c29b75c713114288652cbd9afe54a65fc82865543e8d5fd81d3bf8a737aa9ee",
+    "composite-plan.json": "ca3eabad759aaa05c8d38f76540010f869f3c632b20bea6943124b8127e94264",
+    "probe.zip": "ad857409bfbf4f0c7083fb9ba7030211290fb83fd493d36bf521f5bcbe6622f6"
+  },
+  "source_sha256": {
+    "tools/probes/AndroidPdfCompositeProbe.java": "dd977b606ae782b91893aa63d92d036803643026c805c342f2a91b16e6de2efc",
+    "tools/verify_android_pdf_composite.py": "d718310bab85412a4df1f089b77a6a7d42f6244955177f8415f8be01d8435274",
+    "fixtures/pdf/recipe.json": "3c0bdc87b103143617b8de1138ca88b30222945d4f334994d52c818b3eda9be8",
+    "shared-core/build.gradle.kts": "d9a69f07f8c263ecd8e4e9c9c5f74e8e1b7a2169cf59ef77967e6f1acfabbeda",
+    "shared-core/src/jvmTest/kotlin/dev/notecore/document/PdfCompositeProbePlan.kt": "3f9f2efda8bd6ca22e3a627e647be1bd8d74509817c887487673141ff9182cff",
+    "shared-core/src/commonMain/kotlin/dev/notecore/document/PdfCompositeExportRules.kt": "8c9d4b5d9f9fb3b05364d74988ddecbaa4dab7945abc12a56858ca31ec5133b4"
+  },
+  "output_sha256": {
+    "quality-1.pdf": "7ea308202fc705e17f740e11b34528ca08b35f21b12c00c1f328557b36515532",
+    "quality-1.pdf.0.png": "3b7a7cd1413ff7f9fb7e765f52275c5ce965c1cfc28648f4e50ef6a2ab495f23",
+    "quality-1.pdf.1.png": "969bba58f349074d4b0d64df2f3fde1563df841524824c6c991b83ce6d57b57c",
+    "quality-1.pdf.2.png": "444a89670f500839c2233c7d09be6b63edc154560e2b465c9b1f7270c91efff6",
+    "quality-2.pdf": "7096930e6d4fddf8386854720d93969929bcd5e92a4f340b93be86fe3d316cef",
+    "quality-2.pdf.0.png": "26558081ca36845b0a7d64a3e89d5bb086d46f8e0da58562f9067b31db9dfa29",
+    "quality-2.pdf.1.png": "969bba58f349074d4b0d64df2f3fde1563df841524824c6c991b83ce6d57b57c",
+    "quality-2.pdf.2.png": "79890354abae33640b7c3c19ded919dad6d3893e89d7803a786a0bbddfafd0c5",
+    "native.json": "ce23b53b5dde628357eccd28ef2a5d2b4b103a2a8a26e157b46c9db61f22f686"
+  },
+  "qualities": {
+    "1": {
+      "pages": [
+        {
+          "source_index": 3,
+          "page_points": [
+            180,
+            300
+          ],
+          "image_pixels": [
+            180,
+            300
+          ],
+          "matched_pixel_anchors": 5
+        },
+        {
+          "source_index": null,
+          "page_points": [
+            200,
+            120
+          ],
+          "image_pixels": [
+            200,
+            120
+          ],
+          "matched_pixel_anchors": 2
+        },
+        {
+          "source_index": 0,
+          "page_points": [
+            300,
+            180
+          ],
+          "image_pixels": [
+            300,
+            180
+          ],
+          "matched_pixel_anchors": 5
+        }
+      ],
+      "page_ids": [
+        "rotated",
+        "blank",
+        "first"
+      ],
+      "retained_bitmap_bytes": 528000
+    },
+    "2": {
+      "pages": [
+        {
+          "source_index": 3,
+          "page_points": [
+            180,
+            300
+          ],
+          "image_pixels": [
+            360,
+            600
+          ],
+          "matched_pixel_anchors": 5
+        },
+        {
+          "source_index": null,
+          "page_points": [
+            200,
+            120
+          ],
+          "image_pixels": [
+            400,
+            240
+          ],
+          "matched_pixel_anchors": 2
+        },
+        {
+          "source_index": 0,
+          "page_points": [
+            300,
+            180
+          ],
+          "image_pixels": [
+            600,
+            360
+          ],
+          "matched_pixel_anchors": 5
+        }
+      ],
+      "page_ids": [
+        "rotated",
+        "blank",
+        "first"
+      ],
+      "retained_bitmap_bytes": 2112000
+    }
+  },
+  "cancelled_before_publish": true,
+  "scope": "Android 35 isolated native raster PDF export, no App or aggregate native heap claim",
+  "shared_plan_consumed": true
+}

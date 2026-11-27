@@ -7,12 +7,16 @@ on:
     paths:
       - '.github/workflows/apple-pdf.yml'
       - 'ci/collect_apple_pdf.py'
+      - 'ci/gradle_download_retry.py'
       - 'tools/probes/PdfCapabilityProbe.swift'
       - 'tools/verify_apple_pdf_metadata.py'
       - 'tools/generate_pdf_password_fixture.py'
       - 'tools/generate_pdf_outline_fixture.py'
       - 'fixtures/pdf/outline-*'
       - 'android-app/src/androidTest/assets/pdf/**'
+      - 'shared-core/src/jvmTest/kotlin/dev/notecore/document/PdfCompositeProbePlan.kt'
+      - 'shared-core/src/commonMain/kotlin/dev/notecore/document/PdfCompositeExportRules.kt'
+      - 'shared-core/build.gradle.kts'
 
 permissions:
   contents: read
@@ -24,13 +28,28 @@ concurrency:
 jobs:
   collect:
     runs-on: macos-15
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user-home
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+      - name: Cache pinned Gradle downloads
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        with:
+          path: |
+            .gradle-user-home/wrapper/dists
+            .gradle-user-home/caches/modules-2
+            !.gradle-user-home/caches/modules-2/modules-2.lock
+            !.gradle-user-home/caches/modules-2/gc.properties
+          key: apple-pdf-gradle-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.gradle.kts', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Select bundled JDK 17
+        run: |
+          test -x "$JAVA_HOME_17_arm64/bin/java"
+          echo "JAVA_HOME=$JAVA_HOME_17_arm64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_17_arm64/bin" >> "$GITHUB_PATH"
       - name: Collect metadata and native images
         run: python3 ci/collect_apple_pdf.py
       - name: Retain observations, including failures

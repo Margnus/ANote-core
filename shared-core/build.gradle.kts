@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
+
 plugins { kotlin("multiplatform") }
 val sdkCandidate = providers.gradleProperty("sdkCandidate").map(String::toBoolean).orElse(false)
 
@@ -69,4 +71,15 @@ kotlin {
         }
     }
     jvmToolchain(17)
+}
+
+tasks.register<JavaExec>("writePdfCompositeProbePlan") {
+    group = "verification"
+    description = "Generate isolated Android and Apple composite PDF tasks from the shared planner."
+    dependsOn("jvmTestClasses")
+    val tests = kotlin.targets.getByName<KotlinJvmTarget>("jvm").compilations.getByName("test")
+    classpath(tests.output.allOutputs, configurations.named("jvmTestRuntimeClasspath"))
+    mainClass.set("dev.notecore.document.PdfCompositeProbePlan")
+    args(rootProject.file("android-app/src/androidTest/assets/pdf/crop-rotations.pdf").absolutePath,
+        rootProject.file("build/pdf-composite-plan.json").absolutePath)
 }
