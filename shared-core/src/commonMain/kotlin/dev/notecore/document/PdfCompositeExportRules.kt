@@ -92,24 +92,11 @@ internal object PdfCompositeExportRules {
         }
         val projection = PdfPageCatalogRules.project(root, catalog, space, metadataRevision)
         projection.failure?.let { return PdfCompositeExportResult(catalogFailure = it) }
-        val references = catalog.references.associateBy { it.pageId }
         val tasks = mutableListOf<PdfCompositePageTask>()
+        // The entire selection must fit before asking the source reader for any metadata.
         for (position in projection.pages) {
             if (normalized.none { position.displayNumber in it.first..it.last }) continue
             val page = root.page(position.displayNumber - 1)
-            val reference = references[position.pageId]
-            val background = if (reference == null) null else {
-                val source = metadata(reference)
-                    ?: return PdfCompositeExportResult(failure = PdfCompositeExportFailure.MISSING_SOURCE_METADATA)
-                val bound = PdfAnnotationGeometryRules.bind(root, catalog, space, metadataRevision, page.id, source)
-                bound.binding ?: return PdfCompositeExportResult(
-                    failure = PdfCompositeExportFailure.SOURCE_GEOMETRY_REJECTED,
-                    catalogFailure = bound.catalogFailure,
-                    annotationFailure = bound.failure,
-                    geometryFailure = bound.geometryFailure,
-                )
-                bound.binding
-            }
             val width = ceil(page.width * request.pixelsPerPageUnit)
             val height = ceil(page.height * request.pixelsPerPageUnit)
             if (!width.isFinite() || !height.isFinite() || width < 1 || height < 1 ||
@@ -120,11 +107,26 @@ internal object PdfCompositeExportRules {
             if (pixels > request.maxPagePixels) {
                 return PdfCompositeExportResult(failure = PdfCompositeExportFailure.PIXEL_CAPACITY)
             }
-            tasks.add(PdfCompositePageTask(tasks.size + 1, position.displayNumber, page, background,
+            tasks.add(PdfCompositePageTask(tasks.size + 1, position.displayNumber, page, null,
                 width.toInt(), height.toInt(), pixels * 4))
         }
         if (tasks.isEmpty()) return PdfCompositeExportResult(failure = PdfCompositeExportFailure.EMPTY_SELECTION)
         val snapshotCatalog = catalog.copy(sources = catalog.sources.toList(), references = catalog.references.toList())
+        val references = snapshotCatalog.references.associateBy { it.pageId }
+        for (index in tasks.indices) {
+            val task = tasks[index]
+            val reference = references[task.page.id] ?: continue
+            val source = metadata(reference)
+                ?: return PdfCompositeExportResult(failure = PdfCompositeExportFailure.MISSING_SOURCE_METADATA)
+            val bound = PdfAnnotationGeometryRules.bind(root, snapshotCatalog, space, metadataRevision, task.page.id, source)
+            val background = bound.binding ?: return PdfCompositeExportResult(
+                failure = PdfCompositeExportFailure.SOURCE_GEOMETRY_REJECTED,
+                catalogFailure = bound.catalogFailure,
+                annotationFailure = bound.failure,
+                geometryFailure = bound.geometryFailure,
+            )
+            tasks[index] = task.copy(background = background)
+        }
         return PdfCompositeExportResult(plan = PdfCompositeExportPlan(root, snapshotCatalog,
             request.copy(ranges = normalized.toList()), PdfCompositeExportDisclosure(), tasks.toList()))
     }

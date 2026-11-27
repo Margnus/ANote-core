@@ -139,6 +139,47 @@ class PdfCompositeExportRulesTest {
         assertEquals(4097, root.pageCount)
     }
 
+    @Test fun everySelectedPageFitsThePixelBudgetBeforeAnySourceMetadataIsRead() {
+        val (root, catalog) = model()
+        val largerBlank = root.page(1).copy(width = 350.0, height = 200.0)
+        val expanded = DocumentRoot.compose(root.title, root.scene, listOf(root.page(0), largerBlank, root.page(2)))
+        val reads = mutableListOf<PdfPageRef>()
+        fun resolver(reference: PdfPageRef): PdfSourcePageGeometry {
+            reads.add(reference)
+            return metadata(reference)
+        }
+
+        val denied = plan(expanded, catalog, request(maxPixels = 279_999), resolver = ::resolver)
+        assertNull(denied.plan)
+        assertEquals(PdfCompositeExportFailure.PIXEL_CAPACITY, denied.failure)
+        assertTrue(reads.isEmpty())
+
+        val admitted = assertNotNull(plan(expanded, catalog, request(maxPixels = 280_000), resolver = ::resolver).plan)
+        assertEquals(catalog.references, reads)
+        assertEquals(1_120_000L, admitted.tasks[1].argbByteUpperBound)
+    }
+
+    @Test fun metadataCallbackCannotChangeTheCatalogAndSelectionUsedByThePlan() {
+        val (root, catalog) = model()
+        val sources = catalog.sources.toMutableList()
+        val references = catalog.references.toMutableList()
+        val ranges = mutableListOf(PdfPageRange(1, 3))
+        val reads = mutableListOf<PdfPageRef>()
+        val planned = assertNotNull(plan(root, catalog.copy(sources = sources, references = references), request(ranges)) {
+            reads.add(it)
+            sources.clear()
+            references.clear()
+            ranges.clear()
+            metadata(it)
+        }.plan)
+
+        assertEquals(catalog.references, reads)
+        assertEquals(catalog, planned.catalog)
+        assertEquals(listOf(PdfPageRange(1, 3)), planned.request.ranges)
+        assertEquals(catalog.references, planned.tasks.mapNotNull { it.background?.reference })
+        assertEquals(planned, PdfCompositeExportRules.revalidate(planned, planned.operationId).plan)
+    }
+
     @Test fun missingChangedOrInvalidSourceGeometryRejectsTheWholePlan() {
         val (root, catalog) = model()
         val missing = plan(root, catalog) { null }
