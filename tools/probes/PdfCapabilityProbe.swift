@@ -152,8 +152,34 @@ func passwordMain() throws {
         "correct_rendered": true, "pages": pages], options: [.sortedKeys])
     FileHandle.standardOutput.write(Data("NOTECORE_PDF_PASSWORD ".utf8) + data + Data("\n".utf8))
 }
+func outlineMain() throws {
+    let url = URL(fileURLWithPath: CommandLine.arguments[1]).standardizedFileURL
+    guard let document = PDFDocument(url: url), let root = document.outlineRoot else {
+        throw ProbeFailure.invariant
+    }
+    var remaining = 1000
+    func children(of parent: PDFOutline, depth: Int) throws -> [[String: Any]] {
+        let count = parent.numberOfChildren
+        if count == 0 { return [] }
+        try require(depth < 5 && count > 0 && count <= remaining)
+        remaining -= count
+        return try (0..<count).map { index in
+            guard let item = parent.child(at: index), let title = item.label,
+                  let destination = item.destination ?? (item.action as? PDFActionGoTo)?.destination,
+                  let page = destination.page, page.document === document else {
+                throw ProbeFailure.invariant
+            }
+            let sourceIndex = document.index(for: page)
+            try require((0..<document.pageCount).contains(sourceIndex))
+            return ["title": title, "source_index": sourceIndex, "children": try children(of: item, depth: depth + 1)]
+        }
+    }
+    let data = try JSONSerialization.data(withJSONObject: try children(of: root, depth: 0), options: [.sortedKeys])
+    FileHandle.standardOutput.write(Data("NOTECORE_PDF_OUTLINE ".utf8) + data + Data("\n".utf8))
+}
 do {
     if CommandLine.arguments.count == 3 && CommandLine.arguments[2] == "--password" { try passwordMain() }
+    else if CommandLine.arguments.count == 3 && CommandLine.arguments[2] == "--outline" { try outlineMain() }
     else if CommandLine.arguments.count == 3 { try metadataMain() }
     else { try main() }
 } catch {fputs("Synthetic PDF probe failed: \(error)\n",stderr);exit(2)}

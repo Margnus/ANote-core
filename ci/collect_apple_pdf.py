@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / 'build/apple-pdf'
 NAMES = ('crop-rotations.pdf', 'inherited-geometry.pdf', 'user-unit-2.pdf')
 SOURCE = 'tools/probes/PdfCapabilityProbe.swift'
+OUTLINE = 'fixtures/pdf/outline-destinations.pdf'
+OUTLINE_RECIPE = 'fixtures/pdf/outline-recipe.json'
 
 
 def sha(path):
@@ -28,6 +30,7 @@ def main():
     inputs += ['android-app/src/androidTest/assets/pdf/password-aes256.pdf',
                'android-app/src/androidTest/assets/pdf/password-manifest.json', 'tools/generate_pdf_password_fixture.py',
                'tools/verify_apple_pdf_metadata.py']
+    inputs += [OUTLINE, OUTLINE_RECIPE, 'tools/generate_pdf_outline_fixture.py']
     before = {p: sha(ROOT / p) for p in inputs}
     report = {'status': 'running', 'stage': 'environment', 'source_sha256': before,
               'pixel_verification_complete': False, 'app_integration': False, 'c1_complete': False}
@@ -67,6 +70,18 @@ def main():
         run('boot', ['xcrun', 'simctl', 'bootstatus', device, '-b'], 240)
         root = ROOT / ('build/pdf-capability-' + uuid.uuid4().hex)
         root.mkdir()
+        report['stage'] = 'native_outline_destinations'
+        outline = root / Path(OUTLINE).name
+        shutil.copyfile(ROOT / OUTLINE, outline)
+        text = run('outline', ['xcrun', 'simctl', 'spawn', device, str(binary), str(outline), '--outline'], 120)
+        lines = [line.removeprefix('NOTECORE_PDF_OUTLINE ') for line in text.splitlines()
+                 if line.startswith('NOTECORE_PDF_OUTLINE ')]
+        assert len(lines) == 1
+        report['outline_observations'] = json.loads(lines[0])
+        expected_outline = json.loads((ROOT / OUTLINE_RECIPE).read_text(encoding='utf-8'))
+        assert report['outline_observations'] == expected_outline, report['outline_observations']
+        assert sha(outline) == before[OUTLINE]
+        report['outline_destinations_verified'] = True
         for name in NAMES:
             shutil.copyfile(ROOT / 'android-app/src/androidTest/assets/pdf' / name, root / name)
         report['stage'] = 'native_observations'
