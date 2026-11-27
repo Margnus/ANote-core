@@ -1,0 +1,84 @@
+{
+  "status": "passed",
+  "base_commit": "25b89a59bf062fe5629c417cd5b10836ddd41b24",
+  "runtime_fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "observations": {
+    "api": 36,
+    "image_sha256": "04aff48004d759be073f3d497eddfdb5b22c5cf7c5ea16208f76d55b8d9b8120",
+    "fallback_font_sha256": "3e7e5afaac2c6d872592d76abedac03a51c6f0fc42d11e311ff2816a6c368afe",
+    "font_faces": [
+      0,
+      2
+    ],
+    "frames": [
+      {
+        "sequence": 1,
+        "hits": []
+      },
+      {
+        "sequence": 2,
+        "hits": [
+          "IMAGE",
+          "TEXT"
+        ]
+      },
+      {
+        "sequence": 3,
+        "hits": [
+          "TEXT"
+        ]
+      },
+      {
+        "sequence": 4,
+        "hits": [
+          "TEXT"
+        ]
+      },
+      {
+        "sequence": 5,
+        "hits": [
+          "IMAGE"
+        ]
+      },
+      {
+        "sequence": 6,
+        "hits": [
+          "IMAGE",
+          "TEXT"
+        ]
+      }
+    ],
+    "cold_tile_comparisons": 12,
+    "same_scene_revision": 1,
+    "tile_bytes": 46080,
+    "peak_charged_tile_bytes": 184320,
+    "recycled_tiles": 6,
+    "late_worker_bitmap_rejected": true
+  },
+  "source_sha256": {
+    "android-app/src/androidTest/java/dev/notecore/app/MixedTileDependencyArtChecks.kt": "788ed992a03b3e9a4119341ad07adadab6e80b4f2e790c16641914b3c6187baa",
+    "android-app/src/androidTest/java/dev/notecore/app/ViewportInstrumentation.kt": "6b2d20f65f531117190f907360334af070a3f8187fe0043e8988a7f37025fdaf",
+    "android-app/src/androidTest/assets/image-ownership/jpeg-1.jpeg": "04aff48004d759be073f3d497eddfdb5b22c5cf7c5ea16208f76d55b8d9b8120",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "4906c53bd2f3ad95681d8fe1561cf2e3f8296201c67fe43a6dda7b4185f9ccae"
+  },
+  "apk_sha256": {
+    "android-app/build/outputs/apk/debug/android-app-debug.apk": "277d75735424aed0c751a5f236f5c1a607570477f085a6e034b62a4a250ba72e",
+    "android-app/build/outputs/apk/androidTest/debug/android-app-debug-androidTest.apk": "1a75c65037c8023649416e84f64fcce635797c62a144aefefaadab17d2484b47"
+  },
+  "raw_evidence_sha256": {
+    "android-instrumentation.log": "edadd6f870a48ad8b3ad37313206e2889a10035e8c977594a5e7b680735a5953",
+    "android-fingerprint.txt": "e6d554f822e844090f7f421d5b4de578313d7f407839d2a5d7a48be0bae3dac1",
+    "android-build.log": "3334f2674c79ef3ac4206d0b243fcddd901674c55d6ac3443a577d5eb083ef88",
+    "android-install-app.log": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "android-install-tests.log": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7",
+    "android-crash.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "android-first-png-control.log": "9d4b1b177441178e97aef4ca30e7c9ea01c846f5606dd1d6f35a8535f837351a",
+    "android-jpeg-sample-only-control.log": "0c037e891d0297512d02ba4e59bc80b4b1624a1d6ac032daacac6c63d5092099"
+  },
+  "archive_sha256": "99fd0f5ef3adf41984e034755a0ea154655e2a55a796f511a09832e5c35a1712",
+  "raster_controls": "The original PNG and JPEG produced identical cold tile pixels after the sample-only change. Both fixtures failed the positive pixel-change control. The passing JPEG case changes the source-to-display orientation as well as the native decode size.",
+  "adoption": "For this fixed Android software draw configuration, include the source/decode outcome and the resolved glyph run, including TTC face, in cache dependencies. Advance the publication request sequence when these dependencies change.",
+  "scope": "Native Android API 36 emulator BitmapFactory, TextRunShaper and software Canvas in the isolated instrumentation process. Tile residency includes owned outputs and pending output reservations. Input decodes, font data, cold oracle and native heap are outside this declared charge. API 26 font fallback diagnostics, Apple producer behavior, production App composition and M-1 remain open."
+}

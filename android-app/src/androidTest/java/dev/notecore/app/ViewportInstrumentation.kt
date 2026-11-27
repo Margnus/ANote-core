@@ -50,6 +50,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var imageOwnershipOnly = false
     private var imageBudgetOnly = false
     private var fontFallbackOnly = false
+    private var mixedTileOnly = false
     override fun onCreate(arguments: Bundle?) {
         budgetOverlapOnly = arguments?.getString("notecore_case") == "budget_overlap"
         atomicCutAction = arguments?.getString("notecore_atomic_cut")
@@ -60,6 +61,7 @@ class ViewportInstrumentation : Instrumentation() {
         imageOwnershipOnly = arguments?.getString("notecore_case") == "image_ownership"
         imageBudgetOnly = arguments?.getString("notecore_case") == "image_budget"
         fontFallbackOnly = arguments?.getString("notecore_case") == "font_fallback"
+        mixedTileOnly = arguments?.getString("notecore_case") == "mixed_tile_dependencies"
         pdfGeometryOnly = arguments?.getString("notecore_case") in listOf("pdf_geometry", "pdf_user_unit", "pdf_inherited")
         if (arguments?.getString("notecore_case") == "pdf_user_unit") { pdfFixture = "user-unit-2.pdf"; pdfUserUnit = 2.0 }
         if (arguments?.getString("notecore_case") == "pdf_inherited") pdfFixture = "inherited-geometry.pdf"
@@ -99,6 +101,11 @@ class ViewportInstrumentation : Instrumentation() {
             if (imageBudgetOnly) {
                 result.putString("image_observations", ImageDecodeBudgetArtChecks.verify(targetContext))
                 result.putString("image_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
+            if (mixedTileOnly) {
+                result.putString("mixed_tile_observations", MixedTileDependencyArtChecks.verify(context.assets))
+                result.putString("mixed_tile_status", "passed")
                 finish(Activity.RESULT_OK, result); return
             }
             if (fontFallbackOnly) {
