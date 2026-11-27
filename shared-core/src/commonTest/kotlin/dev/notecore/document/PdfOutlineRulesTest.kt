@@ -123,6 +123,53 @@ class PdfOutlineRulesTest {
         assertFalse(result.outlineAvailable)
     }
 
+    @Test fun oversizedChildListIsRejectedWithoutEnumeratingItsEntries() {
+        val children = object : AbstractList<PdfOutlineDest>() {
+            override val size = PdfOutlineRules.MAX_ENTRIES
+            override fun get(index: Int): PdfOutlineDest = error("Oversized children must not be enumerated")
+        }
+        val result = map(listOf(PdfOutlineDest(0, "Parent", children)))
+        assertEquals(PdfOutlineFailure.CAPACITY, result.failure)
+        assertFalse(result.outlineAvailable)
+        assertTrue(result.nodes.isEmpty())
+    }
+
+    @Test fun cyclicAdapterInputExhaustsTheBudgetAndReturnsARejection() {
+        val children = mutableListOf<PdfOutlineDest>()
+        val ancestor = PdfOutlineDest(0, "Ancestor", children)
+        children.add(ancestor)
+        val result = map(listOf(ancestor))
+        assertEquals(PdfOutlineFailure.CAPACITY, result.failure)
+        assertFalse(result.outlineAvailable)
+        assertTrue(result.nodes.isEmpty())
+    }
+
+    @Test fun exactlyTheEntryLimitCanBeMappedWithOnlyTheFirstFiveLevelsVisible() {
+        var branch = PdfOutlineDest(0, "Leaf")
+        repeat(PdfOutlineRules.MAX_ENTRIES - 1) {
+            branch = PdfOutlineDest(0, "Parent", listOf(branch))
+        }
+        val result = map(listOf(branch))
+        assertTrue(result.outlineAvailable)
+        assertNull(result.failure)
+        var level = result.nodes
+        repeat(PdfOutlineRules.MAX_DEPTH) { level = level.single().children }
+        assertTrue(level.isEmpty())
+        assertEquals(PdfOutlineRules.MAX_ENTRIES - PdfOutlineRules.MAX_DEPTH, result.skippedCount)
+    }
+
+    @Test fun unmappedAndInvalidAncestorsCountTheirEntireHiddenSubtrees() {
+        val child = PdfOutlineDest(0, "Valid child", listOf(PdfOutlineDest(1, "Valid grandchild")))
+        val result = map(listOf(
+            PdfOutlineDest(3, "Unmapped", listOf(child)),
+            PdfOutlineDest(0, "", listOf(child)),
+            PdfOutlineDest(5, "Visible"),
+        ))
+        assertTrue(result.outlineAvailable)
+        assertEquals(listOf("Visible"), result.nodes.map { it.title })
+        assertEquals(6, result.skippedCount)
+    }
+
     @Test fun staleOrInvalidCatalogRejectsEntireOutline() {
         val outline = listOf(PdfOutlineDest(0, "Chapter"))
         for ((rev, cat, expected) in listOf(
