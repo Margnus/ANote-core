@@ -1,0 +1,80 @@
+{
+  "status": "passed",
+  "base_commit": "7ddac4139ec3bc4f0d30375f21168b7540a50004",
+  "runtime": {
+    "architecture": "arm64",
+    "deviceId": "DCD5EF01-D374-4A2A-AA28-BEF0619C498E",
+    "deviceName": "NoteCore-Mixed-e24cb5d8e7d64c7e8501c8a168bd75b9",
+    "modelName": "iPhone 18 Pro",
+    "osBuildNumber": "24A434",
+    "osVersion": "27.0",
+    "platform": "iOS Simulator"
+  },
+  "observations": {
+    "cold_tile_comparisons": 12,
+    "decoded_dimensions": [
+      80,
+      120,
+      40,
+      60
+    ],
+    "font_faces": [
+      "HiraginoSans-W3",
+      "PingFangSC-Regular"
+    ],
+    "hits": [
+      [],
+      [
+        "image",
+        "text"
+      ],
+      [
+        "text"
+      ],
+      [
+        "text"
+      ],
+      [
+        "image"
+      ],
+      [
+        "image",
+        "text"
+      ]
+    ],
+    "late_worker_result_retired": true,
+    "peak_charged_tile_bytes": 184320,
+    "provider_confirmed_after_foreign_release": true,
+    "provider_held_bytes_after_close": 46080,
+    "released_tiles": 6,
+    "scene_revision": 1,
+    "source_sha256": "968537f087492d86cb54baf51156b610eac23fd6c2b9898211b4765925ba3cf6",
+    "tile_bytes": 46080,
+    "trace_id": "c1-apple-mixed-tile-v1"
+  },
+  "source_sha256": {
+    "ios-app/NoteCorePreviewTests/BrushRenderHostTests.swift": "52ec4f0c076ed8e58332562a17172a1001303f772fe124da24badfdeda2b1e5e",
+    "ios-app/NoteCorePreview/BoundedOwnerExecutor.swift": "2b078f555ffb0ecd1cc73e98be84889f79b746b185b493c2d483a8e98c0d307e",
+    "ios-app/NoteCorePreview.xcodeproj/project.pbxproj": "b5dbacb34834054bdf48ada5dd277b8f1063018bf8716bb7864a9f41422b2a58",
+    "tools/verify_ios_host.py": "280b65c2005763485fb0f4e5f6725729c2405945e634a87a8b531a1579b80d57",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/ResourceLeasePool.kt": "ec2ad2e15561d7c7644a778cc8e326a4fe81ce3037ef5ea198610c95c7168cd7"
+  },
+  "executables_sha256": {
+    "build/apple-mixed-tile-20261127-derived/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview": "001944900e779cc795957379e48dddf8455190e3ad8736562651c249c8208867",
+    "build/apple-mixed-tile-20261127-derived/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/PlugIns/NoteCorePreviewTests.xctest/NoteCorePreviewTests": "b8b73a50efa2dbcf9d0c868b9aa059c7e9dd50bc921553f6a537cd4309fdfcb3",
+    "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype": "56e0ef58a420777fd99eabbc141eb9f87b26d7133b1a6d46ed5edb4971a5f0a3"
+  },
+  "raw_evidence_sha256": {
+    "ios-test-summary.json": "7f24d8a9deae232a76ce78726c5382cc1f301a2c5fe90a6d905f14a95978f357",
+    "ios-test-cases.json": "8d8f4a7b01274e845fde8f775c6cb8a93cf8bd50bc558a1f25a4bebdc40e95fd",
+    "ios-tile-observations.json": "09b3b6ae17fccaaa937857e43837902f273ff9dd8ebcc25d5b5331a2b7af7f0d",
+    "ios-xcodebuild.stdout.log": "595ceeefb992c1a7f40f3b9004e74e5c3eb533046c1e701b2de761a67e0b3128",
+    "ios-xcodebuild.stderr.log": "465dbe91181ee7945042ff6a7077481293d514f0f324ecb848e700c1d79a06f7",
+    "kotlin-native-build.log": "07f6af5f6d2494ac559c839b6a5381f8cc9889cbf4dc1f1e53caa9bcb94f6f3e",
+    "apple-mixed-tile-20261127-first-test.stdout.log": "4e8c85812322796319be9bf15827005e82895aac4ae6073b1e9ada1de8161bd8"
+  },
+  "archive_sha256": "5ad3a4f81df1e922bb7a7ac178f2faa7183ad8b6d0409ddd2736c0568ea625e6",
+  "scope": "iOS 27.0 simulator ImageIO, CoreText, CoreGraphics, original Swift executor and Kotlin resource pool with a provider source owned by this test. The charge covers declared output row storage and in-flight output reservations. No decode, shaping, runtime heap, physical or production App composition confirmation.",
+  "adoption": "Under a fixed software backend and runtime, compare resolved glyph font identity, glyphs and positions, plus actual image availability/decode/projection dependencies. Update request identity on a dependency change. Keep retained provider storage charged to the owner until the callback is confirmed."
+}

@@ -1,5 +1,8 @@
 import XCTest
 import CoreGraphics
+import CoreText
+import CryptoKit
+import ImageIO
 import UIKit
 import NoteCanvasPrototype
 @testable import NoteCorePreview
@@ -723,4 +726,286 @@ final class BrushRenderHostTests: XCTestCase {
         attachment.name = "notecore-apple-render-trace.json"; attachment.lifetime = .keepAlways; add(attachment)
     }
 
+}
+
+// Isolated fixed-grid composition. These stamps describe the actual inputs used by this backend.
+private enum MixedTileDependency: Equatable {
+    struct Glyph: Equatable {
+        let font: String
+        let id: CGGlyph
+        let position: CGPoint
+    }
+    case missing(source: String)
+    case image(source: String, width: Int, height: Int, mirrored: Bool)
+    case text([Glyph])
+}
+
+private struct MixedTilePlan {
+    let slot: NSString
+    let dependency: MixedTileDependency
+    let draw: (CGContext) -> Void
+}
+
+private final class MixedTileReleaseReceipt {
+    private let lock = NSLock()
+    private var freed = false
+    var confirmed: Bool { lock.withLock { freed } }
+    func release(_ data: UnsafeRawPointer) {
+        UnsafeMutableRawPointer(mutating: data).deallocate()
+        lock.withLock { precondition(!freed); freed = true }
+    }
+}
+
+private final class MixedNativeTile: NSObject {
+    static let width = 96, height = 120, stride = width * 4
+    static let bytes = Int64(stride * height)
+    static let colorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
+    static let layout = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+    let dependency: MixedTileDependency
+    let receipt = MixedTileReleaseReceipt()
+    var image: CGImage?
+
+    init(plan: MixedTilePlan) throws {
+        dependency = plan.dependency
+        let bytes = Int(Self.bytes)
+        let data = UnsafeMutableRawPointer.allocate(byteCount: bytes, alignment: 16)
+        guard let context = CGContext(data: data, width: Self.width, height: Self.height,
+            bitsPerComponent: 8, bytesPerRow: Self.stride, space: Self.colorSpace, bitmapInfo: Self.layout) else {
+            data.deallocate()
+            throw CocoaError(.coderInvalidValue)
+        }
+        let rect = CGRect(x: 0, y: 0, width: Self.width, height: Self.height)
+        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.fill(rect)
+        plan.draw(context)
+        let info = Unmanaged.passRetained(receipt).toOpaque()
+        guard let provider = CGDataProvider(dataInfo: info, data: data, size: bytes, releaseData: { info, data, _ in
+            Unmanaged<MixedTileReleaseReceipt>.fromOpaque(info!).takeRetainedValue().release(data)
+        }) else {
+            Unmanaged<MixedTileReleaseReceipt>.fromOpaque(info).release()
+            data.deallocate()
+            throw CocoaError(.coderInvalidValue)
+        }
+        image = try XCTUnwrap(CGImage(width: Self.width, height: Self.height, bitsPerComponent: 8,
+            bitsPerPixel: 32, bytesPerRow: Self.stride, space: Self.colorSpace,
+            bitmapInfo: CGBitmapInfo(rawValue: Self.layout), provider: provider, decode: nil,
+            shouldInterpolate: false, intent: .defaultIntent))
+    }
+
+    func pixels() throws -> Data {
+        let data = try XCTUnwrap(image?.dataProvider?.data) as Data
+        XCTAssertEqual(Int64(data.count), Self.bytes)
+        return data
+    }
+}
+
+extension BrushRenderHostTests {
+    @MainActor func testNativeMixedTileDependenciesAndProviderRetirement() async throws {
+        let rect = CGRect(x: 0, y: 0, width: MixedNativeTile.width, height: MixedNativeTile.height)
+        let slotImage: NSString = "image", slotText: NSString = "text"
+        let source = try XCTUnwrap(CGContext(data: nil, width: 80, height: 120, bitsPerComponent: 8,
+            bytesPerRow: 320, space: MixedNativeTile.colorSpace, bitmapInfo: MixedNativeTile.layout))
+        source.setFillColor(red: 0.8, green: 0.2, blue: 0, alpha: 1)
+        source.fill(CGRect(x: 0, y: 0, width: 80, height: 120))
+        source.setFillColor(red: 0, green: 0.2, blue: 0.8, alpha: 1)
+        source.fill(CGRect(x: 0, y: 0, width: 25, height: 120))
+        let encoded = NSMutableData()
+        let encoder = try XCTUnwrap(CGImageDestinationCreateWithData(encoded, "public.png" as CFString, 1, nil))
+        CGImageDestinationAddImage(encoder, try XCTUnwrap(source.makeImage()), nil)
+        XCTAssertTrue(CGImageDestinationFinalize(encoder))
+        let sourceHash = SHA256.hash(data: encoded as Data).map { String(format: "%02x", $0) }.joined()
+        let reader = try XCTUnwrap(CGImageSourceCreateWithData(encoded, nil))
+        let full = try XCTUnwrap(CGImageSourceCreateImageAtIndex(reader, 0,
+            [kCGImageSourceShouldCacheImmediately as String: true] as CFDictionary))
+        let thumbnail = try XCTUnwrap(CGImageSourceCreateThumbnailAtIndex(reader, 0, [
+            kCGImageSourceCreateThumbnailFromImageAlways as String: true,
+            kCGImageSourceShouldCacheImmediately as String: true,
+            kCGImageSourceThumbnailMaxPixelSize as String: 60,
+        ] as CFDictionary))
+        XCTAssertEqual(full.width, thumbnail.width * 2)
+        XCTAssertEqual(full.height, thumbnail.height * 2)
+
+        let missing = MixedTilePlan(slot: slotImage, dependency: .missing(source: sourceHash)) { context in
+            context.setFillColor(CGColor(gray: 0.6, alpha: 1))
+            context.fill(rect)
+        }
+        func imagePlan(_ image: CGImage, mirrored: Bool) -> MixedTilePlan {
+            MixedTilePlan(slot: slotImage, dependency: .image(source: sourceHash,
+                width: image.width, height: image.height, mirrored: mirrored)) { context in
+                context.interpolationQuality = .none
+                if mirrored { context.translateBy(x: rect.width, y: 0); context.scaleBy(x: -1, y: 1) }
+                context.draw(image, in: rect)
+            }
+        }
+        let high = imagePlan(full, mirrored: false), low = imagePlan(thumbnail, mirrored: true)
+        let primary = CTFontCreateWithName("Helvetica" as CFString, 26, nil)
+        let logicalText = "骨直令"
+        let characters = Array(logicalText.utf16)
+        var primaryGlyphs = Array(repeating: CGGlyph(0), count: characters.count)
+        XCTAssertFalse(CTFontGetGlyphsForCharacters(primary, characters, &primaryGlyphs, characters.count))
+        func textPlan(_ actualName: String) throws -> MixedTilePlan {
+            let fallback = CTFontDescriptorCreateWithNameAndSize(actualName as CFString, 26)
+            let cascade = CTFontDescriptorCreateWithAttributes([
+                kCTFontCascadeListAttribute as String: [fallback],
+            ] as CFDictionary)
+            let font = CTFontCreateCopyWithAttributes(primary, 26, nil, cascade)
+            XCTAssertEqual(CTFontCopyPostScriptName(font) as String, CTFontCopyPostScriptName(primary) as String)
+            let line = CTLineCreateWithAttributedString(NSAttributedString(string: logicalText, attributes: [
+                NSAttributedString.Key(kCTFontAttributeName as String): font,
+            ]))
+            let runs = CTLineGetGlyphRuns(line) as! [CTRun]
+            var stamp = [MixedTileDependency.Glyph]()
+            for run in runs {
+                let attributes = CTRunGetAttributes(run) as NSDictionary
+                let resolved = attributes[kCTFontAttributeName] as! CTFont
+                let name = CTFontCopyPostScriptName(resolved) as String
+                XCTAssertEqual(name, actualName)
+                let count = CTRunGetGlyphCount(run)
+                var glyphs = Array(repeating: CGGlyph(0), count: count)
+                var positions = Array(repeating: CGPoint.zero, count: count)
+                CTRunGetGlyphs(run, CFRange(location: 0, length: 0), &glyphs)
+                CTRunGetPositions(run, CFRange(location: 0, length: 0), &positions)
+                stamp += zip(glyphs, positions).map { .init(font: name, id: $0, position: $1) }
+            }
+            XCTAssertEqual(stamp.count, characters.count)
+            XCTAssertTrue(stamp.allSatisfy { $0.id != 0 })
+            return MixedTilePlan(slot: slotText, dependency: .text(stamp)) { context in
+                context.textPosition = CGPoint(x: 5, y: 52)
+                CTLineDraw(line, context)
+            }
+        }
+        let firstFont = "HiraginoSans-W3", secondFont = "PingFangSC-Regular"
+        let firstText = try textPlan(firstFont), secondText = try textPlan(secondFont)
+
+        let size = MixedNativeTile.bytes
+        let pool = ResourceLeasePool<NSString, MixedNativeTile>(residentBudget: 2 * size, totalBudget: 4 * size,
+            maxResources: 8, maxLeases: 2, releaseLane: .owner)
+        let scene = SceneId(value: "native-mixed-tile")
+        func frame(_ request: Int64) -> FrameToken {
+            FrameToken(sceneId: scene, sceneRevision: 1, viewportVersion: 1,
+                sessionGeneration: 1, surfaceGeneration: 1, requestSequence: request)
+        }
+        let gate = FramePublicationGate(initial: frame(1))
+        var peak: Int64 = 0
+        var released = 0
+        var hitsByRequest = [[String]]()
+        typealias Ticket = ResourceReleaseTicket<MixedNativeTile>
+        func reserve() throws -> ResourceReservation {
+            let token = try XCTUnwrap((pool.reserve(bytes: size) as? ReservationResultReserved)?.reservation)
+            peak = max(peak, pool.chargedBytes)
+            if pool.chargedBytes == pool.totalBudget {
+                let refused = try XCTUnwrap(pool.reserve(bytes: 1) as? ReservationResultRejected)
+                XCTAssertEqual(refused.reason, .totalLimit)
+            }
+            return token
+        }
+        func settle(_ ticket: Ticket) {
+            guard ticket.value.receipt.confirmed else { return XCTFail("Provider bytes are still retained") }
+            XCTAssertEqual(pool.completeRelease(ticket: ticket, outcome: .released), .updated)
+            released += 1
+        }
+        func releaseReady() {
+            while let item = pool.nextRelease(destination: .owner) as? ResourceReleaseDispatchReady<MixedNativeTile> {
+                item.ticket.value.image = nil
+                settle(item.ticket)
+            }
+        }
+        func step(_ sequence: Int64, _ image: MixedTilePlan, _ text: MixedTilePlan, hits expected: [String]) throws {
+            let request = frame(sequence)
+            XCTAssertTrue(gate.expect(token: request))
+            var hits = [String]()
+            for plan in [image, text] {
+                let reader = (pool.borrow(key: plan.slot) as? ResourceBorrowBorrowed<MixedNativeTile>)?.lease
+                let cold = try MixedNativeTile(plan: plan).pixels()
+                if let reader, reader.value.dependency == plan.dependency {
+                    hits.append(plan.slot as String)
+                    XCTAssertEqual(try reader.value.pixels(), cold)
+                } else {
+                    if let reader { XCTAssertNotEqual(try reader.value.pixels(), cold, "request \(sequence) \(plan.slot)") }
+                    let charge = try reserve()
+                    let fresh = try MixedNativeTile(plan: plan)
+                    XCTAssertEqual(try fresh.pixels(), cold)
+                    XCTAssertTrue(gate.canPublish(token: request))
+                    XCTAssertTrue(pool.publish(reservation: charge, key: plan.slot, value: fresh) is ResourcePublicationResident)
+                    if let reader {
+                        XCTAssertFalse(reader.value.receipt.confirmed)
+                        XCTAssertEqual(pool.retiredBytes, size)
+                        XCTAssertTrue(pool.nextRelease(destination: .owner) is ResourceReleaseDispatchIdle)
+                    }
+                }
+                if let reader { XCTAssertEqual(pool.returnLease(lease: reader), .returned) }
+                releaseReady()
+            }
+            XCTAssertEqual(hits, expected)
+            hitsByRequest.append(hits)
+        }
+        try step(1, missing, firstText, hits: [])
+        try step(2, missing, firstText, hits: ["image", "text"])
+        try step(3, high, firstText, hits: ["text"])
+
+        let worker = try AppleBoundedOwnerExecutor(maxEntries: 1, maxBytes: size, automaticPump: false)
+        defer { try? worker.stopAccepting() }
+        let obsolete = try reserve()
+        var resultRetired = false
+        let admission = try worker.submit(input: frame(3), chargedBytes: size, compute: { _ in
+            precondition(!Thread.isMainThread)
+            return try MixedNativeTile(plan: high)
+        }, receive: { request, result in
+            XCTAssertTrue(Thread.isMainThread)
+            if case .succeeded(let tile) = result {
+                XCTAssertFalse(gate.canPublish(token: request))
+                resultRetired = pool.publishRetired(reservation: obsolete, value: tile) is ResourcePublicationRetired
+            }
+            return .acknowledged
+        })
+        guard case .accepted = admission else { return XCTFail("worker admission") }
+        try worker.stopAccepting()
+        try await eventually { (try? worker.status().workerStopped) == true }
+        XCTAssertEqual(try worker.status().entries.map { $0.stage }, [.ready])
+        XCTAssertEqual(try worker.status().chargedBytes, size)
+        try step(4, low, firstText, hits: ["text"])
+        XCTAssertEqual(try worker.drainResults().acknowledged, 1)
+        XCTAssertTrue(resultRetired)
+        XCTAssertTrue(try worker.status().isDrained)
+        XCTAssertEqual(pool.retiredBytes, size)
+        releaseReady()
+
+        try step(5, low, secondText, hits: ["image"])
+        try step(6, low, secondText, hits: ["image", "text"])
+
+        let lease = try XCTUnwrap((pool.borrow(key: slotImage) as? ResourceBorrowBorrowed<MixedNativeTile>)?.lease)
+        nonisolated(unsafe) var heldProvider = lease.value.image?.dataProvider
+        XCTAssertNotNil(heldProvider)
+        XCTAssertEqual(pool.returnLease(lease: lease), .returned)
+        XCTAssertTrue(pool.evict(key: slotImage))
+        let pending = try XCTUnwrap((pool.nextRelease(destination: .owner) as? ResourceReleaseDispatchReady<MixedNativeTile>)?.ticket)
+        pending.value.image = nil
+        gate.close()
+        pool.close()
+        releaseReady()
+        XCTAssertFalse(pending.value.receipt.confirmed)
+        XCTAssertFalse(pool.isDrained)
+        XCTAssertEqual(pool.chargedBytes, size)
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().async { heldProvider = nil; continuation.resume() }
+        }
+        try await eventually { pending.value.receipt.confirmed }
+        settle(pending)
+        XCTAssertTrue(pool.isDrained)
+        XCTAssertEqual(peak, 4 * size)
+        XCTAssertEqual(released, 6)
+        let evidence: [String: Any] = [
+            "trace_id": "c1-apple-mixed-tile-v1", "source_sha256": sourceHash,
+            "decoded_dimensions": [full.width, full.height, thumbnail.width, thumbnail.height],
+            "font_faces": [firstFont, secondFont], "hits": hitsByRequest, "cold_tile_comparisons": 12,
+            "scene_revision": 1, "tile_bytes": size, "peak_charged_tile_bytes": peak,
+            "released_tiles": released, "late_worker_result_retired": resultRetired,
+            "provider_held_bytes_after_close": size, "provider_confirmed_after_foreign_release": true,
+        ]
+        let artifact = XCTAttachment(data: try JSONSerialization.data(withJSONObject: evidence, options: [.sortedKeys]),
+            uniformTypeIdentifier: "public.json")
+        artifact.name = "c1-apple-mixed-tile.json"
+        artifact.lifetime = .keepAlways
+        add(artifact)
+    }
 }

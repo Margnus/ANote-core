@@ -67,6 +67,7 @@ EXPECTED = {
     'testPreviewRetainedProviderSurvivesCloseAndBlocksNewPoolUntilCallback()',
     'testProviderRetentionDelaysReleaseAndForeignCallbackSettlesOnlyOnOwner()',
     'testSweptWorkerDiscardsObsoleteRasterAndWaitsForProviderRelease()',
+    'testNativeMixedTileDependenciesAndProviderRetirement()',
     'testProviderUnknownReconciliationRequiresRealReleaseReceipt()',
     'testPreviewUIViewConsumesSharedFrameThenDetachKeepsStorageUsable()',
     'testPreviewViewDisappearsWhileRenderRunsAndModelAcknowledgesAfterClose()',
