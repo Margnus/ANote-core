@@ -7,6 +7,7 @@ import tempfile
 from unittest.mock import patch
 
 from capture_android_m1 import capture
+from verify_android_m1_session import verify
 
 
 def checks():
@@ -82,6 +83,54 @@ def checks():
             return calls, report
 
         case('matching_candidate_keeps_acceptance_false')
+        case('matching_post_snapshot')
+        pre = root / 'matching_candidate_keeps_acceptance_false'
+        post = root / 'matching_post_snapshot'
+        trace = root / 'interaction.pftrace'
+        trace.write_bytes(b'synthetic trace bytes')
+        bound = verify(pre, post, apk, trace)
+        assert bound['status'] == 'snapshot-pair-verified'
+        assert bound['process_identity'] == {'pid': 101, 'starttime_ticks': 999}
+        assert bound['trace_sha256'] == hashlib.sha256(trace.read_bytes()).hexdigest()
+        assert not bound['trace_metrics_verified'] and not bound['m1_accepted']
+
+        def refused(before, after, message):
+            try:
+                verify(before, after, apk, trace)
+            except ValueError as error:
+                assert message in str(error), error
+            else:
+                raise AssertionError(message)
+
+        refused(post, pre, 'pre/post order')
+        frames = post / 'frames.txt'
+        original_frames = frames.read_bytes()
+        frames.write_bytes(b'changed')
+        refused(pre, post, 'digest mismatch')
+        frames.write_bytes(original_frames)
+        receipt = post / 'snapshot.json'
+        original = receipt.read_bytes()
+        replacement = json.loads(original)
+        replacement['serial'] = 'another-device'
+        receipt.write_text(json.dumps(replacement), encoding='utf-8')
+        refused(pre, post, 'changed between snapshots')
+        replacement = json.loads(original)
+        replacement['samples'][0]['process_identity']['starttime_ticks'] = 1000
+        for label in ('stat-before', 'stat-after'):
+            path = post / (label + '.txt')
+            updated = path.read_bytes().removesuffix(b'999') + b'1000'
+            path.write_bytes(updated)
+            replacement['artifacts'][label]['sha256'] = hashlib.sha256(updated).hexdigest()
+        receipt.write_text(json.dumps(replacement), encoding='utf-8')
+        refused(pre, post, 'changed between snapshots')
+        for label in ('stat-before', 'stat-after'):
+            path = post / (label + '.txt')
+            path.write_bytes(path.read_bytes().removesuffix(b'1000') + b'999')
+        receipt.write_bytes(original)
+        trace.write_bytes(b'')
+        refused(pre, post, 'trace file is empty')
+        results.append('paired_snapshots_refuse_mismatch_tampering_and_empty_trace')
+
         calls, _ = case('emulator_refused_before_package_reads', expected='emulator rejected', emulator=True)
         assert not any('pm' in args for args in calls)
         calls, _ = case('wrong_candidate_refused_before_metrics',
