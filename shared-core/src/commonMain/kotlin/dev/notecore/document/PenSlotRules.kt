@@ -3,8 +3,8 @@ package dev.notecore.document
 import dev.notecore.canvas.prototype.BrushKind
 
 /** App-level pen preference slot; not document content and not a persisted authority. */
-internal data class PenSlot(val kind: BrushKind, val argb: Int, val width: Double)
-internal data class PenSlotState(val slots: List<PenSlot>, val activeIndex: Int)
+data class PenSlot(val kind: BrushKind, val argb: Int, val width: Double)
+data class PenSlotState(val slots: List<PenSlot>, val activeIndex: Int)
 internal sealed interface PenSlotChange {
     data class Select(val index: Int) : PenSlotChange
     data class Update(val index: Int, val slot: PenSlot) : PenSlotChange
@@ -16,8 +16,9 @@ internal data class PenSlotPatch(
 internal enum class PenSlotFailure { INVALID_STATE, INVALID_INDEX, INVALID_SLOT, NO_CHANGE }
 internal data class PenSlotResult(val patch: PenSlotPatch? = null, val failure: PenSlotFailure? = null)
 
-internal object PenSlotRules {
+object PenSlotRules {
     const val SLOT_COUNT = 6
+    private const val FORMAT = "v1"
 
     fun defaults(): PenSlotState = PenSlotState(listOf(
         PenSlot(BrushKind.MONOLINE, 0xFF000000.toInt(), 2.0),
@@ -40,7 +41,45 @@ internal object PenSlotRules {
         return null
     }
 
-    fun plan(state: PenSlotState, change: PenSlotChange): PenSlotResult {
+    /** Host facade: null means invalid input or no change, leaving the caller's state untouched. */
+    fun select(state: PenSlotState, index: Int): PenSlotState? =
+        plan(state, PenSlotChange.Select(index)).patch?.after
+
+    fun update(state: PenSlotState, index: Int, kind: BrushKind, argb: Int, width: Double): PenSlotState? =
+        plan(state, PenSlotChange.Update(index, PenSlot(kind, argb, width))).patch?.after
+
+    fun reset(state: PenSlotState): PenSlotState? = plan(state, PenSlotChange.Reset).patch?.after
+
+    /** Stable host-preference encoding; never part of the document codec. */
+    fun encode(state: PenSlotState): String? {
+        if (validate(state) != null) return null
+        return buildString {
+            append(FORMAT)
+            state.slots.forEach { slot ->
+                append(';').append(slot.kind.name).append(',').append(slot.argb).append(',').append(slot.width)
+            }
+            append(";a=").append(state.activeIndex)
+        }
+    }
+
+    /** Restores a validated state from host preferences; missing or corrupt values return null. */
+    fun decode(value: String?): PenSlotState? {
+        if (value == null) return null
+        val parts = value.split(';')
+        if (parts.size != SLOT_COUNT + 2 || parts.first() != FORMAT || !parts.last().startsWith("a=")) return null
+        val active = parts.last().removePrefix("a=").toIntOrNull() ?: return null
+        val slots = parts.subList(1, parts.size - 1).map { entry ->
+            val fields = entry.split(',')
+            if (fields.size != 3) return null
+            val kind = BrushKind.values().firstOrNull { it.name == fields[0] } ?: return null
+            val argb = fields[1].toIntOrNull() ?: return null
+            val width = fields[2].toDoubleOrNull() ?: return null
+            PenSlot(kind, argb, width)
+        }
+        return PenSlotState(slots, active).takeIf { validate(it) == null }
+    }
+
+    internal fun plan(state: PenSlotState, change: PenSlotChange): PenSlotResult {
         validate(state)?.let { return PenSlotResult(failure = it) }
         val frozen = state.copy(slots = state.slots.toList())
         return when (change) {

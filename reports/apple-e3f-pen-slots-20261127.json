@@ -1,0 +1,31 @@
+{
+  "schema": "apple-e3f-pen-slots-1",
+  "status": "passed",
+  "date": "2026-11-27",
+  "base_core": "eeddcfe2",
+  "milestone": "E3f",
+  "scope": "iOS simulator framework linking and Swift host compilation only; no runtime UI execution",
+  "verified": {
+    "framework": {
+      "task": ":shared-core:linkDebugFrameworkIosSimulatorArm64",
+      "binary": "shared-core/build/bin/iosSimulatorArm64/debugFramework/NoteCanvasPrototype.framework/NoteCanvasPrototype",
+      "sha256": "fabd5a0d5816cef2aa3e39b420b6c6a0861fb7b2f7bcb3545109ccedd30f50ed",
+      "header_exports": ["PenSlot", "PenSlotRules", "PenSlotState"]
+    },
+    "host": {
+      "command": "xcodebuild -project ios-app/NoteCorePreview.xcodeproj -scheme NoteCorePreview -sdk iphonesimulator -destination generic/platform=iOS Simulator -derivedDataPath ios-app/build CODE_SIGNING_ALLOWED=NO build",
+      "result": "BUILD SUCCEEDED",
+      "binary": "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview",
+      "sha256": "001944900e779cc795957379e48dddf8455190e3ad8736562651c249c8208867"
+    }
+  },
+  "environment_note": "A stale duplicate project-local .konan bundle was moved out of the project before linking; Kotlin/Native now uses ~/.konan only. This is a machine cache cleanup, not a repository source change.",
+  "limitations": [
+    "No iOS simulator UI interaction or UserDefaults runtime verification in this report",
+    "No physical iPad/iPhone, Pencil, or device persistence test",
+    "No production storage or document-format change"
+  ],
+  "ios_runtime_verified": false,
+  "physical_device_verified": false,
+  "real_stylus_verified": false
+}

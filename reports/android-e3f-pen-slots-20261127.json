@@ -1,0 +1,42 @@
+{
+  "schema": "android-e3f-pen-slots-1",
+  "status": "passed",
+  "date": "2026-11-27",
+  "base_core": "eeddcfe2",
+  "milestone": "E3f",
+  "scope": "ordinary Android app process, authorized ADB input, read-only uiautomator observation",
+  "device": {
+    "serial": "emulator-5554",
+    "avd": "NoteCorePreview",
+    "api": "36",
+    "image": "google_apis_playstore/arm64-v8a",
+    "screen": "1080x1920@420",
+    "headless": true
+  },
+  "artifact": {
+    "apk": "android-app/build/outputs/apk/debug/android-app-debug.apk",
+    "sha256": "c26184732ff28f7788967f3c853ba31de28fb5063dab24b2edb59288ccd08c3a"
+  },
+  "input_method": "Explicitly user-authorized ADB system input (tap and force-stop/relaunch); uiautomator dump for read-only observation",
+  "verified_cases": {
+    "default_six_slots_visible": {"slots": "1/2/3/4/5(荧)/6", "active": "1", "status": "passed"},
+    "slot_four_selection": {"before": "4", "after": "4✓", "status": "passed"},
+    "active_slot_highlighter_update": {"before": "4✓", "after": "荧4✓ and 荧光笔✓", "status": "passed"},
+    "highlighter_stroke_committed": {"before": "0笔", "after": "1笔", "saved_status": "已保存到本机 · 1 笔", "status": "passed"},
+    "process_restart_restores_slot": {"restart": "am force-stop then new launcher process", "after_reopen": "荧4✓, 手写画布，1笔", "status": "passed"},
+    "reset_slots": {"after": "1✓, slot 4 without 荧", "status": "passed"},
+    "process_restart_restores_reset": {"restart": "am force-stop then new launcher process", "after_reopen": "1✓, 手写画布，1笔", "status": "passed"}
+  },
+  "host_preference": "SharedPreferences stores one shared PenSlotRules v1 string; corrupt or missing value falls back to defaults in tests",
+  "screenshot_retained": "session temp e3f-pen-slots.png (not committed)",
+  "limitations": [
+    "Android simulator input only; no physical stylus or device",
+    "iOS runtime UI not exercised in this report",
+    "Preference corruption was verified by Robolectric unit test, not by device storage fault injection",
+    "One preview note was created on the isolated AVD; app data was cleared before the run"
+  ],
+  "windows_capture_verified": false,
+  "physical_device_verified": false,
+  "real_stylus_verified": false,
+  "ios_runtime_verified": false
+}

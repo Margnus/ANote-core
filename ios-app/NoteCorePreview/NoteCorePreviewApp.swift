@@ -811,6 +811,23 @@ final class PreviewWindowState: ObservableObject {
     func finishExport(request: UUID? = nil) { model.finishEditorExport(identity, request: request ?? exportRequest) }
 }
 
+/** Preview-only host persistence for pen slots; the document codec is unchanged. */
+private final class PenSlotStore {
+    private let defaults: UserDefaults
+    private let key = "notecore-preview-pens.slots-v1"
+    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
+    func load() -> PenSlotState {
+        if let raw = defaults.string(forKey: key), let state = PenSlotRules.shared.decode(value: raw) {
+            return state
+        }
+        return PenSlotRules.shared.defaults()
+    }
+    func save(_ state: PenSlotState) {
+        guard let raw = PenSlotRules.shared.encode(state: state) else { return }
+        defaults.set(raw, forKey: key)
+    }
+}
+
 @main
 struct NoteCorePreviewApp: App {
     @StateObject private var model = PreviewModel()
@@ -830,9 +847,7 @@ struct PreviewRoot: View {
         self.model = model
         _window = StateObject(wrappedValue: window ?? PreviewWindowState(model: model))
     }
-    @State private var color: Int32 = Int32(bitPattern: 0xff253247)
-    @State private var width: Double = 2.5
-    @State private var kind: BrushKind = .monoline
+    @State private var penState = PenSlotRules.shared.defaults()
     @State private var tool: InkTool = .pen
     @State private var finger = true
     @State private var renaming = false
@@ -843,6 +858,17 @@ struct PreviewRoot: View {
     @State private var deletingPage = false
     @State private var viewportRequest = 0
     @State private var viewportRatio = 0.0
+    private let penStore = PenSlotStore()
+    private var activePen: PenSlot { penState.slots[Int(penState.activeIndex)] }
+    private func updateActivePen(kind: BrushKind? = nil, argb: Int32? = nil, width: Double? = nil) {
+        let slot = activePen
+        guard let next = PenSlotRules.shared.update(state: penState, index: penState.activeIndex,
+            kind: kind ?? slot.kind, argb: argb ?? slot.argb, width: width ?? slot.width) else { return }
+        commitPenState(next)
+    }
+    private func commitPenState(_ next: PenSlotState) {
+        window.cancelInput(); penState = next; penStore.save(next)
+    }
     var body: some View {
         let exportAtRender = exportingRequest
         return ZStack {
@@ -861,19 +887,35 @@ struct PreviewRoot: View {
                         Spacer(); Toggle("手指书写", isOn: $finger).fixedSize()
                     }.padding(.horizontal)
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
+                        HStack(spacing: 14) {
+                            ForEach(Array(penState.slots.indices), id: \.self) { index in
+                                let slot = penState.slots[index]
+                                Button {
+                                    if let next = PenSlotRules.shared.select(state: penState, index: Int32(index)) {
+                                        commitPenState(next)
+                                    }
+                                } label: {
+                                    Text((slot.kind == .highlighter ? "荧" : "") + "\(index + 1)" +
+                                        (index == Int(penState.activeIndex) ? "✓" : ""))
+                                        .foregroundStyle(Color(uiColor: inkColor(slot.argb)))
+                                }
+                                .accessibilityLabel("笔槽\(index + 1)")
+                                .accessibilityValue(index == Int(penState.activeIndex) ? "当前" : "")
+                            }
+                            Button("重置笔槽") {
+                                if let next = PenSlotRules.shared.reset(state: penState) { commitPenState(next) }
+                            }
                             ForEach([UInt32(0xff253247), 0xff3568be, 0xffce4d52, 0xff21816b], id: \.self) { raw in
-                                Button { window.cancelInput(); color = Int32(bitPattern: raw) } label: {
+                                Button { updateActivePen(argb: Int32(bitPattern: raw)) } label: {
                                     Circle().fill(Color(uiColor: inkColor(Int32(bitPattern: raw)))).frame(width: 25, height: 25)
-                                        .overlay(Circle().stroke(color == Int32(bitPattern: raw) ? .gray : .clear, lineWidth: 3))
+                                        .overlay(Circle().stroke(activePen.argb == Int32(bitPattern: raw) ? .gray : .clear, lineWidth: 3))
                                 }.accessibilityLabel("笔颜色")
                             }
                             ForEach([2.5, 5.0, 9.0], id: \.self) { value in
-                                Button(value == 2.5 ? "细" : value == 5 ? "中" : "粗") { window.cancelInput(); width = value }
+                                Button(value == 2.5 ? "细" : value == 5 ? "中" : "粗") { updateActivePen(width: value) }
                             }
-                            Button(kind == .highlighter ? "荧光✓" : "荧光") {
-                                window.cancelInput()
-                                kind = kind == .highlighter ? .monoline : .highlighter
+                            Button(activePen.kind == .highlighter ? "荧光✓" : "荧光") {
+                                updateActivePen(kind: activePen.kind == .highlighter ? .monoline : .highlighter)
                             }.accessibilityLabel("荧光笔")
                         }.padding(.horizontal)
                     }.frame(height: 36)
@@ -936,11 +978,12 @@ struct PreviewRoot: View {
                         }
                     }.padding(.horizontal).frame(minHeight: 44)
                     Text(model.status).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("note-status")
-                    NativeInkCanvas(note: note, renderModel: model, color: color, width: width, kind: kind, tool: tool, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
+                    NativeInkCanvas(note: note, renderModel: model, color: activePen.argb, width: activePen.width, kind: activePen.kind, tool: tool, finger: finger, revision: model.revision, viewportRequest: viewportRequest, viewportRatio: viewportRatio,
                         changed: { model.changed() }, failed: { model.status = $0 }, inputOwner: window)
                         .id(note.documentId)
                         .padding(.horizontal, 12).padding(.bottom, 8)
                 }.padding(.top, 8)
+                    .onAppear { penState = penStore.load() }
             } else {
                 NavigationStack {
                     List {

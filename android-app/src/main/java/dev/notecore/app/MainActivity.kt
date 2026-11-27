@@ -36,6 +36,10 @@ class MainActivity : Activity() {
     private var nextPage: Button? = null
     private var viewGeneration = 0L
     private val navy = 0xff253247.toInt()
+    private val penPreferences by lazy { PenSlotPreferences(this) }
+    private var penState = PenSlotRules.defaults()
+    private val penSlotButtons = mutableListOf<Button>()
+    private var highlighterButton: Button? = null
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +82,32 @@ class MainActivity : Activity() {
         setOnClickListener { action() }
     }
     private fun row() = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(12), dp(4), dp(12), dp(4)) }
+    private fun applyActivePen() {
+        val slot = penState.slots[penState.activeIndex]
+        canvas?.let { view ->
+            view.cancelInk()
+            view.penKind = slot.kind
+            view.penColor = slot.argb
+            view.penWidth = slot.width
+        }
+    }
+    private fun refreshPenControls() {
+        penSlotButtons.forEachIndexed { index, button ->
+            val slot = penState.slots[index]
+            val active = index == penState.activeIndex
+            button.text = (if (slot.kind == BrushKind.HIGHLIGHTER) "荧" else "") + (index + 1) + if (active) "✓" else ""
+            button.contentDescription = "笔槽${index + 1}" + if (active) "，当前" else ""
+            button.setTextColor(slot.argb)
+        }
+        highlighterButton?.text = if (penState.slots[penState.activeIndex].kind == BrushKind.HIGHLIGHTER) "荧光笔✓" else "荧光笔"
+    }
+    private fun commitPenState(next: PenSlotState?) {
+        if (next == null) return
+        penState = next
+        penPreferences.save(next)
+        applyActivePen()
+        refreshPenControls()
+    }
     private fun library() {
         notebook?.let { store.forgetEditor(it, editorIdentity) }
         lastPresentation = null
@@ -132,6 +162,7 @@ class MainActivity : Activity() {
         if (!store.attachEditor(note, editorIdentity, editorObserver)) { library(); showError("编辑窗口已满或会话已切换，请返回后重试"); return }
         lastPresentation = null
         viewGeneration++; notebook = note; root.removeAllViews()
+        penState = penPreferences.load(); penSlotButtons.clear(); highlighterButton = null
         val header = row()
         header.addView(button("返回") { leaveEditor() })
         titleView = text(note.title, 18f).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END; setPadding(dp(8), 0, dp(8), 0); setOnClickListener { rename() } }
@@ -164,19 +195,35 @@ class MainActivity : Activity() {
         })
         tools.addView(Switch(this).apply { text = "手指书写"; isChecked = true; setOnCheckedChangeListener { _, enabled -> canvas?.cancelInk(); canvas?.fingerDrawing = enabled } })
         root.addView(tools)
+        val slots = row()
+        repeat(PenSlotRules.SLOT_COUNT) { index ->
+            val b = button("") { commitPenState(PenSlotRules.select(penState, index)) }
+            penSlotButtons.add(b); slots.addView(b)
+        }
+        slots.addView(button("重置笔槽") { commitPenState(PenSlotRules.reset(penState)) })
+        root.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(slots) })
         val palette = row()
         val colors = listOf("墨黑" to navy, "深蓝" to 0xff3568be.toInt(), "朱红" to 0xffce4d52.toInt(), "松绿" to 0xff21816b.toInt())
-        colors.forEach { (name, color) -> palette.addView(button(name) { canvas?.cancelInk(); canvas?.penColor = color }.apply { setTextColor(color) }) }
-        listOf("细" to 2.5, "中" to 5.0, "粗" to 9.0).forEach { (name, width) -> palette.addView(button(name) { canvas?.cancelInk(); canvas?.penWidth = width }) }
-        val highlighterButton = button("荧光笔") {}
-        highlighterButton.setOnClickListener {
-            val view = canvas ?: return@setOnClickListener
-            view.cancelInk()
-            view.penKind = if (view.penKind == BrushKind.HIGHLIGHTER) BrushKind.MONOLINE else BrushKind.HIGHLIGHTER
-            highlighterButton.text = if (view.penKind == BrushKind.HIGHLIGHTER) "荧光笔✓" else "荧光笔"
+        colors.forEach { (name, color) ->
+            palette.addView(button(name) {
+                val slot = penState.slots[penState.activeIndex]
+                commitPenState(PenSlotRules.update(penState, penState.activeIndex, slot.kind, color, slot.width))
+            }.apply { setTextColor(color) })
         }
-        palette.addView(highlighterButton)
+        listOf("细" to 2.5, "中" to 5.0, "粗" to 9.0).forEach { (name, width) ->
+            palette.addView(button(name) {
+                val slot = penState.slots[penState.activeIndex]
+                commitPenState(PenSlotRules.update(penState, penState.activeIndex, slot.kind, slot.argb, width))
+            })
+        }
+        highlighterButton = button("荧光笔") {
+            val slot = penState.slots[penState.activeIndex]
+            commitPenState(PenSlotRules.update(penState, penState.activeIndex,
+                if (slot.kind == BrushKind.HIGHLIGHTER) BrushKind.MONOLINE else BrushKind.HIGHLIGHTER, slot.argb, slot.width))
+        }
+        palette.addView(checkNotNull(highlighterButton))
         root.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(palette) })
+        refreshPenControls()
         val viewportTools = row()
         viewportTools.addView(button("缩小") { canvas?.zoomViewport(1.0 / 1.5) })
         viewportTools.addView(button("放大") { canvas?.zoomViewport(1.5) })
@@ -190,6 +237,7 @@ class MainActivity : Activity() {
         }
         root.addView(status)
         canvas = InkCanvasView(this, note, { save(); updateControls() }, ::showError)
+        applyActivePen()
         root.addView(if (android.os.Build.VERSION.SDK_INT >= 33) InkSurfaceHost(checkNotNull(canvas),store) else checkNotNull(canvas), LinearLayout.LayoutParams(-1, 0, 1f).apply { setMargins(dp(12), 0, dp(12), dp(12)) })
         refreshPresentation()
     }

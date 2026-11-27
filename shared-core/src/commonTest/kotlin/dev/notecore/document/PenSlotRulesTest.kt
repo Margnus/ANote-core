@@ -89,6 +89,32 @@ class PenSlotRulesTest {
         assertEquals(2, patch.after.activeIndex)
     }
 
+    @Test fun hostFacadeUsesTheSameRulesAndReturnsNullWithoutChanges() {
+        val edited = assertNotNull(PenSlotRules.update(defaults, 4, BrushKind.HIGHLIGHTER, 0xFFABCDEF.toInt(), 20.0))
+        assertEquals(PenSlot(BrushKind.HIGHLIGHTER, 0xFFABCDEF.toInt(), 20.0), edited.slots[4])
+        assertEquals(3, assertNotNull(PenSlotRules.select(edited, 3)).activeIndex)
+        assertNull(PenSlotRules.select(edited, edited.activeIndex))
+        assertNull(PenSlotRules.select(edited, -1))
+        assertNull(PenSlotRules.update(edited, 0, BrushKind.PRESSURE, 1, 2.0))
+        assertEquals(defaults, PenSlotRules.reset(edited))
+        assertNull(PenSlotRules.reset(defaults))
+    }
+
+    @Test fun hostEncodingRoundTripsAndRejectsCorruptPreferences() {
+        val edited = assertNotNull(PenSlotRules.update(
+            assertNotNull(PenSlotRules.select(defaults, 5)), 5, BrushKind.HIGHLIGHTER, 0xFF102030.toInt(), 12.5))
+        val encoded = assertNotNull(PenSlotRules.encode(edited))
+        assertEquals(edited, PenSlotRules.decode(encoded))
+        assertNull(PenSlotRules.decode(null))
+        assertNull(PenSlotRules.decode(""))
+        assertNull(PenSlotRules.decode(encoded.replaceFirst("v1", "v2")))
+        assertNull(PenSlotRules.decode(encoded.replaceFirst("HIGHLIGHTER", "PRESSURE")))
+        assertNull(PenSlotRules.decode(encoded.replaceFirst("12.5", "0.0")))
+        assertNull(PenSlotRules.decode(encoded.replaceFirst("a=5", "a=6")))
+        assertNull(PenSlotRules.decode(encoded + ";extra"))
+        assertNull(PenSlotRules.encode(PenSlotState(defaults.slots.drop(1), 0)))
+    }
+
     private fun validSlotForTest(slot: PenSlot) = when (slot.kind) {
         BrushKind.PRESSURE -> false
         else -> slot.width.isFinite() && slot.width > 0.0 && slot.width <= 128.0
