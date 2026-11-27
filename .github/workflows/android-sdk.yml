@@ -39,6 +39,15 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+      - name: Restore pinned Gradle downloads
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684
+        with:
+          path: |
+            .gradle-user-home/wrapper/dists
+            .gradle-user-home/caches/modules-2
+            !.gradle-user-home/caches/modules-2/modules-2.lock
+            !.gradle-user-home/caches/modules-2/gc.properties
+          key: jvm-android-dependencies-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.gradle.kts', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
       - name: Select bundled JDK 17
         run: |
           test -x "$JAVA_HOME_17_X64/bin/java"
