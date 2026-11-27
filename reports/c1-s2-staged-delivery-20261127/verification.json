@@ -1,0 +1,44 @@
+{
+  "status": "passed",
+  "base_commit": "d465d75d7de8d90fe72878cccd9cd1c230d84d61",
+  "jvm_tests": 825,
+  "observations": {
+    "tiles": 3,
+    "currentPulses": 3,
+    "currentWork": 24627292,
+    "maxPulseWork": 12786524,
+    "pulseLimit": 20000000,
+    "peakDeclaredBytes": 121648,
+    "prefixBytes": 27440,
+    "atlasBytes": 12288,
+    "obsolete": 1,
+    "failed": 1,
+    "publications": 1,
+    "coldByteChecks": 12288
+  },
+  "historical_composition_and_work_counts_match": true,
+  "checks": [
+    "extra byte refused before worker allocation",
+    "one worker slot held through blocked delivery",
+    "obsolete result acknowledged without copying into the new stage",
+    "output copied while executor charge is live; only metadata survives ACK",
+    "stage swapped once after three successful tile receipts",
+    "previous complete atlas readable while a new frame is visible",
+    "later tile rejection removes its complete staging attempt and preserves the prior frame"
+  ],
+  "source_sha256": {
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/S2StagedFrameProbe.kt": "f3404d0fecbde211579e6d9a5de525daee7423f20f851514b44a30ad6cad86e0",
+    "canvas-core/src/jvmTest/kotlin/dev/notecore/canvas/prototype/SweptDensePageProbe.kt": "3825f6c435297419e1b0d2980e94631799f0cd8fab3faef3634b0d104463bc94",
+    "canvas-core/src/jvmAndAndroidMain/kotlin/dev/notecore/canvas/prototype/BoundedOwnerExecutor.kt": "4906c53bd2f3ad95681d8fe1561cf2e3f8296201c67fe43a6dda7b4185f9ccae",
+    "canvas-core/src/commonMain/kotlin/dev/notecore/canvas/prototype/Presentation.kt": "543c25980862f3bd9f9ebeb0d55b82ee8b059f8006b3dc0885f9ef287c403722"
+  },
+  "raw_evidence_sha256": {
+    "tests.log": "03c0c889a99e8d35c110c0f29d22c20f9ecc74e5c5214078d4e3d7cca6503070",
+    "swept-dense-page.log": "50e24a92ccf6a29e86d4769499c98bb76c9e171f11c3186e0b4168ac24cba048",
+    "check_architecture.py.log": "86716dec9b02de90b40cfe2af88c2f35693d237d7a328b9e6b2a8a522de2a358",
+    "verify_portable_inputs.py.log": "1c1567780b0090d32dec71050d899eb7ca3e28797495c7f16cc32e6effe4b5da"
+  },
+  "archive_sha256": "f2eab15146ee3cea40cdd53a5cbd26066f19fde91738ce9022d3fb0b30b01488",
+  "adoption": "Keep a bounded tile job and a private frame staging buffer. Perform tile handoff under the existing executor charge, and publish only once at complete current-frame ACK. Keep the previously published atlas available during assembly and on failure.",
+  "scope": "Offscreen desktop JVM S2 with rectangle proxies and actual serial worker. Pulse is a test-driver dispatch budget, not actual device vsync. The declared peak covers the one selected prefix cache, two output atlases and one tile output/work reservation. Canonical inputs, spatial data, test oracle, JVM object overhead and physical heap are outside the figure. No platform no-op frame, actual GUI, physical latency or production integration claims."
+}

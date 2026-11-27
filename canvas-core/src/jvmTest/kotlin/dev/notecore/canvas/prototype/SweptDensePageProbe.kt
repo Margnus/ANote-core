@@ -209,6 +209,7 @@ object SweptDensePageProbe {
             val entries = items.mapIndexed { i, item -> SpatialEntry(i, item.bounds) }
             val plans = planTiles(items, entries, PackedRTreePoc(entries), tops)
             val priorCold = mutableMapOf<Int, BrushTilePixelsPoc>()
+            var initialCold = emptyList<BrushTilePixelsPoc>()
             val strategies = listOf(false, true).associateWith {
                 WeightedLruCache<Int, LayerCheckpoint>(CACHE_BYTES) { it.logicalBytes }
             }
@@ -227,6 +228,7 @@ object SweptDensePageProbe {
                         }
                     }
                 }
+                if (sequence == 1L) initialCold = tops.map(cold::getValue)
                 for ((prefixOnly, cache) in strategies) {
                     var fullHits = 0
                     var prefixHits = 0
@@ -274,13 +276,38 @@ object SweptDensePageProbe {
                         "request=$sequence fullHits=$fullHits prefixHits=$prefixHits " +
                         "work=$work maxTileWork=$maxTileWork residentLogicalBytes=${cache.residentBytes} coldByteChecks=12288")
                 }
+                if (!tailOnly && sequence == 3L) {
+                    val cache = strategies.getValue(true)
+                    val checkpoints = tops.map { checkNotNull(cache.get(it)) }
+                    verifyStagedDelivery(items, changed, tops.map(plans::getValue), checkpoints,
+                        initialCold, tops.map(cold::getValue), cache.residentBytes)
+                }
             }
+        }
+    }
+
+    private fun verifyStagedDelivery(
+        oldItems: List<Item>, currentItems: List<Item>, plans: List<TilePlan>, checkpoints: List<LayerCheckpoint>,
+        old: List<BrushTilePixelsPoc>, current: List<BrushTilePixelsPoc>, prefixBytes: Long,
+    ) {
+        val workingLimit = 64L * 1024
+        S2StagedFrameProbe.verify(old, current, prefixBytes, WORK_LIMIT, workingLimit) { frame, slot, limit ->
+            val plan = plans[slot]
+            val prefix = checkpoints[slot]
+            val totals = Totals(copiedChannels = prefix.pixels.logicalBytes)
+            if (totals.work > limit) return@verify null
+            val output = BrushTilePixelsPoc.Companion.Composition(frame, layer, plan.grid, prefix.pixels)
+            val items = if (frame.requestSequence == 4L) oldItems else currentItems
+            if (!composeTile(frame, items, plan, output, totals, limit, from = prefix.keyEntries,
+                    workingLimit = workingLimit)) return@verify null
+            check(totals.peakTransient <= workingLimit)
+            S2StagedFrameProbe.TileResult(output.finish(), totals.work)
         }
     }
 
     private fun composeTile(frame: FrameToken, items: List<Item>, plan: TilePlan,
         output: BrushTilePixelsPoc.Companion.Composition, totals: Totals, workLimit: Long, destY: Int = 0,
-        from: Int = 0, end: Int = plan.candidates.size,
+        from: Int = 0, end: Int = plan.candidates.size, workingLimit: Long = 1024 * 1024,
     ): Boolean {
         val tile = plan.grid
         val channelSteps = tile.width * tile.height * 4L
@@ -297,10 +324,11 @@ object SweptDensePageProbe {
             } else {
                 val catalog = assertCatalog(frame, item.stroke)
                 val ready = when (val rendered = catalog.renderSwept(frame, tile,
+                    maxWorkingBytes = workingLimit - catalog.boundsPayloadBytes,
                     maxEdgeTests = minOf(remaining, WORK_LIMIT))) {
                     is BrushTileBuild.Ready -> rendered
                     is BrushTileBuild.Rejected -> {
-                        check(rendered.reason == "raster-work-budget") { rendered.reason }
+                        check(rendered.reason in setOf("raster-work-budget", "working-budget")) { rendered.reason }
                         return false
                     }
                     BrushTileBuild.Cancelled -> error("Unexpected cancellation")
