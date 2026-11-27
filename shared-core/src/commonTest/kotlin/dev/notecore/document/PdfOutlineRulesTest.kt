@@ -53,6 +53,28 @@ class PdfOutlineRulesTest {
         assertEquals(6, result.nodes[2].sourceNumber)
     }
 
+    @Test fun unregisteredOrMismatchedSourceRejectsEntireOutlineBeforeReadingEntries() {
+        val unreadableOutline = object : AbstractList<PdfOutlineDest>() {
+            override val size: Int get() = error("Unverified outline must not be inspected")
+            override fun get(index: Int): PdfOutlineDest = error("Unverified outline must not be inspected")
+        }
+        for ((observed, expectedFailure) in listOf(
+            source.copy(sha256 = "cd".repeat(32)) to PdfPageCatalogFailure.SOURCE_CHANGED,
+            source.copy(pageCount = 5) to PdfPageCatalogFailure.SOURCE_CHANGED,
+            source.copy(pageCount = 7) to PdfPageCatalogFailure.SOURCE_CHANGED,
+            source.copy(pageCount = 0) to PdfPageCatalogFailure.INVALID_SOURCES,
+        )) {
+            val result = PdfOutlineRules.map(root, catalog, "local", 0, observed, unreadableOutline)
+            assertEquals(PdfOutlineResult(failure = PdfOutlineFailure.INVALID_CATALOG,
+                catalogFailure = expectedFailure), result)
+        }
+    }
+
+    @Test fun registeredSourceWithAllPagesRemovedReturnsAnEmptyAvailableOutline() {
+        val result = map(listOf(PdfOutlineDest(0, "Removed")), cat = catalog.copy(references = emptyList()))
+        assertEquals(PdfOutlineResult(outlineAvailable = true, skippedCount = 1), result)
+    }
+
     @Test fun nestedOutlineMapsChildrenRecursivelyWithOwnPageBinding() {
         val outline = listOf(
             PdfOutlineDest(0, "Chapter 1", listOf(

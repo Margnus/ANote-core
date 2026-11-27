@@ -56,7 +56,7 @@ internal object PdfOutlineRules {
 
     fun map(root: DocumentRoot, catalog: PdfPageCatalog, space: String, metadataRevision: Long,
             source: PdfSourcePages, outline: List<PdfOutlineDest>?): PdfOutlineResult {
-        val projection = PdfPageCatalogRules.project(root, catalog, space, metadataRevision)
+        val projection = PdfPageCatalogRules.project(root, catalog, space, metadataRevision, expectedSource = source)
         projection.failure?.let {
             return PdfOutlineResult(failure = PdfOutlineFailure.INVALID_CATALOG, catalogFailure = it)
         }

@@ -89,6 +89,10 @@ internal object PdfPageCatalogRules {
     fun validateSource(root: DocumentRoot, s: PdfPageCatalog, space: String, revision: Long,
                        expected: PdfSourcePages): PdfPageCatalogFailure? {
         validate(root, s, space, revision)?.let { return it }
+        return validateRegisteredSource(s, expected)
+    }
+
+    private fun validateRegisteredSource(s: PdfPageCatalog, expected: PdfSourcePages): PdfPageCatalogFailure? {
         if (!hash(expected.sha256) || expected.pageCount !in 1..100000) return PdfPageCatalogFailure.INVALID_SOURCES
         val registered = s.sources.singleOrNull { it.sha256 == expected.sha256 } ?: return PdfPageCatalogFailure.SOURCE_CHANGED
         return if (registered == expected) null else PdfPageCatalogFailure.SOURCE_CHANGED
@@ -112,7 +116,7 @@ internal object PdfPageCatalogRules {
         }
         val reference = if (source == null && sourceIndex == null) null else {
             if (source == null || sourceIndex == null) return PdfPageInsertionPlan(failure = PdfPageCatalogFailure.INVALID_REFERENCES)
-            validateSource(root, s, space, revision, source)?.let { return PdfPageInsertionPlan(failure = it) }
+            validateRegisteredSource(s, source)?.let { return PdfPageInsertionPlan(failure = it) }
             if (sourceIndex !in 0 until source.pageCount) return PdfPageInsertionPlan(failure = PdfPageCatalogFailure.INVALID_REFERENCES)
             PdfPageRef(page.id, source.sha256, sourceIndex)
         }
@@ -136,8 +140,12 @@ internal object PdfPageCatalogRules {
         return if (insertion == candidate) fresh else PdfPageInsertionPlan(failure = PdfPageCatalogFailure.STALE_PLAN)
     }
 
-    fun project(root: DocumentRoot, s: PdfPageCatalog, space: String, revision: Long): PdfPageProjection {
+    fun project(root: DocumentRoot, s: PdfPageCatalog, space: String, revision: Long,
+                expectedSource: PdfSourcePages? = null): PdfPageProjection {
         validate(root, s, space, revision)?.let { return PdfPageProjection(failure = it) }
+        if (expectedSource != null) {
+            validateRegisteredSource(s, expectedSource)?.let { return PdfPageProjection(failure = it) }
+        }
         val refs = s.references.associateBy { it.pageId }
         return PdfPageProjection(root.pages().mapIndexed { index, page ->
             val ref = refs[page.id]
