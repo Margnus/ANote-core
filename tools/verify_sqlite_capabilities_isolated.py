@@ -125,14 +125,17 @@ def apple(args, output, work):
     (output / 'apple-build.log').write_text(compilation.stdout + compilation.stderr, encoding='utf-8')
     link = command('xcrun', 'vtool', '-show-build', binary).stdout
     assert 'minos 17.0' in link and 'IOSSIMULATOR' in link
-    runtime_info = json.loads(command(*run, 'list', 'runtimes', '-j').stdout)
+    inventory = command(*run, 'list', 'runtimes', '-j', timeout=150)
+    (output / 'apple-runtimes.json').write_text(inventory.stdout, encoding='utf-8')
+    runtime_info = json.loads(inventory.stdout)
     runtime, = [row for row in runtime_info['runtimes'] if row['identifier'] == args.runtime and row['isAvailable']]
     device = command(*run, 'create', 'NoteCoreSqliteMatrix-' + uuid.uuid4().hex, args.device_type,
                      args.runtime).stdout.strip()
     uuid.UUID(device)
     try:
         command(*run, 'boot', device)
-        command(*run, 'bootstatus', device, '-b', timeout=180)
+        boot = command(*run, 'bootstatus', device, '-b', timeout=240)
+        (output / 'apple-boot.log').write_text(boot.stdout + boot.stderr, encoding='utf-8')
         with tempfile.TemporaryDirectory(prefix='sqlite-capability-', dir=ROOT / 'build') as folder:
             def invoke(stage):
                 return command(*run, 'spawn', device, binary, folder, stage, codes=(0, 137))
