@@ -21,6 +21,10 @@ BUILD = ROOT / 'build'
 OFFLINE = ROOT / 'reports/offline-jvm-verification.json'
 DECODE = ROOT / 'tools/probes/SqliteLegacyFixture.java'
 SCOPE = 'dev041-checkpoint-fixture-v1'
+# Windows os.kill with a non-console signal calls TerminateProcess using that exit code.
+CUT_SIGNAL = signal.SIGTERM if os.name == 'nt' else signal.SIGKILL
+CUT_EXIT_CODE = int(CUT_SIGNAL) if os.name == 'nt' else -int(CUT_SIGNAL)
+CUT_METHOD = 'TerminateProcess' if os.name == 'nt' else 'SIGKILL'
 ATTACHMENTS = {
     'attached': ('resource-a.bin', 'resource-b.bin'),
     'attached-reversed': ('resource-b.bin', 'resource-a.bin'),
@@ -70,7 +74,7 @@ def worker(folder, op, base, source, kind, fault):
     if folder.parent != BUILD.resolve() or not folder.name.startswith('dev041-checkpoint-'):
         raise ValueError('invalid fixture directory')
     if (folder / '.fixture-scope').read_text(encoding='utf-8') != SCOPE or source not in {
-        'legacy.ncp', 'transfer.ncp', 'corrupt.ncp', 'edit.ncp', 'other.ncp', 'large.ncp', 'changed-source.ncp',
+        'legacy.ncp', 'transfer.ncp', 'corrupt.ncp', 'edit.ncp', 'other.ncp', 'large.ncp', 'changed-source.ncp', 'next-edit.ncp',
     }:
         raise ValueError('invalid fixture scope')
     command, _ = codec_environment()
@@ -79,7 +83,7 @@ def worker(folder, op, base, source, kind, fault):
     def phase(point):
         if fault == point:
             print(json.dumps({'cut': point, 'pid': os.getpid()}), flush=True)
-            os.kill(os.getpid(), signal.SIGKILL)
+            os.kill(os.getpid(), CUT_SIGNAL)
 
     try:
         checkpoint = decode(command, content)
@@ -123,7 +127,7 @@ def verify_resource_import(imported, transferred, v1, v2):
                  'new', source, kind, cut],
                 capture_output=True, timeout=45,
             )
-            assert result.returncode == (-signal.SIGKILL if cut != 'none' else 0), (label, result)
+            assert result.returncode == (CUT_EXIT_CODE if cut != 'none' else 0), (label, result)
             observation = json.loads(result.stdout)
             if cut == 'none':
                 assert observation == expected, (label, observation)
@@ -216,6 +220,7 @@ def verify():
     imported, transferred = decode(command, v1), decode(command, v2)
     header, title = b'D\tlegacy-fixture\t', '旧标题😀'.encode()
     edit = v1.replace(header + title + b'\t2\t1\t2\n', header + b'Edited\t2\t1\t3\n', 1)
+    next_edit = edit.replace(header + b'Edited\t2\t1\t3\n', header + b'Next\t2\t1\t4\n', 1)
     other = edit.replace(b'Edited\t2', b'Other\t2', 1)
     large = edit.replace(b'S\tink-1\t-1\t2.5\t2\nP\t1\t2\t0.3\t123\nP\t3\t4\t0.8\t456\n',
                          b'S\tink-1\t-1\t2.5\t4000\n' +
@@ -230,7 +235,7 @@ def verify():
     assert len(decode(command, large).canonical) > 64 * 1024
 
     fixtures = {'legacy.ncp': v1, 'transfer.ncp': v2, 'corrupt.ncp': v1[:len(v1) // 2],
-                'edit.ncp': edit, 'other.ncp': other, 'large.ncp': large,
+                'edit.ncp': edit, 'other.ncp': other, 'large.ncp': large, 'next-edit.ncp': next_edit,
                 'changed-source.ncp': v1.replace(b'P\t1\t2\t', b'P\t1.0\t2.0\t', 1)}
     events = {}
     with tempfile.TemporaryDirectory(prefix='dev041-checkpoint-', dir=BUILD) as temp:
@@ -257,7 +262,7 @@ def verify():
 
         def expect(label, expected, *args, cut=None):
             result = subprocess.run(invocation(*args), capture_output=True, timeout=45)
-            assert result.returncode == (-signal.SIGKILL if cut else 0), (label, result)
+            assert result.returncode == (CUT_EXIT_CODE if cut else 0), (label, result)
             obj = json.loads(result.stdout)
             if cut:
                 assert obj['cut'] == cut and obj['pid'] > 0, obj
@@ -311,21 +316,32 @@ def verify():
         )
 
         with open_store(folder) as db:
+            corrupted = updated.canonical.replace(b'Edited', b'BROKEN', 1)
+            assert len(corrupted) == len(updated.canonical) and corrupted != updated.canonical
+            db.execute('UPDATE document SET checkpoint=? WHERE id=?', (corrupted, imported.document_id))
+        damaged = snapshot()
+        expect('damaged_checkpoint_replay', {'status': 'REPAIR_REQUIRED'}, 'edit-v1', 2, 'edit.ncp')
+        expect('damaged_checkpoint_new_write', {'status': 'REPAIR_REQUIRED'}, 'next-edit', 3, 'next-edit.ncp')
+        assert snapshot() == damaged
+
+        with open_store(folder) as db:
+            db.execute('UPDATE document SET checkpoint=? WHERE id=?', (updated.canonical, imported.document_id))
+        expect('repaired_checkpoint_can_advance', {'status': 'COMMITTED', 'revision': 4}, 'next-edit', 3, 'next-edit.ncp')
+        advanced = snapshot()
+        assert (imported.document_id, 4, decode(command, next_edit).canonical) in advanced[0]
+        assert advanced[1] == damaged[1]
+        assert ('next-edit', imported.document_id, 3, 4) in advanced[2]
+        with open_store(folder) as db:
             db.execute('UPDATE legacy_source SET original=? WHERE document_id=?', (b'broken', imported.document_id))
         damaged = snapshot()
         expect('damaged_source_replay', {'status': 'REPAIR_REQUIRED'}, 'import-v1', 'new', 'legacy.ncp', 'import')
-        assert snapshot() == damaged
-        with open_store(folder) as db:
-            db.execute('UPDATE document SET checkpoint=? WHERE id=?', (b'broken', imported.document_id))
-        damaged = snapshot()
-        expect('damaged_checkpoint_replay', {'status': 'REPAIR_REQUIRED'}, 'edit-v1', 2, 'edit.ncp')
         assert snapshot() == damaged
         assert all((folder / name).read_bytes() == data for name, data in fixtures.items())
     assert V1.read_bytes() == v1 and V2.read_bytes() == v2
     return {
         'status': 'passed', 'milestone': 'DEV-041', 'scope': 'isolated host SQLite, JVM preview codec, synthetic notes',
         'sqlite_version': sqlite3.sqlite_version, 'journal_mode': 'wal', 'synchronous': 'full',
-        'crash_signal': 'SIGKILL', 'events': events, 'original_fixtures_preserved': True,
+        'crash_signal': CUT_METHOD, 'events': events, 'original_fixtures_preserved': True,
         'joint_resource_import': verify_resource_import(imported, transferred, v1, v2),
         'app_storage_touched': False, 'production_connected': False, 'power_loss_verified': False,
         'fixture_sha256': {path.relative_to(ROOT).as_posix(): raw_hash(path) for path in (V1, V2)},
@@ -345,8 +361,6 @@ def main():
     if args.worker:
         worker(Path(args.worker[0]).resolve(), *args.worker[1:])
     else:
-        if os.name != 'posix':
-            parser.error('this verifier requires POSIX SIGKILL')
         BUILD.mkdir(exist_ok=True)
         report = json.dumps(verify(), ensure_ascii=False, indent=2) + '\n'
         if args.output:

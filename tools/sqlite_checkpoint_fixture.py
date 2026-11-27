@@ -87,7 +87,7 @@ def immediate(db):
 def open_store(folder, *, initialize=False):
     path = folder / 'checkpoint.sqlite'
     mode = 'rwc' if initialize else 'rw'
-    db = sqlite3.connect(f'{path.as_uri()}?mode={mode}', timeout=5, isolation_level=None)
+    db = sqlite3.connect(f'{path.as_uri()}?mode={mode}', timeout=5, isolation_level=None, uri=True)
     try:
         db.execute('PRAGMA foreign_keys=ON')
         version, = db.execute('PRAGMA user_version').fetchone()
@@ -144,6 +144,16 @@ def publish_resource(folder, sha, payload):
     stage.unlink()
 
 
+def read_head(db, document_id):
+    return db.execute(
+        """SELECT document.revision,checkpoint,checkpoint_sha256
+           FROM document LEFT JOIN operation
+           ON operation.document_id=document.id AND operation.revision=document.revision
+           WHERE document.id=?""",
+        (document_id,),
+    ).fetchone()
+
+
 def check_operation(db, operation_id, identity, manifest, folder, *, reserve=False):
     document_id, base_revision, revision, _, source_sha = identity
     prior = db.execute(
@@ -158,13 +168,7 @@ def check_operation(db, operation_id, identity, manifest, folder, *, reserve=Fal
         ).fetchall()
         if prior != identity or saved_manifest != manifest:
             raise Rejected('OPERATION_CONFLICT')
-        head = db.execute(
-            """SELECT document.revision,checkpoint,checkpoint_sha256
-               FROM document LEFT JOIN operation
-               ON operation.document_id=document.id AND operation.revision=document.revision
-               WHERE document.id=?""",
-            (document_id,),
-        ).fetchone()
+        head = read_head(db, document_id)
         if head is None or head[0] < revision or digest(head[1]) != head[2]:
             raise Rejected('REPAIR_REQUIRED')
         if source_sha is not None:
@@ -188,9 +192,11 @@ def check_operation(db, operation_id, identity, manifest, folder, *, reserve=Fal
             raise Rejected('OPERATION_CONFLICT')
     elif db.execute('SELECT 1 FROM import_task WHERE document_id=?', (document_id,)).fetchone():
         raise Rejected('DOCUMENT_RESERVED')
-    head = db.execute('SELECT revision FROM document WHERE id=?', (document_id,)).fetchone()
-    if head != (None if base_revision is None else (base_revision,)):
+    head = read_head(db, document_id)
+    if (head is None and base_revision is not None) or (head is not None and head[0] != base_revision):
         raise Rejected('STALE_BASE')
+    if head is not None and digest(head[1]) != head[2]:
+        raise Rejected('REPAIR_REQUIRED')
     if task is None and manifest:
         if not reserve:
             raise Rejected('REPAIR_REQUIRED')
