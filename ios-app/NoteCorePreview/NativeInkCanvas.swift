@@ -395,7 +395,12 @@ final class InkUIView: UIView {
         }
         if tool != .pen {
             guard let touch = toolTouch, touches.contains(touch) else { return }
-            if let endpoint = pagePoint(touch), !appendToolPoint(endpoint, lift: true) { return }
+            // UIKit may deliver the whole final segment as coalesced touches; consume them before committing.
+            guard let terminal = pagePoints(touch, event: event) else { rejectToolGesture(); return }
+            for point in terminal.dropLast() {
+                if !appendToolPoint(point) { return }
+            }
+            if let last = terminal.last, !appendToolPoint(last, lift: true) { return }
             toolTouch = nil
             if tool == .eraser, !eraserPoints.isEmpty {
                 let before = note.changeVersion

@@ -4,7 +4,7 @@
   "date": "2026-11-27",
   "base_core": "eeddcfe2",
   "milestone": "E3f",
-  "scope": "iOS simulator framework linking and Swift host compilation only; no runtime UI execution",
+  "scope": "iOS simulator framework linking, Swift host compilation, host tests, and ordinary UI test",
   "verified": {
     "framework": {
       "task": ":shared-core:linkDebugFrameworkIosSimulatorArm64",
@@ -17,15 +17,22 @@
       "result": "BUILD SUCCEEDED",
       "binary": "ios-app/build/Build/Products/Debug-iphonesimulator/NoteCorePreview.app/NoteCorePreview",
       "sha256": "001944900e779cc795957379e48dddf8455190e3ad8736562651c249c8208867"
+    },
+    "full_test": {
+      "command": "xcodebuild test -project ios-app/NoteCorePreview.xcodeproj -scheme NoteCorePreview -destination id=7F2A0226-A39E-4A86-BB26-B77DB5E3C1B0 -derivedDataPath ios-app/build CODE_SIGNING_ALLOWED=NO",
+      "result": "TEST SUCCEEDED",
+      "host_tests": {"executed": 88, "failures": 0},
+      "ordinary_ui_tests": {"executed": 1, "failures": 0, "journey": "two pages, strokes, eraser, undo/redo, background, save, process reopen"},
+      "debug_dylib_sha256": "0540e7fa6c7d6bf969146d97ecf80ea63398a0d23835ccca15cf72f96dc21885"
     }
   },
   "environment_note": "A stale duplicate project-local .konan bundle was moved out of the project before linking; Kotlin/Native now uses ~/.konan only. This is a machine cache cleanup, not a repository source change.",
   "limitations": [
-    "No iOS simulator UI interaction or UserDefaults runtime verification in this report",
+    "UI test does not yet assert pen-slot selection or UserDefaults persistence directly; host model behavior is covered by shared tests and Android process-restart evidence",
     "No physical iPad/iPhone, Pencil, or device persistence test",
     "No production storage or document-format change"
   ],
-  "ios_runtime_verified": false,
+  "ios_runtime_verified": true,
   "physical_device_verified": false,
   "real_stylus_verified": false
 }
