@@ -311,6 +311,7 @@ class ViewportInstrumentation : Instrumentation() {
             result.putString("viewport_status", "passed")
             finish(Activity.RESULT_OK, result)
         } catch (failure: Throwable) {
+            android.util.Log.e("NoteCoreTest", "instrumentation-failed", failure)
             result.putString("viewport_status", "failed"); result.putString("failure", failure.stackTraceToString())
             finish(Activity.RESULT_CANCELED, result)
         }

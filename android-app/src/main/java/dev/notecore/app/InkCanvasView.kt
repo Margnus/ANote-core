@@ -55,6 +55,10 @@ class InkCanvasView(context: Context, val notebook: PagedPreviewNotebook, privat
     private var activePointer = -1
     private var inputOperation: String? = null
     private val ownsInput: Boolean get() = inputOperation != null && inputOperation == notebook.activeInputOperationId
+    // Cross-layer compositor blending can differ from the committed CPU composite.
+    // Keep translucent active ink and its background in one canonical Canvas draw.
+    internal val needsUnifiedInkComposition: Boolean get() = active != null && ownsInput &&
+        (BrushDisplayRules.displayArgb(BrushSpec(penKind, 1, penWidth, penColor)) ushr 24) < 255
     private var startX = 0f; private var startY = 0f
     private var moved = false
     val viewport = PreviewViewport()

@@ -33,7 +33,10 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
     fun submit(scene: SceneSnapshot, frame: FrameToken, layer: LayerId, x: Double, y: Double,
         width: Int, height: Int, pixelSize: Double): Request? {
         val bytes = width.toLong()*height*4
-        val rowUpper = ((width*4L+4095)/4096)*4096
+        // The Xiaomi API35 allocator returned a 5120-byte stride for a 4096-byte
+        // row. Reserve one additional alignment block before native allocation,
+        // even for exactly aligned widths; measured layouts beyond it still fail.
+        val rowUpper = ((width*4L+4095)/4096)*4096 + 4096
         val allowance = bytes*3 + rowUpper*height // CPU ink + composite + staging + one uploaded plane
         return when (val admitted = renderer.submitPage(scene, frame, layer,
             BrushFrameGridPoc(PointD(x,y),width,height,pixelSize), 2L*1024*1024, allowance, 100_000_000)) {
@@ -105,7 +108,9 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
                 val plane = input.planes.single()
                 rowStride = plane.rowStride
                 check(plane.pixelStride == 4 && rowStride >= w*4)
-                check(rowStride.toLong()*h + bytes*3L <= job.nativeCopyAllowanceBytes)
+                check(rowStride.toLong()*h + bytes*3L <= job.nativeCopyAllowanceBytes) {
+                    "Native upload rowStride=$rowStride width=$w height=$h exceeds reservedBytes=${job.nativeCopyAllowanceBytes}"
+                }
                 val composite = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888)
                 uploadComposite = composite
                 check(composite.rowBytes == w*4)
@@ -127,7 +132,7 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
                 checkNotNull(writer).queueInputImage(input); uploadInput = null
                 poll()
             } catch (failure: Throwable) {
-                android.util.Log.w("NoteCoreRender","upload-rejected error=${failure.javaClass.simpleName}")
+                android.util.Log.w("NoteCoreRender","upload-rejected",failure)
                 uploadRejected = true
             }
             finally {

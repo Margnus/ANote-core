@@ -21,6 +21,23 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
     private lateinit var note: PagedPreviewNotebook
     private lateinit var view: InkCanvasView
     private lateinit var directory: File
+    private var oversizedFallbackVerified = false
+    private var oversizedWidth = 0
+    private var oversizedHeight = 0
+    private var fixtureWidth = 0
+    private var fixtureHeight = 0
+    private var initialNativeStride = 0
+    private var initialChargedBytes = 0L
+    private fun installSurface(bounded: Boolean = true) {
+        val surface = InkSurfaceHost(view,store)
+        if (bounded) {
+            // Physical tablets can exceed the preview's 4,194,304 pixel cap.
+            // Keep every replacement host in the same supported fixture scope.
+            val display = host.resources.displayMetrics
+            host.setContentView(surface, android.widget.FrameLayout.LayoutParams(
+                minOf(1024, display.widthPixels), minOf(768, display.heightPixels)))
+        } else host.setContentView(surface)
+    }
     private fun main(action: () -> Unit) = test.runOnMainSync(action)
     private fun eventually(message: String, condition: () -> Boolean) {
         val until = SystemClock.uptimeMillis()+12000
@@ -36,7 +53,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         check(done) { "$message; $state" }
     }
     private fun setup(before: () -> Unit = {}, afterRelease: () -> Unit = {},
-        afterSubmit: () -> Unit = {}, maySettleRelease: () -> Boolean = { true }) {
+        afterSubmit: () -> Unit = {}, maySettleRelease: () -> Boolean = { true }, boundedSurface: Boolean = true) {
         val firstFrame = CountDownLatch(1)
         main {
             directory = File(host.cacheDir,"surface-host-${java.util.UUID.randomUUID()}")
@@ -47,13 +64,17 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
                 check(note.beginStroke(50.0,40.0,1f,0)); check(note.endStroke(50.0,40.0,1f,1))
             }
             view = InkCanvasView(host,note,{}, { error(it) })
-            host.setContentView(InkSurfaceHost(view,store))
+            installSurface(boundedSurface)
             view.viewTreeObserver.registerFrameCommitCallback { firstFrame.countDown() }
         }
         test.waitForIdleSync()
         // Idle main queue does not prove a newly installed hierarchy submitted its fallback.
         // Frame commit is only a fixture prerequisite, never the source-release proof.
         check(firstFrame.await(5,TimeUnit.SECONDS)) { "New fixture did not submit its initial ViewRoot frame" }
+        if (boundedSurface) main {
+            fixtureWidth = view.width; fixtureHeight = view.height
+            check(fixtureWidth in 1..1024 && fixtureHeight in 1..768)
+        }
     }
     private fun point(): Pair<Int,Int> {
         var result = 0 to 0
@@ -83,8 +104,36 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
     }
     fun verify(recoveryFiles: Pair<String, String>? = null): String {
         check(android.os.Build.VERSION.SDK_INT >= 33)
+        val display = host.resources.displayMetrics
+        if (display.widthPixels.toLong()*display.heightPixels > 4194304) {
+            setup(boundedSurface = false)
+            main { oversizedWidth = view.width; oversizedHeight = view.height }
+            // Window insets/multi-window may make the actual view smaller than the display.
+            if (oversizedWidth.toLong()*oversizedHeight > 4194304) {
+                val until = SystemClock.uptimeMillis()+2000
+                var pixel = screenPixel()
+                fun expected() = kotlin.math.abs(Color.red(pixel)-127)<=4 &&
+                    kotlin.math.abs(Color.green(pixel)-63)<=4 && kotlin.math.abs(Color.blue(pixel)-191)<=4
+                while (!expected() && SystemClock.uptimeMillis()<until) {
+                    SystemClock.sleep(20); pixel = screenPixel()
+                }
+                check(expected()) { "Over-budget full-screen Path fallback is not visible" }
+                main {
+                    check(store.inkFramePublications == 0 && !store.inkOwnerRetained && store.inkChargedBytes == 0L)
+                    check(note.totalStrokeCount == 2 && !note.hasActiveStroke)
+                }
+                oversizedFallbackVerified = true
+            }
+            close()
+        }
         setup()
         eventually("Original app hierarchy never scheduled a complete SurfaceControl frame") { store.inkFramePublications > 0 }
+        main {
+            val image = checkNotNull(NoteStore::class.java.getDeclaredField("inkImage").apply { isAccessible = true }.get(store))
+            initialNativeStride = image.javaClass.getMethod("getRowStride").invoke(image) as Int
+            initialChargedBytes = store.inkChargedBytes
+            check(initialNativeStride >= view.width*4 && initialChargedBytes > 0)
+        }
         SystemClock.sleep(150) // screenshot observation, not a resource release rule
         val original = screenPixel()
         check(kotlin.math.abs(Color.red(original)-127)<=4 && kotlin.math.abs(Color.green(original)-63)<=4 &&
@@ -108,6 +157,13 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         SystemClock.sleep(100)
         val active = screenPixel()
         check(Color.green(active)>Color.green(original)+50) { "Active ink was not above the static surface" }
+        eventually("Translucent input did not retire the old native source") {
+            !store.inkOwnerRetained && store.inkChargedBytes == 0L
+        }
+        main {
+            check(view.needsUnifiedInkComposition && note.hasActiveStroke)
+            check(store.inkFramePublications == publication)
+        }
         main {
             val p = view.viewport.toView(50.0,40.0); val now = SystemClock.uptimeMillis()
             val up = MotionEvent.obtain(now-100,now,MotionEvent.ACTION_UP,p.x.toFloat(),p.y.toFloat(),0)
@@ -116,8 +172,12 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Commit did not replace fallback with a complete new frame") { store.inkFramePublications>publication }
         SystemClock.sleep(100)
         val committed = screenPixel()
-        check(kotlin.math.abs(Color.green(active)-Color.green(committed))<=4 &&
-            kotlin.math.abs(Color.blue(active)-Color.blue(committed))<=4) { "Active/static replacement changed alpha" }
+        if (kotlin.math.abs(Color.green(active)-Color.green(committed))>4 ||
+            kotlin.math.abs(Color.blue(active)-Color.blue(committed))>4) {
+            SystemClock.sleep(500)
+            error("Active/static replacement changed alpha: active=${Integer.toHexString(active)} " +
+                "firstCommitted=${Integer.toHexString(committed)} delayed=${Integer.toHexString(screenPixel())}")
+        }
         main { check(note.insertPage()); view.refreshPage() }
         eventually("Empty next page did not schedule") { store.inkFramePublications>publication+1 }
         SystemClock.sleep(100)
@@ -390,7 +450,7 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
             releaseAdmitted()
             note = if (recovered == null) store.create() else store.adopt(OpenedDocument(recovered.root, false, recovered))
             view = InkCanvasView(host,note,{}, { error(it) })
-            host.setContentView(InkSurfaceHost(view,store))
+            installSurface()
             if (recovered != null) {
                 check(note.hasPendingStroke && note.inputReservedByteCharge == 2248L)
                 check(note.changeVersion == 1L && note.totalStrokeCount == 0 && note.pendingInk()?.samples?.size == 4)
@@ -553,6 +613,6 @@ internal class SurfaceFrameHostChecks(private val test: Instrumentation, private
         eventually("Read-only reconciliation did not finish owner retirement") {
             reconciledRetirement && store.ownerRetirementStatus().workerStopped && store.inkChargedBytes == 0L
         }
-        return "{\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"pending_fallback_first_argb\":$pendingFallbackFirstPixel,\"pending_fallback_observations\":$pendingFallbackObservations,\"startup_no_transient_blank_verified\":false,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"queued_draw_removal_lost_endpoint_without_draw\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"pending_and_canonical_saved_during_deferred_release\":${recoveryFiles != null},\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
+        return "{\"active_argb\":\"${Integer.toHexString(active)}\",\"committed_argb\":\"${Integer.toHexString(committed)}\",\"unified_translucent_input_retained\":true,\"initial_native_stride_bytes\":$initialNativeStride,\"initial_charged_bytes\":$initialChargedBytes,\"fixture_width_px\":$fixtureWidth,\"fixture_height_px\":$fixtureHeight,\"oversized_width_px\":$oversizedWidth,\"oversized_height_px\":$oversizedHeight,\"oversized_path_fallback_verified\":$oversizedFallbackVerified,\"app_hierarchy_pixels\":true,\"active_static_alpha\":true,\"page_zoom\":true,\"resize\":true,\"pending_complete_fallback\":true,\"pending_fallback_first_argb\":$pendingFallbackFirstPixel,\"pending_fallback_observations\":$pendingFallbackObservations,\"startup_no_transient_blank_verified\":false,\"actual_release_callback\":true,\"valid_release_fence_observed\":$validFence,\"late_view_ack\":true,\"shared_storage_after_close\":true,\"saved_new_owner_reopen\":true,\"weak_saved_identity_rewrites_after_clear\":true,\"export_picker_single_capture_budget_identity_and_io\":true,\"export_activity_state_and_stale_cancel\":true,\"typed_reader_rejects_original_open_import_without_overwrite\":true,\"lost_view_retires_on_owner_progress_without_bypassing_receipts\":true,\"queued_draw_removal_lost_endpoint_without_draw\":true,\"lost_view_late_worker_ack_without_publication\":true,\"unknown_retained_bytes\":$held,\"unknown_readonly_reconciled\":true,\"ambiguous_handoff_recovered\":true,\"deferred_completion_keeps_charge\":true,\"storage_during_deferred_release\":true,\"pending_and_canonical_saved_during_deferred_release\":${recoveryFiles != null},\"new_frame_after_handoff_recovery\":true,\"handoff_unknown_retained_bytes\":$handoffHeld,\"stopped_backend_keeps_accepted_write\":true,\"stopped_backend_rejects_only_pending\":true,\"terminal_save_notification_drops_receiver_retains_content\":true,\"retiring_owner_waits_native_receipts\":true,\"retiring_owner_acks_late_work_and_save\":true,\"retiring_owner_unknown_readonly_reconciled\":true,\"long_unsignaled_gpu_fence_tested\":false}"
     }
 }

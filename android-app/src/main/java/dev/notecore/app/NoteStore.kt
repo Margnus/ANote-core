@@ -428,6 +428,12 @@ class NoteStore private constructor(context: Context, private val directory: Fil
         if (android.os.Build.VERSION.SDK_INT < 33 || !canvas.isHardwareAccelerated) return false
         val key = keyFor(view) ?: return false
         if (inkView.get() !== view) { retireInk(); inkView = java.lang.ref.WeakReference(view) }
+        if (view.needsUnifiedInkComposition) {
+            // Removal and the complete Path draw share ViewRoot's on-draw handoff.
+            // Render retirement must not cancel the notebook's accepted input.
+            if (inkRenderer != null && !inkRetiring) retireInk()
+            return false
+        }
         if (inkRetiring) return false
         if (inkKey != null && inkKey != key) { retireInk(); return false }
         if (inkRenderer == null) {
