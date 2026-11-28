@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import re
 
-from capture_android_m1 import process_identity
+from capture_android_m1 import process_identity, verify_metric_identity
 
 
 def sha256(path):
@@ -51,6 +51,8 @@ def read_snapshot(directory, apk_digest):
     if (not re.fullmatch(r'[1-9][0-9]{0,9}', pid) or raw('pid-after') != pid
             or any(process_identity(raw(label), pid) != identity for label in ('stat-before', 'stat-after'))):
         raise ValueError(f'{directory}: process identity does not match the raw snapshot')
+    for label in ('frames', 'memory'):
+        verify_metric_identity(raw(label), pid, label)
     package_path = raw('apk-path')
     if not package_path.startswith('package:/data/app/') or raw('apk-path-after') != package_path:
         raise ValueError(f'{directory}: installed APK path changed')

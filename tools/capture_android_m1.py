@@ -21,6 +21,14 @@ def process_identity(stat, pid):
     return {'pid': int(pid), 'starttime_ticks': int(tail[19])}
 
 
+def verify_metric_identity(data, pid, label):
+    """Require exactly the selected preview process, including on offline replay."""
+    heading = {'frames': 'Graphics info for pid', 'memory': 'MEMINFO in pid'}[label]
+    identities = re.findall(r'\b' + heading + r'\s+([0-9]+)\s+\[([^\]\r\n]+)\]', data)
+    if identities != [(str(pid), 'dev.notecore.preview')]:
+        raise ValueError(f'{label} output does not identify only the bound preview process')
+
+
 def capture(adb, serial, output, emulator_preflight=False, apk=None,
             sample_count=1, interval_seconds=1.0):
     if (type(sample_count) is not int or not 1 <= sample_count <= 3600
@@ -124,10 +132,8 @@ def capture(adb, serial, output, emulator_preflight=False, apk=None,
             # Select the bound PID, rather than aggregating a package's multiple processes.
             frames = read(prefix + 'frames', 'shell', 'dumpsys', 'gfxinfo', pid_before, 'framestats')
             memory = read(prefix + 'memory', 'shell', 'dumpsys', 'meminfo', '-s', pid_before)
-            for label, data, heading in [('frames', frames, 'Graphics info for pid'),
-                                          ('memory', memory, 'MEMINFO in pid')]:
-                if not re.search(r'\b' + heading + r'\s+' + pid_before + r'\s+\[' + re.escape(package) + r'\]', data):
-                    raise ValueError(f'{label} output does not identify the bound preview process')
+            verify_metric_identity(frames, pid_before, 'frames')
+            verify_metric_identity(memory, pid_before, 'memory')
             pid_after = read(prefix + 'pid-after', 'shell', 'pidof', package)
             if pid_before != pid_after:
                 raise ValueError('process missing or changed during snapshot')

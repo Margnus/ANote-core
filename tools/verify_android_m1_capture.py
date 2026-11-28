@@ -110,6 +110,24 @@ def checks():
         frames.write_bytes(original_frames)
         receipt = post / 'snapshot.json'
         original = receipt.read_bytes()
+        # A freshly calculated digest alone must not bind another process's metrics.
+        for label, heading in (('frames', 'Graphics info for pid'), ('memory', 'MEMINFO in pid')):
+            path = post / (label + '.txt')
+            original_metric = path.read_bytes()
+            for changed in (
+                original_metric.replace(b'pid 101', b'pid 102'),
+                original_metric.replace(b'dev.notecore.preview', b'another.package'),
+                b'No process found',
+                original_metric + f'\n** {heading} 102 [dev.notecore.preview] **'.encode(),
+            ):
+                replacement = json.loads(original)
+                path.write_bytes(changed)
+                replacement['artifacts'][label]['sha256'] = hashlib.sha256(changed).hexdigest()
+                receipt.write_text(json.dumps(replacement), encoding='utf-8')
+                refused(pre, post, label + ' output does not identify')
+            path.write_bytes(original_metric)
+            receipt.write_bytes(original)
+        results.append('rehash_cannot_rebind_missing_wrong_or_multiple_process_metrics')
         replacement = json.loads(original)
         replacement['serial'] = 'another-device'
         receipt.write_text(json.dumps(replacement), encoding='utf-8')
@@ -143,6 +161,9 @@ def checks():
         case('wrong_process_memory_refused',
              lambda args, text, count: text.replace('pid 101', 'pid 102') if 'meminfo' in args else text,
              'memory output does not identify')
+        case('multiple_process_metrics_refused',
+             lambda args, text, count: text + '\n** MEMINFO in pid 102 [dev.notecore.preview] **'
+             if 'meminfo' in args else text, 'memory output does not identify')
         calls, _ = case('shell_syntax_in_observed_path_refused',
                         lambda args, text, count: 'package:/data/app/evil;touch/base.apk' if args[:3] == ('shell', 'pm', 'path') else text,
                         'unsupported installed APK path')
