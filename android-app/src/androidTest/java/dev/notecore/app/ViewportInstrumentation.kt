@@ -22,6 +22,7 @@ class ViewportInstrumentation : Instrumentation() {
     private var brushPathOnly = false
     private var renderTargetOnly = false
     private var surfaceFramesOnly = false
+    private var denseAdmissionOnly = false
     private var surfaceRecovery: Pair<String, String>? = null
     private var inputBatchesOnly = false
     private var titleOnly = false
@@ -83,6 +84,7 @@ class ViewportInstrumentation : Instrumentation() {
         brushPathOnly = arguments?.getString("notecore_case") == "brush_path"
         renderTargetOnly = arguments?.getString("notecore_case") == "render_target"
         surfaceFramesOnly = arguments?.getString("notecore_case") == "surface_frames"
+        denseAdmissionOnly = arguments?.getString("notecore_case") == "dense_admission"
         if (surfaceFramesOnly) {
             val pending = arguments?.getString("surface_pending_base64")
             val canonical = arguments?.getString("surface_canonical_base64")
@@ -130,6 +132,11 @@ class ViewportInstrumentation : Instrumentation() {
                 finish(Activity.RESULT_OK, result); return
             }
             host = startActivitySync(Intent(targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (denseAdmissionOnly) {
+                result.putString("dense_admission_report", DenseAdmissionHostChecks(this, host).verify())
+                result.putString("dense_admission_status", "passed")
+                finish(Activity.RESULT_OK, result); return
+            }
             if (recoveryOpenBudgetOnly) {
                 val bytes = android.util.Base64.decode(checkNotNull(recoveryOpenFixture), android.util.Base64.DEFAULT)
                 result.putString("recovery_open_budget", PendingRecoveryHostChecks(this, host).verifyOpenBudget(bytes))
