@@ -2,6 +2,17 @@ package dev.notecore.canvas.prototype
 
 import kotlin.math.*
 
+/** Primitive signatures avoid Function1<Int, Double> boxing in the ART per-edge hot loop.
+ * Both plans remain immutable; no extra geometry or samples are copied/retained.
+ */
+private interface RasterContourPath {
+    val contourCount: Int
+    fun start(contour: Int): Int
+    fun end(contour: Int): Int
+    fun x(vertex: Int): Double
+    fun y(vertex: Int): Double
+}
+
 internal sealed interface BrushPixelGridPoc {
     val origin: PointD
     val width: Int
@@ -107,7 +118,7 @@ internal class ChunkedBrushPoc private constructor(
             Long.MAX_VALUE, swept = false, cancelled = cancelled)
     }
 
-    /** Isolated swept-disc consumer. The original tile cache and App never call this entry. */
+    /** Unfrozen swept-disc consumer, also used by the Android staged-page preview candidate. */
     fun renderSwept(frame: FrameToken, grid: BrushTileGridPoc, maxTargetDeviation: Double = 0.125,
         maxWorkingBytes: Long = 1024 * 1024, maxCandidateChunks: Int = 128,
         maxEdgeTests: Long = 20_000_000, maxGeneratedVertices: Long = 400_000,
@@ -141,11 +152,7 @@ internal class ChunkedBrushPoc private constructor(
         for (id in candidates) {
             if (fullPixels == mask.size) break // Union is complete at every subpixel; later chunks cannot change it.
             if (cancelled()) return BrushTileBuild.Cancelled
-            val xAt: (Int) -> Double
-            val yAt: (Int) -> Double
-            val contourStart: (Int) -> Int
-            val contourEnd: (Int) -> Int
-            val contourCount: Int
+            val rasterPath: RasterContourPath
             if (swept) {
                 val available = maxWorkingBytes - stableBytes
                 if (available <= 0) return BrushTileBuild.Rejected("working-budget")
@@ -170,9 +177,13 @@ internal class ChunkedBrushPoc private constructor(
                 }
                 peakWorking = maxOf(peakWorking, stableBytes + geometry.logicalByteCharge)
                 vertices += path.vertexCount
-                contourCount = path.contourCount
-                contourStart = path::contourStart; contourEnd = path::contourEnd
-                xAt = path::x; yAt = path::y
+                rasterPath = object : RasterContourPath {
+                    override val contourCount get() = path.contourCount
+                    override fun start(contour: Int) = path.contourStart(contour)
+                    override fun end(contour: Int) = path.contourEnd(contour)
+                    override fun x(vertex: Int) = path.x(vertex)
+                    override fun y(vertex: Int) = path.y(vertex)
+                }
             } else {
                 val start = chunkStart(id); val end = chunkEnd(id); val count = end - start + 1
                 // Caller input is already canonical/owned. Account both temporary projection copies.
@@ -195,21 +206,26 @@ internal class ChunkedBrushPoc private constructor(
                 val path = produced.path
                 peakWorking = maxOf(peakWorking, stableBytes + projectionBytes + produced.workingLogicalBytes)
                 vertices += path.vertexCount
-                contourCount = path.contourCount
-                contourStart = path::contourStart; contourEnd = path::contourEnd
-                xAt = path::x; yAt = path::y
+                rasterPath = object : RasterContourPath {
+                    override val contourCount get() = path.contourCount
+                    override fun start(contour: Int) = path.contourStart(contour)
+                    override fun end(contour: Int) = path.contourEnd(contour)
+                    override fun x(vertex: Int) = path.x(vertex)
+                    override fun y(vertex: Int) = path.y(vertex)
+                }
             }
             built++
 
-            for (contour in 0 until contourCount) {
-                val first = contourStart(contour); val last = contourEnd(contour)
+            for (contour in 0 until rasterPath.contourCount) {
+                val first = rasterPath.start(contour); val last = rasterPath.end(contour)
                 var left = Double.POSITIVE_INFINITY; var top = Double.POSITIVE_INFINITY
                 var right = Double.NEGATIVE_INFINITY; var bottom = Double.NEGATIVE_INFINITY
                 for (i in first until last) {
                     if (work >= maxEdgeTests) return BrushTileBuild.Rejected("raster-work-budget")
                     if (work++ % 256 == 0L && cancelled()) return BrushTileBuild.Cancelled
-                    left = minOf(left, xAt(i)); top = minOf(top, yAt(i))
-                    right = maxOf(right, xAt(i)); bottom = maxOf(bottom, yAt(i))
+                    val vx = rasterPath.x(i); val vy = rasterPath.y(i)
+                    left = minOf(left, vx); top = minOf(top, vy)
+                    right = maxOf(right, vx); bottom = maxOf(bottom, vy)
                 }
                 val x0 = floor((left - grid.origin.x) / grid.pixelSize).coerceIn(0.0, grid.width.toDouble()).toInt()
                 val x1 = floor((right - grid.origin.x) / grid.pixelSize).coerceIn(-1.0, grid.width - 1.0).toInt()
@@ -228,9 +244,11 @@ internal class ChunkedBrushPoc private constructor(
                             if (work >= maxEdgeTests) return BrushTileBuild.Rejected("raster-work-budget")
                             if (work++ % 256 == 0L && cancelled()) return BrushTileBuild.Cancelled
                             val j = if (i + 1 == last) first else i + 1
-                            val cross = (xAt(j) - xAt(i)) * (py - yAt(i)) - (px - xAt(i)) * (yAt(j) - yAt(i))
-                            if (yAt(i) <= py && yAt(j) > py && cross > 0) winding++
-                            if (yAt(i) > py && yAt(j) <= py && cross < 0) winding--
+                            val ax = rasterPath.x(i); val ay = rasterPath.y(i)
+                            val bx = rasterPath.x(j); val by = rasterPath.y(j)
+                            val cross = (bx - ax) * (py - ay) - (px - ax) * (by - ay)
+                            if (ay <= py && by > py && cross > 0) winding++
+                            if (ay > py && by <= py && cross < 0) winding--
                         }
                         if (winding != 0) {
                             val before = mask[pixel]

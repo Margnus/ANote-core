@@ -28,6 +28,15 @@ internal class DenseAdmissionHostChecks(private val test: Instrumentation, priva
     private val expectedSha = "22eea352e0ded47f34cabc0c8b543de0126a658377a6ea286cf60130a17c6725"
     private val timings = linkedMapOf<String, MutableList<Long>>()
     private fun main(action: () -> Unit) = test.runOnMainSync(action)
+    private fun eventually(message: String, condition: () -> Boolean) {
+        val deadline = SystemClock.uptimeMillis() + 30000
+        while (SystemClock.uptimeMillis() < deadline) {
+            var done = false; main { done = condition() }
+            if (done) return
+            SystemClock.sleep(20)
+        }
+        error(message)
+    }
     private fun record(kind: String, vararg values: Pair<String, Any>) {
         val row = JSONObject().put("kind", kind).put("uptimeMs", SystemClock.uptimeMillis())
         values.forEach { row.put(it.first, it.second) }
@@ -135,10 +144,18 @@ internal class DenseAdmissionHostChecks(private val test: Instrumentation, priva
         val writeHeld = CountDownLatch(1); val releaseWrite = CountDownLatch(1)
         val savedAck = CountDownLatch(1)
         val nativeComputations = java.util.concurrent.atomic.AtomicInteger()
+        val holdRender = java.util.concurrent.atomic.AtomicBoolean(false)
+        val renderHeld = CountDownLatch(1); val releaseRender = CountDownLatch(1)
         var saveFailure: String? = null
+        var surfaceInstalledAt = 0L
         main {
             original = timed("prefix-canonical-read") { readRoot(1900) }
-            store = NoteStore.isolated(host, directory, beforeInkCompute = { nativeComputations.incrementAndGet() }, observeWriteBoundary = {
+            store = NoteStore.isolated(host, directory, beforeInkCompute = {
+                nativeComputations.incrementAndGet()
+                if (holdRender.compareAndSet(true, false)) {
+                    renderHeld.countDown(); check(releaseRender.await(30, TimeUnit.SECONDS))
+                }
+            }, observeWriteBoundary = {
                 if (it == PreviewWriteBoundary.PREFIX_WRITTEN_BEFORE_SYNC) {
                     writeHeld.countDown(); check(releaseWrite.await(30, TimeUnit.SECONDS)) { "Write observation timed out" }
                 }
@@ -153,9 +170,29 @@ internal class DenseAdmissionHostChecks(private val test: Instrumentation, priva
                 timed("warm-projection") { check(note.strokeCount == 1900) }
             }
             view = InkCanvasView(host, note, {}, { error(it) })
+            surfaceInstalledAt = System.nanoTime()
             host.setContentView(InkSurfaceHost(view, store), android.widget.FrameLayout.LayoutParams(1024, 768))
         }
         test.waitForIdleSync()
+        try { eventually("Dense staged frame did not publish") { store.inkFramePublications == 1 } }
+        catch (failure: Throwable) {
+            main { memory("native-publication-failure", note, store)
+                record("native-compute-count-at-failure", "count" to nativeComputations.get()) }
+            throw failure
+        }
+        record("first-complete-native-frame", "hostInstallToObservedPublicationNs" to System.nanoTime() - surfaceInstalledAt,
+            "slices" to nativeComputations.get())
+        main { memory("complete-dense-native-before-software-oracle", note, store) }
+        var sampleX = 0; var sampleY = 0; var screenX = 0; var screenY = 0
+        main {
+            val point = view.viewport.toView(12.5, 103.25)
+            sampleX = point.x.toInt(); sampleY = point.y.toInt()
+            val location = IntArray(2); view.getLocationOnScreen(location)
+            screenX = location[0] + sampleX; screenY = location[1] + sampleY
+        }
+        SystemClock.sleep(100)
+        val shot = checkNotNull(test.uiAutomation.takeScreenshot())
+        val nativePixel = try { shot.getPixel(screenX, screenY) } finally { shot.recycle() }
         main {
             bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
             // Force the original cold path cache; draw uses a software destination and thus full fallback.
@@ -164,10 +201,15 @@ internal class DenseAdmissionHostChecks(private val test: Instrumentation, priva
             repeat(10) { timed("warm-original-path-draw") { view.draw(Canvas(bitmap)) } }
             memory("prefix-projection-path-native", note, store)
             val refused = NoteStore::class.java.getDeclaredField("inkAdmissionRejected").apply { isAccessible = true }.getBoolean(store)
-            check(refused && nativeComputations.get() == 0 && store.inkFramePublications == 0 && store.inkChargedBytes == 0L)
+            check(!refused && nativeComputations.get() > 1 && store.inkFramePublications == 1 && store.inkChargedBytes > 0L)
+            val fallbackPixel = bitmap.getPixel(sampleX, sampleY)
+            check(nativePixel != android.graphics.Color.WHITE)
+            for (shift in listOf(0, 8, 16, 24)) check(kotlin.math.abs((nativePixel ushr shift and 255) -
+                (fallbackPixel ushr shift and 255)) <= 8) { "Dense compositor/fallback pixel differs" }
             record("original-native-admission", "rejected" to refused, "workerComputations" to nativeComputations.get(),
                 "selectedPageStrokes" to note.strokeCount, "nativeFrameCharge" to store.inkChargedBytes,
-                "sourceReviewedGate" to "BrushRenderOwnerPoc.admitPage selected > 256: page-input-budget")
+                "nativePixel" to Integer.toHexString(nativePixel), "fallbackPixel" to Integer.toHexString(fallbackPixel),
+                "backend" to "staged original executor/pool; whole atlas publication")
             val originalPixels = IntArray(bitmap.width * bitmap.height)
             bitmap.getPixels(originalPixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
             repeat(12) { iteration ->
@@ -197,20 +239,28 @@ internal class DenseAdmissionHostChecks(private val test: Instrumentation, priva
             saved = timed("save-capture") { note.capture() }
             record("save-responsibility", "retainedCharge" to saved.retainedByteCharge,
                 "workReservationCharge" to saved.encodingWorkByteCharge, "rootSharedWithAuthority" to (saved.root === note.snapshot()))
+            holdRender.set(true); view.syncPresentation()
         }
         val saveStart = System.nanoTime()
         try {
+            check(renderHeld.await(30, TimeUnit.SECONDS)) { "Replacement renderer did not begin" }
             main { check(store.save(saved) { revision, failure ->
                 check(revision == saved.version); saveFailure = failure; savedAck.countDown()
             }) }
+            releaseRender.countDown()
             check(writeHeld.await(30, TimeUnit.SECONDS)) { "Writer did not reach the actual file boundary" }
-            main { memory("write-held-before-sync", note, store) }
-        } finally { releaseWrite.countDown() }
+            main {
+                check(store.inkFramePublications == 1 && store.inkChargedBytes > 0L)
+                memory("write-held-with-staged-atlas-before-sync", note, store)
+            }
+        } finally { releaseRender.countDown(); releaseWrite.countDown() }
         check(savedAck.await(30, TimeUnit.SECONDS)) { "No durable save callback" }
         check(saveFailure == null) { "Save failed: $saveFailure" }
         record("save-ack", "elapsedNsIncludingObservationHold" to System.nanoTime() - saveStart,
             "fileBytes" to File(directory, "${saved.documentId}.ncp").length(),
             "sha256" to digest(File(directory, "${saved.documentId}.ncp")))
+        eventually("Saved revision did not publish a complete replacement frame") { store.inkFramePublications == 2 }
+        main { memory("saved-revision-native-frame", note, store) }
         main {
             store.detachInk(view); check(store.releaseActive(note)); host.setContentView(View(host))
             bitmap.recycle()
@@ -222,6 +272,8 @@ internal class DenseAdmissionHostChecks(private val test: Instrumentation, priva
             if (!drained) SystemClock.sleep(20)
         }
         check(drained) { "Original renderer failed to drain" }
+        main { check(store.inkReleaseCallbacks > 0); record("native-release", "callbacks" to store.inkReleaseCallbacks,
+            "validFenceObserved" to store.inkValidFenceObserved, "chargeAfterDrain" to store.inkChargedBytes) }
         lateinit var reopenedStore: NoteStore
         lateinit var reopened: PagedPreviewNotebook
         val opened = CountDownLatch(1)
@@ -251,7 +303,7 @@ internal class DenseAdmissionHostChecks(private val test: Instrumentation, priva
         }
         record("passed", "prefixStrokes" to 1900, "prefixPoints" to 190000,
             "savedStrokes" to 1901, "savedPoints" to 190002, "acceptedStrokePreserved" to true,
-            "fullS2Accepted" to false, "nativeFramePeakMeasured" to false,
+            "fullS2Accepted" to false, "nativeFramePeakMeasured" to false, "stagedNativeFrames" to 2,
             "scope" to "original consumers; synthetic API input; debug API35; held-write latency is not a benchmark")
         return report.name
     }

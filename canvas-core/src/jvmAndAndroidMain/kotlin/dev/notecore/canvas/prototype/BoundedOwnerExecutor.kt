@@ -2,6 +2,12 @@ package dev.notecore.canvas.prototype
 
 import java.util.ArrayDeque
 
+/** Internal cooperative CPU work. More keeps the same input, ticket and full charge. */
+internal sealed interface OwnerWorkSlice<out R : Any> {
+    data object More : OwnerWorkSlice<Nothing>
+    data class Complete<R : Any>(val value: R) : OwnerWorkSlice<R>
+}
+
 /** Creator thread owns admissions and results; one real serial worker owns execution.
  * Slots/declared bytes include queued, running, ready and blocked delivery until receiver ACK.
  * No unbounded completion posts, task cancellation, automatic execution retry or shutdownNow.
@@ -16,27 +22,35 @@ class BoundedOwnerExecutor(
     private val monitor = java.lang.Object()
     private abstract class Work(val ticket: OwnerWorkTicket, val bytes: Long) {
         var stage = OwnedWorkStage.QUEUED
+        var started = false
         var deliveryFailure: String? = null
-        abstract fun execute()
+        abstract fun execute(): Boolean
         abstract fun deliver(): ResultDisposition
         abstract fun workerTerminated(detail: String)
         abstract fun clear()
     }
     private class TypedWork<I : Any, R : Any>(ticket: OwnerWorkTicket, bytes: Long, input: I,
-        compute: (I) -> R, receive: (I, WorkResult<R>) -> ResultDisposition) : Work(ticket, bytes) {
+        compute: (I) -> OwnerWorkSlice<R>, receive: (I, WorkResult<R>) -> ResultDisposition) : Work(ticket, bytes) {
         private var input: I? = input
-        private var compute: ((I) -> R)? = compute
+        private var compute: ((I) -> OwnerWorkSlice<R>)? = compute
         private var receive: ((I, WorkResult<R>) -> ResultDisposition)? = receive
         private var result: WorkResult<R>? = null
-        override fun execute() {
+        override fun execute(): Boolean {
             val action = checkNotNull(compute)
-            result = try { WorkResult.Succeeded(action(checkNotNull(input))) }
-            catch (failure: Throwable) { WorkResult.OutcomeUnknown(failure.javaClass.simpleName.take(80), (failure.message ?: "Worker execution failed").take(256)) }
-            finally { compute = null }
+            try {
+                when (val slice = action(checkNotNull(input))) {
+                    OwnerWorkSlice.More -> return false
+                    is OwnerWorkSlice.Complete -> result = WorkResult.Succeeded(slice.value)
+                }
+            } catch (failure: Throwable) {
+                result = WorkResult.OutcomeUnknown(failure.javaClass.simpleName.take(80), (failure.message ?: "Worker execution failed").take(256))
+            }
+            compute = null
+            return true
         }
         override fun deliver() = checkNotNull(receive)(checkNotNull(input), checkNotNull(result))
         override fun workerTerminated(detail: String) {
-            if (result == null) result = if (stage == OwnedWorkStage.QUEUED) WorkResult.NotExecuted(detail)
+            if (result == null) result = if (!started) WorkResult.NotExecuted(detail)
                 else WorkResult.OutcomeUnknown("WorkerTerminated", detail)
             compute = null
         }
@@ -80,6 +94,14 @@ class BoundedOwnerExecutor(
 
     /** Rejected work remains caller-owned and has never been invoked. Charge covers declared peak input/result cost. */
     fun <I : Any, R : Any> submit(input: I, chargedBytes: Long, compute: (I) -> R, receive: (I, WorkResult<R>) -> ResultDisposition): WorkAdmission {
+        return submitSlices(input, chargedBytes, { OwnerWorkSlice.Complete(compute(it)) }, receive)
+    }
+    /** Each successful More rotates to the existing queue's tail. No admission gap, second queue,
+     * partial owner result or execution retry. Stop still drains accepted work; cancellation is
+     * the input owner's cooperative contract. A throw is terminal OutcomeUnknown, never More.
+     */
+    internal fun <I : Any, R : Any> submitSlices(input: I, chargedBytes: Long,
+        compute: (I) -> OwnerWorkSlice<R>, receive: (I, WorkResult<R>) -> ResultDisposition): WorkAdmission {
         checkOwnerThread()
         return synchronized(monitor) {
             val failure = when {
@@ -111,11 +133,15 @@ class BoundedOwnerExecutor(
                         Thread.interrupted()
                         monitor.wait()
                     }
-                    if (pending.isEmpty()) null else pending.removeFirst().also { it.stage = OwnedWorkStage.RUNNING }
+                    if (pending.isEmpty()) null else pending.removeFirst().also { it.stage = OwnedWorkStage.RUNNING; it.started = true }
                 } ?: break
-                job.execute()
-                synchronized(monitor) { ready.addLast(job); job.stage = OwnedWorkStage.READY; monitor.notifyAll() }
-                wakeOwner()
+                val complete = job.execute()
+                synchronized(monitor) {
+                    if (complete) { ready.addLast(job); job.stage = OwnedWorkStage.READY }
+                    else { pending.addLast(job); job.stage = OwnedWorkStage.QUEUED }
+                    monitor.notifyAll()
+                }
+                if (complete) wakeOwner()
             }
         } catch (failure: Throwable) {
             // Complete reserved result slots in FIFO order. Never-started work is distinct from unknown execution.

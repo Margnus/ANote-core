@@ -39,19 +39,24 @@ class AndroidInkFrameExperiment(frame: FrameToken, layer: LayerId, sharedExecuto
         val rowUpper = ((width*4L+4095)/4096)*4096 + 4096
         val allowance = bytes*3 + rowUpper*height // CPU ink + composite + staging + one uploaded plane
         return when (val admitted = renderer.submitPage(scene, frame, layer,
-            BrushFrameGridPoc(PointD(x,y),width,height,pixelSize), 2L*1024*1024, allowance, 100_000_000)) {
+            BrushFrameGridPoc(PointD(x,y),width,height,pixelSize), 2L*1024*1024, allowance, 100_000_000, staged = true)) {
             is BrushRenderAdmissionPoc.Accepted -> Request(admitted.job).also { requests[admitted.job.id] = it }
-            is BrushRenderAdmissionPoc.Rejected -> null
+            is BrushRenderAdmissionPoc.Rejected -> {
+                android.util.Log.d("NoteCoreRender", "frame-admission-rejected reason=${admitted.reason}")
+                null
+            }
         }
     }
     fun settleAfterDrain(consume: (Request, String) -> Unit) {
         renderer.settleAfterDrain().forEach { (id, ack) ->
             val request = requests[id] ?: return@forEach
+            android.util.Log.d("NoteCoreRender", "staged-frame-result ack=$ack slices=${request.job.completedPageSlices} work=${request.job.pageWork} reason=${request.job.pageFailure}")
             if (ack != BrushRenderAckPoc.QUARANTINED) requests.remove(id)
             consume(request, ack.name)
         }
     }
     fun prepare(request: Request, paper: (Canvas) -> Unit, transform: Matrix, inkRect: RectF, inkClip: RectF): SurfaceImage? {
+        android.util.Log.d("NoteCoreRender", "staged-frame-complete slices=${request.job.completedPageSlices} work=${request.job.pageWork}")
         val calls = object : AndroidBrushImageCallsPoc {
             override fun release(bitmap: Bitmap) { bitmap.recycle(); afterNativeClose() }
         }

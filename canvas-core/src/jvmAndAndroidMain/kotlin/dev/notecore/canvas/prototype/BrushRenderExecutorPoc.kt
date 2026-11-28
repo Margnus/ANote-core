@@ -46,16 +46,18 @@ internal class BrushRenderExecutorPoc(
     }
     fun submitPage(scene: SceneSnapshot, frame: FrameToken, layer: LayerId, grid: BrushPixelGridPoc,
         workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
-        maxEdgeTests: Long = 20_000_000,
+        maxEdgeTests: Long = 20_000_000, staged: Boolean = false,
     ): BrushRenderAdmissionPoc {
         executor.checkOwnerThread()
-        return dispatch(owner.admitPage(scene, frame, layer, grid, workingBytes, nativeCopyAllowanceBytes, maxEdgeTests))
+        return dispatch(owner.admitPage(scene, frame, layer, grid, workingBytes, nativeCopyAllowanceBytes, maxEdgeTests, staged))
     }
     private fun dispatch(admission: BrushRenderAdmissionPoc): BrushRenderAdmissionPoc {
         if (admission !is BrushRenderAdmissionPoc.Accepted) return admission
         val job = admission.job; val dispatch = Dispatch(job)
-        val submitted = executor.submit(job, job.peakBytes, { input ->
-            executor.checkWorkerThread(); beforeCompute(input); input.execute(dispatch.cancelled::get)
+        val submitted = executor.submitSlices(job, job.peakBytes, { input ->
+            executor.checkWorkerThread(); beforeCompute(input)
+            val result = input.executeSlice(dispatch.cancelled::get)
+            if (result.more) OwnerWorkSlice.More else OwnerWorkSlice.Complete(result)
         }) { input, result ->
             check(owner.receive(input, result))
             if (!permitDelivery(input)) ResultDisposition.RETRY_REQUIRED else {

@@ -6,11 +6,12 @@ internal sealed interface BrushRenderAdmissionPoc {
     data class Rejected(val reason: String) : BrushRenderAdmissionPoc
 }
 internal class BrushRenderComputationPoc private constructor(
-    val id: BrushRenderIdPoc, val pixels: BrushTilePixelsPoc?, val failure: String?,
+    val id: BrushRenderIdPoc, val pixels: BrushTilePixelsPoc?, val failure: String?, val more: Boolean = false,
 ) {
     companion object {
         internal fun completed(id: BrushRenderIdPoc, pixels: BrushTilePixelsPoc?, failure: String?) =
             BrushRenderComputationPoc(id, pixels, failure)
+        internal fun continuing(id: BrushRenderIdPoc) = BrushRenderComputationPoc(id, null, null, true)
     }
 }
 
@@ -21,12 +22,31 @@ internal class BrushRenderJobPoc internal constructor(
     val id: BrushRenderIdPoc, catalog: ChunkedBrushPoc?, val frame: FrameToken,
     val layer: LayerId, val grid: BrushPixelGridPoc, val rgb: Int, val workingBytes: Long,
     val nativeCopyAllowanceBytes: Long, val peakBytes: Long, val maxEdgeTests: Long,
-    scene: SceneSnapshot? = null, private val swept: Boolean = false,
+    scene: SceneSnapshot? = null, private val swept: Boolean = false, private val staged: Boolean = false,
 ) {
     private var input: ChunkedBrushPoc? = catalog
     private var pageInput: SceneSnapshot? = scene
-    internal fun clearUnsubmittedInput() { input = null; pageInput = null }
+    private var pageStage: StagedBrushPagePoc? = null
+    var completedPageSlices = 0; private set
+    var pageWork = 0L; private set
+    var pageFailure: String? = null; private set
+    internal fun clearUnsubmittedInput() { input = null; pageInput = null; pageStage = null }
+    /** Continuations stay worker-owned. Only a terminal result may enter receive/acknowledge. */
+    fun executeSlice(cancelled: () -> Boolean = { false }): BrushRenderComputationPoc {
+        if (!staged) return execute(cancelled)
+        try {
+            val stage = pageStage ?: StagedBrushPagePoc(checkNotNull(pageInput), frame, layer, grid, workingBytes, maxEdgeTests)
+                .also { pageStage = it }
+            val step = stage.advance(cancelled)
+            completedPageSlices = stage.slices; pageWork = stage.work
+            if (step.more) return BrushRenderComputationPoc.continuing(id)
+            pageFailure = step.failure
+            clearUnsubmittedInput()
+            return BrushRenderComputationPoc.completed(id, step.pixels, step.failure)
+        } catch (failure: Throwable) { clearUnsubmittedInput(); throw failure }
+    }
     fun execute(cancelled: () -> Boolean = { false }): BrushRenderComputationPoc {
+        check(!staged) { "Staged pages require executeSlice" }
         pageInput?.let { scene ->
             try { return executePage(scene, cancelled) } finally { clearUnsubmittedInput() }
         }
@@ -137,7 +157,7 @@ internal class BrushRenderOwnerPoc(
      */
     fun admitPage(scene: SceneSnapshot, frame: FrameToken, expectedLayer: LayerId, grid: BrushPixelGridPoc,
         workingBytes: Long = 1024 * 1024, nativeCopyAllowanceBytes: Long = 0,
-        maxEdgeTests: Long = 20_000_000,
+        maxEdgeTests: Long = 20_000_000, staged: Boolean = false,
     ): BrushRenderAdmissionPoc {
         checkOwner(); require(workingBytes > 0 && nativeCopyAllowanceBytes >= 0 && maxEdgeTests > 0)
         if (closed) return BrushRenderAdmissionPoc.Rejected("closed")
@@ -153,9 +173,13 @@ internal class BrushRenderOwnerPoc(
                 if (stroke.brush.kind != BrushKind.MONOLINE || stroke.brush.algorithmVersion != 1) invalid = true
             }
         }
-        if (points > 200000 || selected > 256) return BrushRenderAdmissionPoc.Rejected("page-input-budget")
+        if (points > 200000 || (!staged && selected > 256)) return BrushRenderAdmissionPoc.Rejected("page-input-budget")
         if (invalid) return BrushRenderAdmissionPoc.Rejected("unsupported-page-brush")
+        if (staged && (kotlin.math.abs(grid.origin.x + ((grid.width - 1) / StagedBrushPagePoc.TILE) * StagedBrushPagePoc.TILE * grid.pixelSize) > 1e9 ||
+                kotlin.math.abs(grid.origin.y + ((grid.height - 1) / StagedBrushPagePoc.TILE) * StagedBrushPagePoc.TILE * grid.pixelSize) > 1e9))
+            return BrushRenderAdmissionPoc.Rejected("tile-coordinate-range")
         var peak = points * 28 + scene.objectCount * 8L
+        if (staged) peak += StagedBrushPagePoc.planningBytes(scene.objectCount)
         for (bytes in listOf(workingBytes, grid.width * grid.height * 4L, nativeCopyAllowanceBytes)) {
             if (bytes > Long.MAX_VALUE - peak) return BrushRenderAdmissionPoc.Rejected("charge-overflow")
             peak += bytes
@@ -166,7 +190,7 @@ internal class BrushRenderOwnerPoc(
             is ReservationResult.Rejected -> return BrushRenderAdmissionPoc.Rejected("pool-${reserved.reason.name.lowercase()}")
         }
         val job = BrushRenderJobPoc(BrushRenderIdPoc(), null, frame, layer, grid, 0, workingBytes,
-            nativeCopyAllowanceBytes, peak, maxEdgeTests, scene)
+            nativeCopyAllowanceBytes, peak, maxEdgeTests, scene, staged = staged)
         pending[job.id] = Pending(job, reservation)
         return BrushRenderAdmissionPoc.Accepted(job)
     }
@@ -229,6 +253,7 @@ internal class BrushRenderOwnerPoc(
         checkOwner(); val entry = pending[job.id]?.takeIf { it.job === job && !it.quarantined } ?: return false
         if (entry.result != null) return entry.result === result // Idempotent retry of exact delivery.
         if (result is WorkResult.Succeeded && result.value.id !== job.id) return false
+        if (result is WorkResult.Succeeded && result.value.more) return false
         entry.result = result; return true
     }
 
