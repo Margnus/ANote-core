@@ -2,7 +2,8 @@
 
 - Follow docs/AI开发实施规范.md: plan globally, deliver verifiable milestones, and execute implementation/testing/fixes/review through completion within the authorized scope. Define acceptance before coding; close PoCs with an adoption/discard/integration decision. Test counts and unintegrated experiments are not product acceptance. This rule does not authorize spawning sub-agents.
 
-- Start with docs/当前开发状态.md and git status/fetch. Read only the relevant design/plan sections; README.md, docs/开发执行计划.md and docs/进度.md retain historical context. Update the current-state entry after each verified milestone, including evidence scope, remaining gates and the next concrete step.
+- Start with docs/当前开发状态.md and git status/fetch. Read only the relevant current design/plan sections; docs/历史* and docs/进度.md retain historical context. Update the current-state entry after each verified milestone, including evidence scope, remaining gates and the next concrete step.
+- Use docs/开发执行计划.md for the current vertical-slice order and docs/C1未决事项.md for the original six finite exits. Keep one active milestone; device-blocked independent work must close a concrete gap. Archive completed cards instead of appending duplicate current plans. Platform scope is in docs/平台支持与验证范围.md; historical team estimates are not current delivery dates.
 - The user now requests an initial packaged runnable preview. Build a narrow D4 offline handwriting vertical slice alongside C0/C1 validation. Keep prototypes and preview APIs explicitly unfrozen; packaging is not production architecture approval.
 - Preserve jnotesv2cn, jnotesv2 and drawpanellibv2; this is an independent new project.
 - Do not introduce Android/UIKit, database, network, vendor SDK or app business dependencies into canvas-core/commonMain.
