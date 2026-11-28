@@ -1,0 +1,852 @@
+{
+  "schema": 1,
+  "status": "diagnosis-and-conservative-gate-adopted",
+  "m1_accepted": false,
+  "base_core_commit": "352365c36223382a8a4aa8c87b9a06aa70060a46",
+  "base_blueprint_commit": "daa810b781171612e63d8798843bfdbca315bd5d",
+  "product_source_commit": "372801589cc74a14b808b5abbfbbab27b65cac8d",
+  "apk_sha256": "39a7190878cd24f7c664d0cb82b47f162dccc764a8aa3fc93d514ce563ecb9f6",
+  "device": "Xiaomi 23046RP50C / Android 15 / API 35; stock refresh; USB charging; debug candidate",
+  "processor_version": "Perfetto v59.1-1e9c61e98 (1e9c61e9844affd7dccd3d42d9ea9f3a3d10cf6d)\nTrace Processor RPC API version: 14",
+  "processor_sha256": "3acc5aca1c764541033a82ba3bb0a47524b5c3c0aa194eea8d9a7b0cdb346bdc",
+  "source_sha256": {
+    "ci/verify.sh": "84109b101479dc68511249e92ecb144d2c395d126cfb624450acda948f26c3ad",
+    "tools/analyze_android_m1_trace.py": "6d2fbc97d5b33765c7790857b4742f267b013e18b96d86c1dba1e92728c38cdb",
+    "tools/capture_android_m1.py": "9108c27f0d0008047aca5c20f46687bafd4df07ad8a99b7ae50e807a2cf7334d",
+    "tools/capture_android_m1_trace.py": "62b76d9c3ac6ea6c0348cb701a71c98365a5961e3db752a31902b43619000c08",
+    "tools/check_architecture.py": "56f48a4b5a9c874cbd0b5036f0d548fd0314eda0f808b32fe41326616f21e804",
+    "tools/probes/m1-android-perfetto.pbtxt": "325065d695f18dca517b910a98028caf393f4466f1b8f0b95f9ef5c8ba479293",
+    "tools/verify_android_m1_capture.py": "4c031a9b1401a18ebbee98b432aa960e7132f24db2d72e61e927e9224a3b22e5",
+    "tools/verify_android_m1_session.py": "586baad8363d7ab42ac204ccf00ae26f0b5aa4dbee0eef91080be24e215a5cc5",
+    "tools/verify_android_m1_trace.py": "669674446fc6a61f5ba33d2ce974b70ea6773b0b43cff40ad1bf64bd42fbd7c0",
+    "tools/verify_android_m1_trace_quality.py": "79441b97ee33555140cbb9536a94fcf647883cb0bacac1306d4f1de3441335a7",
+    "tools/verify_portable_inputs.py": "29c634f24f4da4bba59835f3049ab6f940bd2a1f93ab796decdd51105e045303"
+  },
+  "diagnosis": {
+    "invalid_timestamps": "All 14 original invalid packets are SurfaceFlinger producer 1586/sequence 2 FrameTimeline frame_end events in clock 6 whose uint64 values exceed signed int64; three match the three incomplete App rows. This identifies emitted invalid data, not the exact vendor source defect.",
+    "ftrace": "All 36 original setup notices are unknown vendor ftrace events expanded by gfx. Removing gfx eliminates those notices but narrows coverage; diagnostic profile not adopted as an equivalent M-1 profile.",
+    "discarded_chunks": "Perfetto upstream v46.0 uses a service-lifetime member counter, unlike session buffer loss. Original single terminal value 3 is not three proven losses in that recording. Periodic captures show 6->7 and 7->8 while recording, without producer/session attribution. Conservative gate retains rejection.",
+    "source_limit": "Upstream v46.0 reference identifies counter semantics; no claim that Xiaomi binaries equal upstream source.",
+    "failed_variant": "Periodic file writes without periodic flush raised config_write_into_file_no_flush. Added flush_period_ms=1000 in the next diagnostic run; that warning disappeared. Both runs retained.",
+    "ui_failure": "Final periodic-flush run collected paired process/APK snapshots, but post-window uiautomator exited 137. File-set/hash comparison afterwards passed; no successful post-window UI assertion claimed."
+  },
+  "runs": {
+    "original": {
+      "status": "window-rejected",
+      "trace_sha256": "103a5ee33c50701880ba65808b353ad0b86524d0b9da8e9a5b0378b1db86ff6c",
+      "config_sha256": "5a2d8fa12b19bcd720dae83beaafe076991a966bec9e62cbb0c61c7263766bea",
+      "session": {
+        "status": "snapshot-pair-verified",
+        "serial": "4628c92",
+        "process_identity": {
+          "pid": 19404,
+          "starttime_ticks": 59568298
+        },
+        "fingerprint": "Xiaomi/liuqin/liuqin:15/AQ3A.250226.002/OS3.0.7.0.VMYCNXM:user/release-keys",
+        "apk_sha256": "39a7190878cd24f7c664d0cb82b47f162dccc764a8aa3fc93d514ce563ecb9f6",
+        "pre_sha256": "0758f8da447f8cf5f9aa357af1e31d7ee20762d5ce137d1d18f39b998581d51c",
+        "post_sha256": "63924ba2d948c11895b06c84876a0f87caa098e9d98ddfd41642b82fff8d4fff",
+        "trace_sha256": "103a5ee33c50701880ba65808b353ad0b86524d0b9da8e9a5b0378b1db86ff6c",
+        "trace_metrics_verified": false,
+        "m1_accepted": false
+      },
+      "app_frames": 80,
+      "complete_app_frames": 77,
+      "invalid_timestamp_packets": [
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5214965,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080519,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215133,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080624,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215141,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080467,
+          "affected_pid": 19404
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215603,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080572,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215611,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080520,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215623,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080676,
+          "affected_pid": 19404
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215647,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080572,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215655,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080624,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215683,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080623,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215759,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080415,
+          "affected_pid": 19404
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5215816,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080624,
+          "affected_pid": 3672
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5216092,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080624,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5216100,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080468,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5216244,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080312,
+          "affected_pid": 3672
+        }
+      ],
+      "unknown_ftrace_events": [
+        "dpu/tracing_mark_write",
+        "g2d/g2d_perf_update_qos",
+        "g2d/tracing_mark_write",
+        "mali/tracing_mark_write",
+        "mdss/mdp_cmd_kickoff",
+        "mdss/mdp_cmd_pingpong_done",
+        "mdss/mdp_cmd_readptr_done",
+        "mdss/mdp_cmd_release_bw",
+        "mdss/mdp_cmd_wait_pingpong",
+        "mdss/mdp_commit",
+        "mdss/mdp_compare_bw",
+        "mdss/mdp_misr_crc",
+        "mdss/mdp_mixer_update",
+        "mdss/mdp_perf_prefill_calc",
+        "mdss/mdp_perf_set_ot",
+        "mdss/mdp_perf_set_panic_luts",
+        "mdss/mdp_perf_set_qos_luts",
+        "mdss/mdp_perf_set_wm_levels",
+        "mdss/mdp_perf_update_bus",
+        "mdss/mdp_sspp_change",
+        "mdss/mdp_sspp_set",
+        "mdss/mdp_trace_counter",
+        "mdss/mdp_video_underrun_done",
+        "mdss/rotator_bw_ao_as_context",
+        "mdss/tracing_mark_write",
+        "panel/panel_write_generic",
+        "sde/sde_cmd_release_bw",
+        "sde/sde_encoder_underrun",
+        "sde/sde_evtlog",
+        "sde/sde_perf_calc_crtc",
+        "sde/sde_perf_crtc_update",
+        "sde/sde_perf_set_danger_luts",
+        "sde/sde_perf_set_ot",
+        "sde/sde_perf_set_qos_luts",
+        "sde/sde_perf_update_bus",
+        "sde/tracing_mark_write"
+      ],
+      "health_blockers": [
+        {
+          "name": "trace_sorter_negative_timestamp_dropped",
+          "idx": "[NULL]",
+          "value": 14,
+          "severity": "error",
+          "source": "trace"
+        },
+        {
+          "name": "ftrace_setup_errors",
+          "idx": "[NULL]",
+          "value": 36,
+          "severity": "notice",
+          "source": "trace"
+        },
+        {
+          "name": "traced_chunks_discarded",
+          "idx": "[NULL]",
+          "value": 3,
+          "severity": "info",
+          "source": "trace"
+        }
+      ],
+      "service_stats_snapshots": [
+        {
+          "chunks_discarded": 3,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        }
+      ],
+      "raw_parsed_projection_matches": true
+    },
+    "full-gfx": {
+      "status": "window-rejected",
+      "trace_sha256": "1ed8ee826812635521e1da5f065fed58d1fe7ffd6e92720d4c04a97a3d240d07",
+      "config_sha256": "857fb5ca52654c10d6afa5ff819b8907ddacfcb768a52bf14aa203276d114810",
+      "session": {
+        "status": "snapshot-pair-verified",
+        "serial": "4628c92",
+        "process_identity": {
+          "pid": 29510,
+          "starttime_ticks": 59937987
+        },
+        "fingerprint": "Xiaomi/liuqin/liuqin:15/AQ3A.250226.002/OS3.0.7.0.VMYCNXM:user/release-keys",
+        "apk_sha256": "39a7190878cd24f7c664d0cb82b47f162dccc764a8aa3fc93d514ce563ecb9f6",
+        "pre_sha256": "26d7566cc9008a6d42a96dc9faab2130630af7c2f632bf92c34dd235b824a0be",
+        "post_sha256": "ffb6c4c0e911be41511cb23c3efc809ca3818dca8fbde38247ebd405e609c6ee",
+        "trace_sha256": "1ed8ee826812635521e1da5f065fed58d1fe7ffd6e92720d4c04a97a3d240d07",
+        "trace_metrics_verified": false,
+        "m1_accepted": false
+      },
+      "app_frames": 20,
+      "complete_app_frames": 19,
+      "invalid_timestamp_packets": [
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5237279,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080520,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5237328,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080416,
+          "affected_pid": 29510
+        }
+      ],
+      "unknown_ftrace_events": [
+        "dpu/tracing_mark_write",
+        "g2d/g2d_perf_update_qos",
+        "g2d/tracing_mark_write",
+        "mali/tracing_mark_write",
+        "mdss/mdp_cmd_kickoff",
+        "mdss/mdp_cmd_pingpong_done",
+        "mdss/mdp_cmd_readptr_done",
+        "mdss/mdp_cmd_release_bw",
+        "mdss/mdp_cmd_wait_pingpong",
+        "mdss/mdp_commit",
+        "mdss/mdp_compare_bw",
+        "mdss/mdp_misr_crc",
+        "mdss/mdp_mixer_update",
+        "mdss/mdp_perf_prefill_calc",
+        "mdss/mdp_perf_set_ot",
+        "mdss/mdp_perf_set_panic_luts",
+        "mdss/mdp_perf_set_qos_luts",
+        "mdss/mdp_perf_set_wm_levels",
+        "mdss/mdp_perf_update_bus",
+        "mdss/mdp_sspp_change",
+        "mdss/mdp_sspp_set",
+        "mdss/mdp_trace_counter",
+        "mdss/mdp_video_underrun_done",
+        "mdss/rotator_bw_ao_as_context",
+        "mdss/tracing_mark_write",
+        "panel/panel_write_generic",
+        "sde/sde_cmd_release_bw",
+        "sde/sde_encoder_underrun",
+        "sde/sde_evtlog",
+        "sde/sde_perf_calc_crtc",
+        "sde/sde_perf_crtc_update",
+        "sde/sde_perf_set_danger_luts",
+        "sde/sde_perf_set_ot",
+        "sde/sde_perf_set_qos_luts",
+        "sde/sde_perf_update_bus",
+        "sde/tracing_mark_write"
+      ],
+      "health_blockers": [
+        {
+          "name": "trace_sorter_negative_timestamp_dropped",
+          "idx": "[NULL]",
+          "value": 2,
+          "severity": "error",
+          "source": "trace"
+        },
+        {
+          "name": "ftrace_setup_errors",
+          "idx": "[NULL]",
+          "value": 36,
+          "severity": "notice",
+          "source": "trace"
+        },
+        {
+          "name": "traced_chunks_discarded",
+          "idx": "[NULL]",
+          "value": 5,
+          "severity": "info",
+          "source": "trace"
+        }
+      ],
+      "service_stats_snapshots": [
+        {
+          "chunks_discarded": 5,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        }
+      ],
+      "raw_parsed_projection_matches": true
+    },
+    "no-gfx": {
+      "status": "window-rejected",
+      "trace_sha256": "e49c35bbbb44d6aee1a5f77797e2ac2fe95bb7fa5d2b0fa381d9b0ac595ba606",
+      "config_sha256": "3cc46944707a7928ecaf4e3573feb52215caf9ae513ad341a757246cd969a3fc",
+      "session": {
+        "status": "snapshot-pair-verified",
+        "serial": "4628c92",
+        "process_identity": {
+          "pid": 29510,
+          "starttime_ticks": 59937987
+        },
+        "fingerprint": "Xiaomi/liuqin/liuqin:15/AQ3A.250226.002/OS3.0.7.0.VMYCNXM:user/release-keys",
+        "apk_sha256": "39a7190878cd24f7c664d0cb82b47f162dccc764a8aa3fc93d514ce563ecb9f6",
+        "pre_sha256": "79ac1686e299c800125513322535c72fbf1b09d86ada91acf9a037099d16bc39",
+        "post_sha256": "4359f3f3d15456a8a07c6962589318ebdf49d1d89b8edcdf597c0788f0de27d5",
+        "trace_sha256": "e49c35bbbb44d6aee1a5f77797e2ac2fe95bb7fa5d2b0fa381d9b0ac595ba606",
+        "trace_metrics_verified": false,
+        "m1_accepted": false
+      },
+      "app_frames": 20,
+      "complete_app_frames": 20,
+      "invalid_timestamp_packets": [
+        {
+          "producer_pid": 1586,
+          "sequence": 2,
+          "cookie": 5237468,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080572,
+          "affected_pid": 4218
+        }
+      ],
+      "unknown_ftrace_events": [],
+      "health_blockers": [
+        {
+          "name": "trace_sorter_negative_timestamp_dropped",
+          "idx": "[NULL]",
+          "value": 1,
+          "severity": "error",
+          "source": "trace"
+        },
+        {
+          "name": "traced_chunks_discarded",
+          "idx": "[NULL]",
+          "value": 6,
+          "severity": "info",
+          "source": "trace"
+        }
+      ],
+      "service_stats_snapshots": [
+        {
+          "chunks_discarded": 6,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        }
+      ],
+      "raw_parsed_projection_matches": true
+    },
+    "stream-no-gfx": {
+      "status": "window-rejected",
+      "trace_sha256": "de34293fe4f9741d7d09b01839bfc45fc2e86939a9e68b6e7939521da91387a2",
+      "config_sha256": "173314d8351fb67cd1040c7bd26fc2160ebd15adeb387194a6c6962e80732516",
+      "session": {
+        "status": "snapshot-pair-verified",
+        "serial": "4628c92",
+        "process_identity": {
+          "pid": 29510,
+          "starttime_ticks": 59937987
+        },
+        "fingerprint": "Xiaomi/liuqin/liuqin:15/AQ3A.250226.002/OS3.0.7.0.VMYCNXM:user/release-keys",
+        "apk_sha256": "39a7190878cd24f7c664d0cb82b47f162dccc764a8aa3fc93d514ce563ecb9f6",
+        "pre_sha256": "f93232cab2d4ec942bcaeaba1ade37e03bdfd21b3ccf86d9ee089f2b42d620c0",
+        "post_sha256": "c007d4acfab05662c2be7c393e062c7eeb4df154d8b3f4b26ba4f7338e5eba62",
+        "trace_sha256": "de34293fe4f9741d7d09b01839bfc45fc2e86939a9e68b6e7939521da91387a2",
+        "trace_metrics_verified": false,
+        "m1_accepted": false
+      },
+      "app_frames": 20,
+      "complete_app_frames": 20,
+      "invalid_timestamp_packets": [
+        {
+          "producer_pid": 1586,
+          "sequence": 4,
+          "cookie": 5268053,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080623,
+          "affected_pid": 4218
+        },
+        {
+          "producer_pid": 1586,
+          "sequence": 4,
+          "cookie": 5268085,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080624,
+          "affected_pid": 4218
+        }
+      ],
+      "unknown_ftrace_events": [],
+      "health_blockers": [
+        {
+          "name": "trace_sorter_negative_timestamp_dropped",
+          "idx": "[NULL]",
+          "value": 2,
+          "severity": "error",
+          "source": "trace"
+        },
+        {
+          "name": "traced_chunks_discarded",
+          "idx": "[NULL]",
+          "value": 7,
+          "severity": "info",
+          "source": "trace"
+        },
+        {
+          "name": "config_write_into_file_no_flush",
+          "idx": "[NULL]",
+          "value": 1,
+          "severity": "error",
+          "source": "trace"
+        }
+      ],
+      "service_stats_snapshots": [
+        {
+          "chunks_discarded": 6,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 6,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 6,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        }
+      ],
+      "raw_parsed_projection_matches": true
+    },
+    "stream-flush-no-gfx": {
+      "status": "window-rejected",
+      "trace_sha256": "d5ad72a0f0e90669d6706cd60ddc7d888fb4e6303bc955315b18749b10fecd38",
+      "config_sha256": "3d8da0dd9d32834b0f2bd413dabfb32e6602a9c6cdad5782b0fd40eb1c21f2c7",
+      "session": {
+        "status": "snapshot-pair-verified",
+        "serial": "4628c92",
+        "process_identity": {
+          "pid": 29510,
+          "starttime_ticks": 59937987
+        },
+        "fingerprint": "Xiaomi/liuqin/liuqin:15/AQ3A.250226.002/OS3.0.7.0.VMYCNXM:user/release-keys",
+        "apk_sha256": "39a7190878cd24f7c664d0cb82b47f162dccc764a8aa3fc93d514ce563ecb9f6",
+        "pre_sha256": "bac7af98fe3261a22153e942745b5ba3419561f8852be4231351a046d4d41966",
+        "post_sha256": "3639f1db805ce75b478439e5b2621ed3b750849ad2815e1bb5f6fcb5b0a8dfb3",
+        "trace_sha256": "d5ad72a0f0e90669d6706cd60ddc7d888fb4e6303bc955315b18749b10fecd38",
+        "trace_metrics_verified": false,
+        "m1_accepted": false
+      },
+      "app_frames": 45,
+      "complete_app_frames": 45,
+      "invalid_timestamp_packets": [
+        {
+          "producer_pid": 1586,
+          "sequence": 4,
+          "cookie": 5268423,
+          "kind": "frame_end",
+          "clock": 6,
+          "timestamp": 9223913722862080572,
+          "affected_pid": 4218
+        }
+      ],
+      "unknown_ftrace_events": [],
+      "health_blockers": [
+        {
+          "name": "trace_sorter_negative_timestamp_dropped",
+          "idx": "[NULL]",
+          "value": 1,
+          "severity": "error",
+          "source": "trace"
+        },
+        {
+          "name": "traced_chunks_discarded",
+          "idx": "[NULL]",
+          "value": 8,
+          "severity": "info",
+          "source": "trace"
+        }
+      ],
+      "service_stats_snapshots": [
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 7,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        },
+        {
+          "chunks_discarded": 8,
+          "patches_discarded": 0,
+          "invalid_packets": 0,
+          "flushes_failed": 0
+        }
+      ],
+      "raw_parsed_projection_matches": true
+    }
+  },
+  "tests": {
+    "protocol_checks": {
+      "verify_android_m1_capture.py": 24,
+      "verify_android_m1_trace.py": 12,
+      "verify_android_m1_trace_quality.py": 24,
+      "verify_portable_inputs.py": 5
+    },
+    "architecture": {
+      "status": "passed",
+      "common_source_files": 74,
+      "imports_checked": 83,
+      "errors": [],
+      "modules": [
+        "canvas-core",
+        "shared-core"
+      ],
+      "project_dependency_direction": "shared-core -> canvas-core only",
+      "independent_sketch_host_project_dependencies": [
+        ":shared-core"
+      ],
+      "independent_apple_sketch_imports": [
+        "NoteCanvasPrototype",
+        "NoteCoreSketch",
+        "UIKit",
+        "XCTest"
+      ],
+      "retired_single_page_stack_absent": true,
+      "scope": "commonMain imports and direct project dependencies; not a transitive bytecode audit"
+    },
+    "jvm": {
+      "canvas-core": {
+        "tests": 269,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "shared-core": {
+        "tests": 556,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "jvm_execution": "Gradle :canvas-core:jvmTest :shared-core:jvmTest BUILD SUCCESSFUL; existing unchanged-input tasks UP-TO-DATE, XML reused. No new Android/Apple product compilation claimed."
+  },
+  "notes_preserved": true,
+  "decision": "Adopt strict offline raw/parsed consistency and binding checks in CI. Reject all five metric windows. Retain the default full profile. Do not rewrite or omit invalid frame ends.",
+  "next_step": "Continue S2 original host presentation/lifecycle handoff independently. Physical M-1 requires valid presentation evidence on this OS or a separately scoped platform profiler/device, plus fixed refresh and full workloads/real stylus.",
+  "remaining_gates": [
+    "physical stylus and pressure/history",
+    "fixed 60/120 Hz",
+    "full S1/S2/S4/S5/S9 workloads",
+    "30 cold/warm and 5 minute runs",
+    "4 GB baseline",
+    "total GPU-inclusive peak",
+    "Pencil iPad",
+    "full C1 and production SQLite"
+  ],
+  "archive": {
+    "path": "evidence.zip",
+    "sha256": "337ddc9cd78c8d3ed624b0919cbde350acae21685094c13eb3cad0898729d69c",
+    "files": 762
+  },
+  "local_only": "Full binary traces and text conversions remain in build/m1-trace-quality-20261128 and original build/m1-android-20261128; their hashes are bound by per-run reports. Archive contains App-scoped snapshots, numeric analysis, raw invalid App packet excerpts and protocol tests, not full system trace."
+}

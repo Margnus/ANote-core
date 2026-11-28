@@ -7,5 +7,8 @@ export GRADLE_USER_HOME="${GRADLE_USER_HOME:-$task_root/.gradle-user-home}"
 task_python="${PYTHON_BIN:-python3}"
 "$task_python" tools/verify_portable_inputs.py
 "$task_python" tools/check_architecture.py
+"$task_python" tools/verify_android_m1_capture.py
+"$task_python" tools/verify_android_m1_trace.py
+"$task_python" tools/verify_android_m1_trace_quality.py
 ./gradlew --no-daemon --console=plain verifyPrototype :canvas-core:runPrototype
 "$task_python" tools/collect_verification.py
